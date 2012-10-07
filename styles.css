@@ -1,0 +1,156 @@
+.formulas_input_warning_outer {
+    position: absolute;
+    z-index: 1;
+    display: inline;
+}
+
+.formulas_input_warning {
+    position: absolute;
+    top: 0.3em;
+    left: -1.3em;
+    background-color: #ffffff;
+}
+
+.formulas_input_info_outer {
+    position: absolute;
+    z-index: 2;
+    display: inline;
+}
+
+.formulas_input_info {
+    position: absolute;
+    top: 1.63em;
+    left: 0;
+    width: 150px;
+    border: 1px solid #8888cc;
+    background-color: #eeeeff;
+}
+
+.formulas_input_info_title {
+    padding: 2px;
+}
+
+.formulas_input_info_interpretation {
+    padding: 2px;
+    border-top: 1px solid #8888cc;
+}
+
+.formulas_input_info_interpretation_incorrect {
+    padding: 2px;
+    border-top: 1px solid #8888cc;
+    color: #bbbbbb;
+}
+
+
+
+input.formulas_unit {
+    margin: 0 0 0 0;
+    width : 150px;
+}
+
+input.formulas_number {
+    margin: 0 0 0 0;
+    width : 130px;
+}
+
+input.formulas_number_unit {
+    margin: 0 0 0 0;
+    width : 250px;
+}
+
+input.formulas_numeric {
+    margin: 0 0 0 0;
+    width : 200px;
+}
+
+input.formulas_numeric_unit {
+    margin: 0 0 0 0;
+    width : 300px;
+}
+
+input.formulas_numerical_formula {
+    margin: 0 0 0 0;
+    width : 200px;
+}
+
+input.formulas_numerical_formula_unit {
+    margin: 0 0 0 0;
+    width : 300px;
+}
+
+input.formulas_algebraic_formula {
+    margin: 0 0 0 0;
+    width : 200px;
+}
+
+
+
+.formulas_subpart {
+    padding-bottom: 0px;
+    margin: 0 0 1.2em 0;
+    #border: solid #dddddd 1px;
+    display: block;
+}
+
+.formulas_submit {
+    margin-top: 1px;
+}
+
+.formulas_mark {
+    display : inline;
+}
+
+.formulas_local_feedback {
+    padding-top: 6px;
+}
+
+
+
+hr.formulas_seperator1 {
+    margin-left: auto;
+    margin-right:0;
+    width: 200px;
+    color : white;
+}
+
+hr.formulas_seperator2 {
+    margin-left: auto;
+    margin-right:0;
+    width: 200px;
+    color : white;
+}
+
+.formulas_grade {
+  font-size: 0.8em;
+}
+
+.subq_navigation {
+    text-align: center;
+    margin: 20px;
+}
+
+.subq_navigation_block {
+    padding: 5px 11px 5px 11px;
+    border: 1px solid #aaaaff;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.subq_navigation_selected {
+    padding: 5px 11px 5px 11px;
+    border: 2px solid black;
+    margin: 1px;
+    cursor: pointer;
+}
+
+.que.formulas .formulation .formulaspartfeedback {
+    background: #fff3bf;
+    margin: 0.2em -0.2em 0.5em;
+    padding: 0.2em;
+}
+
+.que.formulas .formulation .formulaspartfeedback .correct,
+.que.formulas .formulation .formulaspartfeedback .partiallycorrect,
+.que.stack .formulation .formulaspartfeedback .incorrect {
+    background: transparent;
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB PATH="question/type/formulas/db" VERSION="20110807" COMMENT="XMLDB file for Moodle question/type/formulas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <TABLES>
+    <TABLE NAME="qtype_formulas" COMMENT="Options for formulas question type" NEXT="qtype_formulas_answers">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="varsrandom"/>
+        <FIELD NAME="varsrandom" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="varsglobal"/>
+        <FIELD NAME="varsglobal" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="varsrandom" NEXT="showperanswermark"/>
+        <FIELD NAME="showperanswermark" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="varsglobal" NEXT="correctfeedback"/>
+        <FIELD NAME="correctfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any correct response." PREVIOUS="showperanswermark" NEXT="correctfeedbackformat"/>
+        <FIELD NAME="correctfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="correctfeedback" NEXT="partiallycorrectfeedback"/>
+        <FIELD NAME="partiallycorrectfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any partially correct response." PREVIOUS="correctfeedbackformat" NEXT="partiallycorrectfeedbackformat"/>
+        <FIELD NAME="partiallycorrectfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="partiallycorrectfeedback" NEXT="incorrectfeedback"/>
+        <FIELD NAME="incorrectfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any incorrect response." PREVIOUS="partiallycorrectfeedbackformat" NEXT="incorrectfeedbackformat"/>
+        <FIELD NAME="incorrectfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="incorrectfeedback" NEXT="shownumcorrect"/>
+        <FIELD NAME="shownumcorrect" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true, then when the user gets a question partially correct, tell them how many parts they got correct alongside the feedback." PREVIOUS="incorrectfeedbackformat"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="questionid"/>
+        <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="qtype_formulas_answers" COMMENT="Answers for formulas question type" PREVIOUS="qtype_formulas">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="placeholder"/>
+        <FIELD NAME="placeholder" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="answermark"/>
+        <FIELD NAME="answermark" TYPE="float" NOTNULL="true" SEQUENCE="false" PREVIOUS="placeholder" NEXT="answertype"/>
+        <FIELD NAME="answertype" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="answermark" NEXT="numbox"/>
+        <FIELD NAME="numbox" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="answertype" NEXT="vars1"/>
+        <FIELD NAME="vars1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="numbox" NEXT="answer"/>
+        <FIELD NAME="answer" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars1" NEXT="vars2"/>
+        <FIELD NAME="vars2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="answer" NEXT="correctness"/>
+        <FIELD NAME="correctness" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars2" NEXT="unitpenalty"/>
+        <FIELD NAME="unitpenalty" TYPE="float" NOTNULL="false" SEQUENCE="false" PREVIOUS="correctness" NEXT="postunit"/>
+        <FIELD NAME="postunit" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="unitpenalty" NEXT="ruleid"/>
+        <FIELD NAME="ruleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="postunit" NEXT="otherrule"/>
+        <FIELD NAME="otherrule" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="ruleid" NEXT="subqtext"/>
+        <FIELD NAME="subqtext" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="otherrule" NEXT="subqtextformat"/>
+        <FIELD NAME="subqtextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subqtext" NEXT="feedback"/>
+        <FIELD NAME="feedback" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="subqtextformat" NEXT="feedbackformat"/>
+        <FIELD NAME="feedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="feedback"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="questionid"/>
+        <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
