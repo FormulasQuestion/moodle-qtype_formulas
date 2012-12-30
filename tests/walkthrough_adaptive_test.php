@@ -16,12 +16,10 @@
 
 
 /**
- * This file contains tests that walks a question through the adaptive
- * behaviour.
+ * Unit tests for the formulas question type.
  *
- * @package    qbehaviour
- * @subpackage adaptive
- * @copyright  2009 The Open University
+ * @package    qtype_formulas
+ * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,9 +34,9 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 
 
 /**
- * Unit tests for the adaptive behaviour.
+ * Unit tests for the formulas question type.
  *
- * @copyright  2009 The Open University
+ * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthrough_test_base {
@@ -48,7 +46,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
     protected function get_test_formulas_question($which = null) {
         return test_question_maker::make_question('formulas', $which);
     }
-    
+
     public function test_test0_submit_right_first_time() {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('test0');
@@ -75,7 +73,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_output_contains_text_input('0_0', '5', false);
         $this->check_output_does_not_contain_stray_placeholders();
     }
-    
+
     public function test_test0_submit_wrong_submit_right() {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('test0');
@@ -114,9 +112,9 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_output_contains_text_input('0_0', '5', false);
         $this->check_output_does_not_contain_stray_placeholders();
     }
-    
+
     public function test_test0_submit_wrong_wrong_right() {
-        // here we test that the student is not penalized twice for the same error
+        // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('test0');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -166,9 +164,9 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_output_contains_text_input('0_0', '5', false);
         $this->check_output_does_not_contain_stray_placeholders();
     }
-    
+
     public function test_test0_submit_wrong_same_wrong_right() {
-        // here we test that the student is not penalized twice for the same error
+        // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('test0');
         $this->start_attempt_at_question($q, 'adaptive', 1);

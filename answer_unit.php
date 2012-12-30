@@ -8,19 +8,19 @@
 
 /**
  * This class provides methods to check whether an input unit is convertible to a unit in a list.
- * 
+ *
  * A unit is a combination of the 'base units' and its exponents. For the International System of Units
  * (SI), there are 7 base units and some derived units. In comparison, the 'base units' here represents
  * the unit that is not 'compound units', i.e. 'base units' is a string without space.
  * In order to compare whether two string represent the same unit, the method employed here is to
  * decompose both string into 'base units' and exponents and then compare one by one.
- * 
+ *
  * In addition, different units can represent the same dimension linked by a conversion factor.
  * All those units are acceptable, so there is a need for a conversion method. To solve this problem,
  * for the same dimensional quantity, user can specify conversion rules between several 'base units'.
  * Also, user are allow to specify one (and only one) conversion rule between different 'compound units'
  * known as the $target variable in the check_convertibility().
- * 
+ *
  * Example format of rules, for 'compound unit': "J = N m = kg m^2/s^2, W = J/s = V A, Pa = N m^(-2)"
  * For 'base unit': "1 m = 1e-3 km = 100 cm; 1 cm = 0.3937 inch; 1024 B = 1 KiB; 1024 KiB = 1 MiB"
  * The scale of a unit without a prefix is assumed to be 1. For convenience of using SI prefix, an
@@ -39,7 +39,7 @@ class answer_unit_conversion {
         'm'=>1e-3, 'u'=>1e-6, 'n'=>1e-9, 'p'=>1e-12, 'f'=>1e-15, 'a'=>1e-18, 'z'=>1e-21, 'y'=>1e-24,
         'k'=>1e3,  'M'=>1e6,  'G'=>1e9,  'T'=>1e12,  'P'=>1e15,  'E'=>1e18,  'Z'=>1e21,  'Y'=>1e24);
     // For convenient, u is used for micro-, µ, which has multiple similar UTF representation
-    
+
     /// Initialize the internal conversion rule to empty. No throw
     function __construct() {
         $this->default_id = 0;
@@ -48,11 +48,11 @@ class answer_unit_conversion {
         $this->mapping = null;
         $this->additional_rules = '';
     }
-    
-    
+
+
     /**
      * It assign default rules to this class. It will also reset the mapping. No throw
-     * 
+     *
      * @param string $default_id id of the default rule. Use to avoid reinitialization same rule set
      * @param string $default_rules default rules
      */
@@ -64,19 +64,19 @@ class answer_unit_conversion {
         $this->mapping = null;
         $this->additional_rules = '';   // always remove the additional rule
     }
-    
-    
+
+
     /**
      * Add the additional rule other than the default. Note the previous additional rule will be erased.
-     * 
+     *
      * @param string $additional_rules the additional rule string
      */
     function assign_additional_rules($additional_rules) {
         $this->additional_rules = $additional_rules;
         $this->mapping = null;
     }
-    
-    
+
+
     /**
      * Parse all defined rules. It is designed to avoid unnecessary reparsing. Throw on parsing error
      */
@@ -95,14 +95,14 @@ class answer_unit_conversion {
             $this->mapping = $tmp_mapping;
         }
     }
-    
-    
+
+
     /// return the current unit mapping in this class
     function get_unit_mapping() {
         return $this->mapping;
     }
-    
-    
+
+
     /// return a dimension classes list for current mapping. Each class is an array of $unit to $scale mapping
     function get_dimension_list() {
         $dimension_list = array();
@@ -112,11 +112,11 @@ class answer_unit_conversion {
         }
         return $dimension_list;
     }
-    
-    
-    /** 
+
+
+    /**
      * Check whether an input unit is equivalent, under conversion rules, to target units. May throw
-     * 
+     *
      * @param string $ipunit The input unit string
      * @param string $targets The list of unit separated by "=", such as "N = kg m/s^2"
      * @return object with three field:
@@ -144,11 +144,11 @@ class answer_unit_conversion {
         else // for the input successfully converted to one of the unit in the $targets list
             return (object) array('convertible' => true,  'cfactor' => $res[0], 'target' => $res[1]);
     }
-    
-    
+
+
     /**
      * Parse the $targets into an array of target units. Throw on parsing error
-     * 
+     *
      * @param string $targets The "=" separated list of unit, such as "N = kg m/s^2"
      * @return an array of parsed unit, parsed by the parse_unit().
      */
@@ -164,11 +164,11 @@ class answer_unit_conversion {
         }
         return $targets_list;
     }
-    
-    
+
+
     /**
      * Check whether an parsed input unit $a is the same as one of the parsed unit in $target_units. No throw
-     * 
+     *
      * @param array $a the an array of (base unit => exponent) parsed by the parse_unit() function
      * @param array $targets_list an array of parsed units.
      * @return the array of (conversion factor, location in target list) if convertible, otherwise null
@@ -197,12 +197,12 @@ class answer_unit_conversion {
         }
         return null;   // none of the possible units match, so they are not the same
     }
-    
-    
+
+
     /**
      * Attempt to convert the $test_unit_name to one of the unit in the $base_unit_array,
      * using any of the conversion rule added in this class earlier. No throw
-     * 
+     *
      * @param string $test_unit the name of the test unit
      * @param array $base_unit_array in the format of array(unit => exponent, ...)
      * @return array(conversion factor, unit exponent) if it can be converted, otherwise null.
@@ -216,11 +216,11 @@ class answer_unit_conversion {
         }
         return null;
     }
-    
-    
+
+
     /**
      * Split the input into the number and unit. No throw
-     * 
+     *
      * @param string $input physical quantity with number and unit, assume 1 if number is missing
      * @return object with number and unit as the field name. null if input is empty
      */
@@ -233,18 +233,18 @@ class answer_unit_conversion {
         if (is_numeric($number))  return (object) array('number' => floatval($number), 'unit' => $unit);
         else return (object) array('number' => 1, 'unit' => $input);
     }
-    
-    
+
+
     /**
      * Parse the unit string into a simpler pair of base unit and its exponent. No throw
-     * 
+     *
      * @param string $unit_expression The input unit string
      * @param bool $no_divisor whether divisor '/' is acceptable. It is used to parse unit recursively
      * @return an array of the form (base unit name => exponent), null on error
      */
     function parse_unit($unit_expression, $no_divisor=false) {
         if (strlen(trim($unit_expression)) == 0)  return array();
-        
+
         $pos = strpos($unit_expression, '/');
         if ($pos !== false) {
             if ($no_divisor || $pos==0 || $pos>=strlen($unit_expression)-1)  return null;  // only one '/' is allowed
@@ -260,7 +260,7 @@ class answer_unit_conversion {
             }
             return $uleft;
         }
-        
+
         $unit = array();
         $unit_element_name = '([^'.self::$unit_exclude_symbols.']+)';
         $unit_expression = preg_replace('/\s*\^\s*/', '^', $unit_expression);
@@ -286,11 +286,11 @@ class answer_unit_conversion {
         }
         return $unit;
     }
-    
-    
+
+
     /**
      * Parse rules into an mapping that will be used for fast lookup of unit. Throw on parsing error
-     * 
+     *
      * @param array $mapping an empty array, or array of unit => array(dimension class, conversion factor)
      * @param int $dim_id_count current number of dimension class. It will be incremented for new class
      * @param string $rules_string a comma separated list of rules
@@ -335,5 +335,5 @@ class answer_unit_conversion {
                 $mapping[$unit] = array($dim_id, $factor*$scale);
         }
     }
-    
+
 }

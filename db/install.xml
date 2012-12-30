@@ -6,9 +6,8 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
         <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="varsrandom"/>
         <FIELD NAME="varsrandom" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="varsglobal"/>
-        <FIELD NAME="varsglobal" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="varsrandom" NEXT="showperanswermark"/>
-        <FIELD NAME="showperanswermark" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="varsglobal" NEXT="correctfeedback"/>
-        <FIELD NAME="correctfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any correct response." PREVIOUS="showperanswermark" NEXT="correctfeedbackformat"/>
+        <FIELD NAME="varsglobal" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="varsrandom" NEXT="correctfeedback"/>
+        <FIELD NAME="correctfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any correct response." PREVIOUS="varsglobal" NEXT="correctfeedbackformat"/>
         <FIELD NAME="correctfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="correctfeedback" NEXT="partiallycorrectfeedback"/>
         <FIELD NAME="partiallycorrectfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any partially correct response." PREVIOUS="correctfeedbackformat" NEXT="partiallycorrectfeedbackformat"/>
         <FIELD NAME="partiallycorrectfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="partiallycorrectfeedback" NEXT="incorrectfeedback"/>

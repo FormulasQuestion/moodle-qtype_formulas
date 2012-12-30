@@ -1,6 +1,6 @@
 /**
- * Javascript function for the editing interface of formulas question type 
- *    
+ * Javascript function for the editing interface of formulas question type
+ *
  * @copyright &copy; 2010-2011 Hon Wai, Lau
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
@@ -91,16 +91,16 @@ var formulasform = {
         this.numsubq = this.count_subq();
         this.values = this.init_values();
         this.update_values(this.values);
-        
+
         // Show one subquestion at a time, instead of all subquestions in the page
         try { this.show_subq(this.get_value('show_subq')); } catch (e) {}
-        
+
         // Global options allow the change of the same options in all subquestions at once
         try {
             this.init_global_options('unitpenalty');
             this.init_global_options('ruleid');
         } catch (e) {}
-        
+
         // Simplify the form by hiding rarely used input field by default. Those input fields make the whole form extremely long
         for (i=0; i<this.numsubq; i++)  try {
             //this.init_checkboxes('id_vars1_'+i);
@@ -108,7 +108,7 @@ var formulasform = {
             this.init_checkboxes('id_otherrule_'+i);
             //this.init_checkboxes('id_subqtext_'+i);
             this.init_checkboxes('id_feedback_'+i);
-            
+
             var n = document.getElementById('id_feedback_'+i);
             var loc = n;
             while (loc!=null && loc.className!='fitem')  loc = loc.parentNode;
@@ -117,19 +117,19 @@ var formulasform = {
         try {
             this.init_checkboxes('id_generalfeedback');
         } catch (e) {}
-        
+
         // Allow the easier selection of correctness, rather than manual input of formula
         for (i=0; i<this.numsubq; i++)  try {
             this.init_selective_criteria('correctness', i);
         } catch (e) {}
-        
+
         // Add the button to select the number of dataset
         try {
             this.init_numdataset_option();
             this.show_dataset_and_preview('none');
         } catch (e) {}
     },
-    
+
     /// return the number of subquestions in the form
     count_subq : function() {
         var i = 0;
@@ -140,21 +140,21 @@ var formulasform = {
         }
         return i;
     },
-    
+
     get_value : function(name) {
         return this.values[name];
     },
-    
+
     set_value : function(name, value) {
         this.values[name] = value;
         this.update_values(this.values);
     },
-    
+
     update_values : function(values) {
         var tmp = document.getElementsByName('jsvars')[0];
         tmp.value = values['show_subq'];
     },
-    
+
     /// return the initial values that will be used by this object. The value is retained before submission of the editing form.
     init_values : function() {
         var tmp = document.getElementsByName('jsvars')[0];
@@ -162,11 +162,11 @@ var formulasform = {
         values.show_subq = (tmp.value == '' ? 0 : tmp.value);
         return values;
     },
-    
+
     /// return the set of language string that will be used by this object. The strings are stored somewhere in the form.
     get_langstrs : function() {
     },
-    
+
     /// By default, the value of global input field will apply to all its subquestions
     init_global_options : function(name) {
         var n_global = document.getElementsByName('global'+name)[0];
@@ -175,7 +175,7 @@ var formulasform = {
         n_global.onchange = function() { formulas_form_init_global_options_update(name); };
         formulas_form_init_global_options_update(name);
     },
-    
+
     /// Allow the display of one subquestion at a time, it is very effective way to shorten the form and it also allows easy comparison between subquestions
     init_subq_collapse : function(loc, id, selected) {
         // create new navigation panel
@@ -183,7 +183,7 @@ var formulasform = {
         navigation.id = id;
         navigation.className = 'subq_navigation';
         loc.parentNode.insertBefore(navigation, loc.nextSibling);
-        
+
         // add the navigation block
         var previous = selected <= 0 ? this.numsubq-1 : selected-1;
         var next = selected >= this.numsubq-1 ? 0 : selected+1;
@@ -199,30 +199,30 @@ var formulasform = {
             navigation.appendChild(tmp);
         }
     },
-    
+
     /// Show the selected subquestion
     show_subq : function(selected) {
         this.numsubq = this.count_subq();
         this.set_value('show_subq', selected);
-        
+
         // delete the old navigation panels and then add the new one
         var navigation = document.getElementById('subq_navigation');
         if (navigation != null)  navigation.parentNode.removeChild(navigation);
         var loc = document.getElementById('mainq');
         this.init_subq_collapse(loc, 'subq_navigation', selected);
-        
+
         // update the display style of subquestion
         for (var i=0; i<this.numsubq; i++) {
             document.getElementById('answerhdr_'+i).style.display = (selected < -1 || selected == i ? 'block' : 'none');
         }
     },
-    
+
     /// Create checkboxes to show/hide the corresponding input field
     init_checkboxes : function(fieldid, initial_checked) {
         var n = document.getElementById(fieldid);
         var loc = n;
         while (loc!=null && loc.className!='fitem')  loc = loc.parentNode;
-        
+
         if (loc!=null) {
             var id = n.id + '_show';
             if (initial_checked == null)
@@ -230,12 +230,12 @@ var formulasform = {
             var ctext = initial_checked ? ' checked="checked" ' : '';
             var s = '<input type="checkbox" onclick="formulas_form_display(\''+fieldid+'\',this.checked)" '+ctext+' id="'+id+'">';
             var t = '<span onclick="var t=document.getElementById(\''+id+'\'); t.checked = !t.checked; formulas_form_display(\''+fieldid+'\',t.checked);">'+loc.firstChild.innerHTML+'</span>';
-            
+
             loc.firstChild.innerHTML = s+t;
             formulas_form_display(fieldid, initial_checked);
         }
     },
-    
+
     /// Allow a more user friend way to select the commonly used criteria
     init_selective_criteria : function(name, i, initial_checked) {
         var n = document.getElementsByName(name + '[' + i + ']')[0];
@@ -248,7 +248,7 @@ var formulasform = {
         var t = '<span onclick="var t=document.getElementById(\''+id+'\'); t.checked = !t.checked; formulas_form_correctness('+i+',t.checked);">'+n.parentNode.parentNode.firstChild.innerHTML+'</span>';
         n.parentNode.parentNode.firstChild.innerHTML = s+t;
     },
-    
+
     /// Add the options to select the number of dataset
     init_numdataset_option : function() {
         var s = '';
@@ -260,7 +260,7 @@ var formulasform = {
         var loc = document.getElementById('numdataset_option');
         loc.innerHTML = s;
     },
-    
+
     /// Instantiate the dataset by the server and get back the data
     instantiate_dataset : function() {
         var data = {};
@@ -273,17 +273,17 @@ var formulasform = {
         data['start'] = 0;
         data['N'] = document.getElementById('numdataset').value;
         data['random'] = 0;
-        
+
         var p = [];
         for (var key in data)
             p[p.length] = encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
         params = p.join('&').replace(/ /g,'+');
-        
+
         var url = formulasbaseurl+'/instantiate.php';
         var results = {};
         var http_request = new XMLHttpRequest();
         http_request.open( "POST", url, true );
-        
+
         http_request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http_request.setRequestHeader("Content-length", params.length);
         http_request.setRequestHeader("Connection", "close");
@@ -303,7 +303,7 @@ var formulasform = {
         http_request.send(params);
         formulasform.show_dataset_and_preview('hidden');
     },
-    
+
     /// show or hide the dataset and preview region
     show_dataset_and_preview : function(show) {
         var childen_ids = ['qtextpreview_display','varsstatistics_display','varsdata_display'];
@@ -313,7 +313,7 @@ var formulasform = {
             if (show != 'hidden')  style.display = show;
         } catch(e) {}
     },
-    
+
     /// return the set of groupnames selected for display
     get_groupnames : function() {
         var groupnames = ['leading','random','global'];
@@ -323,12 +323,12 @@ var formulasform = {
         }
         return groupnames;
     },
-    
-    /// Add the controls to view the dataset 
+
+    /// Add the controls to view the dataset
     update_dataset : function() {
         var loc = document.getElementById('varsdata_display');
         loc.innerHTML = '';
-        
+
         var groupnames = this.get_groupnames();
         var names = {};
         for (var z in this.vars.names)  names[z] = this.vars.names[z];
@@ -339,16 +339,16 @@ var formulasform = {
             for (var z in this.vars.lists[k])  lists[k][z] = this.vars.lists[k][z];
             lists[k]['leading'] = [k];
         }
-        
+
         var result = this.get_dataset_display(names, lists, this.vars.errors, groupnames);
         loc.innerHTML = result;
     },
-    
+
     /// Show the statistics of the dataset
     update_statistics : function() {
         var loc = document.getElementById('varsstatistics_display');
         loc.innerHTML = '';
-        
+
         var groupnames = this.get_groupnames();
         //var quantities = ['N', 'mean', 'variance', 'min', 'Q1', 'median', 'Q3', 'max'];
         //var quantities = ['min', 'max', 'mean', 'SD', 'N'];
@@ -359,7 +359,7 @@ var formulasform = {
         for (var z in this.vars.names)  names[z] = this.vars.names[z];
         var lists = [];
         for (var k=0; k<quantities.length; k++)  lists.push({});
-        
+
         for (var i=0; i<groupnames.length; i++) {
             var n = this.vars.names[groupnames[i]];
             if (n == null)  continue;
@@ -383,11 +383,11 @@ var formulasform = {
             lists[k]['leading'] = [quantities[k]];
             errors[k] = '';
         }
-        
+
         var result = this.get_dataset_display(names, lists, errors, groupnames);
         loc.innerHTML = result;
     },
-    
+
     /// return the statistics of the input data
     get_statistics : function(data) {
         var sum = 0.;
@@ -402,13 +402,13 @@ var formulasform = {
             maximum = Math.max(maximum, data[i]);
             N++;
         }
-        
+
         if (N == 0)  return {};   // no such need to preform statistics
         var sd = Math.sqrt((sum2-sum*sum/N)/(N-1.));
         if (N <= 1 || isNaN(sd))  sd = 0;
         return {'N': N, 'mean': sum/N, 'SD': sd, 'min':minimum, 'max':maximum};
     },
-    
+
     /// Display the datatable of the instantiated variables
     get_dataset_display : function(names, lists, errors, groupnames) {
         var header = '';
@@ -420,7 +420,7 @@ var formulasform = {
             }
         }
         header = '<tr>' + header + '</tr>';
-        
+
         var s = '';
         for (var count=0; count<lists.length; count++) {
             if (count%50 == 0)  s += header;
@@ -436,10 +436,10 @@ var formulasform = {
             }
             s += '<tr class="r'+(count%2)+'">' + row + (errors[count]=='' ? '' : '<td>'+errors[count]+'</td>') + '</tr>';
         }
-        
+
         return '<table border="1" width="100%" cellpadding="3">'+s+'</table>';
     },
-    
+
     /// return a html string of the shortened element in the dataset table
     get_dataset_shorten : function(elem) {
         if (elem instanceof Array) {
@@ -463,7 +463,7 @@ var formulasform = {
             }
         }
     },
-    
+
     /// Add the controls for the preview function
     init_preview_controls : function() {
         var block0 = '';
@@ -473,10 +473,10 @@ var formulasform = {
         var block1 = '<input type="button" onclick="formulasform.update_preview()" value="Renew">';
         var loc = document.getElementById('qtextpreview_controls');
         loc.innerHTML = block0 + block1;
-        
+
         this.update_preview();
     },
-    
+
     /// Show the questiontext with variables replaced
     update_preview : function() {
         try {
@@ -487,7 +487,7 @@ var formulasform = {
         }
         var idataset = document.getElementById('id_formulas_idataset').value;
         var res = this.substitute_variables_in_text(globaltext, this.get_variables_mapping(idataset, ['random','global']));
-        
+
         for (var i=0; i<this.numsubq; i++) {
             try {
                 var txt = tinyMCE.get('id_subqtext_'+i).getContent();
@@ -517,11 +517,11 @@ var formulasform = {
             else
                 res = res.replace('{' + ph.value + '}', t);
         }
-        
+
         var preview = document.getElementById('qtextpreview_display');
         preview.innerHTML = '<div style="border: solid black 2px; padding : 5px">' + res + '</div>';
     },
-    
+
     /// return the mapping from name to variable values, for the groups specified by groupnames
     get_variables_mapping : function(idataset, groupnames) {
         mapping = {};
@@ -535,7 +535,7 @@ var formulasform = {
         }
         return mapping;
     },
-    
+
     /// substitute the variables in the text, where the variables is given by the mapping
     substitute_variables_in_text : function(text, mapping) {
         var matches = text.match(/\{([A-Za-z][A-Za-z0-9_]*)(\[([0-9]+)\])?\}/g);

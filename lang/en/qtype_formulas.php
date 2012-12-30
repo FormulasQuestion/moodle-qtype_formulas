@@ -1,16 +1,30 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package    qtype_formulas
+ * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 /**
  * The language strings for the formulas question type.
- *    
- * @copyright &copy; 2010-2011 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package questionbank
- * @subpackage questiontypes
  */
- 
 
-/// --- All the texts that will be seen by students in the quiz interface ---
+// All the texts that will be seen by students in the quiz interface.
 
 $string['unit'] = 'Unit';
 $string['number'] = 'Number';
@@ -24,15 +38,8 @@ $string['yougotnright'] = 'You have correctly answered {$a->num} parts of this q
 $string['pleaseputananswer'] = 'Please put an answer in each input field.';
 
 $string['modelanswer'] = 'Model answer';
-$string['localmarknotgraded'] = 'Mark: -/{$a->maxmark}';
-$string['localmark'] = 'Mark: {$a->highestmark}/{$a->maxmark}';
-$string['submitfirst'] = 'Submit';
-$string['submitmore'] = 'Submit try {$a->curtrial} ({$a->curmaxpercent})';
-$string['gradinginfo'] = 'Submission #{$a->prevtrial} ({$a->prevmaxpercent}), raw mark: {$a->rawmark}';  // show only after second try
-//$string['gradinginfo'] = 'Submission #{$a->prevtrial}, result: {$a->curmark}/{$a->maxmark}, Raw mark: {$a->rawmark}, Maximum mark: {$a->curmaxpercent}';
 
-
-/// --- Texts that will be shown in the question editing interface ---
+// Texts that will be shown in the question editing interface.
 $string['pluginname'] = 'Formulas';
 $string['pluginnameadding'] = 'Adding a formulas question';
 $string['pluginnameediting'] = 'Editing a formulas question';
@@ -49,49 +56,48 @@ $string['questiontext_help'] = '<p>In addition to the normal question text, you 
 <p>Global variables will be replaced by their values and placeholders will be replaced by parts. A simple example with variables <tt> A, B, C </tt> and placeholders <tt> #1, #2, #3 </tt> is:</p>
 <pre class="prettyprint">What is the result of {A} + {B}?<br>{#1}<br>What is the result of {A} - {B}?<br>{#2}<br>What is the result of {C} / {B}?<br>{#3}</pre>';
 
-/// The language string for the global variables
+// The language string for the global variables.
 $string['globalvarshdr'] = 'Variables';
 $string['varsrandom'] = 'Random variables';
-$string['varsrandom_help'] = '<p>New random values are generated for these variables at the beginning of each attempt.  It can 
+$string['varsrandom_help'] = '<p>New random values are generated for these variables at the beginning of each attempt.  It can
 be done by defining a set of elements to choose from: </p><pre class="prettyprint">A = {1,2,3};<br>C = {[1,-1], [2,-2], [3,-3]};<br>E = {10:100:10, 100, 1000};</pre><p>The
- elements can be numbers, strings or lists of them. At the start of a new attempt, one element will be drawn from the set and assigned to the variable 
-on the left.  Also, for a set of number, you can use the range 
+ elements can be numbers, strings or lists of them. At the start of a new attempt, one element will be drawn from the set and assigned to the variable
+on the left.  Also, for a set of number, you can use the range
 notation like 10:100:10 (e.g. E). </p>';
 $string['varsrandom_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Random_variables';
 $string['varsglobal'] = 'Global variables';
-$string['varsglobal_help'] = '<p>Formulas can be specified here to manipulate the instantiated random variables 
-(all random variables are available here). The full list of mathematical 
+$string['varsglobal_help'] = '<p>Formulas can be specified here to manipulate the instantiated random variables
+(all random variables are available here). The full list of mathematical
 functions and operators is given in the documentation.</p>
 <pre class="prettyprint">a = 1.11111;<br>b = exp(3);<br>c = A + a + b;<br>d = sin(1.5*pi()) + c;<br>e = round(a, 0);<br>f = [0,1,2,3][A];<br>g = ["zero","one","two","three"][A];<br>distance = sqrt(a*a + b*b);</pre>';
 
-/// The language string for the display and flow options and common question parts settings
+// The language string for the display and flow options and common question parts settings.
 $string['mainq'] = 'Main question';
 $string['subqoptions'] = 'Extra options';
-$string['showperanswermark'] = 'Per answer grading result';
 $string['choiceyes'] = 'Yes';
 $string['choiceno'] = 'No';
 
-/// The language string for the questions parts
+// The language string for the questions parts.
 $string['answerno'] = 'Part {$a}';
 $string['placeholder'] = 'Placeholder name';
-$string['placeholder_help'] = '<p>A placeholder is a used to identify the location in the main question 
-text that will be replaced by the content of the part. It is a 
+$string['placeholder_help'] = '<p>A placeholder is a used to identify the location in the main question
+text that will be replaced by the content of the part. It is a
 string of alphanumeric characters prefixed by \'<strong>#</strong>\', such as #1, #2a, #2b and #A. </p><p>If
- this field is left empty, the part 
+ this field is left empty, the part
 will be appended at the end of the main question text.</p>';
 $string['answermark'] = 'Default answer mark*';
 $string['answermark_help'] = '<p>Required.
- The mark for the answer of this part, which should be a number 
+ The mark for the answer of this part, which should be a number
 greater than 0. The default mark of the whole question is the sum of all its parts
  default marks. </p><p>Note: If this answer mark field is left blank, the part will be deleted when the question is successfully saved.</p>';
 $string['answertype'] = 'Answer type';
 $string['answertype_help'] = '<p>There
  are four answer types. Number, numeric and numerical formula answers
 requires number or a list of numbers as answer. Algebraic formula answers requires a string or
-list of strings as answer. </p><p>Different answer types will 
-impose different restrictions while inputting answers, so students will 
-need to know how to input them. The format check in the question code will 
-also tell them when they type if something is wrong. Please read the 
+list of strings as answer. </p><p>Different answer types will
+impose different restrictions while inputting answers, so students will
+need to know how to input them. The format check in the question code will
+also tell them when they type if something is wrong. Please read the
 documentation for details.</p>';
 $string['answertype_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Answer_type';
 $string['vars1'] = 'Local variables';
@@ -99,37 +105,37 @@ $string['vars1_help'] ='<p>You can define variables here in the same way as glob
 and their scope of visibility is limited to the part.</p>';
 $string['answer'] = 'Answer*';
 $string['answer_help'] = '<p>Required.
- must be a list of numbers, or a list of strings depending on the answer 
-type chosen. When there is only one answer, a number or string can be 
-entered directly. Please note that the number of elements in the list 
+ must be a list of numbers, or a list of strings depending on the answer
+type chosen. When there is only one answer, a number or string can be
+entered directly. Please note that the number of elements in the list
 defines the number of answer fileds for this part.  </p><pre class="prettyprint">123<br>[1, 0, 0, 1]<br>a<br>[1, a, b]<br>"exp(-a t)"<br>["vx t","vy t - 0.5 a t^2"]</pre>';
 $string['vars2'] = 'Grading variables';
 $string['vars2_help'] = '<p>All local variables and the student\'s responses can be used here. See documentation for advanced usages. </p>';
 $string['vars2_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Grading_variables';
 $string['correctness'] = 'Grading criteria*';
-$string['correctness_help'] = '<p>Required. You can choose either relative error or absolute error with error 
-range. Relative error cannot be used for algebraic 
+$string['correctness_help'] = '<p>Required. You can choose either relative error or absolute error with error
+range. Relative error cannot be used for algebraic
 answer type. </p><p>For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation. </p>';
 $string['correctness_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Manual_grading_criteria';
 $string['postunit'] = 'Unit';
 $string['postunit_help'] = '<p>You
- can specify the unit here. This question type is specially designed for SI unit, so an 
+ can specify the unit here. This question type is specially designed for SI unit, so an
 empty space represents the \'product\' of different \'base unit\' and <tt> ^ </tt> is used for exponents.
 Also, <tt> / </tt> can be used for inverse exponent. Any permutation of the base unit are treated the same. </p>
 <p>Students are required to use the same input format. For example, </p>
 <pre class="prettyprint">1 m<br>0.1 m^2<br>20 m s^(-1)<br>400 kg m/s<br>100 kW</pre>';
 $string['unitpenalty'] = 'Deduction for wrong unit (0-1)*';
 $string['unitpenalty_help'] = '<p>This option specify the mark you want to penalize the student for a wrong unit. </p><p>It
- takes value between 0 to 1. If it takes value 1, the unit and answer 
-must be correct at the same time in order to get mark. That is the unit 
-and answer are treated as one entity. On the other hand, if it takes 
-value 0, students can get full mark for only correct answer, all random 
-string will have no effect at the end of answer. Therefore, it is 
+ takes value between 0 to 1. If it takes value 1, the unit and answer
+must be correct at the same time in order to get mark. That is the unit
+and answer are treated as one entity. On the other hand, if it takes
+value 0, students can get full mark for only correct answer, all random
+string will have no effect at the end of answer. Therefore, it is
 recommended to use value 1 whenever the answer has no associated unit. </p>';
 $string['ruleid'] = 'Basic conversion rules';
 $string['ruleid_help'] = '<p>This question type has a build-in unit conversion system and has basic conversion rules.</p>
 <p>The basic one is the "Common SI unit" rules that will convert standard units
- such as unit for length, say, km, m, cm and mm. This option has no 
+ such as unit for length, say, km, m, cm and mm. This option has no
 effect if no unit has been used. </p>';
 $string['otherrule'] = 'Other rules';
 $string['otherrule_help'] = '<p>Here the question\' author can define additional  conversion rules for other accepted base units. See documentation for the advanced usages.</p>';
@@ -140,14 +146,14 @@ $string['feedback'] = 'Feedback';
 $string['feedback_help'] = 'This part feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['globaloptions'] = '[Global] - ';
 
-/// The language string for the variables instantiation and preview
+// The language string for the variables instantiation and preview.
 $string['checkvarshdr'] = 'Check variables instantiation';
 $string['numdataset'] = 'Number of dataset';
 $string['qtextpreview'] = 'Preview using dataset';
 $string['varsstatistics'] = 'Statistics';
 $string['varsdata'] = 'Instantiated dataset';
 
-/// Errors message used by validation of the editing form
+// Errors message used by validation of the editing form.
 $string['error_no_answer'] = 'At least one answer is required.';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
 $string['error_placeholder_too_long'] = 'The size of placeholder must be smaller than 40.';
@@ -165,7 +171,7 @@ $string['error_ruleid'] = 'No such rule exists in the file with the id/name.';
 $string['error_rule'] = 'Rule parsing error! ';
 $string['error_unitpenalty'] = 'The penalty must be a number between 0 and 1.';
 $string['error_validation_eval'] = 'Try evalution error! ';
-$string['error_syntax'] = 'Syntax error.';     // generic syntax error
+$string['error_syntax'] = 'Syntax error.';     // Generic syntax error.
 $string['error_vars_name'] = 'The syntax of the variable name is incorrect.';
 $string['error_vars_string'] = 'Error! Either a string without closing quotation, or use of non-accepted character such as \'.';
 $string['error_vars_end_separator'] = 'Missing an assignment separator at the end.';
@@ -188,10 +194,10 @@ $string['error_func_param'] = 'Wrong number or wrong type of parameters for the 
 $string['error_subexpression_empty'] = 'A subexpression is empty.';
 $string['error_eval_numerical'] = 'Some expressions cannot be evaluated numerically.';
 
-// The language strings for the renderer
+// The language strings for the renderer.
 $string['correctansweris'] = 'One possible correct answer is: {$a}';
 
-// string that were "borrowed" from quiz and are now in calculated plugin
+// String that were "borrowed" from quiz and are now in calculated plugin.
 $string['illegalformulasyntax'] = 'Illegal formula syntax starting with \'{$a}\'';
 $string['functiontakesnoargs'] = 'The function {$a} does not take any arguments';
 $string['functiontakesonearg'] = 'The function {$a} must have exactly one argument';

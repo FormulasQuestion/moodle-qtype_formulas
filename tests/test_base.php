@@ -18,7 +18,7 @@
  * Base class for formulas unit tests.
  *
  * @package    qtype_formulas
- * @copyright  2012 The Open University
+ * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 /**
  * Base class for formulas unit tests.
  *
- * @copyright  2012 The Open University
+ * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class qtype_formulas_testcase extends advanced_testcase {
@@ -42,9 +42,9 @@ abstract class qtype_formulas_testcase extends advanced_testcase {
 /**
  * Base class for formulas walkthrough tests.
  *
- * Sets up the Maxima connection, and provides some additional asserts.
+ * Provides some additional asserts.
  *
- * @copyright 2012 The Open University
+ * @copyright 2012 Jean-Michel Védrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class qtype_formulas_walkthrough_test_base extends qbehaviour_walkthrough_test_base {
@@ -106,13 +106,13 @@ abstract class qtype_formulas_walkthrough_test_base extends qbehaviour_walkthrou
         $this->assertNotRegExp('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
     }
 
-    protected function check_output_contains_lang_string($identifier, $component = '', $a = NULL) {
+    protected function check_output_contains_lang_string($identifier, $component = '', $a = null) {
         $string = get_string($identifier, $component, $a);
         $this->assertNotContains($string, $this->currentoutput,
                 'Expected string ' . $string . ' not found in ' . $this->currentoutput);
     }
 
-    protected function check_output_does_not_contain_lang_string($identifier, $component = '', $a = NULL) {
+    protected function check_output_does_not_contain_lang_string($identifier, $component = '', $a = null) {
         $string = get_string($identifier, $component, $a);
         $this->assertContains($string, $this->currentoutput,
                 'The string ' . $string . ' should not be present in ' . $this->currentoutput);

@@ -81,19 +81,19 @@ class qtype_formulas_question_test extends basic_testcase {
         $this->assertFalse($q->is_complete_response(array('0_0' => '1', '1_0' => '1')));
         $this->assertTrue($q->is_complete_response(array('0_0' => '1', '1_0' => '1', '2_0' => '1')));
     }
-    
+
     public function test_get_question_summary_test0() {
         $q = $this->get_test_formulas_question('test0');
         $q->start_attempt(new question_attempt_step(), 1);
         $this->assertEquals('Minimal question : For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.', $q->get_question_summary());
     }
-    
+
     public function test_get_question_summary_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
         $this->assertEquals('Multiple subquestions : By default, all subquestions will be added at the end. If placeholder is used, the subquestion will be inserted at the location of placeholder.--This is first subquestion.--This is second subquestion.--This is third subquestion.', $q->get_question_summary());
     }
-    
+
     public function test_get_question_summary_test2() {
         $q = $this->get_test_formulas_question('test2');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -108,22 +108,22 @@ class qtype_formulas_question_test extends basic_testcase {
                             .'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0} {_u}'
                             . 'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? speed = {_0}{_u}', $q->get_question_summary());
     }
-    
+
     public function test_get_correct_response_test0() {
         $q = $this->get_test_formulas_question('test0');
         $q->start_attempt(new question_attempt_step(), 1);
-        
+
         $this->assertEquals(array('0_0' => '5'), $q->get_correct_response());
     }
 
     public function test_get_correct_response_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        
-        $this->assertEquals(array('0_0' => '5', '1_0' => '6', '2_0' => '7'), $q->get_correct_response());    
+
+        $this->assertEquals(array('0_0' => '5', '1_0' => '6', '2_0' => '7'), $q->get_correct_response());
     }
-    
-    
+
+
     public function test_get_correct_response_test2() {
         $q = $this->get_test_formulas_question('test2');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -131,7 +131,7 @@ class qtype_formulas_question_test extends basic_testcase {
         $globalvars = $q->get_global_variables();
         $v = $globalvars->all['v']->value;
 
-        $this->assertEquals(array('0_' => "{$v}m/s", '1_0' => "$v", '1_1' => 'm/s', '2_0' => "$v", '3_0' => "$v"), $q->get_correct_response());      
+        $this->assertEquals(array('0_' => "{$v}m/s", '1_0' => "$v", '1_1' => 'm/s', '2_0' => "$v", '3_0' => "$v"), $q->get_correct_response());
     }
 
     public function test_get_is_same_response_for_part_test2() {
@@ -143,7 +143,7 @@ class qtype_formulas_question_test extends basic_testcase {
                 array('1_0' => 'x', '2_0' => 'y')));
         $this->assertFalse($q->is_same_response_for_part('1', array('1_0' => 'x'), array('1_0' => 'y')));
     }
-    
+
     public function test_grade_parts_that_can_be_graded_test1() {
         $q = $this->get_test_formulas_question('test2');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -160,7 +160,7 @@ class qtype_formulas_question_test extends basic_testcase {
         );
         $this->assertEquals($expected, $partscores);
     }
-    
+
     public function test_grade_parts_that_can_be_graded_test2() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -177,7 +177,7 @@ class qtype_formulas_question_test extends basic_testcase {
         );
         $this->assertEquals($expected, $partscores);
     }
-    
+
     public function test_grade_parts_that_can_be_graded_test3() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -193,7 +193,7 @@ class qtype_formulas_question_test extends basic_testcase {
         $expected = array();
         $this->assertEquals($expected, $partscores);
     }
-    
+
     public function test_grade_parts_that_can_be_graded_test4() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -210,7 +210,7 @@ class qtype_formulas_question_test extends basic_testcase {
         );
         $this->assertEquals($expected, $partscores);
     }
-    
+
     public function test_grade_parts_that_can_be_graded_test5() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -225,47 +225,47 @@ class qtype_formulas_question_test extends basic_testcase {
         );
         $this->assertEquals($expected, $partscores);
     }
-    
+
     public function test_get_parts_and_weights_test0() {
         $q = $this->get_test_formulas_question('test0');
-        
+
         $this->assertEquals(array('0' => 1), $q->get_parts_and_weights());
     }
-    
+
     public function test_get_parts_and_weights_test1() {
         $q = $this->get_test_formulas_question('test1');
-        
+
         $this->assertEquals(array('0' => 1/3, '1' => 1/3, '2' => 1/3), $q->get_parts_and_weights());
     }
-    
+
     public function test_get_parts_and_weights_test2() {
         $q = $this->get_test_formulas_question('test2');
-        
+
         $this->assertEquals(array('0' => .25, '1' => .25, '2' => .25, '3' => .25), $q->get_parts_and_weights());
     }
-    
+
     public function test_compute_final_grade_test0() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'), 
+
+        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'),
                            1 => array('0_0' => '5', '1_0' => '7', '2_0' =>'7'),
                            2 => array('0_0' => '5', '1_0' => '6', '2_0' =>'7')
                           );
         $finalgrade = $q->compute_final_grade($responses, 1);
-        $this->assertEquals(5.2/6, $finalgrade);
-    
+        $this->assertEquals((2 + 2*(1 - 2*0.3) + 2*(1 - 0.3)) /6, $finalgrade);
+
     }
-    
+
     public function test_compute_final_grade_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'), 
+
+        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'),
                            1 => array('0_0' => '5', '1_0' => '8', '2_0' =>'6'),
                            2 => array('0_0' => '5', '1_0' => '6', '2_0' =>'6')
                           );
         $finalgrade = $q->compute_final_grade($responses, 1);
-        $this->assertEquals(3.2/6, $finalgrade);
+        $this->assertEquals((2 + 2*(1 - 2*0.3))/6, $finalgrade);
     }
 }

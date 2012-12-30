@@ -1,18 +1,33 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * For course/quiz backup
- *
- * @copyright &copy; 2010 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package questionbank
- * @subpackage questiontypes
+ * @package    moodlecore
+ * @subpackage backup-moodle2
+ * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Provides the information to backup formulas questions
+ *
+ * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_qtype_formulas_plugin extends backup_qtype_plugin {
 
@@ -21,43 +36,43 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
      */
     protected function define_question_plugin_structure() {
 
-        // Define the virtual plugin element with the condition to fulfill
+        // Define the virtual plugin element with the condition to fulfill.
         $plugin = $this->get_plugin_element(null, '../../qtype', 'formulas');
 
-        // Create one standard named plugin element (the visible container)
+        // Create one standard named plugin element (the visible container).
         $pluginwrapper = new backup_nested_element($this->get_recommended_name());
 
-        // connect the visible container ASAP
+        // Connect the visible container ASAP.
         $plugin->add_child($pluginwrapper);
-        
-        // WARNING This qtype don't uses standard question_answers, qtype_formulas_answers are differents
 
-        // Now create the qtype own structures
-        
+        // WARNING This qtype don't uses standard question_answers, qtype_formulas_answers are differents.
+
+        // Now create the qtype own structures.
+
         $formulas = new backup_nested_element('formulas', array('id'), array(
-            'varsrandom', 'varsglobal', 'showperanswermark',
+            'varsrandom', 'varsglobal',
             'correctfeedback', 'correctfeedbackformat',
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
             'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect'));
-        
+
         $formulasanswers = new backup_nested_element('formulasanswers');
         $formulasanswer = new backup_nested_element('formulasanswer', array('id'), array(
             'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'vars2', 'correctness',
-            'unitpenalty','postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat'));
+            'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat'));
 
-        // don't need to annotate ids nor files
-        // Now the own qtype tree
-        // Order is important because we need to know formulas_answers ids
-        // to fill the formulas answerids field at restore
+        // Don't need to annotate ids nor files.
+        // Now the own qtype tree.
+        // Order is important because we need to know formulas_answers ids,
+        // to fill the formulas answerids field at restore.
         $pluginwrapper->add_child($formulasanswers);
         $formulasanswers->add_child($formulasanswer);
         $pluginwrapper->add_child($formulas);
 
-        // set source to populate the data
+        // Set source to populate the data.
         $formulasanswer->set_source_table('qtype_formulas_answers', array('questionid' => backup::VAR_PARENTID));
         $formulas->set_source_table('qtype_formulas', array('questionid' => backup::VAR_PARENTID));
 
-        // don't need to annotate ids nor files
+        // Don't need to annotate ids nor files.
 
         return $plugin;
     }

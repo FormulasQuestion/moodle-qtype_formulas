@@ -18,7 +18,7 @@
  * Test helper code for the formulas question type.
  *
  * @package    qtype_formulas
- * @copyright  2012 Jean-Michel védrine
+ * @copyright  2012 Jean-Michel VÃ©drine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Test helper class for the formulas question type.
  *
- * @copyright  2012 Jean-Michel Védrine
+ * @copyright  2012 Jean-Michel VÃ©drine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_test_helper extends question_test_helper {
@@ -37,9 +37,9 @@ class qtype_formulas_test_helper extends question_test_helper {
 
     public function get_test_questions() {
         return array(
-            'test0', // Minimal formulas question : one subquestion, not randomised. (answer = 5)
-            'test1', // 3 subquestions, not randomised. (answers = 5, 6, 7)
-            'test2'  // 5 subquestions, separated and combined unit field
+            'test0', // Minimal formulas question : one subquestion, not randomised (answer = 5),
+            'test1', // 3 subquestions, not randomised. (answers = 5, 6, 7),
+            'test2'  // 5 subquestions, separated and combined unit field.
         );
     }
 
@@ -51,7 +51,7 @@ class qtype_formulas_test_helper extends question_test_helper {
     protected static function make_a_formulas_question() {
         question_bank::load_question_definition_classes('formulas');
 
-        $q = new qtype_formulas_singlesubmit_question();
+        $q = new qtype_formulas_question();
         test_question_maker::initialise_a_question($q);
         $q->qtype = question_bank::get_qtype('formulas');
         $q->contextid = context_system::instance()->id;
@@ -60,38 +60,37 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->qv = new qtype_formulas_variables();
         $q->penalty = 0.2; // The default.
         test_question_maker::set_standard_combined_feedback_fields($q);
-        $q->numpart = 0;   // This is of course invalid but should be changed by all tests
+        $q->numpart = 0;   // This is of course invalid but should be changed by all tests.
         $q->parts =array();
         $q->evaluatedanswer = array();
         $q->fractions = array();
         $q->anscorrs = array();
         $q->unitcorrs = array();
-//        self::set_standard_combined_feedback_fields($q);
         return $q;
     }
-    
+
     protected static function make_a_formulas_part() {
         question_bank::load_question_definition_classes('formulas');
 
         $p = new qtype_formulas_part();
         $p->id = 0;
-	    $p->placeholder = '';
+        $p->placeholder = '';
         $p->answermark = 1;
         $p->answertype = 0;
-	    $p->numbox = 1;
-	    $p->vars1 = '';
-	    $p->vars2 = '';
-	    $p->answer = '1';
-	    $p->correctness = '_relerr < 0.01';
-	    $p->unitpenalty = 1;
-	    $p->postunit = '';
-	    $p->ruleid = 1;
-	    $p->otherrule = '';
-	    $p->subqtext = '';
-	    $p->subqtextformat = 1;
-	    $p->feedback = '';
+        $p->numbox = 1;
+        $p->vars1 = '';
+        $p->vars2 = '';
+        $p->answer = '1';
+        $p->correctness = '_relerr < 0.01';
+        $p->unitpenalty = 1;
+        $p->postunit = '';
+        $p->ruleid = 1;
+        $p->otherrule = '';
+        $p->subqtext = '';
+        $p->subqtextformat = 1;
+        $p->feedback = '';
         $p->feedbackformat = 1;
-	    $p->location = 0;        
+        $p->location = 0;
 
         return $p;
     }
@@ -104,7 +103,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $q->name = 'test-0';
         $q->questiontext = '<p>Minimal question : For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
-        
+
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->numpart = 1;
         $q->defaultmark = 2;
@@ -155,8 +154,8 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         return $q;
     }
-    
-       /**
+
+    /**
      * @return qtype_formulas_question the question from the test1.xml file.
      */
     public static function make_formulas_question_test2() {
@@ -173,7 +172,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->id = 14;
         $p0->location = 0;
         $p0->answermark = 2;
-        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // combined unit
+        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
@@ -181,7 +180,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 15;
         $p1->location = 1;
         $p1->answermark = 2;
-        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // separated unit
+        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
@@ -189,7 +188,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->id = 16;
         $p2->location = 2;
         $p2->answermark = 2;
-        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // as postunit is empty {_u} should be ignored
+        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
         $p2->postunit = '';
         $q->parts[2] = $p2;
@@ -197,12 +196,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p3->id = 17;
         $p3->location = 3;
         $p3->answermark = 2;
-        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // as postunit is empty {_u} should be ignored
+        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';
         $p3->postunit = '';
         $q->parts[3] = $p3;
 
         return $q;
     }
-    
+
 }

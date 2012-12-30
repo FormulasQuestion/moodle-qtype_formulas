@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /* Each entry of $basic_unit_conversion_rules is a pair:
  *  - The first string is the name of the rule, which is used when editing the form
  *  - The second string is the actual rule that will be parsed and used as unit conversion
@@ -9,7 +24,7 @@ global $basic_unit_conversion_rules;
 
 $basic_unit_conversion_rules = array();
 $basic_unit_conversion_rules[0] = array('None', '');
-$basic_unit_conversion_rules[1] = array('Common SI unit','
+$basic_unit_conversion_rules[1] = array('Common SI unit', '
 m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;

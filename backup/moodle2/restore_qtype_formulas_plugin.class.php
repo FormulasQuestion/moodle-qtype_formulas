@@ -1,19 +1,34 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * For course/quiz restore
- *
- * @copyright &copy; 2010 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package questionbank
- * @subpackage questiontypes
+ * @package    moodlecore
+ * @subpackage backup-moodle2
+ * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * restore plugin class that provides the necessary information
  * needed to restore one formulas qtype plugin
+ *
+ * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
@@ -23,18 +38,18 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
     protected function define_question_plugin_structure() {
 
         $paths = array();
-        
-        // This qtype uses don't question_answers, qtype_formulas_answers are differents
 
-        // Add own qtype stuff
+        // This qtype uses don't question_answers, qtype_formulas_answers are differents.
+
+        // Add own qtype stuff.
         $elename = 'formulas_answer';
-        $elepath = $this->get_pathfor('/formulasanswers/formulasanswer'); // we used get_recommended_name() so this works
+        $elepath = $this->get_pathfor('/formulasanswers/formulasanswer'); // We used get_recommended_name() so this works.
         $paths[] = new restore_path_element($elename, $elepath);
         $elename = 'formulas';
-        $elepath = $this->get_pathfor('/formulas'); // we used get_recommended_name() so this works
+        $elepath = $this->get_pathfor('/formulas'); // We used get_recommended_name() so this works.
         $paths[] = new restore_path_element($elename, $elepath);
 
-        return $paths; // And we return the interesting paths
+        return $paths; // And we return the interesting paths.
     }
 
     /**
@@ -45,24 +60,22 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
         $data = (object)$data;
         $oldid = $data->id;
-        // Detect if the question is created or mapped
+        // Detect if the question is created or mapped.
         $oldquestionid   = $this->get_old_parentid('question');
         $newquestionid   = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
-        // If the question has been created by restore, we need to create its qtype_formulas too
+        // If the question has been created by restore, we need to create its qtype_formulas too.
         if ($questioncreated) {
-            // Adjust some columns
+            // Adjust some columns.
             $data->questionid = $newquestionid;
-            // Insert record
+            // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas', $data);
-            // Create mapping (needed for decoding links)
+            // Create mapping (needed for decoding links).
             $this->set_mapping('qtype_formulas', $oldid, $newitemid);
-        } else {
-            // Nothing to remap if the question already existed
         }
     }
-    
+
     /**
      * Process the qtype/formulasanswer element
      */
@@ -72,25 +85,23 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Detect if the question is created or mapped
+        // Detect if the question is created or mapped.
         $oldquestionid   = $this->get_old_parentid('question');
         $newquestionid   = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
-        // If the question has been created by restore, we need to create its qtype_formulas_answers too
+        // If the question has been created by restore, we need to create its qtype_formulas_answers too.
         if ($questioncreated) {
-            // Adjust some columns
+            // Adjust some columns.
             $data->questionid = $newquestionid;
-            // Insert record
+            // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
-            // Create mapping
+            // Create mapping.
             $this->set_mapping('qtype_formulas_answers', $oldid, $newitemid);
-        } else {
-            // Nothing to remap if the question already existed
         }
     }
-    
-        /**
+
+    /**
      * Return the contents of this qtype to be processed by the links decoder
      */
     public static function define_decode_contents() {
@@ -102,5 +113,5 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
                     'qtype_formulas_answers'),
         );
     }
-    
+
 }
