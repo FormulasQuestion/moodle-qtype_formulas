@@ -67,13 +67,15 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * What data may be included in the form submission when a student enter a response.
      * The number before the _ is the part number,
-     * and the number after the _ is the coordinate number.
-     * For instance "2_3" is anwer to coordinate 3 of part 2
-     * When there is a separated unit answer field for part i, it is called "i_n"
-     * where n is the number of coordinates for part i
-     * Sor for instance if subquestion 2 has 3 coordinates and a separate unit field
-     * we will have responses names 2_0, 2_1, 2_2, 2_3 (last one is unit)
-     * When there is a combined unit answer field for part i, it is simply called "i_"
+     * and the number after the _ is the coordinate number (start at 0).
+     * For instance "2_3" is anwer to coordinate 4 of part 2
+     * When there is a separated unit response for part i, it is called "i_n"
+     * where n is the number of coordinates for part i.
+     * Sor for instance if part 2 has 3 coordinates and a separate unit response,
+     * we will have responses names 2_0, 2_1, 2_2, 2_3 (last one is for unit)
+     * When there is a combined answer&unit field for part i, it is simply called "i_"
+     * So for instance if part 2 has a combined answer&unit response, its name will be "2_"
+     * and will be equivalent to separate anser and unit response "2_0" and "2_1".     
      */
     public function get_expected_data() {
         $expected = array();
@@ -106,18 +108,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             $this->randomsvars_text = $this->qv->vstack_get_serialization($this->randomsvars);
             $step->set_qt_var('_randomsvars_text', $this->randomsvars_text);
             $step->set_qt_var('_varsglobal', $this->varsglobal);
-            $globalvars = $this ->get_global_variables();
-            $ss = qtype_formulas::create_subquestion_structure($this->questiontext, $this->parts);
-            $questiontext = '';
-            foreach ($this->parts as $i => $part) {
-                $pretext = $this->qv->substitute_variables_in_text($globalvars, $ss->pretexts[$i]);
-                $localvars = $this->get_local_variables($part);
-                $subtext = $this->qv->substitute_variables_in_text($localvars, $part->subqtext);
-                $questiontext .= $pretext . $subtext . "{feedback_$i}";
-            }
 
-            $questiontext .= $this->qv->substitute_variables_in_text($globalvars, $ss->posttext);
-            $step->set_qt_var('_questiontext', $questiontext);
             return true;    // Success.
         } catch (Exception $e) {
             return false;   // Fail.
@@ -168,13 +159,14 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * This has to be a formulas-specific method
-     *  so that global variables are replaced by their values.
+     * so that global variables are replaced by their values.
      */
     public function format_generalfeedback($qa) {
         $globalvars = $this->get_global_variables();
         return $this->format_formulas_text($globalvars, $this->generalfeedback, $this->generalfeedbackformat,
                 $qa, 'question', 'generalfeedback', $this->id, false);
     }
+
     /**
      * Generate a brief, plain-text, summary of this question. This is used by
      * various reports. This should show the particular variant of the question
@@ -505,7 +497,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $res;
     }
 
-    // Grade response and return a list with answer correctness and unit correctness.
+    // Grade response for part, and return a list with answer correctness and unit correctness.
     public function grade_responses_individually($part, $response, &$checkunit) {
         // Step 1: Split the student's responses to the subquestion into coordinates and unit.
         $coordinates = array();
@@ -572,7 +564,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return array($answer_correct, $unit_correct);
     }
 
-    // Fill all 'missing' responses by the default values and remove unwanted characters.
+    // Fill all 'missing' responses by default value and remove unwanted characters.
     public function rationalize_responses_for_part($i, array &$response) {
         $part = $this->parts[$i];
         foreach (range(0, $part->numbox) as $j) {
@@ -592,19 +584,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     public function rationalize_responses(array &$response) {
         foreach ($this->parts as $i => $part) {
-            foreach (range(0, $part->numbox) as $j) {
-                $name = "${i}_$j";
-                $response[$name] = isset($response[$name]) ? trim($response[$name]) : '';   // Replace all missing responses with an empty string.
-                if (strlen($response[$name]) > 128) {
-                    $response[$name] = substr($response[$name], 0, 128);    // Restrict length to 128.
-                }
-            }
-            if (isset($response["${i}_"])) {   // For a long answer box, always parse it into a number and unit, say, "0_0" and "0_1".
-                $response["${i}_"] = substr(trim($response["${i}_"]), 0, 128);
-                $tmp = $this->qv->split_formula_unit($response["${i}_"]);
-                $response["${i}_0"] = $tmp[0]; // It will be checked later whether tmp[0] is a number.
-                $response["${i}_1"] = isset($tmp[1]) ? $tmp[1] : '';
-            }   // The else case may occur if there is no further submission for answer $i, in which case we copy the "0_0" and "0_1" in above case.
+            $this->rationalize_responses_for_part($i, array &$response);
         }
     }
 
