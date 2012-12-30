@@ -245,6 +245,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return get_string('correctansweris', 'qtype_formulas', $correctanswer);
     }
 
+    /**
+     * We need to owerwrite this method to replace global variables by their value
+     * @param question_attempt $qa the question attempt to display.
+     * @return string HTML fragment.
+     */
+    protected function hint(question_attempt $qa, question_hint $hint) {
+        $question = $qa->get_question();
+        $globalvars = $question->get_global_variables();
+        $hint->hint = $question->qv->substitute_variables_in_text($globalvars, $hint->hint);
+        return html_writer::nonempty_tag('div',
+                $qa->get_question()->format_hint($hint, $qa), array('class' => 'hint'));
+    }
+
     protected function combined_feedback(question_attempt $qa) {
         $question = $qa->get_question();
 
