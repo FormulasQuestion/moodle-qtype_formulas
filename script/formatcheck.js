@@ -913,8 +913,6 @@ function formulas_format_check(imgloc) {
 
 
 window.onload = (function(oldfunc, newfunc) {
-    var msg = "onload";
-    alert(msg);
     if (oldfunc && typeof oldfunc == 'function')
         return function() { oldfunc(); newfunc(); }
     else
