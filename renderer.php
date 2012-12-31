@@ -79,7 +79,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function head_code(question_attempt $qa) {
         global $PAGE;
 
-        $PAGE->requires->js('/question/type/formulas/script/quiz.js');
         $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
         $PAGE->requires->js('/question/type/formulas/overlib/overlib.js', true);
         $PAGE->requires->js('/question/type/formulas/overlib/overlib_cssstyle.js', true);
