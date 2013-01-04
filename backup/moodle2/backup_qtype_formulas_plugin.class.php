@@ -55,8 +55,8 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
             'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect'));
 
-        $formulasanswers = new backup_nested_element('formulasanswers');
-        $formulasanswer = new backup_nested_element('formulasanswer', array('id'), array(
+        $formulasanswers = new backup_nested_element('formulas_answers');
+        $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(
             'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'vars2', 'correctness',
             'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat'));
 

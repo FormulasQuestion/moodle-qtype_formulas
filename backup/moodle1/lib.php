@@ -51,31 +51,45 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
         } else {
             $answers   = array();
         }
-        $this->xmlwriter->begin_tag('formulasanswers');
+        $this->xmlwriter->begin_tag('formulas_answers');
         foreach ($answers as $answer) {
-            $this->xmlwriter->begin_tag('formulasanswer', array('id' => $this->converter->get_nextid()));
-            $this->xmlwriter->full_tag('placeholder', $answer['placeholder']);
-            $this->xmlwriter->full_tag('answermark', $answer['answermark']);
-            $this->xmlwriter->full_tag('answertype', $answer['answertype']);
-            $this->xmlwriter->full_tag('numbox', $answer['numbox']);
-            $this->xmlwriter->full_tag('vars1', $answer['vars1']);
-            $this->xmlwriter->full_tag('answer', $answer['answer']);
-            $this->xmlwriter->full_tag('vars2', $answer['vars2']);
-            $this->xmlwriter->full_tag('correctness', $answer['correctness']);
-            $this->xmlwriter->full_tag('unitpenalty', $answer['unitpenalty']);
-            $this->xmlwriter->full_tag('postunit', $answer['postunit']);
-            $this->xmlwriter->full_tag('ruleid', $answer['ruleid']);
-            $this->xmlwriter->full_tag('otherrule', $answer['otherrule']);
-            $this->xmlwriter->full_tag('subqtext', $answer['subqtext']);
-            $this->xmlwriter->full_tag('subqtextformat', FORMAT_HTML);
-            $this->xmlwriter->full_tag('feedback', $answer['feedback']);
-            $this->xmlwriter->full_tag('feedbackformat', FORMAT_HTML);
-            $this->xmlwriter->end_tag('formulasanswer');
+            // Create an artificial 'id' attribute (is not included in moodle.xml).
+            $answer['id'] = $this->converter->get_nextid();
+            // Add missing fields.
+            $answer['subqtextformat'] = FORMAT_HTML;
+            $answer['feedbackformat'] = FORMAT_HTML;
+            
+            // Restore images in answers subqtext and feedback fields.
+            // Uncomment the 2 following lines once MDL-33424 is closed.
+//            $answer['subqtext'] = $this->restore_files($answer['subqtext'], 'qtype_formulas', 'answersubqtext', $answer['id']);
+//            $answer['feedback'] = $this->restore_files($answer['feedback'], 'qtype_formulas', 'answerfeedback', $answer['id']);
+ 
+            $this->xmlwriter->begin_tag('formulas_answer', array('id' => $answer['id']));
+            foreach (array(
+                'placeholder', 'answermark', 'answertype', 'numbox',
+                'vars1', 'answer', 'vars2', 'correctness', 'unitpenalty',
+                'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat',
+                'feedback', 'feedbackformat'
+            ) as $fieldname) {
+                if (!array_key_exists($fieldname, $answer)) {
+                    throw new moodle1_convert_exception('missing_formulas_answer_field', $fieldname);
+                }
+                $this->xmlwriter->full_tag($fieldname, $answer[$fieldname]);
+            }
+            $this->xmlwriter->end_tag('formulas_answer');
         }
-        $this->xmlwriter->end_tag('formulasanswers');
+        $this->xmlwriter->end_tag('formulas_answers');
 
         // And finally the formulas options.
 		$options = $data['formulas'][0];
+        if (!isset($options)) {
+            // This should never happen, but it can do if the 1.9 site contained
+            // corrupt data.
+            $options = array(
+                'varsrandom'  => '',
+                'varsglobal' => ''
+            );
+        }
 		$this->xmlwriter->begin_tag('formulas', array('id' => $this->converter->get_nextid()));
 		$this->xmlwriter->full_tag('varsrandom', $options['varsrandom']);
 		$this->xmlwriter->full_tag('varsglobal', $options['varsglobal']);

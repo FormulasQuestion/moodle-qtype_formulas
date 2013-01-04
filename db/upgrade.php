@@ -36,11 +36,11 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         // Renaming old tables.
         $table = new xmldb_table('question_formulas');
         if ($dbman->table_exists($table)) {
-            $dbman->rename_table($table, $tablename . 'qtype_formulas');
+            $dbman->rename_table($table, 'qtype_formulas');
         }
         $table = new xmldb_table('question_formulas_answers');
         if ($dbman->table_exists($table)) {
-            $dbman->rename_table($table, $tablename . 'qtype_formulas_answers');
+            $dbman->rename_table($table, 'qtype_formulas_answers');
         }
 
         // Add combined feedback fields.
