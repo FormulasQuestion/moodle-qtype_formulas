@@ -58,12 +58,12 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
             // Add missing fields.
             $answer['subqtextformat'] = FORMAT_HTML;
             $answer['feedbackformat'] = FORMAT_HTML;
-            
+
             // Restore images in answers subqtext and feedback fields.
             // Uncomment the 2 following lines once MDL-33424 is closed.
 //            $answer['subqtext'] = $this->restore_files($answer['subqtext'], 'qtype_formulas', 'answersubqtext', $answer['id']);
 //            $answer['feedback'] = $this->restore_files($answer['feedback'], 'qtype_formulas', 'answerfeedback', $answer['id']);
- 
+
             $this->xmlwriter->begin_tag('formulas_answer', array('id' => $answer['id']));
             foreach (array(
                 'placeholder', 'answermark', 'answertype', 'numbox',
@@ -81,7 +81,7 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
         $this->xmlwriter->end_tag('formulas_answers');
 
         // And finally the formulas options.
-		$options = $data['formulas'][0];
+        $options = $data['formulas'][0];
         if (!isset($options)) {
             // This should never happen, but it can do if the 1.9 site contained
             // corrupt data.
@@ -90,9 +90,9 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
                 'varsglobal' => ''
             );
         }
-		$this->xmlwriter->begin_tag('formulas', array('id' => $this->converter->get_nextid()));
-		$this->xmlwriter->full_tag('varsrandom', $options['varsrandom']);
-		$this->xmlwriter->full_tag('varsglobal', $options['varsglobal']);
+        $this->xmlwriter->begin_tag('formulas', array('id' => $this->converter->get_nextid()));
+        $this->xmlwriter->full_tag('varsrandom', $options['varsrandom']);
+        $this->xmlwriter->full_tag('varsglobal', $options['varsglobal']);
         $this->xmlwriter->full_tag('correctfeedback', '');
         $this->xmlwriter->full_tag('correctfeedbackformat', FORMAT_HTML);
         $this->xmlwriter->full_tag('partiallycorrectfeedback', '');
@@ -100,6 +100,6 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
         $this->xmlwriter->full_tag('incorrectfeedback', '');
         $this->xmlwriter->full_tag('incorrectfeedbackformat', FORMAT_HTML);
         $this->xmlwriter->full_tag('shownumcorrect', 0);
-		$this->xmlwriter->end_tag('formulas');
+        $this->xmlwriter->end_tag('formulas');
     }
 }

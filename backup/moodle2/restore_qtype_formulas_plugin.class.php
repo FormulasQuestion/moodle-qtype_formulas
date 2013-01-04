@@ -67,7 +67,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
         // If the question has been created by restore, we need to create its qtype_formulas too.
         if ($questioncreated) {
-            // Some 2.0 backups are missing the combined feedback
+            // Some 2.0 backups are missing the combined feedback.
             if (!isset($data->correctfeedback)) {
                 $data->correctfeedback = '';
                 $data->correctfeedbackformat = FORMAT_HTML;
@@ -110,7 +110,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         if ($questioncreated) {
             // Adjust some columns.
             $data->questionid = $newquestionid;
-            // Some 2.0 backups are missing the feedbackformat 
+            // Some 2.0 backups are missing the feedbackformat.
             if (!isset($data->feedbackformat)) {
                 $data->feedbackformat = FORMAT_HTML;
             }
