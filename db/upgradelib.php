@@ -75,7 +75,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     public function set_first_step_data_elements($state, &$data) {
         $parsedanswer = $this->parse_answer($state->answer);
         $data['_randomsvars_text'] = $parsedanswer['randomvars'];
-        $data['_varsglobal'] = $this->question->options->extra->varsglobal;
+        $data['_varsglobal'] = $this->question->options->varsglobal;
 
         // Now that we know random and global variables, we can do our best for question summary.
         $summary = $this->to_text($this->question->questiontext, $this->question->questiontextformat);
@@ -95,7 +95,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
 
     public function supply_missing_first_step_data(&$data) {
         echo "function supply_missing_first_step_data\n";
-        $data['_varsglobal'] = $this->question->options->extra->varsglobal;
+        $data['_varsglobal'] = $this->question->options->varsglobal;
 
     }
 

@@ -107,15 +107,11 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             'modifiedby' => '2',
             'maxmark' => '8.0000000',
             'options' => (object) array(
-                'extra' => (object) array(
-                        'id' => '4',
-                        'questionid' => '4',
-                        'varsrandom' => 'v = {20:100:10};
+                'varsrandom' => 'v = {20:100:10};
  dt = {2:6};',
-                        'varsglobal' => 's = v*dt;',
-                        'peranswersubmit' => '1',
-                        'showperanswermark' => '1',
-                ),
+                'varsglobal' => 's = v*dt;',
+                'peranswersubmit' => '1',
+                'showperanswermark' => '1',
                 'answers' => array(
                     0 => (object) array(
                         'id' => '6',
