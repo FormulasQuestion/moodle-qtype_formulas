@@ -41,24 +41,13 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     }
 
     public function question_summary() {
-        $summary = $this->to_text($this->question->questiontext, $this->question->questiontextformat);
-        foreach ($this->question->options->answers as $i => $part) {
-            $answerbit = $this->to_text($part->subqtext, $part->subqtextformat);
-            if ($part->placeholder != '') {
-                $summary = str_replace('{' . $part->placeholder . '}', $answerbit, $summary);
-            } else {
-                $summary .= $answerbit;
-            }
-        }
-        return $summary;    
+        // Done later when we know random variables.
+        return '';  
     }
 
     public function was_answered($state) {
-    echo "function was answered\n";
         $parsedanswer = $this->parse_answer($state->answer);
-        $responses = $parsedanswer['responses'];
         $allresponses = implode('', $parsedanswer['responses']);
-var_dump($allresponses);
         return !empty($allresponses);
     }
 
@@ -87,6 +76,21 @@ var_dump($allresponses);
         $parsedanswer = $this->parse_answer($state->answer);
         $data['_randomsvars_text'] = $parsedanswer['randomvars'];
         $data['_varsglobal'] = $this->question->options->extra->varsglobal;
+
+        // Now that we know random and global variables, we can do our best for question summary.
+        $summary = $this->to_text($this->question->questiontext, $this->question->questiontextformat);
+        foreach ($this->question->options->answers as $i => $part) {
+            $answerbit = $this->to_text($part->subqtext, $part->subqtextformat);
+            if ($part->placeholder != '') {
+                $summary = str_replace('{' . $part->placeholder . '}', $answerbit, $summary);
+            } else {
+                $summary .= $answerbit;
+            }
+        }
+        if ($parsedanswer['randomvars']) {
+        $summary .= ' ('. $parsedanswer['randomvars'] .')';
+        }
+        $this->updater->qa->questionsummary = $summary;  
     }
 
     public function supply_missing_first_step_data(&$data) {

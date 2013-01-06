@@ -309,8 +309,8 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             {_0}{_u}If a car travel {s} m in {dt} s, what is the speed of the car?
             {_0} {_u}If a car travel {s} m in {dt} s, what is the speed of the car?
             {_0} m/sIf a car travel {s} m in {dt} s, what is the speed of the car?
-            speed = {_0} m/s',
-            'rightanswer' => '30m/s; 30; m/s; 30; 30',
+            speed = {_0} m/s (v=30;dt=3;)',
+            'rightanswer' => '',
             'responsesummary' => '30m/s;40;m/s;30;40',
             'timemodified' => 1357402884,
             'steps' => array(
