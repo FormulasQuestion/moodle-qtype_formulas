@@ -94,7 +94,9 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     }
 
     public function supply_missing_first_step_data(&$data) {
-        echo "function supply_missing_first_step_data\n";
+        // There is nothing we can do now for global variables,
+        // but we will try to fix it later.
+        $data['_randomsvars_text'] = 'Missing';
         $data['_varsglobal'] = $this->question->options->varsglobal;
 
     }
@@ -118,6 +120,11 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
                 }
                 
             }
+        }
+        // If first step was missing we try to fix it now.
+        var_dump($this->updater->qa->steps);
+        if ($this->updater->qa->steps[0]->data['_randomsvars_text'] == 'Missing' && $parsedanswer['randomvars'] != '') {
+            $this->updater->qa->steps[0]->data['_randomsvars_text'] = $parsedanswer['randomvars'];
         }
     }
 

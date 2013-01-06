@@ -660,7 +660,11 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function get_parts_and_weights() {
         $weights = array();
         foreach ($this->parts as $i => $part) {
-            $weights[$i] = $part->answermark / $this->defaultmark;
+            $weights[$i] = $part->answermark;
+        }
+        $totalvalue = array_sum($weights);
+        foreach ($weights as &$w) {
+            $w /= $totalvalue;
         }
         return $weights;
     }
