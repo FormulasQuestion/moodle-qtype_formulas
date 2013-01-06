@@ -406,6 +406,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return array (number, integer) the fraction, and the state.
      */
     public function grade_response(array $response) {
+        // We cant' rely on question defaultmark for restored questions.
+        $totalvalue = 0;
         try {
             $this->rationalize_responses($response);      // May throw if subqtext have changed.
             $checkunit = new answer_unit_conversion; // Defined here for the possibility of reusing parsed default set.
@@ -414,12 +416,14 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                         = $this->grade_responses_individually($part, $response, $checkunit);
                 $this->fractions[$idx] = $this->anscorrs[$idx] * ($this->unitcorrs[$idx] ? 1 : (1-$part->unitpenalty));
                 $this->raw_grades[$idx] = $part->answermark * $this->fractions[$idx];
+                $totalvalue += $part->answermark;
             }
         } catch (Exception $e) {
             notify('Grading error! Probably result of incorrect import file or database corruption.');
             return false; // It should have no error when grading students question.
         }
-        $fraction = array_sum($this->raw_grades)/$this->defaultmark;
+
+        $fraction = array_sum($this->raw_grades)/$totalvalue;
         return array($fraction, question_state::graded_state_for_fraction($fraction));
     }
 

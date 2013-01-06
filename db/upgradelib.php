@@ -122,7 +122,6 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
             }
         }
         // If first step was missing we try to fix it now.
-        var_dump($this->updater->qa->steps);
         if ($this->updater->qa->steps[0]->data['_randomsvars_text'] == 'Missing' && $parsedanswer['randomvars'] != '') {
             $this->updater->qa->steps[0]->data['_randomsvars_text'] = $parsedanswer['randomvars'];
         }
