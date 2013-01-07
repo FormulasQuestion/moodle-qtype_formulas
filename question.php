@@ -578,8 +578,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
         }
         if (isset($response["{$i}_"])) {   // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
-                $response["{$i}_"] = substr(trim($response["{$i}_"]), 0, 128);
-                // TODO verify what will happen if the trimmed response is empty.
+                $response["{$i}_"] = (string) substr(trim($response["{$i}_"]), 0, 128);
                 $tmp = $this->qv->split_formula_unit($response["{$i}_"]);
                 $response["{$i}_0"] = $tmp[0]; // It will be checked later if tmp[0] is a number.
                 $response["{$i}_1"] = isset($tmp[1]) ? $tmp[1] : '';

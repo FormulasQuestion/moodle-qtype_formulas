@@ -112,7 +112,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $checkunit = new answer_unit_conversion;
 
         list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
-        $sub->fraction = $sub->anscorr * $sub->unitcorr ? 1 : (1-$part->unitpenalty);
+        $sub->fraction = $sub->anscorr * ($sub->unitcorr ? 1 : (1-$part->unitpenalty));
 
         // Get the class and image for the feedback.
         if ($options->correctness) {
