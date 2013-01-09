@@ -58,7 +58,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             return;
         }
 
-        $result = html_writer::tag('script', 'var formulasbaseurl='.json_encode($CFG->wwwroot . '/question/type/' . $question->get_type_name()).';', array('type'=>'text/javascript'));
+        $result = html_writer::tag('script', 'var formulasbaseurl='
+                .json_encode($CFG->wwwroot . '/question/type/' . $question->get_type_name()).';', array('type'=>'text/javascript'));
         $questiontext = '';
         foreach ($question->parts as $i => $part) {
             $pretext = $question->formulas_format_text($globalvars, $ss->pretexts[$i], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
@@ -186,6 +187,40 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $name = $qa->get_qt_field_name($var_name);
             $response = $qa->get_last_qt_var($var_name);
 
+            $stexts = null;
+            if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
+                try {
+                    $stexts = $this->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
+                } catch (Exception $e) {
+                    // The $stexts variable will be null if evaluation fails.
+                }
+            }
+            if ($stexts != null) {
+                if ($boxes[$placeholder]->stype == ':SL') {
+                } else {
+                    $popup = $this->get_answers_popup($j, (isset($A) ? $stexts->value[$A[$var_name]] : ''));
+                    if ($boxes[$placeholder]->stype == ':MCE') {
+                        $mc = '<option value="" '.(''==$response?' selected="selected" ':'').'>'.'</option>';
+                        foreach ($stexts->value as $x => $mctxt) {
+                            $mc .= '<option value="'.$x.'" '.((string)$x==$response?' selected="selected" ':'').'>'.$mctxt.'</option>';
+                        }
+                        $inputboxes[$placeholder] = '<select name="'.$name.'" '.$sub->readonlyattribute.' '.$popup.'>' . $mc . '</select>';
+                    } else {
+                        $mc = '';
+                        foreach ($stexts->value as $x => $mctxt) {
+                            $mc .= '<tr class="r'.($x%2).'"><td class="c0 control">';
+                            $mc .= '<input id="'.$name.'_'.$x.'" name="'.$name.'" value="'
+                            . $x .'" type="radio" '.$sub->readonlyattribute.' '.((string) $x==$response?' checked="checked" ':'').'>';
+                            $mc .= '</td><td class="c1 text "><label for="'.$name.'_'.$x.'">'.$mctxt.'</label></td>';
+                            $mc .= '</tr>';
+                        }
+                        $inputboxes[$placeholder] = '<table '.$popup.'><tbody>' . $mc . '</tbody></table>';
+                    }
+                }
+                continue;
+            }
+
+            // Normal answer box with input text.
             $popup = $this->get_answers_popup($j, (isset($A) ? $A[$var_name] : ''));
             $inputboxes[$placeholder] = '';
             if ($j == $part->numbox) {

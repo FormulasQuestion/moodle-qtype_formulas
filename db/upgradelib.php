@@ -40,7 +40,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
 
     public function question_summary() {
         // Done later when we know random variables.
-        return '';  
+        return '';
     }
 
     public function was_answered($state) {
@@ -86,9 +86,9 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
             }
         }
         if ($parsedanswer['randomvars']) {
-        $summary .= ' ('. $parsedanswer['randomvars'] .')';
+            $summary .= ' ('. $parsedanswer['randomvars'] .')';
         }
-        $this->updater->qa->questionsummary = $summary;  
+        $this->updater->qa->questionsummary = $summary;
     }
 
     public function supply_missing_first_step_data(&$data) {
@@ -116,7 +116,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
                     // Last response is unit.
                     $data["${i}_{$part->numbox}"] = $responses["${i}_{$part->numbox}"];
                 }
-                
+
             }
         }
         // If first step was missing we try to fix it now.
@@ -159,6 +159,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     // Copied and adapted from question definition.
     public function has_combined_unit_field($part) {
         return strlen($part->postunit) != 0 && $part->numbox == 1 && $part->answertype != 1000
-                && (strpos($part->subqtext, "{_0}{_u}") !== false || (strpos($part->subqtext, "{_0}") === false && strpos($part->subqtext, "{_u}") === false));
+                && (strpos($part->subqtext, "{_0}{_u}") !== false
+                || (strpos($part->subqtext, "{_0}") === false && strpos($part->subqtext, "{_u}") === false));
     }
 }
