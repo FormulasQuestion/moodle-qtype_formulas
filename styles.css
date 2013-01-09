@@ -151,6 +151,6 @@ hr.formulas_seperator2 {
 
 .que.formulas .formulation .formulaspartfeedback .correct,
 .que.formulas .formulation .formulaspartfeedback .partiallycorrect,
-.que.stack .formulation .formulaspartfeedback .incorrect {
+.que.formulas .formulation .formulaspartfeedback .incorrect {
     background: transparent;
 }

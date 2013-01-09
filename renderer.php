@@ -149,7 +149,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $gtype = $types[$gradingtype];
 
         // Get the set of defined placeholders and their options, also missing placeholders are appended at the end.
-        // Options are no more used as they were not documented anywhere but pattern left as is for compatibility.
         $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
         preg_match_all('/'.$pattern.'/', $subqreplaced, $matches);
         $boxes = array();
@@ -190,11 +189,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $stexts = null;
             if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
                 try {
-                    $stexts = $this->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
+                    $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
                 } catch (Exception $e) {
                     // The $stexts variable will be null if evaluation fails.
                 }
             }
+            // Answer as multichoice options.
             if ($stexts != null) {
                 if ($boxes[$placeholder]->stype == ':SL') {
                 } else {
