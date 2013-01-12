@@ -143,7 +143,8 @@ hr.formulas_seperator2 {
     cursor: pointer;
 }
 
-.que.formulas .formulation .formulaspartfeedback {
+.que.formulas .formulation .formulaspartfeedback,
+.que.formulas .formulation .formulaspartcorrectanswer, {
     background: #fff3bf;
     margin: 0.2em -0.2em 0.5em;
     padding: 0.2em;

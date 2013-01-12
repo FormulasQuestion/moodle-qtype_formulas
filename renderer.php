@@ -23,9 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
-
 
 /**
  * Base class for generating the bits of output for formulas questions.
@@ -52,9 +50,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $globalvars = $question->get_global_variables();
 
-        $ss = qtype_formulas::create_subquestion_structure($question->questiontext, $question->parts);
-        if (count($ss->pretexts) != $question->numpart) {
-            notify("Error: The number of subquestions and number of answer are not the same.");
+        if (count($question->textfragments) != $question->numpart + 1) {
+            notify("Error: Question is damaged, number of text fragments and number of question parts are not the same.");
             return;
         }
 
@@ -62,11 +59,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 .json_encode($CFG->wwwroot . '/question/type/' . $question->get_type_name()).';', array('type'=>'text/javascript'));
         $questiontext = '';
         foreach ($question->parts as $i => $part) {
-            $pretext = $question->formulas_format_text($globalvars, $ss->pretexts[$i], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
-            $subtext = $this->part_formulation_and_controls($qa, $options, $i);
-            $questiontext .= $pretext . $subtext;
+            $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$i], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
+            $questiontext .= $this->part_formulation_and_controls($qa, $options, $i);
         }
-        $questiontext .= $question->formulas_format_text($globalvars, $ss->posttext, FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
+        $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$question->numpart], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
 
         $result .= html_writer::tag('div', $questiontext, array('class' => 'qtext'));
         if ($qa->get_state() == question_state::$invalid) {
@@ -81,35 +77,38 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         global $PAGE;
 
         $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
-        $PAGE->requires->js('/question/type/formulas/overlib/overlib.js', true);
-        $PAGE->requires->js('/question/type/formulas/overlib/overlib_cssstyle.js', true);
     }
 
     // Return the part text, controls, grading details and feedbacks.
-    public function part_formulation_and_controls($qa, $options, $i) {
+    public function part_formulation_and_controls(question_attempt $qa,
+            question_display_options $options, $i) {
         $question = $qa->get_question();
-        $sub = $this->get_subquestion_all_options($qa, $options, $i);
+        $sub = $this->get_part_image_and_class($qa, $options, $i);
         $part = $question->parts[$i];
         $localvars = $question->get_local_variables($part);
 
-        $subqreplaced = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
-        $subqreplaced .= $sub->feedbackimage;
+        $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
+        $output .= $sub->feedbackimage;
 
-        $subqreplaced .= $this->part_feedback($i, $qa, $question, $options);
-        return html_writer::tag('div', $subqreplaced , array('class' => 'formulas_part'));
+        $output .= $this->part_feedback($i, $qa, $question, $options);
+        // We don't display the right answer if one of the part's coordinantes is a MC question.
+        // TODO: find a solution in that case.
+        if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
+            $output .= html_writer::nonempty_tag('div', $this->part_correct_response($i, $qa),
+                    array('class' => 'feedback formulas_local_feedback formulaspartcorrectanswer'));
+        }
+        return html_writer::tag('div', $output , array('class' => 'formulas_part'));
     }
 
-    // Return the object containing all options that affect the display of part i.
-    public function get_subquestion_all_options($qa, $options, $i) {
+    // Return class and image for the part feedback.
+    public function get_part_image_and_class($qa, $options, $i) {
         $question = $qa->get_question();
         $part = $question->parts[$i];
 
         $sub = new StdClass;
-        $sub->readonlyattribute = $options->readonly ? 'readonly="readonly"' : '';
-        $sub->showanswers = $options->correctness && $options->readonly;
 
         $response = $qa->get_last_qt_data();
-        $question->rationalize_responses($response);      // May throw if the subqtext changed.
+        $question->rationalize_responses($response);
         $checkunit = new answer_unit_conversion;
 
         list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
@@ -126,7 +125,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $sub->unitfeedbackclass = $this->feedback_class($sub->unitcorr);
                 $sub->boxfeedbackclass = $this->feedback_class($sub->anscorr);
             }
-        } else {  // There should be no feedback if options->feedback is not set.
+        } else {  // There should be no feedback if options->correctness is not set.
             $sub->feedbackimage = '';
             $sub->feedbackclass = '';
             $sub->unitfeedbackclass = '';
@@ -140,9 +139,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
+        $readonlyattribute = $options->readonly ? 'readonly="readonly"' : '';
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
-        $A = $sub->showanswers ? $question->get_correct_responses_individually($part) : null;
 
         $types = array(0 => 'number', 10 => 'numeric', 100 => 'numerical_formula', 1000 => 'algebraic_formula');
         $gradingtype = ($part->answertype!=10 && $part->answertype!=100 && $part->answertype!=1000) ? 0 : $part->answertype;
@@ -167,14 +166,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // If {_0} and {_u} are adjacent to each other and there is only one number in the answer, "concatenate" them together in a combined input box.
         if ($part->numbox == 1 && (strlen($part->postunit) != 0) && strpos($subqreplaced, "{_0}{_u}") !== false && $gradingtype != 1000) {
-            $popup = $this->get_answers_popup($j, (isset($A) ? $A["${i}_0"].$A["${i}_1"] : ''));
             $inputbox = '<input type="text" maxlength="128" class="formulas_'.$gtype.'_unit '.$sub->feedbackclass.'" ';
             $inputbox .= $options->readonly ? 'readonly="readonly"' : '';
             $inputbox .= ' title="'
                 .get_string($gtype.($part->postunit=='' ? '' : '_unit'), 'qtype_formulas').'"'
                 .' name="'.$qa->get_qt_field_name("${i}_").'"'
-                .' value="'. $qa->get_last_qt_var("${i}_") .'" '.$popup.'/>';
-                // .' value="'. s($qa->get_last_qt_var("${i}_0").$qa->get_last_qt_var("${i}_1"), true) .'" '.$popup.'/>';
+                .' value="'. $qa->get_last_qt_var("${i}_") .'" '.'/>';
             $subqreplaced = str_replace("{_0}{_u}", $inputbox, $subqreplaced);
         }
 
@@ -198,39 +195,37 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if ($stexts != null) {
                 if ($boxes[$placeholder]->stype == ':SL') {
                 } else {
-                    $popup = $this->get_answers_popup($j, (isset($A) ? $stexts->value[$A[$var_name]] : ''));
                     if ($boxes[$placeholder]->stype == ':MCE') {
                         $mc = '<option value="" '.(''==$response?' selected="selected" ':'').'>'.'</option>';
                         foreach ($stexts->value as $x => $mctxt) {
                             $mc .= '<option value="'.$x.'" '.((string)$x==$response?' selected="selected" ':'').'>'.$mctxt.'</option>';
                         }
-                        $inputboxes[$placeholder] = '<select name="'.$name.'" '.$sub->readonlyattribute.' '.$popup.'>' . $mc . '</select>';
+                        $inputboxes[$placeholder] = '<select name="'.$name.'" '.$readonlyattribute.' '.'>' . $mc . '</select>';
                     } else {
                         $mc = '';
                         foreach ($stexts->value as $x => $mctxt) {
                             $mc .= '<tr class="r'.($x%2).'"><td class="c0 control">';
                             $mc .= '<input id="'.$name.'_'.$x.'" name="'.$name.'" value="'
-                            . $x .'" type="radio" '.$sub->readonlyattribute.' '.((string) $x==$response?' checked="checked" ':'').'>';
+                            . $x .'" type="radio" '.$readonlyattribute.' '.((string) $x==$response?' checked="checked" ':'').'>';
                             $mc .= '</td><td class="c1 text "><label for="'.$name.'_'.$x.'">'.$mctxt.'</label></td>';
                             $mc .= '</tr>';
                         }
-                        $inputboxes[$placeholder] = '<table '.$popup.'><tbody>' . $mc . '</tbody></table>';
+                        $inputboxes[$placeholder] = '<table><tbody>' . $mc . '</tbody></table>';
                     }
                 }
                 continue;
             }
 
             // Normal answer box with input text.
-            $popup = $this->get_answers_popup($j, (isset($A) ? $A[$var_name] : ''));
             $inputboxes[$placeholder] = '';
             if ($j == $part->numbox) {
                 // Check if it's an unit placeholder.
                 $inputboxes[$placeholder] = (strlen($part->postunit) == 0) ? '' :
-                        '<input type="text" maxlength="128" class="'.'formulas_unit '.$sub->unitfeedbackclass.'" '.$sub->readonlyattribute.' title="'
-                        .get_string('unit', 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.$popup.'/>';
+                        '<input type="text" maxlength="128" class="'.'formulas_unit '.$sub->unitfeedbackclass.'" '.$readonlyattribute.' title="'
+                        .get_string('unit', 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.'/>';
             } else {
-                $inputboxes[$placeholder] = '<input type="text" maxlength="128" class="'.'formulas_'.$gtype.' '.$sub->boxfeedbackclass.'" '.$sub->readonlyattribute.' title="'
-                        .get_string($gtype, 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.$popup.'/>';
+                $inputboxes[$placeholder] = '<input type="text" maxlength="128" class="'.'formulas_'.$gtype.' '.$sub->boxfeedbackclass.'" '.$readonlyattribute.' title="'
+                        .get_string($gtype, 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.'/>';
             }
         }
 
@@ -240,42 +235,35 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $subqreplaced;
     }
 
-    // Return the popup with correct answer for the input field.
-    public function get_answers_popup($i, $answer) {
-        if ($answer === '') {
-            return '';  // No popup if no answer.
-        }
-        $strfeedbackwrapped = s(get_string('modelanswer', 'qtype_formulas'));
-        $answer = s(str_replace(array("\\", "'"), array("\\\\", "\\'"), $answer));
-        $code = "var a='$answer'; try{ a=this.formulas.common.fn[this.formulas.self.func](this.formulas.common.fn,a); } catch(e) {} ";
-        return " onmouseover=\"$code return overlib(a, MOUSEOFF, CAPTION, '$strfeedbackwrapped', FGCOLOR, '#FFFFFF');\" ".
-            " onmouseout=\"return nd();\" ";
-    }
-
-
     /**
-     * Generate an automatic description of the correct response to this question.
-     * Not all question types can do this. If it is not possible, this method
-     * should just return an empty string.
+     * Correct response is provided by each question part.
      *
      * @param question_attempt $qa the question attempt to display.
      * @return string HTML fragment.
      */
     public function correct_response(question_attempt $qa) {
+        return '';
+    }
+
+    /**
+     * Generate an automatic description of the correct response for this part.
+     *
+     * @param int $i the part index.
+     * @param question_attempt $qa the question attempt to display.
+     * @return string HTML fragment.
+     */
+    public function part_correct_response($i, question_attempt $qa) {
         $question = $qa->get_question();
-        $correctanswer = array();
-        foreach ($question->parts as $i => $part) {
-            $tmp = $question->get_correct_responses_individually($part);
-            if ($part->part_has_combined_unit_field()) {
-                $correctanswer[] = implode(' ', $tmp);
-            } else {
-                if (!$part->part_has_separate_unit_field()) {
-                    unset($tmp["${i}_" .(count($tmp)-1)]);
-                }
-                $correctanswer[] = implode(', ', $tmp);
+
+        $tmp = $question->get_correct_responses_individually($question->parts[$i]);
+        if ($question->parts[$i]->part_has_combined_unit_field()) {
+            $correctanswer = implode(' ', $tmp);
+        } else {
+            if (!$question->parts[$i]->part_has_separate_unit_field()) {
+                unset($tmp["${i}_" .(count($tmp)-1)]);
             }
+            $correctanswer = implode(', ', $tmp);
         }
-        $correctanswer = implode(' | ', $correctanswer);
         return get_string('correctansweris', 'qtype_formulas', $correctanswer);
     }
 
@@ -348,14 +336,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $showfeedback = $details->state == question_state::$gradedwrong;
         }
 
+        $part = $question->parts[$i];
         if ($showfeedback) {
-            $part = $question->parts[$i];
             $localvars = $question->get_local_variables($part);
             $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $i, false);
             if ($feedbacktext) {
                 $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulas_local_feedback'));
             }
         }
+
         return html_writer::nonempty_tag('div',
                 $err . $feedback . $gradingdetails,
                 array('class' => 'formulaspartfeedback formulaspartfeedback-' . $i));

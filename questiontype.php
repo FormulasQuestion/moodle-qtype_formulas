@@ -161,9 +161,9 @@ class qtype_formulas extends question_type {
             if (count($filtered->errors) > 0) {  // There may be errors from import or restore.
                 throw new Exception('Format error! Probably import/restore files have been damaged.');
             }
-            $ss = $this->create_subquestion_structure($question->questiontext, $filtered->answers);
-            // Reorder the answer, so that the ordering of answers is the same as the placeholders ordering in questiontext.
-            foreach ($ss->answerorders as $newloc) {
+            $answersorder = $this->reorder_answers($question->questiontext, $filtered->answers);
+            // Reorder the answers, so that answer's order is the same as the placeholder's order in questiontext.
+            foreach ($answersorder as $newloc) {
                 $newanswers[] = $filtered->answers[$newloc];
             }
 
@@ -258,6 +258,34 @@ class qtype_formulas extends question_type {
     }
 
     /**
+     * Split the main question text according to the placeholders.
+     *
+     * @param string $questiontext The main question text containing all placeholders.
+     * @param array $answers array of answers with placeholder (can be empty string)
+     * @return  array of text fragments with count($answers) elements.
+     */
+    public function split_questiontext($questiontext, $answers) {
+        $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
+        foreach ($answers as $idx => $answer)  if (strlen($answer->placeholder) != 0)
+            $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
+        sort($locations);       // Performs stable sort of location and answerorder pairs.
+
+        $fragments = array();
+        foreach ($locations as $i => $location) {
+            $answerorder = $location%1000;
+            list($fragments[$i], $questiontext) = explode('{'.$answers[$answerorder]->placeholder.'}', $questiontext);
+        }
+        foreach ($answers as $idx => $answer) {
+            if (strlen($answer->placeholder) == 0) { // Add the empty placeholder at the end.
+                $fragments[] = $questiontext;
+                $questiontext = '';
+            }
+        }
+        $fragments[] = $questiontext;  // Add the post-question text, if any.
+
+        return $fragments;
+    }
+    /**
      * Initialise the question_definition fields.
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
@@ -283,6 +311,7 @@ class qtype_formulas extends question_type {
             $question->anscorrs = array_fill(0, $question->numpart, 0);
             $question->unitcorrs = array_fill(0, $question->numpart, 0);
         }
+        $question->textfragments = $this->split_questiontext($question->questiontext, $question->parts);
         $this->initialise_combined_feedback($question, $questiondata, true);
     }
 
@@ -406,39 +435,40 @@ class qtype_formulas extends question_type {
         return $expout;
     }
 
-    // Check whether the placeholder in the $answers is correct and compatible with $questiontext.
+    /**
+     * Check if placeholders in answers are correct and compatible with questiontext.
+     *
+     * @param $questiontext string text of the main question
+     * @param $answers array of objects only the placeholder is used
+     * @return $errors array
+     */
     public function check_placeholder($questiontext, $answers) {
-        if (is_array($questiontext)) {
-            $text = $questiontext['text'];
-        } else {
-            $text = $questiontext;
-        }
         $placeholder_format = '#\w+';
         $placeholders = array();
         foreach ($answers as $idx => $answer) {
             if ( strlen($answer->placeholder) == 0 ) {
-                continue; // No error for empty placeholder.
+                continue; // No error if answer's placeholder is empty.
             }
-            $errstr = '';
+            $errstr = array();
             if ( strlen($answer->placeholder) >= 40 ) {
-                $errstr .= get_string('error_placeholder_too_long', 'qtype_formulas');
+                $errstr[] = get_string('error_placeholder_too_long', 'qtype_formulas');
             }
             if ( !preg_match('/^'.$placeholder_format.'$/', $answer->placeholder) ) {
-                $errstr .= get_string('error_placeholder_format', 'qtype_formulas');
+                $errstr[] = get_string('error_placeholder_format', 'qtype_formulas');
             }
             if ( array_key_exists($answer->placeholder, $placeholders) ) {
-                $errstr .= get_string('error_placeholder_sub_duplicate', 'qtype_formulas');
+                $errstr[] = get_string('error_placeholder_sub_duplicate', 'qtype_formulas');
             }
             $placeholders[$answer->placeholder] = true;
-            $count = substr_count($text, '{'.$answer->placeholder.'}');
+            $count = substr_count($questiontext, '{'.$answer->placeholder.'}');
             if ($count<1) {
-                $errstr .= get_string('error_placeholder_missing', 'qtype_formulas');
+                $errstr[] = get_string('error_placeholder_missing', 'qtype_formulas');
             }
             if ($count>1) {
-                $errstr .= get_string('error_placeholder_main_duplicate', 'qtype_formulas');
+                $errstr[] = get_string('error_placeholder_main_duplicate', 'qtype_formulas');
             }
-            if (strlen($errstr) != 0) {
-                $errors["placeholder[$idx]"] = $errstr;
+            if (!empty($errstr)) {
+                $errors["placeholder[$idx]"] = implode(' ', $errstr);
             }
         }
         return isset($errors) ? $errors : array();
@@ -704,40 +734,33 @@ class qtype_formulas extends question_type {
     }
 
     /**
-     * Split and reorder the main question by the placeholders. The check_placeholder() should be called before
+     * Reorder the answers according to the order of placeholders in main question text.
+     * The check_placeholder() function should be called before.
      *
-     * @param string $questiontext The input question text containing a set of placeholder
-     * @param array $answers Array of answers, containing the placeholder name  (must not empty)
-     * @return  object with fields answerorders, pretexts and posttext.
-     * This method is used both in save_question_options and in the renderer.
-     * In save_question_options only answerorders is used,
-     * in the renderer only pretexts and posttext are used.
+     * @param string $questiontext The main question text containing the placeholders.
+     * @param array $answers array of answers, containing the placeholder name  (must not be empty).
+     * @return  array answersorder.
      */
-    public static function create_subquestion_structure($questiontext, $answers) {
+    public function reorder_answers($questiontext, $answers) {
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) != 0) {
                 $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
             }
         }
-        sort($locations);       // Performs stable sort of location and answerorder pair.
+        sort($locations);       // Performs stable sort of locations.
 
         $ss = new stdClass();
+        $answersorder =array();
         foreach ($locations as $i => $location) {
-            $answerorder = $location%1000;
-            $ss->answerorders[] = $answerorder; // Store the new location of the placeholder in the main text.
-            list($ss->pretexts[$i], $questiontext) = explode('{'.$answers[$answerorder]->placeholder.'}', $questiontext);
+            $answersorder[] = $location%1000;   // Store the new location of the answer in the main text.
         }
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) == 0) { // Add the empty placeholder at the end.
-                $ss->answerorders[] = $idx;
-                $ss->pretexts[] = $questiontext;
-                $questiontext = '';
+                $answersorder[] = $idx;
             }
         }
-        $ss->posttext = $questiontext;  // Add the post-question text, if any.
-
-        return $ss;
+        return $answersorder;
     }
 }
 

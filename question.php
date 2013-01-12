@@ -39,8 +39,19 @@ require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.ph
  */
 class qtype_formulas_question extends question_graded_automatically_with_countback
         implements question_automatically_gradable_with_multiple_parts {
-    /** @var array of qtype_formulas_part. */
+    /**
+     * @var int: number of formulas_parts for the question.
+     */
+    public $numpart;
+    /**
+     * @var array of qtype_formulas_part, the $numpart parts of the question.
+     */
     public $parts = array();
+    /**
+     * @var array of strings, one longer than $numpart, which is achieved by
+     * indexing from 0. The bits of question text that go between the parts.
+     */
+    public $textfragments;
     /** These array may be used some day to store results ? */
     public $evaluatedanswer = array();
     public $fractions = array();
@@ -49,8 +60,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public $varsrandom;
     /** global variables serialized as string (as saved in database) */
     public $varsglobal;
-
-    public $numpart; /* int: number of formulas_parts */
     /** qtype_formulas_variables */
     public $qv;
     /** instancied random variables  */
@@ -66,15 +75,15 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
     /**
      * What data may be included in the form submission when a student enter a response.
-     * The number before the _ is the part number,
-     * and the number after the _ is the coordinate number (start at 0).
-     * For instance "2_3" is anwer to coordinate 4 of part 2
-     * When there is a separated unit response for part i, it is called "i_n"
+     * The number before the _ is the part index (starting at 0),
+     * and the number after the _ is the coordinate index (starting at 0).
+     * For instance "2_3" is anwer for fourth coordinate of third part.
+     * When there is a separated unit response for part index i, it is called "i_n"
      * where n is the number of coordinates for part i.
      * Sor for instance if part 2 has 3 coordinates and a separate unit response,
      * we will have responses names 2_0, 2_1, 2_2, 2_3 (last one is for unit)
-     * When there is a combined answer&unit field for part i, it is simply called "i_"
-     * So for instance if part 2 has a combined answer&unit response, its name will be "2_"
+     * When there is a combined answer&unit field for part index i, it is simply called "i_"
+     * So for instance if part index 2 has a combined answer&unit response, its name will be "2_"
      * and will be equivalent to separate anser and unit response "2_0" and "2_1".
      */
     public function get_expected_data() {
@@ -831,6 +840,23 @@ class qtype_formulas_part {
             }
         }
         return $expected;
+    }
+    
+    public function part_has_multichoice_coordinate() {
+        $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
+        preg_match_all('/'.$pattern.'/', $this->subqtext, $matches);
+        $boxes = array();
+        foreach ($matches[1] as $j => $match) {
+            if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
+                $boxes[$match] = (object)array('pattern' => $matches[0][$j], 'options' => $matches[2][$j], 'stype' => $matches[3][$j]);
+            }
+        }
+        foreach ($boxes as $box) {
+            if (strlen($box->options) != 0) { // Multichoice.
+                return true;
+            }
+        }
+        return false;        
     }
 
     public function part_is_gradable_response(array $response) {

@@ -153,14 +153,14 @@ $string['qtextpreview'] = 'Preview using dataset';
 $string['varsstatistics'] = 'Statistics';
 $string['varsdata'] = 'Instantiated dataset';
 
-// Errors message used by validation of the editing form.
+// Errors message used by editing form's validation.
 $string['error_no_answer'] = 'At least one answer is required.';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
-$string['error_placeholder_too_long'] = 'The size of placeholder must be smaller than 40.';
-$string['error_placeholder_format'] = 'The format of placeholder is wrong or contain characters that is not allowed.';
-$string['error_placeholder_missing'] = 'The placeholder does not appear in the main question text.';
-$string['error_placeholder_main_duplicate'] = 'This placeholder has appeared more than once in the main question text.';
-$string['error_placeholder_sub_duplicate'] = 'This placeholder has already been defined in other parts.';
+$string['error_placeholder_too_long'] = 'The placeholder\'s length is limited to 40 characters.';
+$string['error_placeholder_format'] = 'Wrong placeholder\'s format or forbidden characters.';
+$string['error_placeholder_missing'] = 'This placeholder is missing from the main question text.';
+$string['error_placeholder_main_duplicate'] = 'Duplicated placeholder in the main question text.';
+$string['error_placeholder_sub_duplicate'] = 'This placeholder has already been defined in some other part.';
 $string['error_answerbox_duplicate'] = 'Each answer field placeholder can only be used once in a part.';
 $string['error_answertype_mistmatch'] = 'Answer type mismatch: Numerical answer type requires number and algebraic answer type requires string';
 $string['error_answer_missing'] = 'No answer has been defined.';

@@ -268,4 +268,16 @@ class qtype_formulas_question_test extends basic_testcase {
         $finalgrade = $q->compute_final_grade($responses, 1);
         $this->assertEquals((2 + 2*(1 - 2*0.3))/6, $finalgrade);
     }
+    
+    public function test_part_has_multichoice_coordinate0() {
+        $p = new qtype_formulas_part;
+        $p->subqtext = '{_0} - {_1:choices} - {_2}';
+        $this->assertTrue($p->part_has_multichoice_coordinate());
+    }
+    
+    public function test_part_has_multichoice_coordinate1() {
+        $p = new qtype_formulas_part;
+        $p->subqtext = '{_0} - {_1} - {_2}';
+        $this->assertFalse($p->part_has_multichoice_coordinate());
+    }
 }
