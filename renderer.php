@@ -90,14 +90,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
         $output .= $sub->feedbackimage;
 
-        $output .= $this->part_feedback($i, $qa, $question, $options);
-        // We don't display the right answer if one of the part's coordinantes is a MC question.
+        $feedback = $this->part_feedback($i, $qa, $question, $options);
+        // We don't display the right answer if one of the part's coordinates is a MC question.
         // TODO: find a solution in that case.
         if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
-            $output .= html_writer::nonempty_tag('div', $this->part_correct_response($i, $qa),
-                    array('class' => 'feedback formulas_local_feedback formulaspartcorrectanswer'));
+            $feedback .= $this->part_correct_response($i, $qa);
         }
-        return html_writer::tag('div', $output , array('class' => 'formulas_part'));
+        $output .= html_writer::nonempty_tag('div', $feedback,
+                array('class' => 'formulaspartoutcome'));
+        return html_writer::tag('div', $output , array('class' => 'formulaspart'));
     }
 
     // Return class and image for the part feedback.
@@ -264,7 +265,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
             $correctanswer = implode(', ', $tmp);
         }
-        return get_string('correctansweris', 'qtype_formulas', $correctanswer);
+        return html_writer::nonempty_tag('div', get_string('correctansweris', 'qtype_formulas', $correctanswer),
+                    array('class' => 'formulaspartcorrectanswer'));
     }
 
     /**
@@ -341,12 +343,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $localvars = $question->get_local_variables($part);
             $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $i, false);
             if ($feedbacktext) {
-                $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulas_local_feedback'));
+                $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
             }
         }
 
-        return html_writer::nonempty_tag('div',
-                $err . $feedback . $gradingdetails,
+        return html_writer::nonempty_tag('div', $err . $feedback . $gradingdetails,
                 array('class' => 'formulaspartfeedback formulaspartfeedback-' . $i));
     }
 }

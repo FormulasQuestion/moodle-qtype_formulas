@@ -266,8 +266,11 @@ class qtype_formulas extends question_type {
      */
     public function split_questiontext($questiontext, $answers) {
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
-        foreach ($answers as $idx => $answer)  if (strlen($answer->placeholder) != 0)
-            $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
+        foreach ($answers as $idx => $answer) {
+            if (strlen($answer->placeholder) != 0) {
+                $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
+            }
+        }
         sort($locations);       // Performs stable sort of location and answerorder pairs.
 
         $fragments = array();
@@ -587,22 +590,13 @@ class qtype_formulas extends question_type {
             $qo->$key = $value;
         }
         $tags = $this->subquestion_answer_tags();
-        /* $qo->id = $form->id;
-        $qo->questiontext = $form->questiontext;
-        $qo->qtype = $form->qtype;
-        $qo->generalfeedback = $form->generalfeedback;
-        $qo->defaultmark = $form->defaultmark;
-        foreach ($tags as $tag) {
-            $qo->$tag = $form->$tag;
-        }
-        $qo->subqtext = $form->subqtext;
-        $qo->feedback = $form->feedback;  */
+
         $qo->options = new stdClass();
         $extraquestionfields = $this->extra_question_fields();
         array_shift($extraquestionfields);
         foreach ($extraquestionfields as $field) {
             if (isset($form->{$field})) {
-//                $qo->{$field} = $form->{$field};
+                $qo->{$field} = $form->{$field};
                 $qo->options->{$field} = $form->{$field};
             }
         }
@@ -637,9 +631,9 @@ class qtype_formulas extends question_type {
         $qo->qv = new qtype_formulas_variables();
         $qo->options->numpart = count($qo->options->answers);
         $qo->numpart = $qo->options->numpart;
-/*        $qo->fractions = array_fill(0, $qo->numpart, 0);
+        $qo->fractions = array_fill(0, $qo->numpart, 0);
         $qo->anscorrs = array_fill(0, $qo->numpart, 0);
-        $qo->unitcorrs = array_fill(0, $qo->numpart, 0);   */
+        $qo->unitcorrs = array_fill(0, $qo->numpart, 0);
 
         try {
             $vstack = $qo->qv->parse_random_variables($qo->varsrandom);

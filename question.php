@@ -841,7 +841,7 @@ class qtype_formulas_part {
         }
         return $expected;
     }
-    
+
     public function part_has_multichoice_coordinate() {
         $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
         preg_match_all('/'.$pattern.'/', $this->subqtext, $matches);
@@ -856,7 +856,7 @@ class qtype_formulas_part {
                 return true;
             }
         }
-        return false;        
+        return false;
     }
 
     public function part_is_gradable_response(array $response) {
