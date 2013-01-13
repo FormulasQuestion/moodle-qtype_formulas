@@ -88,10 +88,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $localvars = $question->get_local_variables($part);
 
         $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
-        $output .= $sub->feedbackimage;
+//        $output .= $sub->feedbackimage;
 
         $feedback = $this->part_feedback($i, $qa, $question, $options);
         // We don't display the right answer if one of the part's coordinates is a MC question.
+        // Because for that part it's not the right answer but the index of the right answer,
+        // And it would be very dfficult to calculate the right answer.
         // TODO: find a solution in that case.
         if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
             $feedback .= $this->part_correct_response($i, $qa);
@@ -140,7 +142,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
-        $readonlyattribute = $options->readonly ? 'readonly="readonly"' : '';
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
 
@@ -165,24 +166,44 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
         }
 
-        // If {_0} and {_u} are adjacent to each other and there is only one number in the answer, "concatenate" them together in a combined input box.
-        if ($part->numbox == 1 && (strlen($part->postunit) != 0) && strpos($subqreplaced, "{_0}{_u}") !== false && $gradingtype != 1000) {
-            $inputbox = '<input type="text" maxlength="128" class="formulas_'.$gtype.'_unit '.$sub->feedbackclass.'" ';
-            $inputbox .= $options->readonly ? 'readonly="readonly"' : '';
-            $inputbox .= ' title="'
-                .get_string($gtype.($part->postunit=='' ? '' : '_unit'), 'qtype_formulas').'"'
-                .' name="'.$qa->get_qt_field_name("${i}_").'"'
-                .' value="'. $qa->get_last_qt_var("${i}_") .'" '.'/>';
-            $subqreplaced = str_replace("{_0}{_u}", $inputbox, $subqreplaced);
+        // If part has combined unit answer input.
+        if ($part->part_has_combined_unit_field()) {
+            $var_name =  "${i}_";
+            $currentanswer = $qa->get_last_qt_var($var_name);
+            $inputname = $qa->get_qt_field_name($var_name);
+            $inputattributes = array(
+                'type' => 'text',
+                'name' => $inputname,
+                'title' => get_string($gtype.($part->postunit=='' ? '' : '_unit'), 'qtype_formulas'),
+                'value' => $currentanswer,
+                'id' => $inputname,
+                'class' => 'formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
+                'maxlength' => 128,
+            );
+
+            if ($options->readonly) {
+                $inputattributes['readonly'] = 'readonly';
+            }
+            $input = html_writer::empty_tag('input', $inputattributes) . $sub->feedbackimage;
+            $subqreplaced = str_replace("{_0}{_u}", $input, $subqreplaced);
         }
 
         // Get the set of string for each candidate input box {_0}, {_1}, ..., {_u}.
-        $inputboxes = array();
+        $inputs = array();
         foreach (range(0, $part->numbox) as $j) {    // Replace the input box for each placeholder {_0}, {_1} ...
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";    // The last one is unit.
             $var_name =  "${i}_$j";
-            $name = $qa->get_qt_field_name($var_name);
-            $response = $qa->get_last_qt_var($var_name);
+            $currentanswer = $qa->get_last_qt_var($var_name);
+            $inputname = $qa->get_qt_field_name($var_name);
+            $inputattributes = array(
+                'name' => $inputname,
+                'value' => $currentanswer,
+                'id' => $inputname,
+                'maxlength' => 128,
+            );
+            if ($options->readonly) {
+                $inputattributes['readonly'] = 'readonly';
+            }
 
             $stexts = null;
             if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
@@ -192,50 +213,124 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     // The $stexts variable will be null if evaluation fails.
                 }
             }
-            // Answer as multichoice options.
+            // Coordinate as multichoice options.
             if ($stexts != null) {
                 if ($boxes[$placeholder]->stype == ':SL') {
                 } else {
                     if ($boxes[$placeholder]->stype == ':MCE') {
-                        $mc = '<option value="" '.(''==$response?' selected="selected" ':'').'>'.'</option>';
-                        foreach ($stexts->value as $x => $mctxt) {
-                            $mc .= '<option value="'.$x.'" '.((string)$x==$response?' selected="selected" ':'').'>'.$mctxt.'</option>';
+                        // Select menu.
+                        if ($options->readonly) {
+                            $inputattributes['disabled'] = 'disabled';
                         }
-                        $inputboxes[$placeholder] = '<select name="'.$name.'" '.$readonlyattribute.' '.'>' . $mc . '</select>';
+                        $choices =array();
+                        foreach ($stexts->value as $x => $mctxt) {
+                            $choices[$x] = $mctxt;
+                        }
+                        $select = html_writer::select($choices, $inputname,
+                                $currentanswer, array('' => ''), $inputattributes);
+                        $output = html_writer::start_tag('span', array('class' => 'subquestion'));
+                        $output .= html_writer::tag('label', get_string('answer'),
+                                array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+                        $output .= $select;
+                        $output .= $sub->feedbackimage;
+                        $output .= html_writer::end_tag('span');
+                        $inputs[$placeholder] = $output;
                     } else {
-                        $mc = '';
-                        foreach ($stexts->value as $x => $mctxt) {
-                            $mc .= '<tr class="r'.($x%2).'"><td class="c0 control">';
-                            $mc .= '<input id="'.$name.'_'.$x.'" name="'.$name.'" value="'
-                            . $x .'" type="radio" '.$readonlyattribute.' '.((string) $x==$response?' checked="checked" ':'').'>';
-                            $mc .= '</td><td class="c1 text "><label for="'.$name.'_'.$x.'">'.$mctxt.'</label></td>';
-                            $mc .= '</tr>';
+                        // Multichoice single question.
+                        $inputattributes['type'] = 'radio';
+                        if ($options->readonly) {
+                            $inputattributes['disabled'] = 'disabled';
                         }
-                        $inputboxes[$placeholder] = '<table><tbody>' . $mc . '</tbody></table>';
+                        $output = $this->all_choices_wrapper_start();
+                        foreach ($stexts->value as $x => $mctxt) {
+                            $inputattributes['id'] = $inputname.'_'.$x;
+                            $inputattributes['value'] = $x;
+                            $isselected = $x==$currentanswer;
+                            $class = 'r' . ($x % 2);
+                            if ($isselected) {
+                                $inputattributes['checked'] = 'checked';
+                            } else {
+                                unset($inputattributes['checked']);
+                            }
+                            if ($options->correctness && $isselected) {
+                                $feedbackimg = $sub->feedbackimage;
+                                $class .= ' ' . $this->feedback_class($sub->fraction);
+                            } else {
+                                $feedbackimg = '';
+                            }
+                            $output .= $this->choice_wrapper_start($class);
+                            $output .= html_writer::empty_tag('input', $inputattributes);
+                            $output .= html_writer::tag('label', $mctxt,
+                                    array('for' => $inputattributes['id']));
+                            $output .= $feedbackimg;
+                            $output .= $this->choice_wrapper_end();
+                        }
+                        $output .= $this->all_choices_wrapper_end();
+                        $inputs[$placeholder] = $output;
                     }
                 }
                 continue;
             }
 
-            // Normal answer box with input text.
-            $inputboxes[$placeholder] = '';
+            // Coordinate as shortanswer question.
+            $inputs[$placeholder] = '';
+            $inputattributes['type'] = 'text';
+            if ($options->readonly) {
+                $inputattributes['readonly'] = 'readonly';
+            }
             if ($j == $part->numbox) {
-                // Check if it's an unit placeholder.
-                $inputboxes[$placeholder] = (strlen($part->postunit) == 0) ? '' :
-                        '<input type="text" maxlength="128" class="'.'formulas_unit '.$sub->unitfeedbackclass.'" '.$readonlyattribute.' title="'
-                        .get_string('unit', 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.'/>';
+                // Check if it's an input for unit.
+                if (strlen($part->postunit) > 0) {
+                    $inputattributes['title'] = get_string('unit', 'qtype_formulas');
+                    $inputattributes['class'] = 'formulas_unit '.$sub->unitfeedbackclass;
+
+                    $inputs[$placeholder] = html_writer::empty_tag('input', $inputattributes) . $sub->feedbackimage;
+                }
             } else {
-                $inputboxes[$placeholder] = '<input type="text" maxlength="128" class="'.'formulas_'.$gtype.' '.$sub->boxfeedbackclass.'" '.$readonlyattribute.' title="'
-                        .get_string($gtype, 'qtype_formulas').'"'.' name="'.$name.'" value="'.$response.'" '.'/>';
+                $inputattributes['title'] = get_string($gtype, 'qtype_formulas');
+                $inputattributes['class'] = 'formulas_'.$gtype.' '.$sub->boxfeedbackclass;
+
+                $inputs[$placeholder] = html_writer::empty_tag('input', $inputattributes);
+                if ($j == $part->numbox-1 && strlen($part->postunit) == 0) {
+                    $inputs[$placeholder] .= $sub->feedbackimage;
+                }
             }
         }
 
-        foreach ($inputboxes as $placeholder => $replacement) {
+        foreach ($inputs as $placeholder => $replacement) {
             $subqreplaced = preg_replace('/'.$boxes[$placeholder]->pattern.'/', $replacement, $subqreplaced, 1);
         }
         return $subqreplaced;
     }
 
+    /**
+     * @param string $class class attribute value.
+     * @return string HTML to go before each choice.
+     */
+    protected function choice_wrapper_start($class) {
+        return html_writer::start_tag('div', array('class' => $class));
+    }
+
+    /**
+     * @return string HTML to go after each choice.
+     */
+    protected function choice_wrapper_end() {
+        return html_writer::end_tag('div');
+    }
+
+    /**
+     * @return string HTML to go before all the choices.
+     */
+    protected function all_choices_wrapper_start() {
+        return html_writer::start_tag('div', array('class' => 'answer'));
+    }
+
+    /**
+     * @return string HTML to go after all the choices.
+     */
+    protected function all_choices_wrapper_end() {
+        return html_writer::end_tag('div');
+    }
     /**
      * Correct response is provided by each question part.
      *

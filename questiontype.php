@@ -318,7 +318,23 @@ class qtype_formulas extends question_type {
         $this->initialise_combined_feedback($question, $questiondata, true);
     }
 
+    public function get_possible_responses($questiondata) {
+        $resp = array();
 
+        $q = $this->make_question($questiondata);
+
+        foreach ($q->parts as $i => $part) {
+            $resp[$i] = array(
+                    'incorrect' => new question_possible_response(
+                            'incorrect', 0),
+                    'correct' => new question_possible_response(
+                            'correct', 1),
+                    null              => question_possible_response::no_response()
+            );
+        }
+
+        return $resp;
+    }
     /**
      * Imports the question from Moodle XML format.
      *

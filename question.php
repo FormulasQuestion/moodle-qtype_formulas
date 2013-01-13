@@ -344,13 +344,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function summarise_response(array $response) {
         $summary = array();
         foreach ($this->parts as $i => $part) {
-            foreach ($part->part_get_expected_data() as $name => $type) {
-                if (array_key_exists($name, $response)) {
-                    $summary [] = $response[$name];
-                } else {
-                    $summary [] = '';
-                }
-            }
+            $summary[] = $part->part_summarise_response($response);
         }
         $summary = implode('; ', $summary);
         return $summary;
@@ -365,7 +359,18 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function classify_response(array $response) {
         // TODO Need to decide how to classify formulas questions responses.
-        return array();
+        $this->rationalize_responses($response);
+        $checkunit = new answer_unit_conversion;
+        $classification = array();
+
+        foreach ($this->parts as $i => $part) {
+                list($this->anscorrs[$i], $this->unitcorrs[$i])
+                        = $this->grade_responses_individually($part, $response, $checkunit);
+                $this->fractions[$i] = $this->anscorrs[$i] * ($this->unitcorrs[$i] ? 1 : (1-$part->unitpenalty));
+                $classification[$i] = new question_classified_response(
+                        ($this->fractions[$i] >= .999) ? 'correct' : 'incorrect', $part->part_summarise_response($response), $this->fractions[$i]);
+        }
+        return $classification;
     }
 
     /**
@@ -857,6 +862,24 @@ class qtype_formulas_part {
             }
         }
         return false;
+    }
+
+    /**
+     * Produce a plain text summary of a response for the part.
+     * @param $response a response, as might be passed to {@link grade_response()}.
+     * @return string a plain text summary of that response, that could be used in reports.
+     */
+    public function part_summarise_response(array $response) {
+        $summary = array();
+        foreach ($this->part_get_expected_data() as $name => $type) {
+            if (array_key_exists($name, $response)) {
+                $summary [] = $response[$name];
+            } else {
+                    $summary [] = '';
+            }
+        }
+        $summary = implode('; ', $summary);
+        return $summary;
     }
 
     public function part_is_gradable_response(array $response) {
