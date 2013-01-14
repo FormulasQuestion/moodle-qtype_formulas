@@ -90,7 +90,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
         // Place for the right/wrong feeback image or appended at part's end.
         if (strpos($output, '{_m}') !== false) {
-            $output = str_replace('{_m}', $sub->feedbackimage, $$output);
+            $output = str_replace('{_m}', $sub->feedbackimage, $output);
         } else {
             $output .= $sub->feedbackimage;
         }
