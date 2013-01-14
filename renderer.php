@@ -88,13 +88,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $localvars = $question->get_local_variables($part);
 
         $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
-//        $output .= $sub->feedbackimage;
+        // Place for the right/wrong feeback image or appended at part's end.
+        if (strpos($output, '{_m}') !== false) {
+            $output = str_replace('{_m}', $sub->feedbackimage, $$output);
+        } else {
+            $output .= $sub->feedbackimage;
+        }
 
         $feedback = $this->part_feedback($i, $qa, $question, $options);
-        // We don't display the right answer if one of the part's coordinates is a MC question.
-        // Because for that part it's not the right answer but the index of the right answer,
+        // We don't display the right answer if one of the part's coordinates is a MC or select question.
+        // Because for that coordinate our result is not the right answer, but the index of the right answer,
         // And it would be very dfficult to calculate the right answer.
-        // TODO: find a solution in that case.
+        // TODO: find a solution in that case. A popup (calculated in the part renderer) would work,
+        // but would no be very accessible.
         if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
             $feedback .= $this->part_correct_response($i, $qa);
         }
@@ -184,7 +190,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if ($options->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
-            $input = html_writer::empty_tag('input', $inputattributes) . $sub->feedbackimage;
+            $input = html_writer::empty_tag('input', $inputattributes);
             $subqreplaced = str_replace("{_0}{_u}", $input, $subqreplaced);
         }
 
@@ -232,7 +238,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         $output .= html_writer::tag('label', get_string('answer'),
                                 array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
                         $output .= $select;
-                        $output .= $sub->feedbackimage;
                         $output .= html_writer::end_tag('span');
                         $inputs[$placeholder] = $output;
                     } else {
@@ -245,7 +250,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         foreach ($stexts->value as $x => $mctxt) {
                             $inputattributes['id'] = $inputname.'_'.$x;
                             $inputattributes['value'] = $x;
-                            $isselected = $x==$currentanswer;
+                            $isselected = ($currentanswer != '' && $x==$currentanswer);
                             $class = 'r' . ($x % 2);
                             if ($isselected) {
                                 $inputattributes['checked'] = 'checked';
@@ -253,16 +258,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                                 unset($inputattributes['checked']);
                             }
                             if ($options->correctness && $isselected) {
-                                $feedbackimg = $sub->feedbackimage;
-                                $class .= ' ' . $this->feedback_class($sub->fraction);
-                            } else {
-                                $feedbackimg = '';
+                                $class .= ' ' . $sub->feedbackclass;
                             }
                             $output .= $this->choice_wrapper_start($class);
                             $output .= html_writer::empty_tag('input', $inputattributes);
                             $output .= html_writer::tag('label', $mctxt,
                                     array('for' => $inputattributes['id']));
-                            $output .= $feedbackimg;
                             $output .= $this->choice_wrapper_end();
                         }
                         $output .= $this->all_choices_wrapper_end();
@@ -284,16 +285,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     $inputattributes['title'] = get_string('unit', 'qtype_formulas');
                     $inputattributes['class'] = 'formulas_unit '.$sub->unitfeedbackclass;
 
-                    $inputs[$placeholder] = html_writer::empty_tag('input', $inputattributes) . $sub->feedbackimage;
+                    $inputs[$placeholder] = html_writer::empty_tag('input', $inputattributes);
                 }
             } else {
                 $inputattributes['title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['class'] = 'formulas_'.$gtype.' '.$sub->boxfeedbackclass;
 
                 $inputs[$placeholder] = html_writer::empty_tag('input', $inputattributes);
-                if ($j == $part->numbox-1 && strlen($part->postunit) == 0) {
-                    $inputs[$placeholder] .= $sub->feedbackimage;
-                }
             }
         }
 
