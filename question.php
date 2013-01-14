@@ -358,17 +358,46 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      *      returns an empty array if no analysis is possible.
      */
     public function classify_response(array $response) {
-        // TODO Need to decide how to classify formulas questions responses.
         $this->rationalize_responses($response);
         $checkunit = new answer_unit_conversion;
         $classification = array();
 
         foreach ($this->parts as $i => $part) {
-                list($this->anscorrs[$i], $this->unitcorrs[$i])
-                        = $this->grade_responses_individually($part, $response, $checkunit);
-                $this->fractions[$i] = $this->anscorrs[$i] * ($this->unitcorrs[$i] ? 1 : (1-$part->unitpenalty));
-                $classification[$i] = new question_classified_response(
-                        ($this->fractions[$i] >= .999) ? 'correct' : 'incorrect', $part->part_summarise_response($response), $this->fractions[$i]);
+            if ($part->part_is_unanswered($response)) {
+                $classification[$i] = question_classified_response::no_response();
+                continue;
+            }
+            list($anscorr, $unitcorr)
+                    = $this->grade_responses_individually($part, $response, $checkunit);
+            
+            if ($part->postunit != '') {
+                if ($anscorr==1 && $unitcorr==1) {
+                    $classification[$i] = new question_classified_response(
+                            'right', $part->part_summarise_response($response), 1);
+                }
+                if ($anscorr==0 && $unitcorr==1) {
+                    $classification[$i] = new question_classified_response(
+                            'wrongvalue', $part->part_summarise_response($response), 0);
+                }
+                if ($anscorr==1 && $unitcorr==0) {
+                    $classification[$i] = new question_classified_response(
+                            'wrongunit', $part->part_summarise_response($response), 1-$part->unitpenalty);
+                }
+                if ($anscorr==0 && $unitcorr==0) {
+                    $classification[$i] = new question_classified_response(
+                            'wrong', $part->part_summarise_response($response), 0);
+                }
+            } else {
+                $fraction = $anscorr * ($unitcorr ? 1 : (1-$part->unitpenalty));
+                if ($fraction> .999) {
+                    $classification[$i] = new question_classified_response(
+                            'right', $part->part_summarise_response($response), $fraction);
+                } else {
+                     $classification[$i] = new question_classified_response(
+                            'wrong', $part->part_summarise_response($response), $fraction);
+                }
+            }
+
         }
         return $classification;
     }
@@ -890,5 +919,18 @@ class qtype_formulas_part {
     public function part_is_complete_response(array $response) {
         // TODO and after that use it in is_complete_response.
 
+    }
+
+    public function part_is_unanswered(array$response) {
+        $i = $this->location;
+        if (array_key_exists("${i}_", $response) && $response["${i}_"] != '') {
+            return false;
+        }
+        foreach (range(0, $this->numbox) as $j) {
+            if (array_key_exists("${i}_$j", $response) && $response["${i}_$j"] != '') {
+                    return false;
+            }
+        }
+        return true;
     }
 }

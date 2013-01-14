@@ -318,19 +318,60 @@ class qtype_formulas extends question_type {
         $this->initialise_combined_feedback($question, $questiondata, true);
     }
 
+    /**
+     * This method should return all the possible types of response that are
+     * recognised for this question.
+     *
+     * The question is modelled as comprising one or more subparts. For each
+     * subpart, there are one or more classes that that students response
+     * might fall into, each of those classes earning a certain score.
+     *
+     * For example, in a shortanswer question, there is only one subpart, the
+     * text entry field. The response the student gave will be classified according
+     * to which of the possible $question->options->answers it matches.
+     *
+     * For the matching question type, there will be one subpart for each
+     * question stem, and for each stem, each of the possible choices is a class
+     * of student's response.
+     *
+     * A response is an object with two fields, ->responseclass is a string
+     * presentation of that response, and ->fraction, the credit for a response
+     * in that class.
+     *
+     * Array keys have no specific meaning, but must be unique, and must be
+     * the same if this function is called repeatedly.
+     *
+     * @param object $question the question definition data.
+     * @return array keys are subquestionid, values are arrays of possible
+     *      responses to that subquestion.
+     */
     public function get_possible_responses($questiondata) {
         $resp = array();
 
         $q = $this->make_question($questiondata);
 
         foreach ($q->parts as $i => $part) {
-            $resp[$i] = array(
-                    'incorrect' => new question_possible_response(
-                            'incorrect', 0),
-                    'correct' => new question_possible_response(
-                            'correct', 1),
+            if ($part->postunit =='') {
+                $resp[$i] = array(
+                    'wrong' => new question_possible_response(
+                            'Wrong', 0),
+                    'right' => new question_possible_response(
+                            'Right', 1),
                     null              => question_possible_response::no_response()
-            );
+                );
+            } else {
+                 $resp[$i] = array(
+                    'wrong' => new question_possible_response(
+                            'Wrong', 0),
+                    'right' => new question_possible_response(
+                            'Right', 1),
+                    'wrongvalue' => new question_possible_response(
+                            'Wrong value right unit', 0),
+                    'wrongunit' => new question_possible_response(
+                            'Right value wrong unit', 1 - $part->unitpenalty),
+                    null              => question_possible_response::no_response()
+                );
+            }
         }
 
         return $resp;
