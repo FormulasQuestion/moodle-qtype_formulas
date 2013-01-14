@@ -65,7 +65,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
                 }
             }
         }
-        $summary = implode('; ', $summary);
+        $summary = implode(', ', $summary);
         return $summary;
         return '';
     }

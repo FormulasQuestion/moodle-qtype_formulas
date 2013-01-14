@@ -95,7 +95,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $output .= $sub->feedbackimage;
         }
 
-        $feedback = $this->part_feedback($i, $qa, $question, $options);
+        $feedback = $this->part_feedback($i, $qa, $options);
         // We don't display the right answer if one of the part's coordinates is a MC or select question.
         // Because for that coordinate our result is not the right answer, but the index of the right answer,
         // And it would be very dfficult to calculate the right answer.
@@ -412,12 +412,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string nicely formatted feedback, for display.
      */
     protected function part_feedback($i, question_attempt $qa,
-            question_definition $question,
             question_display_options $options) {
         $err = '';
         $feedback = '';
         $gradingdetails = '';
 
+        $question = $qa->get_question();
+        $part = $question->parts[$i];
         $state = $qa->get_state();
         // Only show feedback if response is wrong (will be corrected later for adaptive behaviour).
         $showfeedback = $options->feedback && $state == question_state::$gradedwrong;
@@ -428,6 +429,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $details = $qa->get_behaviour()->get_part_mark_details("$i");
             $fraction = $qa->get_last_behaviour_var("_fraction_{$i}");
             $gradingdetails = $renderer->render_adaptive_marks($details, $options);
+            // Only show feedback if response is wrong.
             $showfeedback = $details->state == question_state::$gradedwrong;
         }
 

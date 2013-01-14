@@ -346,7 +346,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         foreach ($this->parts as $i => $part) {
             $summary[] = $part->part_summarise_response($response);
         }
-        $summary = implode('; ', $summary);
+        $summary = implode(', ', $summary);
         return $summary;
     }
 
