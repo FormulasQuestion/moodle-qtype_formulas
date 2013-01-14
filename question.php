@@ -57,6 +57,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public $fractions = array();
     public $anscorrs = array();
     public $unitcorrs = array();
+    
+    public $localvars = array();
     public $varsrandom;
     /** global variables serialized as string (as saved in database) */
     public $varsglobal;
@@ -359,7 +361,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function classify_response(array $response) {
         $this->rationalize_responses($response);
-        $checkunit = new answer_unit_conversion;
         $classification = array();
 
         foreach ($this->parts as $i => $part) {
@@ -367,6 +368,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                 $classification[$i] = question_classified_response::no_response();
                 continue;
             }
+            $checkunit = new answer_unit_conversion;
             list($anscorr, $unitcorr)
                     = $this->grade_responses_individually($part, $response, $checkunit);
             

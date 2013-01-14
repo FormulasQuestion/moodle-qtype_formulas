@@ -56,11 +56,11 @@ class qtype_formulas_edit_form extends question_edit_form {
             ''), 'questiontext');
 
         $mform->insertElementBefore($mform->createElement('textarea', 'varsrandom', get_string('varsrandom', 'qtype_formulas'),
-            array('cols' => 80, 'rows' => 8)) , 'questiontext');
+            array('cols' => 80)) , 'questiontext');
         $mform->addHelpButton('varsrandom', 'varsrandom', 'qtype_formulas');
 
         $mform->insertElementBefore($mform->createElement('textarea', 'varsglobal', get_string('varsglobal', 'qtype_formulas'),
-            array('cols' => 80, 'rows' => 10)) , 'questiontext');
+            array('cols' => 80)) , 'questiontext');
         $mform->addHelpButton('varsglobal', 'varsglobal', 'qtype_formulas');
 
         // Subquestion's answers.
@@ -127,7 +127,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['answermark']['helpbutton'] = array('answermark', 'qtype_formulas');
         $repeated[] = $mform->createElement('hidden', 'numbox', '', '');   // Exact value will be computed during validation.
         $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
-            array('cols' => 80, 'rows' => 6));
+            array('cols' => 80));
         $repeatedoptions['vars1']['helpbutton'] = array('vars1', 'qtype_formulas');
         $repeated[] = $mform->createElement('select', 'answertype', get_string('answertype', 'qtype_formulas'),
                 array(0 => get_string('number', 'qtype_formulas'), 10 => get_string('numeric', 'qtype_formulas'),
@@ -139,7 +139,7 @@ class qtype_formulas_edit_form extends question_edit_form {
             array('size' => 80));
         $repeatedoptions['answer']['helpbutton'] = array('answer', 'qtype_formulas');
         $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'),
-            array('cols' => 80, 'rows' => 6));
+            array('cols' => 80));
         $repeatedoptions['vars2']['helpbutton'] = array('vars2', 'qtype_formulas');
         $repeated[] = $mform->createElement('text', 'correctness', get_string('correctness', 'qtype_formulas'),
             array('size' => 60));
@@ -160,17 +160,17 @@ class qtype_formulas_edit_form extends question_edit_form {
             $default_rule_choice);
         $repeatedoptions['ruleid']['default'] = 1;
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
-            array('cols' => 80, 'rows' => 3));
+            array('cols' => 80));
         $repeatedoptions['otherrule']['helpbutton'] = array('otherrule', 'qtype_formulas');
         $repeated[] = $mform->createElement('static', '', '<hr class="formulas_seperator2" />', '<hr />');
         $repeated[] = $mform->createElement('text', 'placeholder', get_string('placeholder', 'qtype_formulas'),
             array('size' => 20));
         $repeatedoptions['placeholder']['helpbutton'] = array('placeholder', 'qtype_formulas');
         $repeated[] = $mform->createElement('editor', 'subqtext', get_string('subqtext', 'qtype_formulas'),
-            array('rows' => 12), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['subqtext']['helpbutton'] = array('subqtext', 'qtype_formulas');
         $repeated[] = $mform->createElement('editor', 'feedback', get_string('feedback', 'qtype_formulas'),
-            array('rows' => 8), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['feedback']['helpbutton'] = array('feedback', 'qtype_formulas');
         $answersoption = 'answers';
         return $repeated;
