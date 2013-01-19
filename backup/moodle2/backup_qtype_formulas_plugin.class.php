@@ -70,7 +70,7 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
 
         // Set source to populate the data.
         $formulasanswer->set_source_table('qtype_formulas_answers', array('questionid' => backup::VAR_PARENTID));
-        $formulas->set_source_table('qtype_formulas', array('questionid' => backup::VAR_PARENTID));
+        $formulas->set_source_table('qtype_formulas_options', array('questionid' => backup::VAR_PARENTID));
 
         // Don't need to annotate ids nor files.
 

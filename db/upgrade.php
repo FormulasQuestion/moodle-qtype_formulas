@@ -199,6 +199,17 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         upgrade_plugin_savepoint(true, 2012071401, 'qtype', 'formulas');
     }
 
+    if ($oldversion < 2012071402) {
+        // Define table qtype_formulas to be renamed to qtype_formulas_options.
+        $table = new xmldb_table('qtype_formulas');
+
+        // Launch rename table for qtype_formulas_options.
+        $dbman->rename_table($table, 'qtype_formulas_options');
+
+        // Formulas savepoint reached.
+        upgrade_plugin_savepoint(true, 2012071402, 'qtype', 'formulas');
+    }
+
     // Moodle v2.2.0 release upgrade line.
     // Put any upgrade step following this.
 

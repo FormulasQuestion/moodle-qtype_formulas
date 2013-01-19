@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <XMLDB PATH="question/type/formulas/db" VERSION="20110807" COMMENT="XMLDB file for Moodle question/type/formulas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <TABLES>
-    <TABLE NAME="qtype_formulas" COMMENT="Options for formulas question type" NEXT="qtype_formulas_answers">
+    <TABLE NAME="qtype_formulas_options" COMMENT="Options for formulas question type" NEXT="qtype_formulas_answers">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
         <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="varsrandom"/>
@@ -20,7 +20,7 @@
         <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="qtype_formulas_answers" COMMENT="Answers for formulas question type" PREVIOUS="qtype_formulas">
+    <TABLE NAME="qtype_formulas_answers" COMMENT="Answers for formulas question type" PREVIOUS="qtype_formulas_options">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
         <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="placeholder"/>

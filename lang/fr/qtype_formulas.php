@@ -57,8 +57,8 @@ $string['questiontext_help'] = '<p>In addition to the normal question text, you 
 <pre class="prettyprint">What is the result of {A} + {B}?<br>{#1}<br>What is the result of {A} - {B}?<br>{#2}<br>What is the result of {C} / {B}?<br>{#3}</pre>';
 
 // The language string for the global variables.
-$string['globalvarshdr'] = 'Variables';
-$string['varsrandom'] = 'Random variables';
+$string['globalvarshdr'] = 'Variables globales';
+$string['varsrandom'] = 'Variables au hasard';
 $string['varsrandom_help'] = '<p>New random values are generated for these variables at the beginning of each attempt.  It can
 be done by defining a set of elements to choose from: </p><pre class="prettyprint">A = {1,2,3};<br>C = {[1,-1], [2,-2], [3,-3]};<br>E = {10:100:10, 100, 1000};</pre><p>The
  elements can be numbers, strings or lists of them. At the start of a new attempt, one element will be drawn from the set and assigned to the variable
@@ -153,14 +153,14 @@ $string['qtextpreview'] = 'Preview using dataset';
 $string['varsstatistics'] = 'Statistiques';
 $string['varsdata'] = 'Instantiated dataset';
 
-// Errors message used by validation of the editing form.
+// Errors message used by editing form's validation.
 $string['error_no_answer'] = 'At least one answer is required.';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
-$string['error_placeholder_too_long'] = 'The size of placeholder must be smaller than 40.';
-$string['error_placeholder_format'] = 'The format of placeholder is wrong or contain characters that is not allowed.';
-$string['error_placeholder_missing'] = 'The placeholder does not appear in the main question text.';
-$string['error_placeholder_main_duplicate'] = 'This placeholder has appeared more than once in the main question text.';
-$string['error_placeholder_sub_duplicate'] = 'This placeholder has already been defined in other parts.';
+$string['error_placeholder_too_long'] = 'The placeholder\'s length is limited to 40 characters.';
+$string['error_placeholder_format'] = 'Wrong placeholder\'s format or forbidden characters.';
+$string['error_placeholder_missing'] = 'This placeholder is missing from the main question text.';
+$string['error_placeholder_main_duplicate'] = 'Duplicated placeholder in the main question text.';
+$string['error_placeholder_sub_duplicate'] = 'This placeholder has already been defined in some other part.';
 $string['error_answerbox_duplicate'] = 'Each answer field placeholder can only be used once in a part.';
 $string['error_answertype_mistmatch'] = 'Answer type mismatch: Numerical answer type requires number and algebraic answer type requires string';
 $string['error_answer_missing'] = 'No answer has been defined.';
@@ -198,10 +198,14 @@ $string['error_eval_numerical'] = 'Some expressions cannot be evaluated numerica
 $string['correctansweris'] = 'Une réponse correcte possible est: {$a}';
 
 // Strings that were "borrowed" from quiz and are now in calculated plugin.
-$string['illegalformulasyntax'] = 'Illegal formula syntax starting with \'{$a}\'';
-$string['functiontakesnoargs'] = 'The function {$a} does not take any arguments';
-$string['functiontakesonearg'] = 'The function {$a} must have exactly one argument';
-$string['functiontakesoneortwoargs'] = 'The function {$a} must have either one or two arguments';
-$string['functiontakestwoargs'] = 'The function {$a} must have exactly two arguments';
-$string['functiontakesatleasttwo'] = 'The function {$a} must have at least two arguments';
-$string['unsupportedformulafunction'] = 'The function {$a} is not supported';
+$string['illegalformulasyntax'] = 'Syntaxe incorrecte pour la formule commençant par « {$a} »';
+$string['functiontakesnoargs'] = 'La fonction {$a} ne prend aucun argument';
+$string['functiontakesonearg'] = 'la fonction {$a} doit avoir exactement un argument';
+$string['functiontakesoneortwoargs'] = 'la fonction {$a} doit avoir un ou deux arguments';
+$string['functiontakestwoargs'] = 'La fonction {$a} doit avoir exactement deux arguments';
+$string['functiontakesatleasttwo'] = 'La fonction {$a} doit avoir au moins deux arguments';
+$string['unsupportedformulafunction'] = 'La fonction {$a} n\'est pas supportée';
+
+// Strings for question settings.
+$string['settingusepopup'] = 'Use popups for correct anser and feedback';
+$string['settingusepopup_desc'] = 'Display correct answer and feedback in a tooltip';

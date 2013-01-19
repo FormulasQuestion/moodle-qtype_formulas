@@ -15,22 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the formulas question type.
- *
- * @package    qtype_formulas
- * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @package    qtype_algebra
+ * @copyright  Roger Moore <rwmoore@ualberta.ca>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qtype_formulas';
-$plugin->version   = 2012071403;
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->cron      = 0;
-$plugin->requires  = 2012062500;
-$plugin->dependencies = array(
-    'qbehaviour_adaptivemultipart'     => 2012101200,
-);
-
-$plugin->maturity  = MATURITY_STABLE;
-
+if ($ADMIN->fulltree) {// Options for Maths display.
+    $settings->add(new admin_setting_configcheckbox('qtype_formulas/usepopup',
+            get_string('settingusepopup', 'qtype_formulas'),
+            get_string('settingusepopup_desc', 'qtype_formulas'), 0));
+}

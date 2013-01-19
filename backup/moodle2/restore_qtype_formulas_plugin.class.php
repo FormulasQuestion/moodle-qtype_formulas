@@ -86,9 +86,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             // Adjust some columns.
             $data->questionid = $newquestionid;
             // Insert record.
-            $newitemid = $DB->insert_record('qtype_formulas', $data);
+            $newitemid = $DB->insert_record('qtype_formulas_options', $data);
             // Create mapping (needed for decoding links).
-            $this->set_mapping('qtype_formulas', $oldid, $newitemid);
+            $this->set_mapping('qtype_formulas_options', $oldid, $newitemid);
         }
     }
 
@@ -126,7 +126,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
      */
     public static function define_decode_contents() {
         return array(
-            new restore_decode_content('qtype_formulas',
+            new restore_decode_content('qtype_formulas_options',
                     array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'),
                     'qtype_formulas'),
             new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback'),

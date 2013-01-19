@@ -268,7 +268,7 @@ var formulasform = {
         data['varsglobal'] = document.getElementById('id_varsglobal').value;
         for (var i=0; i<this.numsubq; i++) {
             data['varslocals['+i+']'] = document.getElementById('id_vars1_'+i).value;
-            data['answers['+i+']'] = document.getElementById('id_answer_'+i).value;;
+            data['answers['+i+']'] = document.getElementById('id_answer_'+i).value;
         }
         data['start'] = 0;
         data['N'] = document.getElementById('numdataset').value;

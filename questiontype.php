@@ -75,7 +75,7 @@ class qtype_formulas extends question_type {
      * @return mixed array as above, or null to tell the base class to do nothing.
      */
     public function extra_question_fields() {
-        return array('qtype_formulas', 'varsrandom', 'varsglobal');
+        return array('qtype_formulas_options', 'varsrandom', 'varsglobal');
     }
 
     /**
@@ -128,7 +128,7 @@ class qtype_formulas extends question_type {
      */
     public function get_question_options($question) {
         global $DB;
-        $question->options = $DB->get_record('qtype_formulas',
+        $question->options = $DB->get_record('qtype_formulas_options',
                 array('questionid' => $question->id), '*', MUST_EXIST);
 
         parent::get_question_options($question);
@@ -209,14 +209,14 @@ class qtype_formulas extends question_type {
             return (object)array('error' => $e->getMessage());
         }
         // Save the question options.
-        $options = $DB->get_record('qtype_formulas', array('questionid' => $question->id));
+        $options = $DB->get_record('qtype_formulas_options', array('questionid' => $question->id));
         if (!$options) {
             $options = new stdClass();
             $options->questionid = $question->id;
             $options->correctfeedback = '';
             $options->partiallycorrectfeedback = '';
             $options->incorrectfeedback = '';
-            $options->id = $DB->insert_record('qtype_formulas', $options);
+            $options->id = $DB->insert_record('qtype_formulas_options', $options);
         }
         $extraquestionfields = $this->extra_question_fields();
         array_shift($extraquestionfields);
@@ -230,7 +230,7 @@ class qtype_formulas extends question_type {
             $options->$extra = $question->$extra;
         }
         $options = $this->save_combined_feedback_helper($options, $question, $context, true);
-        $DB->update_record('qtype_formulas', $options);
+        $DB->update_record('qtype_formulas_options', $options);
 
         $this->save_hints($question, true);
         return true;

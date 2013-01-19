@@ -205,3 +205,8 @@ $string['functiontakesoneortwoargs'] = 'The function {$a} must have either one o
 $string['functiontakestwoargs'] = 'The function {$a} must have exactly two arguments';
 $string['functiontakesatleasttwo'] = 'The function {$a} must have at least two arguments';
 $string['unsupportedformulafunction'] = 'The function {$a} is not supported';
+
+// Strings for question settings.
+$string['settingusepopup'] = 'Use popups for correct anser and feedback';
+$string['settingusepopup_desc'] = 'Display correct answer and feedback in a tooltip';
+
