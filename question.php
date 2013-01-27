@@ -57,7 +57,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public $fractions = array();
     public $anscorrs = array();
     public $unitcorrs = array();
-    
+
     public $localvars = array();
     public $varsrandom;
     /** global variables serialized as string (as saved in database) */
@@ -371,7 +371,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             $checkunit = new answer_unit_conversion;
             list($anscorr, $unitcorr)
                     = $this->grade_responses_individually($part, $response, $checkunit);
-            
+
             if ($part->postunit != '') {
                 if ($anscorr==1 && $unitcorr==1) {
                     $classification[$i] = new question_classified_response(
@@ -557,8 +557,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $postunit = trim($response["${i}_{$part->numbox}"]);
 
         // Step 2: Use the unit system to check whether the unit in student responses is *convertible* to the true unit.
-        global $basic_unit_conversion_rules;
-        $checkunit->assign_default_rules($part->ruleid, $basic_unit_conversion_rules[$part->ruleid][1]);
+        $conversionrules = new unit_conversion_rules;
+        $entry = $conversionrules->entry($part->ruleid);
+        $checkunit->assign_default_rules($part->ruleid, $entry[1]);
         $checkunit->assign_additional_rules($part->otherrule);
         $checked = $checkunit->check_convertibility($postunit, $part->postunit);
         $cfactor = $checked->cfactor;

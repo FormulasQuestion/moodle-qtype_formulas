@@ -79,8 +79,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->addHelpButton('globalunitpenalty', 'unitpenalty', 'qtype_formulas');
         $mform->setDefault('globalunitpenalty', 1);
 
-        global $basic_unit_conversion_rules;
-        foreach ($basic_unit_conversion_rules as $id => $entry) {
+        $conversionrules = new unit_conversion_rules;
+        $allrules = $conversionrules->allrules();
+        foreach ($allrules as $id => $entry) {
             $default_rule_choice[$id] = $entry[0];
         }
         $mform->addElement('select', 'globalruleid',
@@ -121,12 +122,14 @@ class qtype_formulas_edit_form extends question_edit_form {
      */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
             &$repeatedoptions, &$answersoption) {
+        $config = get_config('qtype_formulas');
         $repeated = array();
         $repeated[] = $mform->createElement('header', 'answerhdr', $label);
 
         $repeated[] = $mform->createElement('text', 'answermark', get_string('answermark', 'qtype_formulas'),
             array('size' => 3));
         $repeatedoptions['answermark']['helpbutton'] = array('answermark', 'qtype_formulas');
+        $repeatedoptions['answermark']['default'] = $config->defaultanswermark;
         $repeated[] = $mform->createElement('hidden', 'numbox', '', '');   // Exact value will be computed during validation.
         $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
@@ -135,7 +138,7 @@ class qtype_formulas_edit_form extends question_edit_form {
                 array(0 => get_string('number', 'qtype_formulas'), 10 => get_string('numeric', 'qtype_formulas'),
                         100 => get_string('numerical_formula', 'qtype_formulas'),
                         1000 => get_string('algebraic_formula', 'qtype_formulas')));;
-        $repeatedoptions['answertype']['default'] = 0;
+        $repeatedoptions['answertype']['default'] = $config->defaultanswertype;
         $repeatedoptions['answertype']['helpbutton'] = array('answertype', 'qtype_formulas');
         $repeated[] = $mform->createElement('text', 'answer', get_string('answer', 'qtype_formulas'),
             array('size' => 80));
@@ -145,17 +148,18 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['vars2']['helpbutton'] = array('vars2', 'qtype_formulas');
         $repeated[] = $mform->createElement('text', 'correctness', get_string('correctness', 'qtype_formulas'),
             array('size' => 60));
+        $repeatedoptions['correctness']['default'] = $config->defaultcorrectness;
         $repeatedoptions['correctness']['helpbutton'] = array('correctness', 'qtype_formulas');
-        $repeated[] = $mform->createElement('static', '', '<hr class="formulas_seperator1" />', '');
         $repeated[] = $mform->createElement('text', 'unitpenalty', get_string('unitpenalty', 'qtype_formulas'),
             array('size' => 3));
-        $repeatedoptions['unitpenalty']['default'] = 1;
+        $repeatedoptions['unitpenalty']['default'] = $config->defaultunitpenalty;
         $repeatedoptions['unitpenalty']['helpbutton'] = array('unitpenalty', 'qtype_formulas');
         $repeated[] = $mform->createElement('text', 'postunit', get_string('postunit', 'qtype_formulas'),
             array('size' => 60, 'class' => 'formulas_editing_unit'));
         $repeatedoptions['postunit']['helpbutton'] = array('postunit', 'qtype_formulas');
-        global $basic_unit_conversion_rules;
-        foreach ($basic_unit_conversion_rules as $id => $entry) {
+        $conversionrules = new unit_conversion_rules;
+        $allrules = $conversionrules->allrules();
+        foreach ($allrules as $id => $entry) {
             $default_rule_choice[$id] = $entry[0];
         }
         $repeated[] = $mform->createElement('select', 'ruleid', get_string('ruleid', 'qtype_formulas'),

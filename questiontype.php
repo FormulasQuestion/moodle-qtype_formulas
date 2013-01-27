@@ -239,7 +239,14 @@ class qtype_formulas extends question_type {
 
     // Override the parent save_question in order to change the defaultmark.
     public function save_question($question, $form) {
-        $form->defaultmark = array_sum($form->answermark); // Question's default mark is the total of all subquestion's marks.
+        $form->defaultmark = 0;
+        foreach ($form->answermark as $key => $data) {
+            if (trim($form->answermark[$key]) == '' || trim($form->answer[$key]) == '') {
+                continue;
+            }
+            // Question's default mark is the total of all non empty subquestion's marks.
+            $form->defaultmark += $form->answermark[$key];
+        }
         $question = parent::save_question($question, $form);
         return $question;
     }
@@ -544,17 +551,22 @@ class qtype_formulas extends question_type {
         $tags = $this->subquestion_answer_tags();
         $res = (object)array('answers' => array());
         foreach ($form->answermark as $i => $a) {
-            if (strlen(trim($form->answermark[$i])) == 0) {
-                continue;   // If no mark, then skip this answer.
+            if ((strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0)
+                    && (strlen(trim($form->subqtext[$i]['text'])) != 0
+                    || strlen(trim($form->feedback[$i]['text'])) != 0
+                    || strlen(trim($form->vars1[$i])) != 0
+                    )
+                ) {
+                $res->errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
+                $skip = true;
+            }
+            if (strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0) {
+                continue;   // If no mark or no answer, then skip this answer.
             }
             if (floatval($form->answermark[$i]) <= 0) {
                 $res->errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
             }
             $skip = false;
-            if (strlen(trim($form->answer[$i])) == 0) {
-                $res->errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
-                $skip = true;
-            }
             if (strlen(trim($form->correctness[$i])) == 0) {
                 $res->errors["correctness[$i]"] = get_string('error_criterion', 'qtype_formulas');
                 $skip = true;
@@ -637,7 +649,6 @@ class qtype_formulas extends question_type {
     // Validating the data from the client, and return errors.
     // If no errors, the $validanswers should be appended by numbox variables.
     public function validate_instantiation($form, &$validanswers) {
-        global $basic_unit_conversion_rules;
 
         $errors = array();
 
@@ -726,7 +737,8 @@ class qtype_formulas extends question_type {
             }
 
             try {
-                $entry = $basic_unit_conversion_rules[$ans->ruleid];
+                $conversionrules = new unit_conversion_rules;
+                $entry = $conversionrules->entry($ans->ruleid);                
                 if ($entry === null || $entry[1] === null) {
                     throw new Exception(get_string('error_ruleid', 'qtype_formulas'));
                 }

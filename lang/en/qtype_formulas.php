@@ -209,4 +209,11 @@ $string['unsupportedformulafunction'] = 'The function {$a} is not supported';
 // Strings for question settings.
 $string['settingusepopup'] = 'Use popups for correct anser and feedback';
 $string['settingusepopup_desc'] = 'Display correct answer and feedback in a tooltip';
-
+$string['defaultanswertype'] = 'Default answer type';
+$string['defaultanswertype_desc'] = 'Default answer type for new question\'s parts';
+$string['defaultcorrectness'] = 'Default grading criteria';
+$string['defaultcorrectness_desc'] = 'Default grading criteria for new question\'s parts';
+$string['defaultanswermark'] = 'Default part\'s mark';
+$string['defaultanswermark_desc'] = 'Default part\'s mark for new question\'s parts';
+$string['defaultunitpenalty'] ='Default unit penalty';
+$string['defaultunitpenalty_desc'] ='Default penalty for wrong unit (0-1)';
