@@ -433,7 +433,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         if ($showfeedback) {
             $localvars = $question->get_local_variables($part);
-            $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $part->partindex, false);
+            $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $part->id, false);
             if ($feedbacktext) {
                 $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
             }

@@ -746,7 +746,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $itemid = reset($args);
         if ($component == 'qtype_formulas' && ($filearea == 'answersubqtext' || $filearea == 'answerfeedback')) {
             // Check if answer id exists.
-            for ($i = 0; $i < $this-numpart; $i++) {
+            for ($i = 0; $i < $this->numpart; $i++) {
                 if ($this->parts[$i]->id == $itemid) {
                     return true;
                 }
