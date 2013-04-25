@@ -40,6 +40,7 @@ $string['pleaseputananswer'] = 'Please put an answer in each input field.';
 $string['modelanswer'] = 'Model answer';
 
 // Texts that will be shown in the question editing interface.
+$string['addmorepartsblanks'] = 'Blanks for {no} more parts';
 $string['pluginname'] = 'Formulas';
 $string['pluginnameadding'] = 'Adding a formulas question';
 $string['pluginnameediting'] = 'Editing a formulas question';

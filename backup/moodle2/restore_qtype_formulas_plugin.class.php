@@ -65,7 +65,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         $newquestionid   = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
-        // If the question has been created by restore, we need to create its qtype_formulas too.
+        // If the question has been created by restore, we need to create its qtype_formulas_options too.
         if ($questioncreated) {
             // Some 2.0 backups are missing the combined feedback.
             if (!isset($data->correctfeedback)) {

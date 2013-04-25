@@ -25,10 +25,10 @@ defined('MOODLE_INTERNAL') || die();
 class unit_conversion_rules {
     private $basic_unit_conversion_rules = array();
 
-    /// Initialize the internal conversion rule.
-    function __construct() {
+    // Initialize the internal conversion rule.
+    public function __construct() {
         $this->basic_unit_conversion_rules[0] = array('None', '');
-        $this->basic_unit_conversion_rules[1] = array('Common SI unit','
+        $this->basic_unit_conversion_rules[1] = array('Common SI unit', '
 m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;
@@ -48,9 +48,9 @@ F: m u n p f;
 T: k m u n p;
 H: k m u n p;
 ');
-//  $this->basic_unit_conversion_rules[100] = array(
-//  $this->basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
-//  $this->basic_unit_conversion_rules[1][1] + '');
+        //  $this->basic_unit_conversion_rules[100] = array(
+        //  $this->basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
+        //  $this->basic_unit_conversion_rules[1][1] + '');
     }
 
     public function entry($n) {

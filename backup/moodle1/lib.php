@@ -50,23 +50,25 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
         } else {
             $answers   = array();
         }
+        $anscount = 0;
         $this->xmlwriter->begin_tag('formulas_answers');
         foreach ($answers as $answer) {
             // Create an artificial 'id' attribute (is not included in moodle.xml).
             $answer['id'] = $this->converter->get_nextid();
             // Add missing fields.
+            $answer['partindex'] = $anscount;
             $answer['subqtextformat'] = FORMAT_HTML;
             $answer['feedbackformat'] = FORMAT_HTML;
 
-            // Restore images in answers subqtext and feedback fields.
+            // Migrate images in answers subqtext and feedback fields.
             // Uncomment the 2 following lines once MDL-33424 is closed.
-//            $answer['subqtext'] = $this->migrate_files($answer['subqtext'], 'qtype_formulas', 'answersubqtext', $answer['id']);
-//            $answer['feedback'] = $this->migrate_files($answer['feedback'], 'qtype_formulas', 'answerfeedback', $answer['id']);
+            $answer['subqtext'] = $this->migrate_files(($answer['subqtext'], 'qtype_formulas', 'answersubqtext', $answer['id']);
+            $answer['feedback'] = $this->migrate_files($answer['feedback'], 'qtype_formulas', 'answerfeedback', $answer['id']);
 
             $this->xmlwriter->begin_tag('formulas_answer', array('id' => $answer['id']));
             foreach (array(
-                'placeholder', 'answermark', 'answertype', 'numbox',
-                'vars1', 'answer', 'vars2', 'correctness', 'unitpenalty',
+                'partindex', 'placeholder', 'answermark', 'answertype',
+                'numbox', 'vars1', 'answer', 'vars2', 'correctness', 'unitpenalty',
                 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat',
                 'feedback', 'feedbackformat'
             ) as $fieldname) {
@@ -76,6 +78,7 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
                 $this->xmlwriter->full_tag($fieldname, $answer[$fieldname]);
             }
             $this->xmlwriter->end_tag('formulas_answer');
+            ++$anscount;
         }
         $this->xmlwriter->end_tag('formulas_answers');
 

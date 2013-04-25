@@ -50,17 +50,18 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $globalvars = $question->get_global_variables();
 
+        // TODO: is this really necessary here ? If question is damaged it should have been detected before.
         if (count($question->textfragments) != $question->numpart + 1) {
-            notify("Error: Question is damaged, number of text fragments and number of question parts are not the same.");
+            notify('Error: Question is damaged, number of text fragments and number of question parts are not equal.');
             return;
         }
 
         $result = html_writer::tag('script', 'var formulasbaseurl='
                 .json_encode($CFG->wwwroot . '/question/type/' . $question->get_type_name()).';', array('type'=>'text/javascript'));
         $questiontext = '';
-        foreach ($question->parts as $i => $part) {
-            $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$i], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
-            $questiontext .= $this->part_formulation_and_controls($qa, $options, $i);
+        foreach ($question->parts as $part) {
+            $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$part->partindex], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
+            $questiontext .= $this->part_formulation_and_controls($qa, $options, $part);
         }
         $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$question->numpart], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
 
@@ -81,13 +82,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
     // Return the part text, controls, grading details and feedbacks.
     public function part_formulation_and_controls(question_attempt $qa,
-            question_display_options $options, $i) {
+            question_display_options $options, $part) {
         $question = $qa->get_question();
-        $sub = $this->get_part_image_and_class($qa, $options, $i);
-        $part = $question->parts[$i];
+        $sub = $this->get_part_image_and_class($qa, $options, $part);
         $localvars = $question->get_local_variables($part);
 
-        $output = $this->get_subquestion_formulation($qa, $options, $i, $localvars, $sub);
+        $output = $this->get_part_formulation($qa, $options, $part->partindex, $localvars, $sub);
         // Place for the right/wrong feeback image or appended at part's end.
         if (strpos($output, '{_m}') !== false) {
             $output = str_replace('{_m}', $sub->feedbackimage, $output);
@@ -95,14 +95,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $output .= $sub->feedbackimage;
         }
 
-        $feedback = $this->part_feedback($i, $qa, $options);
+        $feedback = $this->part_feedback($qa, $options, $part);
         // We don't display the right answer if one of the part's coordinates is a MC or select question.
         // Because for that coordinate our result is not the right answer, but the index of the right answer,
         // And it would be very dfficult to calculate the right answer.
         // TODO: find a solution in that case. A popup (calculated in the part renderer) would work,
         // but would no be very accessible.
         if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
-            $feedback .= $this->part_correct_response($i, $qa);
+            $feedback .= $this->part_correct_response($part->partindex, $qa);
         }
         $output .= html_writer::nonempty_tag('div', $feedback,
                 array('class' => 'formulaspartoutcome'));
@@ -110,9 +110,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     // Return class and image for the part feedback.
-    public function get_part_image_and_class($qa, $options, $i) {
+    public function get_part_image_and_class($qa, $options, $part) {
         $question = $qa->get_question();
-        $part = $question->parts[$i];
 
         $sub = new StdClass;
 
@@ -143,8 +142,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $sub;
     }
 
-    // Return the subquestion text with variables replaced by their values.
-    public function get_subquestion_formulation(question_attempt $qa, question_display_options $options, $i, $vars, $sub) {
+    // Return the part's text with variables replaced by their values.
+    public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $vars, $sub) {
         $question = $qa->get_question();
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
@@ -234,7 +233,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         }
                         $select = html_writer::select($choices, $inputname,
                                 $currentanswer, array('' => ''), $inputattributes);
-                        $output = html_writer::start_tag('span', array('class' => 'subquestion'));
+                        $output = html_writer::start_tag('span', array('class' => 'formulaspart'));
                         $output .= html_writer::tag('label', get_string('answer'),
                                 array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
                         $output .= $select;
@@ -411,14 +410,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param question_display_options $options controls what should and should not be displayed.
      * @return string nicely formatted feedback, for display.
      */
-    protected function part_feedback($i, question_attempt $qa,
-            question_display_options $options) {
+    protected function part_feedback(question_attempt $qa,
+            question_display_options $options, $part) {
         $err = '';
         $feedback = '';
         $gradingdetails = '';
 
         $question = $qa->get_question();
-        $part = $question->parts[$i];
         $state = $qa->get_state();
         // Only show feedback if response is wrong (will be corrected later for adaptive behaviour).
         $showfeedback = $options->feedback && $state == question_state::$gradedwrong;
@@ -426,23 +424,22 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
-            $details = $qa->get_behaviour()->get_part_mark_details("$i");
-            $fraction = $qa->get_last_behaviour_var("_fraction_{$i}");
+            $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
+            $fraction = $qa->get_last_behaviour_var('_fraction_' . $part->partindex);
             $gradingdetails = $renderer->render_adaptive_marks($details, $options);
             // Only show feedback if response is wrong.
             $showfeedback = $details->state == question_state::$gradedwrong;
         }
 
-        $part = $question->parts[$i];
         if ($showfeedback) {
             $localvars = $question->get_local_variables($part);
-            $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $i, false);
+            $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $part->partindex, false);
             if ($feedbacktext) {
                 $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
             }
         }
 
         return html_writer::nonempty_tag('div', $err . $feedback . $gradingdetails,
-                array('class' => 'formulaspartfeedback formulaspartfeedback-' . $i));
+                array('class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex));
     }
 }

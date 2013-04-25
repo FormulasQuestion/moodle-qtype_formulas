@@ -133,7 +133,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
-                        'location' => 0,
+                        'partindex' => 0,
                         'fraction' => 1,
                     ),
                     1 => (object) array(
@@ -156,7 +156,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
-                        'location' => 1,
+                        'partindex' => 1,
                         'fraction' => 1,
                     ),
                     2 => (object) array(
@@ -179,7 +179,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
-                        'location' => 2,
+                        'partindex' => 2,
                         'fraction' => 1,
                     ),
                     3 => (object) array(
@@ -202,7 +202,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
-                        'location' => 3,
+                        'partindex' => 3,
                         'fraction' => 1,
                     ),
                 ),
@@ -307,7 +307,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             {_0} m/sIf a car travel {s} m in {dt} s, what is the speed of the car?
             speed = {_0} m/s (v=30;dt=3;)',
             'rightanswer' => '',
-            'responsesummary' => '30m/s;40;m/s;30;40',
+            'responsesummary' => '30m/s,40,m/s,30,40',
             'timemodified' => 1357402884,
             'steps' => array(
                 0 => (object) array(

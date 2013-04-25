@@ -90,7 +90,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function get_expected_data() {
         $expected = array();
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             $expected += $part->part_get_expected_data();
         }
         return $expected;
@@ -191,7 +191,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $globalvars = $this->get_global_variables();
         $qtext = $this->qv->substitute_variables_in_text($globalvars, $this->questiontext);
         $summary = $this->html_to_text($qtext, $this->questiontextformat);
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             $localvars = $this->get_local_variables($part);
             $subtext = $this->qv->substitute_variables_in_text($localvars, $part->subqtext);
             $answerbit = $this->html_to_text($subtext, $part->subqtextformat);
@@ -212,16 +212,16 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function clear_wrong_from_response(array $response) {
         $this->rationalize_responses($response);
         $checkunit = new answer_unit_conversion;
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             list( $answer_correct, $unit_correct) = $this->grade_responses_individually($part, $response, $checkunit);
             if ($answer_correct * $unit_correct < 1.0) {
                 foreach (range(0, $part->numbox) as $j) {
-                    if (array_key_exists("${i}_$j", $response)) {
-                        $response["${i}_$j"] = '';
+                    if (array_key_exists($part->partindex . "_$j", $response)) {
+                        $response[$part->partindex . "_$j"] = '';
                     }
                 }
-                if (array_key_exists("${i}_", $response)) {
-                    $response["${i}_"] = '';
+                if (array_key_exists($part->partindex . "_", $response)) {
+                    $response[$part->partindex . "_"] = '';
                 }
             }
         }
@@ -238,7 +238,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $this->rationalize_responses($response);      // May throw if subqtext have changed.
         $checkunit = new answer_unit_conversion;
         $c = 0;
-        foreach ($this->parts as $idx => $part) {
+        foreach ($this->parts as $part) {
             list( $answer_correct, $unit_correct) = $this->grade_responses_individually($part, $response, $checkunit);
             if ($answer_correct * $unit_correct >= .999) {
                 $c++;
@@ -256,16 +256,16 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function get_correct_response() {
         $responses = array();
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             $tmp = $this->get_correct_responses_individually($part);
             if ($tmp === null) {
                 return array(); // TODO : really examine what to return in that case empty array or null ?
             }
             if ($part->part_has_combined_unit_field()) {
-                $tmp["{$i}_"] = $tmp["{$i}_0"] . $tmp["{$i}_1"];
-                unset($tmp["{$i}_0"], $tmp["{$i}_1"]);
+                $tmp[$part->partindex . "_"] = $tmp[$part->partindex . "_0"] . $tmp[$part->partindex . "_1"];
+                unset($tmp[$part->partindex . "_0"], $tmp[$part->partindex . "_1"]);
             } else if (!$part->part_has_separate_unit_field()) {
-                unset($tmp["{$i}_{$part->numbox}"]);
+                unset($tmp[$part->partindex . "_" . $part->numbox]);
             }
             $responses = array_merge($responses, $tmp);
         }
@@ -284,16 +284,16 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function is_complete_response(array $response) {
         // TODO add tests to verify it works in all cases : combined and separate unit field, no unit field.
         $complete = true;
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             if ($part->part_has_combined_unit_field()) {
-                $complete = $complete && array_key_exists("${i}_", $response) && $response["${i}_"] != '';
+                $complete = $complete && array_key_exists($part->partindex . "_", $response) && $response[$part->partindex . "_"] != '';
             } else {
                 foreach (range(0, $part->numbox - 1) as $j) {
-                    $complete = $complete && array_key_exists("${i}_$j", $response) && $response["${i}_$j"] != '';
+                    $complete = $complete && array_key_exists($part->partindex . "_$j", $response) && $response[$part->partindex . "_$j"] != '';
                 }
                 if ($part->part_has_separate_unit_field()) {
-                    $complete = $complete && array_key_exists("${i}_{$part->numbox}", $response)
-                            && $response["${i}_{$part->numbox}"] != '';
+                    $complete = $complete && array_key_exists($part->partindex . "_" . $part->numbox, $response)
+                            && $response[$part->partindex . "_" . $part->numbox] != '';
                 }
             }
         }
@@ -345,11 +345,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function summarise_response(array $response) {
         $summary = array();
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             $summary[] = $part->part_summarise_response($response);
         }
         $summary = implode(', ', $summary);
         return $summary;
+
     }
 
     /**
@@ -363,9 +364,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $this->rationalize_responses($response);
         $classification = array();
 
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             if ($part->part_is_unanswered($response)) {
-                $classification[$i] = question_classified_response::no_response();
+                $classification[$part->partindex] = question_classified_response::no_response();
                 continue;
             }
             $checkunit = new answer_unit_conversion;
@@ -374,28 +375,28 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
             if ($part->postunit != '') {
                 if ($anscorr==1 && $unitcorr==1) {
-                    $classification[$i] = new question_classified_response(
+                    $classification[$part->partindex] = new question_classified_response(
                             'right', $part->part_summarise_response($response), 1);
                 }
                 if ($anscorr==0 && $unitcorr==1) {
-                    $classification[$i] = new question_classified_response(
+                    $classification[$part->partindex] = new question_classified_response(
                             'wrongvalue', $part->part_summarise_response($response), 0);
                 }
                 if ($anscorr==1 && $unitcorr==0) {
-                    $classification[$i] = new question_classified_response(
+                    $classification[$part->partindex] = new question_classified_response(
                             'wrongunit', $part->part_summarise_response($response), 1-$part->unitpenalty);
                 }
                 if ($anscorr==0 && $unitcorr==0) {
-                    $classification[$i] = new question_classified_response(
+                    $classification[$part->partindex] = new question_classified_response(
                             'wrong', $part->part_summarise_response($response), 0);
                 }
             } else {
                 $fraction = $anscorr * ($unitcorr ? 1 : (1-$part->unitpenalty));
                 if ($fraction> .999) {
-                    $classification[$i] = new question_classified_response(
+                    $classification[$part->partindex] = new question_classified_response(
                             'right', $part->part_summarise_response($response), $fraction);
                 } else {
-                     $classification[$i] = new question_classified_response(
+                     $classification[$part->partindex] = new question_classified_response(
                             'wrong', $part->part_summarise_response($response), $fraction);
                 }
             }
@@ -417,13 +418,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // TODO is an unit alone enought to be gradable ? If I read Tim comment correctly, I think yes,
         // but in fact it depends on $part->unitpenalty.
         // TODO if student response is invalid decide what to do.
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             foreach (range(0, $part->numbox) as $j) {
-                if (!empty($response["${i}_$j"])) {
+                if (!empty($response[$part->partindex . "_$j"])) {
                     return true;
                 }
             }
-            if (!empty($response["${i}_"])) {
+            if (!empty($response[$part->partindex . '_'])) {
                 return true;
             }
         }
@@ -456,11 +457,11 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         try {
             $this->rationalize_responses($response);      // May throw if subqtext have changed.
             $checkunit = new answer_unit_conversion; // Defined here for the possibility of reusing parsed default set.
-            foreach ($this->parts as $idx => $part) {
-                list($this->anscorrs[$idx], $this->unitcorrs[$idx])
+            foreach ($this->parts as $part) {
+                list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
                         = $this->grade_responses_individually($part, $response, $checkunit);
-                $this->fractions[$idx] = $this->anscorrs[$idx] * ($this->unitcorrs[$idx] ? 1 : (1-$part->unitpenalty));
-                $this->raw_grades[$idx] = $part->answermark * $this->fractions[$idx];
+                $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex] ? 1 : (1-$part->unitpenalty));
+                $this->raw_grades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
                 $totalvalue += $part->answermark;
             }
         } catch (Exception $e) {
@@ -486,10 +487,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         }
 
         foreach (range(0, count($res)-1) as $j) {
-            $responses[$part->location."_$j"] = $res[$j]; // Coordinates.
+            $responses[$part->partindex."_$j"] = $res[$j]; // Coordinates.
         }
         $tmp = explode('=', $part->postunit, 2);
-        $responses[$part->location."_".count($res)] = $tmp[0];  // Postunit.
+        $responses[$part->partindex."_".count($res)] = $tmp[0];  // Postunit.
         return $responses;
     }
 
@@ -548,9 +549,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     // Grade response for part, and return a list with answer correctness and unit correctness.
     public function grade_responses_individually($part, $response, &$checkunit) {
-        // Step 1: Split the student's responses to the subquestion into coordinates and unit.
+        // Step 1: Split the student's responses to the part into coordinates and unit.
         $coordinates = array();
-        $i = $part->location;
+        $i = $part->partindex;
         foreach (range(0, $part->numbox - 1) as $j) {
             $coordinates[$j] = trim($response["${i}_$j"]);
         }
@@ -590,7 +591,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // Step 5: Get the model answer, which is an array of numbers or strings.
         $modelanswers = $this->get_evaluated_answer($part);
         if (count($coordinates) != count($modelanswers)) {
-            throw new Exception('Database record inconsistence: number of answers in subquestion!');
+            throw new Exception('Database record inconsistence: number of answers in part!');
         }
 
         // Step 6: Check the format of the student response and transform them into variables for grading later.
@@ -615,25 +616,25 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     // Fill all 'missing' responses by default value and remove unwanted characters.
-    public function rationalize_responses_for_part($i, array &$response) {
-        foreach (range(0, $this->parts[$i]->numbox) as $j) {
-            $name = "{$i}_$j";
+    public function rationalize_responses_for_part($part, array &$response) {
+        foreach (range(0, $part->numbox) as $j) {
+            $name = $part->partindex . "_$j";
             $response[$name] = isset($response[$name]) ? trim($response[$name]) : '';   // Replace all missing responses with an empty string.
             if (strlen($response[$name]) > 128) {
                 $response[$name] = substr($response[$name], 0, 128);    // Restrict length to 128.
             }
         }
-        if (isset($response["{$i}_"])) {   // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
-                $response["{$i}_"] = (string) substr(trim($response["{$i}_"]), 0, 128);
-                $tmp = $this->qv->split_formula_unit($response["{$i}_"]);
-                $response["{$i}_0"] = $tmp[0]; // It will be checked later if tmp[0] is a number.
-                $response["{$i}_1"] = isset($tmp[1]) ? $tmp[1] : '';
+        if (isset($response[$part->partindex . "_"])) {   // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
+                $response[$part->partindex . "_"] = (string) substr(trim($response[$part->partindex . "_"]), 0, 128);
+                $tmp = $this->qv->split_formula_unit($response[$part->partindex . "_"]);
+                $response[$part->partindex . "_0"] = $tmp[0]; // It will be checked later if tmp[0] is a number.
+                $response[$part->partindex . "_1"] = isset($tmp[1]) ? $tmp[1] : '';
         }   // The else case may occur if there is no submission for answer "i_", in which case "i_0" and "i_1" were already rationalized.
     }
 
     public function rationalize_responses(array &$response) {
-        foreach ($this->parts as $i => $part) {
-            $this->rationalize_responses_for_part($i, $response);
+        foreach ($this->parts as $part) {
+            $this->rationalize_responses_for_part($part, $response);
         }
     }
 
@@ -652,11 +653,11 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     // Return the variable type and data in the local variable defined in the $part. May throw error.
     public function get_local_variables($part) {
-        if (!isset($this->localvars[$part->location])) {
+        if (!isset($this->localvars[$part->partindex])) {
             // Perform lazy evaluation, when local variables don't already exist.
-            $this->localvars[$part->location] = $this->qv->evaluate_assignments($this->get_global_variables(), $part->vars1);
+            $this->localvars[$part->partindex] = $this->qv->evaluate_assignments($this->get_global_variables(), $part->vars1);
         }
-        return $this->localvars[$part->location];
+        return $this->localvars[$part->partindex];
     }
 
     /**
@@ -676,8 +677,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $partresults = array();
         $checkunit = new answer_unit_conversion;
 
-        foreach ($this->parts as $i => $part) {
-            $name = "$i";
+        foreach ($this->parts as $part) {
+            $name = (string) $part->partindex;
             if (array_key_exists($name, $lastgradedresponses)) {
                 // There is a response for this part in the last graded responses array.
                 $lastresponse = $lastgradedresponses[$name];
@@ -692,7 +693,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
 
             // In that case we need to grade the new response.
-            $this->rationalize_responses_for_part($i, $response);
+            $this->rationalize_responses_for_part($part, $response);
             list($anscorr, $unitcorr) = $this->grade_responses_individually($part, $response, $checkunit);
             $fraction = $anscorr * ($unitcorr ? 1 : (1-$part->unitpenalty));
             $partresults[$name] = new qbehaviour_adaptivemultipart_part_result(
@@ -708,8 +709,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function get_parts_and_weights() {
         $weights = array();
-        foreach ($this->parts as $i => $part) {
-            $weights[$i] = $part->answermark;
+        foreach ($this->parts as $part) {
+            $weights[$part->partindex] = $part->answermark;
         }
         $totalvalue = array_sum($weights);
         foreach ($weights as &$w) {
@@ -729,24 +730,23 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     // Return the evaluated answer array (number will be converted to array). Throw on error.
     public function get_evaluated_answer($part) {
-        if (!isset($this->evaluatedanswer[$part->location])) {   // Perform lazy evaluation.
+        if (!isset($this->evaluatedanswer[$part->partindex])) {   // Perform lazy evaluation.
             $vstack = $this->get_local_variables($part);
             $res = $this->qv->evaluate_general_expression($vstack, $part->answer);
-            $this->evaluatedanswer[$part->location] = $res->type[0]=='l' ? $res->value : array($res->value); // Convert to numbers array.
+            $this->evaluatedanswer[$part->partindex] = $res->type[0]=='l' ? $res->value : array($res->value); // Convert to numbers array.
             $a = $res->type[strlen($res->type)-1];
             if (($part->answertype==1000 ? $a!='s' : $a!='n')) {
                 throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
             }
         }   // Perform the evaluation only when the local variable does not exist before.
-        return $this->evaluatedanswer[$part->location]; // No type information needed, it returns numbers or strings array.
+        return $this->evaluatedanswer[$part->partindex]; // No type information needed, it returns numbers or strings array.
     }
 
     public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload) {
         $itemid = reset($args);
         if ($component == 'qtype_formulas' && ($filearea == 'answersubqtext' || $filearea == 'answerfeedback')) {
             // Check if answer id exists.
-            $numpart = count($this->parts);
-            for ($i = 0; $i < $numpart; $i++) {
+            for ($i = 0; $i < $this-numpart; $i++) {
                 if ($this->parts[$i]->id == $itemid) {
                     return true;
                 }
@@ -780,7 +780,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $fractionmax = 0;
         $checkunit = new answer_unit_conversion;
 
-        foreach ($this->parts as $i => $part) {
+        foreach ($this->parts as $part) {
             $fractionmax += $part->answermark;
             $lastresponse = array();
             $lastchange = 0;
@@ -812,6 +812,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 class qtype_formulas_part {
     /** @var integer the answer id. */
     public $id;
+    public $partindex;
     public $placeholder;
     public $answermark;
     public $answertype;
@@ -827,7 +828,7 @@ class qtype_formulas_part {
     public $subqtext;
     public $subqtextformat;
     public $feedback;
-    public $location;
+
 
     /**
      * Constructor.
@@ -865,7 +866,7 @@ class qtype_formulas_part {
 
     public function part_get_expected_data() {
         $expected = array();
-        $i = $this->location;
+        $i = $this->partindex;
         if ($this->part_has_combined_unit_field()) {
                 $expected["${i}_"] = PARAM_RAW;
         } else {
@@ -910,7 +911,7 @@ class qtype_formulas_part {
                     $summary [] = '';
             }
         }
-        $summary = implode('; ', $summary);
+        $summary = implode(', ', $summary);
         return $summary;
     }
 
@@ -925,7 +926,7 @@ class qtype_formulas_part {
     }
 
     public function part_is_unanswered(array$response) {
-        $i = $this->location;
+        $i = $this->partindex;
         if (array_key_exists("${i}_", $response) && $response["${i}_"] != '') {
             return false;
         }

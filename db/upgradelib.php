@@ -53,21 +53,20 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         $summary = array();
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
-        foreach ($this->question->options->answers as $i => $part) {
+        foreach ($this->question->options->answers as $part) {
             if ($this->has_combined_unit_field($part)) {
-                $summary [] = $responses["${i}_0"] . $responses["${i}_1"];;
+                $summary [] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];;
             } else {
                 foreach (range(0, $part->numbox - 1) as $j) {
-                    $summary [] = $responses["${i}_$j"];
+                    $summary [] = $responses[$part->partindex . "_$j"];
                 }
                 if ($this->has_separate_unit_field($part)) {
-                    $summary [] = $responses["${i}_{$part->numbox}"];
+                    $summary [] = $responses[$part->partindex . '_' . $part->numbox];
                 }
             }
         }
         $summary = implode(', ', $summary);
         return $summary;
-        return '';
     }
 
     public function set_first_step_data_elements($state, &$data) {
@@ -77,7 +76,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
 
         // Now that we know random and global variables, we can do our best for question summary.
         $summary = $this->to_text($this->question->questiontext, $this->question->questiontextformat);
-        foreach ($this->question->options->answers as $i => $part) {
+        foreach ($this->question->options->answers as $part) {
             $answerbit = $this->to_text($part->subqtext, $part->subqtextformat);
             if ($part->placeholder != '') {
                 $summary = str_replace('{' . $part->placeholder . '}', $answerbit, $summary);
@@ -102,19 +101,19 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     public function set_data_elements_for_step($state, &$data) {
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
-        foreach ($this->question->options->answers as $i => $part) {
+        foreach ($this->question->options->answers as $part) {
             if ($this->has_combined_unit_field($part)) {
                 // If part has a combined unit field we need to group answer and unit.
-                $data["${i}_"] = $responses["${i}_0"] . $responses["${i}_1"];
+                $data[$part->partindex . '_'] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];
             } else {
                 foreach (range(0, $part->numbox - 1) as $j) {
                     // All coordinates of response for part.
-                    $data["${i}_$j"] = $responses["${i}_$j"];
+                    $data[$part->partindex . "_$j"] = $responses[$part->partindex . "_$j"];
                 }
                 if ($this->has_separate_unit_field($part)) {
                     // If there is a separated unit field
                     // Last response is unit.
-                    $data["${i}_{$part->numbox}"] = $responses["${i}_{$part->numbox}"];
+                    $data[$part->partindex . '_' . $part->numbox] = $responses[$part->partindex . '_' . $part->numbox];
                 }
 
             }

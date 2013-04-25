@@ -53,7 +53,7 @@ class qtype_formulas extends question_type {
      * subqtext, subqtextformat, feedback and feedbackformat are not included as their handling is special
      * @return array.
      */
-    public function subquestion_answer_tags() {
+    public function part_tags() {
         return array('placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'vars2', 'correctness'
             , 'unitpenalty', 'postunit', 'ruleid', 'otherrule');
     }
@@ -132,12 +132,9 @@ class qtype_formulas extends question_type {
                 array('questionid' => $question->id), '*', MUST_EXIST);
 
         parent::get_question_options($question);
-        $question->options->answers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'id ASC');
+        $question->options->answers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'partindex ASC');
         $question->options->numpart = count($question->options->answers);
         $question->options->answers = array_values($question->options->answers);
-        foreach ($question->options->answers as $idx => $part) {
-            $part->location = $idx;     // It is useful when we only pass the parameter $part, the location stores which part is it.
-        }
         return true;
     }
 
@@ -155,7 +152,7 @@ class qtype_formulas extends question_type {
         $context = $question->context;
         $result = new stdClass();
 
-        $oldanswers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'id ASC');
+        $oldanswers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'partindex ASC');
         try {
             $filtered = $this->validate($question); // Data from the web input interface should be validated.
             if (count($filtered->errors) > 0) {  // There may be errors from import or restore.
@@ -163,12 +160,13 @@ class qtype_formulas extends question_type {
             }
             $answersorder = $this->reorder_answers($question->questiontext, $filtered->answers);
             // Reorder the answers, so that answer's order is the same as the placeholder's order in questiontext.
+            $newanswers = array();
             foreach ($answersorder as $newloc) {
                 $newanswers[] = $filtered->answers[$newloc];
             }
-
             $idcount = 0;
             foreach ($newanswers as $i => $ans) {
+                $ans->partindex = $i;
                 // Subqtext and feedback are now arrays so can't save them like that.
                 $subqtextarr = $ans->subqtext;
                 $ans->subqtext = $subqtextarr['text'];
@@ -244,7 +242,7 @@ class qtype_formulas extends question_type {
             if (trim($form->answermark[$key]) == '' || trim($form->answer[$key]) == '') {
                 continue;
             }
-            // Question's default mark is the total of all non empty subquestion's marks.
+            // Question's default mark is the total of all non empty parts's marks.
             $form->defaultmark += $form->answermark[$key];
         }
         $question = parent::save_question($question, $form);
@@ -272,6 +270,7 @@ class qtype_formulas extends question_type {
      * @return  array of text fragments with count($answers) elements.
      */
     public function split_questiontext($questiontext, $answers) {
+        // TODO Simplify this now that answers are in right order in data structure
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) != 0) {
@@ -285,8 +284,8 @@ class qtype_formulas extends question_type {
             $answerorder = $location%1000;
             list($fragments[$i], $questiontext) = explode('{'.$answers[$answerorder]->placeholder.'}', $questiontext);
         }
-        foreach ($answers as $idx => $answer) {
-            if (strlen($answer->placeholder) == 0) { // Add the empty placeholder at the end.
+        foreach ($answers as $answer) {
+            if (strlen($answer->placeholder) == 0) { // Add the parts with empty placeholder at the end.
                 $fragments[] = $questiontext;
                 $questiontext = '';
             }
@@ -304,18 +303,18 @@ class qtype_formulas extends question_type {
         parent::initialise_question_instance($question, $questiondata);
         $question->parts = array();
         if (!empty($questiondata->options->answers)) {
-            foreach ($questiondata->options->answers as $i => $ans) {
+            foreach ($questiondata->options->answers as $ans) {
                 $part = new qtype_formulas_part();
                 foreach ($ans as $key => $value) {
                     $part->{$key} = $value;
                 }
-                $question->parts[$i] = $part;
+                $question->parts[$part->partindex] = $part;
             }
         }
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
         $question->qv = new qtype_formulas_variables();
-        $question->numpart = count($question->parts);
+        $question->numpart = $questiondata->options->numpart;
         if ($question->numpart != 0) {
             $question->fractions = array_fill(0, $question->numpart, 0);
             $question->anscorrs = array_fill(0, $question->numpart, 0);
@@ -349,17 +348,17 @@ class qtype_formulas extends question_type {
      * the same if this function is called repeatedly.
      *
      * @param object $question the question definition data.
-     * @return array keys are subquestionid, values are arrays of possible
-     *      responses to that subquestion.
+     * @return array keys are part partindex, values are arrays of possible
+     *      responses to that question part.
      */
     public function get_possible_responses($questiondata) {
         $resp = array();
 
         $q = $this->make_question($questiondata);
 
-        foreach ($q->parts as $i => $part) {
+        foreach ($q->parts as $part) {
             if ($part->postunit =='') {
-                $resp[$i] = array(
+                $resp[$part->partindex] = array(
                     'wrong' => new question_possible_response(
                             'Wrong', 0),
                     'right' => new question_possible_response(
@@ -367,7 +366,7 @@ class qtype_formulas extends question_type {
                     null              => question_possible_response::no_response()
                 );
             } else {
-                 $resp[$i] = array(
+                 $resp[$part->partindex] = array(
                     'wrong' => new question_possible_response(
                             'Wrong', 0),
                     'right' => new question_possible_response(
@@ -386,72 +385,56 @@ class qtype_formulas extends question_type {
     /**
      * Imports the question from Moodle XML format.
      *
-     * @param $data structure containing the XML data
-     * @param $question question object to fill: ignored by this function (assumed to be null)
+     * @param $xml structure containing the XML data
+     * @param $fromform question object to fill: ignored by this function (assumed to be null)
      * @param $format format class exporting the question
      * @param $extra extra information (not required for importing this question in this format)
      */
-    public function import_from_xml($data, $question, qformat_xml $format, $extra=null) {
+    public function import_from_xml($xml, $fromform, qformat_xml $format, $extra=null) {
         // Return if data type is not our own one.
-        $nodeqtype = $data['@']['type'];
-        if ($nodeqtype != $this->name()) {
+        if (!isset($xml['@']['type']) || $xml['@']['type'] != $this->name()) {
             return false;
         }
 
         // Import the common question headers and set the corresponding field,
         // Unfortunately we can't use the parent method because it will try to import answers,
-        // and fails as formulas "answers" are not real answers but subquestions !!
-        $qo = $format->import_headers($data);
-        $qo->qtype = $this->name();
-        $format->import_combined_feedback($qo, $data, true);
-        $format->import_hints($qo, $data, true);
+        // and fails as formulas "answers" are not real answers but formulas question parts !!
+        $fromform = $format->import_headers($xml);
+        $fromform->qtype = $this->name();
+        $format->import_combined_feedback($fromform, $xml, true);
+        $format->import_hints($fromform, $xml, true);
 
         $extras = $this->extra_question_fields();
         array_shift($extras);
         foreach ($extras as $extra) {
-            $qo->$extra = $format->getpath($data, array('#', $extra, 0, '#', 'text', 0, '#'), '', true);
+            $fromform->$extra = $format->getpath($xml, array('#', $extra, 0, '#', 'text', 0, '#'), '', true);
         }
 
         // Loop over each answer block found in the XML.
-        $tags = $this->subquestion_answer_tags();
-        $answers = $data['#']['answers'];
-        foreach ($answers as $answer) {
+        $tags = $this->part_tags();
+        $anscount = 0;
+        foreach ($xml['#']['answers'] as $answer) {
+            $partindex = $format->getpath($answer, array('#', 'partindex', 0 , '#' , 'text' , 0 , '#'), false);
+            if ($partindex) {
+                $fromform->partindex[$anscount] = $partindex;
+            }
             foreach ($tags as $tag) {
-                $qotag = &$qo->$tag;
-                $qotag[] = $format->getpath($answer, array('#', $tag, 0 , '#' , 'text' , 0 , '#'), '0', false, 'error');
+                $fromform->{$tag}[$anscount] = $format->getpath($answer, array('#', $tag, 0 , '#' , 'text' , 0 , '#'), '0', false, 'error');
             }
 
-            $subqtexttext = $format->getpath($answer, array('#', 'subqtext', 0, '#', 'text', 0, '#'), '', true);
-            $subqtextformat = $format->trans_format($format->getpath($answer,
-                    array('#', 'subqtext', 0, '@', 'format'), $format->get_format($qo->questiontextformat)));
-            $subqtextfiles = array();
-            $files = $format->getpath($answer, array('#', 'subqtext', 0, '#', 'file'), array());
-            foreach ($files as $file) {
-                $data = new stdclass;
-                $data->content = $file['#'];
-                $data->name = $file['@']['name'];
-                $data->encoding = $file['@']['encoding'];
-                $subqtextfiles[] = $data;
-            }
-            $qo->subqtext[] = array('text'=>$subqtexttext, 'format'=>$subqtextformat, 'files'=>$subqtextfiles);
+            $subqxml = $format->getpath($answer, array('#', 'subqtext', 0), array());
+            $fromform->subqtext[$anscount] = $format->import_text_with_files($subqxml,
+                        array(), '', $format->get_format($fromform->questiontextformat));
 
-            $fbtext = $format->getpath($answer, array('#', 'feedback', 0, '#', 'text', 0, '#'), '', true);
-            $fbformat = $format->trans_format($format->getpath($answer, array('#', 'feedback', 0, '@', 'format'),
-                    $format->get_format($qo->questiontextformat)));
-            $fbfiles = array();
-            $files = $format->getpath($answer, array('#', 'feedback', 0, '#', 'file'), array());
-            foreach ($files as $file) {
-                $data = new stdclass;
-                $data->content = $file['#'];
-                $data->name = $file['@']['name'];
-                $data->encoding = $file['@']['encoding'];
-                $fbfiles[] = $data;
-            }
-            $qo->feedback[] = array('text'=>$fbtext, 'format'=>$fbformat, 'files'=>$fbfiles);
+            $feedbackxml = $format->getpath($answer, array('#', 'feedback', 0), array());
+            $fromform->feedback[$anscount] =  $format->import_text_with_files($feedbackxml,
+                        array(), '', $format->get_format($fromform->questiontextformat));
+
+            ++$anscount;
         }
-        $qo->defaultmark = array_sum($qo->answermark); // Make the defaultmark consistent if not specified.
+        $fromform->defaultmark = array_sum($fromform->answermark); // Make the defaultmark consistent if not specified.
 
-        return $qo;
+        return $fromform;
     }
 
 
@@ -476,9 +459,10 @@ class qtype_formulas extends question_type {
             $expout .= "<$extra>".$format->writetext($question->options->$extra)."</$extra>\n";
         }
 
-        $tags = $this->subquestion_answer_tags();
+        $tags = $this->part_tags();
         foreach ($question->options->answers as $answer) {
             $expout .= "<answers>\n";
+            $expout .= " <partindex>\n  ".$format->writetext($answer->partindex)." </partindex>\n";
             foreach ($tags as $tag) {
                 $expout .= " <$tag>\n  ".$format->writetext($answer->$tag)." </$tag>\n";
             }
@@ -548,7 +532,7 @@ class qtype_formulas extends question_type {
      * @return an object with a field 'answers' containing valid answers. Otherwise, the 'errors' field will be set
      */
     public function check_and_filter_answers($form) {
-        $tags = $this->subquestion_answer_tags();
+        $tags = $this->part_tags();
         $res = (object)array('answers' => array());
         foreach ($form->answermark as $i => $a) {
             if ((strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0)
@@ -657,7 +641,7 @@ class qtype_formulas extends question_type {
         foreach ($form as $key => $value) {
             $qo->$key = $value;
         }
-        $tags = $this->subquestion_answer_tags();
+        $tags = $this->part_tags();
 
         $qo->options = new stdClass();
         $extraquestionfields = $this->extra_question_fields();
@@ -683,7 +667,7 @@ class qtype_formulas extends question_type {
         $qo->parts = array();
         if (!empty($qo->options->answers)) {
             foreach ($qo->options->answers as $i => $ans) {
-                $ans->location = $i;
+                $ans->partindex = $i;
                 $ans->subqtextformat = $ans->subqtext['format'];
                 $ans->subqtext = $ans->subqtext['text'];
                 $ans->feedbackformat = $ans->feedback['format'];
@@ -720,7 +704,7 @@ class qtype_formulas extends question_type {
 
         // Attempt to compute answers to see if they are wrong or not.
         foreach ($validanswers as $idx => $ans) {
-            $ans->location = $idx;
+            $ans->partindex = $idx;
             $unitcheck = new answer_unit_conversion;
 
             try {
@@ -738,7 +722,7 @@ class qtype_formulas extends question_type {
 
             try {
                 $conversionrules = new unit_conversion_rules;
-                $entry = $conversionrules->entry($ans->ruleid);                
+                $entry = $conversionrules->entry($ans->ruleid);
                 if ($entry === null || $entry[1] === null) {
                     throw new Exception(get_string('error_ruleid', 'qtype_formulas'));
                 }
