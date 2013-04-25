@@ -568,8 +568,6 @@ class qtype_formulas extends question_type {
             $subqtext['format'] = $form->subqtext[$i]['format'];
             if (isset($form->subqtext[$i]['itemid'])) {
                 $subqtext['itemid'] = $form->subqtext[$i]['itemid'];
-            } else if (isset($form->subqtext[$i]['files'])) {
-                $subqtext['files'] = $form->subqtext[$i]['files'];
             }
             $res->answers[$i]->subqtext = $subqtext;
 
@@ -578,8 +576,6 @@ class qtype_formulas extends question_type {
             $fb['format'] = $form->feedback[$i]['format'];
             if (isset($form->feedback[$i]['itemid'])) {
                 $fb['itemid'] = $form->feedback[$i]['itemid'];
-            } else if (isset($form->feedback[$i]['files'])) {
-                $fb['files'] = $form->feedback[$i]['files'];
             }
             $res->answers[$i]->feedback = $fb;
         }
