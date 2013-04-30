@@ -114,6 +114,11 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             if (!isset($data->feedbackformat)) {
                 $data->feedbackformat = FORMAT_HTML;
             }
+            // All 2.0 backups are missing the part's index.
+            if (!isset($data->partindex)) {
+                $data->partindex = (int)$DB->get_field('qtype_formulas_answers',
+                        'MAX(partindex) +1', array('questionid'=>$newquestionid));
+            }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
