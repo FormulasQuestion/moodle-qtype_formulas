@@ -95,7 +95,7 @@ var formulasform = {
         // Show one subquestion at a time, instead of all subquestions in the page
         try { this.show_subq(this.get_value('show_subq')); } catch (e) {}
 
-        // Global options allow the change of the same options in all subquestions at once
+        // Global options allow the change of the same options in all parts at once
         try {
             this.init_global_options('unitpenalty');
             this.init_global_options('ruleid');
@@ -130,7 +130,7 @@ var formulasform = {
         } catch (e) {}
     },
 
-    /// return the number of subquestions in the form
+    /// return the number of parts in the form
     count_subq : function() {
         var i = 0;
         while (true) {
@@ -167,7 +167,7 @@ var formulasform = {
     get_langstrs : function() {
     },
 
-    /// By default, the value of global input field will apply to all its subquestions
+    /// By default, the value of global input field will apply to all its parts
     init_global_options : function(name) {
         var n_global = document.getElementsByName('global'+name)[0];
         var n = document.getElementsByName(name + '[0]')[0];    // pick the first value as global
@@ -176,7 +176,7 @@ var formulasform = {
         formulas_form_init_global_options_update(name);
     },
 
-    /// Allow the display of one subquestion at a time, it is very effective way to shorten the form and it also allows easy comparison between subquestions
+    /// Allow the display of one part at a time, it is very effective way to shorten the form and it also allows easy comparison between parts
     init_subq_collapse : function(loc, id, selected) {
         // create new navigation panel
         navigation = document.createElement('div');
@@ -200,7 +200,7 @@ var formulasform = {
         }
     },
 
-    /// Show the selected subquestion
+    /// Show the selected part
     show_subq : function(selected) {
         this.numsubq = this.count_subq();
         this.set_value('show_subq', selected);
@@ -211,7 +211,7 @@ var formulasform = {
         var loc = document.getElementById('mainq');
         this.init_subq_collapse(loc, 'subq_navigation', selected);
 
-        // update the display style of subquestion
+        // update the display style of part
         for (var i=0; i<this.numsubq; i++) {
             document.getElementById('answerhdr_'+i).style.display = (selected < -1 || selected == i ? 'block' : 'none');
         }
@@ -268,7 +268,7 @@ var formulasform = {
         data['varsglobal'] = document.getElementById('id_varsglobal').value;
         for (var i=0; i<this.numsubq; i++) {
             data['varslocals['+i+']'] = document.getElementById('id_vars1_'+i).value;
-            data['answers['+i+']'] = document.getElementById('id_answer_'+i).value;;
+            data['answers['+i+']'] = document.getElementById('id_answer_'+i).value;
         }
         data['start'] = 0;
         data['N'] = document.getElementById('numdataset').value;
@@ -317,7 +317,7 @@ var formulasform = {
     /// return the set of groupnames selected for display
     get_groupnames : function() {
         var groupnames = ['leading','random','global'];
-        for (var i=0; i<100; i++) {     // at most 100 subquestions
+        for (var i=0; i<100; i++) {     // at most 100 parts
             groupnames.push('local'+i);
             groupnames.push('answer'+i);
         }

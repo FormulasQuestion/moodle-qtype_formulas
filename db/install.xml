@@ -1,12 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<XMLDB PATH="question/type/formulas/db" VERSION="20110807" COMMENT="XMLDB file for Moodle question/type/formulas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="question/type/formulas/db" VERSION="20120714" COMMENT="XMLDB file for Moodle question/type/formulas"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
   <TABLES>
-    <TABLE NAME="qtype_formulas" COMMENT="Options for formulas question type" NEXT="qtype_formulas_answers">
+    <TABLE NAME="qtype_formulas_options" COMMENT="Options for formulas question type" NEXT="qtype_formulas_answers">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
         <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="varsrandom"/>
-        <FIELD NAME="varsrandom" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="varsglobal"/>
-        <FIELD NAME="varsglobal" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="varsrandom" NEXT="correctfeedback"/>
+        <FIELD NAME="varsrandom" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="varsglobal"/>
+        <FIELD NAME="varsglobal" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="varsrandom" NEXT="correctfeedback"/>
         <FIELD NAME="correctfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any correct response." PREVIOUS="varsglobal" NEXT="correctfeedbackformat"/>
         <FIELD NAME="correctfeedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="correctfeedback" NEXT="partiallycorrectfeedback"/>
         <FIELD NAME="partiallycorrectfeedback" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Feedback shown for any partially correct response." PREVIOUS="correctfeedbackformat" NEXT="partiallycorrectfeedbackformat"/>
@@ -20,25 +23,26 @@
         <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="qtype_formulas_answers" COMMENT="Answers for formulas question type" PREVIOUS="qtype_formulas">
+    <TABLE NAME="qtype_formulas_answers" COMMENT="Answers for formulas question type" PREVIOUS="qtype_formulas_options">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="questionid"/>
-        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="placeholder"/>
-        <FIELD NAME="placeholder" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" PREVIOUS="questionid" NEXT="answermark"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="partindex"/>
+        <FIELD NAME="partindex" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="index of part in question" PREVIOUS="questionid" NEXT="placeholder"/>
+        <FIELD NAME="placeholder" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" PREVIOUS="partindex" NEXT="answermark"/>
         <FIELD NAME="answermark" TYPE="float" NOTNULL="true" SEQUENCE="false" PREVIOUS="placeholder" NEXT="answertype"/>
         <FIELD NAME="answertype" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="answermark" NEXT="numbox"/>
         <FIELD NAME="numbox" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="answertype" NEXT="vars1"/>
-        <FIELD NAME="vars1" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="numbox" NEXT="answer"/>
-        <FIELD NAME="answer" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars1" NEXT="vars2"/>
-        <FIELD NAME="vars2" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="answer" NEXT="correctness"/>
-        <FIELD NAME="correctness" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars2" NEXT="unitpenalty"/>
+        <FIELD NAME="vars1" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="numbox" NEXT="answer"/>
+        <FIELD NAME="answer" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars1" NEXT="vars2"/>
+        <FIELD NAME="vars2" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="answer" NEXT="correctness"/>
+        <FIELD NAME="correctness" TYPE="text" NOTNULL="true" SEQUENCE="false" PREVIOUS="vars2" NEXT="unitpenalty"/>
         <FIELD NAME="unitpenalty" TYPE="float" NOTNULL="false" SEQUENCE="false" PREVIOUS="correctness" NEXT="postunit"/>
-        <FIELD NAME="postunit" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="unitpenalty" NEXT="ruleid"/>
+        <FIELD NAME="postunit" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="unitpenalty" NEXT="ruleid"/>
         <FIELD NAME="ruleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="postunit" NEXT="otherrule"/>
-        <FIELD NAME="otherrule" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="ruleid" NEXT="subqtext"/>
-        <FIELD NAME="subqtext" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="otherrule" NEXT="subqtextformat"/>
+        <FIELD NAME="otherrule" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="ruleid" NEXT="subqtext"/>
+        <FIELD NAME="subqtext" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="otherrule" NEXT="subqtextformat"/>
         <FIELD NAME="subqtextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subqtext" NEXT="feedback"/>
-        <FIELD NAME="feedback" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="subqtextformat" NEXT="feedbackformat"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="subqtextformat" NEXT="feedbackformat"/>
         <FIELD NAME="feedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="feedback"/>
       </FIELDS>
       <KEYS>

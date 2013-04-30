@@ -100,11 +100,6 @@ input.formulas_algebraic_formula {
     display : inline;
 }
 
-.formulas_local_feedback {
-    padding-top: 6px;
-}
-
-
 
 hr.formulas_seperator1 {
     margin-left: auto;
@@ -143,14 +138,20 @@ hr.formulas_seperator2 {
     cursor: pointer;
 }
 
-.que.formulas .formulation .formulaspartfeedback {
+.que.formulas .formulation .formulaspartfeedback,
+.que.formulas .formulation .formulaspartcorrectanswer,
+.que.formulas .formulation .formulaslocalfeedback {
+    padding-top: 6px;
+}
+
+.que.formulas .formulation .formulaspartoutcome {
     background: #fff3bf;
+    color: black;
     margin: 0.2em -0.2em 0.5em;
     padding: 0.2em;
 }
-
 .que.formulas .formulation .formulaspartfeedback .correct,
 .que.formulas .formulation .formulaspartfeedback .partiallycorrect,
-.que.stack .formulation .formulaspartfeedback .incorrect {
+.que.formulas .formulation .formulaspartfeedback .incorrect {
     background: transparent;
 }

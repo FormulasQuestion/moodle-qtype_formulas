@@ -55,8 +55,8 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
             'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect'));
 
-        $formulasanswers = new backup_nested_element('formulasanswers');
-        $formulasanswer = new backup_nested_element('formulasanswer', array('id'), array(
+        $formulasanswers = new backup_nested_element('formulas_answers');
+        $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(
             'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'vars2', 'correctness',
             'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat'));
 
@@ -69,8 +69,14 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
         $pluginwrapper->add_child($formulas);
 
         // Set source to populate the data.
-        $formulasanswer->set_source_table('qtype_formulas_answers', array('questionid' => backup::VAR_PARENTID));
-        $formulas->set_source_table('qtype_formulas', array('questionid' => backup::VAR_PARENTID));
+        $formulasanswer->set_source_sql('
+                SELECT *
+                FROM {qtype_formulas_answers}
+                WHERE questionid = :questionid
+                ORDER BY partindex',
+                array('questionid' => backup::VAR_PARENTID));
+
+        $formulas->set_source_table('qtype_formulas_options', array('questionid' => backup::VAR_PARENTID));
 
         // Don't need to annotate ids nor files.
 

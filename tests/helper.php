@@ -37,9 +37,9 @@ class qtype_formulas_test_helper extends question_test_helper {
 
     public function get_test_questions() {
         return array(
-            'test0', // Minimal formulas question : one subquestion, not randomised (answer = 5),
-            'test1', // 3 subquestions, not randomised. (answers = 5, 6, 7),
-            'test2'  // 5 subquestions, separated and combined unit field.
+            'test0', // Minimal formulas question : one part, not randomised (answer = 5),
+            'test1', // 3 parts, not randomised. (answers = 5, 6, 7),
+            'test2'  // 5 parts, separated and combined unit field.
         );
     }
 
@@ -90,7 +90,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->subqtextformat = 1;
         $p->feedback = '';
         $p->feedbackformat = 1;
-        $p->location = 0;
+        $p->partindex = 0;
 
         return $p;
     }
@@ -102,9 +102,11 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-0';
-        $q->questiontext = '<p>Minimal question : For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
+        $q->questiontext = '<p>Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
 
         $q->penalty = 0.3; // Non-zero and not the default.
+        $q->textfragments = array(0 => '<p>Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>',
+                1 => '');
         $q->numpart = 1;
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
@@ -124,8 +126,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-1';
-        $q->questiontext = '<p>Multiple subquestions : By default, all subquestions will be added at the end. If placeholder is used, the subquestion will be inserted at the location of placeholder.--{#1}--{#2}--{#3}</p>';
+        $q->questiontext = '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--{#1}--{#2}--{#3}</p>';
         $q->penalty = 0.3; // Non-zero and not the default.
+        $q->textfragments = array(0 => '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--',
+                1 => '--',
+                2 => '--',
+                3 => '</p>');
         $q->numpart = 3;
         $q->defaultmark = 6;
         $p0 = self::make_a_formulas_part();
@@ -133,23 +139,23 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->id = 14;
         $p0->answermark = 2;
         $p0->answer = '5';
-        $p0->subqtext = 'This is first subquestion.';
+        $p0->subqtext = 'This is first part.';
         $q->parts[0] = $p0;
         $p1 = self::make_a_formulas_part();
         $p1->placeholder = '#2';
         $p1->id = 15;
-        $p1->location = 1;
+        $p1->partindex = 1;
         $p1->answermark = 2;
         $p1->answer = '6';
-        $p1->subqtext = 'This is second subquestion.';
+        $p1->subqtext = 'This is second part.';
         $q->parts[1] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->placeholder = '#3';
         $p2->id = 16;
-        $p2->location = 2;
+        $p2->partindex = 2;
         $p2->answermark = 2;
         $p2->answer = '7';
-        $p2->subqtext = 'This is third subquestion.';
+        $p2->subqtext = 'This is third part.';
         $q->parts[2] = $p2;
 
         return $q;
@@ -165,12 +171,18 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->numpart = 4;
+        $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+                1 => '',
+                2 => '',
+                3 => '',
+                4 => '',
+                );
         $q->defaultmark = 8;
         $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $q->varsglobal = 's = v*dt;';
         $p0 = self::make_a_formulas_part();
         $p0->id = 14;
-        $p0->location = 0;
+        $p0->partindex = 0;
         $p0->answermark = 2;
         $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
@@ -178,7 +190,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[0] = $p0;
         $p1 = self::make_a_formulas_part();
         $p1->id = 15;
-        $p1->location = 1;
+        $p1->partindex = 1;
         $p1->answermark = 2;
         $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
@@ -186,7 +198,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[1] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 16;
-        $p2->location = 2;
+        $p2->partindex = 2;
         $p2->answermark = 2;
         $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
@@ -194,7 +206,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[2] = $p2;
         $p3 = self::make_a_formulas_part();
         $p3->id = 17;
-        $p3->location = 3;
+        $p3->partindex = 3;
         $p3->answermark = 2;
         $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';

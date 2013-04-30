@@ -43,7 +43,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
         // Add own qtype stuff.
         $elename = 'formulas_answer';
-        $elepath = $this->get_pathfor('/formulasanswers/formulasanswer'); // We used get_recommended_name() so this works.
+        $elepath = $this->get_pathfor('/formulas_answers/formulas_answer'); // We used get_recommended_name() so this works.
         $paths[] = new restore_path_element($elename, $elepath);
         $elename = 'formulas';
         $elepath = $this->get_pathfor('/formulas'); // We used get_recommended_name() so this works.
@@ -65,14 +65,30 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         $newquestionid   = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
-        // If the question has been created by restore, we need to create its qtype_formulas too.
+        // If the question has been created by restore, we need to create its qtype_formulas_options too.
         if ($questioncreated) {
+            // Some 2.0 backups are missing the combined feedback.
+            if (!isset($data->correctfeedback)) {
+                $data->correctfeedback = '';
+                $data->correctfeedbackformat = FORMAT_HTML;
+            }
+            if (!isset($data->partiallycorrectfeedback)) {
+                $data->partiallycorrectfeedback = '';
+                $data->partiallycorrectfeedbackformat = FORMAT_HTML;
+            }
+            if (!isset($data->incorrectfeedback)) {
+                $data->incorrectfeedback = '';
+                $data->incorrectfeedbackformat = FORMAT_HTML;
+            }
+            if (!isset($data->shownumcorrect)) {
+                $data->shownumcorrect = 0;
+            }
             // Adjust some columns.
             $data->questionid = $newquestionid;
             // Insert record.
-            $newitemid = $DB->insert_record('qtype_formulas', $data);
+            $newitemid = $DB->insert_record('qtype_formulas_options', $data);
             // Create mapping (needed for decoding links).
-            $this->set_mapping('qtype_formulas', $oldid, $newitemid);
+            $this->set_mapping('qtype_formulas_options', $oldid, $newitemid);
         }
     }
 
@@ -94,6 +110,10 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         if ($questioncreated) {
             // Adjust some columns.
             $data->questionid = $newquestionid;
+            // Some 2.0 backups are missing the feedbackformat.
+            if (!isset($data->feedbackformat)) {
+                $data->feedbackformat = FORMAT_HTML;
+            }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
@@ -106,7 +126,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
      */
     public static function define_decode_contents() {
         return array(
-            new restore_decode_content('qtype_formulas',
+            new restore_decode_content('qtype_formulas_options',
                     array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'),
                     'qtype_formulas'),
             new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback'),

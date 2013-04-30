@@ -14,17 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /* Each entry of $basic_unit_conversion_rules is a pair:
  *  - The first string is the name of the rule, which is used when editing the form
  *  - The second string is the actual rule that will be parsed and used as unit conversion
  *  - The array index is the unique id for the rule, which will be stored in the database
- * Note: the id 0 to 99 is reserved, please do not use to create you own rule
+ * Note: the id from 0 to 99 are reserved, please do not use to create you own rules
  */
-global $basic_unit_conversion_rules;
+class unit_conversion_rules {
+    private $basic_unit_conversion_rules = array();
 
-$basic_unit_conversion_rules = array();
-$basic_unit_conversion_rules[0] = array('None', '');
-$basic_unit_conversion_rules[1] = array('Common SI unit', '
+    // Initialize the internal conversion rule.
+    public function __construct() {
+        $this->basic_unit_conversion_rules[0] = array('None', '');
+        $this->basic_unit_conversion_rules[1] = array('Common SI unit', '
 m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;
@@ -44,6 +48,16 @@ F: m u n p f;
 T: k m u n p;
 H: k m u n p;
 ');
-// $basic_unit_conversion_rules[100] = array(
-//  $basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
-//  $basic_unit_conversion_rules[1][1] + '');
+        //  $this->basic_unit_conversion_rules[100] = array(
+        //  $this->basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
+        //  $this->basic_unit_conversion_rules[1][1] + '');
+    }
+
+    public function entry($n) {
+        return $this->basic_unit_conversion_rules[$n];
+    }
+
+    public function allrules() {
+        return $this->basic_unit_conversion_rules;
+    }
+}

@@ -85,13 +85,13 @@ class qtype_formulas_question_test extends basic_testcase {
     public function test_get_question_summary_test0() {
         $q = $this->get_test_formulas_question('test0');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals('Minimal question : For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.', $q->get_question_summary());
+        $this->assertEquals('Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.', $q->get_question_summary());
     }
 
     public function test_get_question_summary_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals('Multiple subquestions : By default, all subquestions will be added at the end. If placeholder is used, the subquestion will be inserted at the location of placeholder.--This is first subquestion.--This is second subquestion.--This is third subquestion.', $q->get_question_summary());
+        $this->assertEquals('Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--This is first part.--This is second part.--This is third part.', $q->get_question_summary());
     }
 
     public function test_get_question_summary_test2() {
@@ -268,4 +268,49 @@ class qtype_formulas_question_test extends basic_testcase {
         $finalgrade = $q->compute_final_grade($responses, 1);
         $this->assertEquals((2 + 2*(1 - 2*0.3))/6, $finalgrade);
     }
+
+    public function test_part_has_multichoice_coordinate0() {
+        $p = new qtype_formulas_part;
+        $p->subqtext = '{_0} - {_1:choices} - {_2}';
+        $this->assertTrue($p->part_has_multichoice_coordinate());
+    }
+
+    public function test_part_has_multichoice_coordinate1() {
+        $p = new qtype_formulas_part;
+        $p->subqtext = '{_0} - {_1} - {_2}';
+        $this->assertFalse($p->part_has_multichoice_coordinate());
+    }
+    
+    public function test_summarise_response_test0() {
+        $q = $this->get_test_formulas_question('test1');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
+        $summary0 = $q->parts[0]->part_summarise_response($response);
+        $this->assertEquals('5', $summary0);
+        $summary1 = $q->parts[1]->part_summarise_response($response);
+        $this->assertEquals('6', $summary1);
+        $summary2 = $q->parts[2]->part_summarise_response($response);
+        $this->assertEquals('7', $summary2);
+        $summary = $q->summarise_response($response);
+        $this->assertEquals('5, 6, 7', $summary);
+    }
+    
+    public function test_summarise_response_test1() {
+        $q = $this->get_test_formulas_question('test2');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = array('0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50");
+        $summary0 = $q->parts[0]->part_summarise_response($response);
+        $this->assertEquals('30m/s', $summary0);
+        $summary1 = $q->parts[1]->part_summarise_response($response);
+        $this->assertEquals('20, m/s', $summary1);
+        $summary2 = $q->parts[2]->part_summarise_response($response);
+        $this->assertEquals('40', $summary2);
+        $summary3 = $q->parts[3]->part_summarise_response($response);
+        $this->assertEquals('50', $summary3);
+        $summary = $q->summarise_response($response);
+        $this->assertEquals('30m/s, 20, m/s, 40, 50', $summary);
+    }
+
 }

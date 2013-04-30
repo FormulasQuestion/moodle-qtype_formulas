@@ -332,7 +332,7 @@ function formulas_format_check(imgloc) {
                 if (rloc+1 < text.length && text[rloc+1] == '-')  rloc += 1;
                 var r = fn.get_next_variable(fn, vstack, text, rloc+1);
                 if (r != null)  rloc = r.endloc-1;
-                if (r == null || (r != null && r.var.type == 'f')) {
+                if (r == null || (r != null && r.variable.type == 'f')) {
                     var rtmp = fn.get_expressions_in_bracket(text, rloc+1, '(', {'(': ')'});
                     if (rtmp == null || rtmp.openloc != rloc+1)  throw 'Expression expected';
                     rloc = rtmp.closeloc;
@@ -348,7 +348,7 @@ function formulas_format_check(imgloc) {
                     var ltmp = fn.get_expressions_in_bracket(reverse, text.length-1-loc+1, ')', {')': '('});
                     if (ltmp == null || ltmp.openloc != text.length-1-loc+1)  throw 'Expression expected';
                     var lfunc = fn.get_previous_variable(fn, vstack, text, text.length-1-ltmp.closeloc);
-                    lloc = (lfunc==null || lfunc.var.type!='f') ? text.length-1-ltmp.closeloc : lfunc.startloc;
+                    lloc = (lfunc==null || lfunc.variable.type!='f') ? text.length-1-ltmp.closeloc : lfunc.startloc;
                 }
 
                 // replace the exponent notation by the pow function
@@ -439,7 +439,7 @@ function formulas_format_check(imgloc) {
             if (m == null)  return null;
             var v = fn.vstack_get_variable(vstack, m[2]);
             if (v == null)  return null;
-            return {'startloc': (loc-m[1].length), 'var': v};
+            return {'startloc': (loc-m[1].length), 'variable': v};
         },
 
         /// get the variable immediately at and after the location $loc (inclusive)
@@ -448,7 +448,7 @@ function formulas_format_check(imgloc) {
             if (m == null)  return null;
             var v = fn.vstack_get_variable(vstack, m[2]);
             if (v == null)  return null;
-            return {'startloc': (loc+(m[1].length-m[2].length)), 'endloc': (loc+m[1].length), 'var': v};
+            return {'startloc': (loc+(m[1].length-m[2].length)), 'endloc': (loc+m[1].length), 'variable': v};
         },
 
         /// return an array of [base unit, exponent] if the input is a unit, otherwise null.
