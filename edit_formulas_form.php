@@ -157,6 +157,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['correctness']['default'] = $config->defaultcorrectness;
         $repeatedoptions['correctness']['helpbutton'] = array('correctness', 'qtype_formulas');
         $repeatedoptions['correctness']['type'] = PARAM_RAW;
+        $repeated[] = $mform->createElement('static', '', '<hr class="formulas_seperator1" />', '');
         // Part's unit penalty.
         $repeated[] = $mform->createElement('text', 'unitpenalty', get_string('unitpenalty', 'qtype_formulas'),
             array('size' => 3));
@@ -181,6 +182,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 3));
         $repeatedoptions['otherrule']['helpbutton'] = array('otherrule', 'qtype_formulas');
+        $repeated[] = $mform->createElement('static', '', '<hr class="formulas_seperator2" />', '<hr />');
         // Part's placeholder.
         $repeated[] = $mform->createElement('text', 'placeholder', get_string('placeholder', 'qtype_formulas'),
             array('size' => 20));
@@ -196,34 +198,6 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['feedback']['helpbutton'] = array('feedback', 'qtype_formulas');
         $answersoption = 'answers';
         return $repeated;
-    }
-
-        /**
-     * Add a set of form fields, obtained from get_per_answer_fields, to the form,
-     * one for each existing answer, with some blanks for some new ones.
-     * @param object $mform the form being built.
-     * @param $label the label to use for each option.
-     * @param $gradeoptions the possible grades for each answer.
-     * @param $minoptions the minimum number of answer blanks to display.
-     *      Default QUESTION_NUMANS_START.
-     * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
-     */
-    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
-            $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
-        $answersoption = '';
-        $repeatedoptions = array();
-        $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
-                $repeatedoptions, $answersoption);
-
-        if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
-        } else {
-            $repeatsatstart = $minoptions;
-        }
-
-        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
-                'noanswers', 'addanswers', $addoptions,
-                $this->get_more_choices_string(), true);
     }
 
     protected function get_more_choices_string() {

@@ -24,13 +24,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-$plugin->version   = 2012121800;
+$plugin->version   = 2012110300;
 
 $plugin->cron      = 0;
-$plugin->requires  = 2012061700;
+$plugin->requires  = 2012062500;
 $plugin->dependencies = array(
-    'qbehaviour_adaptivemultipart'     => 2012070200,
+    'qbehaviour_adaptivemultipart'     => 2012101200,
 );
-$plugin->release = 'Formulas question 6.0 for Moodle 2.4';
+$plugin->release = 'Formulas question 5.0 for Moodle 2.3+';
 $plugin->maturity  = MATURITY_STABLE;
 
