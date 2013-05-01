@@ -61,9 +61,12 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
             $answer['feedbackformat'] = FORMAT_HTML;
 
             // Migrate images in answers subqtext and feedback fields.
-            // Uncomment the 2 following lines once MDL-33424 is closed.
-            $answer['subqtext'] = $this->migrate_files(($answer['subqtext'], 'qtype_formulas', 'answersubqtext', $answer['id']);
-            $answer['feedback'] = $this->migrate_files($answer['feedback'], 'qtype_formulas', 'answerfeedback', $answer['id']);
+            $this->fileman->component = 'qtype_formulas';
+            $this->fileman->itemid    = $answer['id'];
+            $this->fileman->filearea  = 'answersubqtext';
+            $answer['subqtext'] = moodle1_converter::migrate_referenced_files($answer['subqtext'], $this->fileman);
+            $this->fileman->filearea  = 'answerfeedback';
+            $answer['feedback'] = moodle1_converter::migrate_referenced_files($answer['feedback'], $this->fileman);
 
             $this->xmlwriter->begin_tag('formulas_answer', array('id' => $answer['id']));
             foreach (array(
