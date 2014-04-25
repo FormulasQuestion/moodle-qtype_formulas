@@ -39,7 +39,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         return array(
             'test0', // Minimal formulas question : one part, not randomised (answer = 5),
             'test1', // 3 parts, not randomised. (answers = 5, 6, 7),
-            'test2'  // 5 parts, separated and combined unit field.
+            'test2', // 5 parts, separated and combined unit field,
+            'test3'  // one part, not randomized, answer = 0 (to test problem with 0 as answer.
         );
     }
 
@@ -216,4 +217,26 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $q;
     }
 
+    /**
+     * @return qtype_formulas_question the question with 0 as answer.
+     */
+    public static function make_formulas_question_test3() {
+        $q = self::make_a_formulas_question();
+
+        $q->name = 'test-3';
+        $q->questiontext = '<p>This question has 0.0 as answer to test problem when answer is equal to 0.</p>';
+
+        $q->penalty = 0.3; // Non-zero and not the default.
+        $q->textfragments = array(0 => '<p>This question has 0 as answer to test problem when answer is equal to 0.0.</p>',
+                1 => '');
+        $q->numpart = 1;
+        $q->defaultmark = 2;
+        $p = self::make_a_formulas_part();
+        $p->id = 17;
+        $p->answermark = 2;
+        $p->answer = '0';
+        $q->parts[0] = $p;
+
+        return $q;
+    }
 }

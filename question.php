@@ -286,10 +286,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $complete = true;
         foreach ($this->parts as $part) {
             if ($part->part_has_combined_unit_field()) {
-                $complete = $complete && array_key_exists($part->partindex . "_", $response) && $response[$part->partindex . "_"] != '';
+                $complete = $complete && array_key_exists($part->partindex . "_", $response) && $response[$part->partindex . "_"] !== '';
             } else {
                 foreach (range(0, $part->numbox - 1) as $j) {
-                    $complete = $complete && array_key_exists($part->partindex . "_$j", $response) && $response[$part->partindex . "_$j"] != '';
+                    $complete = $complete && array_key_exists($part->partindex . "_$j", $response) && $response[$part->partindex . "_$j"] !== '';
                 }
                 if ($part->part_has_separate_unit_field()) {
                     $complete = $complete && array_key_exists($part->partindex . "_" . $part->numbox, $response)
@@ -420,11 +420,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // TODO if student response is invalid decide what to do.
         foreach ($this->parts as $part) {
             foreach (range(0, $part->numbox) as $j) {
-                if (!empty($response[$part->partindex . "_$j"])) {
+                if (array_key_exists($part->partindex . "_$j", $response) &&
+                        ($response[$part->partindex . "_$j"] || $response[$part->partindex . "_$j"] === '0' || $response[$part->partindex . "_$j"] === 0)) {
                     return true;
                 }
             }
-            if (!empty($response[$part->partindex . '_'])) {
+            if (array_key_exists($part->partindex . '_', $response) &&
+                    ($response[$part->partindex . '_'] || $response[$part->partindex . '_'] === '0' || $response[$part->partindex . '_'] === 0)) {
                 return true;
             }
         }

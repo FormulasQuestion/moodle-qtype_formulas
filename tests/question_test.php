@@ -69,7 +69,7 @@ class qtype_formulas_question_test extends basic_testcase {
 
         $this->assertFalse($q->is_complete_response(array()));
         $this->assertTrue($q->is_complete_response(array('0_0' => '0')));
-        $this->assertFalse($q->is_complete_response(array('0_0' => 0)));
+        $this->assertTrue($q->is_complete_response(array('0_0' => 0)));
         $this->assertTrue($q->is_complete_response(array('0_0' => 'test')));
     }
 
@@ -313,4 +313,23 @@ class qtype_formulas_question_test extends basic_testcase {
         $this->assertEquals('30m/s, 20, m/s, 40, 50', $summary);
     }
 
+    public function test_is_complete_response_test3() {
+        $q = $this->get_test_formulas_question('test3');
+
+        $this->assertFalse($q->is_complete_response(array()));
+        $this->assertTrue($q->is_complete_response(array('0_0' => '0')));
+        $this->assertTrue($q->is_complete_response(array('0_0' => 0)));
+        $this->assertTrue($q->is_complete_response(array('0_0' => 'test')));
+    }
+    
+    public function test_is_gradable_response_test3() {
+        $q = $this->get_test_formulas_question('test3');
+
+        $this->assertFalse($q->is_gradable_response(array()));
+        $this->assertTrue($q->is_gradable_response(array('0_0' => '0')));
+        $this->assertTrue($q->is_gradable_response(array('0_0' => 0)));
+        $this->assertTrue($q->is_gradable_response(array('0_0' => '0.0')));
+        $this->assertTrue($q->is_gradable_response(array('0_0' => '5')));
+        $this->assertTrue($q->is_gradable_response(array('0_0' => 5)));
+    }
 }
