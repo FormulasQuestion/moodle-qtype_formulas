@@ -7,7 +7,63 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
+function fact($n) {
+    $n = (int) $n;
+    if ( $n < 2 )
+        return 1;
+    $return = 1;
+    for ( $i = $n; $i > 1; $i-- ) {
+        $return *= $i;
+    }
 
+    return $return;
+}
+
+function perm($n, $r) {
+    $n=(int)$n;
+    $r=(int)$r;
+    if ($r > $n)
+        return 0;
+    if (($n - $r) < $r)
+        return perm($n, ($n - $r));
+    $return = 1;
+    for ($i=0; $i<$r; $i++){
+         $return *= ($n - $i);
+    }
+    return $return;
+}
+
+function comb($n, $r) {
+    $n=(int)$n;
+    $r=(int)$r;
+    if ($r > $n)
+        return 0;
+    if (($n - $r) < $r)
+        return comb($n, ($n - $r));
+    $return = 1;
+    for ($i=0; $i<$r; $i++){
+         $return *= ($n - $i) / ($i + 1);
+    }
+    return $return;
+}
+
+function gcd($a,$b) {
+    if($a < 0)         $a=0-$a;
+    if($b < 0 )        $b=0-$b;
+    if($a == 0 || $b == 0)    return 1;
+    if($a == $b)              return a;
+
+    do{
+        $rest = (int) $a % $b;
+        $a=$b;
+        $b=$rest;
+    } while($rest >0);
+return $a;
+}
+
+function lcm($a, $b) {
+    return $a * $b / gcd($a, $b);
+}
 /**
  * Class contains methods to parse variables text and evaluate variables. Results are stored in the $vstack
  * The functions can be roughly classified into 5 categories:
@@ -26,8 +82,8 @@ class qtype_formulas_variables {
         $this->func_const = array_flip( array('pi')) ;
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil'
             , 'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan'
-            , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round') );
-        $this->func_binary = array_flip( array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max') );
+            , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact') );
+        $this->func_binary = array_flip( array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'comb', 'perm', 'gcd', 'lcm') );
         $this->func_special = array_flip( array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff') );
         $this->func_all = array_merge($this->func_const, $this->func_unary, $this->func_binary, $this->func_special);
         $this->binary_op_map = array_flip( array('+','-','*','/','%','>','<','==','!=','&&','||','&','|','<<','>>','^') );
@@ -35,7 +91,7 @@ class qtype_formulas_variables {
 
         /// Note that the implementation is exactly the same as the client so the behaviour should be the same
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-            'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor') );
+            'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact') );
         $this->constlist = array('pi'=> '3.14159265358979323846');
         $this->evalreplacelist = array('ln'=> 'log', 'log10'=> '(1./log(10.))*log'); // natural log and log with base 10, no log allowed to avoid ambiguity
     }
@@ -44,7 +100,6 @@ class qtype_formulas_variables {
     function __construct() {
         $this->initialize_function_list();
     }
-
 
 
 
@@ -1225,7 +1280,7 @@ class qtype_formulas_variables {
                 case 'exp': case 'expm1': case 'floor': case 'is_finite':
                 case 'is_infinite': case 'is_nan': case 'log10': case 'log1p':
                 case 'octdec': case 'rad2deg': case 'sin': case 'sinh': case 'sqrt':
-                case 'tan': case 'tanh':
+                case 'tan': case 'tanh': case 'fact':
                     if (strlen($regs[4])!=0 || strlen($regs[3])==0) {
                         return get_string('functiontakesonearg','qtype_formulas',$regs[2]);
                     }
@@ -1239,7 +1294,7 @@ class qtype_formulas_variables {
                     break;
 
                 // Functions that must have two arguments
-                case 'atan2': case 'fmod': case 'pow':
+                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr':
                     if (strlen($regs[5])!=0 || strlen($regs[4])==0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }

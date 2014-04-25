@@ -45,6 +45,6 @@ if ($ADMIN->fulltree) {
         get_string('defaultanswermark_desc', 'qtype_formulas'), 1));
     // Default unit penalty.
     $settings->add(new admin_setting_configtext('qtype_formulas/defaultunitpenalty',
-        get_string('defaultanswermark', 'qtype_formulas'),
+        get_string('defaultunitpenalty', 'qtype_formulas'),
         get_string('defaultunitpenalty_desc', 'qtype_formulas'), 1));
 }

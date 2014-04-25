@@ -36,7 +36,7 @@ function formulas_format_check(imgloc) {
 
     /// The list of allowable (single parameter) function and their evaluation replacement
     var funclist = {'sin': 1, 'cos': 1, 'tan': 1, 'asin': 1, 'acos': 1, 'atan': 1, 'exp': 1,
-        'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1};
+        'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact':1};
 
     /// the replacement list used when preform trial evaluation, note it is not the same as dispreplacelist
     var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log'}; // natural log and log with base 10, no log allowed to avoid ambiguity
