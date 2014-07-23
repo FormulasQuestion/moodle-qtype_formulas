@@ -122,6 +122,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
         $sub->fraction = $sub->anscorr * ($sub->unitcorr ? 1 : (1-$part->unitpenalty));
 
+        // If using adaptivemultipart behaviour, adjust feedback display options for this part.
+        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
+            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $options);
+        }
+
         // Get the class and image for the feedback.
         if ($options->correctness) {
             $sub->feedbackimage = $this->feedback_image($sub->fraction);
@@ -133,7 +138,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $sub->unitfeedbackclass = $this->feedback_class($sub->unitcorr);
                 $sub->boxfeedbackclass = $this->feedback_class($sub->anscorr);
             }
-        } else {  // There should be no feedback if options->correctness is not set.
+        } else {  // There should be no feedback if options->correctness is not set for this part.
             $sub->feedbackimage = '';
             $sub->feedbackclass = '';
             $sub->unitfeedbackclass = '';
@@ -147,6 +152,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
+
+        // If using adaptivemultipart behaviour, adjust feedback display options for this part.
+        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
+            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $options);
+        }
+
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
 

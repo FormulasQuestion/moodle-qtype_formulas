@@ -54,10 +54,14 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
         $this->assertEquals('adaptivemultipart',
                 $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
         $this->render();
         $this->check_output_contains_text_input('0_0');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'incorrect');
         $this->check_current_output(
                 $this->get_contains_marked_out_of_summary(),
                 $this->get_contains_submit_button_expectation(true),
@@ -70,8 +74,25 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_state(question_state::$complete);
         $this->check_current_mark(1);
         $this->render();
-        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('0_0', '5',true);
         $this->check_output_does_not_contain_stray_placeholders();
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_validation_error_expectation());
+
+        // Finish the attempt.
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_submit_button_expectation(false),
+                $this->get_contains_correct_expectation(),
+                $this->get_does_not_contain_validation_error_expectation());
+
     }
 
     public function test_test0_submit_wrong_submit_right() {
@@ -99,7 +120,6 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_output(
                 $this->get_contains_mark_summary(0),
                 $this->get_contains_submit_button_expectation(true),
-                $this->get_contains_incorrect_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
 
         // Submit a correct answer.
@@ -109,7 +129,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_state(question_state::$complete);
         $this->check_current_mark(0.7);
         $this->render();
-        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('0_0', '5', true);
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
@@ -139,7 +159,6 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_output(
                 $this->get_contains_mark_summary(0),
                 $this->get_contains_submit_button_expectation(true),
-                $this->get_contains_incorrect_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
 
         // Submit another incorrect answer.
@@ -151,7 +170,6 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_output(
                 $this->get_contains_mark_summary(0),
                 $this->get_contains_submit_button_expectation(true),
-                $this->get_contains_incorrect_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
 
         // Submit a correct answer.
@@ -161,7 +179,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_state(question_state::$complete);
         $this->check_current_mark(0.4);
         $this->render();
-        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('0_0', '5', true);
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
@@ -191,7 +209,6 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_output(
                 $this->get_contains_mark_summary(0),
                 $this->get_contains_submit_button_expectation(true),
-                $this->get_contains_incorrect_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
 
         // Submit again the same incorrect answer.
@@ -203,7 +220,6 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_output(
                 $this->get_contains_mark_summary(0),
                 $this->get_contains_submit_button_expectation(true),
-                $this->get_contains_incorrect_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
 
         // Submit a correct answer.
@@ -213,7 +229,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_state(question_state::$complete);
         $this->check_current_mark(0.7);
         $this->render();
-        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('0_0', '5', true);
         $this->check_output_does_not_contain_stray_placeholders();
     }
 }
