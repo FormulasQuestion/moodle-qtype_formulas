@@ -1,0 +1,2786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 410  -->
+  <question type="formulas">
+    <name>
+      <text>1.1: Minimal question</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Minimal question </b></i>: For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text <br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 411  -->
+  <question type="formulas">
+    <name>
+      <text>1.2: Generate random data</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Generate random data </b></i>: Random data can be defined in the random variables such as <i> a = {2,3,4,5}; </i> <br>
+Upon quiz generation, one deterministic value will be chosen. For example, <i>a</i> takes value {a} in this instantiation. <br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>a = {2,3,4,5};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 412  -->
+  <question type="formulas">
+    <name>
+      <text>1.3: Multiple subquestions</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Multiple subquestions </b></i>: By default, all subquestions will be added at the end. If placeholder is used, the subquestion will be inserted at the location of placeholder. <br>
+<br>
+--<br>
+{#1}<br>
+--<br>
+{#2}<br>
+--<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>6.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text>#1</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[This is first subquestion.<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text>#2</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[This is second subquestion.<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>2</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[This is third subquestion.<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 413  -->
+  <question type="formulas">
+    <name>
+      <text>1.4: Placeholder of answer and unit</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Placeholder of answer and unit  </b></i>: This question shows different display methods of the answer and unit box.
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>8.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>v = {20:100:10};
+dt = {2:6};</text>
+</varsrandom>
+<varsglobal><text>s = v*dt;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text>m/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br />{_0}{_u}<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text>m/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br /> {_0} {_u}<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>2</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br /> {_0} m/s<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>3</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br />speed = {_0} m/s<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 414  -->
+  <question type="formulas">
+    <name>
+      <text>2.1: Answer type - number</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b>Answer type - Number</b></i>: You can type in the standard scientific E notation such as: 3.14, 6.626e-34.<br>
+Note that the popup under the answer box will check for <u>wrong</u> format, and only show warning sign when the format is <u>wrong</u>.<br><br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>v = {20:100:10};
+dt = {2:6};</text>
+</varsrandom>
+<varsglobal><text>s = v*dt;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text>m/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 415  -->
+  <question type="formulas">
+    <name>
+      <text>2.2: Answer type - Numeric</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Answer type - Numeric</b></i>: You can type in numbers and arithmetic operation + - * / ^ and (  ) and constant pi such as: 5+1/2, 2^9, 3pi. <br>
+Note that the format check is different from the answer type of number.<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>v = {20:100:10};
+dt = {2:6};</text>
+</varsrandom>
+<varsglobal><text>s = v*dt;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>10</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text>m/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[If a car travel {s} m in {dt} s, what is the speed of the car?<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 416  -->
+  <question type="formulas">
+    <name>
+      <text>2.3: Answer type - Numerical formula</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[<i><b> Answer type - Numerical formula </b></i>: You can type in everything of numeric plus a set of single variable functions sin(), cos(), tan(), asin(), acos(), atan(),
+ exp(), log10(), ln(), sqrt(), abs(), ceil(), floor() such as: sin(pi/12), 10 ln(2)
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>v0 = {20,30,40};
+theta = {0.4:1:0.2};
+t0 = {2,3,4};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>100</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>v0*cos(theta)*t0</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text>m</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="moodle_auto_format">
+<text><![CDATA[Considering a 2D projectile motion with initial speed {v0}m/s and angle {theta}rad from the ground, what is the horizontal distance travelled by the particle in {t0} s? <br>]]></text>
+ </subqtext>
+ <feedback format="moodle_auto_format">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 417  -->
+  <question type="formulas">
+    <name>
+      <text>2.4: Answer type - Algebraic formula</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Answer type - Algebraic formula </i></b>: You can type in every numerical formula and any algebraic variables. <br>
+Note that the format check will not tell you which variables are correct, so if you want to hint student about the symbol, you should write them explicitly. <br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>k1 = {2,3,4,5};
+k2 = {2,3,4,5};
+k3 = {2,3,4,5};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>1000</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text># 1) Algebraic variables are just a set of numbers. Checking algebraic formula use simple evaluation method, so the numbers are the points that evaluation will take.
+# 2) Algebraic answer need a string as input, which must be a valid Algebraic formula.
+# 3) No relative error can be defined, so use absolute error instead.
+
+a = {-100:100:1};
+b = {-100:100:1};</text>
+ </vars1>
+ <answer>
+  <text><![CDATA[["k1/k3 a","k2 b"]]]></text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_err < 1e-10]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What are the roots of the {k3}x<sup>2</sup> - ({k1}a + {=k2*k3}b)x + {=k1*k2}ab? <br>
+x = {_0}, or <br>
+x = {_1}]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 418  -->
+  <question type="formulas">
+    <name>
+      <text>3.1: Grading - multiple correct answer</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Grading - multiple correct answer </b></i>: Any grading condition can be entered in the grading criteria.
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>42</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_0 == 42 || _0 == 49</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Give a number x that is a multiple of 7 and 40 < x < 50. <br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 419  -->
+  <question type="formulas">
+    <name>
+      <text>3.2: Grading - multiple criteria</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b>Grading - multiple criteria</b></i>: Two grading criteria are defined here, each of them worth half mark of the question.<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>k = {4:10:1};</text>
+</varsrandom>
+<varsglobal><text>d = 7;
+a = k*d-3;
+b = (k+2)*d-2;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>k*d</text>
+ </answer>
+ <vars2>
+  <text><![CDATA[# The grading variables contain the response from student, so multiple criterion can be defined here
+
+criterion1 = _0 % 7 == 0;
+criterion2 = a < _0 && _0 < b;]]></text>
+ </vars2>
+ <correctness>
+  <text>(criterion1 + criterion2)/2</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Give a number x that is a multiple of {d} and {a} &lt; x &lt; {b}.<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 420  -->
+  <question type="formulas">
+    <name>
+      <text>3.3: Grading - Mark for different accuracy</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b>Grading - Mark for different accuracies</b></i>: Different grade can be assigned for different accuracies. For the example below, one is smaller than 1% and the other is smaller than 5%.<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="moodle_auto_format">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="moodle_auto_format">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text><![CDATA[case1 = _err < 0.01;
+case2 = _err < 0.05;]]></text>
+ </vars2>
+ <correctness>
+  <text>max (case1, 0.5*case2)</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="moodle_auto_format">
+<text><![CDATA[The correct answer is 1. (Try to type 2 (wrong), 1.02 (partially correct) and 1.005 (correct) respectively).<br>]]></text>
+ </subqtext>
+ <feedback format="moodle_auto_format">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 421  -->
+  <question type="formulas">
+    <name>
+      <text>3.4: Grading - arbitrary relation</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b>Grading - arbitrary relation</b></i>: You can also define any grading criteria using any criteria.
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[1,2]</text>
+ </answer>
+ <vars2>
+  <text><![CDATA[# Note that the list of student response _r can be used, which is equivalent to _0 = _r[0] and _1 = _r[1]
+
+criterion1 = _r[0] < _r[1];
+criterion2 = _r[0] > 0;]]></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[criterion1 && criterion2]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Write a point that satisfy the condition x < y and x > 0. <br>
+x = {_0}<br>
+y = {_1}<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 422  -->
+  <question type="formulas">
+    <name>
+      <text>3.5: Grading - multiple answer for algebraic formula</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b>Grading - multiple answer for algebraic formula</b></i>: For the comparison of algebraic formula, a usable function is diff(), which is used internal to compare the response and model answer for all answer type.
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>1000</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text><![CDATA[x = {1:100};
+answer = ["x","x^2","x^3"];]]></text>
+ </vars1>
+ <answer>
+  <text>answer[0]</text>
+ </answer>
+ <vars2>
+  <text><![CDATA[d = diff(answer, fill(3,_0));      # compute the difference for each possible answers
+correct = sum(map("<",d,1e-10));   # the map will compute d[i] < 1e-10 elementwise, and true is 1
+
+# The following is the equivalent for loop version
+#correct = 0;
+#for (i:[0:3])  correct = correct || (diff([answer[i]],[_0])[0] < 1e-10);]]></text>
+ </vars2>
+ <correctness>
+  <text>correct</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Write down one root of f(x). (Suppose the correct answers are "{=answer[0]}", "{=answer[1]}" and "{=answer[2]}")<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 423  -->
+  <question type="formulas">
+    <name>
+      <text>4.1: Unit - basic conversion rule</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Unit - basic conversion rule</span>: If you use the build in conversion &quot;Common SI Unit&quot;, you can use the SI units with different prefix, for some of them. You may try other units with different prefix here:<br /><br />]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>6.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>5000</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>ms</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the time spent? (Answer: 5000 ms, try using s)<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>200</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>mm/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the speed? (Answer: 200 mm/s, try using cm/s)<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>2</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>10000</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>cm^2</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the area? (Answer: 10000 cm^2, try using m^2)<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 424  -->
+  <question type="formulas">
+    <name>
+      <text>4.2: Unit - composite unit</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Unit - composite unit</span>: Suppose the force is N is defined to be equivalent to kg m/s^2 in the following question.<br />
+Note: No basic conversion rule used here.<br />
+<br />]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>1</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>N = kg m/s^2</text>
+ </postunit>
+ <ruleid>
+  <text>0</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the force? (The force is 1 N. You can type &quot;1 N&quot; or &quot;1 kg m/s^2&quot; in the answer box.) <br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 425  -->
+  <question type="formulas">
+    <name>
+      <text>4.3: Unit - other conversion rule</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Unit - other conversion rule</span>: You can enter you conversion rule for base unit.<br />Note: it uses no basic conversion rule here, so all rules are defined manually<br />
+<br />]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>10</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>inch</text>
+ </postunit>
+ <ruleid>
+  <text>0</text>
+ </ruleid>
+ <otherrule>
+  <text>1 m = 100 cm = 1000 mm;
+1 cm = 0.3937 inch;</text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the length of the rod? (Answer: 25.4 cm. Try using inch)<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 426  -->
+  <question type="formulas">
+    <name>
+      <text>5.1: Possible question type - fraction</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold;"></span><span style="font-style: italic; font-weight: bold;">Possible question type - fraction</span>
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>4.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>a = {1,2};
+denominator = {2,3,4};</text>
+</varsrandom>
+<varsglobal><text>numerator = 5*denominator+1;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text>result_n = numerator + a*denominator;</text>
+ </vars1>
+ <answer>
+  <text>[result_n, denominator]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[(Here only the simplest form is correct)
+ <table border="0" width="10px"><tbody>  <tr>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{a} <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;"> + <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{numerator}<br /><hr style="width: 100%; height: 2px;" />{denominator}
+     </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;"> = <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{_0}<br /><hr style="width: 100%; height: 2px;" />{_1}<br />    </td>  </tr></tbody></table><br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text>result_n = numerator + a*denominator;</text>
+ </vars1>
+ <answer>
+  <text>[result_n, denominator]</text>
+ </answer>
+ <vars2>
+  <text>is_simplest_form = (_err == 0);
+ is_other_form = (denominator*_0 == result_n*_1);</text>
+ </vars2>
+ <correctness>
+  <text>max(is_simplest_form, 0.5*is_other_form)</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[(Here other non-simplest fraction is also allow, but with half mark)
+ <table border="0" width="10px"><tbody>  <tr>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{a} <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;"> + <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{numerator}<br /><hr style="width: 100%; height: 2px;" />{denominator}
+     </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;"> = <br />    </td>    <td width="NaNpx" style="vertical-align: middle; text-align: center;">{_0}<br /><hr style="width: 100%; height: 2px;" />{_1}<br />    </td>  </tr></tbody></table><br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 427  -->
+  <question type="formulas">
+    <name>
+      <text>5.2: Possible question type - vector</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-style: italic; font-weight: bold;">Possible question type - vector</span>
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>x1 = {1:5};
+y1 = {1:5};
+x2 = {5:9};
+y2 = {5:9};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[x1+x2, y1+y2]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What is the result of the following vector addition?<br /> ({x1},{y1}) + ({x2},{y2}) = ({_0}, {_1})<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 428  -->
+  <question type="formulas">
+    <name>
+      <text>5.3: Possible question type - matrix</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-style: italic; font-weight: bold;">Possible question type - matrix</span>: Note that variable substitution occurs before Mathjax filter<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>a12 = {-4:0};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>4</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[-a12,1,-4,3]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Compute the following matrix multiplication.<br>
+
+<table border="0" width="10px"><tbody>  <tr>    <td valign="top" width="NaNpx">\(\left(\begin{array}{cc}<br>1 &amp; {a12}\\<br>3 &amp; 4\end{array}\right)\left(\begin{array}{cc}<br>0 &amp; 1\\<br>-1 &amp; 0\end{array}\right)=\left(\begin{array}{c}<br>\\\\\end{array}\right.\)
+     </td>    <td valign="top" width="NaNpx">      <table border="0" width="10px"><tbody>        <tr>          <td>{_0}<br>          </td>          <td>{_1}<br>          </td>        </tr>        <tr>          <td>{_2}<br>          </td>          <td>{_3}<br>          </td>        </tr></tbody>      </table>    </td>    <td valign="top" width="NaNpx">\(\left.\begin{array}{c}\\\\\end{array}\right)\)
+     </td>  </tr></tbody></table>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 429  -->
+  <question type="formulas">
+    <name>
+      <text>5.4: Possible question type - polynomial</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Possible question type - polynomial</span>
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>a = {3:5};
+b = {1:3};
+c = {1:3};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>4</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[1, -(a+b+c), (a*b+b*c+c*a), -a*b*c]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Expand the following polynomial:<br />(x-{a})(x-{b})(x-{c}) = {_0}x<sup>3</sup> + {_1}x<sup>2</sup> + {_2}x + {_3}<br />]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 430  -->
+  <question type="formulas">
+    <name>
+      <text>5.5: Possible question type - quadratic equation</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Possible question type - quadratic equation</span><br />
+<br />]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text><![CDATA[x1 = {-6,-5,-4};
+x2 = {-1,-2,-3};
+symbol = {"t","w","x","z"};]]></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text>b = -(x1 + x2);
+ c = x1*x2;</text>
+ </vars1>
+ <answer>
+  <text>[x1,x2]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[What are the roots of quadratic equation f({symbol}) = {symbol}<sup>2</sup> + {b} {symbol} + {c} ? (smaller first)<br />{symbol} = {_0} or {symbol} = {_1}]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 431  -->
+  <question type="formulas">
+    <name>
+      <text>5.6: Possible question type - simple differentiation</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<i><b> Possible question type - simple differentiation </i></b>: With variations in the number
+<br>
+<br>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>2.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>a = {1:100};
+b = {3:10};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text></text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>1000</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text><![CDATA[# Note that the base and expo are precomputed here for a nice presented answer, otherwise, you can directly type the "a b x^(b-1)" in the answer box
+
+x = {1:100};
+base = a*b;
+expo = b-1;]]></text>
+ </vars1>
+ <answer>
+  <text><![CDATA["base x^expo"]]></text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_err < 1e-10]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>1</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text><![CDATA[Differentiate {a}x<sup>{b}</sup>:<br>]]></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 432  -->
+  <question type="formulas">
+    <name>
+      <text>6.1: Other 1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Other 1</span>: In adaptive mode, for this question, you can try any number of times, but the maximum mark for each trial has 20% deduction
+<br>
+<br>
+ 
+<div> Given line y = {m} x + {c}. What is the y(x) at x = {xr}?
+{#1}
+</div> <div> Can you specify a coordinate point that satisfy the condition y &lt; {m} x + {c}?
+{#2}
+</div> <div> Can you specify a coordinate point that satisfy both condition y &lt; {m} x + {c} and located inside the first quadrant?
+{#3}
+</div>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>6.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>data = { [-2,2], [-3,3], [-4,4], [-5,5], [-2,1], [-4,2], [-6,3], [-8,4] };
+xr = {2:5:0.1};</text>
+</varsrandom>
+<varsglobal><text>m = data[0];
+c = data[1];</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text>#1</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>m*xr + c</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text>#2</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[0,0]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_1 < m*_0 + c]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>2</text>
+ </partindex>
+ <placeholder>
+  <text>#3</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[0,0]</text>
+ </answer>
+ <vars2>
+  <text><![CDATA[corr1 = _1 < m*_0 + c;
+corr2 = (_0 > 0) && (_1>0);]]></text>
+ </vars2>
+ <correctness>
+  <text>0.5 * ( corr1 + corr2 )</text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text></text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 433  -->
+  <question type="formulas">
+    <name>
+      <text>6.2: Other 2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Other 2</span>: In adaptive mode, for this question, five trials are allowed with the maximum mark sequence 100%, 50%, 20%, 0%, 0%
+<br>
+
+<br /> Given a metal rod with a square base with each side {x} mm and height {z} m.
+ 
+<ol> <li> What is the volume of the rod?
+{#1}
+</li> <li> This metal is known to have density {rho} g/cm^3. What is the mass of the rod?
+{#2}
+</li> </ol>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>4.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>x = {4:9:1};
+z = {1.1:1.9:0.1};
+rho = {6:9:0.5};</text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text>#1</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>pow(x/1000.,2) * z</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>m^3</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text>#2</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text>V = pow(x/1000.,2) * z;</text>
+ </vars1>
+ <answer>
+  <text>1000000 * rho * V</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>g</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 434  -->
+  <question type="formulas">
+    <name>
+      <text>6.3: Other 3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Other 3</span>: Even in the adaptive mode, you can only try it once. 
+<br />
+<br />
+Suppose the initial position of a car is ({x0},{y0}) m and it travels to ({x1},{y1}) m after t = {tr} s with constant velocity.
+ 
+<ol> <li> What is the average velocity of this car?
+{#1}
+</li> <li> What is the position of the car if it travels with the same velocity for another {ta} s?
+{#2}
+</li> </ol>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>4.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>x0 = {1,2,3};
+y0 = {1,2,3};
+vx = {2,3,4};
+vy = {-2,-3,-4};
+tr = {7,8,9,11,12};
+ta = {11:19:1.0};</text>
+</varsrandom>
+<varsglobal><text>x1 = x0 + vx*tr;
+y1 = y0 + vy*tr;</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text>#1</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>[vx,vy]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>m/s</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text>#2</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>2</text>
+ </numbox>
+ <vars1>
+  <text>x2 = x1 + vx*ta;
+y2 = y1 + vy*ta;</text>
+ </vars1>
+ <answer>
+  <text>[x2,y2]</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>m</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+<!-- question: 435  -->
+  <question type="formulas">
+    <name>
+      <text>6.4: Other 4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<span style="font-weight: bold; font-style: italic;">Other 4</span>: In adaptive mode, for this question, you can try any number of times, without any mark deduction.
+<br />
+<br />
+Given three items with mass {x} g, {y} g, {z} g.
+ 
+<ol> <li> What is the mode of the items mass?
+{#1}
+</li> <li> What is the average mass of the items?
+{#2}
+</li> <li> What is the sample standard deviation of the items mass?
+{#3}
+</li> </ol>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>6.0000000</defaultgrade>
+    <penalty>0.1000000</penalty>
+    <hidden>0</hidden>
+    <correctfeedback format="html">
+      <text></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text></text>
+    </incorrectfeedback>
+<varsrandom><text>data = { [10,13,15] , [13,16,18] , [14,17,19] };
+scale = {1:5:1};</text>
+</varsrandom>
+<varsglobal><text>x = scale * data[0];
+y = scale * data[1];
+z = scale * data[2];</text>
+</varsglobal>
+<answers>
+ <partindex>
+  <text>0</text>
+ </partindex>
+ <placeholder>
+  <text>#1</text>
+ </placeholder>
+ <answermark>
+  <text>1</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>y</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text>_err == 0</text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>g</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>1</text>
+ </partindex>
+ <placeholder>
+  <text>#2</text>
+ </placeholder>
+ <answermark>
+  <text>2</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text></text>
+ </vars1>
+ <answer>
+  <text>(x + y + z) / 3.</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>g</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+<answers>
+ <partindex>
+  <text>2</text>
+ </partindex>
+ <placeholder>
+  <text>#3</text>
+ </placeholder>
+ <answermark>
+  <text>3</text>
+ </answermark>
+ <answertype>
+  <text>0</text>
+ </answertype>
+ <numbox>
+  <text>1</text>
+ </numbox>
+ <vars1>
+  <text>m = (x + y + z)/3.;
+diffsqr = pow(x-m,2) + pow(y-m,2) + pow(z-m,2);</text>
+ </vars1>
+ <answer>
+  <text>sqrt( diffsqr/2. )</text>
+ </answer>
+ <vars2>
+  <text></text>
+ </vars2>
+ <correctness>
+  <text><![CDATA[_relerr < 0.01]]></text>
+ </correctness>
+ <unitpenalty>
+  <text>0.2</text>
+ </unitpenalty>
+ <postunit>
+  <text>g</text>
+ </postunit>
+ <ruleid>
+  <text>1</text>
+ </ruleid>
+ <otherrule>
+  <text></text>
+ </otherrule>
+ <subqtext format="html">
+<text></text>
+ </subqtext>
+ <feedback format="html">
+<text></text>
+ </feedback>
+</answers>
+  </question>
+
+</quiz>
