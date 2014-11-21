@@ -279,7 +279,7 @@ var formulasform = {
             p[p.length] = encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
         params = p.join('&').replace(/ /g,'+');
 
-        var url = formulasbaseurl+'/instantiate.php';
+        var url = M.cfg.wwwroot + '/question/type/formulas/instantiate.php';
         var results = {};
         var http_request = new XMLHttpRequest();
         http_request.open( "POST", url, true );

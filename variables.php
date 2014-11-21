@@ -1311,7 +1311,7 @@ class qtype_formulas_variables {
                     return get_string('unsupportedformulafunction','qtype_formulas',$regs[2]);
             }
 
-            // Exchange the function call with '1' and then chack for
+            // Exchange the function call with '1' and then check for
             // another function call...
             if ($regs[1]) {
                 // The function call is proceeded by an operator

@@ -7,7 +7,7 @@
  */
 
 /// This function will be called to initialize the format check for input boxes, after the page is fully loaded
-function formulas_format_check(imgloc) {
+function formulas_format_check() {
     var use_format_check = true;    /// if it is set to false, no format check will be used and initialized
     var show_hinting_type = null;   /// show the type hinting under the input box, such as 'Number', 'Unit'. null means use the individual setting in variable types below
     var show_interpretation = null;   /// show the interpretation of the formula under the input box. null means use the individual setting in variable types below
@@ -554,7 +554,7 @@ function formulas_format_check(imgloc) {
     };
 
     /// Initialization: Append the display blocks around the input and the data in the input node
-    function init(common, types, imgloc) {
+    function init(common, types) {
         var others = [];
         var count = 0;
         var inputs = document.getElementsByTagName('input');
@@ -580,7 +580,7 @@ function formulas_format_check(imgloc) {
             input.title = '';       // remove the title
 
             var warning_inner = document.createElement('img');
-            warning_inner.src = imgloc;
+            warning_inner.src = M.util.image_url('warning', 'qtype_formulas');
             //var after_inner = document.createElement('div');
             //after_inner.innerHTML = '\u26A0';
             warning_inner.className = 'formulas_input_warning';
@@ -879,7 +879,7 @@ function formulas_format_check(imgloc) {
         var warning = document.createElement('span');
         warning.innerHTML = '<div style="position:fixed; bottom:20px; right:5px;">'
             +(unittest_fail_show_details ? common.testresult.failcases.join('<br>') : '')
-            +'<img src="'+imgloc+'" title="Format check initialization fail ('+(common.testresult.numcase-common.testresult.numcorrect) +'/'+ common.testresult.numcase+')"></img>'
+            +'<img src="'+M.util.image_url('warning', 'qtype_formulas')+'" title="Format check initialization fail ('+(common.testresult.numcase-common.testresult.numcorrect) +'/'+ common.testresult.numcase+')"></img>'
             +'</div>';
         document.body.insertBefore(warning, null);
     }
@@ -898,7 +898,7 @@ function formulas_format_check(imgloc) {
     if (!common.pass && unittest_fail_show_icon)  signal_fail(common);
 
     // get the set of
-    common.others = init(common, types, imgloc);
+    common.others = init(common, types);
 
     // set the state to ready, now we can use the functions
     common.ready = true;
@@ -917,4 +917,4 @@ window.onload = (function(oldfunc, newfunc) {
         return function() { oldfunc(); newfunc(); }
     else
         return newfunc;
-})(window.onload, function() { formulas_format_check(formulasbaseurl+'/pix/warning.png'); });
+})(window.onload, function() { formulas_format_check(); });

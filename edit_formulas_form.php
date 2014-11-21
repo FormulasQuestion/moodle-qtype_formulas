@@ -92,15 +92,10 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->setDefault('globalruleid', 1);
          $mform->addHelpButton('globalruleid', 'ruleid', 'qtype_formulas');
 
-        // Embed the current plugin url, which will be used by the javascript.
-        global $CFG;
-        $fbaseurl = '<script type="text/javascript">var formulasbaseurl='
-                .json_encode($CFG->wwwroot . '/question/type/formulas').';</script>';   // Temporary hack.
-
         // Allow instantiate random variables and display the data for instantiated variables.
         $mform->addElement('header', 'checkvarshdr', get_string('checkvarshdr', 'qtype_formulas'));
         $mform->addElement('static', 'numdataset', get_string('numdataset', 'qtype_formulas'),
-            '<div id="numdataset_option"></div>'.$fbaseurl);
+            '<div id="numdataset_option"></div>');
         $mform->addElement('static', 'qtextpreview', get_string('qtextpreview', 'qtype_formulas'),
             '<div id="qtextpreview_controls"></div>'
             .'<div id="qtextpreview_display"></div>');
