@@ -6,45 +6,45 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
-/// This function will be called to initialize the format check for input boxes, after the page is fully loaded
+// This function will be called to initialize the format check for input boxes, after the page is fully loaded.
 function formulas_format_check() {
-    var use_format_check = true;    /// if it is set to false, no format check will be used and initialized
-    var show_hinting_type = null;   /// show the type hinting under the input box, such as 'Number', 'Unit'. null means use the individual setting in variable types below
-    var show_interpretation = null;   /// show the interpretation of the formula under the input box. null means use the individual setting in variable types below
-    var show_warning = null;   /// show the warning sign if the input is wrong/not interpretable. null means use the individual setting in variable types below
-    var unittest_fail_show_icon = true; /// Show an icon at the low right corner if the format check testing fail
-    var unittest_fail_show_details = false;  /// Show the detail test case that it fails.
+    var use_format_check = true;    // If it is set to false, no format check will be used and initialized.
+    var show_hinting_type = null;   // Show the type hinting under the input box, such as 'Number', 'Unit'. null means use the individual setting in variable types below.
+    var show_interpretation = null;   // Show the interpretation of the formula under the input box. null means use the individual setting in variable types below.
+    var show_warning = null;   // Show the warning sign if the input is wrong/not interpretable. null means use the individual setting in variable types below.
+    var unittest_fail_show_icon = true; // Show an icon at the low right corner if the format check testing fails
+    var unittest_fail_show_details = false;  // Show the detail test case that it fails.
 
-    /// The following variable can fine control the information for each type in addition to the variable defined above
-    /// So, if the type name is commented out here, the corresponding format checking will be disabled
-    /// For each type record, it contains the input type name (say 'unit')
-    /// and whether to show the type name (true/false), interpretation (true/false) and warning sign (true/false) respectively
+    // The following variable can fine control the information for each type in addition to the variable defined above
+    // So, if the type name is commented out here, the corresponding format checking will be disabled
+    // For each type record, it contains the input type name (say 'unit')
+    // and whether to show the type name (true/false), interpretation (true/false) and warning sign (true/false) respectively
     var types = [
-        ['unit', true, true, true],                 // for the unit input box
-        ['number', true, true, true],               // for the number input box
-        ['number_unit', true, true, true],          // input box with number and unit together
-        ['numeric', true, true, true],              // allow the combination of numbers and operators + - * / ^ ( )
-        ['numeric_unit', true, true, true],         // input box with numeric and unit together
-        ['numerical_formula', true, true, true],    // allow the combination of numbers, operators and functions
-        ['numerical_formula_unit', true, true, true],   // input box with numerical formula and unit together
-        ['algebraic_formula', true, true, true],    // allow the combination of numbers, operators, functions and variables
-        ['editing_unit', false, true, true]         // used for the unit in editing interface
+        ['unit', true, true, true],                 // For the unit input box.
+        ['number', true, true, true],               // For the number input box.
+        ['number_unit', true, true, true],          // Input box with number and unit together.
+        ['numeric', true, true, true],              // Allow the combination of numbers and operators + - * / ^ ( ).
+        ['numeric_unit', true, true, true],         // Input box with numeric and unit together.
+        ['numerical_formula', true, true, true],    // Allow the combination of numbers, operators and functions.
+        ['numerical_formula_unit', true, true, true],   // Input box with numerical formula and unit together.
+        ['algebraic_formula', true, true, true],    // Allow the combination of numbers, operators, functions and variables.
+        ['editing_unit', false, true, true]         // Used for the unit in editing interface.
     ];
 
-    /// The list of constant that will be replaced by the corresponding number
+    // The list of constant that will be replaced by the corresponding number.
     var constlist = {'pi': '3.14159265358979323846'};
 
-    /// The list of allowable (single parameter) function and their evaluation replacement
+    // The list of allowable (single parameter) function and their evaluation replacement.
     var funclist = {'sin': 1, 'cos': 1, 'tan': 1, 'asin': 1, 'acos': 1, 'atan': 1, 'exp': 1,
         'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact':1};
 
-    /// the replacement list used when preform trial evaluation, note it is not the same as dispreplacelist
-    var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log'}; // natural log and log with base 10, no log allowed to avoid ambiguity
+    // The replacement list used when preform trial evaluation, note it is not the same as dispreplacelist
+    var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log'}; // Natural log and log with base 10, no log allowed to avoid ambiguity.
 
-    /// the replacement list used when the formula is displayed on the screen
+    // The replacement list used when the formula is displayed on the screen.
     var dispreplacelist = {'log10': 'log<sub>10</sub>', '3.14159265358979323846': '<i>π</i>'};
 
-    /// Preform the action specified by the above global variables
+    // Perform the action specified by the above global variables.
     if (!use_format_check)  return;
     for (var i=0; i<types.length; i++) {
         if (show_hinting_type != null)  types[i][1] = show_hinting_type;
@@ -52,25 +52,25 @@ function formulas_format_check() {
         if (show_warning != null) types[i][3] = show_warning;
     }
 
-    /// Define the set of function that will be used to check the input and display the warning sign
+    // Define the set of function that will be used to check the input and display the warning sign.
     var fn = {
-        /// When blur, hide the information box attached to the input field
+        // When blur, hide the information box attached to the input field
         stop : function(common, self) {
             if (!common.ready || !common.pass)  return;
             self.info.style.display = 'none';
             common.fn.update(common, self);
         },
 
-        /// Start to show the dynamic checking information when the input field is focused
+        // Start to show the dynamic checking information when the input field is focused.
         monitor : function(common, self) {
             if (!common.ready || !common.pass)  return;
             self.info.style.display = self.show_info ? 'block' : 'none';
             common.fn.update(common, self);
         },
 
-        /// Check the input value and display the updated information
+        // Check the input value and display the updated information.
         update : function(common, self) {
-            // restrict the length of input to 128 characters, extra characters will be stripped away
+            // Restrict the length of input to 128 characters, extra characters will be stripped away.
             if (self.input.value.length > 128)  self.input.value = self.input.value.substr(0,128);
             if (!common.ready || !common.pass)  return;
             self.cur_value = common.fn.trim(self.input.value);
@@ -78,19 +78,19 @@ function formulas_format_check() {
             self.last_value = self.cur_value;
             self.answered = self.input.value == '' ? false : true;
 
-            // call the corresponding function for this particular input box if the value is not empty
+            // Call the corresponding function for this particular input box if the value is not empty.
             var info = self.answered ? common.fn[self.func](common.fn, self.cur_value) : '';
             self.correct = (info != null);  // the function returns a string if correct, otherwise null
             info = (info != null) ? common.fn.trim(info) : '';
 
-            // update the information shown on the screen
+            // Update the information shown on the screen.
             self.warning.style.display = (self.show_sign && self.answered && !self.correct) ? 'block' : 'none';
             if (self.correct) {
                 self.interpretation.innerHTML = info;
                 self.interpretation.style.display = (self.show_interpretation && self.cur_value != info) ? 'block' : 'none';
                 self.interpretation.className = 'formulas_input_info_interpretation';
             }
-            else  // dim the text color and keep the background text unchanged, until the next correct
+            else  // Dim the text color and keep the background text unchanged, until the next correct.
                 self.interpretation.className = 'formulas_input_info_interpretation_incorrect';
         },
 
@@ -106,7 +106,7 @@ function formulas_format_check() {
         check_number : function(fn, value) {
             var v = fn.get_formula_information(fn, value);
             if (v == null)  return null;
-            if (/^[-+]?@0$/.test(v.sub) == false)  return null;  // it must be a positive number, with an optional '-' sign
+            if (/^[-+]?@0$/.test(v.sub) == false)  return null;  // It must be a positive number, with an optional '-' sign.
             if (!((v.lengths['n'] == 1) && (v.lengths['f'] == 0) && (v.lengths['v'] == 0)))  return null;
             return fn.format_number(value);
         },
@@ -125,7 +125,7 @@ function formulas_format_check() {
             if (/^[ )(^\/*+-]*$/.test(v.remaining) == false)  return null;  // it must contain only the operators +-*/^()
             if (!((v.lengths['f'] == 0) && (v.lengths['v'] == 0)))  return null;
             if (fn.test_evaluation(fn, v, v.sub) == null)  return null;
-            var n = fn.check_number(fn, value);    // if it is a simple number, show a better format
+            var n = fn.check_number(fn, value);    // If it is a simple number, show a better format.
             return n != null ? n : fn.replace_display_formula(fn, v, v.sub);
         },
 
@@ -133,17 +133,17 @@ function formulas_format_check() {
             var splitted = fn.split_formula_unit(fn, value);
             var n = fn.check_numeric(fn, splitted[0]);
             var u = fn.check_unit(fn, splitted[1]);
-            if (n == null || u == null)  return null; // both part must correct simultaneously
+            if (n == null || u == null)  return null; // Both part must be correct simultaneously.
             return n + ' ' + u;
         },
 
         check_numerical_formula : function(fn, value) {
             var v = fn.get_formula_information(fn, value);
             if (v == null)  return null;
-            if (/^[ )(^\/*+-]*$/.test(v.remaining) == false)  return null;  // it must contain only the operators +-*/^()
+            if (/^[ )(^\/*+-]*$/.test(v.remaining) == false)  return null;  // It must contain only the operators +-*/^().
             if (!((v.lengths['v'] == 0)))  return null;
             if (fn.test_evaluation(fn, v, v.sub) == null)  return null;
-            var n = fn.check_number(fn, value);    // if it is a simple number, show a better format
+            var n = fn.check_number(fn, value);    // If it is a simple number, show a better format.
             return n != null ? n : fn.replace_display_formula(fn, v, v.sub);
         },
 
@@ -151,20 +151,20 @@ function formulas_format_check() {
             var splitted = fn.split_formula_unit(fn, value);
             var n = fn.check_numerical_formula(fn, splitted[0]);
             var u = fn.check_unit(fn, splitted[1]);
-            if (n == null || u == null)  return null; // both part must correct simultaneously
+            if (n == null || u == null)  return null; // Both part must be correct simultaneously.
             return n + ' ' + u;
         },
 
         check_algebraic_formula : function(fn, value) {
             var v = fn.get_formula_information(fn, value);
             if (v == null)  return null;
-            if (/^[ )(^\/*+-]*$/.test(v.remaining) == false)  return null;  // it must contain only the operators +-*/^()
-            // replace all variables symbol by a number before the evaluation test
-            var variables = {};  // replace all variables in v.all by 1 and then attempt the evaluation
+            if (/^[ )(^\/*+-]*$/.test(v.remaining) == false)  return null;  // It must only contain the  +-*/^() operators.
+            // Replace all variables symbols by a number before the evaluation test.
+            var variables = {};  // replace all variables in v.all by 1 and then attempt the evaluation.
             for (var key in v.all)  variables[key] = v.all[key];    // clone the v.all
             for (var key in v.all)  if (v.all[key]!=null && v.all[key].type=='v')  v.all[key] = {'type': 'n', 'value': 1.};
             if (fn.test_evaluation(fn, v, v.sub) == null)  return null;
-            for (var key in v.all)  v.all[key] = variables[key];    // put the variables back, it will be used in the display formula
+            for (var key in v.all)  v.all[key] = variables[key];    // Put the variables back, it will be used in the display formula.
             return fn.replace_display_formula(fn, v, v.sub);
         },
 
@@ -181,7 +181,7 @@ function formulas_format_check() {
             return formatted.join(' = ');
         },
 
-        /// test whether the input string is evaluable, and return the evaluated value
+        // test whether the input string is evaluable, and return the evaluated value
         test_evaluation: function(fn, vstack, formula) {
             try {
                 var v = fn.replace_vstack_variables(fn, vstack, evalreplacelist);
@@ -189,22 +189,22 @@ function formulas_format_check() {
                 var expr = fn.substitute_placeholders_in_text(fn, v, expr);
                 var res;
                 eval('with(Math) { res = ' + expr + '; }');
-                return res;     // return the evaluated result, even it is NaN or infinity
+                return res;     // Return the evaluated result, even it is NaN or infinity.
             }
-            catch (e) { return null; }  // return null for any error such as syntax error
+            catch (e) { return null; }  // Return null for any error such as syntax error.
         },
 
-        /// This function must be called to initial a variable stack
+        // This function must be called to initial a variable stack
         vstack_create : function() {
             return {idcounter: 0, all: {}};
         },
 
-        /// return the variable with name in the vstack
+        // return the variable with name in the vstack
         vstack_get_variable : function(vstack, name) {
             return (name in vstack.all ? vstack.all[name] : null);
         },
 
-        /// Add a temporary variable in the vstack
+        // Add a temporary variable in the vstack
         vstack_add_temporary_variable : function(vstack, type, value) {
             var name = '@' + vstack.idcounter;
             vstack.all[name] = {'type': type, 'value': value};
@@ -212,7 +212,7 @@ function formulas_format_check() {
             return name;
         },
 
-        /// return the original string by substituting back the placeholders (given by variables in $vstack) in the input $text.
+        // return the original string by substituting back the placeholders (given by variables in $vstack) in the input $text.
         substitute_placeholders_in_text : function(fn, vstack, text) {
             var splitted = text.replace(/(@[0-9]+)/g, '`$1`').split('`');
             for (var i=1; i<splitted.length; i+=2)      // The length will always be odd, and the placeholder is stored in odd index
@@ -220,7 +220,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// return a string with all (positive) numbers substituted by placeholders. The information of placeholders is stored in v.
+        // return a string with all (positive) numbers substituted by placeholders. The information of placeholders is stored in v.
         substitute_numbers_by_placeholders : function(fn, vstack, text) {
             var numPattern = /(^|[\]\[)(}{, ?:><=~!|&%^\/*+-])(([0-9]+\.?[0-9]*|[0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?)/g;
             var splitted = text.replace(numPattern, '$1`$2`').split('`');
@@ -229,7 +229,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// return a string with all functions substituted by placeholders. The information of placeholders is stored in v.
+        // return a string with all functions substituted by placeholders. The information of placeholders is stored in v.
         substitute_functions_by_placeholders : function(fn, vstack, text) {
             var funcPattern = /([a-z][a-z0-9_]*)(\s*\()/g;
             var splitted = text.replace(funcPattern, '`$1`$2').split('`');
@@ -240,7 +240,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// return a string with all constants substituted by placeholders. The information of placeholders is stored in v.
+        // return a string with all constants substituted by placeholders. The information of placeholders is stored in v.
         substitute_constants_by_placeholders : function(fn, vstack, text, preserve) {
             var varPattern = /([A-Za-z][A-Za-z0-9_]*)/g;
             var splitted = text.replace(varPattern, '`$1`').split('`');
@@ -252,7 +252,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// return a string with all variables substituted by placeholders. The information of placeholders is stored in v.
+        // return a string with all variables substituted by placeholders. The information of placeholders is stored in v.
         substitute_variables_by_placeholders : function(fn, vstack, text) {
             var varPattern = /([A-Za-z][A-Za-z0-9_]*)/g;
             var splitted = text.replace(varPattern, '`$1`').split('`');
@@ -263,7 +263,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// return the information of the formula by substituting numbers, variables and functions.
+        // return the information of the formula by substituting numbers, variables and functions.
         get_formula_information : function(fn, str) {
             if (/^[A-Za-z0-9._ )(^\/*+-]*$/.test(str) == false)  return null;   // formula can only contains these characters
             var v = fn.vstack_create();
@@ -280,7 +280,7 @@ function formulas_format_check() {
             return v;
         },
 
-        /// split the input into number/numeric/numerical formula and unit.
+        // split the input into number/numeric/numerical formula and unit.
         split_formula_unit : function(fn, str) {
             if (/[`@]/.test(str) == true)  return ['',str];   // Note: these symbols will be used to split str
             var v = fn.vstack_create();
@@ -295,7 +295,7 @@ function formulas_format_check() {
             return [fn.trim(num), fn.trim(unit)];
         },
 
-        /// replace the user input function in the vstack by another function
+        // replace the user input function in the vstack by another function
         replace_vstack_variables : function(fn, vstack, replacementlist) {
             var res = {idcounter: vstack.idcounter, all: {}};   // the vstack.all will be used so it needs to clone deeply
             for (var key in vstack.all)  res.all[key] = {'type': vstack.all[key].type, 'value': vstack.all[key].value};
@@ -306,7 +306,7 @@ function formulas_format_check() {
             return res;
         },
 
-        /// insert the multiplication symbol whenever juxtaposition occurs
+        // insert the multiplication symbol whenever juxtaposition occurs
         insert_multiplication_for_juxtaposition : function(fn, vstack, text) {
             var splitted = text.replace(/(@[0-9]+)/g, '`$1`').split('`');
             for (var i=3; i<splitted.length; i+=2) {    // The length will always be odd: placeholder in odd index, operators in even index
@@ -321,7 +321,7 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        /// replace the expression x^y by pow(x,y)
+        // replace the expression x^y by pow(x,y)
         replace_caret_by_power : function(fn, vstack, text) {
             while (true){
                 var loc = text.lastIndexOf('^');    // from right to left
@@ -359,7 +359,7 @@ function formulas_format_check() {
             return text;
         },
 
-        /// translate the input text into the corresponding evaluable mathematical formula in javascript.
+        // translate the input text into the corresponding evaluable mathematical formula in javascript.
         replace_evaluation_formula : function(fn, vstack, text) {
             text = fn.insert_multiplication_for_juxtaposition(fn, vstack, text);
             text = fn.replace_caret_by_power(fn, vstack, text);
@@ -367,7 +367,7 @@ function formulas_format_check() {
             return text;
         },
 
-        /// translate the input s into the corresponding displayable HTML.
+        // translate the input s into the corresponding displayable HTML.
         replace_display_formula : function(fn, vstack, text) {
             var vstack = fn.replace_vstack_variables(fn, vstack, dispreplacelist);  // the vstack will be cloned
             text = fn.replace_evaluation_formula(fn, vstack, text);
@@ -405,7 +405,7 @@ function formulas_format_check() {
             return text;
         },
 
-        /// return the list of expression inside the open '(' and close ')' bracket, otherwise null
+        // return the list of expression inside the open '(' and close ')' bracket, otherwise null
         get_expressions_in_bracket : function(text, start, open, bset) {
             var bflip = {};
             for (var b in bset)  bflip[bset[b]] = b;
@@ -433,7 +433,7 @@ function formulas_format_check() {
             throw 'error_bracket_mismatch';
         },
 
-        /// get the variable immediately before the location $loc
+        // get the variable immediately before the location $loc
         get_previous_variable : function(fn, vstack, text, loc) {
             var m = /((@[0-9]+)\s*)$/.exec(text.substr(0,loc));
             if (m == null)  return null;
@@ -442,7 +442,7 @@ function formulas_format_check() {
             return {'startloc': (loc-m[1].length), 'variable': v};
         },
 
-        /// get the variable immediately at and after the location $loc (inclusive)
+        // get the variable immediately at and after the location $loc (inclusive)
         get_next_variable : function(fn, vstack, text, loc) {
             var m = /^(\s*(@[0-9]+))/.exec(text.substr(loc));
             if (m == null)  return null;
@@ -451,7 +451,7 @@ function formulas_format_check() {
             return {'startloc': (loc+(m[1].length-m[2].length)), 'endloc': (loc+m[1].length), 'variable': v};
         },
 
-        /// return an array of [base unit, exponent] if the input is a unit, otherwise null.
+        // return an array of [base unit, exponent] if the input is a unit, otherwise null.
         parse_unit : function(fn, str, no_divisor) {
             if ((fn.trim(str)).length == 0)  return [];
 
@@ -506,7 +506,7 @@ function formulas_format_check() {
             return unit;
         },
 
-        /// return the formatted number in scientific notation, if necessary
+        // return the formatted number in scientific notation, if necessary
         format_number : function(number, is_original) {
         try {
             if (is_original == null)  is_original = false;
@@ -525,7 +525,7 @@ function formulas_format_check() {
                 var is_equal = value == newvalue;
                 if (is_equal && loc == -1 && absnum >= Math.pow(10.,-2) && absnum <= Math.pow(10.,6))
                     return number;
-                var symbol = '';//is_equal ? ' ' : '\u2248 ';    // if they are not equal, show approx sign
+                var symbol = ''; //is_equal ? ' ' : '\u2248 ';    // if they are not equal, show approx sign
             }
             var s = standardform.split(/[eE]/);
             var decimal = s[0].replace(/(\.)?0*$/,'');
@@ -535,7 +535,7 @@ function formulas_format_check() {
         }catch(e) { return ''; }
         },
 
-        /// return the formatted unit into a standard format
+        // return the formatted unit into a standard format
         format_unit : function(base_units) {
         try {
             var res = [];
@@ -547,13 +547,13 @@ function formulas_format_check() {
         }catch(e) { return ''; }
         },
 
-        /// return the string with space trimmed
+        // return the string with space trimmed
         trim : function(str) {
             return str.replace(/^\s+|\s+$/g, '');
         }
     };
 
-    /// Initialization: Append the display blocks around the input and the data in the input node
+    // Initialization: Append the display blocks around the input and the data in the input node
     function init(common, types) {
         var others = [];
         var count = 0;
@@ -581,8 +581,6 @@ function formulas_format_check() {
 
             var warning_inner = document.createElement('img');
             warning_inner.src = M.util.image_url('warning', 'qtype_formulas');
-            //var after_inner = document.createElement('div');
-            //after_inner.innerHTML = '\u26A0';
             warning_inner.className = 'formulas_input_warning';
             warning_inner.style.display = 'none';
             var warning = document.createElement('span');
@@ -633,7 +631,7 @@ function formulas_format_check() {
         return others;
     };
 
-    /// classify the type of the input field, and return the name of the corresponding function
+    // classify the type of the input field, and return the name of the corresponding function
     function classify(className, types) {
         var classes = className.split(' ');
         for (var i=0; i<classes.length; i++)
@@ -644,7 +642,7 @@ function formulas_format_check() {
         return null;
     }
 
-    /// return true if the javascript engine make correct classification of the all standard test samples
+    // return true if the javascript engine make correct classification of the all standard test samples
     function unittest() {
         // test three things: unit check, formula, and number unit splitting
         var numcase = 0;
@@ -908,9 +906,6 @@ function formulas_format_check() {
         common.fn.update(common, common.others[i]);
     } catch(e) {}
 };
-
-
-
 
 window.onload = (function(oldfunc, newfunc) {
     if (oldfunc && typeof oldfunc == 'function')

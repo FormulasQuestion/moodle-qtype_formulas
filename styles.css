@@ -8,7 +8,7 @@
     position: absolute;
     top: 0.3em;
     left: -1.3em;
-    background-color: #ffffff;
+    background: transparent;
 }
 
 .formulas_input_info_outer {
@@ -42,100 +42,61 @@
 }
 
 
-
-input.formulas_unit {
+.que.formulas .formulas_unit input,
     margin: 0 0 0 0;
     width : 150px;
 }
 
-input.formulas_number {
+.que.formulas .formulas_number input,
     margin: 0 0 0 0;
     width : 130px;
 }
 
-input.formulas_number_unit {
+.que.formulas .formulas_number_unit input,
     margin: 0 0 0 0;
     width : 250px;
 }
 
-input.formulas_numeric {
+.que.formulas .formulas_numeric input,
     margin: 0 0 0 0;
     width : 200px;
 }
 
-input.formulas_numeric_unit {
+.que.formulas .formulas_numeric_unit input,
     margin: 0 0 0 0;
     width : 300px;
 }
 
-input.formulas_numerical_formula {
+.que.formulas .formulas_numerical_formula input,
     margin: 0 0 0 0;
     width : 200px;
 }
 
-input.formulas_numerical_formula_unit {
+.que.formulas .formulas_numerical_formula_unit input,
     margin: 0 0 0 0;
     width : 300px;
 }
 
-input.formulas_algebraic_formula {
+.que.formulas .formulas_algebraic_formula input,
     margin: 0 0 0 0;
     width : 200px;
 }
 
 
 
-.formulas_subpart {
+.que.formulas .formulas_subpart {
     padding-bottom: 0px;
     margin: 0 0 1.2em 0;
     #border: solid #dddddd 1px;
     display: block;
 }
 
-.formulas_submit {
-    margin-top: 1px;
-}
-
-.formulas_mark {
+.que.formulas .formulas_mark {
     display : inline;
 }
 
-
-hr.formulas_seperator1 {
-    margin-left: auto;
-    margin-right:0;
-    width: 200px;
-    color : white;
-}
-
-hr.formulas_seperator2 {
-    margin-left: auto;
-    margin-right:0;
-    width: 200px;
-    color : white;
-}
-
-.formulas_grade {
+.que.formulas .formulas_grade {
   font-size: 0.8em;
-}
-
-.subq_navigation {
-    text-align: center;
-    margin: 20px;
-}
-
-.subq_navigation_block {
-    padding: 5px 11px 5px 11px;
-    border: 1px solid #aaaaff;
-    margin: 2px;
-    cursor: pointer;
-}
-
-.subq_navigation_selected {
-    padding: 5px 11px 5px 11px;
-    border: 2px solid black;
-    margin: 1px;
-    cursor: pointer;
 }
 
 .que.formulas .formulation .formulaspartfeedback,

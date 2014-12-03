@@ -67,7 +67,6 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->insertElementBefore($mform->createElement('header', 'mainq', get_string('mainq', 'qtype_formulas'),
             ''), 'questiontext');
         // Part's answers.
-        $creategrades = get_grade_options();
         $this->add_per_answer_fields($mform, get_string('answerno', 'qtype_formulas', '{no}'),
             question_bank::fraction_options(), 1, 2);
         // Display options, flow options and global part's options.

@@ -92,9 +92,6 @@ var formulasform = {
         this.values = this.init_values();
         this.update_values(this.values);
 
-        // Show one question's part at a time, instead of all parts in the page
-//        try { this.show_subq(this.get_value('show_subq')); } catch (e) {}
-
         // Global options allow the change of the same options in all parts at once
         try {
             this.init_global_options('unitpenalty');
@@ -174,47 +171,6 @@ var formulasform = {
         n_global.value = n.value;
         n_global.onchange = function() { formulas_form_init_global_options_update(name); };
         formulas_form_init_global_options_update(name);
-    },
-
-    /// Allow the display of one part at a time, it is very effective way to shorten the form and it also allows easy comparison between parts
-    init_subq_collapse : function(loc, id, selected) {
-        // create new navigation panel
-        navigation = document.createElement('div');
-        navigation.id = id;
-        navigation.className = 'subq_navigation';
-        loc.parentNode.insertBefore(navigation, loc.nextSibling);
-
-        // add the navigation block
-        var previous = selected <= 0 ? this.numsubq-1 : selected-1;
-        var next = selected >= this.numsubq-1 ? 0 : selected+1;
-        for (var i=-1; i<this.numsubq+1; i++) {
-            var tmp = document.createElement('span');
-            tmp.className = i == selected ? 'subq_navigation_selected' : 'subq_navigation_block';
-            tmp.title = (i>0 && i<this.numsubq ? document.getElementById('id_placeholder_'+i).value : '');
-            tmp.formulasform = this;
-            tmp.onclick = (function(formulasform, v) {
-                return function() { formulasform.show_subq(v); }
-            })(this, (i<0 ? previous : (i>=this.numsubq ? next : i)));
-            tmp.innerHTML = i < 0 ? '&lt;' : (i>=this.numsubq ? '&gt;' : (i+1));
-            navigation.appendChild(tmp);
-        }
-    },
-
-    /// Show the selected part
-    show_subq : function(selected) {
-        this.numsubq = this.count_subq();
-        this.set_value('show_subq', selected);
-
-        // delete the old navigation panels and then add the new one
-        var navigation = document.getElementById('subq_navigation');
-        if (navigation != null)  navigation.parentNode.removeChild(navigation);
-        var loc = document.getElementById('mainq');
-        this.init_subq_collapse(loc, 'subq_navigation', selected);
-
-        // update the display style of part
-        for (var i=0; i<this.numsubq; i++) {
-            document.getElementById('answerhdr_'+i).style.display = (selected < -1 || selected == i ? 'block' : 'none');
-        }
     },
 
     /// Create checkboxes to show/hide the corresponding input field
@@ -499,7 +455,6 @@ var formulasform = {
                 var fb = tinyMCE.get('id_feeback_'+i).getContent();
             }
             catch(e) {
-                // var fb = '';
                 var fb = document.getElementById('id_feedback_'+i).value;
             }
             var ans = document.getElementsByName('answer' + '[' + i + ']')[0];
