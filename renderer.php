@@ -17,8 +17,7 @@
 /**
  * Formulas question renderer class.
  *
- * @package    qtype
- * @subpackage formulas
+ * @package    qtype_formulas
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

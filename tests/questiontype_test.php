@@ -72,8 +72,8 @@ class qtype_formulas_test extends advanced_testcase {
         $ans1->placeholder = '#1';
         $ans2 = new stdClass();
         $ans2->placeholder = '#2';
-        $answers =array(0 => $ans1, 1 => $ans2);
-        $this->assertEquals(array(0 =>1, 1 => 0), $this->qtype->reorder_answers($questiontext, $answers));
+        $answers = array(0 => $ans1, 1 => $ans2);
+        $this->assertEquals(array(0 => 1, 1 => 0), $this->qtype->reorder_answers($questiontext, $answers));
     }
 
     public function test_reorder_answers1() {
@@ -86,8 +86,8 @@ class qtype_formulas_test extends advanced_testcase {
         $ans3->placeholder = '#third';
         $ans4 = new stdClass();
         $ans4->placeholder = '#fourth';
-        $answers =array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
-        $this->assertEquals(array(0 =>2, 1 => 3, 2 => 0, 3 => 1), $this->qtype->reorder_answers($questiontext, $answers));
+        $answers = array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
+        $this->assertEquals(array(0 => 2, 1 => 3, 2 => 0, 3 => 1), $this->qtype->reorder_answers($questiontext, $answers));
     }
 
     public function test_reorder_answers2() {
@@ -100,8 +100,8 @@ class qtype_formulas_test extends advanced_testcase {
         $ans3->placeholder = '';
         $ans4 = new stdClass();
         $ans4->placeholder = '';
-        $answers =array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
-        $this->assertEquals(array(0 =>0, 1 => 1, 2 => 2, 3 => 3), $this->qtype->reorder_answers($questiontext, $answers));
+        $answers = array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
+        $this->assertEquals(array(0 => 0, 1 => 1, 2 => 2, 3 => 3), $this->qtype->reorder_answers($questiontext, $answers));
     }
 
     public function test_check_placeholder0() {
@@ -116,7 +116,7 @@ class qtype_formulas_test extends advanced_testcase {
         $ans3->placeholder = '#3';
         $ans4 = new stdClass();
         $ans4->placeholder = '#4';
-        $answers =array(0 => $ans0, 1 => $ans1, 2 => $ans2, 3 => $ans3, 4 => $ans4);
+        $answers = array(0 => $ans0, 1 => $ans1, 2 => $ans2, 3 => $ans3, 4 => $ans4);
         $expected = array(
                 'placeholder[0]' => 'The placeholder\'s length is limited to 40 characters.'
                         .' This placeholder is missing from the main question text.',
@@ -132,7 +132,8 @@ class qtype_formulas_test extends advanced_testcase {
 
     public function test_split_questiontext0() {
         $q = $this->get_test_formulas_question('test1');
-        $expected = array(0 => '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--',
+        $expected = array(0 => '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used,' .
+                'the part will be inserted at the location of placeholder.--',
                 1 => '--',
                 2 => '--',
                 3 => '</p>');

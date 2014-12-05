@@ -17,8 +17,7 @@
 /**
  * Moodle formulas question definition class.
  *
- * @package    qtype
- * @subpackage formula
+ * @package    qtype_formulas
  * @copyright  2010-2011 Hon Wai, Lau
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

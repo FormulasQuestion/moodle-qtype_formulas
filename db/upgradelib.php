@@ -144,8 +144,8 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
                 $responses["${i}_$j"] = array_key_exists("${i}_$j", $details) ? $details["${i}_$j"] : '';
             }
         }
-        $subanum = intval($lines[$counter+1]);
-        $randomvars = implode("", array_slice($lines, $counter+3));
+        $subanum = intval($lines[$counter + 1]);
+        $randomvars = implode("", array_slice($lines, $counter + 3));
         return array('responses' => $responses, 'subanum' => $subanum, 'grading' => $grading, 'randomvars' => trim($randomvars));
 
     }

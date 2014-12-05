@@ -17,8 +17,7 @@
 /**
  * Unit tests for the OU multiple response question class.
  *
- * @package    qtype
- * @subpackage formulas
+ * @package    qtype_formulas
  * @copyright 2012 Jean-Michel Védrine
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -235,7 +234,7 @@ class qtype_formulas_question_test extends basic_testcase {
     public function test_get_parts_and_weights_test1() {
         $q = $this->get_test_formulas_question('test1');
 
-        $this->assertEquals(array('0' => 1/3, '1' => 1/3, '2' => 1/3), $q->get_parts_and_weights());
+        $this->assertEquals(array('0' => 1 / 3, '1' => 1 / 3, '2' => 1 / 3), $q->get_parts_and_weights());
     }
 
     public function test_get_parts_and_weights_test2() {
@@ -248,12 +247,12 @@ class qtype_formulas_question_test extends basic_testcase {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'),
-                           1 => array('0_0' => '5', '1_0' => '7', '2_0' =>'7'),
-                           2 => array('0_0' => '5', '1_0' => '6', '2_0' =>'7')
+        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' => '6'),
+                           1 => array('0_0' => '5', '1_0' => '7', '2_0' => '7'),
+                           2 => array('0_0' => '5', '1_0' => '6', '2_0' => '7')
                           );
         $finalgrade = $q->compute_final_grade($responses, 1);
-        $this->assertEquals((2 + 2*(1 - 2*0.3) + 2*(1 - 0.3)) /6, $finalgrade);
+        $this->assertEquals((2 + 2 * (1 - 2 * 0.3) + 2 * (1 - 0.3)) / 6, $finalgrade);
 
     }
 
@@ -261,12 +260,12 @@ class qtype_formulas_question_test extends basic_testcase {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' =>'6'),
-                           1 => array('0_0' => '5', '1_0' => '8', '2_0' =>'6'),
-                           2 => array('0_0' => '5', '1_0' => '6', '2_0' =>'6')
+        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' => '6'),
+                           1 => array('0_0' => '5', '1_0' => '8', '2_0' => '6'),
+                           2 => array('0_0' => '5', '1_0' => '6', '2_0' => '6')
                           );
         $finalgrade = $q->compute_final_grade($responses, 1);
-        $this->assertEquals((2 + 2*(1 - 2*0.3))/6, $finalgrade);
+        $this->assertEquals((2 + 2 * (1 - 2 * 0.3)) / 6, $finalgrade);
     }
 
     public function test_part_has_multichoice_coordinate0() {
@@ -280,7 +279,7 @@ class qtype_formulas_question_test extends basic_testcase {
         $p->subqtext = '{_0} - {_1} - {_2}';
         $this->assertFalse($p->part_has_multichoice_coordinate());
     }
-    
+
     public function test_summarise_response_test0() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -295,7 +294,7 @@ class qtype_formulas_question_test extends basic_testcase {
         $summary = $q->summarise_response($response);
         $this->assertEquals('5, 6, 7', $summary);
     }
-    
+
     public function test_summarise_response_test1() {
         $q = $this->get_test_formulas_question('test2');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -321,7 +320,7 @@ class qtype_formulas_question_test extends basic_testcase {
         $this->assertTrue($q->is_complete_response(array('0_0' => 0)));
         $this->assertTrue($q->is_complete_response(array('0_0' => 'test')));
     }
-    
+
     public function test_is_gradable_response_test3() {
         $q = $this->get_test_formulas_question('test3');
 

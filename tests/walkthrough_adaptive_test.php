@@ -74,7 +74,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_state(question_state::$complete);
         $this->check_current_mark(1);
         $this->render();
-        $this->check_output_contains_text_input('0_0', '5',true);
+        $this->check_output_contains_text_input('0_0', '5', true);
         $this->check_output_does_not_contain_stray_placeholders();
         $this->check_current_output(
                 $this->get_contains_mark_summary(1),

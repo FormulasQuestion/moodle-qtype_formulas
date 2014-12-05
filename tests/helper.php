@@ -62,7 +62,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->penalty = 0.2; // The default.
         test_question_maker::set_standard_combined_feedback_fields($q);
         $q->numpart = 0;   // This is of course invalid but should be changed by all tests.
-        $q->parts =array();
+        $q->parts = array();
         $q->evaluatedanswer = array();
         $q->fractions = array();
         $q->anscorrs = array();

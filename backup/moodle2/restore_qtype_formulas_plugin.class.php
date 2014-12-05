@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    moodlecore
- * @subpackage backup-moodle2
+ * @package    qtype_formulas
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -117,7 +116,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             // All 2.0 backups are missing the part's index.
             if (!isset($data->partindex)) {
                 $data->partindex = (int)$DB->get_field('qtype_formulas_answers',
-                        'MAX(partindex) +1', array('questionid'=>$newquestionid));
+                        'MAX(partindex) +1', array('questionid' => $newquestionid));
             }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
