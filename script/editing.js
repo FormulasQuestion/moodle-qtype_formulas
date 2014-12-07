@@ -7,7 +7,7 @@
  */
 
 function formulas_form_correctness(id, checked) {
-    var err_names = new Array('Relative error', 'Absolute error');
+    var err_names = new Array(M.util.get_string('relerror', 'qtype_formulas'), M.util.get_string('abserror', 'qtype_formulas'));
         var nid = 'correctness[' + id + ']';
         var n = document.getElementsByName(nid)[0];
         if (n == null)  return;
@@ -205,7 +205,8 @@ var formulasform = {
         for (var i in a) {
             s += '<option value="' + i + '" ' + (i == 5 ? ' selected="selected"' : '') + '>' + a[i] + '</option>';
         }
-        s = '<select name="numdataset" id="numdataset">' + s + '</select><input type="button" value="Instantiate" onclick="formulasform.instantiate_dataset()"><div id="xxx"></div>';
+        s = '<select name="numdataset" id="numdataset">' + s + '</select><input type="button" value="' +
+                M.util.get_string('instantiate', 'qtype_formulas') + '" onclick="formulasform.instantiate_dataset()"><div id="xxx"></div>';
         var loc = document.getElementById('numdataset_option');
         loc.innerHTML = s;
     },
@@ -419,7 +420,7 @@ var formulasform = {
         for (var i = 0; i < this.vars.lists.length; i++)
             block0 += '<option value="' + i + '">' + i + '</option>';
         block0 = (this.vars.lists.length == 0) ? '' : '<select id="id_formulas_idataset" onchange="formulasform.update_preview()">' + block0 + '</select>';
-        var block1 = '<input type="button" onclick="formulasform.update_preview()" value="Renew">';
+        var block1 = '<input type="button" onclick="formulasform.update_preview()" value="' + M.util.get_string('renew', 'qtype_formulas') + '">';
         var loc = document.getElementById('qtextpreview_controls');
         loc.innerHTML = block0 + block1;
 

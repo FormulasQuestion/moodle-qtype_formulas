@@ -27,8 +27,8 @@ class unit_conversion_rules {
 
     // Initialize the internal conversion rule.
     public function __construct() {
-        $this->basic_unit_conversion_rules[0] = array('None', '');
-        $this->basic_unit_conversion_rules[1] = array('Common SI unit', '
+        $this->basic_unit_conversion_rules[0] = array(get_string('none', 'qtype_formulas'), '');
+        $this->basic_unit_conversion_rules[1] = array(get_string('commonsiunit', 'qtype_formulas'), '
 m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;

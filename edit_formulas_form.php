@@ -40,6 +40,10 @@ class qtype_formulas_edit_form extends question_edit_form {
     protected function definition_inner($mform) {
         global $PAGE;
         $PAGE->requires->js('/question/type/formulas/script/editing.js');
+        $PAGE->requires->string_for_js('relerror', 'qtype_formulas');
+        $PAGE->requires->string_for_js('abserror', 'qtype_formulas');
+        $PAGE->requires->string_for_js('instantiate', 'qtype_formulas');
+        $PAGE->requires->string_for_js('renew', 'qtype_formulas');
         $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
         $PAGE->requires->css('/question/type/formulas/styles.css');
         // Hide the unused form fields.

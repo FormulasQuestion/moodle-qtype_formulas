@@ -96,12 +96,12 @@ text that will be replaced by the content of the part. It is a
 string of alphanumeric characters prefixed by \'**#**\', such as #1, #2a, #2b and #A.
 
 If this field is left empty, the part will be appended at the end of the main question text.';
-$string['answermark'] = 'Default answer mark*';
+$string['answermark'] = 'Part\'s mark*';
 $string['answermark_help'] = '**Required**.
-The mark for the answer of this part, which should be a number
-greater than 0. The default mark of the whole question is the sum of all its parts default marks.
+The mark for the answer of this part, which should be a number greater than 0.
+ The default mark of the whole question is the sum of all its parts marks.
 
-Note: If this answer mark field is left blank, the part will be deleted when the question is successfully saved.';
+Note: If this part\'s mark field is left blank, the part will be deleted when the question is saved.';
 $string['answertype'] = 'Answer type';
 $string['answertype_help'] = 'There are four answer types.
 
@@ -114,7 +114,7 @@ need to know how to input them. The format check in the question code will
 also tell them when they type if something is wrong. Please read the documentation for details.';
 $string['answertype_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Answer_type';
 $string['vars1'] = 'Local variables';
-$string['vars1_help'] = 'You can define variables here in the same way as global variables are defined at the question level. Variables defined here can be used in the part\'s ansver or feedback
+$string['vars1_help'] = 'You can define variables here in the same way as global variables are defined at the question level. Variables defined here can be used in the part\'s answer or feedback
 and their scope of visibility is limited to the part.';
 $string['answer'] = 'Answer*';
 $string['answer_help'] = '**Required**.
@@ -133,6 +133,8 @@ range. Relative error cannot be used for algebraic answer type.
 
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
 $string['correctness_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Manual_grading_criteria';
+$string['relerror'] = 'Relative error';
+$string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';
 $string['postunit_help'] = 'You can specify the unit here. This question type is specially designed for SI unit, so an
 empty space represents the \'product\' of different \'base unit\' and <tt> ^ </tt> is used for exponents.
@@ -157,6 +159,8 @@ $string['ruleid_help'] = 'This question type has a build-in unit conversion syst
 The basic one is the "Common SI unit" rules that will convert standard units
 such as unit for length, say, km, m, cm and mm. This option has no
 effect if no unit has been used.';
+$string['none'] = 'None';
+$string['commonsiunit'] = 'Common SI unit';
 $string['otherrule'] = 'Other rules';
 $string['otherrule_help'] = 'Here the question\' author can define additional  conversion rules for other accepted base units. See documentation for the advanced usages.';
 $string['subqtext'] = 'Part\'s text';
@@ -173,7 +177,9 @@ $string['globaloptions'] = '[Global] - ';
 
 // The language string for the variables instantiation and preview.
 $string['checkvarshdr'] = 'Check variables instantiation';
+$string['instantiate'] = 'Instantiate';
 $string['numdataset'] = 'Number of dataset';
+$string['renew'] = 'Renew';
 $string['qtextpreview'] = 'Preview using dataset';
 $string['varsstatistics'] = 'Statistics';
 $string['varsdata'] = 'Instantiated dataset';
@@ -232,7 +238,7 @@ $string['functiontakesatleasttwo'] = 'The function {$a} must have at least two a
 $string['unsupportedformulafunction'] = 'The function {$a} is not supported';
 
 // Strings for question settings.
-$string['settingusepopup'] = 'Use popups for correct anser and feedback';
+$string['settingusepopup'] = 'Use tooltips';
 $string['settingusepopup_desc'] = 'Display correct answer and feedback in a tooltip';
 $string['defaultanswertype'] = 'Default answer type';
 $string['defaultanswertype_desc'] = 'Default answer type for new question\'s parts';
