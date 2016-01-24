@@ -75,7 +75,7 @@ function formulas_form_display(fieldid, checked) {
 
 
 
-//It contains all methods to modify the editing form, aiming to provide a better interface.
+// It contains all methods to modify the editing form, aiming to provide a better interface.
 var formulasform = {
     // The initialization  function that should be called just after the form is constructed.
     init : function() {

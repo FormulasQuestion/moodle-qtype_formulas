@@ -183,7 +183,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated[] = $mform->createElement('select', 'ruleid', get_string('ruleid', 'qtype_formulas'),
             $default_rule_choice);
         $repeatedoptions['ruleid']['default'] = 1;
-        // Part's other rules
+        // Part's other rules.
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
         $repeatedoptions['otherrule']['helpbutton'] = array('otherrule', 'qtype_formulas');
@@ -206,7 +206,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         return $repeated;
     }
 
-        /**
+    /**
      * Add a set of form fields, obtained from get_per_answer_fields, to the form,
      * one for each existing answer, with some blanks for some new ones.
      * @param object $mform the form being built.
@@ -258,7 +258,7 @@ class qtype_formulas_edit_form extends question_edit_form {
                             'format' => $answer->subqtextformat, 'itemid' => $subqtid);
                     $subqfbid = file_get_submitted_draft_itemid('feedback['.$key.']');
                     $subqfb = file_prepare_draft_area($subqfbid, $this->context->id, 'qtype_formulas',
-                            'answerfeedback', empty($answer->id)?null:(int)$answer->id,
+                            'answerfeedback', empty($answer->id) ? null : (int)$answer->id,
                             $this->fileoptions, $answer->feedback);
                     $default_values['feedback['.$key.']'] = array('text'=>$subqfb,
                             'format'=>$answer->feedbackformat, 'itemid'=>$subqfbid);

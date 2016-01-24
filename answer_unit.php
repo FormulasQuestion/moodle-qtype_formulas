@@ -28,19 +28,19 @@
  * a list of SI prefix separated by a space, e.g. "W: M k m" equal to "W = 1e3 mW = 1e-3kW = 1e-6MW"
  */
 class answer_unit_conversion {
-    private $mapping;           // mapping of the unit to the (dimension class, scale)
-    private $additional_rules;  // additional rules other than the default rules
-    private $default_mapping;   // default mapping of a user selected rules, usually Common SI prefix
-    private $default_last_id;   // dimension class id counter
-    private $default_id;        // id of the default rule
-    private $default_rules;     // string of the default rule in a particular format
+    private $mapping;           // Mapping of the unit to the (dimension class, scale).
+    private $additional_rules;  // Additional rules other than the default rules.
+    private $default_mapping;   // Default mapping of a user selected rules, usually Common SI prefix.
+    private $default_last_id;   // Dimension class id counter.
+    private $default_id;        // Id of the default rule.
+    private $default_rules;     // String of the default rule in a particular format.
     public static $unit_exclude_symbols = '][)(}{><0-9.,:;`~!@#^&*\/?|_=+ -';
-    public static $prefix_scale_factors = array('d'=>1e-1, 'c'=>1e-2, 'da'=>1e1, 'h'=>1e2,
-        'm'=>1e-3, 'u'=>1e-6, 'n'=>1e-9, 'p'=>1e-12, 'f'=>1e-15, 'a'=>1e-18, 'z'=>1e-21, 'y'=>1e-24,
-        'k'=>1e3,  'M'=>1e6,  'G'=>1e9,  'T'=>1e12,  'P'=>1e15,  'E'=>1e18,  'Z'=>1e21,  'Y'=>1e24);
-    // For convenient, u is used for micro-, µ, which has multiple similar UTF representation
+    public static $prefix_scale_factors = array('d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
+        'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9, 'p' => 1e-12, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,
+        'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,  'E' => 1e18,  'Z' => 1e21,  'Y' => 1e24);
+    // For convenience, u is used for micro-, µ, which has multiple similar UTF representations.
 
-    /// Initialize the internal conversion rule to empty. No throw
+    // Initialize the internal conversion rule to empty. No throw.
     function __construct() {
         $this->default_id = 0;
         $this->default_rules = '';
@@ -57,12 +57,14 @@ class answer_unit_conversion {
      * @param string $default_rules default rules
      */
     function assign_default_rules($default_id, $default_rules) {
-        if ($this->default_id == $default_id)  return;  // do nothing if the rules is unchange
+        if ($this->default_id == $default_id) {
+            return;  // Do nothing if the rules are unchanged.
+        }
         $this->default_id = $default_id;
         $this->default_rules = $default_rules;
         $this->default_mapping = null;
         $this->mapping = null;
-        $this->additional_rules = '';   // always remove the additional rule
+        $this->additional_rules = '';   // Always remove the additional rule.
     }
 
 
@@ -97,13 +99,13 @@ class answer_unit_conversion {
     }
 
 
-    /// return the current unit mapping in this class
+    // Return the current unit mapping in this class.
     function get_unit_mapping() {
         return $this->mapping;
     }
 
 
-    /// return a dimension classes list for current mapping. Each class is an array of $unit to $scale mapping
+    // Return a dimension classes list for current mapping. Each class is an array of $unit to $scale mapping.
     function get_dimension_list() {
         $dimension_list = array();
         foreach ($this->mapping as $unit => $class_scale) {
@@ -128,21 +130,27 @@ class answer_unit_conversion {
     function check_convertibility($ipunit, $targets) {
         $l1 = strlen(trim($ipunit)) == 0;
         $l2 = strlen(trim($targets)) == 0;
-        if ($l1 && $l2) // if both of them are empty, no unit check is required. i.e. they are equal
+        if ($l1 && $l2) {
+            // If both of them are empty, no unit check is required. i.e. they are equal.
             return (object) array('convertible' => true,  'cfactor' => 1, 'target' => 0);
-        else if (($l1 && !$l2) || (!$l1 && $l2))    // if one of them is empty, they must not equal
+        } else if (($l1 && !$l2) || (!$l1 && $l2)) {
+            // If one of them is empty, they must not equal.
             return (object) array('convertible' => false, 'cfactor' => 1, 'target' => null);
-        // Parsing error for $ipunit is counted as not equal because it cannot match any $targets
+        }
+        // Parsing error for $ipunit is counted as not equal because it cannot match any $targets.
         $ip = $this->parse_unit($ipunit);
-        if ($ip === null)
+        if ($ip === null) {
             return (object) array('convertible' => false, 'cfactor' => 1, 'target' => null);
-        $this->reparse_all_rules();   // reparse if the any rules have been updated
+        }
+        $this->reparse_all_rules();   // Reparse if the any rules have been updated.
         $targets_list = $this->parse_targets($targets);
         $res = $this->check_convertibility_parsed($ip, $targets_list);
-        if ($res === null)
+        if ($res === null) {
             return (object) array('convertible' => false, 'cfactor' => 1, 'target' => null);
-        else // for the input successfully converted to one of the unit in the $targets list
+        } else {
+            // For the input successfully converted to one of the unit in the $targets list.
             return (object) array('convertible' => true,  'cfactor' => $res[0], 'target' => $res[1]);
+        }
     }
 
 
@@ -154,12 +162,18 @@ class answer_unit_conversion {
      */
     function parse_targets($targets) {
         $targets_list = array();
-        if (strlen(trim($targets)) == 0)  return $targets_list;
+        if (strlen(trim($targets)) == 0) {
+            return $targets_list;
+        }
         $units = explode('=', $targets);
         foreach ($units as $unit) {
-            if (strlen(trim($unit) ) == 0)  throw new Exception('""');
+            if (strlen(trim($unit) ) == 0) {
+                throw new Exception('""');
+            }
             $parsed_unit = $this->parse_unit($unit);
-            if ($parsed_unit === null)  throw new Exception('"'.$unit.'"');
+            if ($parsed_unit === null) {
+                throw new Exception('"'.$unit.'"');
+            }
             $targets_list[] = $parsed_unit;
         }
         return $targets_list;
@@ -174,28 +188,34 @@ class answer_unit_conversion {
      * @return the array of (conversion factor, location in target list) if convertible, otherwise null
      */
     function check_convertibility_parsed($a, $targets_list) {
-        foreach ($targets_list as $i => $t) {   // use exclusion method to check whether there is one match
-            if (count($a) != count($t))  continue;  // if they have different number of base unit, skip
+        foreach ($targets_list as $i => $t) {   // Use exclusion method to check whether there is one match.
+            if (count($a) != count($t)) {
+                // If they have different number of base unit, skip.
+                continue;
+            }
             $cfactor = 1.;
             $is_all_matches = true;
             foreach ($a as $name => $exponent) {
                 $unit_found = isset($t[$name]);
-               if ($unit_found) {
+                if ($unit_found) {
                     $f = 1;
-                    $e = $t[$name];         // exponent of the target base unit
-                } else {     // if the base unit not match directly, try conversion
+                    $e = $t[$name];         // Exponent of the target base unit.
+                } else {     // If the base unit not match directly, try conversion.
                     list($f, $e) = $this->attempt_conversion($name, $t);
                     $unit_found = isset($f);
                 }
-                if (!$unit_found || abs($exponent-$e) > 0) {
-                    $is_all_matches = false; // if unit is not found or the exponent of this dimension is wrong
-                    break;  // stop further check
+                if (!$unit_found || abs($exponent - $e) > 0) {
+                    $is_all_matches = false; // If unit is not found or the exponent of this dimension is wrong.
+                    break;  // Stop further check.
                 }
                 $cfactor *= pow($f, $e);
             }
-            if ($is_all_matches)  return array($cfactor, $i); // all unit name and their dimension matches
+            if ($is_all_matches) {
+                // All unit name and their dimension matches.
+                return array($cfactor, $i);
+            }
         }
-        return null;   // none of the possible units match, so they are not the same
+        return null;   // None of the possible units match, so they are not the same.
     }
 
 
@@ -209,10 +229,14 @@ class answer_unit_conversion {
      */
     function attempt_conversion($test_unit_name, $base_unit_array) {
         $oclass = $this->mapping[$test_unit_name];
-        if (!isset($oclass))  return null;  // it does not exist in the mapping implies it is not convertible
+        if (!isset($oclass)) {
+            return null;  // It does not exist in the mapping implies it is not convertible.
+        }
         foreach ($base_unit_array as $u => $e) {
-            $tclass = $this->mapping[$u];   // try to match the dimension class of each base unit
-            if (isset($tclass) && $oclass[0] == $tclass[0])  return array($oclass[1]/$tclass[1], $e);
+            $tclass = $this->mapping[$u];   // Try to match the dimension class of each base unit.
+            if (isset($tclass) && $oclass[0] == $tclass[0]) {
+                return array($oclass[1] / $tclass[1], $e);
+            }
         }
         return null;
     }
@@ -226,12 +250,17 @@ class answer_unit_conversion {
      */
     function split_number_unit($input) {
         $input = trim($input);
-        if (strlen($input) == 0)  return null;
+        if (strlen($input) == 0) {
+            return null;
+        }
         $ex = explode(' ', $input, 2);
         $number = $ex[0];
         $unit = count($ex) > 1 ? $ex[1] : null;
-        if (is_numeric($number))  return (object) array('number' => floatval($number), 'unit' => $unit);
-        else return (object) array('number' => 1, 'unit' => $input);
+        if (is_numeric($number)) {
+            return (object) array('number' => floatval($number), 'unit' => $unit);
+        } else {
+            return (object) array('number' => 1, 'unit' => $input);
+        }
     }
 
 
@@ -243,20 +272,30 @@ class answer_unit_conversion {
      * @return an array of the form (base unit name => exponent), null on error
      */
     function parse_unit($unit_expression, $no_divisor=false) {
-        if (strlen(trim($unit_expression)) == 0)  return array();
+        if (strlen(trim($unit_expression)) == 0) {
+            return array();
+        }
 
         $pos = strpos($unit_expression, '/');
         if ($pos !== false) {
-            if ($no_divisor || $pos==0 || $pos>=strlen($unit_expression)-1)  return null;  // only one '/' is allowed
+            if ($no_divisor || $pos == 0 || $pos >= strlen($unit_expression) - 1) {
+                return null;  // Only one '/' is allowed.
+            }
             $left = trim(substr($unit_expression, 0, $pos));
-            $right = trim(substr($unit_expression, $pos+1));
-            if ($right[0] == '(' && $right[strlen($right)-1] == ')')  $right = substr($right,1,strlen($right)-2);
+            $right = trim(substr($unit_expression, $pos + 1));
+            if ($right[0] == '(' && $right[strlen($right) - 1] == ')') {
+                $right = substr($right, 1, strlen($right) - 2);
+            }
             $uleft = $this->parse_unit($left, true);
             $uright = $this->parse_unit($right, true);
-            if ($uleft==null || $uright==null)  return null;    // if either part contains error
+            if ($uleft == null || $uright == null) {
+                return null;    // If either part contains error.
+            }
             foreach ($uright as $u => $exponent) {
-                if (array_key_exists($u, $uleft))  return null;     // no duplication
-                $uleft[$u] = -$exponent;   // take negation of the exponent
+                if (array_key_exists($u, $uleft)) {
+                    return null;     // No duplication.
+                }
+                $uleft[$u] = -$exponent;   // Take opposite of the exponent.
             }
             return $uleft;
         }
@@ -267,21 +306,39 @@ class answer_unit_conversion {
         $candidates = explode(' ', $unit_expression);
         foreach ($candidates as $candidate) {
             $ex = explode('^', $candidate);
-            $name = $ex[0];     // there should be no space remaining
-            if (count($ex) > 1 && (strlen($name) == 0 || strlen($ex[1]) ==0))  return null;
-            if (strlen($name) == 0)  continue;  // if it is an empty space
-            if (!preg_match('/^'.$unit_element_name.'$/', $name))  return null;
+            $name = $ex[0];     // There should be no space remaining.
+            if (count($ex) > 1 && (strlen($name) == 0 || strlen($ex[1]) == 0)) {
+                return null;
+            }
+            if (strlen($name) == 0) {
+                continue;  // If it is an empty space.
+            }
+            if (!preg_match('/^'.$unit_element_name.'$/', $name)) {
+                return null;
+            }
             $exponent = null;
             if (count($ex) > 1) {
-                if (!preg_match('/(.*)([0-9]+)(.*)/', $ex[1], $matches)) return null;     // get the number of exponent
-                if ($matches[1] == '' && $matches[3] == '')  $exponent = intval($matches[2]);
-                if ($matches[1] == '-' && $matches[3] == '')  $exponent = -intval($matches[2]);
-                if ($matches[1] == '(-' && $matches[3] == ')')  $exponent = -intval($matches[2]);
-                if ($exponent == null)  return null;    // no one pattern matched
-            }
-            else
+                if (!preg_match('/(.*)([0-9]+)(.*)/', $ex[1], $matches)) {
+                    return null;     // Get the number of exponent.
+                }
+                if ($matches[1] == '' && $matches[3] == '') {
+                    $exponent = intval($matches[2]);
+                }
+                if ($matches[1] == '-' && $matches[3] == '') {
+                    $exponent = -intval($matches[2]);
+                }
+                if ($matches[1] == '(-' && $matches[3] == ')') {
+                    $exponent = -intval($matches[2]);
+                }
+                if ($exponent == null) {
+                    return null;    // No pattern matched.
+                }
+            } else {
                 $exponent = 1;
-            if (array_key_exists($name, $unit))  return null;     // no duplication
+            }
+            if (array_key_exists($name, $unit)) {
+                return null;     // No duplication.
+            }
             $unit[$name] = $exponent;
         }
         return $unit;
@@ -297,42 +354,49 @@ class answer_unit_conversion {
      */
     function parse_rules(&$mapping, &$dim_id_count, $rules_string) {
         $rules = explode(';', $rules_string);
-        foreach ($rules as $rule)  if (strlen(trim($rule)) > 0) {
-            $unit_scales = array();
-            $e = explode(':', $rule);
-            if (count($e) > 3)  throw new Exception('Syntax error of SI prefix');
-            else if (count($e) == 2) {
-                $unit_name = trim($e[0]);
-                if (preg_match('/['.self::$unit_exclude_symbols.']+/',$unit_name))
-                    throw new Exception('"'.$unit_name.'" unit contains unaccepted character.');
-                $unit_scales[$unit_name] = 1.0;    // the original unit
-                $si_prefixes = explode(' ',$e[1]);
-                foreach ($si_prefixes as $prefix)  if (strlen($prefix) != 0) {
-                    $f = self::$prefix_scale_factors[$prefix];
-                    if (!isset($f))  throw new Exception('"'.$prefix.'" is not SI prefix.');
-                    $unit_scales[$prefix.$unit_name] = $f;
+        foreach ($rules as $rule) {
+            if (strlen(trim($rule)) > 0) {
+                $unit_scales = array();
+                $e = explode(':', $rule);
+                if (count($e) > 3) {
+                    throw new Exception('Syntax error of SI prefix');
+                } else if (count($e) == 2) {
+                    $unit_name = trim($e[0]);
+                    if (preg_match('/['.self::$unit_exclude_symbols.']+/', $unit_name)) {
+                        throw new Exception('"'.$unit_name.'" unit contains unaccepted character.');
+                    }
+                    $unit_scales[$unit_name] = 1.0;    // The original unit.
+                    $si_prefixes = explode(' ', $e[1]);
+                    foreach ($si_prefixes as $prefix) {
+                        if (strlen($prefix) != 0) {
+                            $f = self::$prefix_scale_factors[$prefix];
+                            if (!isset($f))  throw new Exception('"'.$prefix.'" is not SI prefix.');
+                            $unit_scales[$prefix.$unit_name] = $f;
+                        }
+                    }
+                } else {
+                    $data = explode('=', $rule);
+                    foreach ($data as $d) {
+                        $splitted = $this->split_number_unit($d);
+                        if ($splitted === null || preg_match('/['.self::$unit_exclude_symbols.']+/',$splitted->unit)) {
+                            throw new Exception('"'.$splitted->unit.'" unit contains unaccepted character.');
+                        }
+                        $unit_scales[trim($splitted->unit)] = 1. / floatval($splitted->number);
+                    }
+                }
+                if (array_key_exists(key($unit_scales), $mapping)) {    // Is the first unit already defined?
+                    $m = $mapping[key($unit_scales)];   // If yes, use the existing id of the same dimension class.
+                    $dim_id = $m[0];  // This can automatically join all the previously defined unit scales.
+                    $factor = $m[1] / current($unit_scales);    // Define the relative scale.
+                } else { // Otherwise use a new id and define the relative scale to 1.
+                    $dim_id = $dim_id_count++;
+                    $factor = 1;
+                }
+                foreach ($unit_scales as $unit => $scale) {
+                    // Join the new unit scale to old one, if any.
+                    $mapping[$unit] = array($dim_id, $factor * $scale);
                 }
             }
-            else {
-                $data = explode('=', $rule);
-                foreach ($data as $d) {
-                    $splitted = $this->split_number_unit($d);
-                    if ($splitted === null || preg_match('/['.self::$unit_exclude_symbols.']+/',$splitted->unit))
-                        throw new Exception('"'.$splitted->unit.'" unit contains unaccepted character.');
-                    $unit_scales[trim($splitted->unit)] = 1./floatval($splitted->number);
-                }
-            }
-            if (array_key_exists(key($unit_scales), $mapping)) {    // whether the first unit is already defined?
-                $m = $mapping[key($unit_scales)];   // if yes, use the existing id of the same dimension class
-                $dim_id = $m[0];  // this can automatically join all the previously defined unit scale
-                $factor = $m[1]/current($unit_scales);    // define the relative scale
-            }
-            else { // otherwise use a new id and define the relative scale to 1
-                $dim_id = $dim_id_count++;
-                $factor = 1;
-            }
-            foreach ($unit_scales as $unit => $scale)   // join the new unit scale to old one, if any
-                $mapping[$unit] = array($dim_id, $factor*$scale);
         }
     }
 

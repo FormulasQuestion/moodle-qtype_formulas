@@ -28,24 +28,26 @@ require_once("variables.php");
 require_login();
 $qv = new qtype_formulas_variables();
 
-/// Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript
+// Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
 function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $N, $always_random) {
     global $qv;
-    $show_all = ($N < 0);   // if $N is small than 0, it will try to enumerate all possible combination, if # dataset < 1000
+    $show_all = ($N < 0);   // If $N > 0, it will try to enumerate all possible combinations, if # dataset < 1000.
     $vr_info = $qv->parse_random_variables($varsrandom);
-    $maxdataset = $qv->vstack_get_number_of_dataset($vr_info);   // it is the same for all instantiation
-    if ($show_all)  $N = min(1000, $maxdataset);   // dynamic resize to the same # as exhaustive enumeration, limited to 1000
+    $maxdataset = $qv->vstack_get_number_of_dataset($vr_info);   // It is the same for all instantiations.
+    if ($show_all)  $N = min(1000, $maxdataset);   // Dynamic resize to the same # as exhaustive enumeration, limited to 1000.
     $hasshuffle = $qv->vstack_get_has_shuffle($vr_info);
-    if ($N>=$maxdataset && !$hasshuffle)  $N = $maxdataset;     // there is no need to generate redundant dataset if there is no shuffle assignment
+    if ($N >= $maxdataset && !$hasshuffle) {
+        $N = $maxdataset;     // There is no need to generate redundant datasets if there is no shuffle assignment.
+    }
 
     $names = array();
     $data = array();
     $errors = array();
-    for ($count=0; $count<$N; $count++) {
+    for ($count = 0; $count < $N; $count++) {
         $errors[$count] = '';
         $v = array();
         try {
-            $datasetid = ($always_random || $N<$maxdataset) ? -1 : $start+$count;   // use enumeration if possible, -1 means random
+            $datasetid = ($always_random || $N < $maxdataset) ? -1 : $start + $count;   // Use enumeration if possible, -1 means random.
             $v['random'] = $qv->instantiate_random_variables($vr_info, $datasetid);
             $names['random'] = isset($names['random']) ? $names['random'] + $v['random']->all : $v['random']->all;
             $v['global'] = $qv->evaluate_assignments($v['random'], $varsglobal);
@@ -54,24 +56,29 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
             foreach ($varslocals as $idx => $varslocal) {
                 $v['local'.$idx] = $qv->evaluate_assignments($v['global'], $varslocals[$idx]);
                 $names['local'.$idx] = isset($names['local'.$idx]) ? $names['local'.$idx] + $v['local'.$idx]->all : $v['local'.$idx]->all;
-                if (strlen(trim($answers[$idx])) == 0)  continue;
+                if (strlen(trim($answers[$idx])) == 0) {
+                    continue;
+                }
                 $res = $qv->evaluate_general_expression($v['local'.$idx], $answers[$idx]);
                 if ($res->type[0] != 'l') {
                     $res->type = 'l'.$res->type;
-                    $res->value = array($res->value);   // change all answers to array
+                    $res->value = array($res->value);   // Change all answers to arrays.
                 }
-                if ($res->type[1] == 's')
+                if ($res->type[1] == 's') {
                     $res->value = $qv->substitute_partial_formula($v['local'.$idx], $res->value);
+                }
                 $vstack = $qv->vstack_create();
-                $qv->vstack_update_variable($vstack, '@'.($idx+1), null, $res->type, $res->value);
+                $qv->vstack_update_variable($vstack, '@'.($idx + 1), null, $res->type, $res->value);
                 $v['answer'.$idx] = $vstack;
                 $names['answer'.$idx] = $vstack->all;
             }
-        } catch (Exception $e) { $errors[$count] = $e->getMessage(); }   // skip all error and go to the next instantiation
+        } catch (Exception $e) {
+            $errors[$count] = $e->getMessage();
+        }   // Skip all errors and go to the next instantiation.
         $data[] = $v;
     }
 
-    // filter the repeated variables
+    // Filter the repeated variables.
     $idx = 0;
     while (isset($names['local'.$idx])) {
         $names['answer'.$idx] = filter_redundant_names($data, $names, 'answer'.$idx, '');
@@ -81,12 +88,13 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
     $names['global'] = filter_redundant_names($data, $names, 'global', 'random');
     $names['random'] = filter_redundant_names($data, $names, 'random', '');
 
-    // instantiate the variables and get the values
+    // Instantiate the variables and get the values.
     $lists = array();
-    for ($count=0; $count<$N; $count++) {
+    for ($count = 0; $count < $N; $count++) {
         $s = array();
-        foreach ($names as $category => $n)
+        foreach ($names as $category => $n) {
             $s[$category] = pick_variables_with_names($data, $names, $category, $count);
+        }
         $lists[] = $s;
     }
     return json_encode(array('names' => $names, 'lists' => $lists, 'size' => $N, 'maxdataset' => $maxdataset, 'errors' => $errors));
@@ -95,40 +103,54 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
 
 
 
-/// filter out the unused variable name in the table header
+// Filter out the unused variable names in the table header.
 function filter_redundant_names($data, $names, $A, $B) {
     global $qv;
     $tmp = array();
-    if (!array_key_exists($A, $names))  return null;
-    foreach ($names[$A] as $n => $notused)
-        if (check_include_name($data, $names, $A, $B, $n))  $tmp[] = $n;
+    if (!array_key_exists($A, $names)) {
+        return null;
+    }
+    foreach ($names[$A] as $n => $notused) {
+        if (check_include_name($data, $names, $A, $B, $n)) {
+            $tmp[] = $n;
+        }
+    }
     return $tmp;
 }
 
 
-/// check whether the name should be included
+// Check whether the name should be included.
 function check_include_name($data, $names, $A, $B, $n) {
     global $qv;
-    if (!array_key_exists($B, $names) || !array_key_exists($n, $names[$B]))
+    if (!array_key_exists($B, $names) || !array_key_exists($n, $names[$B])) {
         return true;
-    for ($i=0; $i<count($data); $i++) {
-        if (!array_key_exists($B, $data[$i]))  return true;
-        if (!array_key_exists($A, $data[$i]))  return true;
+    }
+    for ($i = 0; $i < count($data); $i++) {
+        if (!array_key_exists($B, $data[$i])) {
+            return true;
+        }
+        if (!array_key_exists($A, $data[$i])) {
+            return true;
+        }
         $new = $qv->vstack_get_variable($data[$i][$B], $n);
         $old = $qv->vstack_get_variable($data[$i][$A], $n);
-        if ($new !== $old)  return true;
+        if ($new !== $old) {
+             return true;
+        }
     }
     return false;
 }
 
 
-/// pick the corresponding variable value listed in the names[category]
+// Pick the corresponding variable value listed in the names[category].
 function pick_variables_with_names($data, $names, $category, $idx) {
     global $qv;
-    if (!array_key_exists($category, $data[$idx]))  return null;
+    if (!array_key_exists($category, $data[$idx])) {
+        return null;
+    }
     $d = $data[$idx][$category];
     $res = array();
-    for ($i=0; $i<count($names[$category]); $i++) {
+    for ($i = 0; $i < count($names[$category]); $i++) {
         $name = $names[$category][$i];
         $tmp = $qv->vstack_get_variable($d, $name);
         if ($tmp === null) {
@@ -152,5 +174,7 @@ try {
     $always_random = $_POST['random'];
     $res = instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $N, $always_random);
     echo $res;
-} catch (Exception $e) {}   // prevent the display of all other errors
+} catch (Exception $e) {
+    // Prevent the display of all other errors.
+}
 
