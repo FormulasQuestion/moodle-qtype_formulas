@@ -13,7 +13,7 @@ https://code.google.com/p/moodle-coordinate-question/downloads/list
 
 This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine
 
-This version is compatible with Moodle 2.6, 2.7 and 2.8.
+This version is compatible with Moodle 2.6 and ulterior versions.
 
 
 ###Requirements
@@ -23,7 +23,7 @@ You will need to install Tim Hunt's Adaptive question behaviour for multi-part q
 You can get it from the Moodle plugin directory https://moodle.org/plugins/view.php?plugin=qbehaviour_adaptivemultipart
 or from Github https://github.com/maths/moodle-qbehaviour_adaptivemultipart
 
-You absolutely need version 3.3 of this behaviour, the formulas question type will not work with previous versions.
+You absolutely need version 3.3 or newer of this behaviour, the formulas question type will not work with previous versions.
 
 
 ###Installation
