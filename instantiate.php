@@ -23,6 +23,8 @@
  * @package qtype_formulas
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("../../../config.php");
 require_once("variables.php");
 require_login();

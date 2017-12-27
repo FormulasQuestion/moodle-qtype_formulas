@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Used to save and restore image correctly
- * 
+ *
  * @copyright &copy; 2010-2011 Hon Wai, Lau
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3

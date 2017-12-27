@@ -1,29 +1,29 @@
 .formulas_input_warning_outer {
+    display: inline;
     position: absolute;
     z-index: 1;
-    display: inline;
 }
 
 .formulas_input_warning {
+    background: transparent;
+    left: -1.3em;
     position: absolute;
     top: 0.3em;
-    left: -1.3em;
-    background: transparent;
 }
 
 .formulas_input_info_outer {
+    display: inline;
     position: absolute;
     z-index: 2;
-    display: inline;
 }
 
 .formulas_input_info {
+    background-color: #eeeeff;
+    border: 1px solid #8888cc;
+    left: 0;
     position: absolute;
     top: 1.63em;
-    left: 0;
     width: 150px;
-    border: 1px solid #8888cc;
-    background-color: #eeeeff;
 }
 
 .formulas_input_info_title {
@@ -31,14 +31,14 @@
 }
 
 .formulas_input_info_interpretation {
-    padding: 2px;
     border-top: 1px solid #8888cc;
+    padding: 2px;
 }
 
 .formulas_input_info_interpretation_incorrect {
-    padding: 2px;
     border-top: 1px solid #8888cc;
     color: #bbbbbb;
+    padding: 2px;
 }
 
 .que.formulas .formulas_unit {
@@ -82,10 +82,10 @@
 }
 
 .que.formulas .formulas_subpart {
-    padding-bottom: 0px;
-    margin: 0 0 1.2em 0;
-    #border: solid #dddddd 1px;
     display: block;
+    margin: 0 0 1.2em 0;
+    padding-bottom: 0;
+    #border: solid #dddddd 1px;
 }
 
 .que.formulas .formulas_mark {

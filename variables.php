@@ -22,6 +22,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 function fact($n) {
     $n = (int) $n;
     if ( $n < 2 )
