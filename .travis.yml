@@ -1,0 +1,52 @@
+language: php
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+php: 
+# - 5.6
+ - 7.0
+ - 7.1
+
+addons:
+  firefox: "47.0.1"
+  postgresql: "9.3"
+
+env:
+ global:
+  - MOODLE_BRANCH=MOODLE_34_STABLE
+ matrix:
+  - DB=pgsql
+  - DB=mysqli
+  
+  
+
+before_install:
+  - phpenv config-rm xdebug.ini
+  - cd ../..
+  - composer selfupdate
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^1
+  - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+
+install:
+  - moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
+  - moodle-plugin-ci install
+
+  # Prepare to capture Behat failures.
+  - moodle-plugin-ci add-config '$CFG->behat_faildump_path = "'`pwd`'/behat_output";'
+
+script:
+  - moodle-plugin-ci phplint
+  - moodle-plugin-ci csslint
+#  - moodle-plugin-ci stylelint
+  - moodle-plugin-ci jshint
+  - moodle-plugin-ci phpcpd
+  - moodle-plugin-ci phpmd
+  - moodle-plugin-ci codechecker
+#  - moodle-plugin-ci shifter
+  - moodle-plugin-ci validate
+  - moodle-plugin-ci phpunit
+  - moodle-plugin-ci behat
