@@ -44,14 +44,13 @@ $string['addmorepartsblanks'] = 'Blanks for {no} more parts';
 $string['pluginname'] = 'Formulas';
 $string['pluginnameadding'] = 'Adding a formulas question';
 $string['pluginnameediting'] = 'Editing a formulas question';
-$string['pluginname_help'] = 'To start using this question, please read the <a href="http://code.google.com/p/moodle-coordinate-question/wiki/Tutorial">Tutorial</a>.
+$string['pluginname_help'] = 'To start using this question, please read the <a href="https://docs.moodle.org/33/en/Formulas_question_tutorial">Formulas question tutorial</a>.
 
-For possible questions, please download and import the <a href="http://code.google.com/p/moodle-coordinate-question/downloads/list">Example</a>,
-or see the <a href="http://code.google.com/p/moodle-coordinate-question/wiki/ScreenShots">Screenshots</a>.
+For possible questions, please see <a href="https://docs.moodle.org/33/en/Formulas_question_type#Examples">Examples</a>.
 
-For the options in the editing form below, please read <a href="http://code.google.com/p/moodle-coordinate-question/wiki/QuestionOptions">Question Options</a>
+For the options in the editing form below, please read <a href="https://docs.moodle.org/33/en/Formulas_question_page">Formulas question page</a>
 
-For the full documentation, please read <a href="http://code.google.com/p/moodle-coordinate-question/wiki/Documentation">Documentation</a>';
+For the full documentation, please read <a href="https://docs.moodle.org/33/en/Formulas_question_type">Documentation</a>';
 $string['pluginnamesummary'] = 'Question type with random values and multiple answers
 The answer fields can be placed anywhere so that we can create questions involving various structures such as vectors, polynomials and matrix.
 Other features such as unit checking and multiple parts questions are also integrated tightly and easy to use.';
@@ -74,14 +73,14 @@ be done by defining a set of elements to choose from:
 
 The elements can be numbers, strings or lists of them. At the start of a new attempt, one element will be drawn from the set and assigned to the variable
 on the left.  Also, for a set of number, you can use the range notation like 10:100:10 (see example E above.). </p>';
-$string['varsrandom_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Random_variables';
+$string['varsrandom_link'] = 'https://docs.moodle.org/33/en/Formulas_question_page#Random_variables';
 $string['varsglobal'] = 'Global variables';
 $string['varsglobal_help'] = 'Formulas can be specified here to manipulate the instantiated random variables
 (all random variables are available here). The full list of mathematical
 functions and operators is given in the documentation.
 
 <pre class="prettyprint">a = 1.11111;<br>b = exp(3);<br>c = A + a + b;<br>d = sin(1.5*pi()) + c;<br>e = round(a, 0);<br>f = [0,1,2,3][A];<br>g = ["zero","one","two","three"][A];<br>distance = sqrt(a*a + b*b);</pre>';
-$string['varsglobal_link'] = 'https://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Variable_assignments';
+$string['varsglobal_link'] = 'https://docs.moodle.org/33/en/Formulas_question_page#Global_variables';
 // The language string for the display and flow options and common question parts settings.
 $string['mainq'] = 'Main question';
 $string['subqoptions'] = 'Extra options';
@@ -112,7 +111,7 @@ Algebraic formula answers requires a string or list of strings as answer.
 Different answer types will impose different restrictions while inputting answers, so students will
 need to know how to input them. The format check in the question code will
 also tell them when they type if something is wrong. Please read the documentation for details.';
-$string['answertype_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Answer_type';
+$string['answertype_link'] = 'https://docs.moodle.org/33/en/Formulas_question_page#Answer_type';
 $string['vars1'] = 'Local variables';
 $string['vars1_help'] = 'You can define variables here in the same way as global variables are defined at the question level. Variables defined here can be used in the part\'s answer or feedback
 and their scope of visibility is limited to the part.';
@@ -126,13 +125,13 @@ defines the number of answer fields for this part.
 <pre class="prettyprint">123<br>[1, 0, 0, 1]<br>a<br>[1, a, b]<br>"exp(-a t)"<br>["vx t","vy t - 0.5 a t^2"]</pre>';
 $string['vars2'] = 'Grading variables';
 $string['vars2_help'] = 'All local variables and the student\'s responses can be used here. See documentation for advanced usages.';
-$string['vars2_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Grading_variables';
+$string['vars2_link'] = 'https://docs.moodle.org/33/en/FQT_Marking#Grading_variables';
 $string['correctness'] = 'Grading criteria*';
 $string['correctness_help'] = '**Required**. You can choose either relative error or absolute error with error
 range. Relative error cannot be used for algebraic answer type.
 
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
-$string['correctness_link'] = 'http://code.google.com/p/moodle-coordinate-question/wiki/Documentation#Manual_grading_criteria';
+$string['correctness_link'] = 'https://docs.moodle.org/33/en/FQT_Marking#Manual_grading_criteria';
 $string['relerror'] = 'Relative error';
 $string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';

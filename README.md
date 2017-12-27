@@ -19,7 +19,7 @@ https://code.google.com/p/moodle-coordinate-question/downloads/list
 
 This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine
 
-This version is compatible with Moodle 2.6 and ulterior versions.
+This version is compatible with Moodle 2.6 and ulterior versions. It has been tested with Moolde versions up to 3.4 and 3.5dev.
 
 
 ###Requirements
@@ -59,11 +59,10 @@ But mastering all the possibilities require some practice and there is a learnin
 
 Unfortunately there is not yet an up-to date documentation, so here are some pointers to the available help :
 * first you can import the Moodle xml file samples/sample-formulas-questions.xml and play with the included formulas questions.
-* You can visit Hon Wai Lau's original tutorial and documentation for the version for Moodle 1.9 at 
-https://code.google.com/p/moodle-coordinate-question/wiki/Tutorial
-and
-https://code.google.com/p/moodle-coordinate-question/wiki/Documentation
-but be warned there are some differences with the actual version
+* You can visit the documentation made by Domic Bauer https://docs.moodle.org/33/en/Formulas_question_type
+  (As there is no or little difference in the Formulas question type plugin for recent versions of Moodle (2.0 and above),
+  the documentation for the Formulas question type has been moved to this location but it apply to all Moodle versions,
+  including the current release)
 * you can read discussions about the formulas question type in the Moodle quiz forum
 for instance https://moodle.org/mod/forum/discuss.php?d=181049 and https://moodle.org/mod/forum/discuss.php?d=163345
 * you can post your questions in this forum

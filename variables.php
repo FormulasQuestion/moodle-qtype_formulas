@@ -66,7 +66,7 @@ function gcd($a,$b) {
     if($a < 0)         $a=0-$a;
     if($b < 0 )        $b=0-$b;
     if($a == 0 || $b == 0)    return 1;
-    if($a == $b)              return a;
+    if($a == $b)              return $a;
 
     do{
         $rest = (int) $a % $b;
@@ -1309,7 +1309,7 @@ class qtype_formulas_variables {
                     break;
 
                 // Functions that must have two arguments
-                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr':
+                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr': case 'lcm': case 'gcd': 
                     if (strlen($regs[5])!=0 || strlen($regs[4])==0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }
