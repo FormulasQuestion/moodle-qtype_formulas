@@ -34,10 +34,11 @@ You absolutely need version 3.3 or newer of this behaviour, the formulas questio
 
 ### Installation
 
-####Installation from the Moodle plugin directory
+#### Installation from the Moodle plugin directory
+
 This question type is available from https://moodle.org/plugins/view.php?plugin=qtype_formulas
 
-Install as other Moodle question type plugin
+Install as any other Moodle question type plugin
 
 #### Installation Using Git
 
@@ -57,9 +58,9 @@ This question type is very powerful and permit creation of a wide range of quest
 
 But mastering all the possibilities require some practice and there is a learning curve on creating formulas questions.
 
-Unfortunately there is not yet an up-to date documentation, so here are some pointers to the available help :
+Here are some pointers to the available help :
 * first you can import the Moodle xml file samples/sample-formulas-questions.xml and play with the included formulas questions.
-* You can visit the documentation made by Domic Bauer https://docs.moodle.org/33/en/Formulas_question_type
+* You can visit the documentation made by Dominique Bauer https://docs.moodle.org/33/en/Formulas_question_type
   (As there is no or little difference in the Formulas question type plugin for recent versions of Moodle (2.0 and above),
   the documentation for the Formulas question type has been moved to this location but it apply to all Moodle versions,
   including the current release)
