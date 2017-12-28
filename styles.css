@@ -85,7 +85,7 @@
     display: block;
     margin: 0 0 1.2em 0;
     padding-bottom: 0;
-    #border: solid #dddddd 1px;
+    border: solid #dddddd 1px;
 }
 
 .que.formulas .formulas_mark {

@@ -22,7 +22,7 @@ This question type was upgraded to the new question engine introduced in Moodle 
 This version is compatible with Moodle 2.6 and ulterior versions. It has been tested with Moolde versions up to 3.4 and 3.5dev.
 
 
-###Requirements
+### Requirements
 
 You will need to install Tim Hunt's Adaptive question behaviour for multi-part questions (qbehaviour_adaptivemultipart) prior to installing the formulas question type.
 
@@ -32,27 +32,27 @@ or from Github https://github.com/maths/moodle-qbehaviour_adaptivemultipart
 You absolutely need version 3.3 or newer of this behaviour, the formulas question type will not work with previous versions.
 
 
-###Installation
+### Installation
 
 ####Installation from the Moodle plugin directory
 This question type is available from https://moodle.org/plugins/view.php?plugin=qtype_formulas
 
 Install as other Moodle question type plugin
 
-####Installation Using Git 
+#### Installation Using Git
 
 To install using git type these commands in the root of your Moodle install:
     git clone git://github.com/jmvedrine/moodle-qtype_formulas.git question/type/formulas
     echo '/question/type/formulas/' >> .git/info/exclude
 
 
-####Installation From Downloaded zip file
+#### Installation From Downloaded zip file
 
 Alternatively, download the zip from https://github.com/jmvedrine/moodle-qtype_formulas
 
 unzip it into the question/type folder, and then rename the new folder to formulas.
 
-### Creating formulas questions ###
+### Creating formulas questions
 This question type is very powerful and permit creation of a wide range of questions.
 
 But mastering all the possibilities require some practice and there is a learning curve on creating formulas questions.
