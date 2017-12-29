@@ -84,13 +84,13 @@ class qtype_formulas_question_test extends basic_testcase {
     public function test_get_question_summary_test0() {
         $q = $this->get_test_formulas_question('test0');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals('Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.', $q->get_question_summary());
+        $this->assertEquals("Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.\n", $q->get_question_summary());
     }
 
     public function test_get_question_summary_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals('Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--This is first part.--This is second part.--This is third part.', $q->get_question_summary());
+        $this->assertEquals("Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--This is first part.--This is second part.--This is third part.\n", $q->get_question_summary());
     }
 
     public function test_get_question_summary_test2() {
@@ -101,11 +101,11 @@ class qtype_formulas_question_test extends basic_testcase {
         $s = $globalvars->all['s']->value;
         $dt = $globalvars->all['dt']->value;
 
-        $this->assertEquals('This question shows different display methods of the answer and unit box.'
-                            . 'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0}{_u}'
-                            . 'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0} {_u}'
-                            .'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0} {_u}'
-                            . 'If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? speed = {_0}{_u}', $q->get_question_summary());
+        $this->assertEquals("This question shows different display methods of the answer and unit box.\n"
+                            . "If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0}{_u}\n"
+                            . "If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0} {_u}\n"
+                            ."If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? {_0} {_u}\n"
+                            . "If a car travel ' . $s . ' m in ' . $dt . ' s, what is the speed of the car? speed = {_0}{_u}\n", $q->get_question_summary());
     }
 
     public function test_get_correct_response_test0() {
