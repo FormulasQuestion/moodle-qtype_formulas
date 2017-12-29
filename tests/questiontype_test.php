@@ -133,7 +133,7 @@ class qtype_formulas_test extends advanced_testcase {
     public function test_split_questiontext0() {
         $q = $this->get_test_formulas_question('test1');
         $expected = array(0 => '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used,' .
-                'the part will be inserted at the location of placeholder.--',
+                ' the part will be inserted at the location of placeholder.--',
                 1 => '--',
                 2 => '--',
                 3 => '</p>');

@@ -266,7 +266,7 @@ class qtype_formulas extends question_type {
      *
      * @param string $questiontext The main question text containing all placeholders.
      * @param array $answers array of answers with placeholder (can be empty string)
-     * @return  array of text fragments with count($answers) elements.
+     * @return  array of text fragments with count($answers) + 1 elements.
      */
     public function split_questiontext($questiontext, $answers) {
         // TODO Simplify this now that answers are in right order in data structure
@@ -293,6 +293,7 @@ class qtype_formulas extends question_type {
 
         return $fragments;
     }
+
     /**
      * Initialise the question_definition fields.
      * @param question_definition $question the question_definition we are creating.
