@@ -89,10 +89,8 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
         $this->check_current_mark(1);
         $this->check_current_output(
                 $this->get_contains_mark_summary(1),
-                $this->get_contains_submit_button_expectation(false),
                 $this->get_contains_correct_expectation(),
                 $this->get_does_not_contain_validation_error_expectation());
-
     }
 
     public function test_test0_submit_wrong_submit_right() {

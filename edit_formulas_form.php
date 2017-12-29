@@ -253,15 +253,16 @@ class qtype_formulas_edit_form extends question_edit_form {
                     // Prepare part's text.
                     $subqtid = file_get_submitted_draft_itemid('subqtext['.$key.']');
                     $subqt = file_prepare_draft_area($subqtid, $this->context->id, 'qtype_formulas',
-                            'answersubqtext', empty($answer->id)?null:(int)$answer->id, $this->fileoptions, $answer->subqtext);
+                            'answersubqtext', empty($answer->id) ? null : (int)$answer->id,
+                            $this->fileoptions, $answer->subqtext);
                     $default_values['subqtext['.$key.']'] = array('text' => $subqt,
                             'format' => $answer->subqtextformat, 'itemid' => $subqtid);
                     $subqfbid = file_get_submitted_draft_itemid('feedback['.$key.']');
                     $subqfb = file_prepare_draft_area($subqfbid, $this->context->id, 'qtype_formulas',
                             'answerfeedback', empty($answer->id) ? null : (int)$answer->id,
                             $this->fileoptions, $answer->feedback);
-                    $default_values['feedback['.$key.']'] = array('text'=>$subqfb,
-                            'format'=>$answer->feedbackformat, 'itemid'=>$subqfbid);
+                    $default_values['feedback['.$key.']'] = array('text' => $subqfb,
+                            'format' => $answer->feedbackformat, 'itemid' => $subqfbid);
                 }
             }
 

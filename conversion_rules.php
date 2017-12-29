@@ -48,9 +48,9 @@ F: m u n p f;
 T: k m u n p;
 H: k m u n p;
 ');
-        //  $this->basic_unit_conversion_rules[100] = array(
-        //  $this->basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
-        //  $this->basic_unit_conversion_rules[1][1] + '');
+        // $this->basic_unit_conversion_rules[100] = array(
+        // $this->basic_unit_conversion_rules[1][0] + ' and your own conversion rules',
+        // $this->basic_unit_conversion_rules[1][1] + '');
     }
 
     public function entry($n) {
