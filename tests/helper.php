@@ -258,6 +258,17 @@ class qtype_formulas_test_helper extends question_test_helper {
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
         );
+        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->shownumcorrect = '0';
+        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->numhints = 2;
+        $form->hint = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->hintclearwrong = array('0', '0');
+        $form->hintshownumcorrect = array('0', '0');
         return $form;
     }
 
