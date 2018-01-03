@@ -34,9 +34,6 @@ install:
   - moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
   - moodle-plugin-ci install
 
-  # Prepare to capture Behat failures.
-  - moodle-plugin-ci add-config '$CFG->behat_faildump_path = "'`pwd`'/behat_output";'
-
 script:
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpmd
