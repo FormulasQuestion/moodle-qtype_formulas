@@ -120,16 +120,16 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question the question from the test1.xml file.
+     * @return qtype_formulas_question with 3 parts.
      * this version is non randomized to ease testing
      */
     public static function make_formulas_question_test1() {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-1';
-        $q->questiontext = '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--{#1}--{#2}--{#3}</p>';
+        $q->questiontext = '<p>Multiple parts : --{#1}--{#2}--{#3}</p>';
         $q->penalty = 0.3; // Non-zero and not the default.
-        $q->textfragments = array(0 => '<p>Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--',
+        $q->textfragments = array(0 => '<p>Multiple parts : --',
                 1 => '--',
                 2 => '--',
                 3 => '</p>');
@@ -162,6 +162,58 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $q;
     }
 
+    /**
+     * Gets the question form data for the test1 formulas question
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_test1() {
+        $form = new stdClass();
+
+        $form->name = 'test-1';
+        $form->questiontext = array('text' => '<p>Multiple parts : --{#1}--{#2}--{#3}</p>',
+                'format' => FORMAT_HTML);
+        $form->generalfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->defaultmark = 6;
+        $form->penalty = 0.3;
+        $form->varsrandom = '';
+        $form->varsglobal = '';
+        $form->answer = array('5', '6', '7');
+        $form->answermark = array('2', '2', '2');
+        $form->numbox = array(1, 1, 1);
+        $form->placeholder = array('#1', '#2', '#3');
+        $form->postunit = array('', '', '');
+        $form->answertype = array(0, 0, 0);
+        $form->vars1 = array('', '', '');
+        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
+        $form->vars2 = array('', '', '');
+        $form->unitpenalty = array(1, 1, 1);
+        $form->ruleid = array('1', '1', '1');
+        $form->otherrule = array('', '', '');
+        $form->globalunitpenalty = 1;
+        $form->globalruleid = 1;
+        $form->subqtext = array(
+            array('text' => 'This is first part.', 'format' => FORMAT_HTML),
+            array('text' => 'This is second part.', 'format' => FORMAT_HTML),
+            array('text' => 'This is third part.', 'format' => FORMAT_HTML),
+        );
+        $form->feedback = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->shownumcorrect = '0';
+        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->numhints = 2;
+        $form->hint = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->hintclearwrong = array('0', '0');
+        $form->hintshownumcorrect = array('0', '0');
+        return $form;
+    }
     /**
      * @return qtype_formulas_question the question from the test1.xml file.
      */

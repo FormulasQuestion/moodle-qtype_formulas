@@ -90,7 +90,7 @@ class qtype_formulas_question_test extends basic_testcase {
     public function test_get_question_summary_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals("Multiple parts : By default, all parts will be added at the end. If placeholder is used, the part will be inserted at the location of placeholder.--This is first part.--This is second part.--This is third part.\n", $q->get_question_summary());
+        $this->assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n", $q->get_question_summary());
     }
 
     public function test_get_question_summary_test2() {
