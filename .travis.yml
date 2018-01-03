@@ -1,52 +1,45 @@
 language: php
 
-sudo: false
-
-cache:
-  directories:
-    - $HOME/.composer/cache
-
-php: 
-# - 5.6
- - 7.0
- - 7.1
+sudo: required
 
 addons:
   firefox: "47.0.1"
   postgresql: "9.3"
+  apt:
+    packages:
+      - oracle-java8-installer
+      - oracle-java8-set-default
 
-env:
- global:
-  - MOODLE_BRANCH=MOODLE_32_STABLE
- matrix:
-  - DB=pgsql
-  - DB=mysqli
-  
-  
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.npm
+
+php:
+ - 7.0
+ - 7.1
+
+env: 
+  - MOODLE_BRANCH=MOODLE_32_STABLE DB=pgsql IGNORE_PATHS=mobile_src
 
 before_install:
   - phpenv config-rm xdebug.ini
+  - nvm install 8.9
+  - nvm use 8.9
   - cd ../..
-  - composer selfupdate
-  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^1
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
-  - moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
   - moodle-plugin-ci install
-
-  # Prepare to capture Behat failures.
-  - moodle-plugin-ci add-config '$CFG->behat_faildump_path = "'`pwd`'/behat_output";'
 
 script:
   - moodle-plugin-ci phplint
-  - moodle-plugin-ci csslint
-#  - moodle-plugin-ci stylelint
-  - moodle-plugin-ci jshint
-  - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
-#  - moodle-plugin-ci shifter
   - moodle-plugin-ci validate
+  - moodle-plugin-ci savepoints
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat

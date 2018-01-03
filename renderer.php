@@ -428,8 +428,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $question = $qa->get_question();
         $state = $qa->get_state();
-        // Only show feedback if response is wrong (will be corrected later for adaptive behaviour).
-        $showfeedback = $options->feedback && $state == question_state::$gradedwrong;
+        // Only show feedback if response not right (will be corrected later for adaptive behaviour).
+        $showfeedback = $options->feedback
+                && ($state == question_state::$gradedwrong || $state == question_state::$gradedpartial);
 
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
