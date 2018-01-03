@@ -18,8 +18,8 @@
 }
 
 .formulas_input_info {
-    background-color: #eeeeff;
-    border: 1px solid #8888cc;
+    background-color: #eef;
+    border: 1px solid #88c;
     left: 0;
     position: absolute;
     top: 1.63em;
@@ -31,13 +31,13 @@
 }
 
 .formulas_input_info_interpretation {
-    border-top: 1px solid #8888cc;
+    border-top: 1px solid #88c;
     padding: 2px;
 }
 
 .formulas_input_info_interpretation_incorrect {
-    border-top: 1px solid #8888cc;
-    color: #bbbbbb;
+    border-top: 1px solid #88c;
+    color: #bbb;
     padding: 2px;
 }
 
@@ -85,7 +85,7 @@
     display: block;
     margin: 0 0 1.2em 0;
     padding-bottom: 0;
-    border: solid #dddddd 1px;
+    border: solid #ddd 1px;
 }
 
 .que.formulas .formulas_mark {
@@ -93,7 +93,7 @@
 }
 
 .que.formulas .formulas_grade {
-  font-size: 0.8em;
+    font-size: 0.8em;
 }
 
 .que.formulas .formulation .formulaspartfeedback,

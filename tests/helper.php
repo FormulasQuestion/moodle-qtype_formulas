@@ -170,6 +170,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $q->name = 'test-2';
         $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
+        $q->defaultmark = 1;
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->numpart = 4;
         $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
@@ -178,7 +179,6 @@ class qtype_formulas_test_helper extends question_test_helper {
                 3 => '',
                 4 => '',
                 );
-        $q->defaultmark = 8;
         $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $q->varsglobal = 's = v*dt;';
         $p0 = self::make_a_formulas_part();
@@ -215,6 +215,33 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[3] = $p3;
 
         return $q;
+    }
+
+        /**
+     * Gets the question form data for a formulas question
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_test2() {
+        $form = new stdClass();
+
+        $form->name = 'test-2';
+        $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
+                'format' => FORMAT_HTML);
+        $form->generalfeedback = array('text' => 'This is the general feedback', 'format' => FORMAT_HTML);
+        $form->penalty = 0.3;
+        $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
+        $form->varsglobal = 's = v*dt;';
+        $form->answer = array('v', 'v', 'v', 'v');
+        $form->answermark = array('2', '2', '2', '2');
+        $form->postunit = array('m/s', 'm/s', '', '');
+        $form->feedback = array(
+            array('text' => '' => FORMAT_HTML),
+            array('text' => '' => FORMAT_HTML),
+            array('text' => '' => FORMAT_HTML),
+            array('text' => '' => FORMAT_HTML),
+        );
+
+        return $form;
     }
 
     /**

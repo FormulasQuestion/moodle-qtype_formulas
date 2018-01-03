@@ -23,7 +23,6 @@ Feature: Test creating a Formulas question
       | Question name        | formulas-001                              |
       | Question text        | Minimal formula question                  |
       | General feedback     | The correct answer is 1                   |
-      | Default mark         | 1                                         |
       | id_answer_0          | 1                                         |
       | id_answermark_0      | 1                                         |
     Then I should see "formulas-001"
