@@ -234,11 +234,13 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsglobal = 's = v*dt;';
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
+        $form->numbox = array(1, 1, 1, 1);
         $form->placeholder = array('', '', '', '');
         $form->postunit = array('m/s', 'm/s', '', '');
         $form->answertype = array(0, 0, 0, 0);
         $form->vars1 = array('', '', '', '');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
+        $form->vars2 = array('', '', '', '');
         $form->unitpenalty = array(1, 1, 1, 1);
         $form->ruleid = array('1', '1', '1', '1');
         $form->otherrule = array('', '', '', '');
