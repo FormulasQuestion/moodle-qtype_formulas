@@ -33,7 +33,7 @@ Feature: Test duplicating a quiz containing a Formulas question
     Then the following fields match these values:
       | Question name        | formulas-001                                                                  |
       | Question text        | This question shows different display methods of the answer and unit box.     |
-      | Random Variables     | v = {20:100:10}; dt = {2:6};                                                  |
+      | Random variables     | v = {20:100:10}; dt = {2:6};                                                  |
       | Global variables     | s = v*dt;                                                                     |
       | id_answer_0          | v                                                                             |
       | id_answermark_0      | 2                                                                             |
