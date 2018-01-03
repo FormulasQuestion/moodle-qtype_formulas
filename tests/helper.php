@@ -170,7 +170,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $q->name = 'test-2';
         $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
-        $q->defaultmark = 1;
+        $q->defaultmark = 8;
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->numpart = 4;
         $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
@@ -228,19 +228,34 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
                 'format' => FORMAT_HTML);
         $form->generalfeedback = array('text' => 'This is the general feedback', 'format' => FORMAT_HTML);
+        $form->defaultmark = 8;
         $form->penalty = 0.3;
         $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $form->varsglobal = 's = v*dt;';
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
+        $form->placeholder = array('', '', '', '');
         $form->postunit = array('m/s', 'm/s', '', '');
-        $form->feedback = array(
-            array('text' => '' => FORMAT_HTML),
-            array('text' => '' => FORMAT_HTML),
-            array('text' => '' => FORMAT_HTML),
-            array('text' => '' => FORMAT_HTML),
+        $form->answertype = array(0, 0, 0, 0);
+        $form->vars1 = array('', '', '', '');
+        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
+        $form->unitpenalty = array(1, 1, 1, 1);
+        $form->ruleid = array('1', '1', '1', '1');
+        $form->otherrule = array('', '', '', '');
+        $form->globalunitpenalty = 1;
+        $form->globalruleid = 1;
+        $form->subqtext = array(
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
-
+        $form->feedback = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
         return $form;
     }
 
