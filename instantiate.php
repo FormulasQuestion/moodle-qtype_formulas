@@ -23,11 +23,11 @@
  * @package qtype_formulas
  */
 
-defined('MOODLE_INTERNAL') || die();
+define('AJAX_SCRIPT', true);
 
-require_once("../../../config.php");
-require_once("variables.php");
-require_login();
+require_once(__DIR__.'/../../../config.php');
+require_once("$CFG->dirroot/question/type/formulas/variables.php");
+
 $qv = new qtype_formulas_variables();
 
 // Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
@@ -164,9 +164,8 @@ function pick_variables_with_names($data, $names, $category, $idx) {
     return $res;
 }
 
-
-
 try {
+
     $varsrandom = $_POST['varsrandom'];
     $varsglobal = $_POST['varsglobal'];
     $varslocals = $_POST['varslocals'];
@@ -177,6 +176,6 @@ try {
     $res = instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $N, $always_random);
     echo $res;
 } catch (Exception $e) {
-    // Prevent the display of all other errors.
+    // Prevent the display of all errors.
 }
 
