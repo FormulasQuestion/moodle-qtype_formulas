@@ -48,7 +48,7 @@ $string['pluginname_help'] = 'To start using this question, please read the <a h
 
 For possible questions, please see <a href="https://docs.moodle.org/33/en/Formulas_question_type#Examples">Examples</a>.
 
-For the options in the editing form below, please read <a href="https://docs.moodle.org/33/en/Formulas_question_page">Formulas question page</a>
+For the options in the editing form below, please read <a href="https://docs.moodle.org/33/en/Formulas:_Question_page">Formulas question page</a>
 
 For the full documentation, please read <a href="https://docs.moodle.org/33/en/Formulas_question_type">Documentation</a>';
 $string['pluginnamesummary'] = 'Question type with random values and multiple answers
@@ -125,13 +125,15 @@ defines the number of answer fields for this part.
 <pre class="prettyprint">123<br>[1, 0, 0, 1]<br>a<br>[1, a, b]<br>"exp(-a t)"<br>["vx t","vy t - 0.5 a t^2"]</pre>';
 $string['vars2'] = 'Grading variables';
 $string['vars2_help'] = 'All local variables and the student\'s responses can be used here. See documentation for advanced usages.';
-$string['vars2_link'] = 'https://docs.moodle.org/33/en/FQT_Marking#Grading_variables';
-$string['correctness'] = 'Grading criteria*';
+$string['vars2_link'] = 'https://docs.moodle.org/33/en/Formulas:_Answers_and_marking#Grading_variables';
+$string['correctness'] = 'Grading criterion*';
 $string['correctness_help'] = '**Required**. You can choose either relative error or absolute error with error
 range. Relative error cannot be used for algebraic answer type.
 
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
-$string['correctness_link'] = 'https://docs.moodle.org/33/en/FQT_Marking#Manual_grading_criteria';
+$string['correctness_link'] = 'https://docs.moodle.org/33/en/Formulas:_Answers_and_marking#Manual_grading_criteria';
+$string['correctnessexpert'] ='Expert';
+$string['correctnesssimple'] ='Simple';
 $string['relerror'] = 'Relative error';
 $string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';
@@ -178,7 +180,7 @@ $string['globaloptions'] = '[Global] - ';
 $string['checkvarshdr'] = 'Check variables instantiation';
 $string['instantiate'] = 'Instantiate';
 $string['numdataset'] = 'Number of dataset';
-$string['renew'] = 'Renew';
+$string['renew'] = 'Update';
 $string['qtextpreview'] = 'Preview using dataset';
 $string['varsstatistics'] = 'Statistics';
 $string['varsdata'] = 'Instantiated dataset';

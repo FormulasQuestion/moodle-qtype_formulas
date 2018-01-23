@@ -165,15 +165,16 @@ function pick_variables_with_names($data, $names, $category, $idx) {
 }
 
 try {
+    $varsrandom = required_param('varsrandom', PARAM_RAW);
+    $varsglobal = required_param('varsglobal', PARAM_RAW);
+    $varslocals = required_param('varslocals', PARAM_RAW);
+    $answers = required_param('answers', PARAM_RAW);
+    $start = optional_param('start', 0, PARAM_INT);
+    $N = required_param('N', PARAM_INT);
+    $always_random = optional_param('random', 0, PARAM_INT);
 
-    $varsrandom = $_POST['varsrandom'];
-    $varsglobal = $_POST['varsglobal'];
-    $varslocals = $_POST['varslocals'];
-    $answers = $_POST['answers'];
-    $start = $_POST['start'];
-    $N = $_POST['N'];
-    $always_random = $_POST['random'];
     $res = instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $N, $always_random);
+    header('Content-type: application/json; charset=utf-8');
     echo $res;
 } catch (Exception $e) {
     // Prevent the display of all errors.
