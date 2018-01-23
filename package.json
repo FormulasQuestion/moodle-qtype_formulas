@@ -1,0 +1,14 @@
+{
+       "name": "moodle-qtype_formulas",
+       "devDependencies": {
+              "grunt": "^1.0.1",
+              "grunt-contrib-less": "^1.4.1",
+              "grunt-contrib-watch": "^1.0.0",
+              "grunt-load-gruntfile": "0.0.2"
+       },
+       "repository": {
+              "type": "git",
+              "url": "git://github.com/jmvedrine/moodle-qtype_formulas.git"
+       },
+       "license" : "GPL-3.0"
+}

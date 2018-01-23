@@ -269,7 +269,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $q;
     }
 
-        /**
+    /**
      * Gets the question form data for a formulas question
      * @return stdClass
      */
