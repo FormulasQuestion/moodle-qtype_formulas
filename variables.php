@@ -934,7 +934,7 @@ class qtype_formulas_variables {
                 $splitted[$i] = '$a['.$i.']';
             }
         }
-        
+
         // check for possible formula error for the substituted string, before directly calling eval()
         $replaced = $splitted;
         for ($i=1; $i<count($replaced); $i+=2)  if ($replaced[$i][0] == '$')  $replaced[$i] = 1;  // substitute a dummy value for testing
@@ -1313,7 +1313,7 @@ class qtype_formulas_variables {
                     break;
 
                 // Functions that must have two arguments
-                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr': case 'lcm': case 'gcd': 
+                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr': case 'lcm': case 'gcd':
                     if (strlen($regs[5])!=0 || strlen($regs[4])==0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }

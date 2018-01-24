@@ -52,7 +52,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             $errmsg = null;
             try{
                 $result = $qv->get_expressions_in_bracket($b[1], 0, $b[2]);
-            } catch(Exception $e) { 
+            } catch(Exception $e) {
                 $errmsg = $e->getMessage();
             }
             $eval = $errmsg===null;
@@ -360,7 +360,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
         $expected = '1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105 ';
         $this->assertEquals($expected, $newtext);
     }
-    
+
     /**
      * Test 6.1: Numerical formula.
      */
@@ -402,7 +402,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             }
         }
     }
-    
+
     /**
      * Test 6.2: Numerical formula.
      */
@@ -454,7 +454,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             }
         }
     }
-    
+
     /**
      * Test 7: Algebraic formula.
      */
@@ -545,7 +545,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
         $this->assertEquals($result[1], 0);
 //        var_dump($result);
     }
-            
+
     /**
      * Test 8: Split formula unit.
      */
