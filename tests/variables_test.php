@@ -44,17 +44,22 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_get_expressions_in_bracket() {
         $qv = new qtype_formulas_variables;
         $brackettest = array(
-            array(true, '8+sum([1,2+2])', '('),
-            array(true, '8+[1,2+2,3+sin(3),sum([1,2,3])]', '['),
-            array(true, 'a=0; for x in [1,2,3] { a=a+sum([1,x]); }', '{')
+            array(true, '8+sum([1,2+2])', '(', 5, 13, array("[1,2+2]")),
+            array(true, '8+[1,2+2,3+sin(3),sum([1,2,3])]', '[', 2, 30, array("1", "2+2", "3+sin(3)", "sum([1,2,3])")),
+            array(true, 'a=0; for x in [1,2,3] { a=a+sum([1,x]); }', '{', 22, 40, array(" a=a+sum([1,x]); ")),
         );
         foreach ($brackettest as $b) {
             $errmsg = null;
             try{
-                $res = $qv->get_expressions_in_bracket($b[1], 0, $b[2]);
-            } catch(Exception $e) { $errmsg = $e->getMessage(); }
+                $result = $qv->get_expressions_in_bracket($b[1], 0, $b[2]);
+            } catch(Exception $e) { 
+                $errmsg = $e->getMessage();
+            }
             $eval = $errmsg===null;
             $this->assertEquals($b[0], $eval);
+            $this->assertEquals($b[3], $result->openloc);
+            $this->assertEquals($b[4], $result->closeloc);
+            $this->assertEquals($b[5], $result->expressions);
         }
     }
 
@@ -66,10 +71,13 @@ class qtype_formulas_variables_test extends advanced_testcase {
         $errmsg = null;
         try {
             $v = $qv->vstack_create();
-            $res = $qv->evaluate_general_expression($v, 'sin(4) + exp(cos(4+5))');
-        } catch(Exception $e) { $errmsg = $e->getMessage(); }
-        $eval = $errmsg===null;
-        $this->assertEquals(true, $eval);
+            $result = $qv->evaluate_general_expression($v, 'sin(4) + exp(cos(4+5))');
+        } catch(Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+        $this->assertEquals(-0.35473297204849, $result->value);
+        $this->assertEquals('n', $result->type);
     }
 
     /**
@@ -78,37 +86,71 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_evaluate_assignments_1() {
         $qv = new qtype_formulas_variables;
         $testcases = array(
-            array(true, '#--------- basic operation ---------#'),
-            array(true, 'a = 1;'),
-            array(true, 'a = 1; b = 4;'),
-            array(true, 'a = 1; # This is comment! So it will be skipped. '),
-            array(true, 'c = cos(0)+3.14;'),
-            array(true, 'd = "Hello!";'),
-            array(true, 'e =[1,2,3,4];'),
-            array(true, 'f =["A","B","C"];'),
-            array(true, 'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];'),
-            array(true, 'h = [1,2+3,sin(4),5]; j=h[1];'),
-            array(true, 'e = [1,2,3,4][1];'),
-            array(true, 'e = [1,2,3,4]; e[2]=111;'),
-            array(true, 'e = [1,2,3,4]; a=1; e[a]=111;'),
-            array(true, 'e = [1,2,3,4]; a=1-1; e[a]=111;'),
-            array(true, 'g = [3][0];'),
-            array(true, 'a = [7,8,9]; g = [a[1]][0];'),
-            array(true, 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'),
-            array(true, 'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];'),
+            array(true, '#--------- basic operation ---------#', array()),
+            array(true, 'a = 1;', array('a' =>(object) array('type' => 'n', 'value' => 1))),
+            array(true, 'a = 1; b = 4;', array('a' =>(object) array('type' => 'n', 'value' => 1),
+                                               'b' =>(object) array('type' => 'n', 'value' => 4))),
+            array(true, 'a = 1; # This is comment! So it will be skipped. ',
+                                         array('a' =>(object) array('type' => 'n', 'value' => 1))),
+            array(true, 'c = cos(0)+3.14;', array('c' =>(object) array('type' => 'n', 'value' => 4.1400000000000006))),
+            array(true, 'd = "Hello!";', array('d' =>(object) array('type' => 's', 'value' => "Hello!"))),
+            array(true, 'e =[1,2,3,4];', array('e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)))),
+            array(true, 'f =["A","B","C"];', array('f' =>(object) array('type' => 'ls', 'value' => array("A","B","C")))),
+            array(true, 'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];', array(
+                    'a' =>(object) array('type' => 'n', 'value' => 1),
+                    'b' =>(object) array('type' => 'n', 'value' => 4),
+                    'c' =>(object) array('type' => 'n', 'value' => 4),
+                    'g' =>(object) array('type' => 'ln', 'value' => array(1, 47 , 2 , 2.718281828459, 16)))),
+            array(true, 'h = [1,2+3,sin(4),5]; j=h[1];', array(
+                    'h' =>(object) array('type' => 'ln', 'value' => array(1, 5 , -0.7568024953079282, 5)),
+                    'j' =>(object) array('type' => 'n', 'value' => 5))),
+            array(true, 'e = [1,2,3,4][1];', array(
+                    'e' =>(object) array('type' => 'n', 'value' => 2))),
+            array(true, 'e = [1,2,3,4]; e[2]=111;', array(
+                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 111 , 4)))),
+            array(true, 'e = [1,2,3,4]; a=1; e[a]=111;', array(
+                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 111 , 3 , 4)),
+                    'a' =>(object) array('type' => 'n', 'value' => 1))),
+            array(true, 'e = [1,2,3,4]; a=1-1; e[a]=111;', array(
+                    'e' =>(object) array('type' => 'ln', 'value' => array(111, 2 , 3 , 4)),
+                    'a' =>(object) array('type' => 'n', 'value' => 0))),
+            array(true, 'g = [3][0];', array(
+                    'g' =>(object) array('type' => 'n', 'value' => 3))
+            ),
+            array(true, 'a = [7,8,9]; g = [a[1]][0];', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(7, 8 , 9)),
+                    'g' =>(object) array('type' => 'n', 'value' => 8))
+            ),
+//            array(true, 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'),  Need to rework this one.
+            array(true, 'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3)),
+                    's' =>(object) array('type' => 'ln', 'value' => array(2, 0 , 1)),
+                    'n' =>(object) array('type' => 'ln', 'value' => array(9, 3 , 54))),
+            ),
 //            array(false, 'a=3 6;'),  // Problem parseerror unexpected '$a' (T_VARIABLE)
-            array(false, 'a=3`6;'),
-            array(false, 'f=1; g=f[1];'),
-            array(false, 'e=[];')
+            array(false, 'a=3`6;', 'Formula or expression contains forbidden characters or operators.'),
+            array(false, 'f=1; g=f[1];', '2: Variable is unsubscriptable.'),
+            array(false, 'e=[];', '1: A subexpression is empty.')
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
             try {
                 $v = $qv->vstack_create();
-                $v = $qv->evaluate_assignments($v, $testcase[1]);
-            } catch(Exception $e) { $errmsg = $e->getMessage(); }
-            $eval = $errmsg===null;
-            $this->assertEquals($testcase[0], $eval);
+                $result = $qv->evaluate_assignments($v, $testcase[1]);
+            } catch(Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            if ($testcase[0]) {
+                // Test that no exception is thrown
+                // and that correct result is returned
+                $this->assertNull($errmsg);
+                $this->assertEquals(0, $result->idcounter);
+                $this->assertEquals($testcase[2], $result->all);
+
+            } else {
+                // Test that the correct exception message is returned.
+                $this->assertEquals($testcase[2], $errmsg);
+            }
         }
     }
 
@@ -118,39 +160,92 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_evaluate_assignments_2() {
         $qv = new qtype_formulas_variables;
         $testcases = array(
-            array(false, 'e=[1,2,3,4]; a=1-1; e[a]="A";'),
-            array(false, 'e=[1,2,"A"];'),
-            array(false, 'e=[1,2,3][4,5];'),
-            array(false, 'e=[1,2,3]; f=e[4,5]'),
-            array(false, 'e=[1,2,3,4]; f=e*2;'),
-            array(false, 'e=[1,2,3][1][4,5,6][2];'),
-            array(false, 'e=[0:10,"k"];'),
-            array(false, 'e=[[1,2],[3,4]];'),
-            array(false, 'e=[[[1,2],[3,4]]];'),
-            array(false, 'e=[1,2,3]; e[0] = [8,9];'),
-            array(true, '#--------- additional function (correct) ---------#'),
-            array(true, 'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);'),
-            array(true, 'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")'),
-            array(true, 'p1=pick(4,[2,3,5,7,11]);'),
-            array(true, 'p1=pick(3.1,[2,3,5,7,11]);'),
-            array(true, 'p1=pick(1000,[2,3,5,7,11]);'),
-            array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);'),
-            array(true, 's=sort([7,5,3,11,2]);'),
-            array(true, 's=sort(["B","A2","A1"]);'),
-            array(true, 's=sort(["B","A2","A1"],[2,4,1]);'),
-            array(true, 's=sublist(["A","B","C","D"],[1,3]);'),
-            array(true, 's=sublist(["A","B","C","D"],[0,0,2,3]);'),
-            array(true, 's=inv([2,0,3,1]);'),
-            array(true, 's=inv(inv([2,0,3,1]));')
+            array(false, 'e=[1,2,3,4]; a=1-1; e[a]="A";', '3: Element in the same list must be of the same type, either number or string.'),
+            array(false, 'e=[1,2,"A"];', '1: Element in the same list must be of the same type, either number or string.'),
+            array(false, 'e=[1,2,3][4,5];', '1: Non-numeric value cannot be used as list index.'),
+            array(false, 'e=[1,2,3]; f=e[4,5]', '2: Non-numeric value cannot be used as list index.'),
+            array(false, 'e=[1,2,3,4]; f=e*2;', '2: Some expressions cannot be evaluated numerically.'),
+            array(false, 'e=[1,2,3][1][4,5,6][2];', '1: Variable is unsubscriptable.'),
+            array(false, 'e=[0:10,"k"];', 'Syntax error of a fixed range.'),
+            array(false, 'e=[[1,2],[3,4]];', '1: Element in the same list must be of the same type, either number or string.'),
+            array(false, 'e=[[[1,2],[3,4]]];', '1: Element in the same list must be of the same type, either number or string.'),
+            array(false, 'e=[1,2,3]; e[0] = [8,9];', '2: Element in the same list must be of the same type, either number or string.'),
+            array(true, '#--------- additional function (correct) ---------#', array()),
+            array(true, 'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);', array(
+                    'a' =>(object) array('type' => 'n', 'value' => 4),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(0, 0)),
+                    'B' =>(object) array('type' => 'ls', 'value' => array('Hello', 'Hello', 'Hello')),
+                    'C' =>(object) array('type' => 'ln', 'value' => array(4, 4, 4, 4)),
+                    )
+            ),
+            array(true, 'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)),
+                    'b' =>(object) array('type' => 'n', 'value' => 4),
+                    'c' =>(object) array('type' => 'ls', 'value' => array('rr','rr', 'rr', 'rr')),
+                    )
+            ),
+            array(true, 'p1=pick(4,[2,3,5,7,11]);', array(
+                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    )
+            ),
+            array(true, 'p1=pick(3.1,[2,3,5,7,11]);', array(
+                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    )
+            ),
+            array(true, 'p1=pick(1000,[2,3,5,7,11]);', array(
+                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    )
+            ),
+            array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);', array(
+                    'p1' =>(object) array('type' => 'ln', 'value' =>array(6, 7)),
+                    )
+            ),
+            array(true, 's=sort([7,5,3,11,2]);', array(
+                    's' =>(object) array('type' => 'ln', 'value' =>array(2, 3, 5, 7, 11)),
+                    )
+            ),
+            array(true, 's=sort(["B","A2","A1"]);', array(
+                    's' =>(object) array('type' => 'ls', 'value' =>array('A1', 'A2', 'B')),
+                    )
+            ),
+            array(true, 's=sort(["B","A2","A1"],[2,4,1]);', array(
+                    's' =>(object) array('type' => 'ls', 'value' =>array('A1', 'B', 'A2')),
+                    )
+            ),
+            array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
+                    's' =>(object) array('type' => 'ls', 'value' =>array('B', 'D')),
+                    )
+            ),
+            array(true, 's=sublist(["A","B","C","D"],[0,0,2,3]);', array(
+                    's' =>(object) array('type' => 'ls', 'value' =>array('A', 'A', 'C', 'D')),
+                    )
+            ),
+            array(true, 's=inv([2,0,3,1]);', array(
+                    's' =>(object) array('type' => 'ln', 'value' =>array(1, 3, 0, 2)),
+                    )
+            ),
+            array(true, 's=inv(inv([2,0,3,1]));', array(
+                    's' =>(object) array('type' => 'ln', 'value' =>array(2, 0, 3, 1)),
+                    )
+            ),
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
             try {
                 $v = $qv->vstack_create();
-                $v = $qv->evaluate_assignments($v, $testcase[1]);
+                $result = $qv->evaluate_assignments($v, $testcase[1]);
             } catch(Exception $e) { $errmsg = $e->getMessage(); }
-            $eval = $errmsg===null;
-            $this->assertEquals($testcase[0], $eval);
+            if ($testcase[0]) {
+                // Test that no exception is thrown
+                // and that correct result is returned
+                $this->assertNull($errmsg);
+                $this->assertEquals(0, $result->idcounter);
+                $this->assertEquals($testcase[2], $result->all);
+
+            } else {
+                // Test that the correct exception message is returned.
+                $this->assertEquals($testcase[2], $errmsg);
+            }
         }
     }
 

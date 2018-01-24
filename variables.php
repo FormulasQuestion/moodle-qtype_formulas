@@ -910,35 +910,36 @@ class qtype_formulas_variables {
      */
     private function evaluate_numerical_expression($vstacks, $expression, $functype='F') {
         $splitted = explode('`', preg_replace('/(@[0-9]+)/', '`$1`', $expression));
-
         // check and convert the vstacks into an array of array of numbers
         $all = array_fill(0, count($vstacks), array());
         for ($i=1; $i<count($splitted); $i+=2) {
             // $data = $this->vstack_get_variable($vstacks[0], $splitted[$i]);
             $data = $vstacks[0]->all[$splitted[$i]];    // for optimization, bypassing function call
-            if ($data === null || ($data->type != 'n' && $data->type != $functype))
+            if ($data === null || ($data->type != 'n' && $data->type != $functype)) {
                 throw new Exception(get_string('error_eval_numerical','qtype_formulas'));
-            if ($data->type == $functype)     // if it is a function, put it back into the expression
+            }
+            if ($data->type == $functype) {    // if it is a function, put it back into the expression
                 $splitted[$i] = $data->value;
+            }
             if ($data->type == 'n') {   // if it is a number, store in $a for later evaluation
                 $all[0][$i] = floatval($data->value);
                 for ($j=1; $j<count($vstacks); $j++) {  // if it need to evaluate the same expression with different values
                     // $tmp = $this->vstack_get_variable($vstacks[$j], $splitted[$i]);
                     $tmp = $vstacks[$j]->all[$splitted[$i]];    // for optimization, bypassing function call
-                    if ($tmp === null || $tmp->type != 'n')
+                    if ($tmp === null || $tmp->type != 'n') {
                         throw new Exception('Unexpected error! evaluate_numerical_expression(): Variables in all $vstack must be of the same type');
+                    }
                     $all[$j][$i] = floatval($tmp->value);
                 }
                 $splitted[$i] = '$a['.$i.']';
             }
         }
-
+        
         // check for possible formula error for the substituted string, before directly calling eval()
         $replaced = $splitted;
         for ($i=1; $i<count($replaced); $i+=2)  if ($replaced[$i][0] == '$')  $replaced[$i] = 1;  // substitute a dummy value for testing
         $res = $this->find_formula_errors(implode(' ',$replaced));
         if ($res)  throw new Exception($res);   // forward the error
-
         // Now, it should contains pure code of mathematical expression and all numerical variables are stored in $a
         $results = array();
         foreach ($all as $a) {

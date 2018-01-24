@@ -222,7 +222,7 @@ $string['error_randvars_type'] = 'All elements in the set must have exactly the 
 $string['error_randvars_set_size'] = 'The number of generable elements in the set must be larger than 1.';
 $string['error_fixed_range'] = 'Syntax error of a fixed range.';
 $string['error_algebraic_var'] = 'Syntax error of defining algebraic variable.';
-$string['error_func_param'] = 'Wrong number or wrong type of parameters for the function $a()';
+$string['error_func_param'] = 'Wrong number or wrong type of parameters for the function {$a}()';
 $string['error_subexpression_empty'] = 'A subexpression is empty.';
 $string['error_eval_numerical'] = 'Some expressions cannot be evaluated numerically.';
 
