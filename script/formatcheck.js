@@ -768,7 +768,8 @@ function formulas_format_check() {
 
             ['algebraic_formula', false, 'a-'],
             ['algebraic_formula', false, '*a'],
-//            ['algebraic_formula', false, 'a**b'],
+            // For compatibility with old browsers comment the following line.
+            ['algebraic_formula', true, 'a**b'],
             ['algebraic_formula', false, 'a+^c+f'],
             ['algebraic_formula', false, 'a+b^^+f'],
             ['algebraic_formula', false, 'a+(b^c)^+f'],

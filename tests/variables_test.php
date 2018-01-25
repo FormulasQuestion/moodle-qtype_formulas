@@ -105,15 +105,19 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     'h' =>(object) array('type' => 'ln', 'value' => array(1, 5 , -0.7568024953079282, 5)),
                     'j' =>(object) array('type' => 'n', 'value' => 5))),
             array(true, 'e = [1,2,3,4][1];', array(
-                    'e' =>(object) array('type' => 'n', 'value' => 2))),
+                    'e' =>(object) array('type' => 'n', 'value' => 2))
+            ),
             array(true, 'e = [1,2,3,4]; e[2]=111;', array(
-                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 111 , 4)))),
+                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 111 , 4)))
+            ),
             array(true, 'e = [1,2,3,4]; a=1; e[a]=111;', array(
                     'e' =>(object) array('type' => 'ln', 'value' => array(1, 111 , 3 , 4)),
-                    'a' =>(object) array('type' => 'n', 'value' => 1))),
+                    'a' =>(object) array('type' => 'n', 'value' => 1))
+            ),
             array(true, 'e = [1,2,3,4]; a=1-1; e[a]=111;', array(
                     'e' =>(object) array('type' => 'ln', 'value' => array(111, 2 , 3 , 4)),
-                    'a' =>(object) array('type' => 'n', 'value' => 0))),
+                    'a' =>(object) array('type' => 'n', 'value' => 0))
+            ),
             array(true, 'g = [3][0];', array(
                     'g' =>(object) array('type' => 'n', 'value' => 3))
             ),
@@ -121,7 +125,11 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     'a' =>(object) array('type' => 'ln', 'value' => array(7, 8 , 9)),
                     'g' =>(object) array('type' => 'n', 'value' => 8))
             ),
-//            array(true, 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'),  Need to rework this one.
+            array(true, 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];', array(
+                    'h' =>(object) array('type' => 'ln', 'value' => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
+                    'k' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6, 7)),
+                    'm' =>(object) array('type' => 'ln', 'value' => array(-20, -18.5, -17, -15.5, -14, -12.5, -11))),
+            ),
             array(true, 'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];', array(
                     'a' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3)),
                     's' =>(object) array('type' => 'ln', 'value' => array(2, 0 , 1)),
@@ -130,7 +138,8 @@ class qtype_formulas_variables_test extends advanced_testcase {
 //            array(false, 'a=3 6;'),  // Problem parseerror unexpected '$a' (T_VARIABLE)
             array(false, 'a=3`6;', 'Formula or expression contains forbidden characters or operators.'),
             array(false, 'f=1; g=f[1];', '2: Variable is unsubscriptable.'),
-            array(false, 'e=[];', '1: A subexpression is empty.')
+            array(false, 'e=[];', '1: A subexpression is empty.'),
+            array(true, 'a=3**8;', array('a' =>(object) array('type' => 'n', 'value' => 6561))),    // Require PHP > 5.6.
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
@@ -142,9 +151,12 @@ class qtype_formulas_variables_test extends advanced_testcase {
             }
             if ($testcase[0]) {
                 // Test that no exception is thrown
-                // and that correct result is returned
+                // and that correct result is returned.
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
+                if ($testcase[2] != '') {
+                    $this->assertEquals($testcase[2], $result->all);
+                }
                 $this->assertEquals($testcase[2], $result->all);
 
             } else {
@@ -240,7 +252,10 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 // and that correct result is returned
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
-                $this->assertEquals($testcase[2], $result->all);
+                if ($testcase[2] != '') {
+                    // For now we don't test result with some randomness.
+                    $this->assertEquals($testcase[2], $result->all);
+                }
 
             } else {
                 // Test that the correct exception message is returned.
@@ -255,60 +270,198 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_evaluate_assignments_3() {
         $qv = new qtype_formulas_variables;
         $testcases = array(
-            array(true, 'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));'),
-            array(true, 'a=[1,2,3]; A=map("exp",a);'),
-            array(true, 'a=[1,2,3]; A=map("+",a,2.3);'),
-            array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);'),
-            array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);'),
-            array(true, 'r=sum([4,5,6]);'),
-            array(true, 'r=3+sum(fill(10,-1))+3;'),
-            array(true, 's=concat([1,2,3], [4,5,6], [7,8]);'),
-            array(true, 's=concat(["A","B"],["X","Y","Z"],["Hello"]);'),
-            array(true, 's=join("~", [1,2,3]);'),
-            array(true, 's=str(45);'),
-            array(true, 'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);'),
-            array(true, '#--------- additional function (incorrect) ---------#'),
-            array(false, 'c=fill(0,"rr")'),
-            array(false, 'c=fill(10000,"rr")'),
-            array(false, 's=fill);'),
-            array(false, 's=fill(10,"rr";'),
-            array(false, 'a=1; l=len(a);'),
-            array(false, 'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'),
-            array(false, 'p1=pick("r",[2,3,5,7,11]);'),
-            array(false, 'p1=pick(2,[2,3],[4,5],["a","b"]);'),
-            array(false, 's=concat(0, [1,2,3], [5,6], 100);'),
-            array(false, 's=concat([1,2,3], ["A","B"]);'),
-            array(true, '#--------- for loop ---------#'),
-            array(true, 'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;'),
-            array(true, 'for(i:[1,2,3]){};'),
-            array(true, 'for ( i : [1,2,3] ) {};'),
-            array(true, 'z = 0; A=[1,2,3]; for(i:A) z=z+i;'),
-            array(true, 'z = 0; for(i: [0:5]){z = z + i;}'),
-            array(true, 's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }'),
-            array(true, 'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;'),
-            array(false, 'z = 0; for(: [0:5]) z=z+i;'),
-            array(false, 'z = 0; for(i:) z=z+i;'),
+            array(true, 'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));', array(
+                    'A' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
+                    'B' =>(object) array('type' => 'ln', 'value' => array(2, 0, 3, 1)),
+                    's' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
+                    )
+            ),
+            array(true, 'a=[1,2,3]; A=map("exp",a);', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(2.718281828459, 7.3890560989307, 20.085536923188)),
+                    )
+            ),
+            array(true, 'a=[1,2,3]; A=map("+",a,2.3);', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(3.3, 4.3, 5.3)),
+                    )
+            ),
+            array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'b' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6)),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(5, 7, 9)),
+                    )
+            ),
+            array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'b' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6)),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(1, 32, 729)),
+                    )
+            ),
+            array(true, 'r=sum([4,5,6]);', array(
+                    'r' =>(object) array('type' => 'n', 'value' => 15),
+                    )
+            ),
+            array(true, 'r=3+sum(fill(10,-1))+3;', array(
+                    'r' =>(object) array('type' => 'n', 'value' => -4),
+                    )
+            ),
+            array(true, 's=concat([1,2,3], [4,5,6], [7,8]);', array(
+                    's' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3, 4, 5, 6, 7, 8)),
+                    )
+            ),
+            array(true, 's=concat(["A","B"],["X","Y","Z"],["Hello"]);', array(
+                    's' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'X', 'Y', 'Z', 'Hello')),
+                    )
+            ),
+            array(true, 's=join("~", [1,2,3]);', array(
+                    's' =>(object) array('type' => 's', 'value' => '1~2~3'),
+                    )
+            ),
+            array(true, 's=str(45);', array(
+                    's' =>(object) array('type' => 's', 'value' => '45'),
+                    )
+            ),
+            array(true, 'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);', array(
+                    'a' =>(object) array('type' => 'ln', 'value' => array(4, 5)),
+                    's' =>(object) array('type' => 's', 'value' => "A,B,1,5,3,4+5+?,9"),
+                    )
+            ),
+            array(true, '#--------- additional function (incorrect) ---------#', array()),
+            array(false, 'c=fill(0,"rr")', '1: Size of list must be within 1 to 1000.'),
+            array(false, 'c=fill(10000,"rr")', '1: Size of list must be within 1 to 1000.'),
+            array(false, 's=fill);', 'Function fill() is reserved and cannot be used as variable.'),
+            array(false, 's=fill(10,"rr";', '1: Bracket mismatch.'),
+            array(false, 'a=1; l=len(a);', '2: Wrong number or wrong type of parameters for the function len()'),
+            array(false, 'a=[1,2,3,4]; c=fill(len(a)+1,"rr")', '2: Wrong number or wrong type of parameters for the function fill()'),
+            array(false, 'p1=pick("r",[2,3,5,7,11]);', '1: Wrong number or wrong type of parameters for the function pick()'),
+            array(false, 'p1=pick(2,[2,3],[4,5],["a","b"]);', '1: Wrong number or wrong type of parameters for the function pick()'),
+            array(false, 's=concat(0, [1,2,3], [5,6], 100);', '1: Wrong number or wrong type of parameters for the function concat()'),
+            array(false, 's=concat([1,2,3], ["A","B"]);', '1: Wrong number or wrong type of parameters for the function concat()'),
+            array(true, '#--------- for loop ---------#', array()),
+            array(true, 'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;', array(
+                    'A' =>(object) array('type' => 'n', 'value' => 1),
+                    'Z' =>(object) array('type' => 'n', 'value' => 4),
+                    'Y' =>(object) array('type' => 's', 'value' => "Hello!"),
+                    'X' =>(object) array('type' => 'n', 'value' => 31),
+                    )
+            ),
+            array(true, 'for(i:[1,2,3]){};', array(
+                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    )
+            ),
+            array(true, 'for ( i : [1,2,3] ) {};', array(
+                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    )
+            ),
+            array(true, 'z = 0; A=[1,2,3]; for(i:A) z=z+i;', array(
+                    'z' =>(object) array('type' => 'n', 'value' => 6),
+                    'A' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    )
+            ),
+            array(true, 'z = 0; for(i: [0:5]){z = z + i;}', array(
+                    'z' =>(object) array('type' => 'n', 'value' => 10),
+                    'i' =>(object) array('type' => 'n', 'value' => 4),
+                    )
+            ),
+            array(true, 's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }', array(
+                    's' =>(object) array('type' => 's', 'value' => "ABC"),
+                    'i' =>(object) array('type' => 's', 'value' => "C"),
+                    )
+            ),
+            array(true, 'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;', array(
+                    'z' =>(object) array('type' => 'n', 'value' => 30),
+                    'i' =>(object) array('type' => 'n', 'value' => 4),
+                    'j' =>(object) array('type' => 'n', 'value' => 2),
+                    )
+            ),
+            array(false, 'z = 0; for(: [0:5]) z=z+i;', '2: Variable of the for loop has some errors.'),
+            array(false, 'z = 0; for(i:) z=z+i;', '2: A subexpression is empty.'),
             // array(false, 'z = 0; for(i: [0:5]) '),
-            array(false, 'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;'),
-            array(false, 'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];'),
-            array(true, '#--------- algebraic variable ---------#'),
-            array(true, 'x = {1,2,3};'),
-            array(true, 'x = { 1 , 2 , 3 };'),
-            array(true, 'x = {1:3, 4:5:0.1 , 8:10:0.5 };'),
-            array(true, 's=diff([3*3+3],[3*4]);'),
-            array(true, 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50);'),
-            array(true, 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x+y^2"],50)[0];'),
-            array(false, 's=diff([3*3+3,0],[3*4]);'),
-            array(false, 'x = {"A", "B"};'),
+            array(false, 'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;', '4: Syntax error of the for loop.'),
+            array(false, 'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];', '5: Element in the same list must be of the same type, either number or string.'),
+            array(true, '#--------- algebraic variable ---------#', array()),
+            array(true, 'x = {1,2,3};', array(
+                    'x' => (object) array('type' => 'zn', 'value' => (object) array(
+                            'numelement' => 3,
+                            'elements' => array(
+                                    array(1, 1.5, 1),
+                                    array(2, 2.5, 1),
+                                    array(3, 3.5, 1),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            array(true, 'x = { 1 , 2 , 3 };', array(
+                    'x' => (object) array('type' => 'zn', 'value' => (object) array(
+                            'numelement' => 3,
+                            'elements' => array(
+                                    array(1, 1.5, 1),
+                                    array(2, 2.5, 1),
+                                    array(3, 3.5, 1),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            array(true, 'x = {1:3, 4:5:0.1 , 8:10:0.5 };', array(
+                    'x' => (object) array('type' => 'zn', 'value' => (object) array(
+                            'numelement' => 16,
+                            'elements' => array(
+                                    array(1, 3, 1),
+                                    array(4, 5, 0.1),
+                                    array(8, 10, 0.5),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            array(true, 's=diff([3*3+3],[3*4]);', array(
+                    's' => (object) array('type' => 'ln', 'value' =>  array(0),
+                    ),
+                ),
+            ),
+            array(true, 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50);', array(
+                    'x' => (object) array('type' => 'zn', 'value' => (object) array(
+                            'numelement' => 9,
+                            'elements' => array(array(1, 10, 1)),
+                        ),
+                     ),
+                    'y' => (object) array('type' => 'zn', 'value' => (object) array(
+                            'numelement' => 9,
+                            'elements' =>  array(array(1, 10, 1)),
+                        ),
+                    ),
+                    's' => (object) array('type' => 'ln', 'value' =>  array(0),
+                    ),
+                ),
+            ),
+            array(true, 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x+y^2"],50)[0];', ''),
+            array(false, 's=diff([3*3+3,0],[3*4]);', '1: Wrong number or wrong type of parameters for the function diff()'),
+            array(false, 'x = {"A", "B"};', '1: Syntax error of defining algebraic variable.'),
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
             try {
                 $v = $qv->vstack_create();
-                $v = $qv->evaluate_assignments($v, $testcase[1]);
+                $result = $qv->evaluate_assignments($v, $testcase[1]);
             } catch(Exception $e) { $errmsg = $e->getMessage(); }
-            $eval = $errmsg===null;
-            $this->assertEquals($testcase[0], $eval);
+            if ($testcase[0]) {
+                // Test that no exception is thrown
+                // and that correct result is returned
+                $this->assertNull($errmsg);
+                $this->assertEquals(0, $result->idcounter);
+                if ($testcase[2] != '') {
+                    // For now we don't test result with some randomness.
+                    $this->assertEquals($testcase[2], $result->all);
+                }
+
+            } else {
+                // Test that the correct exception message is returned.
+                $this->assertEquals($testcase[2], $errmsg);
+            }
         }
     }
 
@@ -500,9 +653,9 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(true, 'a sin(w t)+ b cos(w t)'), // a*sin(w*t) + b*cos(w*t)
             array(true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'),
 
-//            array(false, 'a-'),     Problem: parse error unexpected '(', expecting ',' or ')'
-//            array(false, '*a'),        Problem: parseerror unexpected '*'
-//            array(false, 'a**b'),     Problem : gives true rather than false.
+//            array(false, 'a-'),    // Problem: parse error unexpected '(', expecting ',' or ')'
+//            array(false, '*a'),      //  Problem: parseerror unexpected '*'
+            array(true, 'a**b'),    // Require PHP > 5.6.
             array(false, 'a+^c+f'),
             array(false, 'a+b^^+f'),
             array(false, 'a+(b^c)^+f'),
@@ -530,11 +683,16 @@ class qtype_formulas_variables_test extends advanced_testcase {
         foreach ($testcases as $idx => $testcase) {
             try {
                 $result = $qv->compute_algebraic_formula_difference($v, array($testcase[1]), array($testcase[1]), 100);
-            } catch (Exception $e) { $result = null; }
+            } catch (Exception $e) {
+                $result = null;
+                if ($testcase[1]==='a**b') {
+                    
+                }
+            }
             $eval = $result!==null;
             $this->assertEquals($testcase[0], $eval);
         }
-
+        
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v, 'x={-10:11:1}; y={-10:-5, 6:11};');
         $result = $qv->compute_algebraic_formula_difference($v, array('x','1+x+y+3','(1+sqrt(x))^2'), array('0','2+x+y+2','1+x'), 100);
