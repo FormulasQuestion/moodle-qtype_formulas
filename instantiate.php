@@ -25,7 +25,7 @@
 
 define('AJAX_SCRIPT', true);
 
-require_once(__DIR__.'/../../../config.php');
+require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/variables.php');
 
 $qv = new qtype_formulas_variables();

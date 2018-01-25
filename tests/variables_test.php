@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the short answer question definition class.
+ * Unit tests for the formulas qtype_formulas_variables class.
  *
  * @package    qtype_formulas
  * @copyright  2018 Jean-Michel Vedrine
@@ -50,12 +50,12 @@ class qtype_formulas_variables_test extends advanced_testcase {
         );
         foreach ($brackettest as $b) {
             $errmsg = null;
-            try{
+            try {
                 $result = $qv->get_expressions_in_bracket($b[1], 0, $b[2]);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $errmsg = $e->getMessage();
             }
-            $eval = $errmsg===null;
+            $eval = $errmsg === null;
             $this->assertEquals($b[0], $eval);
             $this->assertEquals($b[3], $result->openloc);
             $this->assertEquals($b[4], $result->closeloc);
@@ -72,7 +72,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
         try {
             $v = $qv->vstack_create();
             $result = $qv->evaluate_general_expression($v, 'sin(4) + exp(cos(4+5))');
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $errmsg = $e->getMessage();
         }
         $this->assertNull($errmsg);
@@ -87,66 +87,66 @@ class qtype_formulas_variables_test extends advanced_testcase {
         $qv = new qtype_formulas_variables;
         $testcases = array(
             array(true, '#--------- basic operation ---------#', array()),
-            array(true, 'a = 1;', array('a' =>(object) array('type' => 'n', 'value' => 1))),
-            array(true, 'a = 1; b = 4;', array('a' =>(object) array('type' => 'n', 'value' => 1),
-                                               'b' =>(object) array('type' => 'n', 'value' => 4))),
+            array(true, 'a = 1;', array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array(true, 'a = 1; b = 4;', array('a' => (object) array('type' => 'n', 'value' => 1),
+                                               'b' => (object) array('type' => 'n', 'value' => 4))),
             array(true, 'a = 1; # This is comment! So it will be skipped. ',
-                                         array('a' =>(object) array('type' => 'n', 'value' => 1))),
-            array(true, 'c = cos(0)+3.14;', array('c' =>(object) array('type' => 'n', 'value' => 4.1400000000000006))),
-            array(true, 'd = "Hello!";', array('d' =>(object) array('type' => 's', 'value' => "Hello!"))),
-            array(true, 'e =[1,2,3,4];', array('e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)))),
-            array(true, 'f =["A","B","C"];', array('f' =>(object) array('type' => 'ls', 'value' => array("A","B","C")))),
+                                         array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array(true, 'c = cos(0)+3.14;', array('c' => (object) array('type' => 'n', 'value' => 4.1400000000000006))),
+            array(true, 'd = "Hello!";', array('d' => (object) array('type' => 's', 'value' => "Hello!"))),
+            array(true, 'e =[1,2,3,4];', array('e' => (object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)))),
+            array(true, 'f =["A", "B", "C"];', array('f' => (object) array('type' => 'ls', 'value' => array("A","B","C")))),
             array(true, 'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];', array(
-                    'a' =>(object) array('type' => 'n', 'value' => 1),
-                    'b' =>(object) array('type' => 'n', 'value' => 4),
-                    'c' =>(object) array('type' => 'n', 'value' => 4),
-                    'g' =>(object) array('type' => 'ln', 'value' => array(1, 47 , 2 , 2.718281828459, 16)))),
+                    'a' => (object) array('type' => 'n', 'value' => 1),
+                    'b' => (object) array('type' => 'n', 'value' => 4),
+                    'c' => (object) array('type' => 'n', 'value' => 4),
+                    'g' => (object) array('type' => 'ln', 'value' => array(1, 47 , 2 , 2.718281828459, 16)))),
             array(true, 'h = [1,2+3,sin(4),5]; j=h[1];', array(
-                    'h' =>(object) array('type' => 'ln', 'value' => array(1, 5 , -0.7568024953079282, 5)),
-                    'j' =>(object) array('type' => 'n', 'value' => 5))),
+                    'h' => (object) array('type' => 'ln', 'value' => array(1, 5 , -0.7568024953079282, 5)),
+                    'j' => (object) array('type' => 'n', 'value' => 5))),
             array(true, 'e = [1,2,3,4][1];', array(
-                    'e' =>(object) array('type' => 'n', 'value' => 2))
+                    'e' => (object) array('type' => 'n', 'value' => 2))
             ),
             array(true, 'e = [1,2,3,4]; e[2]=111;', array(
-                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 111 , 4)))
+                    'e' => (object) array('type' => 'ln', 'value' => array(1, 2 , 111 , 4)))
             ),
             array(true, 'e = [1,2,3,4]; a=1; e[a]=111;', array(
-                    'e' =>(object) array('type' => 'ln', 'value' => array(1, 111 , 3 , 4)),
-                    'a' =>(object) array('type' => 'n', 'value' => 1))
+                    'e' => (object) array('type' => 'ln', 'value' => array(1, 111 , 3 , 4)),
+                    'a' => (object) array('type' => 'n', 'value' => 1))
             ),
             array(true, 'e = [1,2,3,4]; a=1-1; e[a]=111;', array(
-                    'e' =>(object) array('type' => 'ln', 'value' => array(111, 2 , 3 , 4)),
-                    'a' =>(object) array('type' => 'n', 'value' => 0))
+                    'e' => (object) array('type' => 'ln', 'value' => array(111, 2 , 3 , 4)),
+                    'a' => (object) array('type' => 'n', 'value' => 0))
             ),
             array(true, 'g = [3][0];', array(
-                    'g' =>(object) array('type' => 'n', 'value' => 3))
+                    'g' => (object) array('type' => 'n', 'value' => 3))
             ),
             array(true, 'a = [7,8,9]; g = [a[1]][0];', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(7, 8 , 9)),
-                    'g' =>(object) array('type' => 'n', 'value' => 8))
+                    'a' => (object) array('type' => 'ln', 'value' => array(7, 8 , 9)),
+                    'g' => (object) array('type' => 'n', 'value' => 8))
             ),
             array(true, 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];', array(
-                    'h' =>(object) array('type' => 'ln', 'value' => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
-                    'k' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6, 7)),
-                    'm' =>(object) array('type' => 'ln', 'value' => array(-20, -18.5, -17, -15.5, -14, -12.5, -11))),
+                    'h' => (object) array('type' => 'ln', 'value' => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)),
+                    'k' => (object) array('type' => 'ln', 'value' => array(4, 5, 6, 7)),
+                    'm' => (object) array('type' => 'ln', 'value' => array(-20, -18.5, -17, -15.5, -14, -12.5, -11))),
             ),
             array(true, 'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3)),
-                    's' =>(object) array('type' => 'ln', 'value' => array(2, 0 , 1)),
-                    'n' =>(object) array('type' => 'ln', 'value' => array(9, 3 , 54))),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2 , 3)),
+                    's' => (object) array('type' => 'ln', 'value' => array(2, 0 , 1)),
+                    'n' => (object) array('type' => 'ln', 'value' => array(9, 3 , 54))),
             ),
-//            array(false, 'a=3 6;'),  // Problem parseerror unexpected '$a' (T_VARIABLE)
+            // array(false, 'a=3 6;'),  // Problem parseerror unexpected '$a' (T_VARIABLE)
             array(false, 'a=3`6;', 'Formula or expression contains forbidden characters or operators.'),
             array(false, 'f=1; g=f[1];', '2: Variable is unsubscriptable.'),
             array(false, 'e=[];', '1: A subexpression is empty.'),
-            array(true, 'a=3**8;', array('a' =>(object) array('type' => 'n', 'value' => 6561))),    // Require PHP > 5.6.
+            array(true, 'a=3**8;', array('a' => (object) array('type' => 'n', 'value' => 6561))),    // Require PHP > 5.6.
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
             try {
                 $v = $qv->vstack_create();
                 $result = $qv->evaluate_assignments($v, $testcase[1]);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $errmsg = $e->getMessage();
             }
             if ($testcase[0]) {
@@ -184,60 +184,60 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, 'e=[1,2,3]; e[0] = [8,9];', '2: Element in the same list must be of the same type, either number or string.'),
             array(true, '#--------- additional function (correct) ---------#', array()),
             array(true, 'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);', array(
-                    'a' =>(object) array('type' => 'n', 'value' => 4),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(0, 0)),
-                    'B' =>(object) array('type' => 'ls', 'value' => array('Hello', 'Hello', 'Hello')),
-                    'C' =>(object) array('type' => 'ln', 'value' => array(4, 4, 4, 4)),
+                    'a' => (object) array('type' => 'n', 'value' => 4),
+                    'A' => (object) array('type' => 'ln', 'value' => array(0, 0)),
+                    'B' => (object) array('type' => 'ls', 'value' => array('Hello', 'Hello', 'Hello')),
+                    'C' => (object) array('type' => 'ln', 'value' => array(4, 4, 4, 4)),
                     )
             ),
             array(true, 'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)),
-                    'b' =>(object) array('type' => 'n', 'value' => 4),
-                    'c' =>(object) array('type' => 'ls', 'value' => array('rr','rr', 'rr', 'rr')),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)),
+                    'b' => (object) array('type' => 'n', 'value' => 4),
+                    'c' => (object) array('type' => 'ls', 'value' => array('rr', 'rr', 'rr', 'rr')),
                     )
             ),
             array(true, 'p1=pick(4,[2,3,5,7,11]);', array(
-                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    'p1' => (object) array('type' => 'n', 'value' => 2),
                     )
             ),
             array(true, 'p1=pick(3.1,[2,3,5,7,11]);', array(
-                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    'p1' => (object) array('type' => 'n', 'value' => 2),
                     )
             ),
             array(true, 'p1=pick(1000,[2,3,5,7,11]);', array(
-                    'p1' =>(object) array('type' => 'n', 'value' => 2),
+                    'p1' => (object) array('type' => 'n', 'value' => 2),
                     )
             ),
             array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);', array(
-                    'p1' =>(object) array('type' => 'ln', 'value' =>array(6, 7)),
+                    'p1' => (object) array('type' => 'ln', 'value' =>array(6, 7)),
                     )
             ),
             array(true, 's=sort([7,5,3,11,2]);', array(
-                    's' =>(object) array('type' => 'ln', 'value' =>array(2, 3, 5, 7, 11)),
+                    's' => (object) array('type' => 'ln', 'value' =>array(2, 3, 5, 7, 11)),
                     )
             ),
             array(true, 's=sort(["B","A2","A1"]);', array(
-                    's' =>(object) array('type' => 'ls', 'value' =>array('A1', 'A2', 'B')),
+                    's' => (object) array('type' => 'ls', 'value' =>array('A1', 'A2', 'B')),
                     )
             ),
             array(true, 's=sort(["B","A2","A1"],[2,4,1]);', array(
-                    's' =>(object) array('type' => 'ls', 'value' =>array('A1', 'B', 'A2')),
+                    's' => (object) array('type' => 'ls', 'value' =>array('A1', 'B', 'A2')),
                     )
             ),
             array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
-                    's' =>(object) array('type' => 'ls', 'value' =>array('B', 'D')),
+                    's' => (object) array('type' => 'ls', 'value' =>array('B', 'D')),
                     )
             ),
             array(true, 's=sublist(["A","B","C","D"],[0,0,2,3]);', array(
-                    's' =>(object) array('type' => 'ls', 'value' =>array('A', 'A', 'C', 'D')),
+                    's' => (object) array('type' => 'ls', 'value' =>array('A', 'A', 'C', 'D')),
                     )
             ),
             array(true, 's=inv([2,0,3,1]);', array(
-                    's' =>(object) array('type' => 'ln', 'value' =>array(1, 3, 0, 2)),
+                    's' => (object) array('type' => 'ln', 'value' =>array(1, 3, 0, 2)),
                     )
             ),
             array(true, 's=inv(inv([2,0,3,1]));', array(
-                    's' =>(object) array('type' => 'ln', 'value' =>array(2, 0, 3, 1)),
+                    's' => (object) array('type' => 'ln', 'value' =>array(2, 0, 3, 1)),
                     )
             ),
         );
@@ -246,17 +246,18 @@ class qtype_formulas_variables_test extends advanced_testcase {
             try {
                 $v = $qv->vstack_create();
                 $result = $qv->evaluate_assignments($v, $testcase[1]);
-            } catch(Exception $e) { $errmsg = $e->getMessage(); }
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
             if ($testcase[0]) {
                 // Test that no exception is thrown
-                // and that correct result is returned
+                // and that correct result is returned.
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
                     // For now we don't test result with some randomness.
                     $this->assertEquals($testcase[2], $result->all);
                 }
-
             } else {
                 // Test that the correct exception message is returned.
                 $this->assertEquals($testcase[2], $errmsg);
@@ -271,60 +272,60 @@ class qtype_formulas_variables_test extends advanced_testcase {
         $qv = new qtype_formulas_variables;
         $testcases = array(
             array(true, 'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));', array(
-                    'A' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
-                    'B' =>(object) array('type' => 'ln', 'value' => array(2, 0, 3, 1)),
-                    's' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
+                    'A' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
+                    'B' => (object) array('type' => 'ln', 'value' => array(2, 0, 3, 1)),
+                    's' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
                     )
             ),
             array(true, 'a=[1,2,3]; A=map("exp",a);', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(2.718281828459, 7.3890560989307, 20.085536923188)),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'A' => (object) array('type' => 'ln', 'value' => array(2.718281828459, 7.3890560989307, 20.085536923188)),
                     )
             ),
             array(true, 'a=[1,2,3]; A=map("+",a,2.3);', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(3.3, 4.3, 5.3)),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'A' => (object) array('type' => 'ln', 'value' => array(3.3, 4.3, 5.3)),
                     )
             ),
             array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
-                    'b' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6)),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(5, 7, 9)),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'b' => (object) array('type' => 'ln', 'value' => array(4, 5, 6)),
+                    'A' => (object) array('type' => 'ln', 'value' => array(5, 7, 9)),
                     )
             ),
             array(true, 'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
-                    'b' =>(object) array('type' => 'ln', 'value' => array(4, 5, 6)),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(1, 32, 729)),
+                    'a' => (object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'b' => (object) array('type' => 'ln', 'value' => array(4, 5, 6)),
+                    'A' => (object) array('type' => 'ln', 'value' => array(1, 32, 729)),
                     )
             ),
             array(true, 'r=sum([4,5,6]);', array(
-                    'r' =>(object) array('type' => 'n', 'value' => 15),
+                    'r' => (object) array('type' => 'n', 'value' => 15),
                     )
             ),
             array(true, 'r=3+sum(fill(10,-1))+3;', array(
-                    'r' =>(object) array('type' => 'n', 'value' => -4),
+                    'r' => (object) array('type' => 'n', 'value' => -4),
                     )
             ),
             array(true, 's=concat([1,2,3], [4,5,6], [7,8]);', array(
-                    's' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3, 4, 5, 6, 7, 8)),
+                    's' => (object) array('type' => 'ln', 'value' => array(1, 2, 3, 4, 5, 6, 7, 8)),
                     )
             ),
             array(true, 's=concat(["A","B"],["X","Y","Z"],["Hello"]);', array(
-                    's' =>(object) array('type' => 'ls', 'value' => array('A', 'B', 'X', 'Y', 'Z', 'Hello')),
+                    's' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'X', 'Y', 'Z', 'Hello')),
                     )
             ),
             array(true, 's=join("~", [1,2,3]);', array(
-                    's' =>(object) array('type' => 's', 'value' => '1~2~3'),
+                    's' => (object) array('type' => 's', 'value' => '1~2~3'),
                     )
             ),
             array(true, 's=str(45);', array(
-                    's' =>(object) array('type' => 's', 'value' => '45'),
+                    's' => (object) array('type' => 's', 'value' => '45'),
                     )
             ),
             array(true, 'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);', array(
-                    'a' =>(object) array('type' => 'ln', 'value' => array(4, 5)),
-                    's' =>(object) array('type' => 's', 'value' => "A,B,1,5,3,4+5+?,9"),
+                    'a' => (object) array('type' => 'ln', 'value' => array(4, 5)),
+                    's' => (object) array('type' => 's', 'value' => "A,B,1,5,3,4+5+?,9"),
                     )
             ),
             array(true, '#--------- additional function (incorrect) ---------#', array()),
@@ -340,40 +341,40 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, 's=concat([1,2,3], ["A","B"]);', '1: Wrong number or wrong type of parameters for the function concat()'),
             array(true, '#--------- for loop ---------#', array()),
             array(true, 'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;', array(
-                    'A' =>(object) array('type' => 'n', 'value' => 1),
-                    'Z' =>(object) array('type' => 'n', 'value' => 4),
-                    'Y' =>(object) array('type' => 's', 'value' => "Hello!"),
-                    'X' =>(object) array('type' => 'n', 'value' => 31),
+                    'A' => (object) array('type' => 'n', 'value' => 1),
+                    'Z' => (object) array('type' => 'n', 'value' => 4),
+                    'Y' => (object) array('type' => 's', 'value' => "Hello!"),
+                    'X' => (object) array('type' => 'n', 'value' => 31),
                     )
             ),
             array(true, 'for(i:[1,2,3]){};', array(
-                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    'i' => (object) array('type' => 'n', 'value' => 3),
                     )
             ),
             array(true, 'for ( i : [1,2,3] ) {};', array(
-                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    'i' => (object) array('type' => 'n', 'value' => 3),
                     )
             ),
             array(true, 'z = 0; A=[1,2,3]; for(i:A) z=z+i;', array(
-                    'z' =>(object) array('type' => 'n', 'value' => 6),
-                    'A' =>(object) array('type' => 'ln', 'value' => array(1, 2, 3)),
-                    'i' =>(object) array('type' => 'n', 'value' => 3),
+                    'z' => (object) array('type' => 'n', 'value' => 6),
+                    'A' => (object) array('type' => 'ln', 'value' => array(1, 2, 3)),
+                    'i' => (object) array('type' => 'n', 'value' => 3),
                     )
             ),
             array(true, 'z = 0; for(i: [0:5]){z = z + i;}', array(
-                    'z' =>(object) array('type' => 'n', 'value' => 10),
-                    'i' =>(object) array('type' => 'n', 'value' => 4),
+                    'z' => (object) array('type' => 'n', 'value' => 10),
+                    'i' => (object) array('type' => 'n', 'value' => 4),
                     )
             ),
             array(true, 's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }', array(
-                    's' =>(object) array('type' => 's', 'value' => "ABC"),
-                    'i' =>(object) array('type' => 's', 'value' => "C"),
+                    's' => (object) array('type' => 's', 'value' => "ABC"),
+                    'i' => (object) array('type' => 's', 'value' => "C"),
                     )
             ),
             array(true, 'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;', array(
-                    'z' =>(object) array('type' => 'n', 'value' => 30),
-                    'i' =>(object) array('type' => 'n', 'value' => 4),
-                    'j' =>(object) array('type' => 'n', 'value' => 2),
+                    'z' => (object) array('type' => 'n', 'value' => 30),
+                    'i' => (object) array('type' => 'n', 'value' => 4),
+                    'j' => (object) array('type' => 'n', 'value' => 2),
                     )
             ),
             array(false, 'z = 0; for(: [0:5]) z=z+i;', '2: Variable of the for loop has some errors.'),
@@ -419,7 +420,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 ),
             ),
             array(true, 's=diff([3*3+3],[3*4]);', array(
-                    's' => (object) array('type' => 'ln', 'value' =>  array(0),
+                    's' => (object) array('type' => 'ln', 'value' => array(0),
                     ),
                 ),
             ),
@@ -431,10 +432,10 @@ class qtype_formulas_variables_test extends advanced_testcase {
                      ),
                     'y' => (object) array('type' => 'zn', 'value' => (object) array(
                             'numelement' => 9,
-                            'elements' =>  array(array(1, 10, 1)),
+                            'elements' => array(array(1, 10, 1)),
                         ),
                     ),
-                    's' => (object) array('type' => 'ln', 'value' =>  array(0),
+                    's' => (object) array('type' => 'ln', 'value' => array(0),
                     ),
                 ),
             ),
@@ -447,10 +448,12 @@ class qtype_formulas_variables_test extends advanced_testcase {
             try {
                 $v = $qv->vstack_create();
                 $result = $qv->evaluate_assignments($v, $testcase[1]);
-            } catch(Exception $e) { $errmsg = $e->getMessage(); }
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
             if ($testcase[0]) {
                 // Test that no exception is thrown
-                // and that correct result is returned
+                // and that correct result is returned.
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
@@ -471,33 +474,66 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_parse_random_variables() {
         $qv = new qtype_formulas_variables;
         $testcases = array(
-            array(true, 'a = shuffle ( ["A","B", "C" ])'),
-            array(true, 'a = {1,2,3}'),
-            array(true, 'a = {[1,2], [3,4]}'),
-            array(true, 'a = {"A","B","C"}'),
-            array(true, 'a = {["A","B"],["C","D"]}'),
-            array(true, 'a = {0, 1:3:0.1, 10:30, 100}'),
-            array(true, 'a = {1:3:0.1}; b={"A","B","C"};'),
-            array(false, 'a = {10:1:1}'),
-            array(false, 'a = {1:10,}'),
-            array(false, 'a = {1:10?}'),
-            array(false, 'a = {0, 1:3:0.1, 10:30, 100}*3'),
-            array(false, 'a = {1:3:0.1}; b={a,12,13};'),
-            array(false, 'a = {[1,2],[3,4,5]}'),
-            array(false, 'a = {[1,2],["A","B"]}'),
-            array(false, 'a = {[1,2],["A","B","C"]}'),
+            array(true, 'a = shuffle ( ["A","B", "C" ])', ''),
+            array(true, 'a = {1,2,3}', array(
+                    'a' => (object) array('type' => 'n', 'value' => 2),
+                    )
+            ),
+            array(true, 'a = {[1,2], [3,4]}', array(
+                    'a' => (object) array('type' => 'ln', 'value' => array(3, 4)),
+                    )
+            ),
+            array(true, 'a = {"A","B","C"}', array(
+                    'a' => (object) array('type' => 's', 'value' => "B"),
+                    )
+            ),
+            array(true, 'a = {["A","B"],["C","D"]}', array(
+                    'a' => (object) array('type' => 'ls', 'value' => array('C', 'D')),
+                    )
+            ),
+            array(true, 'a = {0, 1:3:0.1, 10:30, 100}', array(
+                    'a' => (object) array('type' => 'n', 'value' => 10),
+                    )
+            ),
+            array(true, 'a = {1:3:0.1}; b={"A","B","C"};', array(
+                    'a' => (object) array('type' => 'n', 'value' => 2),
+                    'b' => (object) array('type' => 's', 'value' => "B"),
+                    )
+            ),
+            array(false, 'a = {10:1:1}', '1: a: Syntax error.'),
+            array(false, 'a = {1:10,}', '1: a: Uninitialized string offset: 0'),
+            array(false, 'a = {1:10?}', '1: a: Formula or expression contains forbidden characters or operators.'),
+            array(false, 'a = {0, 1:3:0.1, 10:30, 100}*3', '1: a: Syntax error.'),
+            array(false, 'a = {1:3:0.1}; b={a,12,13};', '2: b: Formula or expression contains forbidden characters or operators.'),
+            array(false, 'a = {[1,2],[3,4,5]}', '1: a: All elements in the set must have exactly the same type and size.'),
+            array(false, 'a = {[1,2],["A","B"]}', '1: a: All elements in the set must have exactly the same type and size.'),
+            array(false, 'a = {[1,2],["A","B","C"]}', '1: a: All elements in the set must have exactly the same type and size.'),
         );
         foreach ($testcases as $idx => $testcase) {
             $errmsg = null;
             $var = (object)array('all' => null);
             try {
                 $var = $qv->parse_random_variables($testcase[1]);
-                $inst = $qv->instantiate_random_variables($var);
+                // To predict the result we choose the dataset rather than having it at random.
+                $dataset =(int) ($qv->vstack_get_number_of_dataset($var)/2);
+                $inst = $qv->instantiate_random_variables($var, $dataset);
                 $serialized = $qv->vstack_get_serialization($inst);
-            } catch(Exception $e) { $errmsg = $e->getMessage(); }
-            $eval = $errmsg===null;
-            $this->assertEquals($testcase[0], $eval);
-//            var_dump($serialized);
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            if ($testcase[0]) {
+                // Test that no exception is thrown
+                // and that correct result is returned.
+                $this->assertNull($errmsg);
+                $this->assertEquals(0, $inst->idcounter);
+                if ($testcase[2] != '') {
+                    // For now we don't test variables with shuffle.
+                    $this->assertEquals($testcase[2], $inst->all);
+                }
+            } else {
+                // Test that the correct exception message is returned.
+                $this->assertEquals($testcase[2], $errmsg);
+            }
         }
     }
     /**
@@ -600,7 +636,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
         );
         foreach ($testcases as $idx => $testcase) {
             $result = $qv->compute_numerical_formula_value($testcase[2], $testcase[1]);
-            $eval = $result!==null;
+            $eval = $result !== null;
             $this->assertEquals($testcase[0], $eval);
             if ($testcase[0]) {
                 $this->assertEquals($testcase[3], $result);
@@ -653,9 +689,9 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(true, 'a sin(w t)+ b cos(w t)'), // a*sin(w*t) + b*cos(w*t)
             array(true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'),
 
-//            array(false, 'a-'),    // Problem: parse error unexpected '(', expecting ',' or ')'
-//            array(false, '*a'),      //  Problem: parseerror unexpected '*'
-            array(true, 'a**b'),    // Require PHP > 5.6.
+            // array(false, 'a-'),    // Problem: parse error unexpected '(', expecting ',' or ')'
+            // array(false, '*a'),      //  Problem: parseerror unexpected '*'
+            array(true, 'a**b'),    // True since PHP > 5.6.
             array(false, 'a+^c+f'),
             array(false, 'a+b^^+f'),
             array(false, 'a+(b^c)^+f'),
@@ -686,19 +722,19 @@ class qtype_formulas_variables_test extends advanced_testcase {
             } catch (Exception $e) {
                 $result = null;
             }
-            $eval = $result!==null;
+            $eval = $result !== null;
             $this->assertEquals($testcase[0], $eval);
         }
-        
+
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v, 'x={-10:11:1}; y={-10:-5, 6:11};');
         $result = $qv->compute_algebraic_formula_difference($v, array('x','1+x+y+3','(1+sqrt(x))^2'), array('0','2+x+y+2','1+x'), 100);
         $this->assertEquals($result[1], 0);
         $this->assertEquals($result[2], INF);
-//        var_dump($result);
+        // var_dump($result);
         $result = $qv->compute_algebraic_formula_difference($v, array('x','(x+y)^2'), array('0','x^2+2*x*y+y^2'), 100);
         $this->assertEquals($result[1], 0);
-//        var_dump($result);
+        // var_dump($result);
     }
 
     /**
@@ -707,65 +743,65 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_split_formula_unit() {
         $qv = new qtype_formulas_variables;
         $testcases = array(
-            // check for simple number and unit
-            array('.3', array('.3','')),
-            array('3.1', array('3.1','')),
-            array('3.1e-10', array('3.1e-10','')),
-            array('3m', array('3','m')),
-            array('3kg m/s', array('3','kg m/s')),
-            array('3.m/s', array('3.','m/s')),
-            array('3.e-10m/s', array('3.e-10','m/s')),
-            array('- 3m/s', array('- 3','m/s')),
-            array('3 e10 m/s', array('3 ','e10 m/s')),
-            array('3e 10 m/s', array('3','e 10 m/s')),
-            array('3e8e8 m/s', array('3e8','e8 m/s')),
-            array('3+10*4 m/s', array('3+10*4 ','m/s')),
-            array('3+10^4 m/s', array('3+10^4 ','m/s')),
-            array('sin(3) m/s', array('sin(3) ','m/s')),
-            array('3+exp(4) m/s', array('3+exp(4) ','m/s')),
-            array('3*4*5 m/s', array('3*4*5 ','m/s')),
-            array('3 4 5 m/s', array('3 4 5 ','m/s')),
-            array('m/s', array('','m/s')),
-            array('#', array('','#')),
+            // Check for simple number and unit.
+            array('.3', array('.3', '')),
+            array('3.1', array('3.1', '')),
+            array('3.1e-10', array('3.1e-10', '')),
+            array('3m', array('3', 'm')),
+            array('3kg m/s', array('3', 'kg m/s')),
+            array('3.m/s',  array('3.', 'm/s')),
+            array('3.e-10m/s',  array('3.e-10', 'm/s')),
+            array('- 3m/s', array('- 3', 'm/s')),
+            array('3 e10 m/s', array('3 ', 'e10 m/s')),
+            array('3e 10 m/s', array('3', 'e 10 m/s')),
+            array('3e8e8 m/s', array('3e8', 'e8 m/s')),
+            array('3+10*4 m/s', array('3+10*4 ', 'm/s')),
+            array('3+10^4 m/s', array('3+10^4 ', 'm/s')),
+            array('sin(3) m/s', array('sin(3) ', 'm/s')),
+            array('3+exp(4) m/s', array('3+exp(4) ', 'm/s')),
+            array('3*4*5 m/s', array('3*4*5 ', 'm/s')),
+            array('3 4 5 m/s', array('3 4 5 ', 'm/s')),
+            array('m/s', array('', 'm/s')),
+            array('#', array('', '#')),
 
-            // numeric and unit
-            array('3+4 5+10^4kg m/s', array('3+4 5+10^4','kg m/s')),
-            array('sin(3)kg m/s', array('sin(3)','kg m/s')),
+            // Numeric and unit.
+            array('3+4 5+10^4kg m/s', array('3+4 5+10^4', 'kg m/s')),
+            array('sin(3)kg m/s', array('sin(3)', 'kg m/s')),
 
-            // numerical formula and unit
-            array('3.1e-10kg m/s', array('3.1e-10','kg m/s')),
-            array('-3kg m/s', array('-3','kg m/s')),
-            array('- 3kg m/s', array('- 3','kg m/s')),
-            array('3e', array('3','e')),
-            array('3e8', array('3e8','')),
-            array('3e8e', array('3e8','e')),
-            array('3+4 5+10^4kg m/s', array('3+4 5+10^4','kg m/s')),
-            array('sin(3)kg m/s', array('sin(3)','kg m/s')),
-            array('3*4*5 kg m/s', array('3*4*5 ','kg m/s')),
-            array('3 4 5 kg m/s', array('3 4 5 ','kg m/s')),
-            array('3e8(4.e8+2)(.5e8/2)5kg m/s', array('3e8(4.e8+2)(.5e8/2)5','kg m/s')),
-            array('3+exp(4+5)^sin(6+7)kg m/s', array('3+exp(4+5)^sin(6+7)','kg m/s')),
-            array('3+exp(4+5)^-sin(6+7)kg m/s', array('3+exp(4+5)^-sin(6+7)','kg m/s')),
-            array('3exp^2', array('3','exp^2')), // Note the unit is exp to the power 2
-            array('3 e8', array('3 ','e8')),
-            array('3e 8', array('3','e 8')),
-            array('3e8e8', array('3e8','e8')),
-            array('3e8e8e8', array('3e8','e8e8')),
-            array('3+exp(4+5).m/s', array('3+exp(4+5)','.m/s')),
-            array('3+(4.m/s', array('3+(4.','m/s')),
-            array('3+4.)m/s', array('3+4.)','m/s')),
-            array('3 m^', array('3 ','m^')),
-            array('3 m/', array('3 ','m/')),
-            array('3 /s', array('3 /','s')),
-            array('3 m+s', array('3 ','m+s')),
-            array('1==2?3:4', array('1','==2?3:4')),
-            array('a=b', array('','a=b')),
-            array('3&4', array('3','&4')),
-            array('3==4', array('3','==4')),
-            array('3&&4', array('3','&&4')),
-            array('3!', array('3','!')),
-            array('`', array('','`')),
-            array('@', array('','@')),
+            // Numerical formula and unit.
+            array('3.1e-10kg m/s', array('3.1e-10', 'kg m/s')),
+            array('-3kg m/s', array('-3', 'kg m/s')),
+            array('- 3kg m/s', array('- 3', 'kg m/s')),
+            array('3e', array('3', 'e')),
+            array('3e8', array('3e8', '')),
+            array('3e8e', array('3e8', 'e')),
+            array('3+4 5+10^4kg m/s', array('3+4 5+10^4', 'kg m/s')),
+            array('sin(3)kg m/s', array('sin(3)', 'kg m/s')),
+            array('3*4*5 kg m/s', array('3*4*5 ', 'kg m/s')),
+            array('3 4 5 kg m/s', array('3 4 5 ', 'kg m/s')),
+            array('3e8(4.e8+2)(.5e8/2)5kg m/s', array('3e8(4.e8+2)(.5e8/2)5', 'kg m/s')),
+            array('3+exp(4+5)^sin(6+7)kg m/s', array('3+exp(4+5)^sin(6+7)', 'kg m/s')),
+            array('3+exp(4+5)^-sin(6+7)kg m/s', array('3+exp(4+5)^-sin(6+7)', 'kg m/s')),
+            array('3exp^2', array('3', 'exp^2')), // Note the unit is exp to the power 2
+            array('3 e8', array('3 ', 'e8')),
+            array('3e 8', array('3', 'e 8')),
+            array('3e8e8', array('3e8', 'e8')),
+            array('3e8e8e8', array('3e8', 'e8e8')),
+            array('3+exp(4+5).m/s', array('3+exp(4+5)', '.m/s')),
+            array('3+(4.m/s', array('3+(4.', 'm/s')),
+            array('3+4.)m/s', array('3+4.)', 'm/s')),
+            array('3 m^', array('3 ', 'm^')),
+            array('3 m/', array('3 ', 'm/')),
+            array('3 /s', array('3 /', 's')),
+            array('3 m+s', array('3 ', 'm+s')),
+            array('1==2?3:4', array('1', '==2?3:4')),
+            array('a=b', array('', 'a=b')),
+            array('3&4', array('3', '&4')),
+            array('3==4', array('3', '==4')),
+            array('3&&4', array('3', '&&4')),
+            array('3!', array('3', '!')),
+            array('`', array('', '`')),
+            array('@', array('', '@')),
         );
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v, 'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10}; t={1:10}; u={1:10}; v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};');
