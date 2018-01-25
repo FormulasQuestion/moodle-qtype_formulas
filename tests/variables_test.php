@@ -685,9 +685,6 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 $result = $qv->compute_algebraic_formula_difference($v, array($testcase[1]), array($testcase[1]), 100);
             } catch (Exception $e) {
                 $result = null;
-                if ($testcase[1]==='a**b') {
-                    
-                }
             }
             $eval = $result!==null;
             $this->assertEquals($testcase[0], $eval);
