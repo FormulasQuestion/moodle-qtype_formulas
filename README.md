@@ -1,9 +1,3 @@
-WARNING :
-I am now retired and I stopped all Moodle related activities.
-This repository is here just for history and this work is not maintained any more.
-Feel free to fork it and modify it to suit your needs or improve compatibility with recent Moodle versions.
-Additionaly you can consider contacting the Moodle team and become the new maintainer of this plugin. Thanks
-
 Formulas question type for Moodle
 ---------------------------------
 This is a question type plugin for Moodle with random values and multiple answer fields.
@@ -14,12 +8,12 @@ Other features such as unit checking and multiple subquestions are also availabl
 
 These functionalities can simplify the creation of questions in many fields related to mathematics, numbers and units, such as physics and engineering. 
 
-This question type was written by Hon Wai Lau and versions for Moodle 1.9 and 2.0 are still available at the original author website at the date of this writting
+This question type was written by Hon Wai Lau and versions for Moodle 1.9 and 2.0 are still available at the original author's website at the date of this writting
 https://code.google.com/p/moodle-coordinate-question/downloads/list
 
 This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine
 
-This version is compatible with Moodle 2.6 and ulterior versions. It has been tested with Moolde versions up to 3.4 and 3.5dev.
+This version is compatible with Moodle 2.6 and ulterior versions. It has been tested with Moodle versions up to 3.4 and 3.5dev.
 
 
 ### Requirements
