@@ -55,10 +55,10 @@ class answer_unit_conversion {
     public static $prefix_scale_factors = array('d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
         'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9, 'p' => 1e-12, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,
         'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,  'E' => 1e18,  'Z' => 1e21,  'Y' => 1e24);
-    // For convenience, u is used for micro-, µ, which has multiple similar UTF representations.
+    // For convenience, u is used for micro-, rather than "mu", which has multiple similar UTF representations.
 
-    // Initialize the internal conversion rule to empty. No throw.
-    function __construct() {
+    // Initialize the internal conversion rule to empty. No exception raised.
+    public function __construct() {
         $this->default_id = 0;
         $this->default_rules = '';
         $this->default_mapping = null;
@@ -68,12 +68,12 @@ class answer_unit_conversion {
 
 
     /**
-     * It assign default rules to this class. It will also reset the mapping. No throw
+     * It assign default rules to this class. It will also reset the mapping. No exception raised.
      *
      * @param string $default_id id of the default rule. Use to avoid reinitialization same rule set
      * @param string $default_rules default rules
      */
-    function assign_default_rules($default_id, $default_rules) {
+    public function assign_default_rules($default_id, $default_rules) {
         if ($this->default_id == $default_id) {
             return;  // Do nothing if the rules are unchanged.
         }
@@ -90,16 +90,16 @@ class answer_unit_conversion {
      *
      * @param string $additional_rules the additional rule string
      */
-    function assign_additional_rules($additional_rules) {
+    public function assign_additional_rules($additional_rules) {
         $this->additional_rules = $additional_rules;
         $this->mapping = null;
     }
 
 
     /**
-     * Parse all defined rules. It is designed to avoid unnecessary reparsing. Throw on parsing error
+     * Parse all defined rules. It is designed to avoid unnecessary reparsing. Exception on parsing error
      */
-    function reparse_all_rules() {
+    public function reparse_all_rules() {
         if ($this->default_mapping === null) {
             $tmp_mapping = array();
             $tmp_counter = 0;
@@ -117,13 +117,13 @@ class answer_unit_conversion {
 
 
     // Return the current unit mapping in this class.
-    function get_unit_mapping() {
+    public function get_unit_mapping() {
         return $this->mapping;
     }
 
 
     // Return a dimension classes list for current mapping. Each class is an array of $unit to $scale mapping.
-    function get_dimension_list() {
+    public function get_dimension_list() {
         $dimension_list = array();
         foreach ($this->mapping as $unit => $class_scale) {
             list($class, $scale) = $class_scale;
@@ -144,7 +144,7 @@ class answer_unit_conversion {
      *     If the ipunit is not match to any one of target, the conversion factor is always set to 1
      *   (3) target: indicate the location of the matching in the $targets, if they are convertible
      */
-    function check_convertibility($ipunit, $targets) {
+    public function check_convertibility($ipunit, $targets) {
         $l1 = strlen(trim($ipunit)) == 0;
         $l2 = strlen(trim($targets)) == 0;
         if ($l1 && $l2) {
@@ -177,7 +177,7 @@ class answer_unit_conversion {
      * @param string $targets The "=" separated list of unit, such as "N = kg m/s^2"
      * @return an array of parsed unit, parsed by the parse_unit().
      */
-    function parse_targets($targets) {
+    public function parse_targets($targets) {
         $targets_list = array();
         if (strlen(trim($targets)) == 0) {
             return $targets_list;
@@ -204,7 +204,7 @@ class answer_unit_conversion {
      * @param array $targets_list an array of parsed units.
      * @return the array of (conversion factor, location in target list) if convertible, otherwise null
      */
-    function check_convertibility_parsed($a, $targets_list) {
+    private function check_convertibility_parsed($a, $targets_list) {
         foreach ($targets_list as $i => $t) {   // Use exclusion method to check whether there is one match.
             if (count($a) != count($t)) {
                 // If they have different number of base unit, skip.
@@ -244,7 +244,7 @@ class answer_unit_conversion {
      * @param array $base_unit_array in the format of array(unit => exponent, ...)
      * @return array(conversion factor, unit exponent) if it can be converted, otherwise null.
      */
-    function attempt_conversion($test_unit_name, $base_unit_array) {
+    private function attempt_conversion($test_unit_name, $base_unit_array) {
         $oclass = $this->mapping[$test_unit_name];
         if (!isset($oclass)) {
             return null;  // It does not exist in the mapping implies it is not convertible.
@@ -260,12 +260,12 @@ class answer_unit_conversion {
 
 
     /**
-     * Split the input into the number and unit. No throw
+     * Split the input into the number and unit. No exception
      *
      * @param string $input physical quantity with number and unit, assume 1 if number is missing
      * @return object with number and unit as the field name. null if input is empty
      */
-    function split_number_unit($input) {
+    private function split_number_unit($input) {
         $input = trim($input);
         if (strlen($input) == 0) {
             return null;
@@ -282,13 +282,13 @@ class answer_unit_conversion {
 
 
     /**
-     * Parse the unit string into a simpler pair of base unit and its exponent. No throw
+     * Parse the unit string into a simpler pair of base unit and its exponent. No exception
      *
      * @param string $unit_expression The input unit string
      * @param bool $no_divisor whether divisor '/' is acceptable. It is used to parse unit recursively
      * @return an array of the form (base unit name => exponent), null on error
      */
-    function parse_unit($unit_expression, $no_divisor=false) {
+    public function parse_unit($unit_expression, $no_divisor=false) {
         if (strlen(trim($unit_expression)) == 0) {
             return array();
         }
@@ -363,13 +363,13 @@ class answer_unit_conversion {
 
 
     /**
-     * Parse rules into an mapping that will be used for fast lookup of unit. Throw on parsing error
+     * Parse rules into an mapping that will be used for fast lookup of unit. Exception on parsing error
      *
      * @param array $mapping an empty array, or array of unit => array(dimension class, conversion factor)
      * @param int $dim_id_count current number of dimension class. It will be incremented for new class
      * @param string $rules_string a comma separated list of rules
      */
-    function parse_rules(&$mapping, &$dim_id_count, $rules_string) {
+    private function parse_rules(&$mapping, &$dim_id_count, $rules_string) {
         $rules = explode(';', $rules_string);
         foreach ($rules as $rule) {
             if (strlen(trim($rule)) > 0) {
@@ -387,7 +387,9 @@ class answer_unit_conversion {
                     foreach ($si_prefixes as $prefix) {
                         if (strlen($prefix) != 0) {
                             $f = self::$prefix_scale_factors[$prefix];
-                            if (!isset($f))  throw new Exception('"'.$prefix.'" is not SI prefix.');
+                            if (!isset($f)) {
+                                throw new Exception('"'.$prefix.'" is not SI prefix.');
+                            }
                             $unit_scales[$prefix.$unit_name] = $f;
                         }
                     }

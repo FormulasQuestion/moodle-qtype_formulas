@@ -36,7 +36,9 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
     $show_all = ($N < 0);   // If $N > 0, it will try to enumerate all possible combinations, if # dataset < 1000.
     $vr_info = $qv->parse_random_variables($varsrandom);
     $maxdataset = $qv->vstack_get_number_of_dataset($vr_info);   // It is the same for all instantiations.
-    if ($show_all)  $N = min(1000, $maxdataset);   // Dynamic resize to the same # as exhaustive enumeration, limited to 1000.
+    if ($show_all) {
+        $N = min(1000, $maxdataset);   // Dynamic resize to the same # as exhaustive enumeration, limited to 1000.
+    }
     $hasshuffle = $qv->vstack_get_has_shuffle($vr_info);
     if ($N >= $maxdataset && !$hasshuffle) {
         $N = $maxdataset;     // There is no need to generate redundant datasets if there is no shuffle assignment.

@@ -146,22 +146,14 @@ var formulasform = {
 
     // Allow a more user friend way to select the commonly used criteria.
     init_selective_criteria : function(name, i, initial_checked) {
-
-        var n = document.getElementsByName(name + '[' + i + ']')[0];
-        if (n == null) {
-            alert("n  is null");
-        }
-        var loc = n;
-        while (loc != null && !loc.classList.contains('fitem')) {
-            loc = loc.parentNode;
-        }
+        var n = document.getElementById('id_' + name + '_' +i);
         var showid = n.id + '_' + name + '_' + i + '_show';
         var b = document.getElementById(showid);
         if (b == null) {
-            alert("b is null");
-            var tmp = document.createElement('div');
+            var tmp = document.createElement('span');
             tmp.id = showid;
-            b = n.parentNode.parentNode.appendChild(tmp);
+            c = n.parentNode;
+            b = c.insertBefore(tmp, c.firstChild);
         }
         if (initial_checked == null) {
             initial_checked = false;    // Always unchecked by default.
@@ -169,7 +161,7 @@ var formulasform = {
         formulas_form_correctness(i, initial_checked);
 
         var ctext = initial_checked ? ' checked="checked" ' : '';
-        var s = '<input type="checkbox" onclick="formulas_form_correctness(' + i + ',this.checked)" ' + ctext + ' id="' + showid + '">';
+        var s = '<input type="checkbox" style="width=15px" onclick="formulas_form_correctness(' + i + ',this.checked)" ' + ctext + ' id="' + showid + '" value="Expert">';
         var t = '<span onclick="var t=document.getElementById(\'' + showid + '\'); t.checked = !t.checked; formulas_form_correctness(' + i + ',t.checked);">' + b.innerHTML + '</span>';
         b.innerHTML = s + t;
     },

@@ -95,7 +95,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(true, 'c = cos(0)+3.14;', array('c' => (object) array('type' => 'n', 'value' => 4.1400000000000006))),
             array(true, 'd = "Hello!";', array('d' => (object) array('type' => 's', 'value' => "Hello!"))),
             array(true, 'e =[1,2,3,4];', array('e' => (object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)))),
-            array(true, 'f =["A", "B", "C"];', array('f' => (object) array('type' => 'ls', 'value' => array("A","B","C")))),
+            array(true, 'f =["A", "B", "C"];', array('f' => (object) array('type' => 'ls', 'value' => array("A", "B", "C")))),
             array(true, 'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];', array(
                     'a' => (object) array('type' => 'n', 'value' => 1),
                     'b' => (object) array('type' => 'n', 'value' => 4),
@@ -209,35 +209,35 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     )
             ),
             array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);', array(
-                    'p1' => (object) array('type' => 'ln', 'value' =>array(6, 7)),
+                    'p1' => (object) array('type' => 'ln', 'value' => array(6, 7)),
                     )
             ),
             array(true, 's=sort([7,5,3,11,2]);', array(
-                    's' => (object) array('type' => 'ln', 'value' =>array(2, 3, 5, 7, 11)),
+                    's' => (object) array('type' => 'ln', 'value' => array(2, 3, 5, 7, 11)),
                     )
             ),
             array(true, 's=sort(["B","A2","A1"]);', array(
-                    's' => (object) array('type' => 'ls', 'value' =>array('A1', 'A2', 'B')),
+                    's' => (object) array('type' => 'ls', 'value' => array('A1', 'A2', 'B')),
                     )
             ),
             array(true, 's=sort(["B","A2","A1"],[2,4,1]);', array(
-                    's' => (object) array('type' => 'ls', 'value' =>array('A1', 'B', 'A2')),
+                    's' => (object) array('type' => 'ls', 'value' => array('A1', 'B', 'A2')),
                     )
             ),
             array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
-                    's' => (object) array('type' => 'ls', 'value' =>array('B', 'D')),
+                    's' => (object) array('type' => 'ls', 'value' => array('B', 'D')),
                     )
             ),
             array(true, 's=sublist(["A","B","C","D"],[0,0,2,3]);', array(
-                    's' => (object) array('type' => 'ls', 'value' =>array('A', 'A', 'C', 'D')),
+                    's' => (object) array('type' => 'ls', 'value' => array('A', 'A', 'C', 'D')),
                     )
             ),
             array(true, 's=inv([2,0,3,1]);', array(
-                    's' => (object) array('type' => 'ln', 'value' =>array(1, 3, 0, 2)),
+                    's' => (object) array('type' => 'ln', 'value' => array(1, 3, 0, 2)),
                     )
             ),
             array(true, 's=inv(inv([2,0,3,1]));', array(
-                    's' => (object) array('type' => 'ln', 'value' =>array(2, 0, 3, 1)),
+                    's' => (object) array('type' => 'ln', 'value' => array(2, 0, 3, 1)),
                     )
             ),
         );
@@ -515,7 +515,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             try {
                 $var = $qv->parse_random_variables($testcase[1]);
                 // To predict the result we choose the dataset rather than having it at random.
-                $dataset =(int) ($qv->vstack_get_number_of_dataset($var)/2);
+                $dataset = (int) ($qv->vstack_get_number_of_dataset($var) / 2);
                 $inst = $qv->instantiate_random_variables($var, $dataset);
                 $serialized = $qv->vstack_get_serialization($inst);
             } catch (Exception $e) {
@@ -542,8 +542,8 @@ class qtype_formulas_variables_test extends advanced_testcase {
     public function test_substitute_variables_in_text() {
         $qv = new qtype_formulas_variables;
         $vstack = $qv->vstack_create();
-        $variable_text = 'a=1; b=[2,3,4];';
-        $vstack = $qv->evaluate_assignments($vstack, $variable_text);
+        $variablestring = 'a=1; b=[2,3,4];';
+        $vstack = $qv->evaluate_assignments($vstack, $variablestring);
         $text = '{a}, {a }, { a}, {b}, {b[0]}, {b[0] }, { b[0]}, {b [0]}, {=a*100}, {=b[0]*b[1]}, {= b[1] * b[2] }, {=100+[4:8][1]} ';
         $newtext = $qv->substitute_variables_in_text($vstack, $text);
         $expected = '1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105 ';
@@ -584,7 +584,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
         );
         foreach ($testcases as $idx => $testcase) {
             $result = $qv->compute_numerical_formula_value($testcase[2], $testcase[1]);
-            $eval = $result!==null;
+            $eval = $result !== null;
             $this->assertEquals($testcase[0], $eval);
             if ($testcase[0]) {
                 $this->assertEquals($testcase[3], $result);
@@ -728,11 +728,11 @@ class qtype_formulas_variables_test extends advanced_testcase {
 
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v, 'x={-10:11:1}; y={-10:-5, 6:11};');
-        $result = $qv->compute_algebraic_formula_difference($v, array('x','1+x+y+3','(1+sqrt(x))^2'), array('0','2+x+y+2','1+x'), 100);
+        $result = $qv->compute_algebraic_formula_difference($v, array('x', '1+x+y+3', '(1+sqrt(x))^2'), array('0', '2+x+y+2', '1+x'), 100);
         $this->assertEquals($result[1], 0);
         $this->assertEquals($result[2], INF);
         // var_dump($result);
-        $result = $qv->compute_algebraic_formula_difference($v, array('x','(x+y)^2'), array('0','x^2+2*x*y+y^2'), 100);
+        $result = $qv->compute_algebraic_formula_difference($v, array('x', '(x+y)^2'), array('0', 'x^2+2*x*y+y^2'), 100);
         $this->assertEquals($result[1], 0);
         // var_dump($result);
     }

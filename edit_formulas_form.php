@@ -51,9 +51,6 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->addElement('hidden', 'defaultmark');
         $mform->setType('defaultmark', PARAM_RAW);
 
-        $mform->addElement('hidden', 'jsvars');     // Used to keep the values during page submission.
-        $mform->setType('jsvars', PARAM_NOTAGS);
-
         $mform->addHelpButton('questiontext', 'questiontext', 'qtype_formulas');
 
         // Random and global variables and main question.

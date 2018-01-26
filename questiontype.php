@@ -273,14 +273,14 @@ class qtype_formulas extends question_type {
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) != 0) {
-                $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
+                $locations[] = 1000 * strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
             }
         }
         sort($locations);       // Performs stable sort of location and answerorder pairs.
 
         $fragments = array();
         foreach ($locations as $i => $location) {
-            $answerorder = $location%1000;
+            $answerorder = $location % 1000;
             list($fragments[$i], $questiontext) = explode('{'.$answers[$answerorder]->placeholder.'}', $questiontext);
         }
         foreach ($answers as $answer) {
@@ -357,7 +357,7 @@ class qtype_formulas extends question_type {
         $q = $this->make_question($questiondata);
 
         foreach ($q->parts as $part) {
-            if ($part->postunit =='') {
+            if ($part->postunit == '') {
                 $resp[$part->partindex] = array(
                     'wrong' => new question_possible_response(
                             'Wrong', 0),
@@ -427,7 +427,7 @@ class qtype_formulas extends question_type {
                         array(), '', $format->get_format($fromform->questiontextformat));
 
             $feedbackxml = $format->getpath($answer, array('#', 'feedback', 0), array());
-            $fromform->feedback[$anscount] =  $format->import_text_with_files($feedbackxml,
+            $fromform->feedback[$anscount] = $format->import_text_with_files($feedbackxml,
                         array(), '', $format->get_format($fromform->questiontextformat));
 
             ++$anscount;
@@ -512,10 +512,10 @@ class qtype_formulas extends question_type {
             }
             $placeholders[$answer->placeholder] = true;
             $count = substr_count($questiontext, '{'.$answer->placeholder.'}');
-            if ($count<1) {
+            if ($count < 1) {
                 $errstr[] = get_string('error_placeholder_missing', 'qtype_formulas');
             }
-            if ($count>1) {
+            if ($count > 1) {
                 $errstr[] = get_string('error_placeholder_main_duplicate', 'qtype_formulas');
             }
             if (!empty($errstr)) {
@@ -655,7 +655,7 @@ class qtype_formulas extends question_type {
                 foreach ($tags as $tag) {
                     $ans->{$tag} = $form->{$tag}[$key];
                 }
-                $ans->subqtext =$form->subqtext[$key];
+                $ans->subqtext = $form->subqtext[$key];
                 $ans->feedback = $form->feedback[$key];
                 $qo->options->answers[] = $ans;
             }
@@ -788,15 +788,15 @@ class qtype_formulas extends question_type {
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) != 0) {
-                $locations[] = 1000*strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
+                $locations[] = 1000 * strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
             }
         }
         sort($locations);       // Performs stable sort of locations.
 
         $ss = new stdClass();
-        $answersorder =array();
+        $answersorder = array();
         foreach ($locations as $i => $location) {
-            $answersorder[] = $location%1000;   // Store the new location of the answer in the main text.
+            $answersorder[] = $location % 1000;   // Store the new location of the answer in the main text.
         }
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) == 0) { // Add the empty placeholder at the end.
