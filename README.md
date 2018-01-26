@@ -34,7 +34,7 @@ You absolutely need version 3.3 or newer of this behaviour, the formulas questio
 
 ### Installation
 
-#### Installation from the Moodle plugin directory
+#### Installation from the Moodle plugin directory (prefered method)
 
 This question type is available from https://moodle.org/plugins/view.php?plugin=qtype_formulas
 
@@ -67,3 +67,7 @@ Here are some pointers to the available help :
 * you can read discussions about the formulas question type in the Moodle quiz forum
 for instance https://moodle.org/mod/forum/discuss.php?d=181049 and https://moodle.org/mod/forum/discuss.php?d=163345
 * you can post your questions in this forum
+
+###Reporting bugs, problems
+You can see the list of issues here: https://tracker.moodle.org/browse/CONTRIB-6381?jql=project%20%3D%20CONTRIB%20AND%20component%20%3D%20%22Question%20type%3A%20Formulas%22
+To create a new tracker issue, Log in and click on "Create" in the menu bar. Choose "Plugins (CONTRIB" in the "Project" field and "Question type: formulas" in the "Component(s)" field. Try to include as much details as you can so that the problem can be reproduced.
