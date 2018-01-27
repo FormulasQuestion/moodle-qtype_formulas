@@ -56,7 +56,7 @@ function formulas_form_correctness(id, checked) {
                 s += '</select><select id="' + bid + '_op" class="mform form-inline form-control" onchange="formulas_form_merge(' + id + ')">';
                 s += '<option value="<"' + (res[2] == '<' ? ' selected="selected"' : '') + '>&lt</option>';
                 s += '<option value="=="' + (res[2] == '==' ? ' selected="selected"' : '') + '>==</option>';
-                s += '</select><input id="' + bid + '_tol" class="mform form-inline form-control" value="' + res[3] + '" onchange="formulas_form_merge(' + id + ')">';
+                s += '</select><input id="' + bid + '_tol" type="text" class="mform form-inline form-control" value="' + res[3] + '" onchange="formulas_form_merge(' + id + ')">';
                 b.innerHTML = s;
             }
         }
