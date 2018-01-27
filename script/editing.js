@@ -20,6 +20,7 @@
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
+
 /**
  * Update the correctness simple elements from the expert one.
  */
@@ -30,7 +31,7 @@ function formulas_form_correctness(id, checked) {
         if (n == null) {
             return;
         }
-        var bid = 'correctness[' + id + ']_buttons';
+        var bid = 'id_correctness_' + id + '_buttons';
         var b = document.getElementById(bid);
         if (b == null) {
             var tmp = document.createElement('div');
@@ -69,7 +70,7 @@ function formulas_form_correctness(id, checked) {
 function formulas_form_merge(id) {
     var nid = 'correctness[' + id + ']';
     var n = document.getElementsByName(nid)[0];
-    var bid = 'correctness[' + id + ']_buttons';
+    var bid = 'id_correctness_' + id + '_buttons';
     var b = document.getElementById(bid);
     var error_type = document.getElementById(bid + '_type').value;
     var error_op   = document.getElementById(bid + '_op').value;
@@ -107,7 +108,7 @@ var formulasform = {
         // Allow the easier selection of correctness, rather than manual input of formula.
         for (i = 0; i < this.numsubq; i++) {
             try {
-                this.init_selective_criteria('correctness', i);
+                this.init_selective_criteria(i);
             } catch (e) {
                 alert(e);
             }
@@ -145,19 +146,24 @@ var formulasform = {
     },
 
     // Allow a more user friend way to select the commonly used criteria.
-    init_selective_criteria : function(name, i, initial_checked) {
-        var n = document.getElementById('id_' + name + '_' +i);
-        var showid = n.id + '_' + name + '_' + i + '_show';
+    init_selective_criteria : function(i) {
+        var n = document.getElementById('id_correctness_' +i);
+        loc = n.parentNode
+        while(!loc.classList.contains("fitem")) {
+            loc = loc.parentNode;
+        }
+
+        var showid = 'id_correctness_' + i + '_show';
         var b = document.getElementById(showid);
         if (b == null) {
-            var tmp = document.createElement('span');
+            var tmp = document.createElement('div');
             tmp.id = showid;
-            c = n.parentNode;
-            b = c.insertBefore(tmp, c.firstChild);
+            tmp.classList.add('formulas_correctness_show');
+            b = loc.insertBefore(tmp, loc.firstChild);
         }
-        if (initial_checked == null) {
-            initial_checked = false;    // Always unchecked by default.
-        }
+
+        initial_checked = false;    // Always unchecked by default.
+
         formulas_form_correctness(i, initial_checked);
 
         var ctext = initial_checked ? ' checked="checked" ' : '';

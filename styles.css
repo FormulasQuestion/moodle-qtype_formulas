@@ -81,6 +81,11 @@
     width: 200px;
 }
 
+.que.formulas .formulas_algebraic_formula_unit {
+    margin: 0 0 0 0;
+    width: 300px;
+}
+
 .que.formulas .formulation .formulaspart {
     display: block;
     margin: 0 0 1.2em 0;
@@ -113,3 +118,17 @@
 .que.formulas .formulation .formulaspartfeedback .incorrect {
     background: transparent;
 }
+
+/* Styles for the editing form. */
+body#page-question-type-formulas .formulas_correctness_show {
+    display: inline;
+    width: 15px;
+}
+
+/* RTL hacks */
+ #page-question-type-formulas #id_varsrandom,
+ #page-question-type-formulas #id_varsglobal {
+    height: 80px;
+    direction: ltr;
+    text-align: left;
+ }
