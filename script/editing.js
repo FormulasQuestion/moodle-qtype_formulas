@@ -50,13 +50,13 @@ function formulas_form_correctness(id, checked) {
             if (res == null) {
                 use_raw_input = true;
             } else {
-                var s = '<select id="' + bid + '_type" onchange="formulas_form_merge(' + id + ')">';
+                var s = '<select id="' + bid + '_type" class="mform form-inline form-control" onchange="formulas_form_merge(' + id + ')">';
                 s += '<option value="_relerr"' + (res[1] == '_relerr' ? ' selected="selected"' : '') + '>' + err_names[0] + '</option>';
                 s += '<option value="_err"' + (res[1] == '_err' ? ' selected="selected"' : '') + '>' + err_names[1] + '</option>';
-                s += '</select><select id="' + bid + '_op" onchange="formulas_form_merge(' + id + ')">';
+                s += '</select><select id="' + bid + '_op" class="mform form-inline form-control" onchange="formulas_form_merge(' + id + ')">';
                 s += '<option value="<"' + (res[2] == '<' ? ' selected="selected"' : '') + '>&lt</option>';
                 s += '<option value="=="' + (res[2] == '==' ? ' selected="selected"' : '') + '>==</option>';
-                s += '</select><input id="' + bid + '_tol" value="' + res[3] + '" onchange="formulas_form_merge(' + id + ')">';
+                s += '</select><input id="' + bid + '_tol" class="mform form-inline form-control" value="' + res[3] + '" onchange="formulas_form_merge(' + id + ')">';
                 b.innerHTML = s;
             }
         }
@@ -167,7 +167,7 @@ var formulasform = {
         formulas_form_correctness(i, initial_checked);
 
         var ctext = initial_checked ? ' checked="checked" ' : '';
-        var s = '<input type="checkbox" style="width=15px" onclick="formulas_form_correctness(' + i + ',this.checked)" ' + ctext + ' id="' + showid + '" value="Expert">';
+        var s = '<input type="checkbox" onclick="formulas_form_correctness(' + i + ',this.checked)" ' + ctext + ' id="' + showid + '" value="Expert">';
         var t = '<span onclick="var t=document.getElementById(\'' + showid + '\'); t.checked = !t.checked; formulas_form_correctness(' + i + ',t.checked);">' + b.innerHTML + '</span>';
         b.innerHTML = s + t;
     },
