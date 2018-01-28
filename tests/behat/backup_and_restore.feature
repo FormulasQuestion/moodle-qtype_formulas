@@ -13,7 +13,7 @@ Feature: Test duplicating a quiz containing a Formulas question
       | Course       | C1        | Test questions |
     And the following "questions" exist:
       | questioncategory | qtype       | name             | template     |
-      | Test questions   | formulas     | formulas-001    | test2        |
+      | Test questions   | formulas     | formulas-001    | test4        |
     And the following "activities" exist:
       | activity   | name      | course | idnumber |
       | quiz       | Test quiz | C1     | quiz1    |

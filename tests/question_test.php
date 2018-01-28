@@ -56,7 +56,7 @@ class qtype_formulas_question_test extends basic_testcase {
     }
 
     public function test_get_expected_data_test2() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $this->assertEquals(array('0_' => PARAM_RAW,
                                   '1_0' => PARAM_RAW, '1_1' => PARAM_RAW,
                                   '2_0' => PARAM_RAW,
@@ -94,7 +94,7 @@ class qtype_formulas_question_test extends basic_testcase {
     }
 
     public function test_get_question_summary_test2() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
         $globalvars = $q->get_global_variables();
@@ -124,7 +124,7 @@ class qtype_formulas_question_test extends basic_testcase {
 
 
     public function test_get_correct_response_test2() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
         $globalvars = $q->get_global_variables();
@@ -144,7 +144,7 @@ class qtype_formulas_question_test extends basic_testcase {
     }
 
     public function test_grade_parts_that_can_be_graded_test1() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
         $response = array('0_0' => '5', '1_0' => '6', '2_0' => '8');
@@ -238,7 +238,7 @@ class qtype_formulas_question_test extends basic_testcase {
     }
 
     public function test_get_parts_and_weights_test2() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
 
         $this->assertEquals(array('0' => .25, '1' => .25, '2' => .25, '3' => .25), $q->get_parts_and_weights());
     }
@@ -296,7 +296,7 @@ class qtype_formulas_question_test extends basic_testcase {
     }
 
     public function test_summarise_response_test1() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
         $response = array('0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50");

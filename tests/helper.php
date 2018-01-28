@@ -39,8 +39,9 @@ class qtype_formulas_test_helper extends question_test_helper {
         return array(
             'test0', // Minimal formulas question : one part, not randomised (answer = 5),
             'test1', // 3 parts, not randomised. (answers = 5, 6, 7),
-            'test2', // 5 parts, separated and combined unit field,
-            'test3'  // one part, not randomized, answer = 0 (to test problem with 0 as answer.
+            'test2', // 4 parts, separated and combined unit field, not ramdomized,
+            'test3', // one part, not randomized, answer = 0 (to test problem with 0 as answer,
+            'test4', // 4 parts, separated and combined unit field, ramdomized.
         );
     }
 
@@ -216,6 +217,7 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
     /**
      * @return qtype_formulas_question the question from the test1.xml file.
+     * Non randomized version for Behat tests.
      */
     public static function make_formulas_question_test2() {
         $q = self::make_a_formulas_question();
@@ -231,8 +233,8 @@ class qtype_formulas_test_helper extends question_test_helper {
                 3 => '',
                 4 => '',
                 );
-        $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
-        $q->varsglobal = 's = v*dt;';
+        $q->varsrandom = '';
+        $q->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $p0 = self::make_a_formulas_part();
         $p0->id = 14;
         $p0->partindex = 0;
@@ -279,11 +281,11 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-2';
         $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
                 'format' => FORMAT_HTML);
-        $form->generalfeedback = array('text' => 'This is the general feedback', 'format' => FORMAT_HTML);
+        $form->generalfeedback = array('text' => 'This is the general feedback.', 'format' => FORMAT_HTML);
         $form->defaultmark = 8;
         $form->penalty = 0.3;
-        $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
-        $form->varsglobal = 's = v*dt;';
+        $form->varsrandom = '';
+        $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
         $form->numbox = array(1, 1, 1, 1);
@@ -345,5 +347,116 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[0] = $p;
 
         return $q;
+    }
+
+    /**
+     * @return qtype_formulas_question the question from the test1.xml file.
+     * Randomized version.
+     */
+    public static function make_formulas_question_test4() {
+        $q = self::make_a_formulas_question();
+
+        $q->name = 'test-4';
+        $q->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
+        $q->defaultmark = 8;
+        $q->penalty = 0.3; // Non-zero and not the default.
+        $q->numpart = 4;
+        $q->textfragments = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+                1 => '',
+                2 => '',
+                3 => '',
+                4 => '',
+                );
+        $q->varsrandom = 'v = {20:100:10}; dt = {2:6};';
+        $q->varsglobal = 's = v*dt;';
+        $p0 = self::make_a_formulas_part();
+        $p0->id = 18;
+        $p0->partindex = 0;
+        $p0->answermark = 2;
+        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
+        $p0->answer = 'v';
+        $p0->postunit = 'm/s';
+        $q->parts[0] = $p0;
+        $p1 = self::make_a_formulas_part();
+        $p1->id = 19;
+        $p1->partindex = 1;
+        $p1->answermark = 2;
+        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
+        $p1->answer = 'v';
+        $p1->postunit = 'm/s';
+        $q->parts[1] = $p1;
+        $p2 = self::make_a_formulas_part();
+        $p2->id = 20;
+        $p2->partindex = 2;
+        $p2->answermark = 2;
+        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p2->answer = 'v';
+        $p2->postunit = '';
+        $q->parts[2] = $p2;
+        $p3 = self::make_a_formulas_part();
+        $p3->id = 21;
+        $p3->partindex = 3;
+        $p3->answermark = 2;
+        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p3->answer = 'v';
+        $p3->postunit = '';
+        $q->parts[3] = $p3;
+
+        return $q;
+    }
+
+    /**
+     * Gets the question form data for a formulas question
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_test4() {
+        $form = new stdClass();
+
+        $form->name = 'test-4';
+        $form->questiontext = array('text' => '<p>This question shows different display methods of the answer and unit box.</p>',
+                'format' => FORMAT_HTML);
+        $form->generalfeedback = array('text' => 'This is the general feedback.', 'format' => FORMAT_HTML);
+        $form->defaultmark = 8;
+        $form->penalty = 0.3;
+        $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
+        $form->varsglobal = 's = v*dt;';
+        $form->answer = array('v', 'v', 'v', 'v');
+        $form->answermark = array('2', '2', '2', '2');
+        $form->numbox = array(1, 1, 1, 1);
+        $form->placeholder = array('', '', '', '');
+        $form->postunit = array('m/s', 'm/s', '', '');
+        $form->answertype = array(0, 0, 0, 0);
+        $form->vars1 = array('', '', '', '');
+        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
+        $form->vars2 = array('', '', '', '');
+        $form->unitpenalty = array(1, 1, 1, 1);
+        $form->ruleid = array('1', '1', '1', '1');
+        $form->otherrule = array('', '', '', '');
+        $form->globalunitpenalty = 1;
+        $form->globalruleid = 1;
+        $form->subqtext = array(
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
+        );
+        $form->feedback = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->shownumcorrect = '0';
+        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->numhints = 2;
+        $form->hint = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->hintclearwrong = array('0', '0');
+        $form->hintshownumcorrect = array('0', '0');
+        return $form;
     }
 }

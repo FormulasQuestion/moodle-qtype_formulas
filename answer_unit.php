@@ -397,7 +397,7 @@ class answer_unit_conversion {
                     $data = explode('=', $rule);
                     foreach ($data as $d) {
                         $splitted = $this->split_number_unit($d);
-                        if ($splitted === null || preg_match('/['.self::$unit_exclude_symbols.']+/',$splitted->unit)) {
+                        if ($splitted === null || preg_match('/['.self::$unit_exclude_symbols.']+/', $splitted->unit)) {
                             throw new Exception('"'.$splitted->unit.'" unit contains unaccepted character.');
                         }
                         $unit_scales[trim($splitted->unit)] = 1. / floatval($splitted->number);

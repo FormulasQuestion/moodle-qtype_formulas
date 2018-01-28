@@ -116,6 +116,14 @@ $string['vars1'] = 'Local variables';
 $string['vars1_help'] = 'You can define variables here in the same way as global variables are defined at the question level. Variables defined here can be used in the part\'s answer or feedback
 and their scope of visibility is limited to the part.';
 $string['answer'] = 'Answer*';
+$string['answercombinedunitmulti'] = 'Answer and unit for part {$a->part}';
+$string['answercombinedunitsingle'] = 'Answer and unit';
+$string['answercoordinatemulti'] = 'Answer for part {$a->part} and coordinate {$a->numanswer}';
+$string['answercoordinatesingle'] = 'Answer for coordinate {$a->numanswer}';
+$string['answermulti'] = 'Answer for part {$a->part}';
+$string['answersingle'] = 'Answer';
+$string['answerunitmulti'] = 'Unit for part {$a->part}';
+$string['answerunitsingle'] = 'Unit';
 $string['answer_help'] = '**Required**.
 must be a list of numbers, or a list of strings depending on the answer
 type chosen. When there is only one answer, a number or string can be

@@ -28,29 +28,38 @@ Feature: Preview a Formulas question
   Scenario: Preview a formulas question with correct answer
     When I click on "Preview" "link" in the "formulas-001" "table_row"
     And I switch to "questionpreview" window
-    Then I should see "Multiple parts : --This is first part."
+    Then I should see "This question shows different display methods of the answer and unit box."
+    And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
     # Set behaviour options
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
     And I press "Start again with these options"
-    And I set the field with xpath "//div[@class='answer']//input[contains(@id, '1_answer')]" to "7*x"
+    And I set the field "Answer and unit for part 1" to "40 m/s"
+    And I set the field "Answer for part 2" to "40"
+    And I set the field "Unit for part 2" to "m/s"
+    And I set the field "Answer for part 3" to "40"
+    And I set the field "Answer for part 4" to "40"
     And I press "Check"
-    Then I should see "This is a very good answer."
-    Then I should see "Mark 1.00 out of 1.00"
-    And I should see "Generalfeedback: (P + Q)(x) = 7x."
-    And I should see "The correct answer is: 7*x"
+    And I should see "Mark 8.00 out of 8.00"
+    And I should see "This is the general feedback."
+    And I should see "One possible correct answer is: 40 m/s"
 
   @javascript @_switch_window
   Scenario: Preview an formulas question with incorrect answer
     When I click on "Preview" "link" in the "formulas-001" "table_row"
     And I switch to "questionpreview" window
-    Then I should see "P(x) = 3x and Q(x) = 4x. Calculate (P + Q)(x)"
+    Then I should see "This question shows different display methods of the answer and unit box."
+    And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
     # Set behaviour options
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
     And I press "Start again with these options"
-    And I set the field with xpath "//div[@class='answer']//input[contains(@id, '1_answer')]" to "6*x"
+    And I set the field "Answer and unit for part 1" to "40 m/s"
+    And I set the field "Answer for part 2" to "40"
+    And I set the field "Unit for part 2" to "km"
+    And I set the field "Answer for part 3" to "60"
+    And I set the field "Answer for part 4" to "40"
     And I press "Check"
-    Then I should see "Mark 0.00 out of 1.00"
-    And I should see "Generalfeedback: (P + Q)(x) = 7x."
-    And I should see "The correct answer is: 7*x"
+    And I should see "Mark 4.00 out of 8.00"
+    And I should see "This is the general feedback."
+    And I should see "One possible correct answer is: 40 m/s"

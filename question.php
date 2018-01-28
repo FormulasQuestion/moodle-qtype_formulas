@@ -227,6 +227,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $response;
     }
 
+     /**
+     * Return the number of parts of the question
+     */
+    public function get_number_of_parts() {
+        return $this->numpart;
+    }
+
     /**
      * Return the number of subparts of this response that are right.
      * @param array $response a response

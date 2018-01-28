@@ -140,7 +140,7 @@ class qtype_formulas_test extends advanced_testcase {
     }
 
     public function test_split_questiontext1() {
-        $q = $this->get_test_formulas_question('test2');
+        $q = $this->get_test_formulas_question('test4');
         $expected = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
                 1 => '',
                 2 => '',
