@@ -57,10 +57,26 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $questiontext = '';
         foreach ($question->parts as $part) {
-            $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$part->partindex], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
+            $questiontext .= $question->formulas_format_text(
+                    $globalvars,
+                    $question->textfragments[$part->partindex],
+                    FORMAT_HTML,
+                    $qa,
+                    'question',
+                    'questiontext',
+                    $question->id,
+                    false);
             $questiontext .= $this->part_formulation_and_controls($qa, $options, $part);
         }
-        $questiontext .= $question->formulas_format_text($globalvars, $question->textfragments[$question->get_number_of_parts()], FORMAT_HTML, $qa, 'question', 'questiontext', $question->id, false);
+        $questiontext .= $question->formulas_format_text(
+                $globalvars,
+                $question->textfragments[$question->get_number_of_parts()],
+                FORMAT_HTML,
+                $qa,
+                'question',
+                'questiontext',
+                $question->id,
+                false);
 
         $result = html_writer::tag('div', $questiontext, array('class' => 'qtext'));
         if ($qa->get_state() == question_state::$invalid) {
@@ -84,7 +100,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $sub = $this->get_part_image_and_class($qa, $options, $part);
         $localvars = $question->get_local_variables($part);
 
-        $output = $this->get_part_formulation($qa, $options, $part->partindex, $localvars, $sub);
+        $output = $this->get_part_formulation(
+                $qa,
+                $options,
+                $part->partindex,
+                $localvars,
+                $sub);
         // Place for the right/wrong feeback image or appended at part's end.
         if (strpos($output, '{_m}') !== false) {
             $output = str_replace('{_m}', $sub->feedbackimage, $output);
@@ -181,9 +202,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // If part has combined unit answer input.
         if ($part->part_has_combined_unit_field()) {
-            $var_name = "${i}_";
-            $currentanswer = $qa->get_last_qt_var($var_name);
-            $inputname = $qa->get_qt_field_name($var_name);
+            $variablename = "${i}_";
+            $currentanswer = $qa->get_last_qt_var($variablename);
+            $inputname = $qa->get_qt_field_name($variablename);
             $inputattributes = array(
                 'type' => 'text',
                 'name' => $inputname,
@@ -216,9 +237,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $inputs = array();
         foreach (range(0, $part->numbox) as $j) {    // Replace the input box for each placeholder {_0}, {_1} ...
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";    // The last one is unit.
-            $var_name = "${i}_$j";
-            $currentanswer = $qa->get_last_qt_var($var_name);
-            $inputname = $qa->get_qt_field_name($var_name);
+            $variablename = "${i}_$j";
+            $currentanswer = $qa->get_last_qt_var($variablename);
+            $inputname = $qa->get_qt_field_name($variablename);
             $inputattributes = array(
                 'name' => $inputname,
                 'value' => $currentanswer,
@@ -233,14 +254,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
                 try {
                     $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
-                } catch (Exception $e) {
-                    // The $stexts variable will be null if evaluation fails.
-                }
+                } catch (Exception $e) {}
+                // The $stexts variable will be null if evaluation fails.
             }
             // Coordinate as multichoice options.
             if ($stexts != null) {
-                if ($boxes[$placeholder]->stype == ':SL') {
-                } else {
+                if ($boxes[$placeholder]->stype != ':SL') {
                     if ($boxes[$placeholder]->stype == ':MCE') {
                         // Select menu.
                         if ($options->readonly) {
@@ -311,7 +330,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         $label = get_string('answerunitmulti', 'qtype_formulas', $a);
                     }
                     $inputs[$placeholder] = html_writer::tag('label', $label,
-                                array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+                            array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
                     $inputs[$placeholder] .= html_writer::empty_tag('input', $inputattributes);
                 }
             } else {
@@ -321,13 +340,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;
                 if ($part->numbox == 1){
-                        if ($question->get_number_of_parts() == 1) {
-                            $label = get_string('answersingle', 'qtype_formulas', $a);
-                        } else {
-                            $label = get_string('answermulti', 'qtype_formulas', $a);
-                        }
+                    if ($question->get_number_of_parts() == 1) {
+                        $label = get_string('answersingle', 'qtype_formulas', $a);
+                    } else {
+                        $label = get_string('answermulti', 'qtype_formulas', $a);
+                    }
                 } else {
-                     if ($question->get_number_of_parts() == 1) {
+                    if ($question->get_number_of_parts() == 1) {
                         $label = get_string('answercoordinatesingle', 'qtype_formulas', $a);
                     } else {
                         $label = get_string('answercoordinatemulti', 'qtype_formulas', $a);

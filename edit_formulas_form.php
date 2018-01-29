@@ -84,11 +84,11 @@ class qtype_formulas_edit_form extends question_edit_form {
         $conversionrules = new unit_conversion_rules;
         $allrules = $conversionrules->allrules();
         foreach ($allrules as $id => $entry) {
-            $default_rule_choice[$id] = $entry[0];
+            $defaultrulechoice[$id] = $entry[0];
         }
         $mform->addElement('select', 'globalruleid',
                 get_string('globaloptions', 'qtype_formulas') . get_string('ruleid', 'qtype_formulas'),
-            $default_rule_choice);
+            $defaultrulechoice);
         $mform->setDefault('globalruleid', 1);
          $mform->addHelpButton('globalruleid', 'ruleid', 'qtype_formulas');
 
@@ -175,10 +175,10 @@ class qtype_formulas_edit_form extends question_edit_form {
         $conversionrules = new unit_conversion_rules;
         $allrules = $conversionrules->allrules();
         foreach ($allrules as $id => $entry) {
-            $default_rule_choice[$id] = $entry[0];
+            $defaultrulechoice[$id] = $entry[0];
         }
         $repeated[] = $mform->createElement('select', 'ruleid', get_string('ruleid', 'qtype_formulas'),
-            $default_rule_choice);
+            $defaultrulechoice);
         $repeatedoptions['ruleid']['default'] = 1;
         // Part's other rules.
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
@@ -245,25 +245,25 @@ class qtype_formulas_edit_form extends question_edit_form {
                 foreach ($question->options->answers as $key => $answer) {
 
                     foreach ($tags as $tag) {
-                        $default_values[$tag.'['.$key.']'] = $answer->$tag;
+                        $defaultvalues[$tag.'['.$key.']'] = $answer->$tag;
                     }
                     // Prepare part's text.
                     $subqtid = file_get_submitted_draft_itemid('subqtext['.$key.']');
                     $subqt = file_prepare_draft_area($subqtid, $this->context->id, 'qtype_formulas',
                             'answersubqtext', empty($answer->id) ? null : (int)$answer->id,
                             $this->fileoptions, $answer->subqtext);
-                    $default_values['subqtext['.$key.']'] = array('text' => $subqt,
+                    $defaultvalues['subqtext['.$key.']'] = array('text' => $subqt,
                             'format' => $answer->subqtextformat, 'itemid' => $subqtid);
                     $subqfbid = file_get_submitted_draft_itemid('feedback['.$key.']');
                     $subqfb = file_prepare_draft_area($subqfbid, $this->context->id, 'qtype_formulas',
                             'answerfeedback', empty($answer->id) ? null : (int)$answer->id,
                             $this->fileoptions, $answer->feedback);
-                    $default_values['feedback['.$key.']'] = array('text' => $subqfb,
+                    $defaultvalues['feedback['.$key.']'] = array('text' => $subqfb,
                             'format' => $answer->feedbackformat, 'itemid' => $subqfbid);
                 }
             }
 
-            $question = (object)((array)$question + $default_values);
+            $question = (object)((array)$question + $defaultvalues);
         }
         return $question;
     }
@@ -277,13 +277,13 @@ class qtype_formulas_edit_form extends question_edit_form {
 
         // Use the validation defined in the question type, check by instantiating one variable set.
         $data = (object)$fromform;
-        $instantiation_result = question_bank::get_qtype($this->qtype())->validate($data);
-        if (isset($instantiation_result->errors)) {
-            $errors = array_merge($errors, $instantiation_result->errors);
+        $instantiationresult = question_bank::get_qtype($this->qtype())->validate($data);
+        if (isset($instantiationresult->errors)) {
+            $errors = array_merge($errors, $instantiationresult->errors);
         }
         // Forward the (first) local error of the options to the global one.
-        $global_tags = array('unitpenalty', 'ruleid');
-        foreach ($global_tags as $gtag) {
+        $globaltags = array('unitpenalty', 'ruleid');
+        foreach ($globaltags as $gtag) {
             if (array_key_exists($gtag.'[0]', $errors)) {
                 $errors['global'.$gtag] = $errors[$gtag.'[0]'];
             }

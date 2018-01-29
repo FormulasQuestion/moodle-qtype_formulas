@@ -89,7 +89,8 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             'category' => '3',
             'parent' => '0',
             'name' => '1.4: Placeholder of answer and unit',
-            'questiontext' => '<i><b> Placeholder of answer  and unit  </b></i>: This question shows different display methods of the answer and unit box.
+            'questiontext' => '<i><b> Placeholder of answer  and unit  </b>'
+                    . '</i>: This question shows different display methods of the answer and unit box.
  <br>
  <br>',
             'questiontextformat' => '1',

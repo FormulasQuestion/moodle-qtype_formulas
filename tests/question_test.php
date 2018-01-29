@@ -52,15 +52,20 @@ class qtype_formulas_question_test extends basic_testcase {
 
     public function test_get_expected_data_test1() {
         $q = $this->get_test_formulas_question('test1');
-        $this->assertEquals(array('0_0' => PARAM_RAW, '1_0' => PARAM_RAW, '2_0' => PARAM_RAW), $q->get_expected_data());
+        $this->assertEquals(array('0_0' => PARAM_RAW,
+                                  '1_0' => PARAM_RAW,
+                                  '2_0' => PARAM_RAW),
+                                  $q->get_expected_data());
     }
 
     public function test_get_expected_data_test2() {
         $q = $this->get_test_formulas_question('test4');
         $this->assertEquals(array('0_' => PARAM_RAW,
-                                  '1_0' => PARAM_RAW, '1_1' => PARAM_RAW,
+                                  '1_0' => PARAM_RAW,
+                                  '1_1' => PARAM_RAW,
                                   '2_0' => PARAM_RAW,
-                                  '3_0' => PARAM_RAW), $q->get_expected_data());
+                                  '3_0' => PARAM_RAW),
+                                  $q->get_expected_data());
     }
 
     public function test_is_complete_response_test0() {
@@ -84,13 +89,18 @@ class qtype_formulas_question_test extends basic_testcase {
     public function test_get_question_summary_test0() {
         $q = $this->get_test_formulas_question('test0');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals("Minimal question : For a minimal question, you must define a part with (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.\n", $q->get_question_summary());
+        $this->assertEquals(
+                "Minimal question : For a minimal question,"
+                . "you must define a part with (1) mark, (2) answer,"
+                . "(3) grading criteria, and optionally (4) question text.\n",
+                $q->get_question_summary());
     }
 
     public function test_get_question_summary_test1() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
-        $this->assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n", $q->get_question_summary());
+        $this->assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n",
+                $q->get_question_summary());
     }
 
     public function test_get_question_summary_test2() {
@@ -105,7 +115,8 @@ class qtype_formulas_question_test extends basic_testcase {
                             . "If a car travel $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
                             . "If a car travel $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
                             . "If a car travel $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
-                            . "If a car travel $s m in $dt s, what is the speed of the car? speed = {_0}{_u}\n", $q->get_question_summary());
+                            . "If a car travel $s m in $dt s, what is the speed of the car? speed = {_0}{_u}\n",
+                                    $q->get_question_summary());
     }
 
     public function test_get_correct_response_test0() {
@@ -130,15 +141,22 @@ class qtype_formulas_question_test extends basic_testcase {
         $globalvars = $q->get_global_variables();
         $v = $globalvars->all['v']->value;
 
-        $this->assertEquals(array('0_' => "{$v}m/s", '1_0' => "$v", '1_1' => 'm/s', '2_0' => "$v", '3_0' => "$v"), $q->get_correct_response());
+        $this->assertEquals(array('0_' => "{$v}m/s",
+                                  '1_0' => "$v",
+                                  '1_1' => 'm/s',
+                                  '2_0' => "$v",
+                                  '3_0' => "$v"),
+                $q->get_correct_response());
     }
 
     public function test_get_is_same_response_for_part_test2() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $this->assertTrue($q->is_same_response_for_part('1', array('1_0' => 'x'), array('1_0' => 'x')));
-        $this->assertTrue($q->is_same_response_for_part('1', array('1_0' => 'x', '2_0' => 'x'),
+        $this->assertTrue($q->is_same_response_for_part('1',
+                array('1_0' => 'x'), array('1_0' => 'x')));
+        $this->assertTrue($q->is_same_response_for_part('1',
+                array('1_0' => 'x', '2_0' => 'x'),
                 array('1_0' => 'x', '2_0' => 'y')));
         $this->assertFalse($q->is_same_response_for_part('1', array('1_0' => 'x'), array('1_0' => 'y')));
     }

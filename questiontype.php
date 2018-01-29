@@ -494,7 +494,7 @@ class qtype_formulas extends question_type {
      * @return $errors array
      */
     public function check_placeholder($questiontext, $answers) {
-        $placeholder_format = '#\w+';
+        $placeholderformat = '#\w+';
         $placeholders = array();
         foreach ($answers as $idx => $answer) {
             if ( strlen($answer->placeholder) == 0 ) {
@@ -504,7 +504,7 @@ class qtype_formulas extends question_type {
             if ( strlen($answer->placeholder) >= 40 ) {
                 $errstr[] = get_string('error_placeholder_too_long', 'qtype_formulas');
             }
-            if ( !preg_match('/^'.$placeholder_format.'$/', $answer->placeholder) ) {
+            if ( !preg_match('/^'.$placeholderformat.'$/', $answer->placeholder) ) {
                 $errstr[] = get_string('error_placeholder_format', 'qtype_formulas');
             }
             if ( array_key_exists($answer->placeholder, $placeholders) ) {
