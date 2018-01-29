@@ -122,13 +122,12 @@
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
-    width: 15px;
 }
 
 /* RTL hacks */
- #page-question-type-formulas #id_varsrandom,
- #page-question-type-formulas #id_varsglobal {
+#page-question-type-formulas #id_varsrandom,
+#page-question-type-formulas #id_varsglobal {
     height: 80px;
     direction: ltr;
     text-align: left;
- }
+}
