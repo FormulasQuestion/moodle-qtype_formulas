@@ -228,8 +228,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
      /**
-     * Return the number of parts of the question
-     */
+      * Return the number of parts of the question
+      */
     public function get_number_of_parts() {
         return $this->numpart;
     }

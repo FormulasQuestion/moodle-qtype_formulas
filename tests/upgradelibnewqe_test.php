@@ -303,7 +303,9 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             'minfraction' => 0,
             'maxfraction' => 1,
             'flagged' => 0,
-            'questionsummary' => '_ PLACEHOLDER OF ANSWER AND UNIT _: This question shows different display methods of the answer and unit box.If a car travel {s} m in {dt} s, what is the speed of the car?
+            'questionsummary' => '_ PLACEHOLDER OF ANSWER AND UNIT _:'
+                    . 'This question shows different display methods of the answer and unit box.'
+                    . 'If a car travel {s} m in {dt} s, what is the speed of the car?
             {_0}{_u}If a car travel {s} m in {dt} s, what is the speed of the car?
             {_0} {_u}If a car travel {s} m in {dt} s, what is the speed of the car?
             {_0} m/sIf a car travel {s} m in {dt} s, what is the speed of the car?

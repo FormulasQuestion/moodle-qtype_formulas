@@ -254,8 +254,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
                 try {
                     $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
-                } catch (Exception $e) {}
-                // The $stexts variable will be null if evaluation fails.
+                } catch (Exception $e) {
+                    // The $stexts variable will be null if evaluation fails.
+                }
             }
             // Coordinate as multichoice options.
             if ($stexts != null) {
@@ -339,7 +340,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $a = new stdClass();
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;
-                if ($part->numbox == 1){
+                if ($part->numbox == 1) {
                     if ($question->get_number_of_parts() == 1) {
                         $label = get_string('answersingle', 'qtype_formulas', $a);
                     } else {
