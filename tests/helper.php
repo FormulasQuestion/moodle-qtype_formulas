@@ -105,7 +105,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $q->name = 'test-0';
         $q->questiontext = '<p>Minimal question : For a minimal question, you must define a part with'
-                . '(1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
+                . ' (1) mark, (2) answer, (3) grading criteria, and optionally (4) question text.</p>';
 
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->textfragments = array(0 => '<p>Minimal question : For a minimal question, you must define a part with'
