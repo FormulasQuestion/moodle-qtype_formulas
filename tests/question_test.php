@@ -91,8 +91,8 @@ class qtype_formulas_question_test extends basic_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
         $this->assertEquals(
                 "Minimal question : For a minimal question,"
-                . "you must define a part with (1) mark, (2) answer,"
-                . "(3) grading criteria, and optionally (4) question text.\n",
+                . " you must define a part with (1) mark, (2) answer,"
+                . " (3) grading criteria, and optionally (4) question text.\n",
                 $q->get_question_summary());
     }
 
