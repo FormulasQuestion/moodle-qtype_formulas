@@ -32,31 +32,40 @@
          id="path7" />
     </clipPath>
   </defs>
-  <rect
-     style="fill:#ffffff;fill-opacity:0;stroke:#000000;stroke-width:1.90104449;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-     id="rect3339"
-     width="13.917314"
-     height="10.629179"
-     x="1.1091396"
-     y="2.1599874" />
   <text
      id="text3341"
-     y="10.169492"
-     x="3.1864407"
-     style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     xml:space="preserve"><tspan
-       style="-inkscape-font-specification:'Sans Bold';font-family:Sans;font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal"
-       y="10.169492"
-       x="3.1864407"
-       id="tspan3343">x</tspan></text>
+     y="6.0823979"
+     x="-0.086517774"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.73787737px;line-height:125%;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.26335192px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"
+     transform="scale(0.83589297,1.1963254)"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.73787737px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:1.26335192px"
+       y="6.0823979"
+       x="-0.086517774"
+       id="tspan3343">x=</tspan></text>
   <text
-     transform="scale(0.9589025,1.0428589)"
-     id="text3345"
-     y="8.3213234"
-     x="8.8515368"
-     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.75380421px;line-height:125%;font-family:Sans;-inkscape-font-specification:'Sans Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     xml:space="preserve"><tspan
-       y="8.3213234"
-       x="8.8515368"
-       id="tspan3347">2</tspan></text>
+     id="text3341-6"
+     y="11.077769"
+     x="0.34386635"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.84380436px;line-height:125%;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;isolation:isolate;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.28321326px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"
+     transform="scale(0.79373363,1.2598685)"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.84380436px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:1.28321326px"
+       y="11.077769"
+       x="0.34386635"
+       id="tspan3343-0">y=</tspan></text>
+  <rect
+     y="1.6949152"
+     x="9.6271181"
+     height="5.8983049"
+     width="5.762712"
+     id="rect822"
+     style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.09399998;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <rect
+     y="8.9830513"
+     x="9.5932207"
+     height="5.8983049"
+     width="5.762712"
+     id="rect822-3"
+     style="isolation:isolate;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.09399998;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
 </svg>

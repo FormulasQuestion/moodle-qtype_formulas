@@ -1,4 +1,5 @@
 .que.formulas .formulas_input_warning_outer {
+
     display: inline;
     position: absolute;
     z-index: 1;
@@ -122,6 +123,50 @@
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
+}
+
+body#page-question-type-formulas .formulas_input_warning_outer {
+
+    display: inline;
+    position: absolute;
+    z-index: 1;
+}
+
+body#page-question-type-formulas .formulas_input_warning {
+    background: transparent;
+    left: -1.3em;
+    position: absolute;
+    top: 0.3em;
+}
+
+body#page-question-type-formulas .formulas_input_info_outer {
+    display: inline;
+    position: absolute;
+    z-index: 2;
+}
+
+body#page-question-type-formulas .formulas_input_info {
+    background-color: #eef;
+    border: 1px solid #88c;
+    left: 0;
+    position: absolute;
+    top: 1.94em;
+    width: 150px;
+}
+*/
+body#page-question-type-formulas .formulas_input_info_title {
+    padding: 2px;
+}
+
+body#page-question-type-formulas .formulas_input_info_interpretation {
+    border-top: 1px solid #88c;
+    padding: 2px;
+}
+
+body#page-question-type-formulas .formulas_input_info_interpretation_incorrect {
+    border-top: 1px solid #88c;
+    color: #bbb;
+    padding: 2px;
 }
 
 /* RTL hacks */

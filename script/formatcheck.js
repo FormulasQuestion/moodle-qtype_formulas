@@ -43,7 +43,7 @@ function formulas_format_check() {
         ['numerical_formula', true, true, true],    // Allow the combination of numbers, operators and functions.
         ['numerical_formula_unit', true, true, true],   // Input box with numerical formula and unit together.
         ['algebraic_formula', true, true, true],    // Allow the combination of numbers, operators, functions and variables.
-        ['editing_unit', false, true, true]         // Used for the unit in editing interface.
+        ['editing_unit', true, true, true]         // Used for the unit in editing interface.
     ];
 
     // The list of constant that will be replaced by the corresponding number.
@@ -191,8 +191,12 @@ function formulas_format_check() {
                 var base_units = fn.parse_unit(common.fn, unit_lists[i]);
                 correct = correct && (base_units != null) && (fn.trim(unit_lists[i]).length != 0);
                 formatted.push(fn.format_unit(base_units));
-            } catch(e) { correct = false; }
-            if (!correct)  return null;
+            } catch(e) {
+                correct = false;
+            }
+            if (!correct) {
+                return null;
+            }
             return formatted.join(' = ');
         },
 
@@ -568,7 +572,7 @@ function formulas_format_check() {
         }
     };
 
-    // Initialization: Append the display blocks around the input and the data in the input node
+    // Initialization: Append the display blocks around the input and the data in the input node.
     function init(common, types) {
         var others = [];
         var count = 0;
@@ -576,23 +580,30 @@ function formulas_format_check() {
         for (i=0; i<inputs.length; i++)  {
             var input = inputs[i];
             if (input.type != 'text')  continue;    // if it is not a text input field
+            // With the Boost theme the element class is on a div element, not on the input element
+            // So we re-add it so that classify function works on it.
+            if (input.name.indexOf('postunit') == 0) {
+                input.classList.add('formulas_editing_unit');
+                input.title = M.util.get_string('unit', 'qtype_formulas');
+            }
             var type = classify(input.className, types);
+
             if (type == null)  continue;            // if it does not contain the required class
 
             var self = {};
             self.input = input;
             self.which = count;
-            self.answered = false;  // default value, it will be checked later
+            self.answered = false;  // Default value, it will be checked later.
             self.correct = false;   // Note: if there is no answer, self.correct is always undefined
             self.cur_value = null;  // it will store the trimmed value of the user input
-            self.last_value = null; // the input value in the last checking state, nothing by default
+            self.last_value = null; // the input value in the last checking state, nothing by default.
             self.func = type.func;
             self.show_info = (type.show_type || type.show_interpretation);
             self.show_type = type.show_type;
             self.show_sign = type.show_sign;
             self.show_interpretation = type.show_interpretation;
             self.title = input.title;
-            input.title = '';       // remove the title
+            input.title = '';       // Remove the title.
 
             var warning_inner = document.createElement('img');
             warning_inner.src = M.util.image_url('warning', 'qtype_formulas');

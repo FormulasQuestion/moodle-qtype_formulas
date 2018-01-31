@@ -44,6 +44,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $PAGE->requires->string_for_js('abserror', 'qtype_formulas');
         $PAGE->requires->string_for_js('instantiate', 'qtype_formulas');
         $PAGE->requires->string_for_js('renew', 'qtype_formulas');
+        $PAGE->requires->string_for_js('unit', 'qtype_formulas');
         $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
         $PAGE->requires->css('/question/type/formulas/styles.css');
         // Hide the unused form fields.
