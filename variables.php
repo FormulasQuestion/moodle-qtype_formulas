@@ -36,13 +36,13 @@ function fact($n) {
     return $return;
 }
 
-function perm($n, $r) {
+function npr($n, $r) {
     $n=(int)$n;
     $r=(int)$r;
     if ($r > $n)
         return 0;
     if (($n - $r) < $r)
-        return perm($n, ($n - $r));
+        return npr($n, ($n - $r));
     $return = 1;
     for ($i=0; $i<$r; $i++){
          $return *= ($n - $i);
@@ -50,13 +50,13 @@ function perm($n, $r) {
     return $return;
 }
 
-function comb($n, $r) {
+function ncr($n, $r) {
     $n=(int)$n;
     $r=(int)$r;
     if ($r > $n)
         return 0;
     if (($n - $r) < $r)
-        return comb($n, ($n - $r));
+        return ncr($n, ($n - $r));
     $return = 1;
     for ($i=0; $i<$r; $i++){
          $return *= ($n - $i) / ($i + 1);
