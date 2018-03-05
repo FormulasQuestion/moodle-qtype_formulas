@@ -135,7 +135,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     's' => (object) array('type' => 'ln', 'value' => array(2, 0 , 1)),
                     'n' => (object) array('type' => 'ln', 'value' => array(9, 3 , 54))),
             ),
-            // array(false, 'a=3 6;'),  // Problem parseerror unexpected '$a' (T_VARIABLE)
+            array(false, 'a=3 6;', '1: Some expressions cannot be evaluated numerically.'),
             array(false, 'a=3`6;', 'Formula or expression contains forbidden characters or operators.'),
             array(false, 'f=1; g=f[1];', '2: Variable is unsubscriptable.'),
             array(false, 'e=[];', '1: A subexpression is empty.'),
@@ -379,7 +379,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             ),
             array(false, 'z = 0; for(: [0:5]) z=z+i;', '2: Variable of the for loop has some errors.'),
             array(false, 'z = 0; for(i:) z=z+i;', '2: A subexpression is empty.'),
-            // array(false, 'z = 0; for(i: [0:5]) '),
+            array(false, 'z = 0; for(i: [0:5]) ', ''),   // Problem : error message is missing.
             array(false, 'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;', '4: Syntax error of the for loop.'),
             array(false, 'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];', '5: Element in the same list must be of the same type, either number or string.'),
             array(true, '#--------- algebraic variable ---------#', array()),
@@ -689,8 +689,8 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(true, 'a sin(w t)+ b cos(w t)'), // a*sin(w*t) + b*cos(w*t)
             array(true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'),
 
-            // array(false, 'a-'),    // Problem: parse error unexpected '(', expecting ',' or ')'
-            // array(false, '*a'),      //  Problem: parseerror unexpected '*'
+            array(false, 'a-'),
+            array(false, '*a'),
             array(true, 'a**b'),    // True since PHP > 5.6.
             array(false, 'a+^c+f'),
             array(false, 'a+b^^+f'),

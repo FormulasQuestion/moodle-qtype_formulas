@@ -927,7 +927,12 @@ class qtype_formulas_variables {
         $results = array();
         foreach ($all as $a) {
             $res = null;
-            eval('$res = '.implode(' ',$splitted).';');
+            // In PHP 7 eval() terminates the script if the evaluated code generate a fatal error
+            try {
+                eval('$res = '.implode(' ',$splitted).';');
+            } catch (Throwable $t) {
+                throw new Exception(get_string('error_eval_numerical','qtype_formulas'));
+            }
             if (!isset($res))  throw new Exception(get_string('error_eval_numerical','qtype_formulas'));
             $results[] = floatval($res);    // make sure it is a number, not other data type such as bool
         }
