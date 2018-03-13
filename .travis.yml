@@ -18,6 +18,7 @@ cache:
 php:
  - 7.0
  - 7.1
+ - 7.2
 
 env: 
   - MOODLE_BRANCH=MOODLE_32_STABLE DB=pgsql IGNORE_PATHS=mobile_src
