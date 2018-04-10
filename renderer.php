@@ -96,6 +96,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     // Return the part text, controls, grading details and feedbacks.
     public function part_formulation_and_controls(question_attempt $qa,
             question_display_options $options, $part) {
+
         $question = $qa->get_question();
         $sub = $this->get_part_image_and_class($qa, $options, $part);
         $localvars = $question->get_local_variables($part);
@@ -131,6 +132,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function get_part_image_and_class($qa, $options, $part) {
         $question = $qa->get_question();
 
+        $partoptions = clone $options;
         $sub = new StdClass;
 
         $response = $qa->get_last_qt_data();
@@ -142,11 +144,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // If using adaptivemultipart behaviour, adjust feedback display options for this part.
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
-            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $options);
+            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $partoptions);
         }
 
         // Get the class and image for the feedback.
-        if ($options->correctness) {
+        if ($partoptions->correctness) {
             $sub->feedbackimage = $this->feedback_image($sub->fraction);
             $sub->feedbackclass = $this->feedback_class($sub->fraction);
             if ($part->unitpenalty >= 1) { // All boxes must be correct at the same time, so they are of the same color.
@@ -168,12 +170,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     // Return the part's text with variables replaced by their values.
     public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $vars, $sub) {
         $question = $qa->get_question();
+        $partoptions = clone $options;
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
 
         // If using adaptivemultipart behaviour, adjust feedback display options for this part.
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
-            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $options);
+            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $partoptions);
         }
 
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
@@ -215,7 +218,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'maxlength' => 128,
             );
 
-            if ($options->readonly) {
+            if ($partoptions->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
             // Create a meaningful label for accessibility.
@@ -246,7 +249,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'id' => $inputname,
                 'maxlength' => 128,
             );
-            if ($options->readonly) {
+            if ($partoptions->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
 
@@ -263,7 +266,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 if ($boxes[$placeholder]->stype != ':SL') {
                     if ($boxes[$placeholder]->stype == ':MCE') {
                         // Select menu.
-                        if ($options->readonly) {
+                        if ($partoptions->readonly) {
                             $inputattributes['disabled'] = 'disabled';
                         }
                         $choices = array();
@@ -281,7 +284,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     } else {
                         // Multichoice single question.
                         $inputattributes['type'] = 'radio';
-                        if ($options->readonly) {
+                        if ($partoptions->readonly) {
                             $inputattributes['disabled'] = 'disabled';
                         }
                         $output = $this->all_choices_wrapper_start();
@@ -295,7 +298,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             } else {
                                 unset($inputattributes['checked']);
                             }
-                            if ($options->correctness && $isselected) {
+                            if ($partoptions->correctness && $isselected) {
                                 $class .= ' ' . $sub->feedbackclass;
                             }
                             $output .= $this->choice_wrapper_start($class);
@@ -314,7 +317,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // Coordinate as shortanswer question.
             $inputs[$placeholder] = '';
             $inputattributes['type'] = 'text';
-            if ($options->readonly) {
+            if ($partoptions->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
             if ($j == $part->numbox) {
