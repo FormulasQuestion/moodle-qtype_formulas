@@ -125,7 +125,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
         $output .= html_writer::nonempty_tag('div', $feedback,
                 array('class' => 'formulaspartoutcome'));
-        return html_writer::tag('div', $output , array('class' => 'formulaspart'));
+        return html_writer::tag('span', $output , array('class' => 'formulaspart'));
     }
 
     // Return class and image for the part feedback.
@@ -427,6 +427,27 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
         return html_writer::nonempty_tag('div', get_string('correctansweris', 'qtype_formulas', $correctanswer),
                     array('class' => 'formulaspartcorrectanswer'));
+    }
+
+    /**
+     * Gereate a brief statement of how many sub-parts of this question the
+     * student got right.
+     * @param question_attempt $qa the question attempt to display.
+     * @return string HTML fragment.
+     */
+    protected function num_parts_correct(question_attempt $qa) {
+        $response = $qa->get_last_qt_data();
+        if (!$qa->get_question()->is_gradable_response($response)) {
+            return '';
+        }
+        $a = new stdClass();
+        list($a->num, $a->outof) = $qa->get_question()->get_num_parts_right(
+                $response);
+        if (is_null($a->outof)) {
+            return '';
+        } else {
+            return get_string('yougotnright', 'qtype_formulas', $a);
+        }
     }
 
     /**

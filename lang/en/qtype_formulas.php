@@ -34,7 +34,7 @@ $string['numeric_unit'] = 'Numeric and unit';
 $string['numerical_formula'] = 'Numerical formula';
 $string['numerical_formula_unit'] = 'Numerical formula and unit';
 $string['algebraic_formula'] = 'Algebraic formula';
-$string['yougotnright'] = 'You have correctly answered {$a->num} parts of this question.';
+$string['yougotnright'] = 'You have correctly answered {$a->num} part(s) of this question.';
 $string['pleaseputananswer'] = 'Please put an answer in each input field.';
 
 $string['modelanswer'] = 'Model answer';
