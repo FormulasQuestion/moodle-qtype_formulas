@@ -98,12 +98,17 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             question_display_options $options, $part) {
 
         $question = $qa->get_question();
-        $sub = $this->get_part_image_and_class($qa, $options, $part);
+        $partoptions = clone $options;
+        // If using adaptivemultipart behaviour, adjust feedback display options for this part.
+        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
+            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $partoptions);
+        }
+        $sub = $this->get_part_image_and_class($qa, $partoptions, $part);
         $localvars = $question->get_local_variables($part);
 
         $output = $this->get_part_formulation(
                 $qa,
-                $options,
+                $partoptions,
                 $part->partindex,
                 $localvars,
                 $sub);
@@ -114,13 +119,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $output .= $sub->feedbackimage;
         }
 
-        $feedback = $this->part_feedback($qa, $options, $part);
+        $feedback = $this->part_combined_feedback($qa, $partoptions, $part, $sub->fraction);
+        $feedback .= $this->part_general_feedback($qa, $partoptions, $part);
         // We don't display the right answer if one of the part's coordinates is a MC or select question.
         // Because for that coordinate our result is not the right answer, but the index of the right answer,
         // And it would be very dfficult to calculate the right answer.
         // TODO: find a solution in that case. A popup (calculated in the part renderer) would work,
         // but would no be very accessible.
-        if ($options->rightanswer && !$part->part_has_multichoice_coordinate()) {
+        if ($partoptions->rightanswer && !$part->part_has_multichoice_coordinate()) {
             $feedback .= $this->part_correct_response($part->partindex, $qa);
         }
         $output .= html_writer::nonempty_tag('div', $feedback,
@@ -132,7 +138,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function get_part_image_and_class($qa, $options, $part) {
         $question = $qa->get_question();
 
-        $partoptions = clone $options;
         $sub = new StdClass;
 
         $response = $qa->get_last_qt_data();
@@ -142,13 +147,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
         $sub->fraction = $sub->anscorr * ($sub->unitcorr ? 1 : (1 - $part->unitpenalty));
 
-        // If using adaptivemultipart behaviour, adjust feedback display options for this part.
-        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
-            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $partoptions);
-        }
+
 
         // Get the class and image for the feedback.
-        if ($partoptions->correctness) {
+        if ($options->correctness) {
             $sub->feedbackimage = $this->feedback_image($sub->fraction);
             $sub->feedbackclass = $this->feedback_class($sub->fraction);
             if ($part->unitpenalty >= 1) { // All boxes must be correct at the same time, so they are of the same color.
@@ -170,14 +172,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     // Return the part's text with variables replaced by their values.
     public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $vars, $sub) {
         $question = $qa->get_question();
-        $partoptions = clone $options;
         $part = &$question->parts[$i];
         $localvars = $question->get_local_variables($part);
-
-        // If using adaptivemultipart behaviour, adjust feedback display options for this part.
-        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
-            $qa->get_behaviour()->adjust_display_options_for_part($part->partindex, $partoptions);
-        }
 
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
@@ -218,7 +214,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'maxlength' => 128,
             );
 
-            if ($partoptions->readonly) {
+            if ($options->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
             // Create a meaningful label for accessibility.
@@ -249,7 +245,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'id' => $inputname,
                 'maxlength' => 128,
             );
-            if ($partoptions->readonly) {
+            if ($options->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
 
@@ -266,7 +262,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 if ($boxes[$placeholder]->stype != ':SL') {
                     if ($boxes[$placeholder]->stype == ':MCE') {
                         // Select menu.
-                        if ($partoptions->readonly) {
+                        if ($options->readonly) {
                             $inputattributes['disabled'] = 'disabled';
                         }
                         $choices = array();
@@ -284,7 +280,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     } else {
                         // Multichoice single question.
                         $inputattributes['type'] = 'radio';
-                        if ($partoptions->readonly) {
+                        if ($options->readonly) {
                             $inputattributes['disabled'] = 'disabled';
                         }
                         $output = $this->all_choices_wrapper_start();
@@ -298,7 +294,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             } else {
                                 unset($inputattributes['checked']);
                             }
-                            if ($partoptions->correctness && $isselected) {
+                            if ($options->correctness && $isselected) {
                                 $class .= ' ' . $sub->feedbackclass;
                             }
                             $output .= $this->choice_wrapper_start($class);
@@ -317,7 +313,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // Coordinate as shortanswer question.
             $inputs[$placeholder] = '';
             $inputattributes['type'] = 'text';
-            if ($partoptions->readonly) {
+            if ($options->readonly) {
                 $inputattributes['readonly'] = 'readonly';
             }
             if ($j == $part->numbox) {
@@ -499,37 +495,74 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param question_display_options $options controls what should and should not be displayed.
      * @return string nicely formatted feedback, for display.
      */
-    protected function part_feedback(question_attempt $qa,
-            question_display_options $options, $part) {
-        $err = '';
+    protected function part_general_feedback(question_attempt $qa, question_display_options $options, $part) {
+        if ($part->feedback == '') {
+            return '';
+        }
+        
+        
         $feedback = '';
         $gradingdetails = '';
-
         $question = $qa->get_question();
         $state = $qa->get_state();
-        // Only show feedback if response not right (will be corrected later for adaptive behaviour).
-        $showfeedback = $options->feedback
-                && ($state == question_state::$gradedwrong || $state == question_state::$gradedpartial);
 
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
-            $fraction = $qa->get_last_behaviour_var('_fraction_' . $part->partindex);
             $gradingdetails = $renderer->render_adaptive_marks($details, $options);
-            // Only show feedback if response is wrong.
-            $showfeedback = $details->state == question_state::$gradedwrong;
+            $state = $details->state;
         }
-
+        $showfeedback = $options->feedback && $state->get_feedback_class() != '';
         if ($showfeedback) {
             $localvars = $question->get_local_variables($part);
             $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $part->id, false);
-            if ($feedbacktext) {
-                $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
+            $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
+            return html_writer::nonempty_tag('div', $feedback . $gradingdetails,
+                    array('class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex));
+        }
+        return '';
+    }
+    
+    /**
+     * @param int $i the part index.
+     * @param question_attempt $qa the question attempt to display.
+     * @param question_definition $question the question being displayed.
+     * @param question_display_options $options controls what should and should not be displayed.
+     * @return string nicely formatted feedback, for display.
+     */
+    protected function part_combined_feedback(question_attempt $qa, question_display_options $options, $part, $fraction) {
+        $feedback = '';
+        $showfeedback = false;
+        $gradingdetails = '';
+        $question = $qa->get_question();
+        $localvars = $question->get_local_variables($part);
+        $state = $qa->get_state();
+        $feedbackclass = $state->get_feedback_class();
+
+        if ($qa->get_behaviour_name() == 'adaptivemultipart') {
+            // This is rather a hack, but it will probably work.
+            $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
+            $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
+            $feedbackclass = $details->state->get_feedback_class();
+        } else {
+            $state = question_state::graded_state_for_fraction($fraction);
+            $feedbackclass = $state->get_feedback_class();
+        }
+        if ($feedbackclass != '') {
+            $showfeedback = $options->feedback;
+            $field = 'part' . $feedbackclass . 'fb';
+            $format = 'part' . $feedbackclass . 'fbformat';
+            if ($part->$field) {
+                $feedback = $question->formulas_format_text($localvars, $part->$field, $part->$format,
+                        $qa, 'qtype_formulas', $field, $part->id, false);
             }
         }
-
-        return html_writer::nonempty_tag('div', $err . $feedback . $gradingdetails,
-                array('class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex));
+        if ($showfeedback && $feedback) {
+                $feedback = html_writer::tag('div', $feedback , array('class' => 'feedback formulaslocalfeedback'));
+                return html_writer::nonempty_tag('div', $feedback,
+                        array('class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex));
+        }
+        return '';
     }
 }

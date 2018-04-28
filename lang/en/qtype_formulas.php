@@ -180,8 +180,14 @@ $string['subqtext_help'] = 'Part text and answer fields places can be specified 
 The <tt> {_0}, {_1}, {_2} </tt> are the input fields for coordinates and <tt> {_u} </tt> is the input field for unit.
 
 All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one coordinate and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
-$string['feedback'] = 'Feedback';
-$string['feedback_help'] = 'This part feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
+$string['feedback'] = 'Part general feedback';
+$string['feedback_help'] = 'This part feedback will be show to all students. It can include global and locals variables that will be replaced by their values';
+$string['incorrectfeedback'] = 'For any incorrect response';
+$string['partiallycorrectfeedback'] = 'For any partially correct response';
+$string['correctfeedback'] = 'For any correct response';
+$string['incorrectfeedback_help'] = 'This feedback will be show to students that don\'t get any mark at this part. It can include global and locals variables that will be replaced by their values';
+$string['partiallycorrectfeedback_help'] = 'This feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
+$string['correctfeedback_help'] = 'This feedback will be show to students that get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['globaloptions'] = '[Global] - ';
 
 // The language string for the variables instantiation and preview.

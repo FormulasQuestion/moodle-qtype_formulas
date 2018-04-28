@@ -757,7 +757,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload) {
         $itemid = reset($args);
-        if ($component == 'qtype_formulas' && ($filearea == 'answersubqtext' || $filearea == 'answerfeedback')) {
+        if ($component == 'qtype_formulas' && ($filearea == 'answersubqtext' || $filearea == 'answerfeedback'
+                || $filearea == 'partcorrectfb' || $filearea == 'partpartiallycorrectfb' || $filearea == 'partincorrectfb')) {
             // Check if answer id exists.
             for ($i = 0; $i < $this->numpart; $i++) {
                 if ($this->parts[$i]->id == $itemid) {
@@ -841,6 +842,13 @@ class qtype_formulas_part {
     public $subqtext;
     public $subqtextformat;
     public $feedback;
+    public $feedbackformat;
+    public $partcorrectfb;
+    public $partcorrectfbformat;
+    public $partpartiallycorrectfb;
+    public $partpartiallycorrectfbformat;
+    public $partincorrectfb;
+    public $partincorrectfbformat;
 
 
     /**
