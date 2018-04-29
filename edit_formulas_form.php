@@ -262,12 +262,22 @@ class qtype_formulas_edit_form extends question_edit_form {
                         $defaultvalues[$tag.'['.$key.']'] = $answer->$tag;
                     }
                     
-                    $fields = array('subqtext', 'feedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb');
+                    $fields = array('subqtext', 'feedback');
                     foreach ($fields as $field) {
                         $fieldformat = $field . 'format';
                         $itemid = file_get_submitted_draft_itemid($field . '[' . $key . ']');
                         $fieldtxt = file_prepare_draft_area($itemid, $this->context->id, 'qtype_formulas',
                                 'answer' . $field, empty($answer->id) ? null : (int)$answer->id,
+                                $this->fileoptions, $answer->$field);
+                        $defaultvalues[$field . '[' . $key . ']'] = array('text' => $fieldtxt,
+                            'format' => $answer->$fieldformat, 'itemid' => $itemid);
+                    }
+                    $fields = array('partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb');
+                    foreach ($fields as $field) {
+                        $fieldformat = $field . 'format';
+                        $itemid = file_get_submitted_draft_itemid($field . '[' . $key . ']');
+                        $fieldtxt = file_prepare_draft_area($itemid, $this->context->id, 'qtype_formulas',
+                                $field, empty($answer->id) ? null : (int)$answer->id,
                                 $this->fileoptions, $answer->$field);
                         $defaultvalues[$field . '[' . $key . ']'] = array('text' => $fieldtxt,
                             'format' => $answer->$fieldformat, 'itemid' => $itemid);
