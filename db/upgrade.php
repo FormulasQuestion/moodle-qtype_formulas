@@ -338,5 +338,11 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         // Formulas savepoint reached.
         upgrade_plugin_savepoint(true, 2018042800, 'qtype', 'formulas');
     }
+    if ($oldversion < 2018042801) {
+        $sql = "UPDATE {qtype_formulas_answers} SET partincorrectfb = feedback";
+        $DB->execute($sql);
+        $DB->set_field('qtype_formulas_answers', 'feedback', '');
+        upgrade_plugin_savepoint(true, 2018042801, 'qtype', 'formulas');
+    }
     return true;
 }
