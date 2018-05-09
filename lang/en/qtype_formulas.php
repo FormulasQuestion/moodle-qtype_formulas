@@ -55,6 +55,7 @@ $string['pluginnamesummary'] = 'Question type with random values and multiple an
 The answer fields can be placed anywhere so that we can create questions involving various structures such as vectors, polynomials and matrix.
 Other features such as unit checking and multiple parts questions are also integrated tightly and easy to use.';
 $string['pluginname_link'] = 'question/type/formulas';
+$string['privacy:metadata'] = 'The Formulas question type plugin does not store any personal data.';
 $string['questiontext'] = 'Question text';
 $string['questiontext_help'] = 'In addition to the normal question text, you can also use global variables and placeholders here.
 
