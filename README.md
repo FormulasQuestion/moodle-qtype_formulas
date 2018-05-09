@@ -13,7 +13,9 @@ https://code.google.com/p/moodle-coordinate-question/downloads/list
 
 This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine
 
-This version is compatible with Moodle 2.6 and ulterior versions. It has been tested with Moodle versions up to 3.4 and 3.5dev.
+This version is compatible with Moodle 3.0 and ulterior versions. It has been tested with Moodle versions up to 3.4 and 3.5dev. It has also een tested with PHP versions 7.0,
+7.1 and 7.2.
+If you are running an older version of Moodle another version of the formulas question type is available for Moodle versions 2.6 to 2.9.
 
 
 ### Requirements
