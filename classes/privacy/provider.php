@@ -15,24 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the formulas question type.
+ * Privacy main class.
  *
  * @package    qtype_formulas
- * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @copyright  2018 Jean-Michel vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qtype_formulas';
-$plugin->version   = 2018042801;
+/**
+ * Privacy main class.
+ *
+ * @package    qtype_formulas
+ * @copyright  2018 Jean-Michel Vedrine
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
 
-$plugin->cron      = 0;
-$plugin->requires  = 2015111600;
-$plugin->dependencies = array(
-    'qbehaviour_adaptive' => 2015111600,
-    'qbehaviour_adaptivemultipart'     => 2014092500,
-);
-$plugin->release   = '4.52 for Moodle 3.0 to 3.4';
+    // To provide php 5.6 (33_STABLE) and up support.
+    use \core_privacy\local\legacy_polyfill;
 
-$plugin->maturity  = MATURITY_STABLE;
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}

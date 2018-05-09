@@ -57,7 +57,10 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
         $formulasanswers = new backup_nested_element('formulas_answers');
         $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(
             'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'vars2', 'correctness',
-            'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat'));
+            'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat',
+            'partcorrectfb', 'partcorrectfbformat',
+            'partpartiallycorrectfb', 'partpartiallycorrectfbformat',
+            'partincorrectfb', 'partincorrectfbformat'));
 
         // Don't need to annotate ids nor files.
         // Now the own qtype tree.
@@ -94,6 +97,9 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
             'answerfeedback' => 'qtype_formulas_answers',
             'correctfeedback' => 'question_created',
             'partiallycorrectfeedback' => 'question_created',
-            'incorrectfeedback' => 'question_created');
+            'incorrectfeedback' => 'question_created',
+            'partcorrectfb' => 'qtype_formulas_answers',
+            'partpartiallycorrectfb' => 'qtype_formulas_answers',
+            'partincorrectfb' => 'qtype_formulas_answers');
     }
 }

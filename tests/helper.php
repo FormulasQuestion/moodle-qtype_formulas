@@ -92,6 +92,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->subqtextformat = 1;
         $p->feedback = '';
         $p->feedbackformat = 1;
+        $p->partcorrectfb = '';
+        $p->partcorrectfbformat = 1;
+        $p->partpartiallycorrectfb = '';
+        $p->partpartiallycorrectfbformat = 1;
+        $p->partincorrectfb = '';
+        $p->partincorrectfbformat = 1;
         $p->partindex = 0;
 
         return $p;
@@ -144,6 +150,9 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->answermark = 2;
         $p0->answer = '5';
         $p0->subqtext = 'This is first part.';
+        $p0->partcorrectfb = 'Part 1 correct feedback.';
+        $p0->partpartiallycorrectfb = 'Part 1 partially correct feedback.';
+        $p0->partincorrectfb = 'Part 1 incorrect feedback.';
         $q->parts[0] = $p0;
         $p1 = self::make_a_formulas_part();
         $p1->placeholder = '#2';
@@ -152,6 +161,9 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answermark = 2;
         $p1->answer = '6';
         $p1->subqtext = 'This is second part.';
+        $p1->partcorrectfb = 'Part 2 correct feedback.';
+        $p1->partpartiallycorrectfb = 'Part 2 partially correct feedback.';
+        $p1->partincorrectfb = 'Part 2 incorrect feedback.';
         $q->parts[1] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->placeholder = '#3';
@@ -160,6 +172,9 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->answermark = 2;
         $p2->answer = '7';
         $p2->subqtext = 'This is third part.';
+        $p2->partcorrectfb = 'Part 3 correct feedback.';
+        $p2->partpartiallycorrectfb = 'Part 3 partially correct feedback.';
+        $p2->partincorrectfb = 'Part 3 incorrect feedback.';
         $q->parts[2] = $p2;
 
         return $q;
@@ -203,6 +218,21 @@ class qtype_formulas_test_helper extends question_test_helper {
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partcorrectfb = array(
+            array('text' => 'Part 1 correct feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 2 correct feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 3 correct feedback.', 'format' => FORMAT_HTML),
+        );
+        $form->partpartiallycorrectfb = array(
+            array('text' => 'Part 1 partially correct feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 2 partially correct feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 3 partially correct feedback.', 'format' => FORMAT_HTML),
+        );
+        $form->partincorrectfb = array(
+            array('text' => 'Part 1 incorrect feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 2 incorrect feedback.', 'format' => FORMAT_HTML),
+            array('text' => 'Part 3 incorrect feedback.', 'format' => FORMAT_HTML),
         );
         $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
         $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
@@ -309,6 +339,24 @@ class qtype_formulas_test_helper extends question_test_helper {
             array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
         $form->feedback = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partcorrectfb = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partpartiallycorrectfb = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partincorrectfb = array(
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
@@ -443,6 +491,24 @@ class qtype_formulas_test_helper extends question_test_helper {
             array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
         $form->feedback = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partcorrectfb = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partpartiallycorrectfb = array(
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+            array('text' => '', 'format' => FORMAT_HTML),
+        );
+        $form->partincorrectfb = array(
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),
             array('text' => '', 'format' => FORMAT_HTML),

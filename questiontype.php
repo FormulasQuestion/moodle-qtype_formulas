@@ -49,7 +49,8 @@ class qtype_formulas extends question_type {
      * column names of qtype_formulas_answers table (apart from id and questionid)
      * WARNING qtype_formulas_answers is NOT an extension of answers table
      * so we can't use extra_answer_fields here.
-     * subqtext, subqtextformat, feedback and feedbackformat are not included as their handling is special
+     * subqtext, subqtextformat, feedback and feedbackformat and all part's combined
+     * feedback fields are not included as their handling is special
      * @return array.
      */
     public function part_tags() {
@@ -91,6 +92,12 @@ class qtype_formulas extends question_type {
             $newcontextid, 'qtype_formulas', 'answersubqtext', $questionid);
         $fs->move_area_files_to_new_context($oldcontextid,
             $newcontextid, 'qtype_formulas', 'answerfeedback', $questionid);
+        $fs->move_area_files_to_new_context($oldcontextid,
+            $newcontextid, 'qtype_formulas', 'partcorrectfb', $questionid);
+        $fs->move_area_files_to_new_context($oldcontextid,
+            $newcontextid, 'qtype_formulas', 'partpartiallycorrectfb', $questionid);
+        $fs->move_area_files_to_new_context($oldcontextid,
+            $newcontextid, 'qtype_formulas', 'partincorrectfb', $questionid);
         $this->move_files_in_combined_feedback($questionid, $oldcontextid, $newcontextid);
         $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
     }
@@ -111,6 +118,9 @@ class qtype_formulas extends question_type {
         $fs->delete_area_files($contextid, 'question', 'incorrectfeedback', $questionid);
         $fs->delete_area_files($contextid, 'qtype_formulas', 'answersubqtext', $questionid);
         $fs->delete_area_files($contextid, 'qtype_formulas', 'answerfeedback', $questionid);
+        $fs->delete_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $questionid);
+        $fs->delete_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $questionid);
+        $fs->delete_area_files($contextid, 'qtype_formulas', 'partincorrectfb', $questionid);
     }
 
     /**
@@ -166,13 +176,22 @@ class qtype_formulas extends question_type {
             $idcount = 0;
             foreach ($newanswers as $i => $ans) {
                 $ans->partindex = $i;
-                // Subqtext and feedback are now arrays so can't save them like that.
+                // Save all editors content (arrays).
                 $subqtextarr = $ans->subqtext;
                 $ans->subqtext = $subqtextarr['text'];
                 $ans->subqtextformat = $subqtextarr['format'];
                 $feedbackarr = $ans->feedback;
                 $ans->feedback = $feedbackarr['text'];
                 $ans->feedbackformat = $feedbackarr['format'];
+                $correctfbarr = $ans->partcorrectfb;
+                $ans->partcorrectfb = $correctfbarr['text'];
+                $ans->partcorrectfbformat = $correctfbarr['format'];
+                $partiallycorrectfbarr = $ans->partpartiallycorrectfb;
+                $ans->partpartiallycorrectfb = $partiallycorrectfbarr['text'];
+                $ans->partpartiallycorrectfbformat = $partiallycorrectfbarr['format'];
+                $incorrectfbarr = $ans->partincorrectfb;
+                $ans->partincorrectfb = $incorrectfbarr['text'];
+                $ans->partincorrectfbformat = $incorrectfbarr['format'];
                 // Update an existing answer if possible.
                 $answer = array_shift($oldanswers);
                 if (!$answer) {
@@ -186,12 +205,19 @@ class qtype_formulas extends question_type {
                     $answer->trialmarkseq = '';
                     $answer->subqtextformat = 0;
                     $answer->feedbackformat = 0;
+                    $answer->partcorrectfbformat = 0;
+                    $answer->partpartiallycorrectfbformat = 0;
+                    $answer->partincorrectfbformat = 0;
+
                     $ans->id = $DB->insert_record('qtype_formulas_answers', $answer);
                 } else {
                     $ans->id = $answer->id;
                 }
                 $ans->subqtext = $this->import_or_save_files($subqtextarr, $context, 'qtype_formulas', 'answersubqtext', $ans->id);
                 $ans->feedback = $this->import_or_save_files($feedbackarr, $context, 'qtype_formulas', 'answerfeedback', $ans->id);
+                $ans->partcorrectfb = $this->import_or_save_files($correctfbarr, $context, 'qtype_formulas', 'partcorrectfb', $ans->id);
+                $ans->partpartiallycorrectfb = $this->import_or_save_files($partiallycorrectfbarr, $context, 'qtype_formulas', 'partpartiallycorrectfb', $ans->id);
+                $ans->partincorrectfb = $this->import_or_save_files($incorrectfbarr, $context, 'qtype_formulas', 'partincorrectfb', $ans->id);
                 $DB->update_record('qtype_formulas_answers', $ans);
             }
 
@@ -200,6 +226,9 @@ class qtype_formulas extends question_type {
             foreach ($oldanswers as $oldanswer) {
                 $fs->delete_area_files($context->id, 'qtype_formulas', 'answersubqtext', $oldanswer->id);
                 $fs->delete_area_files($context->id, 'qtype_formulas', 'answerfeedback', $oldanswer->id);
+                $fs->delete_area_files($context->id, 'qtype_formulas', 'partcorrectfb', $oldanswer->id);
+                $fs->delete_area_files($context->id, 'qtype_formulas', 'partpartiallycorrectfb', $oldanswer->id);
+                $fs->delete_area_files($context->id, 'qtype_formulas', 'partincorrectfb', $oldanswer->id);
                 $DB->delete_records('qtype_formulas_answers', array('id' => $oldanswer->id));
             }
         } catch (Exception $e) {
@@ -227,6 +256,7 @@ class qtype_formulas extends question_type {
             $options->$extra = $question->$extra;
         }
         $options = $this->save_combined_feedback_helper($options, $question, $context, true);
+
         $DB->update_record('qtype_formulas_options', $options);
 
         $this->save_hints($question, true);
@@ -430,6 +460,15 @@ class qtype_formulas extends question_type {
             $fromform->feedback[$anscount] = $format->import_text_with_files($feedbackxml,
                         array(), '', $format->get_format($fromform->questiontextformat));
 
+            $feedbackxml = $format->getpath($answer, array('#', 'correctfeedback', 0), array());
+            $fromform->partcorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
+                        array(), '', $format->get_format($fromform->questiontextformat));
+            $feedbackxml = $format->getpath($answer, array('#', 'partiallycorrectfeedback', 0), array());
+            $fromform->partpartiallycorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
+                        array(), '', $format->get_format($fromform->questiontextformat));
+            $feedbackxml = $format->getpath($answer, array('#', 'incorrectfeedback', 0), array());
+            $fromform->partincorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
+                        array(), '', $format->get_format($fromform->questiontextformat));
             ++$anscount;
         }
         $fromform->defaultmark = array_sum($fromform->answermark); // Make the defaultmark consistent if not specified.
@@ -480,6 +519,25 @@ class qtype_formulas extends question_type {
             $expout .= $format->writetext($answer->feedback);
             $expout .= $format->write_files($fbfiles);
             $expout .= " </feedback>\n";
+
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $answer->id);
+            $feedbackformat = $format->get_format($answer->partcorrectfbformat);
+            $expout .= " <correctfeedback format=\"$feedbackformat\">\n";
+            $expout .= $format->writetext($answer->correctfeedback);
+            $expout .= $format->write_files($fbfiles);
+            $expout .= " </correctfeedback>\n";
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $answer->id);
+            $feedbackformat = $format->get_format($answer->partpartiallycorrectfbformat);
+            $expout .= " <partiallycorrectfeedback format=\"$feedbackformat\">\n";
+            $expout .= $format->writetext($answer->partpartiallycorrectfb);
+            $expout .= $format->write_files($fbfiles);
+            $expout .= " </partiallycorrectfeedback>\n";
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partincorrectfb', $answer->id);
+            $feedbackformat = $format->get_format($answer->partincorrectfbformat);
+            $expout .= " <incorrectfeedback format=\"$feedbackformat\">\n";
+            $expout .= $format->writetext($answer->partincorrectfb);
+            $expout .= $format->write_files($fbfiles);
+            $expout .= " </incorrectfeedback>\n";
 
             $expout .= "</answers>\n";
         }
@@ -578,6 +636,30 @@ class qtype_formulas extends question_type {
                 $fb['itemid'] = $form->feedback[$i]['itemid'];
             }
             $res->answers[$i]->feedback = $fb;
+
+            $fb = array();
+            $fb['text'] = $form->partcorrectfb[$i]['text'];
+            $fb['format'] = $form->partcorrectfb[$i]['format'];
+            if (isset($form->partcorrectfb[$i]['itemid'])) {
+                $fb['itemid'] = $form->partcorrectfb[$i]['itemid'];
+            }
+            $res->answers[$i]->partcorrectfb = $fb;
+
+            $fb = array();
+            $fb['text'] = $form->partpartiallycorrectfb[$i]['text'];
+            $fb['format'] = $form->partpartiallycorrectfb[$i]['format'];
+            if (isset($form->partpartiallycorrectfb[$i]['itemid'])) {
+                $fb['itemid'] = $form->partpartiallycorrectfb[$i]['itemid'];
+            }
+            $res->answers[$i]->partpartiallycorrectfb = $fb;
+
+            $fb = array();
+            $fb['text'] = $form->partincorrectfb[$i]['text'];
+            $fb['format'] = $form->partincorrectfb[$i]['format'];
+            if (isset($form->partincorrectfb[$i]['itemid'])) {
+                $fb['itemid'] = $form->partincorrectfb[$i]['itemid'];
+            }
+            $res->answers[$i]->partincorrectfb = $fb;
         }
         if (count($res->answers) == 0) {
             $res->errors["answermark[0]"] = get_string('error_no_answer', 'qtype_formulas');
@@ -657,6 +739,9 @@ class qtype_formulas extends question_type {
                 }
                 $ans->subqtext = $form->subqtext[$key];
                 $ans->feedback = $form->feedback[$key];
+                $ans->partcorrectfb = $form->partcorrectfb[$key];
+                $ans->partpartiallycorrectfb = $form->partpartiallycorrectfb[$key];
+                $ans->partincorrectfb = $form->partincorrectfb[$key];
                 $qo->options->answers[] = $ans;
             }
         }
@@ -668,6 +753,12 @@ class qtype_formulas extends question_type {
                 $ans->subqtext = $ans->subqtext['text'];
                 $ans->feedbackformat = $ans->feedback['format'];
                 $ans->feedback = $ans->feedback['text'];
+                $ans->partcorrectfbformat = $ans->partcorrectfb['format'];
+                $ans->partcorrectfb = $ans->partcorrectfb['text'];
+                $ans->partpartiallycorrectfbformat = $ans->partpartiallycorrectfb['format'];
+                $ans->partpartiallycorrectfb = $ans->partpartiallycorrectfb['text'];
+                $ans->partincorrectfbformat = $ans->partincorrectfb['format'];
+                $ans->partincorrectfb = $ans->partincorrectfb['text'];
 
                 $qo->parts[$i] = new qtype_formulas_part();
                 foreach ($ans as $key => $value) {

@@ -59,6 +59,13 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
             $answer['partindex'] = $anscount;
             $answer['subqtextformat'] = FORMAT_HTML;
             $answer['feedbackformat'] = FORMAT_HTML;
+            // Add part's combined feedback.
+            $answer['partcorrectfb'] = '';
+            $answer['partcorrectfbformat'] = FORMAT_HTML;
+            $answer['partpartiallycorrectfb'] = '';
+            $answer['partpartiallycorrectfbformat'] = FORMAT_HTML;
+            $answer['partincorrectfb'] = '';
+            $answer['partincorrectfbformat'] = FORMAT_HTML;
 
             // Migrate images in answers subqtext and feedback fields.
             // Uncomment the 2 following lines once MDL-33424 is closed.
@@ -70,7 +77,9 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
                 'partindex', 'placeholder', 'answermark', 'answertype',
                 'numbox', 'vars1', 'answer', 'vars2', 'correctness', 'unitpenalty',
                 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat',
-                'feedback', 'feedbackformat'
+                'feedback', 'feedbackformat', 'partcorrectfb', 'partcorrectfbformat',
+                'partpartiallycorrectfb', 'partpartiallycorrectfbformat',
+                'partincorrectfb', 'partincorrectfbformat'
             ) as $fieldname) {
                 if (!array_key_exists($fieldname, $answer)) {
                     throw new moodle1_convert_exception('missing_formulas_answer_field', $fieldname);

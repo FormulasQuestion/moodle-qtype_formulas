@@ -118,6 +118,20 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
                 $data->partindex = (int)$DB->get_field('qtype_formulas_answers',
                         'MAX(partindex) +1', array('questionid' => $newquestionid));
             }
+            // Old backups are missing the part's combined feedback.
+            if (!isset($data->partcorrectfb)) {
+                $data->partcorrectfb = '';
+                $data->partcorrectfbformat = FORMAT_HTML;
+            }
+            if (!isset($data->partpartiallycorrectfb)) {
+                $data->partpartiallycorrectfb = '';
+                $data->partpartiallycorrectfbformat = FORMAT_HTML;
+            }
+            if (!isset($data->partincorrectfb)) {
+                $data->partincorrectfb = '';
+                $data->partincorrectfbformat = FORMAT_HTML;
+            }
+
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
@@ -133,7 +147,8 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             new restore_decode_content('qtype_formulas_options',
                     array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'),
                     'qtype_formulas'),
-            new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback'),
+            new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback',
+                    'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'),
                     'qtype_formulas_answers'),
         );
     }

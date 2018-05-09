@@ -43,7 +43,13 @@
         <FIELD NAME="subqtext" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="otherrule" NEXT="subqtextformat"/>
         <FIELD NAME="subqtextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subqtext" NEXT="feedback"/>
         <FIELD NAME="feedback" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="subqtextformat" NEXT="feedbackformat"/>
-        <FIELD NAME="feedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="feedback"/>
+        <FIELD NAME="feedbackformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="feedback" NEXT="partcorrectfb"/>
+        <FIELD NAME="partcorrectfb" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="feedbackformat" NEXT="partcorrectfbformat"/>
+        <FIELD NAME="partcorrectfbformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="partcorrectfb" NEXT="partpartiallycorrectfb"/>
+        <FIELD NAME="partpartiallycorrectfb" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="partcorrectfbformat" NEXT="partpartiallycorrectfbformat"/>
+        <FIELD NAME="partpartiallycorrectfbformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="partpartiallycorrectfb" NEXT="partincorrectfb"/>
+        <FIELD NAME="partincorrectfb" TYPE="text" NOTNULL="false" SEQUENCE="false" PREVIOUS="partpartiallycorrectfbformat" NEXT="partincorrectfbformat"/>
+        <FIELD NAME="partincorrectfbformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="partincorrectfb"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="questionid"/>
