@@ -205,8 +205,11 @@ class qtype_formulas extends question_type {
                     $answer->trialmarkseq = '';
                     $answer->subqtextformat = 0;
                     $answer->feedbackformat = 0;
+                    $answer->partcorrectfb = '';
                     $answer->partcorrectfbformat = 0;
+                    $answer->partpartiallycorrectfb = '';
                     $answer->partpartiallycorrectfbformat = 0;
+                    $answer->partincorrectfb = '';
                     $answer->partincorrectfbformat = 0;
 
                     $ans->id = $DB->insert_record('qtype_formulas_answers', $answer);
