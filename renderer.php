@@ -131,7 +131,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
         $output .= html_writer::nonempty_tag('div', $feedback,
                 array('class' => 'formulaspartoutcome'));
-        return html_writer::tag('span', $output , array('class' => 'formulaspart'));
+        return html_writer::tag('div', $output , array('class' => 'formulaspart'));
     }
 
     // Return class and image for the part feedback.
