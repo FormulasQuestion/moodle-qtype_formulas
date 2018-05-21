@@ -271,7 +271,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         }
                         $select = html_writer::select($choices, $inputname,
                                 $currentanswer, array('' => ''), $inputattributes);
-                        $output = html_writer::start_tag('span', array('class' => 'formulaspart'));
+                        $output = html_writer::start_tag('span', array('class' => 'formulas_menu'));
                         $output .= html_writer::tag('label', get_string('answer'),
                                 array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
                         $output .= $select;
