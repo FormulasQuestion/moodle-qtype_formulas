@@ -125,11 +125,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // stored in the database is not the right answer, but the index of the right answer,
         // so in that case, we need to calculate the right answer.
         if ($partoptions->rightanswer) {
-            if ($part->part_has_multichoice_coordinate()) {
-                $feedback .= $this->part_with_multichoice_correct_response($part->partindex, $qa);
-            } else {
-                $feedback .= $this->part_correct_response($part->partindex, $qa);
-            }
+            $feedback .= $this->part_correct_response($part->partindex, $qa);
         }
         $output .= html_writer::nonempty_tag('div', $feedback,
                 array('class' => 'formulaspartoutcome'));
@@ -148,8 +144,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
         $sub->fraction = $sub->anscorr * ($sub->unitcorr ? 1 : (1 - $part->unitpenalty));
-
-
 
         // Get the class and image for the feedback.
         if ($options->correctness) {
@@ -185,14 +179,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $gtype = $types[$gradingtype];
 
         // Get the set of defined placeholders and their options, also missing placeholders are appended at the end.
-        $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
-        preg_match_all('/'.$pattern.'/', $subqreplaced, $matches);
-        $boxes = array();
-        foreach ($matches[1] as $j => $match) {
-            if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
-                $boxes[$match] = (object)array('pattern' => $matches[0][$j], 'options' => $matches[2][$j], 'stype' => $matches[3][$j]);
-            }
-        }
+        $boxes = $part->part_answer_boxes();
         foreach (range(0, $part->numbox) as $j => $notused) {
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";
             if (!array_key_exists($placeholder, $boxes)) {
@@ -414,70 +401,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function part_correct_response($i, question_attempt $qa) {
         $question = $qa->get_question();
 
-        $tmp = $question->get_correct_responses_individually($question->parts[$i]);
-        if ($question->parts[$i]->part_has_combined_unit_field()) {
-            $correctanswer = implode(' ', $tmp);
-        } else {
-            if (!$question->parts[$i]->part_has_separate_unit_field()) {
-                unset($tmp["${i}_" . (count($tmp) - 1)]);
-            }
-            $correctanswer = implode(', ', $tmp);
-        }
-        return html_writer::nonempty_tag('div', get_string('correctansweris', 'qtype_formulas', $correctanswer),
-                    array('class' => 'formulaspartcorrectanswer'));
-    }
-
-    /**
-     * Generate an automatic description of the correct response for this part.
-     * To be used when a part has one ore more coordinate rendered as a
-     * multichoice question (drop down menu or radio buttons).
-     *
-     * @param int $i the part index.
-     * @param question_attempt $qa the question attempt to display.
-     * @return string HTML fragment.
-     */
-    public function part_with_multichoice_correct_response($i, question_attempt $qa) {
-        $question = $qa->get_question();
-        $part = $question->parts[$i];
-        $localvars = $question->get_local_variables($part);
-
-        // Calculate the correct answers.
-        $tmp = $question->get_correct_responses_individually($part);
-
-        // Find the multichoice coordinates.
-        $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
-        preg_match_all('/'.$pattern.'/', $question->parts[$i]->subqtext, $matches);
-        $boxes = array();
-        foreach ($matches[1] as $j => $match) {
-            if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
-                $boxes[$match] = (object)array('pattern' => $matches[0][$j], 'options' => $matches[2][$j], 'stype' => $matches[3][$j]);
-            }
-        }
-
-        foreach ($boxes as $key => $box) {
-            if (strlen($box->options) != 0) { // Multichoice.
-                // Calculate all choices.
-                try {
-                    $stexts = $question->qv->evaluate_general_expression($localvars, substr($box->options, 1));
-                } catch (Exception $e) {
-                    // The $stexts variable will be null if evaluation fails.
-                    $stexts = null;
-                }
-                if ($stexts != null) {
-                    // Replace index with calculated choice.
-                     $tmp["$i". $key] = $stexts->value[$tmp["$i". $key]];
-                }
-            }
-
-        }
-        if ($question->parts[$i]->part_has_combined_unit_field()) {
-            $correctanswer = implode(' ', $tmp);
-        } else {
-            if (!$question->parts[$i]->part_has_separate_unit_field()) {
-                unset($tmp["${i}_" . (count($tmp) - 1)]);
-            }
-            $correctanswer = implode(', ', $tmp);
-        }
+        $correctanswer = $question->correct_response_formatted($question->parts[$i]);
         return html_writer::nonempty_tag('div', get_string('correctansweris', 'qtype_formulas', $correctanswer),
                     array('class' => 'formulaspartcorrectanswer'));
     }
@@ -556,7 +480,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         if ($part->feedback == '') {
             return '';
         }
-
 
         $feedback = '';
         $gradingdetails = '';

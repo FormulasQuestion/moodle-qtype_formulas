@@ -261,7 +261,7 @@ class qtype_formulas_edit_form extends question_edit_form {
                     foreach ($tags as $tag) {
                         $defaultvalues[$tag.'['.$key.']'] = $answer->$tag;
                     }
-                    
+
                     $fields = array('subqtext', 'feedback');
                     foreach ($fields as $field) {
                         $fieldformat = $field . 'format';

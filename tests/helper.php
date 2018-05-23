@@ -42,6 +42,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             'test2', // 4 parts, separated and combined unit field, not ramdomized,
             'test3', // one part, not randomized, answer = 0 (to test problem with 0 as answer,
             'test4', // 4 parts, separated and combined unit field, ramdomized.
+            'test5', // One part not randomized multichoice answer.
         );
     }
 
@@ -526,5 +527,29 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->hintclearwrong = array('0', '0');
         $form->hintshownumcorrect = array('0', '0');
         return $form;
+    }
+
+        /**
+     * @return qtype_formulas_question witha multichoice answer.
+     */
+    public static function make_formulas_question_test5() {
+        $q = self::make_a_formulas_question();
+
+        $q->name = 'test-5';
+        $q->questiontext = '<p>This question has a multichoice answer.</p>';
+        $q->varsglobal = 'mychoices=["Dog","Cat","Bird","Fish"];';
+        $q->penalty = 0.3; // Non-zero and not the default.
+        $q->textfragments = array(0 => '<p>This question has a multichoice answer.</p>',
+                                  1 => '');
+        $q->numpart = 1;
+        $q->defaultmark = 2;
+        $p = self::make_a_formulas_part();
+        $p->id = 14;
+        $p->answermark = 1;
+        $p->answer = '1';
+        $p->subqtext = 'This is first part. The menu {_0:mychoices:MCE}.';
+        $q->parts[0] = $p;
+
+        return $q;
     }
 }

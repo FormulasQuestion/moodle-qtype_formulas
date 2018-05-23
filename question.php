@@ -506,6 +506,43 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $responses;
     }
 
+    // Compute the correct response for the given question part.
+    // Formatted for display.
+    public function correct_response_formatted($part) {
+        $localvars = $this->get_local_variables($part);
+        $tmp = $this->get_correct_responses_individually($part);
+        // Get all part's answer boxes.
+        $boxes = $part->part_answer_boxes();
+
+        // Find all multichoice coordinates in the part.
+        foreach ($boxes as $key => $box) {
+            if (strlen($box->options) != 0) { // It's a multichoice coordinate.
+                // Calculate all the choices.
+                try {
+                    // Remove the : at the beginning of options and evaluate it.
+                    $stexts = $this->qv->evaluate_general_expression($localvars, substr($box->options, 1));
+                } catch (Exception $e) {
+                    // The $stexts variable will be null if evaluation fails.
+                    $stexts = null;
+                }
+                if ($stexts != null) {
+                    // Replace index with calculated choice.
+                     $tmp["{$part->partindex}". $key] = $stexts->value[$tmp["{$part->partindex}". $key]];
+                }
+            }
+
+        }
+        if ($part->part_has_combined_unit_field()) {
+            $correctanswer = implode(' ', $tmp);
+        } else {
+            if (!$part->part_has_separate_unit_field()) {
+                unset($tmp["{$part->partindex}_" . (count($tmp) - 1)]);
+            }
+            $correctanswer = implode(', ', $tmp);
+        }
+        return $correctanswer;
+    }
+
     // Add the set of special variables that may be useful to check the correctness of the user input.
     public function add_special_correctness_variables(&$vars, $_a, $_r, $diff, $is_number) {
         // Calculate other special variables.
@@ -857,6 +894,10 @@ class qtype_formulas_part {
     public function __construct() {
     }
 
+    public function part_has_unit() {
+        return strlen($this->postunit) != 0;
+    }
+
     public function part_has_separate_unit_field() {
         return strlen($this->postunit) != 0 && $this->part_has_combined_unit_field() == false;
     }
@@ -900,8 +941,17 @@ class qtype_formulas_part {
         }
         return $expected;
     }
+    /**
+     * Return the array of answer boxes for the part.
+     * Each box is an object with 3 strings properties
+     * pattern, options and stype
+     *
+     * options is empty except for multichoice answers.
+     *
+     * @return array.
+     */
 
-    public function part_has_multichoice_coordinate() {
+    public function part_answer_boxes() {
         $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
         preg_match_all('/'.$pattern.'/', $this->subqtext, $matches);
         $boxes = array();
@@ -910,6 +960,11 @@ class qtype_formulas_part {
                 $boxes[$match] = (object)array('pattern' => $matches[0][$j], 'options' => $matches[2][$j], 'stype' => $matches[3][$j]);
             }
         }
+        return $boxes;
+    }
+
+    public function part_has_multichoice_coordinate() {
+        $boxes = $this->part_answer_boxes();
         foreach ($boxes as $box) {
             if (strlen($box->options) != 0) { // Multichoice.
                 return true;
