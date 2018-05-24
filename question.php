@@ -512,7 +512,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $localvars = $this->get_local_variables($part);
         $tmp = $this->get_correct_responses_individually($part);
         // Get all part's answer boxes.
-        $boxes = $part->part_answer_boxes();
+        $boxes = $part->part_answer_boxes($part->subqtext);
 
         // Find all multichoice coordinates in the part.
         foreach ($boxes as $key => $box) {
@@ -951,9 +951,9 @@ class qtype_formulas_part {
      * @return array.
      */
 
-    public function part_answer_boxes() {
+    public function part_answer_boxes($text) {
         $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
-        preg_match_all('/'.$pattern.'/', $this->subqtext, $matches);
+        preg_match_all('/'.$pattern.'/', $text, $matches);
         $boxes = array();
         foreach ($matches[1] as $j => $match) {
             if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
@@ -964,7 +964,7 @@ class qtype_formulas_part {
     }
 
     public function part_has_multichoice_coordinate() {
-        $boxes = $this->part_answer_boxes();
+        $boxes = $this->part_answer_boxes($this->subqtext);
         foreach ($boxes as $box) {
             if (strlen($box->options) != 0) { // Multichoice.
                 return true;

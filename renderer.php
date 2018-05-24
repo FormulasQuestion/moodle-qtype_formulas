@@ -173,13 +173,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $subqreplaced = $question->formulas_format_text($localvars, $part->subqtext,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
-
         $types = array(0 => 'number', 10 => 'numeric', 100 => 'numerical_formula', 1000 => 'algebraic_formula');
         $gradingtype = ($part->answertype != 10 && $part->answertype != 100 && $part->answertype != 1000) ? 0 : $part->answertype;
         $gtype = $types[$gradingtype];
 
         // Get the set of defined placeholders and their options.
-        $boxes = $part->part_answer_boxes();
+        $boxes = $part->part_answer_boxes($subqreplaced);
         // Append missing placholders at the end of part.
         foreach (range(0, $part->numbox) as $j => $notused) {
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";
