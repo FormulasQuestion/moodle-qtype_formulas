@@ -529,8 +529,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $form;
     }
 
-        /**
-     * @return qtype_formulas_question witha multichoice answer.
+    /**
+     * @return qtype_formulas_question with a multichoice answer.
      */
     public static function make_formulas_question_test5() {
         $q = self::make_a_formulas_question();

@@ -178,8 +178,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $gradingtype = ($part->answertype != 10 && $part->answertype != 100 && $part->answertype != 1000) ? 0 : $part->answertype;
         $gtype = $types[$gradingtype];
 
-        // Get the set of defined placeholders and their options, also missing placeholders are appended at the end.
+        // Get the set of defined placeholders and their options.
         $boxes = $part->part_answer_boxes();
+        // Append missing placholders at the end of part.
         foreach (range(0, $part->numbox) as $j => $notused) {
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";
             if (!array_key_exists($placeholder, $boxes)) {
@@ -239,7 +240,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
 
             $stexts = null;
-            if (strlen($boxes[$placeholder]->options) != 0) { // MC or check box.
+            if (strlen($boxes[$placeholder]->options) != 0) { // Then it's a multichoice answer..
                 try {
                     $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
                 } catch (Exception $e) {

@@ -165,7 +165,6 @@ class qtype_formulas_question_test extends basic_testcase {
         $this->assertEquals('Cat', $q->correct_response_formatted($q->parts[0]));
     }
 
-
     public function test_get_is_same_response_for_part_test2() {
         $q = $this->get_test_formulas_question('test1');
         $q->start_attempt(new question_attempt_step(), 1);
