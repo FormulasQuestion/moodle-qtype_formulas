@@ -372,7 +372,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML to go before all the choices.
      */
     protected function all_choices_wrapper_start() {
-        return html_writer::start_tag('div', array('class' => 'answer'));
+        return html_writer::start_tag('div', array('class' => 'multichoice_answer'));
     }
 
     /**

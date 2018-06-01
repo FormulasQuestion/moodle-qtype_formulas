@@ -99,6 +99,13 @@
     padding-bottom: 0;
 }
 
+.que.formulas .multichoice_answer div.r0,
+.que.formulas .multichoice_answer div.r1 {
+    padding: 0.3em 0 0.3em 25px;
+    text-indent: -10px;
+}
+
+
 .que.formulas .formulas_mark {
     display: inline;
 }

@@ -942,12 +942,17 @@ class qtype_formulas_part {
         return $expected;
     }
     /**
-     * Return the array of answer boxes for the part.
+     * Parse a string with placeholders and return
+     * the corresponding array of answer boxes.
      * Each box is an object with 3 strings properties
-     * pattern, options and stype
+     * pattern, options and stype.
+     * pattern is the placeholder as _0, _1, ..., _u
+     * options is empty except for multichoice answers
+     * where it is the name of a variable containing the list of choices
+     * stype is empty for radio buttons or :MCE for drop down
+     * select menu.
      *
-     * options is empty except for multichoice answers.
-     *
+     * @param $text string to be parsed.
      * @return array.
      */
 
