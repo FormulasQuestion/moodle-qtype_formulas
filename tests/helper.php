@@ -60,6 +60,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->contextid = context_system::instance()->id;
         $q->varsrandom = '';
         $q->varsglobal = '';
+        $q->answernumbering = 'abc';
         $q->qv = new qtype_formulas_variables();
         $q->penalty = 0.2; // The default.
         test_question_maker::set_standard_combined_feedback_fields($q);
@@ -196,6 +197,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->penalty = 0.3;
         $form->varsrandom = '';
         $form->varsglobal = '';
+        $form->answernumbering = 'abc';
         $form->answer = array('5', '6', '7');
         $form->answermark = array('2', '2', '2');
         $form->numbox = array(1, 1, 1);
@@ -319,6 +321,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->penalty = 0.3;
         $form->varsrandom = '';
         $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
+        $form->answernumbering = 'abc';
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
         $form->numbox = array(1, 1, 1, 1);
@@ -471,6 +474,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->penalty = 0.3;
         $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $form->varsglobal = 's = v*dt;';
+        $form->answernumbering = 'abc';
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
         $form->numbox = array(1, 1, 1, 1);

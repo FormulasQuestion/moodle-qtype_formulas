@@ -32,6 +32,7 @@ $plugin->requires  = 2015111600;
 $plugin->dependencies = array(
     'qbehaviour_adaptive' => 2015111600,
     'qbehaviour_adaptivemultipart'     => 2014092500,
+    'qtype_multichoice' => 2015111600,
 );
 $plugin->release   = '4.7 for Moodle 3.0 to 3.5';
 

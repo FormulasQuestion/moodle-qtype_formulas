@@ -71,7 +71,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $numberingoptions = question_bank::get_qtype('multichoice')->get_numbering_styles();
         $mform->addElement('select', 'answernumbering',
                 get_string('answernumbering', 'qtype_multichoice'), $numberingoptions);
-        $mform->setDefault('answernumbering', 'abc');
+        $mform->setDefault('answernumbering', get_config('qtype_multichoice', 'answernumbering'));
         // Part's answers.
         $this->add_per_answer_fields($mform, get_string('answerno', 'qtype_formulas', '{no}'),
             question_bank::fraction_options(), 1, 2);
