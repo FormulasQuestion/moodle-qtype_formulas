@@ -165,6 +165,37 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $sub;
     }
 
+    /**
+     * @param int $num The number, starting at 0.
+     * @param string $style The style to render the number in. One of the
+     * options returned by {@link qtype_multichoice:;get_numbering_styles()}.
+     * @return string the number $num in the requested style.
+     */
+    protected function number_in_style($num, $style) {
+        switch($style) {
+            case 'abc':
+                $number = chr(ord('a') + $num);
+                break;
+            case 'ABCD':
+                $number = chr(ord('A') + $num);
+                break;
+            case '123':
+                $number = $num + 1;
+                break;
+            case 'iii':
+                $number = question_utils::int_to_roman($num + 1);
+                break;
+            case 'IIII':
+                $number = strtoupper(question_utils::int_to_roman($num + 1));
+                break;
+            case 'none':
+                return '';
+            default:
+                return 'ERR';
+        }
+        return $number . '. ';
+    }
+
     // Return the part's text with variables replaced by their values.
     public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $vars, $sub) {
         $question = $qa->get_question();
@@ -274,6 +305,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         }
                         $output = $this->all_choices_wrapper_start();
                         foreach ($stexts->value as $x => $mctxt) {
+                            $mctxt = html_writer::span($this->number_in_style($x, $question->answernumbering), 'answernumber') . $mctxt;
                             $inputattributes['id'] = $inputname.'_'.$x;
                             $inputattributes['value'] = $x;
                             $isselected = ($currentanswer != '' && $x == $currentanswer);
@@ -289,7 +321,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             $output .= $this->choice_wrapper_start($class);
                             $output .= html_writer::empty_tag('input', $inputattributes);
                             $output .= html_writer::tag('label', $mctxt,
-                                    array('for' => $inputattributes['id']));
+                                    array('for' => $inputattributes['id'], 'class' => 'm-l-1'));
                             $output .= $this->choice_wrapper_end();
                         }
                         $output .= $this->all_choices_wrapper_end();

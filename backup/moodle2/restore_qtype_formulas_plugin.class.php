@@ -82,6 +82,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             if (!isset($data->shownumcorrect)) {
                 $data->shownumcorrect = 0;
             }
+            if (!isset($data->answernumbering)) {
+                $data->answernumbering = 'abc';
+            }
             // Adjust some columns.
             $data->questionid = $newquestionid;
             // Insert record.

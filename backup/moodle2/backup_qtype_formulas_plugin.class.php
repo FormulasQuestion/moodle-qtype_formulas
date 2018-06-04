@@ -52,7 +52,8 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
             'varsrandom', 'varsglobal',
             'correctfeedback', 'correctfeedbackformat',
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
-            'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect'));
+            'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect',
+            'answernumbering'));
 
         $formulasanswers = new backup_nested_element('formulas_answers');
         $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(

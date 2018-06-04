@@ -75,7 +75,7 @@ class qtype_formulas extends question_type {
      * @return mixed array as above, or null to tell the base class to do nothing.
      */
     public function extra_question_fields() {
-        return array('qtype_formulas_options', 'varsrandom', 'varsglobal');
+        return array('qtype_formulas_options', 'varsrandom', 'varsglobal', 'answernumbering');
     }
 
     /**
