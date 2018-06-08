@@ -41,10 +41,11 @@ function mycount($a) {
 
 function fact($n) {
     $n = (int) $n;
-    if ( $n < 2 )
+    if ( $n < 2 ) {
         return 1;
+    }
     $return = 1;
-    for ( $i = $n; $i > 1; $i-- ) {
+    for ( $i = $n ; $i > 1 ; $i--) {
         $return *= $i;
     }
 
@@ -52,44 +53,55 @@ function fact($n) {
 }
 
 function npr($n, $r) {
-    $n=(int)$n;
-    $r=(int)$r;
-    if ($r > $n)
+    $n = (int)$n;
+    $r = (int)$r;
+    if ($r > $n) {
         return 0;
-    if (($n - $r) < $r)
+    }
+    if (($n - $r) < $r) {
         return npr($n, ($n - $r));
+    }
     $return = 1;
-    for ($i=0; $i<$r; $i++){
+    for ($i = 0 ; $i < $r ; $i++) {
          $return *= ($n - $i);
     }
     return $return;
 }
 
 function ncr($n, $r) {
-    $n=(int)$n;
-    $r=(int)$r;
-    if ($r > $n)
+    $n = (int)$n;
+    $r = (int)$r;
+    if ($r > $n) {
         return 0;
-    if (($n - $r) < $r)
+    }
+    if (($n - $r) < $r) {
         return ncr($n, ($n - $r));
+    }
     $return = 1;
-    for ($i=0; $i<$r; $i++){
+    for ($i = 0 ; $i < $r ; $i++) {
          $return *= ($n - $i) / ($i + 1);
     }
     return $return;
 }
 
 function gcd($a,$b) {
-    if($a < 0)         $a=0-$a;
-    if($b < 0 )        $b=0-$b;
-    if($a == 0 || $b == 0)    return 1;
-    if($a == $b)              return $a;
-
-    do{
+    if($a < 0) {
+        $a = 0 - $a;
+    }
+    if($b < 0 ) {
+        $b = 0 - $b;
+    }
+    if($a == 0 || $b == 0) {
+        return 1;
+    }
+    if($a == $b) {
+        return $a;
+    }
+    do {
         $rest = (int) $a % $b;
-        $a=$b;
-        $b=$rest;
-    } while($rest >0);
+        $a = $b;
+        $b = $rest;
+    } while($rest > 0);
 return $a;
 }
 
@@ -107,7 +119,7 @@ function sigfig($number, $precision) {
     }
 
     $answer = ($decimalPlaces > 0) ?
-        number_format($number, $decimalPlaces, '.', '') : round($number, $decimalPlaces);
+            number_format($number, $decimalPlaces, '.', '') : round($number, $decimalPlaces);
     return $answer;
 }
 

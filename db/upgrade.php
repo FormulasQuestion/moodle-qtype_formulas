@@ -344,9 +344,8 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         $DB->set_field('qtype_formulas_answers', 'feedback', '');
         upgrade_plugin_savepoint(true, 2018042801, 'qtype', 'formulas');
     }
-    
-     if ($oldversion < 2018060400) {
 
+    if ($oldversion < 2018060400) {
         // Define field answernumbering to be added to qtype_formulas_options.
         $table = new xmldb_table('qtype_formulas_options');
         $field = new xmldb_field('answernumbering', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'abc', 'shownumcorrect');
