@@ -49,11 +49,11 @@ T: k m u n p;
 H: k m u n p;
 ');
 
-/* You can define your own rules here, for instance:
- * $this->basicunitconversionrule[100] = array(
- * $this->basicunitconversionrule[1][0] + ' and your own conversion rules',
- * $this->basicunitconversionrule[1][1] + '');
- */
+        /* You can define your own rules here, for instance:
+         * $this->basicunitconversionrule[100] = array(
+         * $this->basicunitconversionrule[1][0] + ' and your own conversion rules',
+         * $this->basicunitconversionrule[1][1] + '');
+         */
 
     }
 
