@@ -45,7 +45,7 @@ function fact($n) {
         return 1;
     }
     $return = 1;
-    for ( $i = $n ; $i > 1 ; $i--) {
+    for ($i = $n; $i > 1; $i--) {
         $return *= $i;
     }
 
@@ -62,7 +62,7 @@ function npr($n, $r) {
         return npr($n, ($n - $r));
     }
     $return = 1;
-    for ($i = 0 ; $i < $r ; $i++) {
+    for ($i = 0; $i < $r; $i++) {
          $return *= ($n - $i);
     }
     return $return;
@@ -78,31 +78,31 @@ function ncr($n, $r) {
         return ncr($n, ($n - $r));
     }
     $return = 1;
-    for ($i = 0 ; $i < $r ; $i++) {
+    for ($i = 0; $i < $r; $i++) {
          $return *= ($n - $i) / ($i + 1);
     }
     return $return;
 }
 
-function gcd($a,$b) {
-    if($a < 0) {
+function gcd($a, $b) {
+    if ($a < 0) {
         $a = 0 - $a;
     }
-    if($b < 0 ) {
+    if ($b < 0 ) {
         $b = 0 - $b;
     }
-    if($a == 0 || $b == 0) {
+    if ($a == 0 || $b == 0) {
         return 1;
     }
-    if($a == $b) {
+    if ($a == $b) {
         return $a;
     }
     do {
         $rest = (int) $a % $b;
         $a = $b;
         $b = $rest;
-    } while($rest > 0);
-return $a;
+    } while ($rest > 0);
+    return $a;
 }
 
 function lcm($a, $b) {
@@ -111,15 +111,15 @@ function lcm($a, $b) {
 
 function sigfig($number, $precision) {
     if ($number == 0) {
-        $decimalPlaces = $precision - 1;
-    } elseif ($number < 0) {
-        $decimalPlaces = $precision - floor(log10($number * -1)) - 1;
+        $decimalplaces = $precision - 1;
+    } else if ($number < 0) {
+        $decimalplaces = $precision - floor(log10($number * -1)) - 1;
     } else {
-        $decimalPlaces = $precision - floor(log10($number)) - 1;
+        $decimalplaces = $precision - floor(log10($number)) - 1;
     }
 
-    $answer = ($decimalPlaces > 0) ?
-            number_format($number, $decimalPlaces, '.', '') : round($number, $decimalPlaces);
+    $answer = ($decimalplaces > 0) ?
+            number_format($number, $decimalplaces, '.', '') : round($number, $decimalplaces);
     return $answer;
 }
 
@@ -134,11 +134,11 @@ function sigfig($number, $precision) {
  * - evaluate algebraic formula
  */
 class qtype_formulas_variables {
-    private static $maxdataset = 2e9;      // it is the upper limit for the exhaustive enumeration
+    private static $maxdataset = 2e9;      // It is the upper limit for the exhaustive enumeration.
     private static $listmaxsize = 1000;
 
     function initialize_function_list() {
-        $this->func_const = array_flip( array('pi')) ;
+        $this->func_const = array_flip( array('pi'));
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil'
             , 'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan'
             , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact') );
@@ -148,11 +148,11 @@ class qtype_formulas_variables {
         $this->binary_op_map = array_flip( array('+','-','*','/','%','>','<','==','!=','&&','||','&','|','<<','>>','^') );
         // $this->binary_op_reduce = array_flip( array('||','&&','==','+','*') );
 
-        // Note that the implementation is exactly the same as the client so the behaviour should be the same
+        // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
             'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact') );
         $this->constlist = array('pi'=> '3.14159265358979323846');
-        $this->evalreplacelist = array('ln'=> 'log', 'log10'=> '(1./log(10.))*log'); // natural log and log with base 10, no log allowed to avoid ambiguity
+        $this->evalreplacelist = array('ln'=> 'log', 'log10'=> '(1./log(10.))*log'); // Natural log and log with base 10, no log allowed to avoid ambiguity.
     }
 
     function __construct() {
@@ -174,12 +174,12 @@ class qtype_formulas_variables {
      * Note the type number 'n' has a "constantness" associated to it. The value is of type string if it is constant
      */
 
-    // This function must be called to initial a variable stack, and the returned variable is required by most function
+    // This function must be called to initial a variable stack, and the returned variable is required by most function.
     function vstack_create() {
         return (object)array('idcounter' => 0, 'all' => array());
     }
 
-    // return a serialized string of vstack with type n,s,ln,ls. It can be reconstructed by calling evaluate_assignments().
+    // Return a serialized string of vstack with type n,s,ln,ls. It can be reconstructed by calling evaluate_assignments().
     function vstack_get_serialization(&$vstack) {
         $ctype = array_flip(explode(',','n,s,ln,ls'));
         $vstr = '';
