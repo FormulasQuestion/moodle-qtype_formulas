@@ -865,19 +865,24 @@ class qtype_formulas_variables {
                         // The create_function function is deprecated since php 7.2.
                         // $value = array_map(create_function('$a,$b', 'return floatval(($a)'.$values[0].'($b));'), $values[1], $values[2]);
                         $value = array_map(function ($a, $b) use ($values){return eval( 'return floatval(($a)'.$values[0].'($b));');}, $values[1], $values[2]);
-                    else if (array_key_exists($values[0], $this->func_binary))
+                    else if (array_key_exists($values[0], $this->func_binary)) {
                         // The create_function function is deprecated since php 7.2.
                         // $value = array_map(create_function('$a,$b', 'return floatval('.$values[0].'($a,$b));'), $values[1], $values[2]);
                         $value = array_map(function ($a, $b) use ($values){return floatval($values[0]($a, $b));}, $values[1], $values[2]);
-                    else
+                    } else {
                         break;
+                    }
                 }
                 $this->replace_middle($vstack, $expression, $l, $r, 'ln', $value);
                 return true;
             case 'sum':
-                if (!($sz == 1 && $typestr == 'ln'))  break;
+                if (!($sz == 1 && $typestr == 'ln')) {
+                    break;
+                }
                 $sum = 0;
-                foreach ($values[0] as $v)  $sum += floatval($v);
+                foreach ($values[0] as $v) {
+                    $sum += floatval($v);
+                }
                 $this->replace_middle($vstack, $expression, $l, $r, 'n', $sum);
                 return true;
             case 'poly':
@@ -888,33 +893,39 @@ class qtype_formulas_variables {
                 } else if ($sz == 2 && $typestr == 's,ln') {
                     $varName = $values[0];
                     $vals = $values[1];
-                } else break;
+                } else {
+                    break;
+                }
 
                 $pow = mycount($vals);
                 $pp = '';
                 foreach ($vals as $v) {
                     $pow--;
-                    if ($v == 0)
+                    if ($v == 0) {
                         continue;
+                    }
                     $ss = ($pp != '' && $v > 0) ? '+' : '';
-                    if ($pow == 0)
+                    if ($pow == 0) {
                         $pp .= "{$ss}{$v}";
-                    else {
-                        if ($v == 1)
+                    } else {
+                        if ($v == 1) {
                             $coff = "{$ss}";
-                        else if ($v == -1)
+                        } else if ($v == -1) {
                             $coff = "-";
-                        else
+                        } else {
                             $coff = "{$ss}{$v}";
+                        }
 
-                        if ($pow == 1)
+                        if ($pow == 1) {
                             $pp .= "{$coff}{$varName}";
-                        else
+                        } else {
                             $pp .= "{$coff}{$varName}^{{$pow}}";
+                        }
                     }
                 }
-                if ($pp == '')
+                if ($pp == '') {
                     $pp = '0';
+                }
                 $this->replace_middle($vstack, $expression, $l, $r, 's', $pp);
                 return true;
             case 'concat':
@@ -1008,7 +1019,7 @@ class qtype_formulas_variables {
             $res = null;
             // In PHP 7 eval() terminates the script if the evaluated code generate a fatal error.
             try {
-                eval('$res = '.implode(' ', $splitted).';');
+                eval('$res = ' . implode(' ', $splitted) . ';');
             } catch (Throwable $t) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
             }
@@ -1137,9 +1148,9 @@ class qtype_formulas_variables {
             if ($this->vstack_get_variable($vstack, $splitted[$i - 2])->type == 'f')  continue;   // No need to add '*' if the left is function.
             if (strlen($op) == 0)  $op = ' * ';    // Add multiplication if no operator.
             else if ($op[0] == '(')  $op = ' * '.$op;
-            else if ($op[strlen($op)-1] == ')')  $op = $op.' * ';
+            else if ($op[strlen($op) - 1] == ')')  $op = $op.' * ';
             else $op = preg_replace('/^(\))(\s*)(\()/', '$1 * $3', $op);
-            $splitted[$i-1] = $op;
+            $splitted[$i - 1] = $op;
         }
         return implode('', $splitted);
     }
@@ -1201,7 +1212,7 @@ class qtype_formulas_variables {
                 $tmp = $this->replace_evaluation_formula($info, $info->sub);
                 $nums = $this->evaluate_numerical_expression(array($info), $tmp, 'f');
                 return $nums[0];
-            } else {  // $gradingtype != {10, 100, 1000}, for unknown type, all are treated as number.
+            } else {  // When $gradingtype != {10, 100, 1000}, for unknown type, all are treated as number.
                 if (preg_match('/^[-+]?@0$/', $info->sub) == false)  return null;
                 if (!($info->lengths['v'] == 0 && $info->lengths['f'] == 0 && $info->lengths['n'] == 1))  return null;
                 return floatval($str);
