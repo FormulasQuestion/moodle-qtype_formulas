@@ -1358,12 +1358,12 @@ class qtype_formulas_variables {
 
                 // Single argument functions (the most common case).
                 case 'abs': case 'acos': case 'acosh': case 'asin': case 'asinh':
-                case 'atan': case 'atanh': case 'bindec': case 'ceil': case 'cos':
-                case 'cosh': case 'decbin': case 'decoct': case 'deg2rad':
-                case 'exp': case 'expm1': case 'floor': case 'is_finite':
-                case 'is_infinite': case 'is_nan': case 'log10': case 'log1p':
-                case 'octdec': case 'rad2deg': case 'sin': case 'sinh': case 'sqrt':
-                case 'tan': case 'tanh': case 'fact':
+                        case 'atan': case 'atanh': case 'bindec': case 'ceil': case 'cos':
+                        case 'cosh': case 'decbin': case 'decoct': case 'deg2rad':
+                        case 'exp': case 'expm1': case 'floor': case 'is_finite':
+                        case 'is_infinite': case 'is_nan': case 'log10': case 'log1p':
+                        case 'octdec': case 'rad2deg': case 'sin': case 'sinh': case 'sqrt':
+                        case 'tan': case 'tanh': case 'fact':
                     if (strlen($regs[4]) != 0 || strlen($regs[3]) == 0) {
                         return get_string('functiontakesonearg', 'qtype_formulas', $regs[2]);
                     }

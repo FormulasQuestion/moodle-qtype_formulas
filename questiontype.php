@@ -69,7 +69,7 @@ class qtype_formulas extends question_type {
     /**
      * If your question type has a table that extends the question table, and
      * you want the base class to automatically save, backup and restore the extra fields,
-     * override this method to return an array wherer the first element is the table name,
+     * override this method to return an array where the first element is the table name,
      * and the subsequent entries are the column names (apart from id and questionid).
      *
      * @return mixed array as above, or null to tell the base class to do nothing.
