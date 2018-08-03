@@ -83,7 +83,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
                 $data->shownumcorrect = 0;
             }
             if (!isset($data->answernumbering)) {
-                $data->answernumbering = 'abc';
+                $data->answernumbering = 'none';
             }
             // Adjust some columns.
             $data->questionid = $newquestionid;

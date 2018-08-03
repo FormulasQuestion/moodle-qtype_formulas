@@ -191,7 +191,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             case 'none':
                 return '';
             default:
-                return 'ERR';
+                // Default similar to none for compatibility with old questions.
+                return '';
         }
         return $number . '. ';
     }

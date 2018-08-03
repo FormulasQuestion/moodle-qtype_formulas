@@ -348,17 +348,28 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
     if ($oldversion < 2018060400) {
         // Define field answernumbering to be added to qtype_formulas_options.
         $table = new xmldb_table('qtype_formulas_options');
-        $field = new xmldb_field('answernumbering', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'abc', 'shownumcorrect');
+        $field = new xmldb_field('answernumbering', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'none', 'shownumcorrect');
 
         // Conditionally launch add field answernumbering.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
             // Now fill it with 'none' for compatibility with existing questions'.
-            $DB->set_field('qtype_formulas_answers', 'answernumbering', 'none');
+            $DB->set_field('qtype_formulas_options', 'answernumbering', 'none');
         }
 
         // Formulas savepoint reached.
         upgrade_plugin_savepoint(true, 2018060400, 'qtype', 'formulas');
+    }
+
+    if ($oldversion < 2018080300) {
+        // Import from xml code was wrong for answernumbering,
+        // There was also a typo in the upgrade code.
+        // Fix all broken questions in database.
+        $DB->set_field('qtype_formulas_options', 'answernumbering', 'none', array('answernumbering' => ''));
+
+
+        // Formulas savepoint reached.
+        upgrade_plugin_savepoint(true, 2018080300, 'qtype', 'formulas');
     }
     return true;
 }

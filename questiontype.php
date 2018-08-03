@@ -346,6 +346,7 @@ class qtype_formulas extends question_type {
         }
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
+        $question->answernumbering = $questiondata->options->answernumbering;
         $question->qv = new qtype_formulas_variables();
         $question->numpart = $questiondata->options->numpart;
         if ($question->numpart != 0) {
@@ -437,11 +438,9 @@ class qtype_formulas extends question_type {
         $format->import_combined_feedback($fromform, $xml, true);
         $format->import_hints($fromform, $xml, true);
 
-        $extras = $this->extra_question_fields();
-        array_shift($extras);
-        foreach ($extras as $extra) {
-            $fromform->$extra = $format->getpath($xml, array('#', $extra, 0, '#', 'text', 0, '#'), '', true);
-        }
+        $fromform->varsrandom = $format->getpath($xml, array('#', 'varsrandom', 0, '#', 'text', 0, '#'), '', true);
+        $fromform->varsglobal = $format->getpath($xml, array('#', 'varsglobal', 0, '#', 'text', 0, '#'), '', true);
+        $fromform->answernumbering = $format->getpath($xml, array('#', 'answernumbering', 0, '#', 'text', 0, '#'), 'none', true);
 
         // Loop over each answer block found in the XML.
         $tags = $this->part_tags();

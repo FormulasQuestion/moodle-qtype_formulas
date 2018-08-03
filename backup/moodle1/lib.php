@@ -111,7 +111,7 @@ class moodle1_qtype_formulas_handler extends moodle1_qtype_handler {
         $this->xmlwriter->full_tag('incorrectfeedback', '');
         $this->xmlwriter->full_tag('incorrectfeedbackformat', FORMAT_HTML);
         $this->xmlwriter->full_tag('shownumcorrect', 0);
-        $this->xmlwriter->full_tag('answernumbering', 'abc');
+        $this->xmlwriter->full_tag('answernumbering', 'none');
         $this->xmlwriter->end_tag('formulas');
     }
 }
