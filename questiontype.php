@@ -245,19 +245,17 @@ class qtype_formulas extends question_type {
             $options->correctfeedback = '';
             $options->partiallycorrectfeedback = '';
             $options->incorrectfeedback = '';
+            $options->answernumbering = 'none';
             $options->id = $DB->insert_record('qtype_formulas_options', $options);
         }
         $extraquestionfields = $this->extra_question_fields();
         array_shift($extraquestionfields);
         foreach ($extraquestionfields as $extra) {
-            if (!isset($question->$extra)) {
-                $result = new stdClass();
-                $result->error = "No data for field $extra when saving " .
-                    ' formulas options question id ' . $question->id;
-                return $result;
+            if (property_exists($question, $extra)) {
+                $options->$extra = $question->$extra;
             }
-            $options->$extra = $question->$extra;
         }
+
         $options = $this->save_combined_feedback_helper($options, $question, $context, true);
 
         $DB->update_record('qtype_formulas_options', $options);
