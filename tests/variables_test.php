@@ -815,16 +815,28 @@ class qtype_formulas_variables_test extends advanced_testcase {
      */
     public function test_sigfig() {
         $number = .012345;
-        $this->assertEquals(sigfig($number, 3), '.0123');
-        $this->assertEquals(sigfig($number, 4), '.01235');
-        $this->assertEquals(sigfig($number, 6), '.0123450');
+        $this->assertSame(sigfig($number, 3), '0.0123');
+        $this->assertSame(sigfig($number, 4), '0.01235');
+        $this->assertSame(sigfig($number, 6), '0.0123450');
+        $number = -.012345;
+        $this->assertSame(sigfig($number, 3), '-0.0123');
+        $this->assertSame(sigfig($number, 4), '-0.01235');
+        $this->assertSame(sigfig($number, 6), '-0.0123450');
         $number = 123.45;
-        $this->assertEquals(sigfig($number, 2), '120');
-        $this->assertEquals(sigfig($number, 4), '123.5');
-        $this->assertEquals(sigfig($number, 6), '123.450');
+        $this->assertSame(sigfig($number, 2), '120');
+        $this->assertSame(sigfig($number, 4), '123.5');
+        $this->assertSame(sigfig($number, 6), '123.450');
         $number = -123.45;
-        $this->assertEquals(sigfig($number, 2), '-120');
-        $this->assertEquals(sigfig($number, 4), '-123.5');
-        $this->assertEquals(sigfig($number, 6), '-123.450');
+        $this->assertSame(sigfig($number, 2), '-120');
+        $this->assertSame(sigfig($number, 4), '-123.5');
+        $this->assertSame(sigfig($number, 6), '-123.450');
+        $number = .005;
+        $this->assertSame(sigfig($number, 1), '0.005');
+        $this->assertSame(sigfig($number, 2), '0.0050');
+        $this->assertSame(sigfig($number, 3), '0.00500');
+        $number = -.005;
+        $this->assertSame(sigfig($number, 1), '-0.005');
+        $this->assertSame(sigfig($number, 2), '-0.0050');
+        $this->assertSame(sigfig($number, 3), '-0.00500');
     }
 }

@@ -117,9 +117,8 @@ function sigfig($number, $precision) {
     } else {
         $decimalplaces = $precision - floor(log10($number)) - 1;
     }
-
     $answer = ($decimalplaces > 0) ?
-            number_format($number, $decimalplaces, '.', '') : round($number, $decimalplaces);
+            number_format($number, $decimalplaces, '.', '') : number_format(round($number, $decimalplaces), 0, '.', '');
     return $answer;
 }
 
