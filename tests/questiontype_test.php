@@ -28,7 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+require_once($CFG->dirroot . '/question/type/edit_question_form.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
+require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
 
 
 /**
@@ -147,5 +149,82 @@ class qtype_formulas_test extends advanced_testcase {
                 3 => '',
                 4 => '');
         $this->assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
+    }
+    
+    /**
+     * Test to make sure that loading of question options works, including in an error case.
+     */
+    public function test_get_question_options() {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        // Create a complete, in DB question to use.
+        $questiondata = test_question_maker::get_question_data('formulas', 'test2');
+        // echo "questiondata";
+        // var_dump(count($questiondata->options->answers));
+        $formdata = test_question_maker::get_question_form_data('formulas', 'test2');
+        // var_dump((array)$formdata);
+        $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $generator->create_question_category(array());
+
+        $formdata->category = "{$cat->id},{$cat->contextid}";
+        qtype_formulas_edit_form::mock_submit((array)$formdata);
+        echo "after mocksubmit";
+        // var_dump($_POST);
+        $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
+        var_dump($form);
+        $this->assertTrue($form->is_validated());
+
+        $fromform = $form->get_data();
+// var_dump($fromform); pas correct
+        $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
+// var_dump($returnedfromsave);
+        // Now get just the raw DB record.
+        $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
+        // $testanswers = $DB->get_records('qtype_formulas_answers');
+        // var_dump($testanswers);
+        // Load it.
+        $this->qtype->get_question_options($question);
+        $this->assertDebuggingNotCalled();
+        $this->assertInstanceOf(stdClass::class, $question->options);
+
+        $options = $question->options;
+        // var_dump($options);
+        $this->assertEquals($question->id, $options->questionid);
+        // $this->assertEquals(4, $options->numpart);
+
+        $this->assertCount(4, $options->answers);
+
+        // Now we are going to delete the options record.
+        $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
+
+        // Now see what happens.
+        $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
+        $this->qtype->get_question_options($question);
+
+        $this->assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        $this->assertInstanceOf(stdClass::class, $question->options);
+        $options = $question->options;
+        $this->assertEquals($question->id, $options->questionid);
+        $this->assertEquals(4, $options->numpart);
+        $this->assertCount(4, $options->answers);
+
+        $this->assertEquals(get_string('correctfeedbackdefault', 'question'), $options->correctfeedback);
+        $this->assertEquals(FORMAT_HTML, $options->correctfeedbackformat);
+
+        // And finally we try again with no answer either.
+        $DB->delete_records('qtype_formulas_answers', ['questionid' => $question->id]);
+
+        $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
+        $this->qtype->get_question_options($question);
+
+        $this->assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        $this->assertInstanceOf(stdClass::class, $question->options);
+        $options = $question->options;
+        $this->assertEquals($question->id, $options->questionid);
+        $this->assertEquals(0, $options->numpart);
+        $this->assertCount(0, $options->answers);
     }
 }

@@ -307,6 +307,171 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
+     * Get the question data, as it would be loaded by get_question_options.
+     * @return object
+     */
+    public static function get_formulas_question_data_test2() {
+        global $USER;
+
+        $qdata = new stdClass();
+        test_question_maker::initialise_question_data($qdata);
+
+        $qdata->qtype = 'formulas';
+        $qdata->name = 'test-2';
+        $qdata->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
+        $qdata->questiontextformat = FORMAT_HTML;
+        $qdata->generalfeedback = '';
+        $qdata->generalfeedbackformat = FORMAT_HTML;
+        $qdata->defaultmark = 8;
+        $qdata->length = 1;
+        $qdata->penalty = 0.3;
+        $qdata->hidden = 0;
+
+        $qdata->options = new stdClass();
+        $qdata->options->varsrandom = '';
+        $qdata->options->varsglobal = 'v = 40;dt = 3;s = v*dt;';
+        $qdata->options->shownumcorrect = 
+        $qdata->options->answernumbering = 'abc';
+        $qdata->options->correctfeedback =
+                test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
+        $qdata->options->correctfeedbackformat = FORMAT_HTML;
+        $qdata->options->partiallycorrectfeedback =
+                test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK;
+        $qdata->options->partiallycorrectfeedbackformat = FORMAT_HTML;
+        $qdata->options->shownumcorrect = 1;
+        $qdata->options->incorrectfeedback =
+                test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
+        $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
+
+        $qdata->options->answers = array(
+            14 => (object) array(
+                'id' => 14,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => 0,
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => 'v',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => 'm/s',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => '',
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => '',
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => '',
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 0,
+            ),
+            15 => (object) array(
+                'id' => 15,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => 0,
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => 'v',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => 'm/s',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => '',
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => '',
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => '',
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 1,
+            ),
+            16 => (object) array(
+                'id' => 16,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => 0,
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => 'v',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => '',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => '',
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => '',
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => '',
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 2,
+            ),
+            17 => (object) array(
+                'id' => 17,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => 0,
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => 'v',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => '',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => '',
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => '',
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => '',
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 3,
+            ),
+        );
+        
+        $qdata->options->numpart = 4;
+
+        $qdata->hints = array(
+            1 => (object) array(
+                'hint' => 'Hint 1.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 0,
+                'options' => 0,
+            ),
+            2 => (object) array(
+                'hint' => 'Hint 2.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 1,
+                'options' => 1,
+            ),
+        );
+
+        return $qdata;
+    }
+    /**
      * Gets the question form data for a formulas question
      * @return stdClass
      */
@@ -322,49 +487,109 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsrandom = '';
         $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $form->answernumbering = 'abc';
-        $form->answer = array('v', 'v', 'v', 'v');
-        $form->answermark = array('2', '2', '2', '2');
-        $form->numbox = array(1, 1, 1, 1);
-        $form->placeholder = array('', '', '', '');
-        $form->postunit = array('m/s', 'm/s', '', '');
-        $form->answertype = array(0, 0, 0, 0);
-        $form->vars1 = array('', '', '', '');
-        $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
-        $form->vars2 = array('', '', '', '');
-        $form->unitpenalty = array(1, 1, 1, 1);
-        $form->ruleid = array('1', '1', '1', '1');
-        $form->otherrule = array('', '', '', '');
+        $form->answer = array(
+            0 => 'v',
+            1 => 'v',
+            2 => 'v',
+            3 => 'v',
+        );
+        $form->answermark = array(
+            0 => 2,
+            1 => 2,
+            2 => 2,
+            3 => 2,
+        );
+        $form->numbox = array(
+            0 => 1,
+            1 => 1,
+            2 => 1,
+            3 => 1,
+        );
+        $form->placeholder = array(
+            0 => '', 
+            1 => '',
+            2 => '',
+            3 => '',
+        );
+        $form->postunit = array(
+            0 => 'm/s',
+            1 => 'm/s',
+            2 => '',
+            3 => '',
+        );
+        $form->answertype = array(
+            0 => 0,
+            1 => 0,
+            2 => 0,
+            3 => 0,
+        );
+        $form->vars1 = array(
+            0 => '', 
+            1 => '',
+            2 => '',
+            3 => '',
+        );
+        $form->correctness = array(
+            0 => '_relerr < 0.01',
+            1 => '_relerr < 0.01',
+            2 => '_relerr < 0.01',
+            3 => '_relerr < 0.01'
+        );
+        $form->vars2 = array(
+            0 => '', 
+            1 => '',
+            2 => '',
+            3 => '',
+        );
+        $form->unitpenalty = array(
+            0 => '1.0',
+            1 => '1.0',
+            2 => '1.0'
+            3 => '1.0',
+        );
+        $form->ruleid = array(
+            0 => 1,
+            1 = >1,
+            2 => 1
+            3 => 1,
+        );
+        $form->otherrule = array(
+            0 => '',
+            1 => '',
+            2 => '',
+            3 => '',
+        );
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
         $form->subqtext = array(
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            0 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            1 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            2 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            3 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
         $form->feedback = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
+            0 => array('text' => '', 'format' => FORMAT_HTML),
+            1 => array('text' => '', 'format' => FORMAT_HTML),
+            2 => array('text' => '', 'format' => FORMAT_HTML),
+            3 => array('text' => '', 'format' => FORMAT_HTML),
         );
         $form->partcorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
+            0 => array('text' => '', 'format' => FORMAT_HTML),
+            1 => array('text' => '', 'format' => FORMAT_HTML),
+            2 => array('text' => '', 'format' => FORMAT_HTML),
+            3 => array('text' => '', 'format' => FORMAT_HTML),
         );
         $form->partpartiallycorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
+            0 => array('text' => '', 'format' => FORMAT_HTML),
+            1 => array('text' => '', 'format' => FORMAT_HTML),
+            2 => array('text' => '', 'format' => FORMAT_HTML),
+            3 => array('text' => '', 'format' => FORMAT_HTML),
         );
         $form->partincorrectfb = array(
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
-            array('text' => '', 'format' => FORMAT_HTML),
+            0 => array('text' => '', 'format' => FORMAT_HTML),
+            1 => array('text' => '', 'format' => FORMAT_HTML),
+            2 => array('text' => '', 'format' => FORMAT_HTML),
+            3 => array('text' => '', 'format' => FORMAT_HTML),
         );
         $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
         $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);

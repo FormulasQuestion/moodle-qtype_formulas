@@ -137,14 +137,49 @@ class qtype_formulas extends question_type {
      */
     public function get_question_options($question) {
         global $DB;
-        $question->options = $DB->get_record('qtype_formulas_options',
-                array('questionid' => $question->id), '*', MUST_EXIST);
+
+        $question->options = $DB->get_record('qtype_formulas_options', ['questionid' => $question->id]);
+
+        if ($question->options === false) {
+            // If this has happened, then we have a problem.
+            // For the user to be able to edit or delete this question, we need options.
+            debugging("Formulas question ID {$question->id} was missing an options record. Using default.", DEBUG_DEVELOPER);
+
+            $question->options = $this->create_default_options($question);
+        }
 
         parent::get_question_options($question);
         $question->options->answers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'partindex ASC');
         $question->options->numpart = count($question->options->answers);
         $question->options->answers = array_values($question->options->answers);
         return true;
+    }
+
+    /**
+     * Create a default options object for the provided question.
+     *
+     * @param object $question The question we are working with.
+     * @return object The options object.
+     */
+    protected function create_default_options($question) {
+        // Create a default question options record.
+        $options = new stdClass();
+        $options->questionid = $question->id;
+        $options->varsrandom = '';
+        $options->varsglobal = '';
+
+        // Get the default strings and just set the format.
+        $options->correctfeedback = get_string('correctfeedbackdefault', 'question');
+        $options->correctfeedbackformat = FORMAT_HTML;
+        $options->partiallycorrectfeedback = get_string('partiallycorrectfeedbackdefault', 'question');;
+        $options->partiallycorrectfeedbackformat = FORMAT_HTML;
+        $options->incorrectfeedback = get_string('incorrectfeedbackdefault', 'question');
+        $options->incorrectfeedbackformat = FORMAT_HTML;
+
+        $options->answernumbering = 'none';
+        $options->shownumcorrect = 1;
+
+        return $options;
     }
 
     /**
@@ -165,7 +200,7 @@ class qtype_formulas extends question_type {
         try {
             $filtered = $this->validate($question); // Data from the web input interface should be validated.
             if (count($filtered->errors) > 0) {  // There may be errors from import or restore.
-                throw new Exception('Format error! Probably import/restore files have been damaged.');
+                throw new Exception('Format error! Probably imported/restored formulas questions have been damaged.');
             }
             $answersorder = $this->reorder_answers($question->questiontext, $filtered->answers);
             // Reorder the answers, so that answer's order is the same as the placeholder's order in questiontext.
@@ -176,6 +211,7 @@ class qtype_formulas extends question_type {
             $idcount = 0;
             foreach ($newanswers as $i => $ans) {
                 $ans->partindex = $i;
+                $ans->questionid = $question->id;
                 // Save all editors content (arrays).
                 $subqtextarr = $ans->subqtext;
                 $ans->subqtext = $subqtextarr['text'];
@@ -523,7 +559,7 @@ class qtype_formulas extends question_type {
             $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $answer->id);
             $feedbackformat = $format->get_format($answer->partcorrectfbformat);
             $expout .= " <correctfeedback format=\"$feedbackformat\">\n";
-            $expout .= $format->writetext($answer->correctfeedback);
+            $expout .= $format->writetext($answer->partcorrectfb);
             $expout .= $format->write_files($fbfiles);
             $expout .= " </correctfeedback>\n";
             $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $answer->id);
@@ -616,7 +652,8 @@ class qtype_formulas extends question_type {
             if ($skip) {
                 continue;   // If no answer or correctness conditions, it cannot check other parts, so skip.
             }
-            $res->answers[$i] = (object)array('questionid' => $form->id);   // Create an object of answer with the id.
+            $res->answers[$i] = new stdClass();
+            $res->answers[$i]->questionid = $form->id;
             foreach ($tags as $tag) {
                 $res->answers[$i]->{$tag} = trim($form->{$tag}[$i]);
             }
@@ -664,19 +701,18 @@ class qtype_formulas extends question_type {
         if (count($res->answers) == 0) {
             $res->errors["answermark[0]"] = get_string('error_no_answer', 'qtype_formulas');
         }
+
         return $res;
     }
 
     // It checks basic errors as well as formula errors by evaluating one instantiation.
     public function validate($form) {
         $errors = array();
-
         $answerschecked = $this->check_and_filter_answers($form);
         if (isset($answerschecked->errors)) {
             $errors = array_merge($errors, $answerschecked->errors);
         }
         $validanswers = $answerschecked->answers;
-
         foreach ($validanswers as $idx => $part) {
             if ($part->unitpenalty < 0 || $part->unitpenalty > 1) {
                 $errors["unitpenalty[$idx]"] = get_string('error_unitpenalty', 'qtype_formulas');

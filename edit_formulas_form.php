@@ -258,6 +258,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $question = $this->data_preprocessing_combined_feedback($question, true);
         $question = $this->data_preprocessing_hints($question, true, true);
         if (isset($question->options)) {
+            $defaultvalues = array();
             if (count($question->options->answers)) {
                 $tags = question_bank::get_qtype($question->qtype)->part_tags();
                 foreach ($question->options->answers as $key => $answer) {
@@ -300,7 +301,6 @@ class qtype_formulas_edit_form extends question_edit_form {
      */
     public function validation($fromform, $files) {
         $errors = parent::validation($fromform, $files);
-
         // Use the validation defined in the question type, check by instantiating one variable set.
         $data = (object)$fromform;
         $instantiationresult = question_bank::get_qtype($this->qtype())->validate($data);

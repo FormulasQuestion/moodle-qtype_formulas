@@ -25,7 +25,7 @@ Feature: Test exporting Formulas questions
 
   @javascript @_file_upload
   Scenario: Export a Formulas question
-    When I navigate to "Export" node in "Course administration > Question bank"
+    When I navigate to "Question bank > Export" in current page administration
     And I set the field "id_format_xml" to "1"
     And I press "Export questions to file"
     Then following "click here" should download between "4200" and "4300" bytes
