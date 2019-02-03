@@ -330,7 +330,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $qdata->options = new stdClass();
         $qdata->options->varsrandom = '';
         $qdata->options->varsglobal = 'v = 40;dt = 3;s = v*dt;';
-        $qdata->options->shownumcorrect = 
+        $qdata->options->shownumcorrect =
         $qdata->options->answernumbering = 'abc';
         $qdata->options->correctfeedback =
                 test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
@@ -449,7 +449,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'partindex' => 3,
             ),
         );
-        
+
         $qdata->options->numpart = 4;
 
         $qdata->hints = array(
@@ -506,7 +506,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             3 => 1,
         );
         $form->placeholder = array(
-            0 => '', 
+            0 => '',
             1 => '',
             2 => '',
             3 => '',
@@ -524,7 +524,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             3 => 0,
         );
         $form->vars1 = array(
-            0 => '', 
+            0 => '',
             1 => '',
             2 => '',
             3 => '',
@@ -536,7 +536,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             3 => '_relerr < 0.01'
         );
         $form->vars2 = array(
-            0 => '', 
+            0 => '',
             1 => '',
             2 => '',
             3 => '',
@@ -544,7 +544,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->unitpenalty = array(
             0 => '1.0',
             1 => '1.0',
-            2 => '1.0'
+            2 => '1.0',
             3 => '1.0',
         );
         $form->ruleid = array(

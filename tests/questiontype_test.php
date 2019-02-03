@@ -150,7 +150,7 @@ class qtype_formulas_test extends advanced_testcase {
                 4 => '');
         $this->assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
-    
+
     /**
      * Test to make sure that loading of question options works, including in an error case.
      */
