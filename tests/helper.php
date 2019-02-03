@@ -549,8 +549,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         );
         $form->ruleid = array(
             0 => 1,
-            1 = >1,
-            2 => 1
+            1 => 1,
+            2 => 1,
             3 => 1,
         );
         $form->otherrule = array(
