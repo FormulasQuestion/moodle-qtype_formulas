@@ -367,7 +367,6 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         // Fix all broken questions in database.
         $DB->set_field('qtype_formulas_options', 'answernumbering', 'none', array('answernumbering' => ''));
 
-
         // Formulas savepoint reached.
         upgrade_plugin_savepoint(true, 2018080300, 'qtype', 'formulas');
     }

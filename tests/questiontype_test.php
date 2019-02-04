@@ -170,10 +170,12 @@ class qtype_formulas_test extends advanced_testcase {
         $cat = $generator->create_question_category(array());
 
         $formdata->category = "{$cat->id},{$cat->contextid}";
+        $formdata->id = 0;
         qtype_formulas_edit_form::mock_submit((array)$formdata);
         // echo "after mocksubmit";
         // var_dump($_POST);
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
+        $form->id = 0;
         // var_dump($form);
         $this->assertTrue($form->is_validated());
 
