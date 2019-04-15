@@ -177,7 +177,7 @@ class qtype_formulas extends question_type {
         $options->incorrectfeedbackformat = FORMAT_HTML;
 
         $options->answernumbering = 'none';
-        $options->shownumcorrect = 1;
+        $options->shownumcorrect = 0;
 
         return $options;
     }

@@ -60,6 +60,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->contextid = context_system::instance()->id;
         $q->varsrandom = '';
         $q->varsglobal = '';
+        $q->shownumcorrect = 0;
         $q->answernumbering = 'abc';
         $q->qv = new qtype_formulas_variables();
         $q->penalty = 0.2; // The default.
@@ -330,15 +331,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $qdata->options = new stdClass();
         $qdata->options->varsrandom = '';
         $qdata->options->varsglobal = 'v = 40;dt = 3;s = v*dt;';
-        $qdata->options->shownumcorrect =
         $qdata->options->answernumbering = 'abc';
+        $qdata->options->shownumcorrect = 0;
         $qdata->options->correctfeedback =
                 test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
         $qdata->options->correctfeedbackformat = FORMAT_HTML;
         $qdata->options->partiallycorrectfeedback =
                 test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK;
         $qdata->options->partiallycorrectfeedbackformat = FORMAT_HTML;
-        $qdata->options->shownumcorrect = 1;
         $qdata->options->incorrectfeedback =
                 test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
         $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
