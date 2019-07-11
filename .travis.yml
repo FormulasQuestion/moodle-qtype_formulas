@@ -1,14 +1,19 @@
 language: php
+dist: xenial
 
 sudo: required
 
+services:
+  - mysql
+
 addons:
   firefox: "47.0.1"
-  postgresql: "9.3"
+  postgresql: "9.6"
+  chrome: stable
   apt:
     packages:
-      - oracle-java8-installer
-      - oracle-java8-set-default
+      - openjdk-8-jre-headless
+      - chromium-chromedriver
 
 cache:
   directories:
@@ -16,20 +21,35 @@ cache:
     - $HOME/.npm
 
 php:
- - 7.0
- - 7.1
  - 7.2
 
-env: 
-  - MOODLE_BRANCH=MOODLE_34_STABLE DB=pgsql IGNORE_PATHS=mobile_src
+env:
+  - DB=pgsql MOODLE_BRANCH=master
+  - DB=mysqli MOODLE_BRANCH=master
+  - DB=mariadb MOODLE_BRANCH=master
 
+matrix:
+  include:
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_34_STABLE
+    - php: 7.1
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
+    - php: 7.2
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
+    - php: 7.3
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.3
+      env: DB=pgsql MOODLE_BRANCH=master
+  
 before_install:
   - phpenv config-rm xdebug.ini
   - nvm install 8.9
   - nvm use 8.9
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
+  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+
 
 install:
   - moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
@@ -37,6 +57,9 @@ install:
 
 script:
   - moodle-plugin-ci phplint
+  - moodle-plugin-ci phpcpd
+  - moodle-plugin-ci phpmd
+  - moodle-plugin-ci phpdoc
   - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
@@ -44,3 +67,4 @@ script:
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
+  - moodle-plugin-ci behat --profile chrome
