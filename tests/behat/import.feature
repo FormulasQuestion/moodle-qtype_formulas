@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @_file_upload
 Feature: Test importing Formulas questions
   As a teacher
   In order to reuse my Formulas questions
