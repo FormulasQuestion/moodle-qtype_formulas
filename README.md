@@ -11,10 +11,9 @@ These functionalities can simplify the creation of questions in many fields rela
 This question type was written by Hon Wai Lau and versions for Moodle 1.9 and 2.0 are still available at the original author's website at the date of this writting
 https://code.google.com/p/moodle-coordinate-question/downloads/list
 
-This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine
+This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine.
 
-This version is compatible with Moodle 3.0 and ulterior versions. It has been tested with Moodle versions up to 3.4 and 3.5dev. It has also een tested with PHP versions 7.0,
-7.1 and 7.2.
+This version is compatible with Moodle 3.0 and ulterior versions. It has been tested with Moodle versions up to 3.8. It has also been tested with PHP versions 7.0, 7.1 and 7.2.
 If you are running an older version of Moodle another version of the formulas question type is available for Moodle versions 2.6 to 2.9.
 
 
@@ -39,13 +38,13 @@ Install as any other Moodle question type plugin
 #### Installation Using Git
 
 To install using git type these commands in the root of your Moodle install:
-    git clone git://github.com/jmvedrine/moodle-qtype_formulas.git question/type/formulas
+    git clone git://github.com/dbauer-ets/moodle-qtype_formulas.git question/type/formulas
     echo '/question/type/formulas/' >> .git/info/exclude
 
 
 #### Installation From Downloaded zip file
 
-Alternatively, download the zip from https://github.com/jmvedrine/moodle-qtype_formulas
+Alternatively, download the zip from https://github.com/dbauer-ets/moodle-qtype_formulas
 
 unzip it into the question/type folder, and then rename the new folder to formulas.
 
@@ -56,7 +55,7 @@ But mastering all the possibilities require some practice and there is a learnin
 
 Here are some pointers to the available help :
 * first you can import the Moodle xml file samples/sample-formulas-questions.xml and play with the included formulas questions.
-* You can visit the documentation made by Dominique Bauer https://docs.moodle.org/33/en/Formulas_question_type
+* You can visit the documentation made by Dominique Bauer https://moodleformulas.org/
   (As there is no or little difference in the Formulas question type plugin for recent versions of Moodle (2.0 and above),
   the documentation for the Formulas question type has been moved to this location but it apply to all Moodle versions,
   including the current release)
