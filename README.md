@@ -1,6 +1,6 @@
 Formulas question type for Moodle
 ---------------------------------
-This is a question type plugin for Moodle with random values and multiple answer fields.
+This is a question type plugin for Moodle with random values and multiple answer fields.$$$
 
 The answer fields can be placed anywhere in the question so that we can create questions involving various answer structures such as coordinate, polynomial and matrix.
 
