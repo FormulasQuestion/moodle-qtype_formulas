@@ -8,7 +8,7 @@
        },
        "repository": {
               "type": "git",
-              "url": "git://github.com/jmvedrine/moodle-qtype_formulas.git"
+              "url": "git://github.com/dbauer-ets/moodle-qtype_formulas.git"
        },
        "license" : "GPL-3.0"
 }
