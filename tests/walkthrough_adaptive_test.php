@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 /**
  * Unit tests for the formulas question type.
  *
- * @copyright  2012 Jean-Michel Védrine
+ * @copyright  2012 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthrough_test_base {
