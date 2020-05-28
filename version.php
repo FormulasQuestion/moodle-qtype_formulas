@@ -25,11 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-<<<<<<< Updated upstream
-$plugin->version   = 2020052200;
-=======
 $plugin->version   = 2020052700;
->>>>>>> Stashed changes
 
 $plugin->cron      = 0;
 $plugin->requires  = 2015111600;
