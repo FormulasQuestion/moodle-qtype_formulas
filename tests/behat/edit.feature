@@ -26,7 +26,7 @@ Feature: Test editing a Formulas question
 
   @javascript @_switch_window
   Scenario: Edit a Formulas question
-    When I click on "Edit" "link" in the "formulas-001 for editing" "table_row"
+    When I choose "Edit question" action for "formulas-001 for editing" in the question bank
     And I set the following fields to these values:
       | Question name | |
     And I press "id_submitbutton"
@@ -35,12 +35,12 @@ Feature: Test editing a Formulas question
       | Question name | Edited formulas-001 name |
     And I press "id_submitbutton"
     Then I should see "Edited formulas-001 name"
-    When I click on "Edit" "link" in the "Edited formulas-001 name" "table_row"
+    When I choose "Edit question" action for "Edited formulas-001 name" in the question bank
     And I set the following fields to these values:
       | Random variables     | v = {40:120:10}; dt = {2:6};  |
     And I press "id_submitbutton"
     Then I should see "Edited formulas-001 name"
-    When I click on "Preview" "link" in the "Edited formulas-001 name" "table_row"
+    When I choose "Preview" action for "Edited formulas-001 name" in the question bank
     And I switch to "questionpreview" window
     Then I should see "Multiple parts : --"
     # Set behaviour options

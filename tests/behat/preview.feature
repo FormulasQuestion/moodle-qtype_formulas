@@ -26,7 +26,7 @@ Feature: Preview a Formulas question
 
   @javascript @_switch_window
   Scenario: Preview a formulas question with correct answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
+    When I choose "Preview" action for "formulas-001" in the question bank
     And I switch to "questionpreview" window
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
@@ -46,7 +46,7 @@ Feature: Preview a Formulas question
 
   @javascript @_switch_window
   Scenario: Preview an formulas question with incorrect answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
+    When I choose "Preview" action for "formulas-001" in the question bank
     And I switch to "questionpreview" window
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
