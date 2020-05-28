@@ -44,6 +44,7 @@ $string['addmorepartsblanks'] = 'Blanks for {no} more parts';
 $string['pluginname'] = 'Formulas';
 $string['pluginnameadding'] = 'Adding a formulas question';
 $string['pluginnameediting'] = 'Editing a formulas question';
+<<<<<<< Updated upstream
 $string['pluginname_help'] = 'To start using this question, please go to <a href="https://moodleformulas.org/">moodleformulas.org</a>.
 
 For possible questions, please see <a href="https://moodleformulas.org/">moodleformulas.org</a>.
@@ -51,6 +52,15 @@ For possible questions, please see <a href="https://moodleformulas.org/">moodlef
 For the options in the editing form below, please read <a href="https://moodleformulas.org/">moodleformulas.org</a>
 
 For the full documentation, please go to <a href="https://moodleformulas.org/">moodleformulas.org</a>';
+=======
+$string['pluginname_help'] = 'To start using this question, please read the <a href="https://moodleformulas.org/">Formulas question tutorial</a>.
+
+For possible questions, please see <a href="https://moodleformulas.org/">Examples</a>.
+
+For the options in the editing form below, please read <a href="https://moodleformulas.org/">Formulas question page</a>
+
+For the full documentation, please read <a href="https://moodleformulas.org/">Documentation</a>';
+>>>>>>> Stashed changes
 $string['pluginnamesummary'] = 'Question type with random values and multiple answers
 The answer fields can be placed anywhere so that we can create questions involving various structures such as vectors, polynomials and matrix.
 Other features such as unit checking and multiple parts questions are also integrated tightly and easy to use.';
