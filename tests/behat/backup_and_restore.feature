@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @_file_upload
 Feature: Test duplicating a quiz containing a Formulas question
   As a teacher
   In order re-use my courses containing formulas questions
@@ -28,7 +28,7 @@ Feature: Test duplicating a quiz containing a Formulas question
       | Confirmation | Filename | test_backup.mbz |
     And I restore "test_backup.mbz" backup into a new course using this options:
       | Schema | Course name | Course 2 |
-    And I navigate to "Question bank" in current page administration
+    And I navigate to "Question bank > Questions" in current page administration
     And I click on "Edit" "link" in the "formulas-001" "table_row"
     Then the following fields match these values:
       | Question name        | formulas-001                                                                  |

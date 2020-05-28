@@ -21,7 +21,7 @@
 
     <php>
         <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
-        <const name="PHPUNIT_SEQUENCE_START" value="172000"/>
+        <const name="PHPUNIT_SEQUENCE_START" value="102000"/>
 
         <!--Following constants instruct tests to fetch external test files from alternative location or skip tests if empty, clone https://github.com/moodlehq/moodle-exttests to local web server-->
         <!--<const name="TEST_EXTERNAL_FILES_HTTP_URL" value="http://download.moodle.org/unittest"/> uncomment and alter to fetch external test files from alternative location-->
@@ -29,18 +29,19 @@
     </php>
 
 
-        <testsuites>
-            <testsuite name="question_type_formulas_testsuite">
-                <directory suffix="_test.php">.</directory>
-            </testsuite>
-        </testsuites>
-        <filter>
+    <testsuites>
+        <testsuite name="qtype_formulas_testsuite">
+            <directory suffix="_test.php">.</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+
             <whitelist processUncoveredFilesFromWhitelist="false">
                 <directory suffix=".php">.</directory>
                 <exclude>
                     <directory suffix="_test.php">.</directory>
                 </exclude>
             </whitelist>
-        </filter>
+    </filter>
 
 </phpunit>
