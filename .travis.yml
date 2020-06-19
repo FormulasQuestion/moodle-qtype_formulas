@@ -3,8 +3,8 @@ language: php
 sudo: required
 
 addons:
-  firefox: "47.0.1"
-  postgresql: "9.3"
+  firefox: "77.0.1"
+  postgresql: "12.3"
   apt:
     packages:
       - oracle-java8-installer
@@ -19,6 +19,8 @@ php:
  - 7.0
  - 7.1
  - 7.2
+ - 7.3
+ - 7.4
 
 env: 
   - MOODLE_BRANCH=MOODLE_39_STABLE DB=pgsql IGNORE_PATHS=mobile_src
