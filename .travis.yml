@@ -9,8 +9,12 @@ services:
   - mysql
 
 addons:
-  postgresql: "9.6"
-  firefox: "47.0.1"
+  firefox: "77.0.1"
+  postgresql: "12.3"
+  apt:
+    packages:
+      - oracle-java8-installer
+      - oracle-java8-set-default
 
 cache:
   directories:
