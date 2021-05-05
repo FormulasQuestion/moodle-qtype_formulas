@@ -58,9 +58,6 @@ function npr($n, $r) {
     if ($r > $n) {
         return 0;
     }
-    if (($n - $r) < $r) {
-        return npr($n, ($n - $r));
-    }
     $return = 1;
     for ($i = 0; $i < $r; $i++) {
          $return *= ($n - $i);
