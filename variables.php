@@ -52,6 +52,62 @@ function fact($n) {
     return $return;
 }
 
+function stdnormpdf($z) {
+    return 1/(sqrt(2)*M_SQRTPI)*exp(-.5*$z**2);
+}
+
+function stdnormcdf($z) {
+    if ($z < 0) {
+        return 1-stdnormcdf(-$z);
+    }
+    $n = max(10, floor(10*$z));
+    $h = $z/$n;
+    $res=stdnormpdf(0)+stdnormpdf($z);
+    for ($i=1; $i<$n; $i++) {
+        $res+=2*stdnormpdf($i*$h);
+        $res+=4*stdnormpdf(($i-0.5)*$h);
+    }
+    $res+=4*stdnormpdf(($n-.5)*$h);
+    $res*=$h/6;
+    return $res+0.5;
+}
+
+function normcdf($x, $mu, $sigma) {
+    return stdnormcdf(($x-$mu)/$sigma);
+}
+
+function modpow($a, $b, $m) {
+    $bin = decbin($b);
+    $res = $a;
+    for ($i=1; $i<strlen($bin); $i++) {
+        if ($bin[$i] == "0") {
+            $res = ($res*$res) % $m;
+        }
+        else {
+            $res = ($res*$res) % $m;
+            $res = ($res*$a) % $m;
+        }
+    }
+    return $res;
+}
+
+function modinv($a, $m) {
+    $orig_m = $m;
+    if (gcd($a, $m) != 1) {
+        // inverse does not exist
+        return 0;
+    }
+    list($s, $t, $last_s, $last_t) = [1, 0, 0, 1];
+    while ($m != 0) {
+        $q = floor($a/$m);
+        list($a, $m) = [$m, $a - $q*$m];
+        list($s, $last_s) = [$last_s, $s - $q*$last_s];
+        list($t, $last_t) = [$last_t, $t - $q*$last_t];
+    }
+    return ($s<0) ? $s+$orig_m : $s;
+}
+
+
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
@@ -140,16 +196,16 @@ class qtype_formulas_variables {
         $this->func_const = array_flip( array('pi'));
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil'
             , 'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan'
-            , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact') );
-        $this->func_binary = array_flip( array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig') );
-        $this->func_special = array_flip( array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly') );
+                                              , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact', 'stdnormcdf') );
+        $this->func_binary = array_flip( array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig', 'modinv') );
+        $this->func_special = array_flip( array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly', 'normcdf', 'modpow') );
         $this->func_all = array_merge($this->func_const, $this->func_unary, $this->func_binary, $this->func_special);
         $this->binary_op_map = array_flip( array('+', '-', '*', '/', '%', '>', '<', '==', '!=', '&&', '||', '&', '|', '<<', '>>', '^'));
         // $this->binary_op_reduce = array_flip( array('||', '&&', '==', '+', '*') );
 
         // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-            'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact'));
+                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact', 'stdnormcdf'));
         $this->constlist = array('pi' => '3.14159265358979323846');
         $this->evalreplacelist = array('ln' => 'log', 'log10' => '(1./log(10.))*log'); // Natural log and log with base 10, no log allowed to avoid ambiguity.
     }
@@ -1357,12 +1413,12 @@ class qtype_formulas_variables {
 
                 // Single argument functions (the most common case).
                 case 'abs': case 'acos': case 'acosh': case 'asin': case 'asinh':
-                        case 'atan': case 'atanh': case 'bindec': case 'ceil': case 'cos':
-                        case 'cosh': case 'decbin': case 'decoct': case 'deg2rad':
-                        case 'exp': case 'expm1': case 'floor': case 'is_finite':
-                        case 'is_infinite': case 'is_nan': case 'log10': case 'log1p':
-                        case 'octdec': case 'rad2deg': case 'sin': case 'sinh': case 'sqrt':
-                        case 'tan': case 'tanh': case 'fact':
+                case 'atan': case 'atanh': case 'bindec': case 'ceil': case 'cos':
+                case 'cosh': case 'decbin': case 'decoct': case 'deg2rad':
+                case 'exp': case 'expm1': case 'floor': case 'is_finite':
+                case 'is_infinite': case 'is_nan': case 'log10': case 'log1p':
+                case 'octdec': case 'rad2deg': case 'sin': case 'sinh': case 'sqrt':
+                case 'tan': case 'tanh': case 'fact': case 'stdnormcdf':
                     if (strlen($regs[4]) != 0 || strlen($regs[3]) == 0) {
                         return get_string('functiontakesonearg', 'qtype_formulas', $regs[2]);
                     }
@@ -1376,14 +1432,15 @@ class qtype_formulas_variables {
                     break;
 
                 // Functions that must have two arguments.
-                case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr': case 'lcm': case 'gcd': case 'sigfig':
+            case 'atan2': case 'fmod': case 'pow': case 'ncr': case 'npr': case 'lcm':
+            case 'gcd': case 'sigfig': case 'modinv' :
                     if (strlen($regs[5]) != 0 || strlen($regs[4]) == 0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }
                     break;
 
                 // Functions that take two or more arguments.
-                case 'min': case 'max':
+            case 'min': case 'max': case 'normcdf' : case 'modpow' :
                     if (strlen($regs[4]) == 0) {
                         return get_string('functiontakesatleasttwo', 'qtype_formulas', $regs[2]);
                     }
