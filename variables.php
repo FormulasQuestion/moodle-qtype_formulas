@@ -79,6 +79,9 @@ function normcdf($x, $mu, $sigma) {
 function modpow($a, $b, $m) {
     $bin = decbin($b);
     $res = $a;
+    if ($b == 0) {
+        return 1;
+    }
     for ($i=1; $i<strlen($bin); $i++) {
         if ($bin[$i] == "0") {
             $res = ($res*$res) % $m;
