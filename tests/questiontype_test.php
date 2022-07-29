@@ -202,6 +202,11 @@ class qtype_formulas_test extends advanced_testcase {
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
 
+        // Notifications we expect due to missing options
+        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!
+!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!
+');
+
         // Now see what happens.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         $this->qtype->get_question_options($question);

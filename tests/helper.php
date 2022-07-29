@@ -487,6 +487,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsrandom = '';
         $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $form->answernumbering = 'abc';
+        $form->noanswers = 4;
         $form->answer = array(
             0 => 'v',
             1 => 'v',
