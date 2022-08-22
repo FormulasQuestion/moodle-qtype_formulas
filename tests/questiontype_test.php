@@ -52,11 +52,11 @@ class qtype_formulas_test extends advanced_testcase {
         return test_question_maker::make_question('formulas', $which);
     }
 
-    protected function setUp() {
+    protected function setUp():void {
         $this->qtype = new qtype_formulas();
     }
 
-    protected function tearDown() {
+    protected function tearDown():void {
         $this->qtype = null;
     }
 
