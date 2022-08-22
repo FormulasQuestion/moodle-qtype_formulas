@@ -816,7 +816,7 @@ class qtype_formulas_variables {
                     }
                     if (!$allsametype)  break;
                 }
-                $v = intval($values[0] >= 0 && $values[0] < count($pool) ? $values[0] : 0);    // Always choose 0 if index out of range.
+                $v = intval($values[0] >= 0 && $values[0] < mycount($pool) ? $values[0] : 0);    // Always choose 0 if index out of range.
                 $this->replace_middle($vstack, $expression, $l, $r, $type, $pool[$v]);
                 return true;
             case 'sort':
