@@ -196,20 +196,100 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     'c' => (object) array('type' => 'ls', 'value' => array('rr', 'rr', 'rr', 'rr')),
                     )
             ),
-            array(true, 'p1=pick(4,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
+            array(true, 'p1=pick(3,[0,1,2,3,4,5]);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 3),
                     )
             ),
-            array(true, 'p1=pick(3.1,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
+            array(true, 'p1=pick(3.9,[0,1,2,3,4,5]);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 3),
                     )
             ),
-            array(true, 'p1=pick(1000,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
+            array(true, 'p1=pick(10,[0,1,2,3,4,5]);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 0),
                     )
             ),
-            array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);', array(
-                    'p1' => (object) array('type' => 'ln', 'value' => array(6, 7)),
+            array(true, 'p1=pick(10.9,[0,1,2,3,4,5]);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 0),
+                    )
+            ),
+            array(true, 'p1=pick(3,0,1,2,3,4,5);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 3),
+                    )
+            ),
+            array(true, 'p1=pick(3.9,0,1,2,3,4,5);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 3),
+                    )
+            ),
+            array(true, 'p1=pick(10,0,1,2,3,4,5);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 0),
+                    )
+            ),
+            array(true, 'p1=pick(10.9,0,1,2,3,4,5);', array(
+                    'p1' => (object) array('type' => 'n', 'value' => 0),
+                    )
+            ),
+            array(true, 'p1=pick(3,["A","B","C","D","E","F"]);', array(
+                    'p1' => (object) array('type' => 's', 'value' => "D"),
+                    )
+            ),
+            array(true, 'p1=pick(3.9,["A","B","C","D","E","F"]);', array(
+                    'p1' => (object) array('type' => 's', 'value' => "D"),
+                    )
+            ),
+            array(true, 'p1=pick(10,["A","B","C","D","E","F"]);', array(
+                    'p1' => (object) array('type' => 's', 'value' => "A"),
+                    )
+            ),
+            array(true, 'p1=pick(10.9,["A","B","C","D","E","F"]);', array(
+                    'p1' => (object) array('type' => 's', 'value' => "A"),
+                    )
+            ),
+            array(true, 'p1=pick(3,"A","B","C","D","E","F");', array(
+                    'p1' => (object) array('type' => 's', 'value' => "D"),
+                    )
+            ),
+            array(true, 'p1=pick(3.9,"A","B","C","D","E","F");', array(
+                    'p1' => (object) array('type' => 's', 'value' => "D"),
+                    )
+            ),
+            array(true, 'p1=pick(10,"A","B","C","D","E","F");', array(
+                    'p1' => (object) array('type' => 's', 'value' => "A"),
+                    )
+            ),
+            array(true, 'p1=pick(10.9,"A","B","C","D","E","F");', array(
+                    'p1' => (object) array('type' => 's', 'value' => "A"),
+                    )
+            ),
+            array(true, 'p1=pick(3,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
+                'p1' => (object) array('type' => 'ln', 'value' => array(3, 3)),
+                    )
+            ),
+            array(true, 'p1=pick(3.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
+                'p1' => (object) array('type' => 'ln', 'value' => array(3, 3)),
+                    )
+            ),
+            array(true, 'p1=pick(10,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
+                'p1' => (object) array('type' => 'ln', 'value' => array(0, 0)),
+                    )
+            ),
+            array(true, 'p1=pick(10.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
+                'p1' => (object) array('type' => 'ln', 'value' => array(0, 0)),
+                    )
+            ),
+            array(true, 'p1=pick(3,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
+                'p1' => (object) array('type' => 'ls', 'value' => array("D", "D")),
+                    )
+            ),
+            array(true, 'p1=pick(3.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
+                'p1' => (object) array('type' => 'ls', 'value' => array("D", "D")),
+                    )
+            ),
+            array(true, 'p1=pick(10,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
+                'p1' => (object) array('type' => 'ls', 'value' => array("A", "A")),
+                    )
+            ),
+            array(true, 'p1=pick(10.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
+                'p1' => (object) array('type' => 'ls', 'value' => array("A", "A")),
                     )
             ),
             array(true, 's=sort([7,5,3,11,2]);', array(
