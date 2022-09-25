@@ -168,38 +168,27 @@ class questiontype_test extends \advanced_testcase {
 
         // Create a complete, in DB question to use.
         $questiondata = test_question_maker::get_question_data('formulas', 'test2');
-        // echo "questiondata";
-        // var_dump(count($questiondata->options->answers));
         $formdata = test_question_maker::get_question_form_data('formulas', 'test2');
-        // var_dump((array)$formdata);
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $generator->create_question_category(array());
 
         $formdata->category = "{$cat->id},{$cat->contextid}";
         $formdata->id = 0;
         qtype_formulas_edit_form::mock_submit((array)$formdata);
-        // echo "after mocksubmit";
-        // var_dump($_POST);
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
         $form->id = 0;
-        // var_dump($form);
         $this->assertTrue($form->is_validated());
 
         $fromform = $form->get_data();
-        // var_dump($fromform); pas correct
         $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
-        // var_dump($returnedfromsave);
         // Now get just the raw DB record.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
-        // $testanswers = $DB->get_records('qtype_formulas_answers');
-        // var_dump($testanswers);
         // Load it.
         $this->qtype->get_question_options($question);
         $this->assertDebuggingNotCalled();
         $this->assertInstanceOf(stdClass::class, $question->options);
 
         $options = $question->options;
-        // var_dump($options);
         $this->assertEquals($question->id, $options->questionid);
         $this->assertEquals(1, $options->numpart);
         $this->assertCount(1, $options->answers);
@@ -207,10 +196,11 @@ class questiontype_test extends \advanced_testcase {
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
 
-        // Notifications we expect due to missing options
-        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!' . "\n" .
-'!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!
-');
+        // Notifications we expect due to missing options.
+        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options' .
+                                  ' for questionid ' . $question->id . ' !!' . "\n" .
+                                  '!! Failed to load question options from the table qtype_formulas_options for '.
+                                  'questionid ' . $question->id . ' !!' . "\n");
 
         // Now see what happens.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
