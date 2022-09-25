@@ -584,7 +584,7 @@ class variables_test extends \advanced_testcase {
                     )
             ),
             array(false, 'a = {10:1:1}', '1: a: Syntax error.'),
-            array(false, 'a = {1:10,}', '1: a: Uninitialized string offset: 0'),
+            array(false, 'a = {1:10,}', '1: a: Uninitialized string offset'),
             array(false, 'a = {1:10?}', '1: a: Formula or expression contains forbidden characters or operators.'),
             array(false, 'a = {0, 1:3:0.1, 10:30, 100}*3', '1: a: Syntax error.'),
             array(false, 'a = {1:3:0.1}; b={a,12,13};', '2: b: Formula or expression contains forbidden characters or operators.'),
@@ -615,7 +615,7 @@ class variables_test extends \advanced_testcase {
                 }
             } else {
                 // Test that the correct exception message is returned.
-                $this->assertEquals($testcase[2], $errmsg);
+                $this->assertStringStartsWith($testcase[2], $errmsg);
             }
         }
     }
