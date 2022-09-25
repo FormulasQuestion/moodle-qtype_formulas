@@ -6,14 +6,14 @@ The answer fields can be placed anywhere in the question so that we can create q
 
 Other features such as unit checking and multiple subquestions are also available.
 
-These functionalities can simplify the creation of questions in many fields related to mathematics, numbers and units, such as physics and engineering. 
+These functionalities can simplify the creation of questions in many fields related to mathematics, numbers and units, such as physics and engineering.
 
 This question type was written by Hon Wai Lau and versions for Moodle 1.9 and 2.0 are still available at the original author's website at the date of this writting
 https://code.google.com/p/moodle-coordinate-question/downloads/list
 
 This question type was upgraded to the new question engine introduced in Moodle 2.1 by Jean-Michel Vedrine.
 
-This version is compatible with Moodle 3.0 and ulterior versions. It has been tested with Moodle versions up to 3.9. It has also been tested with PHP versions 7.0, 7.1, 7.3 and 7.4.
+This version is compatible with Moodle 3.0 and ulterior versions. It has been tested with Moodle versions 3.11 and 4.0. It has also been tested with PHP versions 7.4 and 8.0.
 
 If you are running an older version of Moodle another version of the formulas question type is available for Moodle versions 2.6 to 2.9.
 
