@@ -16,8 +16,6 @@
 
 namespace qtype_formulas;
 
-defined('MOODLE_INTERNAL') || die();
-
 /* Each entry of $basicunitconversionrule is a pair:
  *  - The first string is the name of the rule, which is used when editing the form
  *  - The second string is the actual rule that will be parsed and used as unit conversion

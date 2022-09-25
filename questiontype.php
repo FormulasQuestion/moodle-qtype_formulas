@@ -152,7 +152,10 @@ class qtype_formulas extends question_type {
         }
 
         parent::get_question_options($question);
-        $question->options->answers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'partindex ASC');
+        $question->options->answers = $DB->get_records(
+          'qtype_formulas_answers',
+          array('questionid' => $question->id), 'partindex ASC'
+        );
         $question->options->numpart = count($question->options->answers);
         $question->options->answers = array_values($question->options->answers);
         return true;
@@ -257,9 +260,26 @@ class qtype_formulas extends question_type {
                 }
                 $ans->subqtext = $this->import_or_save_files($subqtextarr, $context, 'qtype_formulas', 'answersubqtext', $ans->id);
                 $ans->feedback = $this->import_or_save_files($feedbackarr, $context, 'qtype_formulas', 'answerfeedback', $ans->id);
-                $ans->partcorrectfb = $this->import_or_save_files($correctfbarr, $context, 'qtype_formulas', 'partcorrectfb', $ans->id);
-                $ans->partpartiallycorrectfb = $this->import_or_save_files($partiallycorrectfbarr, $context, 'qtype_formulas', 'partpartiallycorrectfb', $ans->id);
-                $ans->partincorrectfb = $this->import_or_save_files($incorrectfbarr, $context, 'qtype_formulas', 'partincorrectfb', $ans->id);
+                $ans->partcorrectfb = $this->import_or_save_files(
+                  $correctfbarr, $context,
+                  'qtype_formulas',
+                  'partcorrectfb',
+                  $ans->id
+                );
+                $ans->partpartiallycorrectfb = $this->import_or_save_files(
+                  $partiallycorrectfbarr,
+                  $context,
+                  'qtype_formulas',
+                  'partpartiallycorrectfb',
+                  $ans->id
+                );
+                $ans->partincorrectfb = $this->import_or_save_files(
+                  $incorrectfbarr,
+                  $context,
+                  'qtype_formulas',
+                  'partincorrectfb',
+                  $ans->id
+                );
                 $DB->update_record('qtype_formulas_answers', $ans);
             }
 
@@ -339,7 +359,7 @@ class qtype_formulas extends question_type {
      * @return  array of text fragments with count($answers) + 1 elements.
      */
     public function split_questiontext($questiontext, $answers) {
-        // TODO Simplify this now that answers are in right order in data structure
+        // TODO Simplify this now that answers are in right order in data structure.
         $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
         foreach ($answers as $idx => $answer) {
             if (strlen($answer->placeholder) != 0) {
@@ -446,8 +466,8 @@ class qtype_formulas extends question_type {
                             'Wrong value right unit', 0),
                     'wrongunit' => new question_possible_response(
                             'Right value wrong unit', 1 - $part->unitpenalty),
-                    null              => question_possible_response::no_response()
-                );
+                    null => question_possible_response::no_response()
+                 );
             }
         }
 
@@ -488,7 +508,13 @@ class qtype_formulas extends question_type {
                 $fromform->partindex[$anscount] = $partindex;
             }
             foreach ($tags as $tag) {
-                $fromform->{$tag}[$anscount] = $format->getpath($answer, array('#', $tag, 0 , '#' , 'text' , 0 , '#'), '0', false, 'error');
+                $fromform->{$tag}[$anscount] = $format->getpath(
+                  $answer,
+                  array('#', $tag, 0 , '#' , 'text' , 0 , '#'),
+                  '0',
+                  false,
+                  'error'
+                );
             }
 
             $subqxml = $format->getpath($answer, array('#', 'subqtext', 0), array());
@@ -736,8 +762,10 @@ class qtype_formulas extends question_type {
             }
         }
 
-        $placeholdererrors = $this->check_placeholder(is_string($form->questiontext) ? $form->questiontext : $form->questiontext['text'],
-                $validanswers);
+        $placeholdererrors = $this->check_placeholder(
+          is_string($form->questiontext) ? $form->questiontext : $form->questiontext['text'],
+          $validanswers
+        );
         $errors = array_merge($errors, $placeholdererrors);
 
         $instantiationerrors = $this->validate_instantiation($form, $validanswers);

@@ -24,8 +24,6 @@
 
 namespace qtype_formulas\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy main class.
  *

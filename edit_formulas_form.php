@@ -211,8 +211,13 @@ class qtype_formulas_edit_form extends question_edit_form {
             array('rows' => 3), $this->editoroptions);
         $repeatedoptions['partcorrectfb']['helpbutton'] = array('correctfeedback', 'qtype_formulas');
         $repeatedoptions['partcorrectfb']['advanced'] = true;
-        $repeated[] = $mform->createElement('editor', 'partpartiallycorrectfb', get_string('partiallycorrectfeedback', 'qtype_formulas'),
-            array('rows' => 3), $this->editoroptions);
+        $repeated[] = $mform->createElement(
+          'editor',
+          'partpartiallycorrectfb',
+          get_string('partiallycorrectfeedback', 'qtype_formulas'),
+          array('rows' => 3),
+          $this->editoroptions
+        );
         $repeatedoptions['partpartiallycorrectfb']['helpbutton'] = array('partiallycorrectfeedback', 'qtype_formulas');
         $repeatedoptions['partpartiallycorrectfb']['advanced'] = true;
         $repeated[] = $mform->createElement('editor', 'partincorrectfb', get_string('incorrectfeedback', 'qtype_formulas'),

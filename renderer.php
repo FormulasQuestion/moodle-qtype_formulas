@@ -24,8 +24,6 @@
 
 use qtype_formulas\answer_unit_conversion;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Base class for generating the bits of output for formulas questions.
  *
@@ -90,9 +88,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     public function head_code(question_attempt $qa) {
-        global $PAGE;
-
-        $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
+        $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
     }
 
     // Return the part text, controls, grading details and feedbacks.
@@ -276,7 +272,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if (strlen($boxes[$placeholder]->options) != 0) { // Then it's a multichoice answer..
                 try {
                     $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]->options, 1));
-                } catch (Exception $e) {
+                } catch (Exception $e) { // @codingStandardsIgnoreLine
                     // The $stexts variable will be null if evaluation fails.
                 }
             }
@@ -536,7 +532,16 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $showfeedback = $options->feedback && $state->get_feedback_class() != '';
         if ($showfeedback) {
             $localvars = $question->get_local_variables($part);
-            $feedbacktext = $question->formulas_format_text($localvars, $part->feedback, FORMAT_HTML, $qa, 'qtype_formulas', 'answerfeedback', $part->id, false);
+            $feedbacktext = $question->formulas_format_text(
+              $localvars,
+              $part->feedback,
+              FORMAT_HTML,
+              $qa,
+              'qtype_formulas',
+              'answerfeedback',
+              $part->id,
+              false
+            );
             $feedback = html_writer::tag('div', $feedbacktext , array('class' => 'feedback formulaslocalfeedback'));
             return html_writer::nonempty_tag('div', $feedback . $gradingdetails,
                     array('class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex));
