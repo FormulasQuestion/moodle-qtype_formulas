@@ -195,12 +195,16 @@ class qtype_formulas_test extends advanced_testcase {
         $options = $question->options;
         // var_dump($options);
         $this->assertEquals($question->id, $options->questionid);
-        // $this->assertEquals(4, $options->numpart);
-
-        $this->assertCount(4, $options->answers);
+        $this->assertEquals(1, $options->numpart);
+        $this->assertCount(1, $options->answers);
 
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
+
+        // Notifications we expect due to missing options
+        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!' . "\n" .
+'!! Failed to load question options from the table qtype_formulas_options for questionid ' . $question->id . ' !!
+');
 
         // Now see what happens.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
@@ -210,8 +214,8 @@ class qtype_formulas_test extends advanced_testcase {
         $this->assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(4, $options->numpart);
-        $this->assertCount(4, $options->answers);
+        $this->assertEquals(1, $options->numpart);
+        $this->assertCount(1, $options->answers);
 
         $this->assertEquals(get_string('correctfeedbackdefault', 'question'), $options->correctfeedback);
         $this->assertEquals(FORMAT_HTML, $options->correctfeedbackformat);
