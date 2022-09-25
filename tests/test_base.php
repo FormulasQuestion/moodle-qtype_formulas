@@ -32,17 +32,6 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 
 /**
- * Base class for formulas unit tests.
- *
- * @copyright  2012 Jean-Michel Védrine
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-abstract class qtype_formulas_testcase extends advanced_testcase {
-
-}
-
-
-/**
  * Base class for formulas walkthrough tests.
  *
  * Provides some additional asserts.
