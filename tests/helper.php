@@ -275,7 +275,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->id = 14;
         $p0->partindex = 0;
         $p0->answermark = 2;
-        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
+        $p0->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
@@ -283,7 +283,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 15;
         $p1->partindex = 1;
         $p1->answermark = 2;
-        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
+        $p1->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
@@ -291,7 +291,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->id = 16;
         $p2->partindex = 2;
         $p2->answermark = 2;
-        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p2->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
         $p2->postunit = '';
         $q->parts[2] = $p2;
@@ -299,7 +299,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p3->id = 17;
         $p3->partindex = 3;
         $p3->answermark = 2;
-        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p3->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';
         $p3->postunit = '';
         $q->parts[3] = $p3;
@@ -358,7 +358,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'postunit' => 'm/s',
                 'ruleid' => 1,
                 'otherrule' => '',
-                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>',
+                'subqtext' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>',
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
@@ -384,7 +384,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'postunit' => 'm/s',
                 'ruleid' => 1,
                 'otherrule' => '',
-                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'subqtext' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
@@ -410,7 +410,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'postunit' => '',
                 'ruleid' => 1,
                 'otherrule' => '',
-                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
+                'subqtext' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>',
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
@@ -436,7 +436,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'postunit' => '',
                 'ruleid' => 1,
                 'otherrule' => '',
-                'subqtext' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}',
+                'subqtext' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}',
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
@@ -562,10 +562,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
         $form->subqtext = array(
-            0 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
-            1 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            2 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            3 => array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            0 => array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            1 => array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            2 => array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            3 => array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
         $form->feedback = array(
             0 => array('text' => '', 'format' => FORMAT_HTML),
@@ -652,7 +652,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->id = 18;
         $p0->partindex = 0;
         $p0->answermark = 2;
-        $p0->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
+        $p0->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
@@ -660,7 +660,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 19;
         $p1->partindex = 1;
         $p1->answermark = 2;
-        $p1->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
+        $p1->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
@@ -668,7 +668,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->id = 20;
         $p2->partindex = 2;
         $p2->answermark = 2;
-        $p2->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p2->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p2->answer = 'v';
         $p2->postunit = '';
         $q->parts[2] = $p2;
@@ -676,7 +676,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p3->id = 21;
         $p3->partindex = 3;
         $p3->answermark = 2;
-        $p3->subqtext = '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
+        $p3->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';    // As postunit is empty {_u} should be ignored.
         $p3->answer = 'v';
         $p3->postunit = '';
         $q->parts[3] = $p3;
@@ -715,10 +715,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
         $form->subqtext = array(
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
-            array('text' => '<p>If a car travel {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>', 'format' => FORMAT_HTML),
+            array('text' => '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>', 'format' => FORMAT_HTML),
         );
         $form->feedback = array(
             array('text' => '', 'format' => FORMAT_HTML),

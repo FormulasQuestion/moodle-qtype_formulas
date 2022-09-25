@@ -112,10 +112,10 @@ class qtype_formulas_question_test extends basic_testcase {
         $dt = $globalvars->all['dt']->value;
 
         $this->assertEquals("This question shows different display methods of the answer and unit box.\n"
-                            . "If a car travel $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
-                            . "If a car travel $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
-                            . "If a car travel $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
-                            . "If a car travel $s m in $dt s, what is the speed of the car? speed = {_0}{_u}\n",
+                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
+                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
+                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
+                            . "If a car travels $s m in $dt s, what is the speed of the car? speed = {_0}{_u}\n",
                                     $q->get_question_summary());
     }
 
