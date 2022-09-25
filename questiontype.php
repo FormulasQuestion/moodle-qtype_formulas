@@ -23,6 +23,9 @@
  * @package qtype_formulas
  */
 
+use qtype_formulas\answer_unit_conversion;
+use qtype_formulas\unit_conversion_rules;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/questionlib.php');
@@ -42,7 +45,7 @@ class qtype_formulas extends question_type {
 
 
     public function __construct() {
-        $this->qv = new qtype_formulas_variables();
+        $this->qv = new qtype_formulas\variables();
     }
 
     /**
@@ -381,7 +384,7 @@ class qtype_formulas extends question_type {
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
         $question->answernumbering = $questiondata->options->answernumbering;
-        $question->qv = new qtype_formulas_variables();
+        $question->qv = new qtype_formulas\variables();
         $question->numpart = $questiondata->options->numpart;
         if ($question->numpart != 0) {
             $question->fractions = array_fill(0, $question->numpart, 0);
@@ -803,7 +806,7 @@ class qtype_formulas extends question_type {
                 }
             }
         }
-        $qo->qv = new qtype_formulas_variables();
+        $qo->qv = new qtype_formulas\variables();
         $qo->options->numpart = count($qo->options->answers);
         $qo->numpart = $qo->options->numpart;
         $qo->fractions = array_fill(0, $qo->numpart, 0);
@@ -933,4 +936,3 @@ class qtype_formulas extends question_type {
         return $answersorder;
     }
 }
-

@@ -23,12 +23,13 @@
  * @package qtype_formulas
  */
 
+namespace qtype_formulas;
 define('AJAX_SCRIPT', true);
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/variables.php');
 
-$qv = new qtype_formulas_variables();
+$qv = new variables();
 
 // Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
 function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $nbdataset, $alwaysrandom) {
@@ -181,4 +182,3 @@ try {
 } catch (Exception $e) {
     // Prevent the display of all errors.
 }
-

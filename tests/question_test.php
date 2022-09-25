@@ -22,6 +22,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use qbehaviour_adaptivemultipart_part_result;
+use question_attempt_step;
+use qtype_formulas_part;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,13 +40,13 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group qtype_formulas
  */
-class qtype_formulas_question_test extends basic_testcase {
+class question_test extends \basic_testcase {
 
     /**
      * @return qtype_formulas_question the requested question object.
      */
     protected function get_test_formulas_question($which = null) {
-        return test_question_maker::make_question('formulas', $which);
+        return \test_question_maker::make_question('formulas', $which);
     }
 
     public function test_get_expected_data_test0() {

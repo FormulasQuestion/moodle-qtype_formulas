@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use html_writer;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -47,7 +50,7 @@ abstract class qtype_formulas_testcase extends advanced_testcase {
  * @copyright 2012 Jean-Michel Védrine
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class qtype_formulas_walkthrough_test_base extends qbehaviour_walkthrough_test_base {
+abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
     protected $currentoutput = null;
 
     protected function render() {

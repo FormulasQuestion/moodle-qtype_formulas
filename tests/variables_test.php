@@ -15,13 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the formulas qtype_formulas_variables class.
+ * Unit tests for the formulas variables class.
  *
  * @package    qtype_formulas
  * @copyright  2018 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use qtype_formulas\variables;
+use Exception;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,12 +40,12 @@ require_once($CFG->dirroot . '/question/type/formulas/variables.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class qtype_formulas_variables_test extends advanced_testcase {
+class variables_test extends \advanced_testcase {
     /**
      * Test 1: get_expressions_in_bracket() test.
      */
     public function test_get_expressions_in_bracket() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $brackettest = array(
             array(true, '8+sum([1,2+2])', '(', 5, 13, array("[1,2+2]")),
             array(true, '8+[1,2+2,3+sin(3),sum([1,2,3])]', '[', 2, 30, array("1", "2+2", "3+sin(3)", "sum([1,2,3])")),
@@ -67,7 +70,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 2: evaluate_general_expression() test.
      */
     public function test_evaluate_general_expression() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $errmsg = null;
         try {
             $v = $qv->vstack_create();
@@ -84,7 +87,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.1: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_1() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, '#--------- basic operation ---------#', array()),
             array(true, 'a = 1;', array('a' => (object) array('type' => 'n', 'value' => 1))),
@@ -170,7 +173,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.2: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_2() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(false, 'e=[1,2,3,4]; a=1-1; e[a]="A";', '3: Element in the same list must be of the same type, either number or string.'),
             array(false, 'e=[1,2,"A"];', '1: Element in the same list must be of the same type, either number or string.'),
@@ -349,7 +352,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.3: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_3() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));', array(
                     'A' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
@@ -552,7 +555,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 4: parse_random_variables(), instantiate_random_variables().
      */
     public function test_parse_random_variables() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 'a = shuffle ( ["A","B", "C" ])', ''),
             array(true, 'a = {1,2,3}', array(
@@ -620,7 +623,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 5: substitute_variables_in_text.
      */
     public function test_substitute_variables_in_text() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $vstack = $qv->vstack_create();
         $variablestring = 'a=1; b=[2,3,4];';
         $vstack = $qv->evaluate_assignments($vstack, $variablestring);
@@ -634,7 +637,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 6.1: Numerical formula.
      */
     public function test_numerical_formula_1() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 0, '3', 3),
             array(true, 0, '3.', 3),
@@ -676,7 +679,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 6.2: Numerical formula.
      */
     public function test_numerical_formula_2() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             // Numeric is basically a subset of 10al formula.
             array(true, 10, '3+10*4/10^4', 3.004),
@@ -728,7 +731,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 7: Algebraic formula.
      */
     public function test_algebraic_formula() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, '- 3'),
             array(false, '3 e10'),
@@ -819,7 +822,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 8: Split formula unit.
      */
     public function test_split_formula_unit() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             // Check for simple number and unit.
             array('.3', array('.3', '')),

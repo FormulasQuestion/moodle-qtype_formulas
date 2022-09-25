@@ -22,6 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use stdClass;
+use qtype_formulas_edit_form;
+use qtype_formulas;
+use qtype_formulas_test_helper;
+use test_question_maker;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,7 +45,7 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_test extends advanced_testcase {
+class questiontype_test extends \advanced_testcase {
 
     protected $tolerance = 0.00000001;
     /** @var formulas instance of the question type class to test. */

@@ -22,6 +22,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
+namespace qtype_formulas;
+use Exception, Throwable;
+
 defined('MOODLE_INTERNAL') || die();
 
 // Helper function to emulate the behaviour of the count() function
@@ -132,7 +135,7 @@ function sigfig($number, $precision) {
  * - evaluate assignments, general expression and numerical expression.
  * - evaluate algebraic formula
  */
-class qtype_formulas_variables {
+class variables {
     private static $maxdataset = 2e9;      // It is the upper limit for the exhaustive enumeration.
     private static $listmaxsize = 1000;
 

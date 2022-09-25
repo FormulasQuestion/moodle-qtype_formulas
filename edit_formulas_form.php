@@ -23,6 +23,8 @@
  * @package qtype_formulas
  */
 
+use qtype_formulas\unit_conversion_rules;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/question/type/edit_question_form.php');
