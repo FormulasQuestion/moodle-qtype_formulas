@@ -19,7 +19,7 @@ Feature: Test importing Formulas questions
 
   @javascript @_file_upload
   Scenario: import formulas question.
-    When I navigate to "Question bank > Import" in current page administration
+    When I am on the "Course 1" "core_question > course question import" page
     And I set the field "id_format_xml" to "1"
     And I upload "question/type/formulas/tests/fixtures/qtype_sample_formulas.xml" file to "Import" filemanager
     And I press "id_submitbutton"

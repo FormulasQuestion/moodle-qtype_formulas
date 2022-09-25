@@ -26,8 +26,7 @@ Feature: Preview a Formulas question
 
   @javascript @_switch_window
   Scenario: Preview a formulas question with correct answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
-    And I switch to "questionpreview" window
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     # Set behaviour options
@@ -45,9 +44,8 @@ Feature: Preview a Formulas question
     And I should see "One possible correct answer is: 40 m/s"
 
   @javascript @_switch_window
-  Scenario: Preview an formulas question with incorrect answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
-    And I switch to "questionpreview" window
+  Scenario: Preview a formulas question with incorrect answer
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
     And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     # Set behaviour options
