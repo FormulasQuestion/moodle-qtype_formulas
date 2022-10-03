@@ -57,17 +57,10 @@ function fact($n) {
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
-    if ($r > $n) {
+    if ($r == 0 && $n == 0) {
         return 0;
     }
-    if (($n - $r) < $r) {
-        return npr($n, ($n - $r));
-    }
-    $return = 1;
-    for ($i = 0; $i < $r; $i++) {
-         $return *= ($n - $i);
-    }
-    return $return;
+    return ncr($n, $r) * fact($r);
 }
 
 function ncr($n, $r) {
