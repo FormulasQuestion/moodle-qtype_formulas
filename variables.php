@@ -44,14 +44,13 @@ function mycount($a) {
 
 function fact($n) {
     $n = (int) $n;
-    if ( $n < 2 ) {
+    if ($n < 2) {
         return 1;
     }
     $return = 1;
     for ($i = $n; $i > 1; $i--) {
         $return *= $i;
     }
-
     return $return;
 }
 
