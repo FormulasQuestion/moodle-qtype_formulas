@@ -120,7 +120,7 @@ class functions_test extends \advanced_testcase {
     public function test_lcm() {
         $testcases = array(
             array(lcm(0, 0), 0),
-            array(gcd(13, 13), 13),
+            array(lcm(13, 13), 13),
             array(lcm(1, 0), 0),
             array(lcm(1, 1), 1),
             array(lcm(3, 2), 6),
