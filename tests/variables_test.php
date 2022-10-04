@@ -208,102 +208,6 @@ class variables_test extends \advanced_testcase {
                     'c' => (object) array('type' => 'ls', 'value' => array('rr', 'rr', 'rr', 'rr')),
                     )
             ),
-            array(true, 'p1=pick(3,[0,1,2,3,4,5]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 3),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,[0,1,2,3,4,5]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 3),
-                    )
-            ),
-            array(true, 'p1=pick(10,[0,1,2,3,4,5]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 0),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,[0,1,2,3,4,5]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 0),
-                    )
-            ),
-            array(true, 'p1=pick(3,0,1,2,3,4,5);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 3),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,0,1,2,3,4,5);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 3),
-                    )
-            ),
-            array(true, 'p1=pick(10,0,1,2,3,4,5);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 0),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,0,1,2,3,4,5);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 0),
-                    )
-            ),
-            array(true, 'p1=pick(3,["A","B","C","D","E","F"]);', array(
-                    'p1' => (object) array('type' => 's', 'value' => "D"),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,["A","B","C","D","E","F"]);', array(
-                    'p1' => (object) array('type' => 's', 'value' => "D"),
-                    )
-            ),
-            array(true, 'p1=pick(10,["A","B","C","D","E","F"]);', array(
-                    'p1' => (object) array('type' => 's', 'value' => "A"),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,["A","B","C","D","E","F"]);', array(
-                    'p1' => (object) array('type' => 's', 'value' => "A"),
-                    )
-            ),
-            array(true, 'p1=pick(3,"A","B","C","D","E","F");', array(
-                    'p1' => (object) array('type' => 's', 'value' => "D"),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,"A","B","C","D","E","F");', array(
-                    'p1' => (object) array('type' => 's', 'value' => "D"),
-                    )
-            ),
-            array(true, 'p1=pick(10,"A","B","C","D","E","F");', array(
-                    'p1' => (object) array('type' => 's', 'value' => "A"),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,"A","B","C","D","E","F");', array(
-                    'p1' => (object) array('type' => 's', 'value' => "A"),
-                    )
-            ),
-            array(true, 'p1=pick(3,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
-                'p1' => (object) array('type' => 'ln', 'value' => array(3, 3)),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
-                'p1' => (object) array('type' => 'ln', 'value' => array(3, 3)),
-                    )
-            ),
-            array(true, 'p1=pick(10,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
-                'p1' => (object) array('type' => 'ln', 'value' => array(0, 0)),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', array(
-                'p1' => (object) array('type' => 'ln', 'value' => array(0, 0)),
-                    )
-            ),
-            array(true, 'p1=pick(3,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
-                'p1' => (object) array('type' => 'ls', 'value' => array("D", "D")),
-                    )
-            ),
-            array(true, 'p1=pick(3.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
-                'p1' => (object) array('type' => 'ls', 'value' => array("D", "D")),
-                    )
-            ),
-            array(true, 'p1=pick(10,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
-                'p1' => (object) array('type' => 'ls', 'value' => array("A", "A")),
-                    )
-            ),
-            array(true, 'p1=pick(10.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', array(
-                'p1' => (object) array('type' => 'ls', 'value' => array("A", "A")),
-                    )
-            ),
             array(true, 's=sort([7,5,3,11,2]);', array(
                     's' => (object) array('type' => 'ln', 'value' => array(2, 3, 5, 7, 11)),
                     )
@@ -430,12 +334,6 @@ class variables_test extends \advanced_testcase {
               false,
               'a=[1,2,3,4]; c=fill(len(a)+1,"rr")',
               '2: Wrong number or wrong type of parameters for the function fill()'
-            ),
-            array(false, 'p1=pick("r",[2,3,5,7,11]);', '1: Wrong number or wrong type of parameters for the function pick()'),
-            array(
-              false,
-              'p1=pick(2,[2,3],[4,5],["a","b"]);',
-              '1: Wrong number or wrong type of parameters for the function pick()'
             ),
             array(
               false,
@@ -932,33 +830,4 @@ class variables_test extends \advanced_testcase {
         }
     }
 
-    /**
-     * Test 8: Sigfig function.
-     */
-    public function test_sigfig() {
-        $number = .012345;
-        $this->assertSame(sigfig($number, 3), '0.0123');
-        $this->assertSame(sigfig($number, 4), '0.01235');
-        $this->assertSame(sigfig($number, 6), '0.0123450');
-        $number = -.012345;
-        $this->assertSame(sigfig($number, 3), '-0.0123');
-        $this->assertSame(sigfig($number, 4), '-0.01235');
-        $this->assertSame(sigfig($number, 6), '-0.0123450');
-        $number = 123.45;
-        $this->assertSame(sigfig($number, 2), '120');
-        $this->assertSame(sigfig($number, 4), '123.5');
-        $this->assertSame(sigfig($number, 6), '123.450');
-        $number = -123.45;
-        $this->assertSame(sigfig($number, 2), '-120');
-        $this->assertSame(sigfig($number, 4), '-123.5');
-        $this->assertSame(sigfig($number, 6), '-123.450');
-        $number = .005;
-        $this->assertSame(sigfig($number, 1), '0.005');
-        $this->assertSame(sigfig($number, 2), '0.0050');
-        $this->assertSame(sigfig($number, 3), '0.00500');
-        $number = -.005;
-        $this->assertSame(sigfig($number, 1), '-0.005');
-        $this->assertSame(sigfig($number, 2), '-0.0050');
-        $this->assertSame(sigfig($number, 3), '-0.00500');
-    }
 }
