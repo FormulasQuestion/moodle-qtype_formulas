@@ -197,6 +197,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsrandom = '';
         $form->varsglobal = '';
         $form->answernumbering = 'abc';
+        $form->noanswers = 3;
         $form->answer = array('5', '6', '7');
         $form->answermark = array('2', '2', '2');
         $form->numbox = array(1, 1, 1);
@@ -487,6 +488,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsrandom = '';
         $form->varsglobal = 'v = 40;dt = 3;s = v*dt;';
         $form->answernumbering = 'abc';
+        $form->noanswers = 4;
         $form->answer = array(
             0 => 'v',
             1 => 'v',
@@ -714,6 +716,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->varsrandom = 'v = {20:100:10}; dt = {2:6};';
         $form->varsglobal = 's = v*dt;';
         $form->answernumbering = 'abc';
+        $form->noanswers = 4;
         $form->answer = array('v', 'v', 'v', 'v');
         $form->answermark = array('2', '2', '2', '2');
         $form->numbox = array(1, 1, 1, 1);
