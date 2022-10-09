@@ -79,7 +79,7 @@ class variables_test extends \advanced_testcase {
             $errmsg = $e->getMessage();
         }
         $this->assertNull($errmsg);
-        $this->assertEquals(-0.35473297204849, $result->value);
+        $this->assertEqualsWithDelta(-0.35473297204849, $result->value, 1e-8);
         $this->assertEquals('n', $result->type);
     }
 
@@ -159,9 +159,9 @@ class variables_test extends \advanced_testcase {
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
-                    $this->assertEquals($testcase[2], $result->all);
+                    $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
                 }
-                $this->assertEquals($testcase[2], $result->all);
+                $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
 
             } else {
                 // Test that the correct exception message is returned.
@@ -464,7 +464,7 @@ class variables_test extends \advanced_testcase {
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
                     // For now we don't test result with some randomness.
-                    $this->assertEquals($testcase[2], $result->all);
+                    $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
                 }
 
             } else {
@@ -646,7 +646,7 @@ class variables_test extends \advanced_testcase {
             $eval = $result !== null;
             $this->assertEquals($testcase[0], $eval);
             if ($testcase[0]) {
-                $this->assertEquals($testcase[3], $result);
+                $this->assertEqualsWithDelta($testcase[3], $result, 1e-8);
             }
         }
     }
