@@ -27,7 +27,7 @@ function formulas_format_check() {
     var show_hinting_type = null;   // Show the type hinting under the input box, such as 'Number', 'Unit'. null means use the individual setting in variable types below.
     var show_interpretation = null;   // Show the interpretation of the formula under the input box. null means use the individual setting in variable types below.
     var show_warning = null;   // Show the warning sign if the input is wrong/not interpretable. null means use the individual setting in variable types below.
-    var unittest_fail_show_icon = true; // Show an icon at the low right corner if the format check testing fails
+    var unittest_fail_show_icon = false; // Show an icon at the low right corner if the format check testing fails
     var unittest_fail_show_details = false;  // Show the detail test case that it fails.
 
     // The following variable can fine control the information for each type in addition to the variable defined above
@@ -902,10 +902,13 @@ function formulas_format_check() {
 
     function signal_fail(common) {
         var warning = document.createElement('span');
-        warning.innerHTML = '<div style="position:fixed; bottom:20px; right:5px;">'
-            +(unittest_fail_show_details ? common.testresult.failcases.join('<br>') : '')
-            +'<img src="'+M.util.image_url('warning', 'qtype_formulas')+'" title="Format check initialization fail ('+(common.testresult.numcase-common.testresult.numcorrect) +'/'+ common.testresult.numcase+')"></img>'
-            +'</div>';
+        warning.id = 'validation-unittests-failed';
+        if (unittest_fail_show_icon) {
+            warning.innerHTML = '<div style="position:fixed; bottom:20px; right:5px;">'
+                +(unittest_fail_show_details ? common.testresult.failcases.join('<br>') : '')
+                +'<img src="'+M.util.image_url('warning', 'qtype_formulas')+'" title="Format check initialization fail ('+(common.testresult.numcase-common.testresult.numcorrect) +'/'+ common.testresult.numcase+')"></img>'
+                +'</div>';
+        }
         document.body.insertBefore(warning, null);
     }
 
@@ -920,7 +923,7 @@ function formulas_format_check() {
     // check whether the javascript can produce the correct response
     common.testresult = unittest();
     common.pass = common.testresult.numcorrect == common.testresult.numcase;
-    if (!common.pass && unittest_fail_show_icon)  signal_fail(common);
+    if (!common.pass)  signal_fail(common);
 
     // get the set of
     common.others = init(common, types);
@@ -935,8 +938,9 @@ function formulas_format_check() {
 };
 
 window.onload = (function(oldfunc, newfunc) {
-    if (oldfunc && typeof oldfunc == 'function')
+    if (oldfunc && typeof oldfunc == 'function') {
         return function() { oldfunc(); newfunc(); }
-    else
+    } else {
         return newfunc;
+    }
 })(window.onload, function() { formulas_format_check(); });
