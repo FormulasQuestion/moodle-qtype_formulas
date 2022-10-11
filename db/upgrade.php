@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 // This file keeps track of upgrades to
 // the formulas qtype plugin.
 function xmldb_qtype_formulas_upgrade($oldversion=0) {

@@ -24,8 +24,6 @@
 
 namespace qtype_formulas\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy main class.
  *
@@ -34,9 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {
-
-    // To provide php 5.6 (33_STABLE) and up support.
-    use \core_privacy\local\legacy_polyfill;
 
     /**
      * Get the language string identifier with the component's language

@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
+namespace qtype_formulas;
+use Exception;
 
 /**
  * @copyright Copyright (c) 2010-2011, Hon Wai, Lau. All rights reserved.
@@ -51,6 +52,7 @@ class answer_unit_conversion {
     private $default_last_id;   // Dimension class id counter.
     private $default_id;        // Id of the default rule.
     private $default_rules;     // String of the default rule in a particular format.
+    // @codingStandardsIgnoreLine
     public static $unit_exclude_symbols = '][)(}{><0-9.,:;`~!@#^&*\/?|_=+ -';
     public static $prefix_scale_factors = array('d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
         'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9, 'p' => 1e-12, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,

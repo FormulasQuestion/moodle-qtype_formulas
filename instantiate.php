@@ -23,12 +23,16 @@
  * @package qtype_formulas
  */
 
+namespace qtype_formulas;
+use Exception;
+
 define('AJAX_SCRIPT', true);
 
+// @codingStandardsIgnoreLine
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/variables.php');
 
-$qv = new qtype_formulas_variables();
+$qv = new variables();
 
 // Given the variable assignments, it try to instantiate multiple datasets and return a data structure used by javascript.
 function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $nbdataset, $alwaysrandom) {
@@ -51,7 +55,8 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
         $errors[$count] = '';
         $v = array();
         try {
-            $datasetid = ($alwaysrandom || $nbdataset < $maxdataset) ? -1 : $start + $count;   // Use enumeration if possible, -1 means random.
+            // Use enumeration if possible, -1 means random.
+            $datasetid = ($alwaysrandom || $nbdataset < $maxdataset) ? -1 : $start + $count;
             $v['random'] = $qv->instantiate_random_variables($vrinfo, $datasetid);
             $names['random'] = isset($names['random']) ? $names['random'] + $v['random']->all : $v['random']->all;
             $v['global'] = $qv->evaluate_assignments($v['random'], $varsglobal);
@@ -59,7 +64,9 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
 
             foreach ($varslocals as $idx => $varslocal) {
                 $v['local'.$idx] = $qv->evaluate_assignments($v['global'], $varslocals[$idx]);
-                $names['local'.$idx] = isset($names['local'.$idx]) ? $names['local'.$idx] + $v['local'.$idx]->all : $v['local'.$idx]->all;
+                $names['local'.$idx] = isset($names['local'.$idx])
+                  ? $names['local'.$idx] + $v['local'.$idx]->all
+                  : $v['local'.$idx]->all;
                 if (strlen(trim($answers[$idx])) == 0) {
                     continue;
                 }
@@ -101,7 +108,9 @@ function instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $a
         }
         $lists[] = $s;
     }
-    return json_encode(array('names' => $names, 'lists' => $lists, 'size' => $nbdataset, 'maxdataset' => $maxdataset, 'errors' => $errors));
+    return json_encode(
+      array('names' => $names, 'lists' => $lists, 'size' => $nbdataset, 'maxdataset' => $maxdataset, 'errors' => $errors)
+    );
 }
 
 
@@ -178,7 +187,6 @@ try {
     $res = instantiate_multiple_datasets($varsrandom, $varsglobal, $varslocals, $answers, $start, $nbdataset, $alwaysrandom);
     header('Content-type: application/json; charset=utf-8');
     echo $res;
-} catch (Exception $e) {
+} catch (Exception $e) { // @codingStandardsIgnoreLine
     // Prevent the display of all errors.
 }
-

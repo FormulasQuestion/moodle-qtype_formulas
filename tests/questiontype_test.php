@@ -22,6 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use stdClass;
+use qtype_formulas_edit_form;
+use qtype_formulas;
+use qtype_formulas_test_helper;
+use test_question_maker;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,7 +45,7 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @copyright  2013 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_test extends advanced_testcase {
+class questiontype_test extends \advanced_testcase {
 
     protected $tolerance = 0.00000001;
     /** @var formulas instance of the question type class to test. */
@@ -52,11 +58,11 @@ class qtype_formulas_test extends advanced_testcase {
         return test_question_maker::make_question('formulas', $which);
     }
 
-    protected function setUp() {
+    protected function setUp():void {
         $this->qtype = new qtype_formulas();
     }
 
-    protected function tearDown() {
+    protected function tearDown():void {
         $this->qtype = null;
     }
 
@@ -133,7 +139,7 @@ class qtype_formulas_test extends advanced_testcase {
     }
 
     public function test_split_questiontext0() {
-        $q = $this->get_test_formulas_question('test1');
+        $q = $this->get_test_formulas_question('testthreeparts');
         $expected = array(0 => '<p>Multiple parts : --',
                 1 => '--',
                 2 => '--',
@@ -161,46 +167,40 @@ class qtype_formulas_test extends advanced_testcase {
         $this->setAdminUser();
 
         // Create a complete, in DB question to use.
-        $questiondata = test_question_maker::get_question_data('formulas', 'test2');
-        // echo "questiondata";
-        // var_dump(count($questiondata->options->answers));
-        $formdata = test_question_maker::get_question_form_data('formulas', 'test2');
-        // var_dump((array)$formdata);
+        $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $generator->create_question_category(array());
 
         $formdata->category = "{$cat->id},{$cat->contextid}";
         $formdata->id = 0;
         qtype_formulas_edit_form::mock_submit((array)$formdata);
-        // echo "after mocksubmit";
-        // var_dump($_POST);
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
         $form->id = 0;
-        // var_dump($form);
         $this->assertTrue($form->is_validated());
 
         $fromform = $form->get_data();
-        // var_dump($fromform); pas correct
         $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
-        // var_dump($returnedfromsave);
         // Now get just the raw DB record.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
-        // $testanswers = $DB->get_records('qtype_formulas_answers');
-        // var_dump($testanswers);
         // Load it.
         $this->qtype->get_question_options($question);
         $this->assertDebuggingNotCalled();
         $this->assertInstanceOf(stdClass::class, $question->options);
 
         $options = $question->options;
-        // var_dump($options);
         $this->assertEquals($question->id, $options->questionid);
-        // $this->assertEquals(4, $options->numpart);
-
+        $this->assertEquals(4, $options->numpart);
         $this->assertCount(4, $options->answers);
 
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
+
+        // Notifications we expect due to missing options.
+        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options' .
+                                  ' for questionid ' . $question->id . ' !!' . "\n" .
+                                  '!! Failed to load question options from the table qtype_formulas_options for '.
+                                  'questionid ' . $question->id . ' !!' . "\n");
 
         // Now see what happens.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);

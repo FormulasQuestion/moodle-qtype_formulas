@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
+namespace qtype_formulas;
 
 /* Each entry of $basicunitconversionrule is a pair:
  *  - The first string is the name of the rule, which is used when editing the form
