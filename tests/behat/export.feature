@@ -6,8 +6,8 @@ Feature: Test exporting Formulas questions
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname | email                |
-      | teacher1 | T1        | Teacher1 | teacher1@example.com |
+      | username |
+      | teacher1 |
     And the following "courses" exist:
       | fullname | shortname | category |
       | Course 1 | C1        | 0        |
@@ -18,8 +18,8 @@ Feature: Test exporting Formulas questions
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype       | name           | template   |
-      | Test questions   | formulas    | formulas-001   | test2      |
+      | questioncategory | qtype       | name           | template           |
+      | Test questions   | formulas    | formulas-001   | testmethodsinparts |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
 

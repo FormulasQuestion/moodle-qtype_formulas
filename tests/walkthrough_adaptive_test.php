@@ -52,7 +52,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
 
     public function test_test0_submit_right_first_time() {
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -98,7 +98,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
 
     public function test_test0_submit_wrong_submit_right() {
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -137,7 +137,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
     public function test_test0_submit_wrong_wrong_right() {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -187,7 +187,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
     public function test_test0_submit_wrong_same_wrong_right() {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.

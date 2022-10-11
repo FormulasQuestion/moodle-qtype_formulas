@@ -139,7 +139,7 @@ class questiontype_test extends \advanced_testcase {
     }
 
     public function test_split_questiontext0() {
-        $q = $this->get_test_formulas_question('test1');
+        $q = $this->get_test_formulas_question('testthreeparts');
         $expected = array(0 => '<p>Multiple parts : --',
                 1 => '--',
                 2 => '--',
@@ -167,8 +167,8 @@ class questiontype_test extends \advanced_testcase {
         $this->setAdminUser();
 
         // Create a complete, in DB question to use.
-        $questiondata = test_question_maker::get_question_data('formulas', 'test2');
-        $formdata = test_question_maker::get_question_form_data('formulas', 'test2');
+        $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $generator->create_question_category(array());
 

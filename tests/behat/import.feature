@@ -6,11 +6,11 @@ Feature: Test importing Formulas questions
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname | email                |
-      | teacher1 | T1        | Teacher1 | teacher1@example.com |
+      | username |
+      | teacher1 |
     And the following "courses" exist:
-      | fullname | shortname | category |
-      | Course 1 | C1        | 0        |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
