@@ -231,6 +231,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'id' => $inputname,
                 'class' => 'formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
                 'maxlength' => 128,
+                'aria-labelledby' => 'lbl_' . str_replace(':', '__', $inputname)
             );
 
             if ($options->readonly) {
@@ -245,8 +246,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             } else {
                 $label = get_string('answercombinedunitmulti', 'qtype_formulas', $a);
             }
-            $input = html_writer::tag('label', $label,
-                                array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+            $input = html_writer::tag(
+                'label',
+                $label,
+                array(
+                    'class' => 'subq accesshide',
+                    'for' => $inputattributes['id'],
+                    'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                )
+            );
             $input .= html_writer::empty_tag('input', $inputattributes);
             $subqreplaced = str_replace("{_0}{_u}", $input, $subqreplaced);
         }
@@ -263,6 +271,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 'value' => $currentanswer,
                 'id' => $inputname,
                 'maxlength' => 128,
+                'aria-labelledby' => 'lbl_' . str_replace(':', '__', $inputname)
             );
             if ($options->readonly) {
                 $inputattributes['readonly'] = 'readonly';
@@ -292,8 +301,23 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         $select = html_writer::select($choices, $inputname,
                                 $currentanswer, array('' => ''), $inputattributes);
                         $output = html_writer::start_tag('span', array('class' => 'formulas_menu'));
-                        $output .= html_writer::tag('label', get_string('answer'),
-                                array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+                        $a = new stdClass();
+                        $a->numanswer = $j + 1;
+                        $a->part = $i + 1;
+                        if (count($question->parts) > 1) {
+                            $labeltext = get_string('answercoordinatemulti', 'qtype_formulas', $a);
+                        } else {
+                            $labeltext = get_string('answercoordinatesingle', 'qtype_formulas', $a);
+                        }
+                        $output .= html_writer::tag(
+                            'label',
+                            $labeltext,
+                            array(
+                                'class' => 'subq accesshide',
+                                'for' => $inputattributes['id'],
+                                'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                            )
+                        );
                         $output .= $select;
                         $output .= html_writer::end_tag('span');
                         $inputs[$placeholder] = $output;
@@ -310,6 +334,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                                     'qtype_formulas', 'answersubqtext', $part->id, false);
                             $inputattributes['id'] = $inputname.'_'.$x;
                             $inputattributes['value'] = $x;
+                            $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
                             $isselected = ($currentanswer != '' && $x == $currentanswer);
                             $class = 'r' . ($x % 2);
                             if ($isselected) {
@@ -322,8 +347,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             }
                             $output .= $this->choice_wrapper_start($class);
                             $output .= html_writer::empty_tag('input', $inputattributes);
-                            $output .= html_writer::tag('label', $mctxt,
-                                    array('for' => $inputattributes['id'], 'class' => 'm-l-1'));
+                            $output .= html_writer::tag(
+                                'label',
+                                $mctxt,
+                                array(
+                                    'for' => $inputattributes['id'],
+                                    'class' => 'm-l-1',
+                                    'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                                )
+                            );
                             $output .= $this->choice_wrapper_end();
                         }
                         $output .= $this->all_choices_wrapper_end();
@@ -352,13 +384,21 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     } else {
                         $label = get_string('answerunitmulti', 'qtype_formulas', $a);
                     }
-                    $inputs[$placeholder] = html_writer::tag('label', $label,
-                            array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+                    $inputs[$placeholder] = html_writer::tag(
+                        'label',
+                        $label,
+                        array(
+                            'class' => 'subq accesshide',
+                            'for' => $inputattributes['id'],
+                            'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                        )
+                    );
                     $inputs[$placeholder] .= html_writer::empty_tag('input', $inputattributes);
                 }
             } else {
                 $inputattributes['title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['class'] = 'formulas_'.$gtype.' '.$sub->boxfeedbackclass;
+                $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
                 $a = new stdClass();
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;
@@ -375,8 +415,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         $label = get_string('answercoordinatemulti', 'qtype_formulas', $a);
                     }
                 }
-                $inputs[$placeholder] = html_writer::tag('label', $label,
-                                array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
+                $inputs[$placeholder] = html_writer::tag(
+                    'label',
+                    $label,
+                    array(
+                        'class' => 'subq accesshide',
+                        'for' => $inputattributes['id'],
+                        'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                    )
+                );
                 $inputs[$placeholder] .= html_writer::empty_tag('input', $inputattributes);
             }
         }
