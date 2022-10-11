@@ -120,8 +120,8 @@ and their scope of visibility is limited to the part.';
 $string['answer'] = 'Answer*';
 $string['answercombinedunitmulti'] = 'Answer and unit for part {$a->part}';
 $string['answercombinedunitsingle'] = 'Answer and unit';
-$string['answercoordinatemulti'] = 'Answer for part {$a->part} and coordinate {$a->numanswer}';
-$string['answercoordinatesingle'] = 'Answer for coordinate {$a->numanswer}';
+$string['answercoordinatemulti'] = 'Answer field {$a->numanswer} for part {$a->part}';
+$string['answercoordinatesingle'] = 'Answer field {$a->numanswer}';
 $string['answermulti'] = 'Answer for part {$a->part}';
 $string['answersingle'] = 'Answer';
 $string['answerunitmulti'] = 'Unit for part {$a->part}';
@@ -179,9 +179,9 @@ $string['subqtext_help'] = 'Part text and answer fields places can be specified 
 
 <pre class="prettyprint">{_0}<br>{_1}<br>{_2}<br>...<br>{_u}</pre>
 
-The <tt> {_0}, {_1}, {_2} </tt> are the input fields for coordinates and <tt> {_u} </tt> is the input field for unit.
+The <tt> {_0}, {_1}, {_2} </tt> are the different input fields for values and <tt> {_u} </tt> is the input field for unit.
 
-All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one coordinate and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
+All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one answer field and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
 $string['feedback'] = 'Part general feedback';
 $string['feedback_help'] = 'This part feedback will be show to all students. It can include global and locals variables that will be replaced by their values';
 $string['incorrectfeedback'] = 'For any incorrect response';
