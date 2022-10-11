@@ -304,4 +304,98 @@ class functions_test extends \advanced_testcase {
         $this->assertSame(sigfig($number, 2), '-0.0050');
         $this->assertSame(sigfig($number, 3), '-0.00500');
     }
+
+    /**
+     * Test 8: modinv() test.
+     */
+    public function test_modinv() {
+        $testcases = array(
+            array(modinv(15, 3), 0),
+            array(modinv(5, 1), 0),
+            array(modinv(1, 7), 1),
+            array(modinv(2, 7), 4),
+            array(modinv(3, 7), 5),
+            array(modinv(4, 7), 2),
+            array(modinv(5, 7), 3),
+            array(modinv(6, 7), 6)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEquals($case[1], $case[0]);
+        }
+    }
+
+    /**
+     * Test 9: modpow() test.
+     */
+    public function test_modpow() {
+        $testcases = array(
+            array(modpow(15, 300, 19), 7),
+            array(modpow(15, 18, 19), 1),
+            array(modpow(1, 7, 13), 1),
+            array(modpow(2, 7, 13), 11),
+            array(modpow(3, 7, 13), 3),
+            array(modpow(4, 7, 13), 4),
+            array(modpow(5, 7, 13), 8),
+            array(modpow(6, 7, 13), 7),
+            array(modpow(7, 7, 13), 6),
+            array(modpow(12, 7, 13), 12),
+            array(modpow(12, 8, 13), 1)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEquals($case[1], $case[0]);
+        }
+    }
+
+    /**
+     * Test 10: stdnormpdf() test.
+     */
+    public function test_stdnormpdf() {
+        $testcases = array(
+            array(stdnormpdf(0), 0.39894228),
+            array(stdnormpdf(1), 0.24197072),
+            array(stdnormpdf(2), 0.05399097),
+            array(stdnormpdf(-1), 0.24197072),
+            array(stdnormpdf(-2), 0.05399097),
+            array(stdnormpdf(0.5), 0.35206533),
+            array(stdnormpdf(-0.5), 0.35206533)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEqualsWithDelta($case[1], $case[0], 1e-7);
+        }
+    }
+
+    /**
+     * Test 11: stdnormcdf() test.
+     */
+    public function test_stdnormcdf() {
+        $testcases = array(
+            array(stdnormcdf(0), 0.5),
+            array(stdnormcdf(1), 0.84134),
+            array(stdnormcdf(2), 0.97725),
+            array(stdnormcdf(-1), 0.15866),
+            array(stdnormcdf(-2), 0.02275),
+            array(stdnormcdf(0.5), 0.69146),
+            array(stdnormcdf(-0.5), 0.30854)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEqualsWithDelta($case[1], $case[0], .00001);
+        }
+    }
+
+    /**
+     * Test 12: normcdf() test.
+     */
+    public function test_normcdf() {
+        $testcases = array(
+            array(normcdf(1, 1, 5), 0.5),
+            array(normcdf(3, 3, 5), 0.5),
+            array(normcdf(7, 10, 30), 0.46017),
+            array(normcdf(-8, 10, 30), 0.27425),
+            array(normcdf(15, 5, 10), 0.84134),
+            array(normcdf(-5, 5, 10), 0.15866)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEqualsWithDelta($case[1], $case[0], .00001);
+        }
+    }
 }

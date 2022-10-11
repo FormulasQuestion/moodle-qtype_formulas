@@ -54,6 +54,112 @@ function fact($n) {
     return $return;
 }
 
+/**
+ * calculate standard normal probability density
+ *
+ * @param float $z  value
+ *
+ * @author Philipp Imhof
+ * @return float  standard normal density of $z
+ */
+function stdnormpdf($z) {
+    return 1 / (sqrt(2) * M_SQRTPI) * exp(-.5 * $z ** 2);
+}
+
+/**
+ * calculate standard normal cumulative distribution by approximation
+ * using Simpson's rule, accurate to ~5 decimal places
+ *
+ * @param float $z  value
+ *
+ * @author Philipp Imhof
+ * @return float  probability for a value of $z or less under standard normal distribution
+ */
+function stdnormcdf($z) {
+    if ($z < 0) {
+        return 1 - stdnormcdf(-$z);
+    }
+    $n = max(10, floor(10 * $z));
+    $h = $z / $n;
+    $res = stdnormpdf(0) + stdnormpdf($z);
+    for ($i = 1; $i < $n; $i++) {
+        $res += 2 * stdnormpdf($i * $h);
+        $res += 4 * stdnormpdf(($i - 0.5) * $h);
+    }
+    $res += 4 * stdnormpdf(($n - 0.5) * $h);
+    $res *= $h / 6;
+    return $res + 0.5;
+}
+
+/**
+ * calculate normal cumulative distribution by approximation
+ * using Simpson's rule, accurate to ~5 decimal places
+ *
+ * @param float $x      value
+ * @param float $mu     mean
+ * @param float $sigma  standard deviation
+ *
+ * @author Philipp Imhof
+ * @return float  probability for a value of $x or less
+ */
+function normcdf($x, $mu, $sigma) {
+    return stdnormcdf(($x - $mu) / $sigma);
+}
+
+/**
+ * raise $a to the $b-th power modulo $m using efficient
+ * square and multiply
+ *
+ * @param integer $a  base
+ * @param integer $b  exponent
+ * @param integer $m  modulus
+ *
+ * @author Philipp Imhof
+ * @return integer  the result
+ */
+function modpow($a, $b, $m) {
+    $bin = decbin($b);
+    $res = $a;
+    if ($b == 0) {
+        return 1;
+    }
+    for ($i = 1; $i < strlen($bin); $i++) {
+        if ($bin[$i] == "0") {
+            $res = ($res * $res) % $m;
+        } else {
+            $res = ($res * $res) % $m;
+            $res = ($res * $a) % $m;
+        }
+    }
+    return $res;
+}
+
+/**
+ * calculate the multiplicative inverse of $a modulo $m using the
+ * extended euclidean algorithm
+ *
+ * @param integer $a  the number whose inverse is to be found
+ * @param integer $m  the modulus
+ *
+ * @author Philipp Imhof
+ * @return integer  the result or 0 if the inverse does not exist
+ */
+function modinv($a, $m) {
+    $orig_m = $m;
+    if (gcd($a, $m) != 1) {
+        // Inverse does not exist.
+        return 0;
+    }
+    list($s, $t, $last_s, $last_t) = [1, 0, 0, 1];
+    while ($m != 0) {
+        $q = floor($a/$m);
+        list($a, $m) = [$m, $a - $q * $m];
+        list($s, $last_s) = [$last_s, $s - $q * $last_s];
+        list($t, $last_t) = [$last_t, $t - $q * $last_t];
+    }
+    return ($s < 0) ? $s + $orig_m : $s;
+}
+
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
@@ -156,7 +262,7 @@ class variables {
 
         // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-            'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact'));
+                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact', 'stdnormcdf'));
         $this->constlist = array('pi' => '3.14159265358979323846');
         // Natural log and log with base 10, no log allowed to avoid ambiguity.
         $this->evalreplacelist = array('ln' => 'log', 'log10' => '(1./log(10.))*log');
