@@ -64,11 +64,6 @@ jobs:
       #  if: ${{ always() }}
       #  run: moodle-plugin-ci phpcpd
 
-      #- name: PHP Mess Detector
-      #  continue-on-error: true
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci phpmd
-
       #- name: Moodle Code Checker
       #  continue-on-error: true
       #  if: ${{ always() }}
@@ -91,7 +86,7 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci mustache
 
-      #- name: Grunt
-      #  continue-on-error: true
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci grunt --max-lint-warnings 0
+      - name: Grunt
+        continue-on-error: true
+        if: ${{ always() }}
+        run: moodle-plugin-ci grunt --max-lint-warnings 0
