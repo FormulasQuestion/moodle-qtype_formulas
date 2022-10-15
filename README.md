@@ -41,13 +41,13 @@ You absolutely need version 3.3 or newer of this behaviour, the formulas questio
 To install using git type these commands in the root directory of your Moodle install:
 
 ```bash
-$ git clone git://github.com/dbauer-ets/moodle-qtype_formulas.git question/type/formulas
+$ git clone git://github.com/FormulasQuestion/moodle-qtype_formulas.git question/type/formulas
 $ echo '/question/type/formulas/' >> .git/info/exclude
 ```
 
 #### Installation From Downloaded ZIP file
 
-Alternatively, [download the zip](https://github.com/dbauer-ets/moodle-qtype_formulas) and
+Alternatively, [download the zip](https://github.com/FormulasQuestion/moodle-qtype_formulas) and
 unzip it into the `$MOODLE_ROOT/question/type` folder. Do not forget to rename the new
 folder to `formulas`.
 
@@ -60,7 +60,7 @@ on creating formulas questions.
 Here are some pointers to the available help :
 * First, you can import the Moodle XML file `samples/sample-formulas-questions.xml`
   and play with the included formulas questions.
-* You can visit [the documentation](https://moodleformulas.org/) made by Dominique Bauer.
+* You can visit [the documentation](https://dynamiccourseware.org/) made by Dominique Bauer.
   As there is no or little difference in the Formulas question type plugin for recent
   versions of Moodle (2.0 and above), the documentation for the Formulas question type has
   been moved to this location but it applies to all Moodle versions, including the current release.
@@ -73,7 +73,9 @@ Here are some pointers to the available help :
 
 ### Reporting bugs, problems
 
-You can see the list of issues in the
+Please [open an issue on GitHub](https://github.com/FormulasQuestion/moodle-qtype_formulas/issues/new).
+
+You can also open an issue in the
 [Moodle Tracker](https://tracker.moodle.org/browse/CONTRIB-8735?jql=project%20%3D%20CONTRIB%20AND%20component%20%3D%20%22Question%20type%3A%20Formulas%22)
 
 To create a new tracker issue:
@@ -81,5 +83,3 @@ To create a new tracker issue:
 2. Choose *Plugins (CONTRIB)* in the "Project" field.
 3. Set the "Component(s)" field to *Question type: Formulas*.
 4. Try to include as many details as you can so that the problem can be reproduced.
-
-You can also [open an issue on GitHub](https://github.com/dbauer-ets/moodle-qtype_formulas/issues/new).

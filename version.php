@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-$plugin->version   = 2022100300;
+$plugin->version   = 2022101500;
 
 $plugin->cron      = 0;
 $plugin->requires  = 2015111600;
@@ -34,6 +34,7 @@ $plugin->dependencies = array(
     'qbehaviour_adaptivemultipart'     => 2014092500,
     'qtype_multichoice' => 2015111600,
 );
-$plugin->release   = '4.92 for Moodle 3.0 to 3.11 and 4.0';
+$plugin->supported = [39, 40];
+$plugin->release   = '5.0.0 for Moodle 3.9+';
 
 $plugin->maturity  = MATURITY_STABLE;
