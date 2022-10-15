@@ -34,7 +34,7 @@ $plugin->dependencies = array(
     'qbehaviour_adaptivemultipart'     => 2014092500,
     'qtype_multichoice' => 2015111600,
 );
-$plugin->supported = [39, 40];
+$plugin->supported = [39, 400];
 $plugin->release   = '5.0.0 for Moodle 3.9+';
 
 $plugin->maturity  = MATURITY_STABLE;
