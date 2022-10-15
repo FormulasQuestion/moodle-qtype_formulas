@@ -15,13 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the formulas qtype_formulas_variables class.
+ * Unit tests for the formulas variables class.
  *
  * @package    qtype_formulas
  * @copyright  2018 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use qtype_formulas\variables;
+use Exception;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,12 +40,12 @@ require_once($CFG->dirroot . '/question/type/formulas/variables.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class qtype_formulas_variables_test extends advanced_testcase {
+class variables_test extends \advanced_testcase {
     /**
      * Test 1: get_expressions_in_bracket() test.
      */
     public function test_get_expressions_in_bracket() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $brackettest = array(
             array(true, '8+sum([1,2+2])', '(', 5, 13, array("[1,2+2]")),
             array(true, '8+[1,2+2,3+sin(3),sum([1,2,3])]', '[', 2, 30, array("1", "2+2", "3+sin(3)", "sum([1,2,3])")),
@@ -67,7 +70,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 2: evaluate_general_expression() test.
      */
     public function test_evaluate_general_expression() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $errmsg = null;
         try {
             $v = $qv->vstack_create();
@@ -76,7 +79,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             $errmsg = $e->getMessage();
         }
         $this->assertNull($errmsg);
-        $this->assertEquals(-0.35473297204849, $result->value);
+        $this->assertEqualsWithDelta(-0.35473297204849, $result->value, 1e-8);
         $this->assertEquals('n', $result->type);
     }
 
@@ -84,7 +87,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.1: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_1() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, '#--------- basic operation ---------#', array()),
             array(true, 'a = 1;', array('a' => (object) array('type' => 'n', 'value' => 1))),
@@ -136,6 +139,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     'n' => (object) array('type' => 'ln', 'value' => array(9, 3 , 54))),
             ),
             array(false, 'a=3 6;', '1: Some expressions cannot be evaluated numerically.'),
+            // @codingStandardsIgnoreLine
             array(false, 'a=3`6;', 'Formula or expression contains forbidden characters or operators.'),
             array(false, 'f=1; g=f[1];', '2: Variable is unsubscriptable.'),
             array(false, 'e=[];', '1: A subexpression is empty.'),
@@ -155,9 +159,9 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 $this->assertNull($errmsg);
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
-                    $this->assertEquals($testcase[2], $result->all);
+                    $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
                 }
-                $this->assertEquals($testcase[2], $result->all);
+                $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
 
             } else {
                 // Test that the correct exception message is returned.
@@ -170,9 +174,13 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.2: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_2() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
-            array(false, 'e=[1,2,3,4]; a=1-1; e[a]="A";', '3: Element in the same list must be of the same type, either number or string.'),
+            array(
+              false,
+              'e=[1,2,3,4]; a=1-1; e[a]="A";',
+              '3: Element in the same list must be of the same type, either number or string.'
+            ),
             array(false, 'e=[1,2,"A"];', '1: Element in the same list must be of the same type, either number or string.'),
             array(false, 'e=[1,2,3][4,5];', '1: Non-numeric value cannot be used as list index.'),
             array(false, 'e=[1,2,3]; f=e[4,5]', '2: Non-numeric value cannot be used as list index.'),
@@ -181,7 +189,11 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, 'e=[0:10,"k"];', 'Syntax error of a fixed range.'),
             array(false, 'e=[[1,2],[3,4]];', '1: Element in the same list must be of the same type, either number or string.'),
             array(false, 'e=[[[1,2],[3,4]]];', '1: Element in the same list must be of the same type, either number or string.'),
-            array(false, 'e=[1,2,3]; e[0] = [8,9];', '2: Element in the same list must be of the same type, either number or string.'),
+            array(
+              false,
+              'e=[1,2,3]; e[0] = [8,9];',
+              '2: Element in the same list must be of the same type, either number or string.'
+            ),
             array(true, '#--------- additional function (correct) ---------#', array()),
             array(true, 'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);', array(
                     'a' => (object) array('type' => 'n', 'value' => 4),
@@ -194,22 +206,6 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     'a' => (object) array('type' => 'ln', 'value' => array(1, 2 , 3 , 4)),
                     'b' => (object) array('type' => 'n', 'value' => 4),
                     'c' => (object) array('type' => 'ls', 'value' => array('rr', 'rr', 'rr', 'rr')),
-                    )
-            ),
-            array(true, 'p1=pick(4,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
-                    )
-            ),
-            array(true, 'p1=pick(3.1,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
-                    )
-            ),
-            array(true, 'p1=pick(1000,[2,3,5,7,11]);', array(
-                    'p1' => (object) array('type' => 'n', 'value' => 2),
-                    )
-            ),
-            array(true, 'p1=pick(2,[2,3],[4,5],[6,7]);', array(
-                    'p1' => (object) array('type' => 'ln', 'value' => array(6, 7)),
                     )
             ),
             array(true, 's=sort([7,5,3,11,2]);', array(
@@ -269,7 +265,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 3.3: evaluate_assignments() test.
      */
     public function test_evaluate_assignments_3() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));', array(
                     'A' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'C', 'D')),
@@ -334,10 +330,16 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, 's=fill);', 'Function fill() is reserved and cannot be used as variable.'),
             array(false, 's=fill(10,"rr";', '1: Bracket mismatch.'),
             array(false, 'a=1; l=len(a);', '2: Wrong number or wrong type of parameters for the function len()'),
-            array(false, 'a=[1,2,3,4]; c=fill(len(a)+1,"rr")', '2: Wrong number or wrong type of parameters for the function fill()'),
-            array(false, 'p1=pick("r",[2,3,5,7,11]);', '1: Wrong number or wrong type of parameters for the function pick()'),
-            array(false, 'p1=pick(2,[2,3],[4,5],["a","b"]);', '1: Wrong number or wrong type of parameters for the function pick()'),
-            array(false, 's=concat(0, [1,2,3], [5,6], 100);', '1: Wrong number or wrong type of parameters for the function concat()'),
+            array(
+              false,
+              'a=[1,2,3,4]; c=fill(len(a)+1,"rr")',
+              '2: Wrong number or wrong type of parameters for the function fill()'
+            ),
+            array(
+              false,
+              's=concat(0, [1,2,3], [5,6], 100);',
+              '1: Wrong number or wrong type of parameters for the function concat()'
+            ),
             array(false, 's=concat([1,2,3], ["A","B"]);', '1: Wrong number or wrong type of parameters for the function concat()'),
             array(true, '#--------- for loop ---------#', array()),
             array(true, 'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;', array(
@@ -381,7 +383,11 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, 'z = 0; for(i:) z=z+i;', '2: A subexpression is empty.'),
             array(false, 'z = 0; for(i: [0:5]) ', ''),   // Problem : error message is missing.
             array(false, 'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;', '4: Syntax error of the for loop.'),
-            array(false, 'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];', '5: Element in the same list must be of the same type, either number or string.'),
+            array(
+              false,
+              'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];',
+              '5: Element in the same list must be of the same type, either number or string.'
+            ),
             array(true, '#--------- algebraic variable ---------#', array()),
             array(true, 'x = {1,2,3};', array(
                     'x' => (object) array('type' => 'zn', 'value' => (object) array(
@@ -458,7 +464,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 $this->assertEquals(0, $result->idcounter);
                 if ($testcase[2] != '') {
                     // For now we don't test result with some randomness.
-                    $this->assertEquals($testcase[2], $result->all);
+                    $this->assertEqualsWithDelta($testcase[2], $result->all, 1e-8);
                 }
 
             } else {
@@ -472,7 +478,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 4: parse_random_variables(), instantiate_random_variables().
      */
     public function test_parse_random_variables() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 'a = shuffle ( ["A","B", "C" ])', ''),
             array(true, 'a = {1,2,3}', array(
@@ -501,7 +507,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                     )
             ),
             array(false, 'a = {10:1:1}', '1: a: Syntax error.'),
-            array(false, 'a = {1:10,}', '1: a: Uninitialized string offset: 0'),
+            array(false, 'a = {1:10,}', '1: a: Uninitialized string offset'),
             array(false, 'a = {1:10?}', '1: a: Formula or expression contains forbidden characters or operators.'),
             array(false, 'a = {0, 1:3:0.1, 10:30, 100}*3', '1: a: Syntax error.'),
             array(false, 'a = {1:3:0.1}; b={a,12,13};', '2: b: Formula or expression contains forbidden characters or operators.'),
@@ -532,7 +538,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
                 }
             } else {
                 // Test that the correct exception message is returned.
-                $this->assertEquals($testcase[2], $errmsg);
+                $this->assertStringStartsWith($testcase[2], $errmsg);
             }
         }
     }
@@ -540,11 +546,12 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 5: substitute_variables_in_text.
      */
     public function test_substitute_variables_in_text() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $vstack = $qv->vstack_create();
         $variablestring = 'a=1; b=[2,3,4];';
         $vstack = $qv->evaluate_assignments($vstack, $variablestring);
-        $text = '{a}, {a }, { a}, {b}, {b[0]}, {b[0] }, { b[0]}, {b [0]}, {=a*100}, {=b[0]*b[1]}, {= b[1] * b[2] }, {=100+[4:8][1]} ';
+        $text = '{a}, {a }, { a}, {b}, {b[0]}, {b[0] }, { b[0]}, {b [0]}, ' .
+                '{=a*100}, {=b[0]*b[1]}, {= b[1] * b[2] }, {=100+[4:8][1]} ';
         $newtext = $qv->substitute_variables_in_text($vstack, $text);
         $expected = '1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105 ';
         $this->assertEquals($expected, $newtext);
@@ -554,7 +561,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 6.1: Numerical formula.
      */
     public function test_numerical_formula_1() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, 0, '3', 3),
             array(true, 0, '3.', 3),
@@ -596,7 +603,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 6.2: Numerical formula.
      */
     public function test_numerical_formula_2() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             // Numeric is basically a subset of 10al formula.
             array(true, 10, '3+10*4/10^4', 3.004),
@@ -639,7 +646,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             $eval = $result !== null;
             $this->assertEquals($testcase[0], $eval);
             if ($testcase[0]) {
-                $this->assertEquals($testcase[3], $result);
+                $this->assertEqualsWithDelta($testcase[3], $result, 1e-8);
             }
         }
     }
@@ -648,7 +655,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 7: Algebraic formula.
      */
     public function test_algebraic_formula() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             array(true, '- 3'),
             array(false, '3 e10'),
@@ -685,8 +692,8 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(true, 'a+(b^c)^d+f'),
             array(true, 'a+b^c^-d'),
             array(true, '1+ln(a)+log10(b)'),
-            array(true, 'asin(w t)'),   // arcsin(w*t)
-            array(true, 'a sin(w t)+ b cos(w t)'), // a*sin(w*t) + b*cos(w*t)
+            array(true, 'asin(w t)'),
+            array(true, 'a sin(w t)+ b cos(w t)'),
             array(true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'),
 
             array(false, 'a-'),
@@ -711,11 +718,16 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array(false, '3==4'),
             array(false, '3&&4'),
             array(false, '3!'),
+            // @codingStandardsIgnoreLine
             array(false, '`'),
             array(false, '@'),
         );
         $v = $qv->vstack_create();
-        $v = $qv->evaluate_assignments($v, 'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10}; t={1:10}; u={1:10}; v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};');
+        $v = $qv->evaluate_assignments(
+          $v,
+          'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10}; t={1:10}; u={1:10}; v={1:10}; w={1:10}; ' .
+          'x={1:10}; y={1:10}; z={1:10};'
+        );
         foreach ($testcases as $idx => $testcase) {
             try {
                 $result = $qv->compute_algebraic_formula_difference($v, array($testcase[1]), array($testcase[1]), 100);
@@ -728,7 +740,10 @@ class qtype_formulas_variables_test extends advanced_testcase {
 
         $v = $qv->vstack_create();
         $v = $qv->evaluate_assignments($v, 'x={-10:11:1}; y={-10:-5, 6:11};');
-        $result = $qv->compute_algebraic_formula_difference($v, array('x', '1+x+y+3', '(1+sqrt(x))^2'), array('0', '2+x+y+2', '1+x'), 100);
+        $result = $qv->compute_algebraic_formula_difference(
+          $v,
+          array('x', '1+x+y+3', '(1+sqrt(x))^2'), array('0', '2+x+y+2', '1+x'), 100
+        );
         $this->assertEquals($result[1], 0);
         $this->assertEquals($result[2], INF);
         $result = $qv->compute_algebraic_formula_difference($v, array('x', '(x+y)^2'), array('0', 'x^2+2*x*y+y^2'), 100);
@@ -739,7 +754,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
      * Test 8: Split formula unit.
      */
     public function test_split_formula_unit() {
-        $qv = new qtype_formulas_variables;
+        $qv = new variables;
         $testcases = array(
             // Check for simple number and unit.
             array('.3', array('.3', '')),
@@ -780,7 +795,7 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array('3e8(4.e8+2)(.5e8/2)5kg m/s', array('3e8(4.e8+2)(.5e8/2)5', 'kg m/s')),
             array('3+exp(4+5)^sin(6+7)kg m/s', array('3+exp(4+5)^sin(6+7)', 'kg m/s')),
             array('3+exp(4+5)^-sin(6+7)kg m/s', array('3+exp(4+5)^-sin(6+7)', 'kg m/s')),
-            array('3exp^2', array('3', 'exp^2')), // Note the unit is exp to the power 2
+            array('3exp^2', array('3', 'exp^2')), // Note the unit is exp to the power 2.
             array('3 e8', array('3 ', 'e8')),
             array('3e 8', array('3', 'e 8')),
             array('3e8e8', array('3e8', 'e8')),
@@ -798,11 +813,16 @@ class qtype_formulas_variables_test extends advanced_testcase {
             array('3==4', array('3', '==4')),
             array('3&&4', array('3', '&&4')),
             array('3!', array('3', '!')),
+            // @codingStandardsIgnoreLine
             array('`', array('', '`')),
             array('@', array('', '@')),
         );
         $v = $qv->vstack_create();
-        $v = $qv->evaluate_assignments($v, 'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10}; t={1:10}; u={1:10}; v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};');
+        $v = $qv->evaluate_assignments(
+          $v,
+          'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10}; t={1:10}; u={1:10}; ' .
+          'v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};'
+        );
         foreach ($testcases as $idx => $testcase) {
             $result = $qv->split_formula_unit($testcase[0]);
             $this->assertEquals($testcase[1][0], $result[0]);
@@ -810,33 +830,4 @@ class qtype_formulas_variables_test extends advanced_testcase {
         }
     }
 
-    /**
-     * Test 8: Sigfig function.
-     */
-    public function test_sigfig() {
-        $number = .012345;
-        $this->assertSame(sigfig($number, 3), '0.0123');
-        $this->assertSame(sigfig($number, 4), '0.01235');
-        $this->assertSame(sigfig($number, 6), '0.0123450');
-        $number = -.012345;
-        $this->assertSame(sigfig($number, 3), '-0.0123');
-        $this->assertSame(sigfig($number, 4), '-0.01235');
-        $this->assertSame(sigfig($number, 6), '-0.0123450');
-        $number = 123.45;
-        $this->assertSame(sigfig($number, 2), '120');
-        $this->assertSame(sigfig($number, 4), '123.5');
-        $this->assertSame(sigfig($number, 6), '123.450');
-        $number = -123.45;
-        $this->assertSame(sigfig($number, 2), '-120');
-        $this->assertSame(sigfig($number, 4), '-123.5');
-        $this->assertSame(sigfig($number, 6), '-123.450');
-        $number = .005;
-        $this->assertSame(sigfig($number, 1), '0.005');
-        $this->assertSame(sigfig($number, 2), '0.0050');
-        $this->assertSame(sigfig($number, 3), '0.00500');
-        $number = -.005;
-        $this->assertSame(sigfig($number, 1), '-0.005');
-        $this->assertSame(sigfig($number, 2), '-0.0050');
-        $this->assertSame(sigfig($number, 3), '-0.00500');
-    }
 }

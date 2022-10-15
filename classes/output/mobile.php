@@ -15,31 +15,42 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy main class.
+ * Mobile output class for qtype_gapfill
  *
  * @package    qtype_formulas
- * @copyright  2018 Jean-Michel vedrine
+ * @copyright  2022 Jakob Heinemann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qtype_formulas\privacy;
+namespace qtype_formulas\output;
+
+
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
- * Privacy main class.
+ * Mobile output class for gapfill question type
  *
  * @package    qtype_formulas
- * @copyright  2018 Jean-Michel Vedrine
+ * @copyright  2022 Jakob Heinemann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\null_provider {
-
+class mobile {
     /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
+     * Returns the gapfill question type for the quiz in the mobile app.
      *
-     * @return  string
+     * @return void
      */
-    public static function get_reason() : string {
-        return 'privacy:metadata';
+    public static function mobile_get_formulas($args) {
+        global $CFG;
+        return [
+            'templates' => [
+                [
+                    'id' => 'main',
+                    'html' => file_get_contents($CFG->dirroot."/question/type/formulas/mobile/mobile.html")
+                    ]
+            ],
+            'javascript' => file_get_contents($CFG->dirroot . '/question/type/formulas/mobile/mobile.js')
+        ];
     }
 }

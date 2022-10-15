@@ -6,11 +6,11 @@ Feature: Preview a Formulas question
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname | email               |
-      | teacher1 | T1        | Teacher1 | teacher1@moodle.com |
+      | username |
+      | teacher1 |
     And the following "courses" exist:
-      | fullname | shortname | category |
-      | Course 1 | C1        | 0        |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
@@ -18,19 +18,20 @@ Feature: Preview a Formulas question
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype      | name         | template  |
-      | Test questions   | formulas   | formulas-001 | test2     |
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
+      | questioncategory | qtype      | name         | template           |
+      | Test questions   | formulas   | formulas-001 | testmethodsinparts |
+    And the following "activities" exist:
+      | activity   | name   | course | idnumber |
+      | quiz       | Quiz 1 | C1     | quiz1    |
+    And quiz "Quiz 1" contains the following questions:
+      | question     | page |
+      | formulas-001 | 1    |
 
   @javascript @_switch_window
   Scenario: Preview a formulas question with correct answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
-    And I switch to "questionpreview" window
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
-    And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
-    # Set behaviour options
+    And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
     And I press "Start again with these options"
@@ -46,11 +47,9 @@ Feature: Preview a Formulas question
 
   @javascript @_switch_window
   Scenario: Preview an formulas question with incorrect answer
-    When I click on "Preview" "link" in the "formulas-001" "table_row"
-    And I switch to "questionpreview" window
+    When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
-    And I should see "If a car travel 120 m in 3 s, what is the speed of the car"
-    # Set behaviour options
+    And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
     And I press "Start again with these options"

@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_formulas\answer_unit_conversion;
+use qtype_formulas\unit_conversion_rules;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
@@ -472,7 +475,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             foreach ($this->parts as $part) {
                 list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
                         = $this->grade_responses_individually($part, $response, $checkunit);
-                $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex] ? 1 : (1 - $part->unitpenalty));
+                $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
+                                                     ? 1
+                                                     : (1 - $part->unitpenalty));
                 $this->raw_grades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
                 $totalvalue += $part->answermark;
             }
@@ -557,8 +562,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         }
         $this->qv->vstack_update_variable($vars, '_r', null, 'l'.$t, $_r); // Array of scaled responses.
         $this->qv->vstack_update_variable($vars, '_a', null, 'l'.$t, $_a); // Array of model answers.
-        $this->qv->vstack_update_variable($vars, '_d', null, 'ln', $diff); // Array of difference between responses and model answers.
-        $this->qv->vstack_update_variable($vars, '_err', null, 'n', sqrt($sum2));   // Error in Euclidean space, L-2 norm, sqrt(sum(map("pow",_diff,2))).
+        // Array of difference between responses and model answers.
+        $this->qv->vstack_update_variable($vars, '_d', null, 'ln', $diff);
+        // Error in Euclidean space, L-2 norm, sqrt(sum(map("pow",_diff,2))).
+        $this->qv->vstack_update_variable($vars, '_err', null, 'n', sqrt($sum2));
 
         // Calculate the relative error. We only define relative error for number or numerical expression.
         if ($is_number) {
@@ -566,7 +573,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             foreach ($_a as $idx => $coord) {
                 $norm_sqr += $coord * $coord;
             }
-            $relerr = $norm_sqr != 0 ? sqrt($sum2 / $norm_sqr) : ($sum2 == 0 ? 0 : 1e30); // If the model answer is zero, the answer from student must also match exactly.
+            // If the model answer is zero, the answer from student must also match exactly.
+            $relerr = $norm_sqr != 0 ? sqrt($sum2 / $norm_sqr) : ($sum2 == 0 ? 0 : 1e30);
             $this->qv->vstack_update_variable($vars, '_relerr', null, 'n', $relerr);
         }
     }
@@ -587,7 +595,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             } else {
                 $res->diff = $this->qv->compute_numerical_formula_difference($a, $r, $cfactor, $gradingtype);
             }
-        } catch (Exception $e) {
+        } catch (Exception $e) { // @codingStandardsIgnoreLine
             // Any error will return null.
         }
         if ($res->diff === null) {
@@ -669,17 +677,21 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function rationalize_responses_for_part($part, array &$response) {
         foreach (range(0, $part->numbox) as $j) {
             $name = $part->partindex . "_$j";
-            $response[$name] = isset($response[$name]) ? trim($response[$name]) : '';   // Replace all missing responses with an empty string.
+            // Replace all missing responses with an empty string.
+            $response[$name] = isset($response[$name]) ? trim($response[$name]) : '';
             if (strlen($response[$name]) > 128) {
                 $response[$name] = substr($response[$name], 0, 128);    // Restrict length to 128.
             }
         }
-        if (isset($response[$part->partindex . "_"])) {   // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
+        // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
+        // The else case may occur if there is no submission for answer "i_",
+        // in which case "i_0" and "i_1" were already rationalized.
+        if (isset($response[$part->partindex . "_"])) {
                 $response[$part->partindex . "_"] = (string) substr(trim($response[$part->partindex . "_"]), 0, 128);
                 $tmp = $this->qv->split_formula_unit($response[$part->partindex . "_"]);
                 $response[$part->partindex . "_0"] = $tmp[0]; // It will be checked later if tmp[0] is a number.
                 $response[$part->partindex . "_1"] = isset($tmp[1]) ? $tmp[1] : '';
-        }   // The else case may occur if there is no submission for answer "i_", in which case "i_0" and "i_1" were already rationalized.
+        }
     }
 
     public function rationalize_responses(array &$response) {
@@ -783,7 +795,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         if (!isset($this->evaluatedanswer[$part->partindex])) {   // Perform lazy evaluation.
             $vstack = $this->get_local_variables($part);
             $res = $this->qv->evaluate_general_expression($vstack, $part->answer);
-            $this->evaluatedanswer[$part->partindex] = $res->type[0] == 'l' ? $res->value : array($res->value); // Convert to numbers array.
+            // Convert to numbers array.
+            $this->evaluatedanswer[$part->partindex] = $res->type[0] == 'l' ? $res->value : array($res->value);
             $a = $res->type[strlen($res->type) - 1];
             if (($part->answertype == 1000 ? $a != 's' : $a != 'n')) {
                 throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
@@ -857,7 +870,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * Class to represent a question subpart, loaded from the question_answers table
  * in the database.
  *
- * @copyright  2012 Jean-Michel Védrine
+ * @copyright  2012 Jean-Michel Vï¿½drine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {
@@ -904,7 +917,11 @@ class qtype_formulas_part {
 
     public function part_has_combined_unit_field() {
         return strlen($this->postunit) != 0 && $this->numbox == 1 && $this->answertype != 1000
-                && (strpos($this->subqtext, "{_0}{_u}") !== false || (strpos($this->subqtext, "{_0}") === false && strpos($this->subqtext, "{_u}") === false));
+                && (
+                  strpos($this->subqtext, "{_0}{_u}") !== false
+                  || (strpos($this->subqtext, "{_0}") === false
+                  && strpos($this->subqtext, "{_u}") === false)
+                );
     }
 
     /**
@@ -962,7 +979,11 @@ class qtype_formulas_part {
         $boxes = array();
         foreach ($matches[1] as $j => $match) {
             if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
-                $boxes[$match] = (object)array('pattern' => $matches[0][$j], 'options' => $matches[2][$j], 'stype' => $matches[3][$j]);
+                $boxes[$match] = (object)array(
+                  'pattern' => $matches[0][$j],
+                  'options' => $matches[2][$j],
+                  'stype' => $matches[3][$j]
+                );
             }
         }
         return $boxes;
