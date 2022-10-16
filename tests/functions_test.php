@@ -45,6 +45,18 @@ class functions_test extends \advanced_testcase {
      * Test 1: ncr() test.
      */
     public function test_ncr() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=ncr(5, 4);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(ncr(0, 0), 1),
             array(ncr(1, 5), 0),
@@ -64,6 +76,18 @@ class functions_test extends \advanced_testcase {
      * Test 2: npr() test.
      */
     public function test_npr() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=npr(5, 4);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(npr(0, 0), 0),
             array(npr(1, 5), 0),
@@ -83,6 +107,18 @@ class functions_test extends \advanced_testcase {
      * Test 3: fact() test.
      */
     public function test_fact() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=fact(3);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(fact(0), 1),
             array(fact(1), 1),
@@ -98,6 +134,18 @@ class functions_test extends \advanced_testcase {
      * Test 4: gcd() test.
      */
     public function test_gcd() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=gcd(3, 6);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(gcd(0, 0), 0),
             array(gcd(13, 13), 13),
@@ -118,6 +166,18 @@ class functions_test extends \advanced_testcase {
      * Test 5: lcm() test.
      */
     public function test_lcm() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=lcm(3, 6);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(lcm(0, 0), 0),
             array(lcm(13, 13), 13),
@@ -279,6 +339,18 @@ class functions_test extends \advanced_testcase {
      * @copyright  2018 Jean-Michel Vedrine
      */
     public function test_sigfig() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=sigfig(0.123, 1);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $number = .012345;
         $this->assertSame(sigfig($number, 3), '0.0123');
         $this->assertSame(sigfig($number, 4), '0.01235');
@@ -309,6 +381,18 @@ class functions_test extends \advanced_testcase {
      * Test 8: modinv() test.
      */
     public function test_modinv() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=modinv(3, 7);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(modinv(15, 3), 0),
             array(modinv(5, 1), 0),
@@ -328,6 +412,18 @@ class functions_test extends \advanced_testcase {
      * Test 9: modpow() test.
      */
     public function test_modpow() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=modpow(3, 10, 17);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(modpow(15, 300, 19), 7),
             array(modpow(15, 18, 19), 1),
@@ -350,6 +446,18 @@ class functions_test extends \advanced_testcase {
      * Test 10: stdnormpdf() test.
      */
     public function test_stdnormpdf() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=stdnormpdf(1);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(stdnormpdf(0), 0.39894228),
             array(stdnormpdf(1), 0.24197072),
@@ -368,6 +476,18 @@ class functions_test extends \advanced_testcase {
      * Test 11: stdnormcdf() test.
      */
     public function test_stdnormcdf() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=stdnormcdf(0);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(stdnormcdf(0), 0.5),
             array(stdnormcdf(1), 0.84134),
@@ -386,6 +506,18 @@ class functions_test extends \advanced_testcase {
      * Test 12: normcdf() test.
      */
     public function test_normcdf() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=normcdf(1, 1, 1);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
         $testcases = array(
             array(normcdf(1, 1, 5), 0.5),
             array(normcdf(3, 3, 5), 0.5),

@@ -252,6 +252,7 @@ $string['functiontakesonearg'] = 'The function {$a} must have exactly one argume
 $string['functiontakesoneortwoargs'] = 'The function {$a} must have either one or two arguments';
 $string['functiontakestwoargs'] = 'The function {$a} must have exactly two arguments';
 $string['functiontakesatleasttwo'] = 'The function {$a} must have at least two arguments';
+$string['functiontakesthreeargs'] = 'The function {$a} must have exactly three arguments';
 $string['unsupportedformulafunction'] = 'The function {$a} is not supported';
 
 // Strings for question settings.

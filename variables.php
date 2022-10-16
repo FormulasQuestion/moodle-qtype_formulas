@@ -245,14 +245,15 @@ class variables {
 
     private function initialize_function_list() {
         $this->func_const = array_flip( array('pi'));
-        $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil'
-            , 'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan'
-            , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact') );
+        $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
+            'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan',
+            'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact',
+            'stdnormpdf', 'stdnormcdf') );
         $this->func_binary = array_flip(
-          array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig')
+          array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig', 'modinv')
         );
         $this->func_special = array_flip(
-          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly')
+          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly', 'normcdf', 'modpow')
         );
         $this->func_all = array_merge($this->func_const, $this->func_unary, $this->func_binary, $this->func_special);
         $this->binary_op_map = array_flip(
@@ -262,7 +263,7 @@ class variables {
 
         // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact', 'stdnormcdf'));
+                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact'));
         $this->constlist = array('pi' => '3.14159265358979323846');
         // Natural log and log with base 10, no log allowed to avoid ambiguity.
         $this->evalreplacelist = array('ln' => 'log', 'log10' => '(1./log(10.))*log');
@@ -1393,7 +1394,7 @@ class variables {
             $res = null;
             // In PHP 7 eval() terminates the script if the evaluated code generate a fatal error.
             try {
-                eval('$res = ' . implode(' ', $splitted) . ';');
+                eval('namespace qtype_formulas; $res = ' . implode(' ', $splitted) . ';');
             } catch (Throwable $t) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
             }
@@ -1819,12 +1820,12 @@ class variables {
 
         while (
           preg_match(
-            "~(^|[$safeoperatorchar,(])([a-z0-9_]*)\\(($operatorornumber+(,$operatorornumber+((,$operatorornumber+)+)?)?)?\\)~",
+            "~(^|[$safeoperatorchar,(])([a-z0-9_]*)\\(($operatorornumber+(,$operatorornumber+(,$operatorornumber+((,$operatorornumber+)+)?)?)?)?\\)~",
             $formula,
             $regs
           )
         ) {
-            for ($i = 0; $i < 6; $i++) {
+            for ($i = 0; $i < 7; $i++) {
                 if (!isset($regs[$i])) {
                     $regs[] = '';
                 }
@@ -1875,6 +1876,8 @@ class variables {
                 case 'tan':
                 case 'tanh':
                 case 'fact':
+                case 'stdnormpdf':
+                case 'stdnormcdf':
                     if (strlen($regs[4]) != 0 || strlen($regs[3]) == 0) {
                         return get_string('functiontakesonearg', 'qtype_formulas', $regs[2]);
                     }
@@ -1897,6 +1900,7 @@ class variables {
                 case 'lcm':
                 case 'gcd':
                 case 'sigfig':
+                case 'modinv':
                     if (strlen($regs[5]) != 0 || strlen($regs[4]) == 0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }
@@ -1907,6 +1911,14 @@ class variables {
                 case 'max':
                     if (strlen($regs[4]) == 0) {
                         return get_string('functiontakesatleasttwo', 'qtype_formulas', $regs[2]);
+                    }
+                    break;
+
+                // Functions that take three arguments.
+                case 'normcdf':
+                case 'modpow':
+                    if (strlen($regs[6]) != 0 || strlen($regs[5]) == 0) {
+                        return get_string('functiontakesthreeargs', 'qtype_formulas', $regs[2]);
                     }
                     break;
 
