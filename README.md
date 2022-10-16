@@ -1,5 +1,8 @@
 Formulas question type for Moodle
 ---------------------------------
+[![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20code%20checks/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+code+checks%22+branch%3Amaster) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20acceptance%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+acceptance+tests%22+branch%3Amaster)  [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20unit%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+unit+tests%22+branch%3Amaster) [![GitHub 
+Release](https://img.shields.io/github/release/FormulasQuestion/moodle-qtype_formulas.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/releases)
+
 This is a question type plugin for Moodle with random values and multiple answer fields.
 The answer fields can be placed anywhere in the question so that we can create questions
 involving various answer structures such as coordinate, polynomial and matrix. Other
