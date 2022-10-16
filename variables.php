@@ -244,17 +244,24 @@ class variables {
     private static $listmaxsize = 1000;
 
     private function initialize_function_list() {
-        $this->func_const = array_flip( array('pi'));
-        $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil'
-            , 'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan'
-            , 'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact') );
+        $this->func_const = array_flip(array('pi'));
+        $this->func_unary = array_flip(
+            array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
+                'cos', 'cosh', 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan',
+                'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact', 'stdnormpdf',
+                'stdnormcdf')
+            );
         $this->func_binary = array_flip(
-          array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig')
+          array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig', 'modinv')
         );
         $this->func_special = array_flip(
-          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly')
+          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly',
+          'modpow', 'normcdf')
         );
         $this->func_all = array_merge($this->func_const, $this->func_unary, $this->func_binary, $this->func_special);
+        $this->func_own = array_flip(
+            array('ncr', 'npr', 'stdnormpdf', 'stdnormcdf', 'normcdf', 'sigfig', 'lcm', 'gcd', 'fact', 'modinv', 'modpow')
+        );
         $this->binary_op_map = array_flip(
           array('+', '-', '*', '/', '%', '>', '<', '==', '!=', '&&', '||', '&', '|', '<<', '>>', '^')
         );
@@ -262,7 +269,7 @@ class variables {
 
         // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
-                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact', 'stdnormcdf'));
+                                                  'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact'));
         $this->constlist = array('pi' => '3.14159265358979323846');
         // Natural log and log with base 10, no log allowed to avoid ambiguity.
         $this->evalreplacelist = array('ln' => 'log', 'log10' => '(1./log(10.))*log');
@@ -1358,6 +1365,10 @@ class variables {
             }
             if ($data->type == $functype) {    // If it is a function, put it back into the expression.
                 $splitted[$i] = $data->value;
+                // Functions defined in this file must include their namespace.
+                if (array_key_exists($data->value, $this->func_own)) {
+                    $splitted[$i] = "qtype_formulas\\" . $splitted[$i];
+                }
             }
             if ($data->type == 'n') {   // If it is a number, store in $a for later evaluation.
                 $all[0][$i] = floatval($data->value);
@@ -1814,6 +1825,9 @@ class variables {
         // Strip away empty space and lowercase it.
         $formula = str_replace(' ', '', $formula);
 
+        // remove namespace indication
+        $formula = str_replace("qtype_formulas\\", '', $formula);
+
         $safeoperatorchar = '-+/*%>:^\~<?=&|!'; /* */
         $operatorornumber = "[$safeoperatorchar.0-9eE]";
 
@@ -1875,6 +1889,8 @@ class variables {
                 case 'tan':
                 case 'tanh':
                 case 'fact':
+                case 'stdnormpdf':
+                case 'stdnormcdf':
                     if (strlen($regs[4]) != 0 || strlen($regs[3]) == 0) {
                         return get_string('functiontakesonearg', 'qtype_formulas', $regs[2]);
                     }
@@ -1897,6 +1913,7 @@ class variables {
                 case 'lcm':
                 case 'gcd':
                 case 'sigfig':
+                case 'modinv':
                     if (strlen($regs[5]) != 0 || strlen($regs[4]) == 0) {
                         return get_string('functiontakestwoargs', 'qtype_formulas', $regs[2]);
                     }
@@ -1905,6 +1922,8 @@ class variables {
                 // Functions that take two or more arguments.
                 case 'min':
                 case 'max':
+                case 'normcdf':
+                case 'modpow':
                     if (strlen($regs[4]) == 0) {
                         return get_string('functiontakesatleasttwo', 'qtype_formulas', $regs[2]);
                     }
