@@ -26,4 +26,5 @@ jobs:
           tools: phpmd
 
       - name: PHP Mess Detector
+        continue-on-error: true
         run: phpmd . github cleancode, codesize, controversial, design, naming, unusedcode --baseline-file .phpmd/phpmd.baseline.xml
