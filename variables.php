@@ -354,7 +354,7 @@ class variables {
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
             'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan',
             'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact',
-            'stdnormpdf', 'stdnormcdf') );
+            'stdnormpdf', 'stdnormcdf', 'decbin', 'decoct', 'octdec', 'bindec') );
         $this->func_binary = array_flip(
           array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig', 'modinv')
         );
