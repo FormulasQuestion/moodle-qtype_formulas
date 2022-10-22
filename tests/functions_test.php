@@ -530,4 +530,78 @@ class functions_test extends \advanced_testcase {
             $this->assertEqualsWithDelta($case[1], $case[0], .00001);
         }
     }
+
+    /**
+     *
+     * Test number conversion functions decbin(), decoct(), octdec() and bindec()
+     *
+     */
+    public function test_number_conversions() {
+        // Check valid invocations.
+        $testcases = array(
+            array('a=decbin(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array('a=decbin(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
+            array('a=decbin(3);', array('a' => (object) array('type' => 'n', 'value' => 11))),
+            array('a=decbin(10);', array('a' => (object) array('type' => 'n', 'value' => 1010))),
+            array('a=decbin(15);', array('a' => (object) array('type' => 'n', 'value' => 1111))),
+            array('a=decoct(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array('a=decoct(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
+            array('a=decoct(3);', array('a' => (object) array('type' => 'n', 'value' => 3))),
+            array('a=decoct(10);', array('a' => (object) array('type' => 'n', 'value' => 12))),
+            array('a=decoct(15);', array('a' => (object) array('type' => 'n', 'value' => 17))),
+            array('a=octdec(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array('a=octdec(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
+            array('a=octdec(3);', array('a' => (object) array('type' => 'n', 'value' => 3))),
+            array('a=octdec(12);', array('a' => (object) array('type' => 'n', 'value' => 10))),
+            array('a=octdec(17);', array('a' => (object) array('type' => 'n', 'value' => 15))),
+            array('a=bindec(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
+            array('a=bindec(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
+            array('a=bindec(11);', array('a' => (object) array('type' => 'n', 'value' => 3))),
+            array('a=bindec(1010);', array('a' => (object) array('type' => 'n', 'value' => 10))),
+            array('a=bindec(1111);', array('a' => (object) array('type' => 'n', 'value' => 15)))
+        );
+        foreach ($testcases as $case) {
+            $qv = new variables;
+            $errmsg = null;
+            try {
+                $v = $qv->vstack_create();
+                $result = $qv->evaluate_assignments($v, $case[0]);
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            $this->assertNull($errmsg);
+            $this->assertEquals($case[1], $result->all);
+        }
+        // Check invalid invocations.
+        $testcases = array(
+            array('a=decbin();'),
+            array('a=decbin(1, 2);'),
+            array('a=decbin("3");'),
+            array('a=decbin("a");'),
+            array('a=decoct();'),
+            array('a=decoct(1, 2);'),
+            array('a=decoct("3");'),
+            array('a=decoct("a");'),
+            array('a=octdec();'),
+            array('a=octdec(1, 2);'),
+            array('a=octdec("3");'),
+            array('a=octdec("a");'),
+            array('a=bindec();'),
+            array('a=bindec(1, 2);'),
+            array('a=bindec("3");'),
+            array('a=bindec("a");')
+        );
+        foreach ($testcases as $case) {
+            $qv = new variables;
+            $errmsg = null;
+            try {
+                $v = $qv->vstack_create();
+                $result = $qv->evaluate_assignments($v, $case[0]);
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            $this->assertNotNull($errmsg);
+        }
+    }
+
 }
