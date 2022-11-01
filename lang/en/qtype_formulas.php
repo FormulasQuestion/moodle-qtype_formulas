@@ -143,7 +143,7 @@ range. Relative error cannot be used for algebraic answer type.
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
 $string['correctness_link'] = 'https://moodleformulas.org/';
 $string['correctnessexpert'] = 'Expert';
-$string['correctnesssimple'] = 'Simple';
+$string['correctnesssimple'] = 'Simplified mode';
 $string['relerror'] = 'Relative error';
 $string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';
