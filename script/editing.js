@@ -21,76 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 
-/**
- * Update the correctness simple elements from the expert one.
- */
-function formulas_form_correctness(id, checked) {
-    var err_names = new Array(M.util.get_string('relerror', 'qtype_formulas'), M.util.get_string('abserror', 'qtype_formulas'));
-        var nid = 'correctness[' + id + ']';
-        var n = document.getElementsByName(nid)[0];
-        if (n == null) {
-            return;
-        }
-        var bid = 'id_correctness_' + id + '_buttons';
-        var b = document.getElementById(bid);
-        if (b == null) {
-            var tmp = document.createElement('div');
-            tmp.id = bid;
-            b = n.parentNode.appendChild(tmp);
-        }
-        var use_raw_input = checked;
-        if (!use_raw_input) {
-            var res = /^\s*(_relerr|_err)\s*(<|==)\s*([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*$/.exec(n.value);
-            if (res == null) {
-                if (n.value.replace(/^\s+|\s+$/g,"").length == 0) {
-                    res = ['','_relerr','<','0.01'];
-                    n.value = '_relerr < 0.01';
-                }
-            }
-            if (res == null) {
-                use_raw_input = true;
-            } else {
-                var s = '<select id="' + bid + '_type" class="mform form-inline form-control" onchange="formulas_form_merge(' + id + ')">';
-                s += '<option value="_relerr"' + (res[1] == '_relerr' ? ' selected="selected"' : '') + '>' + err_names[0] + '</option>';
-                s += '<option value="_err"' + (res[1] == '_err' ? ' selected="selected"' : '') + '>' + err_names[1] + '</option>';
-                s += '</select><select id="' + bid + '_op" class="mform form-inline form-control" onchange="formulas_form_merge(' + id + ')">';
-                s += '<option value="<"' + (res[2] == '<' ? ' selected="selected"' : '') + '>&lt</option>';
-                s += '<option value="=="' + (res[2] == '==' ? ' selected="selected"' : '') + '>==</option>';
-                s += '</select><input id="' + bid + '_tol" type="text" class="mform form-inline form-control" value="' + res[3] + '" onchange="formulas_form_merge(' + id + ')">';
-                b.innerHTML = s;
-            }
-        }
-        n.style.display = use_raw_input ? 'block' : 'none';
-        b.style.display = use_raw_input ? 'none' : 'block';
-}
-
-/**
- * Update the correctness expert element from the simple ones.
- */
-function formulas_form_merge(id) {
-    var nid = 'correctness[' + id + ']';
-    var n = document.getElementsByName(nid)[0];
-    var bid = 'id_correctness_' + id + '_buttons';
-    var b = document.getElementById(bid);
-    var error_type = document.getElementById(bid + '_type').value;
-    var error_op   = document.getElementById(bid + '_op').value;
-    var error_val  = document.getElementById(bid + '_tol').value;
-    n.value = error_type + ' ' + error_op + ' ' + error_val;
-}
-
-function formulas_form_init_global_options_update(name) {
-    var n_global = document.getElementsByName('global' + name)[0];
-    var i = 0;
-    while (true) {
-        var n = document.getElementsByName(name + '[' + i + ']')[0];
-        if (n == null) {
-            return false;  // Break until there is no more box.
-        }
-        n.value = n_global.value;
-        n.parentNode.parentNode.style.display = 'none';
-        i++;
-    }
-}
 
 // It contains all methods to modify the editing form, aiming to provide a better interface.
 var formulasform = {
@@ -98,21 +28,6 @@ var formulasform = {
     init : function() {
         // Get all the values that will be usable for the methods in this object.
         this.numsubq = this.count_subq();
-
-        // Global options allow the change of the same options in all parts at once.
-        try {
-            this.init_global_options('unitpenalty');
-            this.init_global_options('ruleid');
-        } catch (e) {}
-
-        // Allow the easier selection of correctness, rather than manual input of formula.
-        for (i = 0; i < this.numsubq; i++) {
-            try {
-                this.init_selective_criteria(i);
-            } catch (e) {
-                alert(e);
-            }
-        }
 
         // Add the button to select the number of dataset.
         try {
@@ -134,46 +49,9 @@ var formulasform = {
         return i;
     },
 
-    // By default, the value of global input field will apply to all its parts.
-    init_global_options : function(name) {
-        var n_global = document.getElementsByName('global' + name)[0];
-        var n = document.getElementsByName(name + '[0]')[0];    // Pick the first value as global.
-        n_global.value = n.value;
-        n_global.onchange = function() {
-            formulas_form_init_global_options_update(name);
-        };
-        formulas_form_init_global_options_update(name);
-    },
-
-    // Allow a more user friend way to select the commonly used criteria.
-    init_selective_criteria : function(i) {
-        var n = document.getElementById('id_correctness_' +i);
-        loc = n.parentNode
-        while(!loc.classList.contains("fitem")) {
-            loc = loc.parentNode;
-        }
-
-        var showid = 'id_correctness_' + i + '_show';
-        var b = document.getElementById(showid);
-        if (b == null) {
-            var tmp = document.createElement('div');
-            tmp.id = showid;
-            tmp.classList.add('formulas_correctness_show');
-            b = loc.insertBefore(tmp, loc.firstChild);
-        }
-
-        initial_checked = false;    // Always unchecked by default.
-
-        formulas_form_correctness(i, initial_checked);
-
-        var ctext = initial_checked ? ' checked="checked" ' : '';
-        var s = '<input type="checkbox" onclick="formulas_form_correctness(' + i + ',this.checked)" ' + ctext + ' id="' + showid + '" value="Expert">';
-        var t = '<span onclick="var t=document.getElementById(\'' + showid + '\'); t.checked = !t.checked; formulas_form_correctness(' + i + ',t.checked);">' + b.innerHTML + '</span>';
-        b.innerHTML = s + t;
-    },
-
     // Add the options to select the number of datasets.
     init_numdataset_option : function() {
+        return;
         var s = '';
         var a = {1:1, 5:5 ,10:10, 25:25, 50:50, 100:100, 250:250, 500:500, 1000:1000, '-1':'*'};
         for (var i in a) {
@@ -195,7 +73,7 @@ var formulasform = {
             data['answers[' + i + ']'] = document.getElementById('id_answer_' + i).value;
         }
         data['start'] = 0;
-        data['N'] = document.getElementById('numdataset').value;
+        data['N'] = document.getElementById('id_numdataset').value;
         data['random'] = 0;
 
         var p = [];
@@ -423,20 +301,21 @@ var formulasform = {
 
     // Add the controls for the preview function.
     init_preview_controls : function() {
-        var block0 = '';
-        for (var i = 0; i < this.vars.lists.length; i++) {
-            block0 += '<option value="' + i + '">' + i + '</option>';
+        var dropdown = document.getElementById('id_formulas_idataset');
+        while (dropdown.options.length > 0) {
+            dropdown.remove(0);
         }
-        block0 = (this.vars.lists.length == 0) ? '' : '<select id="id_formulas_idataset" onchange="formulasform.update_preview()">' + block0 + '</select>';
-        var block1 = '<input type="button" onclick="formulasform.update_preview()" value="' + M.util.get_string('renew', 'qtype_formulas') + '">';
-        var loc = document.getElementById('qtextpreview_controls');
-        loc.innerHTML = block0 + block1;
-
+        for (var i = 0; i < this.vars.lists.length; i++) {
+            dropdown.add(new Option(i, i));
+        }
         this.update_preview();
     },
 
     // Show the questiontext with variables replaced.
     update_preview : function() {
+        if (!this.vars) {
+            return;
+        }
         try {
             var globaltext = tinyMCE.get('id_questiontext').getContent();
         } catch(e) {
