@@ -36,7 +36,7 @@ var numberOfParts = 0;
 
 export const init = (defCorrectness) => {
     defaultCorrectness = defCorrectness;
-    numberOfParts = document.querySelectorAll('[id^=id_answerhdr_').length;
+    numberOfParts = document.querySelectorAll('fieldset[id^=id_answerhdr_]').length;
 
     for (let i = 0; i < numberOfParts; i++) {
         let textfield = document.getElementById(`id_correctness_${i}`);
