@@ -659,6 +659,9 @@ class qtype_formulas extends question_type {
      * @return an object with a field 'answers' containing valid answers. Otherwise, the 'errors' field will be set
      */
     public function check_and_filter_answers($form) {
+        // This function is also called when importing a question.
+        // The answers of imported questions already have their unitpenalty and ruleid set.
+        $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
         $tags = $this->part_tags();
         $res = (object)array('answers' => array());
         foreach ($form->answermark as $i => $a) {
@@ -689,8 +692,9 @@ class qtype_formulas extends question_type {
             $res->answers[$i]->questionid = $form->id;
             foreach ($tags as $tag) {
                 // The unitpenalty and ruleid are set via a global option,
-                // but stored with each part.
-                if ($tag === 'unitpenalty' || $tag === 'ruleid') {
+                // but stored with each part. When importing questions,
+                // this is not the case.
+                if (!$isfromimport && ($tag === 'unitpenalty' || $tag === 'ruleid')) {
                     $res->answers[$i]->{$tag} = trim($form->{'global' . $tag});
                 } else {
                     $res->answers[$i]->{$tag} = trim($form->{$tag}[$i]);
@@ -756,8 +760,13 @@ class qtype_formulas extends question_type {
         // the penalty for each part. Is has to be validated separately.
         // The same is true for the globalruleid, but as this is a select
         // field, there is no need to validate it.
-        if ($form->globalunitpenalty < 0 || $form->globalunitpenalty > 1) {
-            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+        // If we are importing a question, there will be no globalunitpenalty or globalruleid,
+        // because the question will already have those values in its parts.
+        // No validation is needed in that case, as the parts have been checked before.
+        if (!property_exists($form, 'unitpenalty') || !property_exists($form, 'ruleid')) {
+            if ($form->globalunitpenalty < 0 || $form->globalunitpenalty > 1) {
+                $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+            }
         }
         foreach ($validanswers as $idx => $part) {
             try {
@@ -813,12 +822,16 @@ class qtype_formulas extends question_type {
         }
 
         if (count($form->answer)) {
+            // This function is also called when importing a question.
+            // The answers of imported questions already have their unitpenalty and ruleid set.
+            $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
             foreach ($form->answer as $key => $answer) {
                 $ans = new stdClass();
                 foreach ($tags as $tag) {
                     // The unitpenalty and ruleid are set via a global option,
-                    // but stored with each part.
-                    if ($tag == 'unitpenalty' || $tag == 'ruleid') {
+                    // but stored with each part. When importing questions,
+                    // this is not the case.
+                    if (!$isfromimport && ($tag == 'unitpenalty' || $tag == 'ruleid')) {
                         $ans->{$tag} = $form->{'global'.$tag};
                     } else {
                         $ans->{$tag} = $form->{$tag}[$key];
