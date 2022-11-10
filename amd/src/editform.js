@@ -300,6 +300,9 @@ const prepareTableColumns = (data) => {
         }).catch();
         return;
     }
+    else {
+        document.getElementById('qtextpreview_display').innerHTML = '';
+    }
     let firstRow = data.data[0];
     let calcOptions = {bottomCalc: 'stats', bottomCalcFormatter: (cell) => cell.getValue().join('<br>')};
     let columnDescription = [{title: '#', field: 'id', bottomCalcFormatter: () => '⌀<br>min</br>max'}];
