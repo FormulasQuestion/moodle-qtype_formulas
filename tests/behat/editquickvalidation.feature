@@ -23,6 +23,29 @@ Feature: Test on-the-fly validation of variables while editing a question
     And I am on the "test" "core_question > edit" page logged in as teacher1
 
   @javascript
+  Scenario: Validate random variables
+    When I follow "Variables"
+    And I set the field "Random variables" to "a=+"
+    Then I should see "1: a: Syntax error."
+    And I set the field "Random variables" to "a={1,2,3};"
+    Then I should not see "1: a: Syntax error."
+
+  @javascript
+  Scenario: Validate global variables
+    When I follow "Variables"
+    And I set the field "Global variables" to "a=+"
+    Then I should see "1: Some expressions cannot be evaluated numerically."
+    And I set the field "Global variables" to "a=5;"
+    Then I should not see "1: Some expressions cannot be evaluated numerically."
+    And I set the field "Global variables" to "a=2*b"
+    Then I should see "1: Variable 'b' has not been defined. in substitute_vname_by_variables"
+    And I set the following fields to these values:
+      | id_varsrandom | b={1,2,3}; |
+      | id_varsglobal |            |
+    And I set the field "Global variables" to "a=2*b"
+    Then I should not see "1: Variable 'b' has not been defined. in substitute_vname_by_variables"
+
+  @javascript
   Scenario: Validate local variables
     When I follow "Part 1"
     And I follow "Show more..."
@@ -40,27 +63,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     Then I should see "1: Variable 'c' has not been defined. in substitute_vname_by_variables"
     And I set the following fields to these values:
       | id_varsglobal | c=4; |
+      | id_vars1_0    |      |
     And I set the field "Local variables" to "a=2*c"
     Then I should not see "1: Variable 'c' has not been defined. in substitute_vname_by_variables"
-
-  @javascript
-  Scenario: Validate random variables
-    When I follow "Variables"
-    And I set the field "Random variables" to "a=+"
-    Then I should see "1: a: Syntax error."
-    And I set the field "Random variables" to "a={1,2,3};"
-    Then I should not see "1: a: Syntax error."
-
-  @javascript
-  Scenario: Validate global variables
-    When I follow "Variables"
-    And I set the field "Global variables" to "a=+"
-    Then I should see "1: Some expressions cannot be evaluated numerically."
-    And I set the field "Global variables" to "a=5;"
-    Then I should not see "1: Some expressions cannot be evaluated numerically."
-    And I set the field "Global variables" to "a=2*b"
-    Then I should see "1: Variable 'b' has not been defined. in substitute_vname_by_variables"
-    And I set the field "Random variables" to "b={1,2,3};"
-    And I set the field "Global variables" to "a=2*b"
-    Then I should not see "1: Variable 'b' has not been defined. in substitute_vname_by_variables"
-
