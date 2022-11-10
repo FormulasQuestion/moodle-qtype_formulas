@@ -108,7 +108,7 @@ class instantiation extends \external_api {
             return $e->getMessage();
         }
 
-        $row = array();
+        $row = array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());//array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());
         foreach ($instantiatedrandomvars->all as $name => $value) {
             $row['randomvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
         }
@@ -273,18 +273,20 @@ class instantiation extends \external_api {
     public static function check_random_global_vars_parameters() {
         return new \external_function_parameters(
             array(
-                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_REQUIRED),
+                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
                 'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, '')
             )
         );
     }
 
     /**
-     * Undocumented function
+     * Try to parse and instantiate the given random vars (if any). If global vars are given,
+     * the result from this first step will be used as a base to evaluate assignments of the
+     * global vars.
      *
-     * @param [type] $randomvars
-     * @param [type] $globalvars
-     * @return void
+     * @param string $randomvars definition of random variables or empty string, if none
+     * @param string $globalvars definition of global variables or empty string, if none
+     * @return string error message (if any) or empty string (if definitions are valid)
      */
     public static function check_random_global_vars($randomvars, $globalvars) {
         $params = self::validate_parameters(self::check_random_global_vars_parameters(),
@@ -313,9 +315,59 @@ class instantiation extends \external_api {
     }
 
     /**
-     * Undocumented function
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function check_local_vars_parameters() {
+        return new \external_function_parameters(
+            array(
+                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
+                'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
+                'localvars' => new \external_value(PARAM_RAW, 'local variables', VALUE_DEFAULT, '')
+            )
+        );
+    }
+
+    /**
+     * Try to parse and evaluate the given local variables. In order to do so, the random and
+     * global variables have to be considered as well, as local variables can be linked to them.
      *
-     * @return void
+     * @param string $randomvars definition of random variables or empty string, if none
+     * @param string $globalvars definition of global variables or empty string, if none
+     * @param string $localvars definition of part's local variables or empty string, if none
+     * @return string error message (if any) or empty string (if definitions are valid)
+     */
+    public static function check_local_vars($randomvars, $globalvars, $localvars) {
+        $params = self::validate_parameters(self::check_local_vars_parameters(),
+                array(
+                    'randomvars' => $randomvars,
+                    'globalvars' => $globalvars,
+                    'localvars' => $localvars
+                )
+            );
+
+        $vars = new variables();
+        try {
+            $stack = $vars->parse_random_variables($randomvars);
+            $evaluatedglobalvars = $vars->evaluate_assignments($vars->instantiate_random_variables($stack), $globalvars);
+            $vars->evaluate_assignments($evaluatedglobalvars, $localvars);
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+        return '';
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function check_local_vars_returns() {
+        return new \external_value(PARAM_RAW, 'empty string or error message');
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
      */
     public static function render_question_text_parameters() {
         return new \external_function_parameters(
@@ -338,12 +390,15 @@ class instantiation extends \external_api {
     }
 
     /**
-     * Undocumented function
+     * Replace variable placeholders in the question text and all parts' text, using global variables
+     * and parts' local variables. This only makes sense after random variables have been instantiated,
+     * so we expect the caller to include them as normal global variables. (That's what they are once they
+     * have lost their randomness.)
      *
-     * @param [type] $questiontext
-     * @param [type] $parttexts
-     * @param [type] $globalvars
-     * @param [type] $partvars
+     * @param string $questiontext the question's text, possibly including place holders or calculations
+     * @param array $parttexts array of parts' texts, possibly including place holders or calculations
+     * @param string $globalvars string defining the global (and instantiated random) variables
+     * @param array $partvars array of strings defining the parts' local variables
      * @return void
      */
     public static function render_question_text($questiontext, $parttexts, $globalvars, $partvars) {
@@ -371,9 +426,8 @@ class instantiation extends \external_api {
     }
 
     /**
-     * Undocumented function
-     *
-     * @return void
+     * Returns description of method result value
+     * @return external_description
      */
     public static function render_question_text_returns() {
         return new \external_single_structure(array(
