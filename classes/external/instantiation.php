@@ -103,12 +103,11 @@ class instantiation extends \external_api {
                 $evaluatedlocalvars[$i] = $vars->evaluate_assignments($evaluatedglobalvars, $localvars[$i]);
                 $evaluatedanswers[$i] = $vars->evaluate_general_expression($evaluatedlocalvars[$i], $answers[$i]);
             }
-
         } catch (Exception $e) {
             return $e->getMessage();
         }
 
-        $row = array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());//array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());
+        $row = array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());
         foreach ($instantiatedrandomvars->all as $name => $value) {
             $row['randomvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
         }
