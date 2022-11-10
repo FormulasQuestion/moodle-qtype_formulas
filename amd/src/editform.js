@@ -23,6 +23,7 @@
  */
 
 import * as Notification from 'core/notification';
+import * as String from 'core/str';
 import {call as fetchMany} from 'core/ajax';
 import {TabulatorFull as Tabulator} from 'qtype_formulas/tabulator';
 
@@ -37,59 +38,23 @@ var defaultCorrectness = '';
 var numberOfParts = 0;
 
 export const init = (defCorrectness) => {
-    Tabulator.extendModule('columnCalcs', 'calculations', {
-        'myavg': (values) => {
-            var count = 0;
-            var sum = 0;
-
-            for (let value of values) {
-                sum += parseFloat(value);
-                count++;
-            }
-
-            if (count > 0 && !isNaN(sum)) {
-                return (sum / count).toFixed(1);
-            }
-            return '';
-        },
-        'avglabel': () => {
-            return '⌀';
-        }
-    });
-    let table = new Tabulator('#varsdata_display', {
-        selectable: 1,
-        movableColumns: true,
-        pagination: 'local',
-        paginationSize: 10,
-        paginationButtonCount: 0,
-        columns: [
-            {title: '#', field: 'id', bottomCalc: 'avglabel'},
-        ],
-        langs: {
-            'default': {
-                'pagination': {
-                    'first': '⏮',
-                    'last': '⏭',
-                    'prev': '⏪',
-                    'next': '⏩'
-                }
-            }
-        },
-    });
-    table.on('rowSelected', previewQuestionWithDataset);
     defaultCorrectness = defCorrectness;
     numberOfParts = document.querySelectorAll('fieldset[id^=id_answerhdr_]').length;
 
+    extendTabulator();
+    initTable();
+
     for (let i = 0; i < numberOfParts; i++) {
         let textfield = document.getElementById(`id_correctness_${i}`);
-        // Constantly check whether the current grading criterion is simple enough
-        // to allow to switch to simple mode.
-        textfield.addEventListener('input', blockModeSwitcherIfNeeded.bind(null, i));
 
         // Event listener for the submission of the form (attach only once)
         if (i === 0) {
             textfield.form.addEventListener('submit', reenableCriterionTextfields);
         }
+
+        // Constantly check whether the current grading criterion is simple enough
+        // to allow to switch to simple mode.
+        textfield.addEventListener('input', blockModeSwitcherIfNeeded.bind(null, i));
 
         let checkbox = document.getElementById(`id_correctness_simple_mode_${i}`);
         checkbox.addEventListener('click', handleGradingCriterionModeSwitcher.bind(null, i));
@@ -105,29 +70,92 @@ export const init = (defCorrectness) => {
 
         // Always keep the textual form of the grading criterion in sync, because that's
         // what is going to be submitted in the end.
-        document.getElementById(`id_correctness_simple_type_${i}`).addEventListener(
-            'change', handleSimpleCriterionChanges.bind(null, i)
-        );
-        document.getElementById(`id_correctness_simple_comp_${i}`).addEventListener(
-            'change', handleSimpleCriterionChanges.bind(null, i)
-        );
-        document.getElementById(`id_correctness_simple_tol_${i}`).addEventListener(
-            'change', handleSimpleCriterionChanges.bind(null, i)
-        );
+        let elements = ['type', 'comp', 'tol'];
+        for (let element of elements) {
+            document.getElementById(`id_correctness_simple_${element}_${i}`).addEventListener(
+                'change', handleSimpleCriterionChanges.bind(null, i)
+            );
+        }
         document.getElementById(`id_correctness_simple_tol_${i}`).addEventListener(
             'change', normalizeTolerance
         );
     }
 
-    document.getElementById('id_varsrandom').addEventListener(
-        'change', validateRandomvars
-    );
-    document.getElementById('id_varsglobal').addEventListener(
-        'change', validateGlobalvars
-    );
+    // When the definition of random, global or any part's local variables is changed,
+    // have them validated by the backend.
+    let variableFields = [{field: 'random', handler: validateRandomvars}, {field: 'global', handler: validateGlobalvars}];
+    for (let i = 0; i < numberOfParts; i++) {
+        variableFields.push({field: `1_${i}`, handler: validateLocalvars.bind(null, i)});
+    }
+    for (let field of variableFields) {
+        document.getElementById(`id_vars${field.field}`).addEventListener(
+            'change', field.handler
+        );
+    }
+
+    // Event listener for the "instantiate" button.
     document.getElementById('id_instantiatebtn').addEventListener(
         'click', instantiate
     );
+};
+
+/**
+ * Add some customizations to Tabulator.js
+ */
+const extendTabulator = () => {
+    Tabulator.extendModule('columnCalcs', 'calculations', {
+        'stats': (values) => {
+            var count = 0;
+            var min = Infinity;
+            var max = -Infinity;
+            var sum = 0;
+
+            for (let value of values) {
+                sum += parseFloat(value);
+                min = Math.min(min, value);
+                max = Math.max(max, value);
+                count++;
+            }
+
+            // If minimum and maximum are the same, we don't display the stats, because
+            // the values are constant.
+            if (min === max) {
+                return ['', '', ''];
+            }
+
+            if (count > 0 && !isNaN(sum)) {
+                return [(sum / count).toFixed(1), min, max];
+            }
+            return ['', '', ''];
+        },
+    });
+};
+
+/**
+ * Init the table we use for checking the variables' instantiation.
+ */
+const initTable = () => {
+    let table = new Tabulator('#varsdata_display', {
+        selectable: 1,
+        movableColumns: true,
+        pagination: 'local',
+        paginationSize: 10,
+        paginationButtonCount: 0,
+        columns: [
+            {title: '#', field: 'id'},
+        ],
+        langs: {
+            'default': {
+                'pagination': {
+                    'first': '⏮',
+                    'last': '⏭',
+                    'prev': '⏪',
+                    'next': '⏩'
+                }
+            }
+        },
+    });
+    table.on('rowSelected', previewQuestionWithDataset);
 };
 
 /**
@@ -180,6 +208,10 @@ const fetchTextFromEditor = (id) => {
  * @param {object} row RowComponent from Tabulator.js
  */
 const previewQuestionWithDataset = (row) => {
+    // The statistics row is clickable, but we cannot use its data to preview the question.
+    if (row.getElement().classList.contains('tabulator-calcs')) {
+        return;
+    }
     let data = row.getData();
     let questionvars = '';
     let partvars = Array(numberOfParts).fill('');
@@ -223,6 +255,25 @@ const previewQuestionWithDataset = (row) => {
 };
 
 /**
+ * Trigger MathJax rendering for the question.
+ *
+ * @param {Element} element the <div> element where the question text is shown
+ */
+const triggerMathJax = (element) => {
+    if (typeof window.MathJax === 'undefined') {
+        return;
+    }
+    let version = window.MathJax.version;
+    if (version[0] == '2') {
+        window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, element]);
+        return;
+    }
+    if (version[0] == '3') {
+        window.MathJax.typesetPromise([element]);
+    }
+};
+
+/**
  * This function is called after the AJAX request to the backend is completed. It will inject
  * the rendered texts into the preview div.
  *
@@ -234,26 +285,49 @@ const showRenderedQuestionAndParts = (data) => {
     for (let text of data.parts) {
         div.innerHTML += text;
     }
+    triggerMathJax(div);
 };
 
 /**
  * Derive the column description from the instantiated variables.
  *
  * @param {object} data instantiation data as received from the backend
- * @returns {object} column description object for Tabulator.js
  */
 const prepareTableColumns = (data) => {
+    if (data.status == 'error') {
+        String.get_string('previewerror', 'qtype_formulas').then((str) => {
+            document.getElementById('qtextpreview_display').innerHTML = `${str}<br>${data.message}`;
+        }).catch();
+        return;
+    }
     let firstRow = data.data[0];
+    let calcOptions = {bottomCalc: 'stats', bottomCalcFormatter: (cell) => cell.getValue().join('<br>')};
+    let columnDescription = [{title: '#', field: 'id', bottomCalcFormatter: () => '⌀<br>min</br>max'}];
+
     // Random variables come first
     let randomColumns = [];
     for (let column of firstRow.randomvars) {
-        randomColumns.push({title: column.name, field: `random_${column.name}`, bottomCalc: 'myavg'});
+        randomColumns.push({
+            title: column.name,
+            field: `random_${column.name}`,
+            ...calcOptions
+        });
+    }
+    if (randomColumns.length > 0) {
+        columnDescription.push({title: 'Random variables', columns: randomColumns});
     }
 
     // Then we take the global variables
     let globalColumns = [];
     for (let column of firstRow.globalvars) {
-        globalColumns.push({title: column.name, field: `global_${column.name}`, bottomCalc: 'myavg'});
+        globalColumns.push({
+            title: column.name,
+            field: `global_${column.name}`,
+            ...calcOptions
+        });
+    }
+    if (globalColumns.length > 0) {
+        columnDescription.push({title: 'Global variables', columns: globalColumns});
     }
 
     // Finally, we prepare the groups for each part
@@ -262,22 +336,24 @@ const prepareTableColumns = (data) => {
     for (let part of firstRow.parts) {
         let thisPartsColumns = [];
         for (let vars of part) {
-            thisPartsColumns.push({title: vars.name, field: `part_${partIndex}_${vars.name}`, bottomCalc: 'myavg'});
+            thisPartsColumns.push({
+                title: vars.name,
+                field: `part_${partIndex}_${vars.name}`,
+                ...calcOptions
+            });
         }
-        partColumns.push({title: `part ${partIndex + 1}`, columns: thisPartsColumns});
+        partColumns.push({title: `Part ${partIndex + 1}`, columns: thisPartsColumns});
         partIndex++;
     }
-
-    // Now, put it all together
-    let columnDescription = [
-        {title: '#', field: 'id'},
-        {title: 'random variables', columns: randomColumns},
-        {title: 'global variables', columns: globalColumns},
-        ...partColumns
-    ];
+    columnDescription = [...columnDescription, ...partColumns];
     Tabulator.findTable("#varsdata_display")[0].setColumns(columnDescription);
     fillTable(data);
-    return columnDescription;
+
+    // We do not show the calculation row in the footer if there's just one data set.
+    let holders = document.querySelectorAll('div.tabulator-calcs-holder');
+    for (let holder of holders) {
+        holder.style.display = (data.data.length > 1 ? 'block' : 'none');
+    }
 };
 
 /**
@@ -317,22 +393,20 @@ const fillTable = (data) => {
  */
 const instantiate = () => {
     let howMany = document.getElementById('id_numdataset').value;
+    let localvars = [];
+    let answers = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        localvars[i] = document.getElementById(`id_vars1_${i}`).value;
+        answers[i] = document.getElementById(`id_answer_${i}`).value;
+    }
     fetchMany([{
         methodname: 'qtype_formulas_instantiate',
         args: {
             n: howMany,
             randomvars: document.getElementById('id_varsrandom').value,
             globalvars: document.getElementById('id_varsglobal').value,
-            localvars: [
-                document.getElementById('id_vars1_0').value,
-                document.getElementById('id_vars1_1').value,
-                document.getElementById('id_vars1_2').value,
-            ],
-            answers: [
-                document.getElementById('id_answer_0').value,
-                document.getElementById('id_answer_1').value,
-                document.getElementById('id_answer_2').value,
-            ]
+            localvars: localvars,
+            answers: answers
         },
         done: prepareTableColumns,
         fail: Notification.exception
@@ -348,6 +422,12 @@ const instantiate = () => {
  * @param {Event} evt Event object
  */
 const validateGlobalvars = (evt) => {
+    // We don't validate an empty field. But if there is an error from earlier validation,
+    // we must make sure it is removed.
+    if (evt.target.value === '') {
+        showOrClearValidationError(evt.target.id, '');
+        return;
+    }
     fetchMany([{
         methodname: 'qtype_formulas_check_random_global_vars',
         args: {
@@ -369,6 +449,12 @@ const validateGlobalvars = (evt) => {
  * @param {Event} evt Event object
  */
 const validateRandomvars = (evt) => {
+    // We don't validate an empty field. But if there is an error from earlier validation,
+    // we must make sure it is removed.
+    if (evt.target.value === '') {
+        showOrClearValidationError(evt.target.id, '');
+        return;
+    }
     fetchMany([{
         methodname: 'qtype_formulas_check_random_global_vars',
         args: {
@@ -376,6 +462,28 @@ const validateRandomvars = (evt) => {
         },
         done: (answer) => {
             showOrClearValidationError(evt.target.id, answer);
+        },
+        fail: Notification.exception
+    }]);
+};
+
+const validateLocalvars = (part) => {
+    let target = document.getElementById(`id_vars1_${part}`);
+    // We don't validate an empty field. But if there is an error from earlier validation,
+    // we must make sure it is removed.
+    if (target.value === '') {
+        showOrClearValidationError(target.id, '');
+        return;
+    }
+    fetchMany([{
+        methodname: 'qtype_formulas_check_local_vars',
+        args: {
+            randomvars: document.getElementById('id_varsrandom').value,
+            globalvars: document.getElementById('id_varsglobal').value,
+            localvars: target.value
+        },
+        done: (answer) => {
+            showOrClearValidationError(target.id, answer);
         },
         fail: Notification.exception
     }]);

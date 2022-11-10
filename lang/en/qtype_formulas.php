@@ -199,6 +199,7 @@ $string['renew'] = 'Update';
 $string['qtextpreview'] = 'Preview';
 $string['varsstatistics'] = 'Statistics';
 $string['varsdata'] = 'Instantiated data sets';
+$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables and parts\' local variables. Original error message:';
 
 // Errors message used by editing form's validation.
 $string['error_no_answer'] = 'At least one answer is required.';
