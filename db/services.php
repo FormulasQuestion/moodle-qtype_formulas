@@ -35,6 +35,15 @@ $functions = array(
         'capabilities'  => '',
         'services' => array()
     ),
+    'qtype_formulas_check_local_vars' => array(
+        'classname'   => 'qtype_formulas\external\instantiation',
+        'methodname'  => 'check_local_vars',
+        'description' => 'Validate definition of a part\'s local variables',
+        'type'        => 'read',
+        'ajax'        => true,
+        'capabilities'  => '',
+        'services' => array()
+    ),
     'qtype_formulas_render_question_text' => array(
         'classname'   => 'qtype_formulas\external\instantiation',
         'methodname'  => 'render_question_text',
