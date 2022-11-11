@@ -24,6 +24,7 @@
 
 import * as Notification from 'core/notification';
 import * as String from 'core/str';
+import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
 import {TabulatorFull as Tabulator} from 'qtype_formulas/tabulator';
 
@@ -207,7 +208,7 @@ const fetchTextFromEditor = (id) => {
  *
  * @param {object} row RowComponent from Tabulator.js
  */
-const previewQuestionWithDataset = (row) => {
+const previewQuestionWithDataset = async (row) => {
     // The statistics row is clickable, but we cannot use its data to preview the question.
     if (row.getElement().classList.contains('tabulator-calcs')) {
         return;
@@ -241,17 +242,23 @@ const previewQuestionWithDataset = (row) => {
         parttexts[i] = fetchTextFromEditor(`id_subqtext_${i}`);
     }
 
-    fetchMany([{
-        methodname: 'qtype_formulas_render_question_text',
-        args: {
-            questiontext: fetchTextFromEditor('id_questiontext'),
-            parttexts: parttexts,
-            globalvars: questionvars,
-            partvars: partvars
-        },
-        done: showRenderedQuestionAndParts,
-        fail: Notification.exception
-    }]);
+    let pendingPromise = new Pending('qtype_formulas/questionpreview');
+    try {
+        let renderedTexts = await fetchMany([{
+            methodname: 'qtype_formulas_render_question_text',
+            args: {
+                questiontext: fetchTextFromEditor('id_questiontext'),
+                parttexts: parttexts,
+                globalvars: questionvars,
+                partvars: partvars
+            }
+        }])[0];
+        showRenderedQuestionAndParts(renderedTexts);
+    }
+    catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
 };
 
 /**
@@ -294,16 +301,7 @@ const showRenderedQuestionAndParts = (data) => {
  * @param {object} data instantiation data as received from the backend
  */
 const prepareTableColumns = (data) => {
-    if (data.status == 'error') {
-        String.get_string('previewerror', 'qtype_formulas').then((str) => {
-            document.getElementById('qtextpreview_display').innerHTML = `${str}<br>${data.message}`;
-        }).catch();
-        return;
-    }
-    else {
-        document.getElementById('qtextpreview_display').innerHTML = '';
-    }
-    let firstRow = data.data[0];
+    let firstRow = data[0];
     let calcOptions = {bottomCalc: 'stats', bottomCalcFormatter: (cell) => cell.getValue().join('<br>')};
     let columnDescription = [{title: '#', field: 'id', bottomCalcFormatter: () => '⌀<br>min</br>max'}];
 
@@ -367,7 +365,7 @@ const prepareTableColumns = (data) => {
 const fillTable = (data) => {
     let allRows = [];
     let rowCounter = 0;
-    for (let row of data.data) {
+    for (let row of data) {
         let thisRow = {id: ++rowCounter};
         for (let thisVar of row.randomvars) {
             thisRow[`random_${thisVar.name}`] = thisVar.value;
@@ -394,7 +392,7 @@ const fillTable = (data) => {
  * on the number the user has selected in the corresponding dropdown field. Once the
  * AJAX requeset is completed, the data will be forwarded to {@link prepareTableColumns}.
  */
-const instantiate = () => {
+const instantiate = async () => {
     let howMany = document.getElementById('id_numdataset').value;
     let localvars = [];
     let answers = [];
@@ -402,18 +400,30 @@ const instantiate = () => {
         localvars[i] = document.getElementById(`id_vars1_${i}`).value;
         answers[i] = document.getElementById(`id_answer_${i}`).value;
     }
-    fetchMany([{
-        methodname: 'qtype_formulas_instantiate',
-        args: {
-            n: howMany,
-            randomvars: document.getElementById('id_varsrandom').value,
-            globalvars: document.getElementById('id_varsglobal').value,
-            localvars: localvars,
-            answers: answers
-        },
-        done: prepareTableColumns,
-        fail: Notification.exception
-    }]);
+    let pendingPromise = new Pending('qtype_formulas/instantiate');
+    try {
+        let response = await fetchMany([{
+            methodname: 'qtype_formulas_instantiate',
+            args: {
+                n: howMany,
+                randomvars: document.getElementById('id_varsrandom').value,
+                globalvars: document.getElementById('id_varsglobal').value,
+                localvars: localvars,
+                answers: answers
+            }
+        }])[0];
+        if (response.status == 'error') {
+            let str = await String.get_string('previewerror', 'qtype_formulas');
+            document.getElementById('qtextpreview_display').innerHTML = `${str}<br>${response.message}`;
+        }
+        else {
+            document.getElementById('qtextpreview_display').innerHTML = '';
+            prepareTableColumns(response.data);
+        }
+    } catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
 };
 
 /**
@@ -424,24 +434,28 @@ const instantiate = () => {
  *
  * @param {Event} evt Event object
  */
-const validateGlobalvars = (evt) => {
+const validateGlobalvars = async (evt) => {
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
     if (evt.target.value === '') {
         showOrClearValidationError(evt.target.id, '');
         return;
     }
-    fetchMany([{
-        methodname: 'qtype_formulas_check_random_global_vars',
-        args: {
-            randomvars: document.getElementById('id_varsrandom').value,
-            globalvars: evt.target.value
-        },
-        done: (answer) => {
-            showOrClearValidationError(evt.target.id, answer);
-        },
-        fail: Notification.exception
-    }]);
+    let pendingPromise = new Pending('qtype_formulas/validateglobal');
+    try {
+        let validationResult = await fetchMany([{
+            methodname: 'qtype_formulas_check_random_global_vars',
+            args: {
+                randomvars: document.getElementById('id_varsrandom').value,
+                globalvars: evt.target.value
+            },
+        }])[0];
+        showOrClearValidationError(evt.target.id, validationResult);
+    }
+    catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
 };
 
 /**
@@ -451,26 +465,30 @@ const validateGlobalvars = (evt) => {
  *
  * @param {Event} evt Event object
  */
-const validateRandomvars = (evt) => {
+const validateRandomvars = async (evt) => {
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
     if (evt.target.value === '') {
         showOrClearValidationError(evt.target.id, '');
         return;
     }
-    fetchMany([{
-        methodname: 'qtype_formulas_check_random_global_vars',
-        args: {
-            randomvars: evt.target.value
-        },
-        done: (answer) => {
-            showOrClearValidationError(evt.target.id, answer);
-        },
-        fail: Notification.exception
-    }]);
+    let pendingPromise = new Pending('qtype_formulas/validaterandom');
+    try {
+        let validationResult = await fetchMany([{
+            methodname: 'qtype_formulas_check_random_global_vars',
+            args: {
+                randomvars: evt.target.value
+            },
+        }])[0];
+        showOrClearValidationError(evt.target.id, validationResult);
+    }
+    catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
 };
 
-const validateLocalvars = (part) => {
+const validateLocalvars = async (part) => {
     let target = document.getElementById(`id_vars1_${part}`);
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
@@ -478,18 +496,22 @@ const validateLocalvars = (part) => {
         showOrClearValidationError(target.id, '');
         return;
     }
-    fetchMany([{
-        methodname: 'qtype_formulas_check_local_vars',
-        args: {
-            randomvars: document.getElementById('id_varsrandom').value,
-            globalvars: document.getElementById('id_varsglobal').value,
-            localvars: target.value
-        },
-        done: (answer) => {
-            showOrClearValidationError(target.id, answer);
-        },
-        fail: Notification.exception
-    }]);
+    let pendingPromise = Pending('qtype_formulas/validatelocal');
+    try {
+        let validationResult = await fetchMany([{
+            methodname: 'qtype_formulas_check_local_vars',
+            args: {
+                randomvars: document.getElementById('id_varsrandom').value,
+                globalvars: document.getElementById('id_varsglobal').value,
+                localvars: target.value
+            }
+        }])[0];
+        showOrClearValidationError(target.id, validationResult);
+    }
+    catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
 };
 
 /**
