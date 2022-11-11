@@ -53,6 +53,5 @@ Feature: Test instantiation and inline preview while editing a question
     When I set the following fields to these values:
       | id_varsglobal | a=3; |
     And I click on "Instantiate" "button"
-    And I click on "div.tabulator-row-odd.tabulator-selectable" "css_element"
     Then I should not see "No preview available."
 
