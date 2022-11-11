@@ -50,9 +50,9 @@ Feature: Test instantiation and inline preview while editing a question
       | id_numdataset   | 5                      |
     And I click on "Instantiate" "button"
     Then I should see "No preview available."
-    When I set the field "id_varsglobal" to "a=3;"
+    When I set the following fields to these values:
+      | id_varsglobal | a=3; |
     And I click on "Instantiate" "button"
     And I click on "div.tabulator-row-odd.tabulator-selectable" "css_element"
-    Then I should see "Showing 3 and 6"
-    And I should see "Part 1 with 8"
+    Then I should not see "No preview available."
 
