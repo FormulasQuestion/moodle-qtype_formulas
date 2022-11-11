@@ -65,5 +65,5 @@ Feature: Test on-the-fly validation of variables while editing a question
     #  | id_varsrandom | b={1,2,3}; |
       | id_varsglobal | c=4; |
       | id_vars1_0    |      |
-    And I set the field "Local variables" to "a=2*c"
+    And I set the field "id_vars1_0" to "a=2*c"
     Then I should not see "1: Variable 'c' has not been defined. in substitute_vname_by_variables"

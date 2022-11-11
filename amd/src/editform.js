@@ -353,7 +353,7 @@ const prepareTableColumns = (data) => {
     // We do not show the calculation row in the footer if there's just one data set.
     let holders = document.querySelectorAll('div.tabulator-calcs-holder');
     for (let holder of holders) {
-        holder.style.display = (data.data.length > 1 ? 'block' : 'none');
+        holder.style.display = (data.length > 1 ? 'block' : 'none');
     }
 };
 
