@@ -398,7 +398,7 @@ class instantiation extends \external_api {
      * @param array $parttexts array of parts' texts, possibly including place holders or calculations
      * @param string $globalvars string defining the global (and instantiated random) variables
      * @param array $partvars array of strings defining the parts' local variables
-     * @return void
+     * @return array associative array with the rendered question text and array of parts' texts
      */
     public static function render_question_text($questiontext, $parttexts, $globalvars, $partvars) {
         $vars = new variables();
@@ -407,7 +407,10 @@ class instantiation extends \external_api {
         try {
             $evaluatedglobalvars = $vars->evaluate_assignments($stack, $globalvars);
         } catch (Exception $e) {
-            return $e->getMessage();
+            return array(
+                'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                'parts' => array()
+            );
         }
         $renderedquestion = $vars->substitute_variables_in_text($evaluatedglobalvars, $questiontext);
 
