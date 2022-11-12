@@ -25,11 +25,11 @@ Feature: Test instantiation and inline preview while editing a question
   @javascript
   Scenario: Instantiate and preview
     When I set the following fields to these values:
-      | id_varsglobal   | a=3;                   |
-      | id_questiontext | Showing {a} and {=2*a} |
-      | id_subqtext_0   | Part 1 with {=a+b}     |
-      | id_vars1_0      | b=5;                   |
-      | id_numdataset   | 5                      |
+      | id_varsglobal   | a=3;                          |
+      | id_questiontext | <p>Showing {a} and {=2*a}</p> |
+      | id_subqtext_0   | <p>Part 1 with {=a+b}</p>     |
+      | id_vars1_0      | b=5;                          |
+      | id_numdataset   | 5                             |
     And I click on "Instantiate" "button"
     Then I should see "3" in the "div.tabulator-row:not(.tabulator-calcs):last-child > [tabulator-field=global_a]" "css_element"
     When I click on "div.tabulator-row:not(.tabulator-calcs):first-child" "css_element"
@@ -38,17 +38,16 @@ Feature: Test instantiation and inline preview while editing a question
     When I set the following fields to these values:
       | id_subqtext_0 |  |
     And I click on "div.tabulator-row:not(.tabulator-calcs):last-child" "css_element"
-    Then I should see "Showing 3 and 6" in the "#qtextpreview_display" "css_element"
-    And I should not see "Part 1 with 8" in the "#qtextpreview_display" "css_element"
+    Then I should not see "Part 1 with 8" in the "#qtextpreview_display" "css_element"
 
   @javascript
   Scenario: Try to instantiate with invalid data
     When I set the following fields to these values:
-      | id_varsglobal   | a=x+;                  |
-      | id_questiontext | Showing {a} and {=2*a} |
-      | id_subqtext_0   | Part 1 with {=a+b}     |
-      | id_vars1_0      | b=5;                   |
-      | id_numdataset   | 5                      |
+      | id_varsglobal   | a=x+;                         |
+      | id_questiontext | <p>Showing {a} and {=2*a}</p> |
+      | id_subqtext_0   | <p>Part 1 with {=a+b}</p>     |
+      | id_vars1_0      | b=5;                          |
+      | id_numdataset   | 5                             |
     And I click on "Instantiate" "button"
     Then I should see "No preview available." in the "#qtextpreview_display" "css_element"
     When I set the following fields to these values:
