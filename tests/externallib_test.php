@@ -45,7 +45,8 @@ class externallib_test extends \externallib_advanced_testcase {
             array('randomvars' => '', 'globalvars' => 'a=1', 'return' => ''),
             array('randomvars' => 'a={1,2}', 'globalvars' => 'b=a', 'return' => ''),
             array('randomvars' => 'a=1', 'globalvars' => '', 'return' => '1: a: Syntax error.'),
-            array('randomvars' => '', 'globalvars' => 'b=a', 'return' => '1: Variable \'a\' has not been defined. in substitute_vname_by_variables'),
+            array('randomvars' => '', 'globalvars' => 'b=a',
+                'return' => '1: Variable \'a\' has not been defined. in substitute_vname_by_variables'),
             array('randomvars' => '', 'globalvars' => 'a=', 'return' => '1: A subexpression is empty.'),
             array('randomvars' => '', 'globalvars' => 'a=+', 'return' => '1: Some expressions cannot be evaluated numerically.')
         );
@@ -54,7 +55,9 @@ class externallib_test extends \externallib_advanced_testcase {
             $returnvalue = external\instantiation::check_random_global_vars(
                 $case['randomvars'], $case['globalvars']
             );
-            $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_random_global_vars_returns(), $returnvalue);
+            $returnvalue = \external_api::clean_returnvalue(
+                external\instantiation::check_random_global_vars_returns(), $returnvalue
+            );
             $this->assertEquals($case['return'], $returnvalue);
         }
     }
@@ -65,10 +68,12 @@ class externallib_test extends \externallib_advanced_testcase {
         $testcases = array(
             array('randomvars' => '', 'globalvars' => '', 'localvars' => '', 'return' => ''),
             array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b', 'return' => '1: Variable \'b\' has not been defined. in substitute_vname_by_variables'),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b',
+                'return' => '1: Variable \'b\' has not been defined. in substitute_vname_by_variables'),
             array('randomvars' => 'b={1,2}', 'globalvars' => '', 'localvars' => 'a=b', 'return' => ''),
             array('randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+', 'return' => '1: Some expressions cannot be evaluated numerically.'),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+',
+                'return' => '1: Some expressions cannot be evaluated numerically.'),
             array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=', 'return' => '1: A subexpression is empty.'),
         );
 
