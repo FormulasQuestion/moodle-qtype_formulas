@@ -196,7 +196,7 @@ const quoteNonNumericValue = (value) => {
  * @returns {string} the question or part's text
  */
 const fetchTextFromEditor = (id) => {
-    if (typeof window.tinyMCE !== 'undefined') {
+    if (typeof window.tinyMCE !== 'undefined' && window.tinyMCE.get(id) !== null) {
         return window.tinyMCE.get(id).getContent();
     }
     return document.getElementById(id).value;
