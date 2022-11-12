@@ -32,12 +32,12 @@ Feature: Test instantiation and inline preview while editing a question
       | id_numdataset   | 5                             |
     And I click on "Instantiate" "button"
     Then I should see "3" in the "div.tabulator-row:not(.tabulator-calcs):last-child > [tabulator-field=global_a]" "css_element"
-    When I click on "div.tabulator-row:not(.tabulator-calcs):first-child" "css_element"
-    Then I should see "Showing" in the "#qtextpreview_display" "css_element"
-    And I should see "Part 1" in the "#qtextpreview_display" "css_element"
+    When I click on "div.tabulator-row-odd.tabulator-selectable" "css_element"
+    Then I should see "Showing 3 and 6" in the "#qtextpreview_display" "css_element"
+    And I should see "Part 1 with 8" in the "#qtextpreview_display" "css_element"
     When I set the following fields to these values:
       | id_subqtext_0 |  |
-    And I click on "div.tabulator-row:not(.tabulator-calcs):last-child" "css_element"
+    And I click on "div.tabulator-row-even.tabulator-selectable" "css_element"
     Then I should not see "Part 1" in the "#qtextpreview_display" "css_element"
 
   @javascript
