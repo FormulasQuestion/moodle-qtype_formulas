@@ -43,11 +43,6 @@ class qtype_formulas_edit_form extends question_edit_form {
         global $PAGE;
         $config = get_config('qtype_formulas');
         $PAGE->requires->js_call_amd('qtype_formulas/editform', 'init', [get_config('qtype_formulas')->defaultcorrectness]);
-        $PAGE->requires->string_for_js('relerror', 'qtype_formulas');
-        $PAGE->requires->string_for_js('abserror', 'qtype_formulas');
-        $PAGE->requires->string_for_js('instantiate', 'qtype_formulas');
-        $PAGE->requires->string_for_js('renew', 'qtype_formulas');
-        $PAGE->requires->string_for_js('unit', 'qtype_formulas');
         $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
         $PAGE->requires->css('/question/type/formulas/styles.css');
         $PAGE->requires->css('/question/type/formulas/tabulator.css');
