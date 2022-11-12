@@ -208,7 +208,7 @@ const fetchTextFromEditor = (id) => {
  *
  * @param {object} row RowComponent from Tabulator.js
  */
-const previewQuestionWithDataset = async (row) => {
+const previewQuestionWithDataset = async(row) => {
     // The statistics row is clickable, but we cannot use its data to preview the question.
     if (row.getElement().classList.contains('tabulator-calcs')) {
         return;
@@ -254,8 +254,7 @@ const previewQuestionWithDataset = async (row) => {
             }
         }])[0];
         showRenderedQuestionAndParts(renderedTexts);
-    }
-    catch (err) {
+    } catch (err) {
         Notification.exception(err);
     }
     pendingPromise.resolve();
@@ -392,7 +391,7 @@ const fillTable = (data) => {
  * on the number the user has selected in the corresponding dropdown field. Once the
  * AJAX requeset is completed, the data will be forwarded to {@link prepareTableColumns}.
  */
-const instantiate = async () => {
+const instantiate = async() => {
     let howMany = document.getElementById('id_numdataset').value;
     let localvars = [];
     let answers = [];
@@ -415,8 +414,7 @@ const instantiate = async () => {
         if (response.status == 'error') {
             let str = await String.get_string('previewerror', 'qtype_formulas');
             document.getElementById('qtextpreview_display').innerHTML = `${str}<br>${response.message}`;
-        }
-        else {
+        } else {
             document.getElementById('qtextpreview_display').innerHTML = '';
             prepareTableColumns(response.data);
         }
@@ -434,7 +432,7 @@ const instantiate = async () => {
  *
  * @param {Event} evt Event object
  */
-const validateGlobalvars = async (evt) => {
+const validateGlobalvars = async(evt) => {
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
     if (evt.target.value === '') {
@@ -451,8 +449,7 @@ const validateGlobalvars = async (evt) => {
             },
         }])[0];
         showOrClearValidationError(evt.target.id, validationResult);
-    }
-    catch (err) {
+    } catch (err) {
         Notification.exception(err);
     }
     pendingPromise.resolve();
@@ -465,7 +462,7 @@ const validateGlobalvars = async (evt) => {
  *
  * @param {Event} evt Event object
  */
-const validateRandomvars = async (evt) => {
+const validateRandomvars = async(evt) => {
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
     if (evt.target.value === '') {
@@ -481,14 +478,13 @@ const validateRandomvars = async (evt) => {
             },
         }])[0];
         showOrClearValidationError(evt.target.id, validationResult);
-    }
-    catch (err) {
+    } catch (err) {
         Notification.exception(err);
     }
     pendingPromise.resolve();
 };
 
-const validateLocalvars = async (part) => {
+const validateLocalvars = async(part) => {
     let target = document.getElementById(`id_vars1_${part}`);
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
@@ -496,7 +492,7 @@ const validateLocalvars = async (part) => {
         showOrClearValidationError(target.id, '');
         return;
     }
-    let pendingPromise = Pending('qtype_formulas/validatelocal');
+    let pendingPromise = new Pending('qtype_formulas/validatelocal');
     try {
         let validationResult = await fetchMany([{
             methodname: 'qtype_formulas_check_local_vars',
@@ -507,8 +503,7 @@ const validateLocalvars = async (part) => {
             }
         }])[0];
         showOrClearValidationError(target.id, validationResult);
-    }
-    catch (err) {
+    } catch (err) {
         Notification.exception(err);
     }
     pendingPromise.resolve();
