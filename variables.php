@@ -27,9 +27,14 @@ use Exception, Throwable;
 
 defined('MOODLE_INTERNAL') || die();
 
-// Helper function to emulate the behaviour of the count() function
-// before php 7.2.
-// Needed because a string is passed as parameter in many places in the code.
+/**
+ * Helper function to emulate the behaviour of the count() function with PHP <7.2
+ * Until then, count() returned 1 for e.g. a string. Since 8.0, it throws TypeError in such cases
+ *
+ * @author Jean-Michel Védrine
+ * @param mixed $a
+ * @return integer
+ */
 function mycount($a) {
     if ($a === null) {
         return 0;
@@ -57,9 +62,8 @@ function fact($n) {
 /**
  * calculate standard normal probability density
  *
- * @param float $z  value
- *
  * @author Philipp Imhof
+ * @param float $z  value
  * @return float  standard normal density of $z
  */
 function stdnormpdf($z) {
@@ -110,11 +114,10 @@ function normcdf($x, $mu, $sigma) {
  * raise $a to the $b-th power modulo $m using efficient
  * square and multiply
  *
+ * @author Philipp Imhof
  * @param integer $a  base
  * @param integer $b  exponent
  * @param integer $m  modulus
- *
- * @author Philipp Imhof
  * @return integer  the result
  */
 function modpow($a, $b, $m) {
@@ -138,10 +141,9 @@ function modpow($a, $b, $m) {
  * calculate the multiplicative inverse of $a modulo $m using the
  * extended euclidean algorithm
  *
+ * @author Philipp Imhof
  * @param integer $a  the number whose inverse is to be found
  * @param integer $m  the modulus
- *
- * @author Philipp Imhof
  * @return integer  the result or 0 if the inverse does not exist
  */
 function modinv($a, $m) {
@@ -229,6 +231,18 @@ function sigfig($number, $precision) {
     return $answer;
 }
 
+/**
+ * format a polynomial to be display with LaTeX / MathJax
+ * can also be used to force the plus sign for a single number
+ * can also be used for arbitrary linear combinations
+ *
+ * @author Philipp Imhof
+ * @param mixed $variables one variable (as a string) or a list of variables (array of strings)
+ * @param mixed $coefficients one number or an array of numbers to be used as coefficients
+ * @param string $forceplus symbol to be used for the normally invisible leading plus, optional
+ * @param string $additionalseparator symbol to be used as separator between the terms, optional
+ * @return string  the formatted string
+ */
 function poly($variables, $coefficients = null, $forceplus = '', $additionalseparator = '') {
     // If no variable is given and there is just one single number, simply force the plus sign
     // on positive numbers.
