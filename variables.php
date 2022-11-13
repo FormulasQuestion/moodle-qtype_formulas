@@ -229,6 +229,77 @@ function sigfig($number, $precision) {
     return $answer;
 }
 
+function poly($variables, $coefficients = null, $forceplus = '', $additionalseparator = '') {
+    // If no variable is given and there is just one single number, simply force the plus sign
+    // on positive numbers.
+    if ($variables === '' && is_numeric($coefficients)) {
+        if ($coefficients > 0) {
+            return $forceplus . $coefficients;
+        }
+        return $coefficients;
+    }
+
+    $numberofterms = count($coefficients);
+    // By default, we think that a final coefficient == 1 is not to be shown, because it is a true coefficient
+    // and not a constant term.
+    $constantone = false;
+    // If there is just one variable, we blow it up to an array of the correct size and descending exponents.
+    if (gettype($variables) === 'string' && $variables !== '') {
+        // As we have just one variable, we are building a standard polynomial where the last coefficient
+        // is not a real coefficient, but a constant term that has to be printed.
+        $constantone = true;
+        $tmp = $variables;
+        $variables = array();
+        for ($i = 0; $i < $numberofterms; $i++) {
+            if ($i == $numberofterms - 2) {
+                $variables[$i] = $tmp;
+            } else if ($i == $numberofterms - 1) {
+                $variables[$i] = '';
+            } else {
+                $variables[$i] = $tmp . '^{' . ($numberofterms - 1 - $i) . '}';
+            }
+        }
+    }
+    // If the list of variables is shorter than the list of coefficients, just start over again.
+    if (count($variables) < $numberofterms) {
+        $numberofvars = count($variables);
+        for ($i = count($variables); $i < $numberofterms; $i++) {
+            $variables[$i] = $variables[$i % $numberofvars];
+        }
+    }
+
+    $result = '';
+    foreach ($coefficients as $i => $coef) {
+        $separator = ($i == 0 ? '' : $additionalseparator);
+        // Terms with coefficient == 0 are not shown. However, if we use a separator, it must be printed anyway.
+        if ($coef == 0) {
+            if ($i > 0) {
+                $result .= $separator;
+            }
+            continue;
+        }
+        // Put a + or - sign according to value of coefficient and replace the coefficient
+        // by its absolute value, as we don't need the sign anymore after this step.
+        if ($coef < 0) {
+            $result .= $separator . '-';
+            $coef = abs($coef);
+        } else {
+            $result .= $separator . '+';
+        }
+        // Put the coefficient. If the coefficient is +1 or -1, we don't put the number,
+        // unless we're at the last term. The sign is already there, so we use the absolute value.
+        if ($coef == 1) {
+            $coef = (($i == $numberofterms - 1 && $constantone) ? '1' : '');
+        }
+        $result .= $coef . $variables[$i];
+        // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).
+        if ($result[0] == '+') {
+            $result = $forceplus . substr($result, 1);
+        }
+    }
+    return $result;
+}
+
 /**
  * Class contains methods to parse variables text and evaluate variables. Results are stored in the $vstack
  * The functions can be roughly classified into 5 categories:
@@ -1251,48 +1322,51 @@ class variables {
                 $this->replace_middle($vstack, $expression, $l, $r, 'n', $sum);
                 return true;
             case 'poly':
-                // The poly function was contributed by PeTeL-Weizmann.
-                if ($sz == 1 && $typestr == 'ln') {
-                    $varName = 'x';
-                    $vals = $values[0];
-                } else if ($sz == 2 && $typestr == 's,ln') {
-                    $varName = $values[0];
-                    $vals = $values[1];
-                } else {
-                    break;
+                // For backwards compatibility: if called with just a list of numbers, use x as variable.
+                if (($sz == 1) && $typestr == 'ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('x', $values[0]));
+                    return true;
                 }
-
-                $pow = mycount($vals);
-                $pp = '';
-                foreach ($vals as $v) {
-                    $pow--;
-                    if ($v == 0) {
-                        continue;
-                    }
-                    $ss = ($pp != '' && $v > 0) ? '+' : '';
-                    if ($pow == 0) {
-                        $pp .= "{$ss}{$v}";
-                    } else {
-                        if ($v == 1) {
-                            $coff = "{$ss}";
-                        } else if ($v == -1) {
-                            $coff = "-";
-                        } else {
-                            $coff = "{$ss}{$v}";
-                        }
-
-                        if ($pow == 1) {
-                            $pp .= "{$coff}{$varName}";
-                        } else {
-                            $pp .= "{$coff}{$varName}^{{$pow}}";
-                        }
-                    }
+                // If called with just a number, force the plus sign (if the number is positive) to be shown.
+                // Basically, there is no other reason one would call this function with just one number.
+                if (($sz == 1) && $typestr == 'n') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('', $values[0], '+'));
+                    return true;
                 }
-                if ($pp == '') {
-                    $pp = '0';
+                // If called with a string and one number, combine them.
+                if (($sz == 2) && $typestr == 's,n') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly(array($values[0]), array($values[1])));
+                    return true;
                 }
-                $this->replace_middle($vstack, $expression, $l, $r, 's', $pp);
-                return true;
+                // Original functionality: if called with a string and a list of numbers, create a polynomial.
+                if (($sz == 2) && $typestr == 's,ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1]));
+                    return true;
+                }
+                // If called with a list of strings and a list of numbers, build a linear combination.
+                if (($sz == 2) && $typestr == 'ls,ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1]));
+                    return true;
+                }
+                // If called with a string, a number and another string, combine them while using the third argument
+                // to e. g. force a "+" on positive numbers.
+                if (($sz == 3) && $typestr == 's,n,s') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly(array($values[0]), array($values[1]), $values[2]));
+                    return true;
+                }
+                // If called with a string (or list of strings), a list of numbers and another string, combine them
+                // while using the third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                if (($sz == 3) && ($typestr == 's,ln,s' || $typestr == 'ls,ln,s')) {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1], '', $values[2]));
+                    return true;
+                }
+                // If called with a list of numbers and a string, use x as default variable for the polynomial and use the
+                // third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                if (($sz == 2) && $typestr == 'ln,s') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('x', $values[0], '', $values[1]));
+                    return true;
+                }
+                break;
             case 'concat':
                 if (!($sz >= 2 && ($types[0][0] == 'l'))) {
                     break;
