@@ -131,6 +131,11 @@ class qtype_formulas_edit_form extends question_edit_form {
         // Part's number of coordinates.
         $repeated[] = $mform->createElement('hidden', 'numbox', '', '');   // Exact value will be computed during validation.
         $repeatedoptions['numbox']['type'] = PARAM_INT;
+        // Part's placeholder.
+        $repeated[] = $mform->createElement('text', 'placeholder', get_string('placeholder', 'qtype_formulas'),
+            array('size' => 20));
+        $repeatedoptions['placeholder']['helpbutton'] = array('placeholder', 'qtype_formulas');
+        $repeatedoptions['placeholder']['type'] = PARAM_RAW;
         // Part's text.
         $repeated[] = $mform->createElement('editor', 'subqtext', get_string('subqtext', 'qtype_formulas'),
             array('rows' => 3), $this->editoroptions);
@@ -196,12 +201,6 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['correctness_simple_tol']['type'] = PARAM_FLOAT;
         $repeatedoptions['correctness_simple_tol']['default'] = '0.01';
 
-        // Part's placeholder.
-        $repeated[] = $mform->createElement('text', 'placeholder', get_string('placeholder', 'qtype_formulas'),
-            array('size' => 20));
-        $repeatedoptions['placeholder']['helpbutton'] = array('placeholder', 'qtype_formulas');
-        $repeatedoptions['placeholder']['type'] = PARAM_RAW;
-        $repeatedoptions['placeholder']['advanced'] = true;
         // Part's local variables.
         $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
