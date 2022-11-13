@@ -711,7 +711,7 @@ class functions_test extends \advanced_testcase {
             array(false, 'a=pi(1);'),
             array(true, 'a=poly("x", [1]);'),
             array(true, 'a=poly("x", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);'),
-            array(false, 'a=poly("x", 1);'),
+            array(true, 'a=poly("x", 1);'),
             array(false, 'a=poly("x", 1, 2);'),
             array(false, 'a=poly("x");'),
             array(false, 'a=poly();'),
