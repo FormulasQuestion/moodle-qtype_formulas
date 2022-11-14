@@ -348,12 +348,75 @@ const prepareTableColumns = (data) => {
     columnDescription = [...columnDescription, ...partColumns];
     Tabulator.findTable("#varsdata_display")[0].setColumns(columnDescription);
     fillTable(data);
+    // Fetch and show localized column group titles for random/global/part variables.
+    localizeColumnGroupNames();
+
 
     // We do not show the calculation row in the footer if there's just one data set.
     let holders = document.querySelectorAll('div.tabulator-calcs-holder');
     for (let holder of holders) {
         holder.style.display = (data.length > 1 ? 'block' : 'none');
     }
+};
+
+/**
+ * Make sure the column titles for random, global and part variables are localized.
+ *
+ * @returns {void}
+ */
+const localizeColumnGroupNames = async() => {
+    // For proper localization, we need to fetch the text for each part separately, because
+    // in some languages, the number might come before the word.
+    let partStringRequests = [];
+    for (let i = 0; i < numberOfParts; i++) {
+        partStringRequests.push({key: 'answerno', component: 'qtype_formulas', param: i + 1});
+    }
+    let strings = null;
+    let pendingPromise = new Pending('qtype_formulas/localization');
+    try {
+        strings = await String.get_strings([
+            {key: 'varsrandom', component: 'qtype_formulas'},
+            {key: 'varsglobal', component: 'qtype_formulas'},
+            ...partStringRequests
+        ]);
+    } catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
+    // If fetching of strings was not successful, we quit here.
+    if (strings === null) {
+        return;
+    }
+
+    // Fetch all column groups. Unfortunately, Tabulator.js does currently only offer
+    // an API to change column titles if the columns are not grouped. Therefore, we're
+    // doing it manually.
+    let columnGroups = document.querySelectorAll('div.tabulator-col-group');
+    let i = 1;
+    for (let group of columnGroups) {
+        // We do not always have random and global variables, so it's better to make sure.
+        if (group.getAttribute('aria-title') == 'Random variables') {
+            setTitleForColumnGroup(group, strings[0]);
+            continue;
+        }
+        if (group.getAttribute('aria-title') == 'Global variables') {
+            setTitleForColumnGroup(group, strings[1]);
+            continue;
+        }
+        // Remaining groups are for parts and there will always be at least one part.
+        setTitleForColumnGroup(group, strings[1 + i]);
+        i++;
+    }
+};
+
+/**
+ * Helper function to set the title and aria-title for a column group header.
+ * @param {Element} element the <div> holding the column title
+ * @param {string} title the new title
+ */
+const setTitleForColumnGroup = (element, title) => {
+    element.setAttribute('aria-title', title);
+    element.querySelector('div.tabulator-col-title').innerText = title;
 };
 
 /**

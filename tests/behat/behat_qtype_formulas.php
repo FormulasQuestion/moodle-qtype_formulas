@@ -47,9 +47,21 @@ class behat_qtype_formulas extends behat_base {
             new behat_component_named_selector(
                 'Validation Unit Tests Error Indicator',
                 ["//span[@id='validation-unittests-failed']"]
+            ),
+            new behat_component_named_selector(
+                'Validation Unit Tests Error Indicator',
+                ["//span[@id='validation-unittests-failed']"]
+            ),
+            new behat_component_named_selector(
+                'Field in first row of instantiation table',
+                ["//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][1]"
+                ."/div[contains(@class, 'tabulator-cell')][@tabulator-field=%locator%]"]
+            ),
+            new behat_component_named_selector(
+                'Field in second row of instantiation table',
+                ["//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][2]"
+                ."/div[contains(@class, 'tabulator-cell')][@tabulator-field=%locator%]"]
             )
         ];
     }
-
-
 }
