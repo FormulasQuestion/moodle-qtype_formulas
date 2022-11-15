@@ -866,6 +866,11 @@ class functions_test extends \advanced_testcase {
             array('p=poly("x", [1, sqrt(3**2), 1]);', 'x^{2}+3x+1'),
             // With a variable and a list of numbers, with or without a separator...
             array('p=poly("x", [1, 1, 1]);', 'x^{2}+x+1'),
+            array(
+                'p=poly("x", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);',
+                'x^{19}+2x^{18}+3x^{17}+4x^{16}+5x^{15}+6x^{14}+7x^{13}+8x^{12}+9x^{11}+10x^{10}+11x^{9}'
+                .'+12x^{8}+13x^{7}+14x^{6}+15x^{5}+16x^{4}+17x^{3}+18x^{2}+19x+20'
+            ),
             array('p=poly("x", [1.3, 1.5, 1.9]);', '1.3x^{2}+1.5x+1.9'),
             array('p=poly("x", [0, 0, 1]);', '1'),
             array('p=poly("y", [0, 0, 1]);', '1'),
