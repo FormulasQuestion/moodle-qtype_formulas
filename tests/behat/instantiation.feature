@@ -31,13 +31,14 @@ Feature: Test instantiation and inline preview while editing a question
       | id_vars1_0      | b=5;                          |
       | id_numdataset   | 5                             |
     And I click on "Instantiate" "button"
-    Then I should see "3" in the "global_a" "qtype_formulas > Field in first row of instantiation table"
-    When I click on "id" "qtype_formulas > Field in first row of instantiation table"
+    Then I should see "3" in the "global_a" field of row number "1" of the Formulas Question instantiation table
+    And I should see "5" in the "part_0_b" field of row number "1" of the Formulas Question instantiation table
+    When I click on row number "1" of the Formulas Question instantiation table
     Then I should see "Showing 3 and 6" in the "#qtextpreview_display" "css_element"
     And I should see "Part 1 with 8" in the "#qtextpreview_display" "css_element"
     When I set the following fields to these values:
       | id_subqtext_0 |  |
-    When I click on "id" "qtype_formulas > Field in second row of instantiation table"
+    When I click on row number "2" of the Formulas Question instantiation table
     Then I should not see "Part 1" in the "#qtextpreview_display" "css_element"
 
   @javascript
@@ -53,5 +54,5 @@ Feature: Test instantiation and inline preview while editing a question
     When I set the following fields to these values:
       | id_varsglobal | a=3; |
     And I click on "Instantiate" "button"
-    Then I should see "3" in the "global_a" "qtype_formulas > Field in first row of instantiation table"
+    Then I should see "3" in the "global_a" field of row number "1" of the Formulas Question instantiation table
     And I should not see "No preview available." in the "#qtextpreview_display" "css_element"
