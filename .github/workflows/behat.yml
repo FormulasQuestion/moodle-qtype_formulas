@@ -31,7 +31,7 @@ jobs:
         database: [mariadb]
         exclude:
           - moodle-branch: 'MOODLE_39_STABLE'
-          - php: '8.0'
+            php: '8.0'
 
     steps:
       - name: Check out repository code
