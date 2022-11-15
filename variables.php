@@ -255,8 +255,19 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
 
     $numberofterms = count($coefficients);
     // By default, we think that a final coefficient == 1 is not to be shown, because it is a true coefficient
-    // and not a constant term.
+    // and not a constant term. Also, terms with coefficient == zero should generally be completely omitted.
     $constantone = false;
+    $omitzero = true;
+
+    // If the variable is left empty, but there is a list of coefficients, we build an empty array
+    // of the same size as the number of coefficients. This can be used to pretty-print matrix rows.
+    // In that case, the numbers 1 and 0 should never be omitted.
+    if ($variables === '') {
+        $variables = array_fill(0, $numberofterms, '');
+        $constantone = true;
+        $omitzero = false;
+    }
+
     // If there is just one variable, we blow it up to an array of the correct size and descending exponents.
     if (gettype($variables) === 'string' && $variables !== '') {
         // As we have just one variable, we are building a standard polynomial where the last coefficient
@@ -285,25 +296,31 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
     $result = '';
     foreach ($coefficients as $i => $coef) {
         $separator = ($i == 0 ? '' : $additionalseparator);
-        // Terms with coefficient == 0 are not shown. However, if we use a separator, it must be printed anyway.
+        // Terms with coefficient == 0 are generally not shown. But if we use a separator, it must be printed anyway.
         if ($coef == 0) {
             if ($i > 0) {
                 $result .= $separator;
             }
-            continue;
+            if ($omitzero) {
+                continue;
+            }
         }
         // Put a + or - sign according to value of coefficient and replace the coefficient
         // by its absolute value, as we don't need the sign anymore after this step.
+        // If the coefficient is 0 and we force its output, do it now. However, do not put a sign,
+        // as the only documented usage of this is for matrix rows and the like.
         if ($coef < 0) {
             $result .= $separator . '-';
             $coef = abs($coef);
-        } else {
-            $result .= $separator . '+';
+        } else if ($coef > 0) {
+            // If $omitzero is false, we are building a matrix row, so we don't put plus signs.
+            $result .= $separator . ($omitzero ? '+' : '');
         }
         // Put the coefficient. If the coefficient is +1 or -1, we don't put the number,
         // unless we're at the last term. The sign is already there, so we use the absolute value.
+        // Never omit 1's if building a matrix row.
         if ($coef == 1) {
-            $coef = (($i == $numberofterms - 1 && $constantone) ? '1' : '');
+            $coef = (!$omitzero || ($i == $numberofterms - 1 && $constantone) ? '1' : '');
         }
         $result .= $coef . $variables[$i];
         // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).

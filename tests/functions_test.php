@@ -906,6 +906,13 @@ class functions_test extends \advanced_testcase {
             array('p=poly(["x", "y"], [1, 0, -3]);', 'x-3x'),
             array('p=poly(["x", "y"], [1, 1, 1, 1]);', 'x+y+x+y'),
             array('p=poly(["x", "y"], [1, 1, 1, 1], "&");', 'x&+y&+x&+y'),
+            // With an empty string and a separator, we build a matrix row...
+            array('p=poly("", [1, 1, 1, 1], "&");', '1&1&1&1'),
+            array('p=poly("", [-1, 1, -1, 1], "&");', '-1&1&-1&1'),
+            array('p=poly("", [1, -1, 1, -1], "&");', '1&-1&1&-1'),
+            array('p=poly("", [0, 0, 0, 0], "&");', '0&0&0&0'),
+            array('p=poly("", [1, 0, 2, 3], "&");', '1&0&2&3'),
+            array('p=poly("", [0, 1, 0, -1], "&");', '0&1&0&-1')
         );
         foreach ($testcases as $case) {
             $qv = new variables;
