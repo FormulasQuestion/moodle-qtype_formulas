@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     name: Automated acceptance tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       mariadb:
@@ -27,12 +27,15 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0']
-        moodle-branch: ['MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'master']
+        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'master']
         database: [mariadb]
+        exclude:
+          - moodle-branch: 'MOODLE_39_STABLE'
+          - php: '8.0'
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: plugin
 
