@@ -532,8 +532,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
-    * Test: incovation of all documented trigonometric / hyberbolic functions
-    */
+     * Test: incovation of all documented trigonometric / hyberbolic functions
+     */
     public function test_invocation_trigonometric() {
         $testcases = array(
             array(true, 'a=acos(0.5);'),
@@ -595,8 +595,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
-    * Test: incovation of all documented combinatorial functions
-    */
+     * Test: incovation of all documented combinatorial functions
+     */
     public function test_invocation_combinatorial() {
         $testcases = array(
             array(true, 'a=inv([0, 1, 2, 3]);'),
@@ -634,8 +634,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
-    * Test: incovation of all documented algebraic / other numerical functions
-    */
+     * Test: incovation of all documented algebraic / other numerical functions
+     */
     public function test_invocation_algebraic() {
         $testcases = array(
             array(true, 'a=abs(-3);'),
@@ -711,7 +711,7 @@ class functions_test extends \advanced_testcase {
             array(false, 'a=pi(1);'),
             array(true, 'a=poly("x", [1]);'),
             array(true, 'a=poly("x", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);'),
-            array(false, 'a=poly("x", 1);'),
+            array(true, 'a=poly("x", 1);'),
             array(false, 'a=poly("x", 1, 2);'),
             array(false, 'a=poly("x");'),
             array(false, 'a=poly();'),
@@ -753,8 +753,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
-    * Test: incovation of all documented string/array functions
-    */
+     * Test: incovation of all documented string/array functions
+     */
     public function test_invocation_string_array() {
         $testcases = array(
             array(true, 'a=concat([1, 2], [2, 4]);'),
@@ -836,6 +836,125 @@ class functions_test extends \advanced_testcase {
             } else {
                 $this->assertNotNull($errmsg);
             }
+        }
+    }
+
+    /**
+     * Test poly() function
+     */
+    public function test_poly() {
+        $testcases = array(
+            // With just a number...
+            array('p=poly(5);', '+5'),
+            array('p=poly(1.5);', '+1.5'),
+            array('p=poly(0);', '0'),
+            array('p=poly(-1.5);', '-1.5'),
+            array('p=poly(-5);', '-5'),
+            // With one variable (or arbitrary string) and a number...
+            array('p=poly("x", -5);', '-5x'),
+            array('p=poly("x", 3);', '3x'),
+            array('p=poly("x", 3.7);', '3.7x'),
+            array('p=poly("x", 1);', 'x'),
+            array('p=poly("x", -1);', '-x'),
+            array('p=poly("x", -1.8);', '-1.8x'),
+            array('p=poly("x", 3, "+");', '+3x'),
+            array('p=poly("x^5", 3, "+");', '+3x^5'),
+            array('p=poly("x", 0);', '0'),
+            // Usage of other variables as coefficients...
+            array('a=5; b=2; p=poly([a,b]);', '5x+2'),
+            array('a=5; b=2; p=poly(a*b);', '+10'),
+            // Usage of other functions in the list of coefficients...
+            array('p=poly("x", [1, sqrt(3**2), 1]);', 'x^{2}+3x+1'),
+            // With a variable and a list of numbers, with or without a separator...
+            array('p=poly("x", [1, 1, 1]);', 'x^{2}+x+1'),
+            array(
+                'p=poly("x", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);',
+                'x^{19}+2x^{18}+3x^{17}+4x^{16}+5x^{15}+6x^{14}+7x^{13}+8x^{12}+9x^{11}+10x^{10}+11x^{9}'
+                .'+12x^{8}+13x^{7}+14x^{6}+15x^{5}+16x^{4}+17x^{3}+18x^{2}+19x+20'
+            ),
+            array('p=poly("x", [1.3, 1.5, 1.9]);', '1.3x^{2}+1.5x+1.9'),
+            array('p=poly("x", [0, 0, 1]);', '1'),
+            array('p=poly("y", [0, 0, 1]);', '1'),
+            array('p=poly("x", [0, -1]);', '-1'),
+            array('p=poly("y", [0, -1]);', '-1'),
+            array('p=poly("y", [0, -2.8]);', '-2.8'),
+            array('p=poly("x", [1, 0, 1]);', 'x^{2}+1'),
+            array('p=poly("y", [1, 0, 1]);', 'y^{2}+1'),
+            array('p=poly("x", [1, 2, 3]);', 'x^{2}+2x+3'),
+            array('p=poly("x", [-1, -2, -3]);', '-x^{2}-2x-3'),
+            array('p=poly("y", [-1, -2, -3]);', '-y^{2}-2y-3'),
+            array('p=poly("y", [1, 1, 1]);', 'y^{2}+y+1'),
+            array('p=poly("y", [1, 2, 3]);', 'y^{2}+2y+3'),
+            array('p=poly("y", [2, -1], "&");', '2y&-1'),
+            array('p=poly("z", [1, 1, 1], "&");', 'z^{2}&+z&+1'),
+            array('p=poly("y", [-1, -2, -3], "&");', '-y^{2}&-2y&-3'),
+            array('p=poly("x", [0, 0, 0]);', '0'),
+            array('p=poly("x", [0, 0, 0], "&");', '&&0'),
+            // With multiple variables and coefficients plus a separator...
+            array('p=poly(["x","y","z"], [1, 1, 1], "&");', 'x&+y&+z'),
+            array('p=poly(["x","y","z"], [2, 3, 4], "&");', '2x&+3y&+4z'),
+            array('p=poly(["x","y","z"], [-2, -3, -4], "&");', '-2x&-3y&-4z'),
+            array('p=poly(["x","y","z"], [-2.4, -3.1, -4.0], "&");', '-2.4x&-3.1y&-4z'),
+            array('p=poly(["x","y","z"], [-1, -1, -1], "&");', '-x&-y&-z'),
+            array('p=poly(["x","y","z"], [0, 0, 0], "&");', '&&0'),
+            array('p=poly(["x","y","z"], [0, 0, 0]);', '0'),
+            // With the default variable x, with or without a separator...
+            array('p=poly([1, 1, 1]);', 'x^{2}+x+1'),
+            array('p=poly([-1, -1, -1]);', '-x^{2}-x-1'),
+            array('p=poly([0, 0, 1]);', '1'),
+            array('p=poly([0, 0, 0]);', '0'),
+            array('p=poly([0, -1]);', '-1'),
+            array('p=poly([1, 0, 1]);', 'x^{2}+1'),
+            array('p=poly([1, 2, 3]);', 'x^{2}+2x+3'),
+            array('p=poly([-1, -2, -3]);', '-x^{2}-2x-3'),
+            array('p=poly([-1, -2, -3], "&");', '-x^{2}&-2x&-3'),
+            array('p=poly([0, 1], "&");', '&+1'),
+            array('p=poly([1, 0, 1], "&");', 'x^{2}&&+1'),
+            array('p=poly([1, 0, 0, 1], "&");', 'x^{3}&&&+1'),
+            // With a list of variables and coefficients...
+            array('p=poly(["x", "y", "xy"], [-1, -2, -3]);', '-x-2y-3xy'),
+            array('p=poly(["x", "y", "xy"], [1, 0, -3]);', 'x-3xy'),
+            array('p=poly(["x", "y"], [1, 0, -3]);', 'x-3x'),
+            array('p=poly(["x", "y"], [1, 1, 1, 1]);', 'x+y+x+y'),
+            array('p=poly(["x", "y"], [1, 1, 1, 1], "&");', 'x&+y&+x&+y'),
+            // With an empty string and a separator, we build a matrix row...
+            array('p=poly("", [1, 1, 1, 1], "&");', '1&1&1&1'),
+            array('p=poly("", [-1, 1, -1, 1], "&");', '-1&1&-1&1'),
+            array('p=poly("", [1, -1, 1, -1], "&");', '1&-1&1&-1'),
+            array('p=poly("", [0, 0, 0, 0], "&");', '0&0&0&0'),
+            array('p=poly("", [1, 0, 2, 3], "&");', '1&0&2&3'),
+            array('p=poly("", [0, 1, 0, -1], "&");', '0&1&0&-1')
+        );
+        foreach ($testcases as $case) {
+            $qv = new variables;
+            $errmsg = null;
+            try {
+                $v = $qv->vstack_create();
+                $result = $qv->evaluate_assignments($v, $case[0]);
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            $this->assertNull($errmsg);
+            $this->assertEquals($case[1], $result->all['p']->value);
+        }
+        $testcases = array(
+            array('p=poly();', '1: A subexpression is empty.'),
+            array('p=poly("x");', '1: Wrong number or wrong type of parameters'),
+            array('p=poly("x", "x");', '1: Wrong number or wrong type of parameters'),
+            array('p=poly(["x", "y"]);', '1: Wrong number or wrong type of parameters'),
+            array('p=poly(["x", "y"], 1);', '1: Wrong number or wrong type of parameters'),
+
+        );
+        foreach ($testcases as $case) {
+            $qv = new variables;
+            $errmsg = null;
+            try {
+                $v = $qv->vstack_create();
+                $result = $qv->evaluate_assignments($v, $case[0]);
+            } catch (Exception $e) {
+                $errmsg = $e->getMessage();
+            }
+            $this->assertStringStartsWith($case[1], $errmsg);
         }
     }
 }

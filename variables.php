@@ -27,9 +27,14 @@ use Exception, Throwable;
 
 defined('MOODLE_INTERNAL') || die();
 
-// Helper function to emulate the behaviour of the count() function
-// before php 7.2.
-// Needed because a string is passed as parameter in many places in the code.
+/**
+ * Helper function to emulate the behaviour of the count() function with PHP <7.2
+ * Until then, count() returned 1 for e.g. a string. Since 8.0, it throws TypeError in such cases
+ *
+ * @author Jean-Michel Védrine
+ * @param mixed $a
+ * @return integer
+ */
 function mycount($a) {
     if ($a === null) {
         return 0;
@@ -57,9 +62,8 @@ function fact($n) {
 /**
  * calculate standard normal probability density
  *
- * @param float $z  value
- *
  * @author Philipp Imhof
+ * @param float $z  value
  * @return float  standard normal density of $z
  */
 function stdnormpdf($z) {
@@ -110,11 +114,10 @@ function normcdf($x, $mu, $sigma) {
  * raise $a to the $b-th power modulo $m using efficient
  * square and multiply
  *
+ * @author Philipp Imhof
  * @param integer $a  base
  * @param integer $b  exponent
  * @param integer $m  modulus
- *
- * @author Philipp Imhof
  * @return integer  the result
  */
 function modpow($a, $b, $m) {
@@ -138,10 +141,9 @@ function modpow($a, $b, $m) {
  * calculate the multiplicative inverse of $a modulo $m using the
  * extended euclidean algorithm
  *
+ * @author Philipp Imhof
  * @param integer $a  the number whose inverse is to be found
  * @param integer $m  the modulus
- *
- * @author Philipp Imhof
  * @return integer  the result or 0 if the inverse does not exist
  */
 function modinv($a, $m) {
@@ -227,6 +229,110 @@ function sigfig($number, $precision) {
     $answer = ($decimalplaces > 0) ?
             number_format($number, $decimalplaces, '.', '') : number_format(round($number, $decimalplaces), 0, '.', '');
     return $answer;
+}
+
+/**
+ * format a polynomial to be display with LaTeX / MathJax
+ * can also be used to force the plus sign for a single number
+ * can also be used for arbitrary linear combinations
+ *
+ * @author Philipp Imhof
+ * @param mixed $variables one variable (as a string) or a list of variables (array of strings)
+ * @param mixed $coefficients one number or an array of numbers to be used as coefficients
+ * @param string $forceplus symbol to be used for the normally invisible leading plus, optional
+ * @param string $additionalseparator symbol to be used as separator between the terms, optional
+ * @return string  the formatted string
+ */
+function poly($variables, $coefficients = null, $forceplus = '', $additionalseparator = '') {
+    // If no variable is given and there is just one single number, simply force the plus sign
+    // on positive numbers.
+    if ($variables === '' && is_numeric($coefficients)) {
+        if ($coefficients > 0) {
+            return $forceplus . $coefficients;
+        }
+        return $coefficients;
+    }
+
+    $numberofterms = count($coefficients);
+    // By default, we think that a final coefficient == 1 is not to be shown, because it is a true coefficient
+    // and not a constant term. Also, terms with coefficient == zero should generally be completely omitted.
+    $constantone = false;
+    $omitzero = true;
+
+    // If the variable is left empty, but there is a list of coefficients, we build an empty array
+    // of the same size as the number of coefficients. This can be used to pretty-print matrix rows.
+    // In that case, the numbers 1 and 0 should never be omitted.
+    if ($variables === '') {
+        $variables = array_fill(0, $numberofterms, '');
+        $constantone = true;
+        $omitzero = false;
+    }
+
+    // If there is just one variable, we blow it up to an array of the correct size and descending exponents.
+    if (gettype($variables) === 'string' && $variables !== '') {
+        // As we have just one variable, we are building a standard polynomial where the last coefficient
+        // is not a real coefficient, but a constant term that has to be printed.
+        $constantone = true;
+        $tmp = $variables;
+        $variables = array();
+        for ($i = 0; $i < $numberofterms; $i++) {
+            if ($i == $numberofterms - 2) {
+                $variables[$i] = $tmp;
+            } else if ($i == $numberofterms - 1) {
+                $variables[$i] = '';
+            } else {
+                $variables[$i] = $tmp . '^{' . ($numberofterms - 1 - $i) . '}';
+            }
+        }
+    }
+    // If the list of variables is shorter than the list of coefficients, just start over again.
+    if (count($variables) < $numberofterms) {
+        $numberofvars = count($variables);
+        for ($i = count($variables); $i < $numberofterms; $i++) {
+            $variables[$i] = $variables[$i % $numberofvars];
+        }
+    }
+
+    $result = '';
+    foreach ($coefficients as $i => $coef) {
+        $separator = ($i == 0 ? '' : $additionalseparator);
+        // Terms with coefficient == 0 are generally not shown. But if we use a separator, it must be printed anyway.
+        if ($coef == 0) {
+            if ($i > 0) {
+                $result .= $separator;
+            }
+            if ($omitzero) {
+                continue;
+            }
+        }
+        // Put a + or - sign according to value of coefficient and replace the coefficient
+        // by its absolute value, as we don't need the sign anymore after this step.
+        // If the coefficient is 0 and we force its output, do it now. However, do not put a sign,
+        // as the only documented usage of this is for matrix rows and the like.
+        if ($coef < 0) {
+            $result .= $separator . '-';
+            $coef = abs($coef);
+        } else if ($coef > 0) {
+            // If $omitzero is false, we are building a matrix row, so we don't put plus signs.
+            $result .= $separator . ($omitzero ? '+' : '');
+        }
+        // Put the coefficient. If the coefficient is +1 or -1, we don't put the number,
+        // unless we're at the last term. The sign is already there, so we use the absolute value.
+        // Never omit 1's if building a matrix row.
+        if ($coef == 1) {
+            $coef = (!$omitzero || ($i == $numberofterms - 1 && $constantone) ? '1' : '');
+        }
+        $result .= $coef . $variables[$i];
+        // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).
+        if ($result[0] == '+') {
+            $result = $forceplus . substr($result, 1);
+        }
+    }
+    // If the resulting string is empty (or empty with just alignment separators), add a zero at the end.
+    if ($result === '' || $result === str_repeat('&', $numberofterms - 1)) {
+        $result .= '0';
+    }
+    return $result;
 }
 
 /**
@@ -1235,48 +1341,51 @@ class variables {
                 $this->replace_middle($vstack, $expression, $l, $r, 'n', $sum);
                 return true;
             case 'poly':
-                // The poly function was contributed by PeTeL-Weizmann.
-                if ($sz == 1 && $typestr == 'ln') {
-                    $varName = 'x';
-                    $vals = $values[0];
-                } else if ($sz == 2 && $typestr == 's,ln') {
-                    $varName = $values[0];
-                    $vals = $values[1];
-                } else {
-                    break;
+                // For backwards compatibility: if called with just a list of numbers, use x as variable.
+                if (($sz == 1) && $typestr == 'ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('x', $values[0]));
+                    return true;
                 }
-
-                $pow = mycount($vals);
-                $pp = '';
-                foreach ($vals as $v) {
-                    $pow--;
-                    if ($v == 0) {
-                        continue;
-                    }
-                    $ss = ($pp != '' && $v > 0) ? '+' : '';
-                    if ($pow == 0) {
-                        $pp .= "{$ss}{$v}";
-                    } else {
-                        if ($v == 1) {
-                            $coff = "{$ss}";
-                        } else if ($v == -1) {
-                            $coff = "-";
-                        } else {
-                            $coff = "{$ss}{$v}";
-                        }
-
-                        if ($pow == 1) {
-                            $pp .= "{$coff}{$varName}";
-                        } else {
-                            $pp .= "{$coff}{$varName}^{{$pow}}";
-                        }
-                    }
+                // If called with just a number, force the plus sign (if the number is positive) to be shown.
+                // Basically, there is no other reason one would call this function with just one number.
+                if (($sz == 1) && $typestr == 'n') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('', $values[0], '+'));
+                    return true;
                 }
-                if ($pp == '') {
-                    $pp = '0';
+                // If called with a string and one number, combine them.
+                if (($sz == 2) && $typestr == 's,n') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly(array($values[0]), array($values[1])));
+                    return true;
                 }
-                $this->replace_middle($vstack, $expression, $l, $r, 's', $pp);
-                return true;
+                // Original functionality: if called with a string and a list of numbers, create a polynomial.
+                if (($sz == 2) && $typestr == 's,ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1]));
+                    return true;
+                }
+                // If called with a list of strings and a list of numbers, build a linear combination.
+                if (($sz == 2) && $typestr == 'ls,ln') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1]));
+                    return true;
+                }
+                // If called with a string, a number and another string, combine them while using the third argument
+                // to e. g. force a "+" on positive numbers.
+                if (($sz == 3) && $typestr == 's,n,s') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly(array($values[0]), array($values[1]), $values[2]));
+                    return true;
+                }
+                // If called with a string (or list of strings), a list of numbers and another string, combine them
+                // while using the third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                if (($sz == 3) && ($typestr == 's,ln,s' || $typestr == 'ls,ln,s')) {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly($values[0], $values[1], '', $values[2]));
+                    return true;
+                }
+                // If called with a list of numbers and a string, use x as default variable for the polynomial and use the
+                // third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                if (($sz == 2) && $typestr == 'ln,s') {
+                    $this->replace_middle($vstack, $expression, $l, $r, 's', poly('x', $values[0], '', $values[1]));
+                    return true;
+                }
+                break;
             case 'concat':
                 if (!($sz >= 2 && ($types[0][0] == 'l'))) {
                     break;
