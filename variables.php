@@ -328,6 +328,10 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
             $result = $forceplus . substr($result, 1);
         }
     }
+    // If the resulting string is empty (or empty with just alignment separators), add a zero at the end.
+    if ($result === '' || $result === str_repeat('&', $numberofterms - 1)) {
+        $result .= '0';
+    }
     return $result;
 }
 
