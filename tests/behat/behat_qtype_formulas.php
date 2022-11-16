@@ -78,5 +78,4 @@ class behat_qtype_formulas extends behat_base {
 
         $this->execute("behat_general::assert_element_contains_text", [$text, $xpath, "xpath_element"]);
     }
-
 }
