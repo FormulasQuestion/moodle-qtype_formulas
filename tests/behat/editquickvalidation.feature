@@ -93,16 +93,18 @@ Feature: Test on-the-fly validation of variables while editing a question
   Scenario: Validate local variables with prior error in random or global variables
     When I follow "Variables"
     And I set the following fields to these values:
-      | id_varsglobal | b=1    |
-      | id_varsrandom | a=+    |
-      | id_vars1_0    | a=2*c; |
+      | id_varsglobal | b=1 |
+      | id_varsrandom | a=+ |
+    And I take focus off "id_varsrandom" "field"
+    And I set the field "id_vars1_0" to "a=2*c;"
     And I take focus off "id_vars1_0" "field"
     Then I should see "1: a: Syntax error." in the "#id_error_varsrandom" "css_element"
     And the focused element is "id_varsrandom" "field"
     When I set the following fields to these values:
       | id_varsrandom | a={1,2} |
       | id_varsglobal | b=++    |
-      | id_vars1_0    | c=3*a;  |
+    And I take focus off "id_varsglobal" "field"
+    And I set the field "id_vars1_0" to "c=3*a;"
     And I take focus off "id_vars1_0" "field"
     Then I should see "1: Some expressions cannot be evaluated numerically." in the "#id_error_varsglobal" "css_element"
     And the focused element is "id_varsglobal" "field"
