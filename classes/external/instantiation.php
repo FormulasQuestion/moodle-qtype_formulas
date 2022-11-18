@@ -296,13 +296,26 @@ class instantiation extends \external_api {
             );
 
         $vars = new variables();
+        // Evaluation of global variables can fail, because there is an error in the random
+        // variables. In order to know that, we need to have two separate try-catch constructions.
         try {
             $stack = $vars->parse_random_variables($randomvars);
+        } catch (Exception $e) {
+            return array(
+                'source' => 'random',
+                'message' => $e->getMessage()
+            );
+        }
+        try {
             $vars->evaluate_assignments($vars->instantiate_random_variables($stack), $globalvars);
         } catch (Exception $e) {
-            return $e->getMessage();
+            return array(
+                'source' => 'global',
+                'message' => $e->getMessage()
+            );
         }
-        return '';
+
+        return array('source' => '', 'message' => '');
     }
 
     /**
@@ -310,7 +323,10 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function check_random_global_vars_returns() {
-        return new \external_value(PARAM_RAW, 'empty string or error message');
+        return new \external_single_structure(array(
+            'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
+        ));
     }
 
     /**
@@ -346,14 +362,34 @@ class instantiation extends \external_api {
             );
 
         $vars = new variables();
+        // Evaluation of global variables can fail, because there is an error in the random
+        // variables. In order to know that, we need to have three separate try-catch constructions.
         try {
             $stack = $vars->parse_random_variables($randomvars);
+        } catch (Exception $e) {
+            return array(
+                'source' => 'random',
+                'message' => $e->getMessage()
+            );
+        }
+        try {
             $evaluatedglobalvars = $vars->evaluate_assignments($vars->instantiate_random_variables($stack), $globalvars);
+        } catch (Exception $e) {
+            return array(
+                'source' => 'global',
+                'message' => $e->getMessage()
+            );
+        }
+        try {
             $vars->evaluate_assignments($evaluatedglobalvars, $localvars);
         } catch (Exception $e) {
+            return array(
+                'source' => 'local',
+                'message' => $e->getMessage()
+            );
             return $e->getMessage();
         }
-        return '';
+        return array('source' => '', 'message' => '');
     }
 
     /**
@@ -361,7 +397,10 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function check_local_vars_returns() {
-        return new \external_value(PARAM_RAW, 'empty string or error message');
+        return new \external_single_structure(array(
+            'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
+        ));
     }
 
     /**

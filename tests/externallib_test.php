@@ -40,15 +40,23 @@ class externallib_test extends \externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $testcases = array(
-            array('randomvars' => '', 'globalvars' => '', 'return' => ''),
-            array('randomvars' => 'a={1,2};', 'globalvars' => '', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => 'a=1', 'return' => ''),
-            array('randomvars' => 'a={1,2}', 'globalvars' => 'b=a', 'return' => ''),
-            array('randomvars' => 'a=1', 'globalvars' => '', 'return' => '1: a: Syntax error.'),
-            array('randomvars' => '', 'globalvars' => 'b=a',
-                'return' => '1: Variable \'a\' has not been defined. in substitute_vname_by_variables'),
-            array('randomvars' => '', 'globalvars' => 'a=', 'return' => '1: A subexpression is empty.'),
-            array('randomvars' => '', 'globalvars' => 'a=+', 'return' => '1: Some expressions cannot be evaluated numerically.')
+            array('randomvars' => '', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => 'a={1,2};', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => '', 'globalvars' => 'a=1', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => 'a={1,2}', 'globalvars' => 'b=a', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => 'a=1', 'globalvars' => '', 'return' => array('source' => 'random', 'message' => '1: a: Syntax error.')),
+            array('randomvars' => '', 'globalvars' => 'b=a', 'return' => array(
+                'source' => 'global',
+                'message' => '1: Variable \'a\' has not been defined. in substitute_vname_by_variables'
+            )),
+            array('randomvars' => '', 'globalvars' => 'a=', 'return' => array(
+                'source' => 'global',
+                'message' => '1: A subexpression is empty.'
+            )),
+            array('randomvars' => '', 'globalvars' => 'a=+', 'return' => array(
+                'source' => 'global',
+                'message' => '1: Some expressions cannot be evaluated numerically.'
+            ))
         );
 
         foreach ($testcases as $case) {
@@ -66,15 +74,58 @@ class externallib_test extends \externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $testcases = array(
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => '', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b',
-                'return' => '1: Variable \'b\' has not been defined. in substitute_vname_by_variables'),
-            array('randomvars' => 'b={1,2}', 'globalvars' => '', 'localvars' => 'a=b', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b', 'return' => ''),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+',
-                'return' => '1: Some expressions cannot be evaluated numerically.'),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=', 'return' => '1: A subexpression is empty.'),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => '', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b', 'return' => array(
+                'source' => 'local',
+                'message' => '1: Variable \'b\' has not been defined. in substitute_vname_by_variables'
+            )),
+            array('randomvars' => 'b={1,2}', 'globalvars' => '', 'localvars' => 'a=b', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+', 'return' => array(
+                'source' => 'local',
+                'message' => '1: Some expressions cannot be evaluated numerically.'
+            )),
+            array('randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2', 'return' => array(
+                'source' => 'global',
+                'message' => '1: Some expressions cannot be evaluated numerically.'
+            )),
+            array('randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2', 'return' => array(
+                'source' => 'global',
+                'message' => '1: Some expressions cannot be evaluated numerically.'
+            )),
+            array('randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=2', 'return' => array(
+                'source' => 'random',
+                'message' => '1: a: Syntax error.'
+            )),
+            array('randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=+++', 'return' => array(
+                'source' => 'random',
+                'message' => '1: a: Syntax error.'
+            )),
+            array('randomvars' => 'a=+', 'globalvars' => '', 'localvars' => 'c=+++', 'return' => array(
+                'source' => 'random',
+                'message' => '1: a: Syntax error.'
+            )),
+            array('randomvars' => 'a=+', 'globalvars' => 'b=++', 'localvars' => 'c=+++', 'return' => array(
+                'source' => 'random',
+                'message' => '1: a: Syntax error.'
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=', 'return' => array(
+                'source' => 'local',
+                'message' => '1: A subexpression is empty.'
+            )),
         );
 
         foreach ($testcases as $case) {

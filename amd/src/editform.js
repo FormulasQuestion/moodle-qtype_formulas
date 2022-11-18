@@ -82,15 +82,19 @@ export const init = (defCorrectness) => {
         );
     }
 
-    // When the definition of random, global or any part's local variables is changed,
-    // have them validated by the backend.
+    // When the form fields for random, global or any part's local variables loses focus,
+    // have them validated by the backend. We don't use the 'change' event, because we want
+    // the content re-validated, even if there is no change. This is to capture some edge
+    // cases where there is an error in both random and global variables. The validation will
+    // fail for random and cannot check the globals. Now, if the user fixes the error in random
+    // and enters globals, we should have a new validation on blurring, even if there was no change.
     let variableFields = [{field: 'random', handler: validateRandomvars}, {field: 'global', handler: validateGlobalvars}];
     for (let i = 0; i < numberOfParts; i++) {
         variableFields.push({field: `1_${i}`, handler: validateLocalvars.bind(null, i)});
     }
     for (let field of variableFields) {
         document.getElementById(`id_vars${field.field}`).addEventListener(
-            'change', field.handler
+            'blur', field.handler
         );
     }
 
@@ -511,7 +515,11 @@ const validateGlobalvars = async(evt) => {
                 globalvars: evt.target.value
             },
         }])[0];
-        showOrClearValidationError(evt.target.id, validationResult);
+        if (validationResult.source === '' || validationResult.source === 'global') {
+            showOrClearValidationError(evt.target.id, validationResult.message);
+        } else {
+            showOrClearValidationError('id_varsrandom', validationResult.message, false);
+        }
     } catch (err) {
         Notification.exception(err);
     }
@@ -540,7 +548,7 @@ const validateRandomvars = async(evt) => {
                 randomvars: evt.target.value
             },
         }])[0];
-        showOrClearValidationError(evt.target.id, validationResult);
+        showOrClearValidationError(evt.target.id, validationResult.message);
     } catch (err) {
         Notification.exception(err);
     }
@@ -548,7 +556,12 @@ const validateRandomvars = async(evt) => {
 };
 
 const validateLocalvars = async(part) => {
-    let target = document.getElementById(`id_vars1_${part}`);
+    let fieldList = {
+        'random': 'id_varsrandom',
+        'global': 'id_varsglobal',
+        'local': `id_vars1_${part}`
+    };
+    let target = document.getElementById(fieldList.local);
     // We don't validate an empty field. But if there is an error from earlier validation,
     // we must make sure it is removed.
     if (target.value === '') {
@@ -560,12 +573,19 @@ const validateLocalvars = async(part) => {
         let validationResult = await fetchMany([{
             methodname: 'qtype_formulas_check_local_vars',
             args: {
-                randomvars: document.getElementById('id_varsrandom').value,
-                globalvars: document.getElementById('id_varsglobal').value,
+                randomvars: document.getElementById(fieldList.random).value,
+                globalvars: document.getElementById(fieldList.global).value,
                 localvars: target.value
             }
         }])[0];
-        showOrClearValidationError(target.id, validationResult);
+        if (validationResult.source === '') {
+            validationResult.source = 'local';
+        }
+        showOrClearValidationError(
+            fieldList[validationResult.source],
+            validationResult.message,
+            validationResult.source === 'local'
+        );
     } catch (err) {
         Notification.exception(err);
     }
@@ -578,16 +598,23 @@ const validateLocalvars = async(part) => {
  *
  * @param {string} fieldID id of the form field to which the error belongs
  * @param {string} message error message or empty string, if error is to be removed
+ * @param {boolean} sameField did the error occur in the field that was originally validated
  */
-const showOrClearValidationError = (fieldID, message) => {
+const showOrClearValidationError = (fieldID, message, sameField = true) => {
     let field = document.getElementById(fieldID);
     let annotation = document.getElementById(fieldID.replace(/^id_(.*)$/, 'id_error_$1'));
+    let alreadyWithError = (annotation.innerText.trim() !== '');
     if (message === '') {
         annotation.innerText = '';
         field.classList.remove('is-invalid');
-    } else {
-        annotation.innerText = message;
-        field.classList.add('is-invalid');
+        return;
+    }
+    annotation.innerText = message;
+    field.classList.add('is-invalid');
+    // If there is already an error in *this* field, we don't generally force the focus,
+    // because that could trap the user. We do, however, set the focus, if the prior error
+    // occured in another field.
+    if (!alreadyWithError || !sameField) {
         field.focus();
     }
 };
