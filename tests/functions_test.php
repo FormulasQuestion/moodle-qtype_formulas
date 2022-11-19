@@ -32,7 +32,6 @@ global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 
-
 /**
  * Unit tests for various functions
  *
@@ -41,6 +40,7 @@ require_once($CFG->dirroot . '/question/type/formulas/variables.php');
  */
 
 class functions_test extends \advanced_testcase {
+
     /**
      * Test 1: ncr() test.
      */
@@ -1028,4 +1028,22 @@ class functions_test extends \advanced_testcase {
             $this->assertStringStartsWith($case[1], $errmsg);
         }
     }
+
+    /**
+     * Test fqversionnumber() function
+     */
+    public function test_fqversionnumber() {
+        $qv = new variables();
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_assignments($v, 'a=fqversionnumber();');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+        $this->assertEquals(get_config('qtype_formulas')->version, $result->all['a']->value);
+    }
+
+
 }

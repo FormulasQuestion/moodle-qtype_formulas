@@ -60,6 +60,15 @@ function fact($n) {
 }
 
 /**
+ * Return the plugin's version number.
+ *
+ * @return integer
+ */
+function fqversionnumber() {
+    return get_config('qtype_formulas')->version;
+}
+
+/**
  * calculate standard normal probability density
  *
  * @author Philipp Imhof
@@ -350,7 +359,7 @@ class variables {
     private static $listmaxsize = 1000;
 
     private function initialize_function_list() {
-        $this->func_const = array_flip( array('pi'));
+        $this->func_const = array_flip( array('pi', 'fqversionnumber'));
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
             'cos', 'cosh' , 'deg2rad', 'exp', 'expm1', 'floor', 'is_finite', 'is_infinite', 'is_nan',
             'log10', 'log1p', 'rad2deg', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'log', 'round', 'fact',
@@ -1948,6 +1957,7 @@ class variables {
                     break;
 
                 // Zero argument functions.
+                case 'fqversionnumber':
                 case 'pi':
                     if (strlen($regs[3]) != 0) {
                         return get_string('functiontakesnoargs', 'qtype_formulas', $regs[2]);
