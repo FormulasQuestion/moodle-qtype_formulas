@@ -113,13 +113,26 @@ class instantiation extends \external_api {
         }
         $filteredglobalvars = self::remove_duplicated_variables($evaluatedglobalvars->all, $instantiatedrandomvars->all);
         foreach ($filteredglobalvars as $name => $value) {
-            $row['globalvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
+            if (is_object($value->value)) {
+                $row['globalvars'][] = array('name' => $name, 'value' => "{{$name}}");
+            } else {
+                $row['globalvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
+            }
         }
         for ($i = 0; $i < $noparts; $i++) {
             $filteredlocalvars = self::remove_duplicated_variables($evaluatedlocalvars[$i]->all, $evaluatedglobalvars->all);
             $row['parts'][$i] = array();
             foreach ($filteredlocalvars as $name => $value) {
-                $row['parts'][$i][] = array('name' => $name, 'value' => $value->value);
+                if (is_object($value->value)) {
+                    $row['parts'][$i][] = array('name' => $name, 'value' => "{{$name}}");
+                } else {
+                    $row['parts'][$i][] = array('name' => $name, 'value' => $value->value);
+                }
+            }
+            // This should not happen.
+            if (is_object(($evaluatedanswers[$i]->value))) {
+                $row['parts'][$i][] = array('name' => '_0', 'value' => '!!!');
+                break;
             }
             if (gettype($evaluatedanswers[$i]->value) == 'string') {
                 $row['parts'][$i][] = array('name' => '_0', 'value' => $evaluatedanswers[$i]->value);

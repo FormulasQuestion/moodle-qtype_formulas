@@ -43,6 +43,8 @@ class externallib_test extends \externallib_advanced_testcase {
             array('randomvars' => '', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
             array('randomvars' => 'a={1,2};', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
             array('randomvars' => '', 'globalvars' => 'a=1', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => '', 'globalvars' => 'a={1:5}', 'return' => array('source' => '', 'message' => '')),
+            array('randomvars' => '', 'globalvars' => 'a={1,2,3,4}', 'return' => array('source' => '', 'message' => '')),
             array('randomvars' => 'a={1,2}', 'globalvars' => 'b=a', 'return' => array('source' => '', 'message' => '')),
             array('randomvars' => 'a=1', 'globalvars' => '', 'return' => array('source' => 'random', 'message' => '1: a: Syntax error.')),
             array('randomvars' => '', 'globalvars' => 'b=a', 'return' => array(
@@ -79,6 +81,14 @@ class externallib_test extends \externallib_advanced_testcase {
                 'message' => ''
             )),
             array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1:5}', 'return' => array(
+                'source' => '',
+                'message' => ''
+            )),
+            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1,2}', 'return' => array(
                 'source' => '',
                 'message' => ''
             )),
@@ -176,6 +186,16 @@ class externallib_test extends \externallib_advanced_testcase {
             array(
                 'questiontext' => 'Foo Bar {a}',
                 'parttexts' => array(),
+                'globalvars' => 'a="{a}"',
+                'partvars' => array(),
+                'return' => array(
+                    'question' => 'Foo Bar {a}',
+                    'parts' => array()
+                )
+            ),
+            array(
+                'questiontext' => 'Foo Bar {a}',
+                'parttexts' => array(),
                 'globalvars' => '',
                 'partvars' => array(),
                 'return' => array(
@@ -185,12 +205,12 @@ class externallib_test extends \externallib_advanced_testcase {
             ),
             array(
                 'questiontext' => 'Foo Bar {a}',
-                'parttexts' => array(''),
-                'globalvars' => '',
-                'partvars' => array('a=1'),
+                'parttexts' => array('local {a}'),
+                'globalvars' => 'a={1,2,3}',
+                'partvars' => array('a=10'),
                 'return' => array(
                     'question' => 'Foo Bar {a}',
-                    'parts' => array('')
+                    'parts' => array('local 10')
                 )
             ),
             array(
@@ -228,6 +248,96 @@ class externallib_test extends \externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $testcases = array(
+            array(
+                'n' => 1,
+                'randomvars' => '',
+                'globalvars' => 'a={1,2,3}',
+                'localvars' => array(''),
+                'answers' => array('1'),
+                'return' => array(
+                    'status' => 'ok',
+                    'data' => array(
+                        array(
+                            'randomvars' => array(),
+                            'globalvars' => array(
+                                array('name' => 'a', 'value' => '{a}')
+                            ),
+                            'parts' => array(
+                                array(
+                                    array('name' => '_0', 'value' => 1),
+                                )
+                            ),
+                        )
+                    )
+                )
+            ),
+            array(
+                'n' => 1,
+                'randomvars' => '',
+                'globalvars' => 'a={1:10}',
+                'localvars' => array(''),
+                'answers' => array('1'),
+                'return' => array(
+                    'status' => 'ok',
+                    'data' => array(
+                        array(
+                            'randomvars' => array(),
+                            'globalvars' => array(
+                                array('name' => 'a', 'value' => '{a}')
+                            ),
+                            'parts' => array(
+                                array(
+                                    array('name' => '_0', 'value' => 1),
+                                )
+                            ),
+                        )
+                    )
+                )
+            ),
+            array(
+                'n' => 1,
+                'randomvars' => '',
+                'globalvars' => '',
+                'localvars' => array('a={1,3}'),
+                'answers' => array('a'),
+                'return' => array(
+                    'status' => 'ok',
+                    'data' => array(
+                        array(
+                            'randomvars' => array(),
+                            'globalvars' => array(),
+                            'parts' => array(
+                                array(
+                                    array('name' => 'a', 'value' => '{a}'),
+                                    array('name' => '_0', 'value' => '!!!'),
+                                )
+                            ),
+                        )
+                    )
+                )
+            ),
+            array(
+                'n' => 1,
+                'randomvars' => '',
+                'globalvars' => '',
+                'localvars' => array('a={1:5}'),
+                'answers' => array('a'),
+                'return' => array(
+                    'status' => 'ok',
+                    'data' => array(
+                        array(
+                            'randomvars' => array(),
+                            'globalvars' => array(),
+                            'parts' => array(
+                                array(
+                                    array('name' => 'a', 'value' => '{a}'),
+                                    array('name' => '_0', 'value' => '!!!'),
+                                )
+                            ),
+                        )
+                    )
+                )
+            ),
             array(
                 'n' => 0,
                 'randomvars' => '',
@@ -331,5 +441,18 @@ class externallib_test extends \externallib_advanced_testcase {
             $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
             $this->assertEquals($case['return'], $returnvalue);
         }
+
+        $case = array(
+            'n' => 10,
+            'randomvars' => '',
+            'globalvars' => 'a=1',
+            'localvars' => array(''),
+            'answers' => array('1')
+        );
+        $returnvalue = external\instantiation::instantiate(
+            $case['n'], $case['randomvars'], $case['globalvars'], $case['localvars'], $case['answers']
+        );
+        $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
+        $this->assertEquals(10, count($returnvalue['data']));
     }
 }

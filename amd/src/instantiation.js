@@ -123,6 +123,8 @@ const quoteNonNumericValue = (value) => {
         return '[' + quotedElements.join(', ') + ']';
     }
     // Not a number and not an array, so we enclose it in double quotes.
+    // This includes the case where the variable is an "algebraic variable",
+    // because those are represented as {variablename}, e.g. {a} for the variable a.
     return `"${value}"`;
 };
 
