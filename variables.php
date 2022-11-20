@@ -360,8 +360,8 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
         $result = $forceplus . substr($result, 1);
     }
     // If we have nothing but separators before the leading +, replace that + by $forceplus.
-    if ($additionalseparator !== '' && preg_match("/^($additionalseparator+)\+/", $result)) {
-        $result = preg_replace("/^($additionalseparator+)\+/", "\\1$forceplus", $result);
+    if ($separatorbefore !== '' && preg_match("/^($separatorbefore+)\+/", $result)) {
+        $result = preg_replace("/^($separatorbefore+)\+/", "\\1$forceplus", $result);
     }
     return $result;
 }

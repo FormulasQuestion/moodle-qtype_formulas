@@ -1000,7 +1000,7 @@ class functions_test extends \advanced_testcase {
             array('p=poly(["x", "y", "z"], [1, 2, 3], "&&");', 'x&+&2y&+&3z'),
             array('p=poly(["x", "y", "z"], [-1, -1, -1], "&&");', '-x&-&y&-&z'),
             array('p=poly(["x", "y", "z"], [-1, -2, -3], "&&");', '-x&-&2y&-&3z'),
-            array('p=poly(["x", "y", "z"], [0, 1, 1], "&&");', '&+&y&+&z'),
+            array('p=poly(["x", "y", "z"], [0, 1, 1], "&&");', '&&y&+&z'),
             array('p=poly(["x", "y", "z"], [1, 0, 1], "&&");', 'x&&&+&z'),
             array('p=poly(["x", "y", "z"], [1, 1, 0], "&&");', 'x&+&y&&'),
             array('p=poly(["x", "y", "z"], [0, 0, 1], "&&");', '&&&&z'),
