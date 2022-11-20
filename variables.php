@@ -302,13 +302,31 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
         }
     }
 
+    // If the separator is "doubled", e.g. &&, we put one half before and one half after the
+    // operator. By default, we have the entire separator before the operator. Also, we do not
+    // change anything if we are building a matrix row, because there are no operators. (They are signs.)
+    $separatorlength = strlen($additionalseparator);
+    $separatorbefore = $additionalseparator;
+    $separatorafter = '';
+    if ($separatorlength > 0 && $separatorlength % 2 === 0 && $omitzero) {
+        $tmpbefore = substr($additionalseparator, 0, $separatorlength / 2);
+        $tmpafter = substr($additionalseparator, $separatorlength / 2);
+        // If the separator just has even length, but is not "doubled", we don't touch it.
+        if ($tmpbefore === $tmpafter) {
+            $separatorbefore = $tmpbefore;
+            $separatorafter = $tmpafter;
+        }
+    }
+
     $result = '';
+    // First term should not have a leading plus sign, unless user wants to force it.
     foreach ($coefficients as $i => $coef) {
-        $separator = ($i == 0 ? '' : $additionalseparator);
+        $thisseparatorbefore = ($i == 0 ? '' : $separatorbefore);
+        $thisseparatorafter = ($i == 0 ? '' : $separatorafter);
         // Terms with coefficient == 0 are generally not shown. But if we use a separator, it must be printed anyway.
         if ($coef == 0) {
             if ($i > 0) {
-                $result .= $separator;
+                $result .= $thisseparatorbefore . $thisseparatorafter;
             }
             if ($omitzero) {
                 continue;
@@ -319,11 +337,11 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
         // If the coefficient is 0 and we force its output, do it now. However, do not put a sign,
         // as the only documented usage of this is for matrix rows and the like.
         if ($coef < 0) {
-            $result .= $separator . '-';
+            $result .= $thisseparatorbefore . '-' . $thisseparatorafter;
             $coef = abs($coef);
         } else if ($coef > 0) {
             // If $omitzero is false, we are building a matrix row, so we don't put plus signs.
-            $result .= $separator . ($omitzero ? '+' : '');
+            $result .= $thisseparatorbefore . ($omitzero ? '+' : '') . $thisseparatorafter;
         }
         // Put the coefficient. If the coefficient is +1 or -1, we don't put the number,
         // unless we're at the last term. The sign is already there, so we use the absolute value.
@@ -332,14 +350,18 @@ function poly($variables, $coefficients = null, $forceplus = '', $additionalsepa
             $coef = (!$omitzero || ($i == $numberofterms - 1 && $constantone) ? '1' : '');
         }
         $result .= $coef . $variables[$i];
-        // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).
-        if ($result[0] == '+') {
-            $result = $forceplus . substr($result, 1);
-        }
     }
     // If the resulting string is empty (or empty with just alignment separators), add a zero at the end.
-    if ($result === '' || $result === str_repeat('&', $numberofterms - 1)) {
+    if ($result === '' || $result === str_repeat($additionalseparator, $numberofterms - 1)) {
         $result .= '0';
+    }
+    // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).
+    if ($result[0] == '+') {
+        $result = $forceplus . substr($result, 1);
+    }
+    // If we have nothing but separators before the leading +, replace that + by $forceplus.
+    if ($additionalseparator !== '' && preg_match("/^($additionalseparator+)\+/", $result)) {
+        $result = preg_replace("/^($additionalseparator+)\+/", "\\1$forceplus", $result);
     }
     return $result;
 }
