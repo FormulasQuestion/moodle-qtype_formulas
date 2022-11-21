@@ -979,7 +979,7 @@ class functions_test extends \advanced_testcase {
             array('p=poly([1, 2, 3]);', 'x^{2}+2x+3'),
             array('p=poly([-1, -2, -3]);', '-x^{2}-2x-3'),
             array('p=poly([-1, -2, -3], "&");', '-x^{2}&-2x&-3'),
-            array('p=poly([0, 1], "&");', '&+1'),
+            array('p=poly([0, 1], "&");', '&1'),
             array('p=poly([1, 0, 1], "&");', 'x^{2}&&+1'),
             array('p=poly([1, 0, 0, 1], "&");', 'x^{3}&&&+1'),
             // With a list of variables and coefficients...
@@ -994,7 +994,22 @@ class functions_test extends \advanced_testcase {
             array('p=poly("", [1, -1, 1, -1], "&");', '1&-1&1&-1'),
             array('p=poly("", [0, 0, 0, 0], "&");', '0&0&0&0'),
             array('p=poly("", [1, 0, 2, 3], "&");', '1&0&2&3'),
-            array('p=poly("", [0, 1, 0, -1], "&");', '0&1&0&-1')
+            array('p=poly("", [0, 1, 0, -1], "&");', '0&1&0&-1'),
+            // With double separators for e.g. equation systems...
+            array('p=poly(["x", "y", "z"], [1, 1, 1], "&&");', 'x&+&y&+&z'),
+            array('p=poly(["x", "y", "z"], [1, 2, 3], "&&");', 'x&+&2y&+&3z'),
+            array('p=poly(["x", "y", "z"], [-1, -1, -1], "&&");', '-x&-&y&-&z'),
+            array('p=poly(["x", "y", "z"], [-1, -2, -3], "&&");', '-x&-&2y&-&3z'),
+            array('p=poly(["x", "y", "z"], [0, 1, 1], "&&");', '&&y&+&z'),
+            array('p=poly(["x", "y", "z"], [1, 0, 1], "&&");', 'x&&&+&z'),
+            array('p=poly(["x", "y", "z"], [1, 1, 0], "&&");', 'x&+&y&&'),
+            array('p=poly(["x", "y", "z"], [0, 0, 1], "&&");', '&&&&z'),
+            array('p=poly(["x", "y", "z"], [0, 0, -1], "&&");', '&&&-&z'),
+            array('p=poly(["x", "y", "z"], [0, 0, 0], "&&");', '&&&&0'),
+            // Separator with even length, but not doubled; no practical use...
+            array('p=poly(["x", "y", "z"], [1, -2, 3], "&#");', 'x&#-2y&#+3z'),
+            // Artificially making the lengh odd; no practical use...
+            array('p=poly(["x", "y", "z"], [1, -2, 3], "&& ");', 'x&& -2y&& +3z'),
         );
         foreach ($testcases as $case) {
             $qv = new variables;
