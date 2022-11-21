@@ -1006,6 +1006,10 @@ class functions_test extends \advanced_testcase {
             array('p=poly(["x", "y", "z"], [0, 0, 1], "&&");', '&&&&z'),
             array('p=poly(["x", "y", "z"], [0, 0, -1], "&&");', '&&&-&z'),
             array('p=poly(["x", "y", "z"], [0, 0, 0], "&&");', '&&&&0'),
+            // Separator with even length, but not doubled; no practical use...
+            array('p=poly(["x", "y", "z"], [1, -2, 3], "&#");', 'x&#-2y&#+3z'),
+            // Artificially making the lengh odd; no practical use...
+            array('p=poly(["x", "y", "z"], [1, -2, 3], "&& ");', 'x&& -2y&& +3z'),
         );
         foreach ($testcases as $case) {
             $qv = new variables;
