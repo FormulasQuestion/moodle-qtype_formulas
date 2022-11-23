@@ -85,7 +85,7 @@ functions and operators is given in the documentation.
 $string['varsglobal_link'] = 'https://moodleformulas.org/';
 // The language string for the display and flow options and common question parts settings.
 $string['mainq'] = 'Main question';
-$string['subqoptions'] = 'Extra options';
+$string['subqoptions'] = 'Unit settings';
 $string['choiceyes'] = 'Yes';
 $string['choiceno'] = 'No';
 
@@ -143,7 +143,7 @@ range. Relative error cannot be used for algebraic answer type.
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
 $string['correctness_link'] = 'https://moodleformulas.org/';
 $string['correctnessexpert'] = 'Expert';
-$string['correctnesssimple'] = 'Simple';
+$string['correctnesssimple'] = 'Simplified mode';
 $string['relerror'] = 'Relative error';
 $string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';
@@ -190,16 +190,16 @@ $string['correctfeedback'] = 'For any correct response';
 $string['incorrectfeedback_help'] = 'This feedback will be show to students that don\'t get any mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['partiallycorrectfeedback_help'] = 'This feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['correctfeedback_help'] = 'This feedback will be show to students that get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
-$string['globaloptions'] = '[Global] - ';
 
 // The language string for the variables instantiation and preview.
 $string['checkvarshdr'] = 'Check variables instantiation';
 $string['instantiate'] = 'Instantiate';
-$string['numdataset'] = 'Number of dataset';
+$string['numdataset'] = 'Number of data sets';
 $string['renew'] = 'Update';
-$string['qtextpreview'] = 'Preview using dataset';
+$string['qtextpreview'] = 'Preview';
 $string['varsstatistics'] = 'Statistics';
-$string['varsdata'] = 'Instantiated dataset';
+$string['varsdata'] = 'Instantiated data sets';
+$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message:';
 
 // Errors message used by editing form's validation.
 $string['error_no_answer'] = 'At least one answer is required.';

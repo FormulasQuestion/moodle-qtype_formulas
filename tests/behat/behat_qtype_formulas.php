@@ -47,9 +47,35 @@ class behat_qtype_formulas extends behat_base {
             new behat_component_named_selector(
                 'Validation Unit Tests Error Indicator',
                 ["//span[@id='validation-unittests-failed']"]
+            ),
+            new behat_component_named_selector(
+                'Validation Unit Tests Error Indicator',
+                ["//span[@id='validation-unittests-failed']"]
             )
         ];
     }
 
+    /**
+     * @When /^I click on row number "(?P<rownumber>\d+)" of the Formulas Question instantiation table$/
+     * @param integer $rownumber which row
+     */
+    public function i_click_on_row_number_of_the_formulas_question_instantiation_table($rownumber) {
+        $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]";
+        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+    }
 
+    /**
+     * @Given /^I should see "(?P<text>[^"]*)" in the "(?P<field>[^"]*)" field of row number "(?P<rownumber>\d+)" of the Formulas Question instantiation table$/
+     * @param string $what the text to look for
+     * @param string $field the field name
+     * @param integer $rownumber which row
+     */
+    public function i_should_see_in_the_field_of_row_of_the_formulas_question_instatiation_table($text, $field, $rownumber) {
+        $field = behat_context_helper::escape($field);
+
+        $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]"
+        ."/div[contains(@class, 'tabulator-cell')][@tabulator-field=$field]";
+
+        $this->execute("behat_general::assert_element_contains_text", [$text, $xpath, "xpath_element"]);
+    }
 }

@@ -334,6 +334,10 @@ class qtype_formulas extends question_type {
             // Question's default mark is the total of all non empty parts's marks.
             $form->defaultmark += $form->answermark[$key];
         }
+        // Add the unitpenalty and ruleid to each part, from the global option.
+        $form->unitpenalty = array_fill(0, count($form->answer), $form->globalunitpenalty);
+        $form->ruleid = array_fill(0, count($form->answer), $form->globalruleid);
+
         $question = parent::save_question($question, $form);
         return $question;
     }
@@ -655,6 +659,9 @@ class qtype_formulas extends question_type {
      * @return an object with a field 'answers' containing valid answers. Otherwise, the 'errors' field will be set
      */
     public function check_and_filter_answers($form) {
+        // This function is also called when importing a question.
+        // The answers of imported questions already have their unitpenalty and ruleid set.
+        $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
         $tags = $this->part_tags();
         $res = (object)array('answers' => array());
         foreach ($form->answermark as $i => $a) {
@@ -684,7 +691,14 @@ class qtype_formulas extends question_type {
             $res->answers[$i] = new stdClass();
             $res->answers[$i]->questionid = $form->id;
             foreach ($tags as $tag) {
-                $res->answers[$i]->{$tag} = trim($form->{$tag}[$i]);
+                // The unitpenalty and ruleid are set via a global option,
+                // but stored with each part. When importing questions,
+                // this is not the case.
+                if (!$isfromimport && ($tag === 'unitpenalty' || $tag === 'ruleid')) {
+                    $res->answers[$i]->{$tag} = trim($form->{'global' . $tag});
+                } else {
+                    $res->answers[$i]->{$tag} = trim($form->{$tag}[$i]);
+                }
             }
 
             $subqtext = array();
@@ -742,10 +756,19 @@ class qtype_formulas extends question_type {
             $errors = array_merge($errors, $answerschecked->errors);
         }
         $validanswers = $answerschecked->answers;
-        foreach ($validanswers as $idx => $part) {
-            if ($part->unitpenalty < 0 || $part->unitpenalty > 1) {
-                $errors["unitpenalty[$idx]"] = get_string('error_unitpenalty', 'qtype_formulas');
+        // The value from the globalunitpenalty field is only used to set
+        // the penalty for each part. Is has to be validated separately.
+        // The same is true for the globalruleid, but as this is a select
+        // field, there is no need to validate it.
+        // If we are importing a question, there will be no globalunitpenalty or globalruleid,
+        // because the question will already have those values in its parts.
+        // No validation is needed in that case, as the parts have been checked before.
+        if (!property_exists($form, 'unitpenalty') || !property_exists($form, 'ruleid')) {
+            if ($form->globalunitpenalty < 0 || $form->globalunitpenalty > 1) {
+                $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
             }
+        }
+        foreach ($validanswers as $idx => $part) {
             try {
                 $pattern = '\{(_[0-9u][0-9]*)(:[^{}]+)?\}';
                 preg_match_all('/'.$pattern.'/', $part->subqtext['text'], $matches);
@@ -799,10 +822,20 @@ class qtype_formulas extends question_type {
         }
 
         if (count($form->answer)) {
+            // This function is also called when importing a question.
+            // The answers of imported questions already have their unitpenalty and ruleid set.
+            $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
             foreach ($form->answer as $key => $answer) {
                 $ans = new stdClass();
                 foreach ($tags as $tag) {
-                    $ans->{$tag} = $form->{$tag}[$key];
+                    // The unitpenalty and ruleid are set via a global option,
+                    // but stored with each part. When importing questions,
+                    // this is not the case.
+                    if (!$isfromimport && ($tag == 'unitpenalty' || $tag == 'ruleid')) {
+                        $ans->{$tag} = $form->{'global'.$tag};
+                    } else {
+                        $ans->{$tag} = $form->{$tag}[$key];
+                    }
                 }
                 $ans->subqtext = $form->subqtext[$key];
                 $ans->feedback = $form->feedback[$key];

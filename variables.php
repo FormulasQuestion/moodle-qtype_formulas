@@ -455,8 +455,22 @@ class variables {
     public function vstack_get_number_of_dataset(&$vstack) {
         $numdataset = 1;
         foreach ($vstack->all as $name => $data) {
-            if ($data->type[0] == 'z' && $data->type != 'zh') {
+            if ($data->type[0] == 'z' && $data->type[1] != 'h') {
                 // The 'shuffle' is not counted, as it always have large number of permutation...
+                $numdataset *= $data->value->numelement;
+                if ($numdataset > self::$maxdataset) {
+                    return null;
+                }
+            }
+        }
+        return $numdataset;
+    }
+
+    // Return the size of sample space, or null if it is too large. The purpose of this number is to instantiate all random dataset.
+    public function vstack_get_number_of_dataset_with_shuffle(&$vstack) {
+        $numdataset = 1;
+        foreach ($vstack->all as $name => $data) {
+            if ($data->type[0] == 'z') {
                 $numdataset *= $data->value->numelement;
                 if ($numdataset > self::$maxdataset) {
                     return null;
@@ -868,7 +882,9 @@ class variables {
                         throw new Exception(get_string('error_syntax', 'qtype_formulas'));
                     }
                     $type = 'zh'.$result->type;
-                    $var->numelement = mycount($result->value);   // The actual number should be a!, but it will not be used anyway.
+                    // Factorials can get pretty big, so it is worth limiting the true count to
+                    // some reasonable number, e.g. 1000.
+                    $var->numelement = min(1000, fact(mycount($result->value)));
                     $var->elements = $result->value;
                 } else {
                     throw new Exception(get_string('error_syntax', 'qtype_formulas'));
