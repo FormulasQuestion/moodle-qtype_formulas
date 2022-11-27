@@ -87,7 +87,7 @@ class behat_qtype_formulas extends behat_base {
         require_once($CFG->libdir . '/environmentlib.php');
         require($CFG->dirroot . '/version.php');
         $currentversion = normalize_version($release);
-        if (version_compare($currentversion, '4.0', ">=")) {
+        if (version_compare($currentversion, '4.1', ">=")) {
             $xpath = "//div[contains(@class, 'modal-dialog')]/*/*/button[contains(@class, 'btn-primary')]";
         } else if (version_compare($currentversion, '3.9', ">=")) {
             $xpath = "//div[contains(@class, 'confirmation-dialogue')]/*/input[contains(@class, 'btn-primary')]";
