@@ -78,4 +78,20 @@ class behat_qtype_formulas extends behat_base {
 
         $this->execute("behat_general::assert_element_contains_text", [$text, $xpath, "xpath_element"]);
     }
+
+    /**
+     * @Given /^I confirm the quiz submission in the modal dialog$/
+     */
+    public function i_confirm_the_quiz_submission_in_the_modal_dialog() {
+        global $CFG;
+        require_once($CFG->libdir . '/environmentlib.php');
+        require($CFG->dirroot . '/version.php');
+        $currentversion = normalize_version($release);
+        if (version_compare($currentversion, '4.1', ">=")) {
+            $xpath = "//div[contains(@class, 'modal-dialog')]/*/*/button[contains(@class, 'btn-primary')]";
+        } else if (version_compare($currentversion, '3.9', ">=")) {
+            $xpath = "//div[contains(@class, 'confirmation-dialogue')]/*/input[contains(@class, 'btn-primary')]";
+        }
+        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+    }
 }
