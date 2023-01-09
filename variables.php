@@ -1310,10 +1310,7 @@ class variables {
                 $tmp = $values[0];
                 $order = $values[1];
                 uksort($tmp, function($a, $b) use ($order) {
-                    if ($order[$a] === $order[$b]) {
-                        return 0;
-                    }
-                    return ($order[$a] > $order[$b] ? 1 : -1);
+                    return strnatcmp($order[$a], $order[$b]);
                 });
                 $this->replace_middle($vstack, $expression, $l, $r, $types[0], array_values($tmp));
                 return true;

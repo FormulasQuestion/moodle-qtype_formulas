@@ -240,6 +240,10 @@ class variables_test extends \advanced_testcase {
                     's' => (object) array('type' => 'ls', 'value' => array('A1', 'B', 'A2')),
                     )
             ),
+            array(true, 's=sort(["A","B","C"],["A2","A10","A1"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array('C', 'A', 'B')),
+                    )
+            ),
             array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
                     's' => (object) array('type' => 'ls', 'value' => array('B', 'D')),
                     )
