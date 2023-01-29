@@ -1,14 +1,13 @@
 {
        "name": "moodle-qtype_formulas",
        "devDependencies": {
-              "grunt": "^1.0.1",
-              "grunt-contrib-less": "^1.4.1",
-              "grunt-contrib-watch": "^1.0.0",
-              "grunt-load-gruntfile": "0.0.2"
+              "grunt": "^1.5.3",
+              "grunt-cli": "^1.4.3",
+              "grunt-contrib-watch": "^1.1.0"
        },
        "repository": {
               "type": "git",
-              "url": "git://github.com/dbauer-ets/moodle-qtype_formulas.git"
+              "url": "git://github.com/FormulasQuestion/moodle-qtype_formulas.git"
        },
        "license" : "GPL-3.0"
 }

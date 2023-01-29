@@ -7,4 +7,11 @@
         <license>MIT</license>
         <licenseversion></licenseversion>
     </library>
+    <library>
+        <location>tabulator.css</location>
+        <name>Tabulator</name>
+        <version>5.4</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
 </libraries>
