@@ -134,7 +134,7 @@ class instantiation extends \external_api {
                 $row['parts'][$i][] = array('name' => '_0', 'value' => '!!!');
                 break;
             }
-            if (gettype($evaluatedanswers[$i]->value) == 'string') {
+            if (is_scalar($evaluatedanswers[$i]->value)) {
                 $row['parts'][$i][] = array('name' => '_0', 'value' => $evaluatedanswers[$i]->value);
                 continue;
             }
