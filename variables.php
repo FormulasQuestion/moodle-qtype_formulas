@@ -1296,13 +1296,22 @@ class variables {
                     break;
                 }
                 if ($sz == 1) {
-                    $values[1] = $values[0];
+                    // If we have one list, we use natural sorting.
+                    $tmp = $values[0];
+                    natsort($tmp);
+                    $this->replace_middle($vstack, $expression, $l, $r, $types[0], array_values($tmp));
+                    return true;
                 }
                 if (mycount($values[0]) != mycount($values[1])) {
                     break;
                 }
-                $tmp = array_combine($values[1], $values[0]);
-                ksort($tmp);
+                // Still here? That means we have two lists of the same size. Use the latter
+                // as the sort order.
+                $tmp = $values[0];
+                $order = $values[1];
+                uksort($tmp, function($a, $b) use ($order) {
+                    return strnatcmp($order[$a], $order[$b]);
+                });
                 $this->replace_middle($vstack, $expression, $l, $r, $types[0], array_values($tmp));
                 return true;
             case 'sublist':

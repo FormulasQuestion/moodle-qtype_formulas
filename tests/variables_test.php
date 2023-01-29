@@ -212,12 +212,44 @@ class variables_test extends \advanced_testcase {
                     's' => (object) array('type' => 'ln', 'value' => array(2, 3, 5, 7, 11)),
                     )
             ),
+            array(true, 's=sort(["A1","A10","A2","A100"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array("A1", "A2", "A10", "A100")),
+                    )
+            ),
+            array(true, 's=sort([1,2,3], ["A10","A1","A2"]);', array(
+                    's' => (object) array('type' => 'ln', 'value' => array(2, 3, 1)),
+                    )
+            ),
+            array(true, 's=sort([1,10,5,3]);', array(
+                    's' => (object) array('type' => 'ln', 'value' => array(1, 3, 5, 10)),
+                    )
+            ),
+            array(true, 's=sort(["4","3","A","a","B","2","1","b","c","C"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => ['1','2','3','4','A','B','C','a','b','c']),
+                    )
+            ),
+            array(true, 's=sort(["B","C","A","B"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array('A', 'B', 'B', 'C')),
+                    )
+            ),
+            array(true, 's=sort(["B","3","1","0","A","C","c","b","2","a"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array('0','1','2','3','A','B','C','a','b','c')),
+                    )
+            ),
             array(true, 's=sort(["B","A2","A1"]);', array(
                     's' => (object) array('type' => 'ls', 'value' => array('A1', 'A2', 'B')),
                     )
             ),
+            array(true, 's=sort(["B","C","A"],[0,2,1]);', array(
+                's' => (object) array('type' => 'ls', 'value' => array('B', 'A', 'C')),
+                )
+            ),
             array(true, 's=sort(["B","A2","A1"],[2,4,1]);', array(
                     's' => (object) array('type' => 'ls', 'value' => array('A1', 'B', 'A2')),
+                    )
+            ),
+            array(true, 's=sort(["A","B","C"],["A2","A10","A1"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array('C', 'A', 'B')),
                     )
             ),
             array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
