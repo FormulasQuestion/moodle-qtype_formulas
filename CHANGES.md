@@ -6,6 +6,8 @@
 - bugfix: instantiation check could fail in certain cases
 - internal: some cleanup, update of package.json
 
+Please note: future releases will no longer support Internet Explorer.
+
 ### 5.1.0 (2022-11-23)
 - added support for Moodle 4.1
 - new functions for number conversion (decimal <-> octal/binary)
