@@ -1060,5 +1060,30 @@ class functions_test extends \advanced_testcase {
         $this->assertEquals(get_config('qtype_formulas')->version, $result->all['a']->value);
     }
 
+    public function test_fmod() {
+        $testcases = array(
+            array(fmod(35, 20), 15),
+            array(fmod(-35, 20), 5),
+            array(fmod(35, -20), -5),
+            array(fmod(-35, -20), -15),
+            array(fmod(12, 3), 0),
+            array(fmod(5, 8), 5),
+            array(fmod(5.7, 1.3), 0.5),
+            array(fmod(0, 7.9), 0),
+            array(fmod(2, 0.4), 0)
+        );
+        foreach ($testcases as $case) {
+            $this->assertEquals($case[1], $case[0]);
+        }
+        $qv = new variables();
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $qv->evaluate_assignments($v, 'a=fmod(4, 0);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertEquals('1: ' . get_string('error_eval_numerical', 'qtype_formulas'), $errmsg);
+    }
 
 }

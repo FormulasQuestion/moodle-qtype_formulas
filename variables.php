@@ -171,6 +171,26 @@ function modinv($a, $m) {
     return ($s < 0) ? $s + $orig_m : $s;
 }
 
+/**
+ * Calculate the floating point remainder of the division of
+ * the arguments, i. e. x - m * floor(x / m). There is no
+ * canonical definition for this function; some calculators
+ * use flooring (round down to nearest integer) and others
+ * use truncation (round to nearest integer, but towards zero).
+ * This implementation gives the same results as e. g. Wolfram Alpha.
+ *
+ * @author Philipp Imhof
+ * @param float $x the dividend
+ * @param float $m the modulus
+ * @return float remainder of $x modulo $m
+ */
+function fmod($x, $m) {
+    if ($m === 0) {
+        throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+    }
+    return $x - $m * floor($x / $m);
+}
+
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
