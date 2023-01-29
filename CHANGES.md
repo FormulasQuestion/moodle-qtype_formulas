@@ -1,5 +1,13 @@
 # Changelog
 
+### 5.1.1 (2023-01-30)
+- bugfix: fmod() now works like in other scientific calculators
+- bugfix: sort() now uses natural sorting and does not lose values anymore
+- bugfix: instantiation check could fail in certain cases
+- internal: some cleanup, update of package.json
+
+Please note: future releases will no longer support Internet Explorer.
+
 ### 5.1.0 (2022-11-23)
 - added support for Moodle 4.1
 - new functions for number conversion (decimal <-> octal/binary)

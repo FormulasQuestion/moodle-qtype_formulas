@@ -14,39 +14,38 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * support for the mdl35+ mobile app. PHP calls this from within
+ * support for the Moodle mobile app >= 3.9.5. PHP calls this from within
  * classes/output/mobile.php
  */
-/* jshint esversion: 6 */
-/* eslint-disable no-console */
 
 var that = this;
 var result = {
     componentInit: function() {
         var div = document.createElement('div');
         div.innerHTML = this.question.html;
-        this.question.text = this.CoreDomUtilsProvider.getContentsOfElement(div, '.qtext');
+        this.question.text = div.querySelector('.qtext').innerHTML;
 
         // Replace Moodle's correct/incorrect and feedback classes with our own.
-        this.CoreQuestionHelperProvider.replaceCorrectnessClasses(div);
-        this.CoreQuestionHelperProvider.replaceFeedbackClasses(div);
+        that.CoreQuestionHelperProvider.replaceCorrectnessClasses(div);
+        that.CoreQuestionHelperProvider.replaceFeedbackClasses(div);
+        that.CoreQuestionHelperProvider.treatCorrectnessIcons(div);
 
-         // Treat the correct/incorrect icons.
-        this.CoreQuestionHelperProvider.treatCorrectnessIcons(div);
+        if (typeof this.question.text === 'undefined') {
+            return that.CoreQuestionHelperProvider.showComponentError(this.onAbort);
+        }
 
         if (div.querySelector('.readonly') !== null) {
             this.question.readOnly = true;
         }
+
         if (div.querySelector('.feedback') !== null) {
             this.question.feedback = div.querySelector('.feedback');
             this.question.feedbackHTML = true;
         }
 
-        if (typeof this.question.text == 'undefined') {
-            this.logger.warn('Aborting because of an error parsing question.', this.question.name);
-            return this.CoreQuestionHelperProvider.showComponentError(this.onAbort);
-        }
         return true;
     }
 };
+
+/* eslint-disable-next-line */
 result;

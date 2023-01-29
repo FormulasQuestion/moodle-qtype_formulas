@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Mobile output class for qtype_gapfill
+ * Mobile output class for qtype_formulas
  *
  * @package    qtype_formulas
  * @copyright  2022 Jakob Heinemann
@@ -23,8 +23,6 @@
  */
 
 namespace qtype_formulas\output;
-
-
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class mobile {
     /**
-     * Returns the gapfill question type for the quiz in the mobile app.
+     * Returns the Formulas question type for the quiz in the mobile app.
      *
      * @return void
      */
