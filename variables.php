@@ -1375,6 +1375,10 @@ class variables {
                     if (!array_key_exists($values[0], $this->func_unary)) {
                         break;
                     }
+                    // Check if the function is one of our own. If it is, prepend the namespace.
+                    if (is_callable(__NAMESPACE__ . '\\' . $values[0])) {
+                        $values[0] = __NAMESPACE__ . '\\' . $values[0];
+                    }
                     $value = array_map(
                         function ($a) use ($values) {
                             return floatval($values[0]($a));
@@ -1396,6 +1400,10 @@ class variables {
                                 return eval('return floatval(($a)'.$values[0].'($b));');
                             }, $values[1], $values[2]);
                     } else if (array_key_exists($values[0], $this->func_binary)) {
+                        // Check if the function is one of our own. If it is, prepend the namespace.
+                        if (is_callable(__NAMESPACE__ . '\\' . $values[0])) {
+                            $values[0] = __NAMESPACE__ . '\\' . $values[0];
+                        }
                         $value = array_map(
                             function ($a, $b) use ($values) {
                                 return floatval($values[0]($a, $b));
@@ -1579,7 +1587,7 @@ class variables {
             $res = null;
             // In PHP 7 eval() terminates the script if the evaluated code generate a fatal error.
             try {
-                eval('namespace qtype_formulas; $res = ' . implode(' ', $splitted) . ';');
+                eval('namespace ' . __NAMESPACE__ . '; $res = ' . implode(' ', $splitted) . ';');
             } catch (Throwable $t) {
                 throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
             }
