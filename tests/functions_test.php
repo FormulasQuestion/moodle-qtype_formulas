@@ -859,6 +859,8 @@ class functions_test extends \advanced_testcase {
             array(false, 'a=len();'),
             array(false, 'a=len(1);'),
             array(true, 'a=map("+", [1, 2], [3, 4]);'),
+            array(true, 'a=map("sigfig", [2.123, 3.568], 3);'),
+            array(true, 'a=map("stdnormcdf", [2, 1]);'),
             array(true, 'a=map("abs", [-1, -2]);'),
             array(false, 'a=map("+", [1, 2]);'), // Binary operator needs two lists.
             array(false, 'a=map("abs", [-1, -2], [3, 4]);'),
