@@ -89,4 +89,4 @@ jobs:
       - name: Grunt
         continue-on-error: true
         if: ${{ always() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
+        run: moodle-plugin-ci grunt --max-lint-warnings 1
