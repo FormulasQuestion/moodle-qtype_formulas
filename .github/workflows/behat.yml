@@ -32,6 +32,8 @@ jobs:
         exclude:
           - moodle-branch: 'MOODLE_39_STABLE'
             php: '8.0'
+          - moodle-branch: 'master'
+            php: '7.4'
 
     steps:
       - name: Check out repository code
