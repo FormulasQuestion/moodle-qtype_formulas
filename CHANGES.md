@@ -1,5 +1,8 @@
 # Changelog
 
+### 5.1.2 (2023-02-15)
+- bugfix: internal functions (e.g. sigfig) working with map() again
+
 ### 5.1.1 (2023-01-30)
 - bugfix: fmod() now works like in other scientific calculators
 - bugfix: sort() now uses natural sorting and does not lose values anymore
