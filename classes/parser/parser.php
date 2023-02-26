@@ -121,7 +121,7 @@ class Parser {
             $value = $currenttoken->value;
             // If we are at the start of a list (array), we combine all relevant tokens into one
             // and append it to the current statement.
-            if ($type === Token::OPENING_PAREN && $value === '[') {
+            if ($type === Token::OPENING_BRACKET) {
                 // An opening [ could also be the start of a range. In that case, the
                 // next but one token must be a colon.
                 $nextbutone = $this->peek(1);
@@ -157,7 +157,7 @@ class Parser {
             $value = $currenttoken->value;
             // If we are at the start of a list (array), we combine all relevant tokens into one
             // and append it to the current statement.
-            if ($type === Token::OPENING_PAREN && $value === '[') {
+            if ($type === Token::OPENING_BRACKET) {
                 print('diving into list');
                 $currentstatement[] = $this->parse_list();
                 $this->statements[] = $currentstatement;
@@ -209,12 +209,12 @@ class Parser {
             // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION
             // - if it is not a known variable and not followed by a ( symbol, we assume it is a VARIABLE
             if ($type === Token::IDENTIFIER) {
-                if (!$this->is_known_variable($currenttoken) && $nexttype === Token::OPENING_PAREN && $nextvalue === '(') {
+                if (!$this->is_known_variable($currenttoken) && $nexttype === Token::OPENING_PAREN) {
                     print("changing token {$currenttoken->value}'s type to FUNCTION\n");
                     $type = ($currenttoken->type = Token::FUNCTION);
 
                 } else {
-                    $this->variableslist[] = $value;
+                    $this->register_variable($currenttoken);
                     print("changing token {$currenttoken->value}'s type to VARIABLE\n");
                     $type = ($currenttoken->type = Token::VARIABLE);
                 }
@@ -222,9 +222,9 @@ class Parser {
             // Add implicit multiplication signs:
             // if the current token is an VARIABLE or a NUMBER or a ) symbol *and*
             // the next token is an IDENTIFIER or a NUMBER or a ( symbol
-            // we insert a multiplication sign, *except* if
-            if ($type === Token::NUMBER || $type === Token::VARIABLE || ($type === Token::CLOSING_PAREN && $value === ')')) {
-                if ($nexttype === Token::NUMBER || $nexttype === Token::IDENTIFIER || ($nexttype === Token::OPENING_PAREN && $nextvalue === '(')) {
+            // we insert a multiplication sign
+            if (in_array($type, [Token::NUMBER, Token::VARIABLE, Token::CLOSING_PAREN])) {
+                if (in_array($nexttype, [Token::NUMBER, Token::IDENTIFIER, Token::OPENING_PAREN])) {
                     $this->insert_implicit_multiplication();
                 }
             }
@@ -301,12 +301,12 @@ class Parser {
             $currenttoken = $this->peek();
             $type = $currenttoken->type;
             $value = $currenttoken->value;
-            if ($type === Token::OPENING_PAREN && $value === '[') {
+            if ($type === Token::OPENING_BRACKET) {
                 $bracketlevel++;
                 // Recursively parse the sublist. The opening bracked will be consumed there.
                 $listelements[] = $this->parse_list();
                 continue;
-            } else if ($type === Token::CLOSING_PAREN && $value === ']') {
+            } else if ($type === Token::CLOSING_BRACKET) {
                 $bracketlevel--;
                 $this->read_next();
                 return $listelements;
@@ -330,6 +330,13 @@ class Parser {
     // FIXME doc
     private function is_known_variable($token) {
         return in_array($token->value, $this->variableslist);
+    }
+
+    private function register_variable($token) {
+        if ($this->is_known_variable($token)) {
+            return;
+        }
+        $this->variableslist[] = $token->value;
     }
 
     public function parse_ifelse() {
