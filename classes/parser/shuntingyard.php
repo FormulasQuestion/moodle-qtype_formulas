@@ -202,7 +202,7 @@ class ShuntingYard {
                 continue;
             }
             // Opening parenthesis goes straight to the operator stack.
-            if ($type === Token::OPENING_PAREN && $value === '(') {
+            if ($type === Token::OPENING_PAREN) {
                 $opstack[] = $token;
                 $unarypossible = true;
                 continue;
@@ -216,7 +216,7 @@ class ShuntingYard {
             }
             // Closing parenthesis means we flush all operators until we get to the
             // matching opening parenthesis.
-            if ($type === Token::CLOSING_PAREN && $value === ')') {
+            if ($type === Token::CLOSING_PAREN) {
                 self::flush_until($opstack, function($operator) {
                     return $operator->value === '(';
                 }, $output, true, true);

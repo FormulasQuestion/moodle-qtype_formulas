@@ -45,6 +45,10 @@ class Token {
     const OPERATOR = 256;
     const OPENING_PAREN = 512;
     const CLOSING_PAREN = 1024;
+    const OPENING_BRACKET = 513;
+    const CLOSING_BRACKET = 1025;
+    const OPENING_BRACE = 514;
+    const CLOSING_BRACE = 1026;
     const ARG_SEPARATOR = 2048;
     const END_OF_STATEMENT = 4096;
     const RESERVED_WORD = 8192;
@@ -158,11 +162,23 @@ class Lexer {
         }
         // Brackets, braces and parentheses are tokens on their own, they are always returned as an individual token.
         // We will have a separate category for opening and closing brackets.
-        if (preg_match('/[\[{(]/', $currentchar)) {
+        if ($currentchar === '(') {
             return $this->read_single_char_token(Token::OPENING_PAREN);
         }
-        if (preg_match('/[\]})]/', $currentchar)) {
+        if ($currentchar === ')') {
             return $this->read_single_char_token(Token::CLOSING_PAREN);
+        }
+        if ($currentchar === '[') {
+            return $this->read_single_char_token(Token::OPENING_BRACKET);
+        }
+        if ($currentchar === ']') {
+            return $this->read_single_char_token(Token::CLOSING_BRACKET);
+        }
+        if ($currentchar === '{') {
+            return $this->read_single_char_token(Token::OPENING_BRACE);
+        }
+        if ($currentchar === '}') {
+            return $this->read_single_char_token(Token::CLOSING_BRACE);
         }
         // The comma is used as an argument separator (or similar) token.
         if ($currentchar === ',') {
