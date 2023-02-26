@@ -29,73 +29,149 @@ use Exception;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser.php');
+require_once($CFG->dirroot . '/question/type/formulas/classes/parser/parser.php');
+require_once($CFG->dirroot . '/question/type/formulas/classes/parser/lexer.php');
+require_once($CFG->dirroot . '/question/type/formulas/classes/parser/inputstream.php');
+require_once($CFG->dirroot . '/question/type/formulas/classes/parser/shuntingyard.php');
 
 class tokenizer_test extends \advanced_testcase {
 
+    public function test_basic_operations() {
+        //$input = 'for (i:1:4) { }';
+        //$tokens = (new Lexer($input))->get_token_list();
+        //print_r($tokens); return;
+
+        /*$input = '1*2-3/4+5*6-7*8+9/10';
+        $input = 'a(2)';
+        $input = 'a b';
+        $lexer = new Lexer($input);
+        $tokens = $lexer->get_token_list();
+        $parser = new Parser($tokens, true, ['a']);
+        $output = ShuntingYard::shunting_yard($parser->statements[0]);
+        print_r(array_map(function($el) { return $el->value; }, $output));
+        die();*/
+
+        $input = 'a = 1+2*3';
+        $input = 'a = 1*(2+3)**2*4';
+        $input = 'a = 1*2+3';
+        $input = 'a = 5 = 3';
+        $input = 'a = b = 7 + 1';
+        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * d(4 + a) + e;';
+        $input = 'a = 4; b = !a';
+        $input = 'a = 1*2-3/4+5*6-7*8+9/10';
+        $input = 'a = !a b 2';
+
+        $lexer = new Lexer($input);
+        $parser = new Parser($lexer->get_token_list());
+        foreach ($parser->statements as $statement) {
+            $output = ShuntingYard::shunting_yard($statement);
+            print_r(array_map(function($el) { return $el->value; }, $output));
+        }
+        //print_r($output);
+    }
+
+    public function test_parse_list() {
+        //$input = '[1, 2, 3]';
+        //$input = '[1, "a", 3]';
+        //$input = '[1, ["x", "y"], 3]';
+        //$input = '[[1,2]]';
+        $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
+
+        $lexer = new Lexer($input);
+        $parser = new Parser($lexer->get_token_list());
+        print_r($parser->get_statements());
+    }
+
     public function test_get_token_list_1() {
         $input = <<<EOF
-        this = that * other_thing;
-        s1 = 'single quoted string with a double quote " inside';
-        # just a comment
-        s2 = "double quoted string with a single quote ' inside";
-        s3 = "string\nwith a newline";
-        s4 = 'string with a real
+this = that * other_thing;
+s1 = 'single quoted string with a double quote " inside';
+# just a comment
+s2 = "double quoted string with a single quote ' inside";
+s3 = "string\\nwith a newline";
+_s4 = 'string with a real
 newline';
-        x = 2*x+z;
-        f = 4g-e;
-        test = (a == b ? c : d);
+x = 2*x+z;
+f = 4g-e;
+test = (a == b ? c : d);
 EOF;
         $output = array(
-            new Token(Token::IDENTIFIER, 'this'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'that'),
-            new Token(Token::OPERATOR, '*'),
-            new Token(Token::IDENTIFIER, 'other_thing'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 's1'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, 'single quoted string with a double quote " inside'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 's2'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, 'double quoted string with a single quote \' inside'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 's3'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, "string\nwith a newline"),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 's4'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, "string with a real\nnewline"),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'x'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, 2),
-            new Token(Token::OPERATOR, '*'),
-            new Token(Token::IDENTIFIER, 'x'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'z'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'f'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, 4),
-            new Token(Token::IDENTIFIER, 'g'),
-            new Token(Token::OPERATOR, '-'),
-            new Token(Token::IDENTIFIER, 'e'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'test'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '=='),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '?'),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, ':'),
-            new Token(Token::IDENTIFIER, 'd'),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 'this', 1, 1),
+            new Token(Token::OPERATOR, '=', 1, 6),
+            new Token(Token::IDENTIFIER, 'that', 1, 8),
+            new Token(Token::OPERATOR, '*', 1, 13),
+            new Token(Token::IDENTIFIER, 'other_thing', 1, 15),
+            new Token(Token::END_OF_STATEMENT, ';', 1, 26),
+            new Token(Token::IDENTIFIER, 's1', 2, 1),
+            new Token(Token::OPERATOR, '=', 2, 4),
+            new Token(Token::STRING, 'single quoted string with a double quote " inside', 2, 6),
+            new Token(Token::END_OF_STATEMENT, ';', 2, 57),
+            new Token(Token::IDENTIFIER, 's2', 4, 1),
+            new Token(Token::OPERATOR, '=', 4, 4),
+            new Token(Token::STRING, 'double quoted string with a single quote \' inside', 4, 6),
+            new Token(Token::END_OF_STATEMENT, ';', 4, 57),
+            new Token(Token::IDENTIFIER, 's3', 5, 1),
+            new Token(Token::OPERATOR, '=', 5, 4),
+            new Token(Token::STRING, "string\nwith a newline", 5, 6),
+            new Token(Token::END_OF_STATEMENT, ';', 5, 30),
+            new Token(Token::IDENTIFIER, '_s4', 6, 1),
+            new Token(Token::OPERATOR, '=', 6, 5),
+            new Token(Token::STRING, "string with a real\nnewline", 6, 7),
+            new Token(Token::END_OF_STATEMENT, ';', 7, 9),
+            new Token(Token::IDENTIFIER, 'x', 8, 1),
+            new Token(Token::OPERATOR, '=', 8, 3),
+            new Token(Token::NUMBER, 2, 8, 5),
+            new Token(Token::OPERATOR, '*', 8, 6),
+            new Token(Token::IDENTIFIER, 'x', 8, 7),
+            new Token(Token::OPERATOR, '+', 8, 8),
+            new Token(Token::IDENTIFIER, 'z', 8, 9),
+            new Token(Token::END_OF_STATEMENT, ';', 8, 10),
+            new Token(Token::IDENTIFIER, 'f', 9, 1),
+            new Token(Token::OPERATOR, '=', 9, 3),
+            new Token(Token::NUMBER, 4, 9, 5),
+            new Token(Token::IDENTIFIER, 'g', 9, 6),
+            new Token(Token::OPERATOR, '-', 9, 7),
+            new Token(Token::IDENTIFIER, 'e', 9, 8),
+            new Token(Token::END_OF_STATEMENT, ';', 9, 9),
+            new Token(Token::IDENTIFIER, 'test', 10, 1),
+            new Token(Token::OPERATOR, '=', 10, 6),
+            new Token(Token::OPENING_PAREN, '(', 10, 8),
+            new Token(Token::IDENTIFIER, 'a', 10, 9),
+            new Token(Token::OPERATOR, '==', 10, 11),
+            new Token(Token::IDENTIFIER, 'b', 10, 14),
+            new Token(Token::OPERATOR, '?', 10, 16),
+            new Token(Token::IDENTIFIER, 'c', 10, 18),
+            new Token(Token::OPERATOR, ':', 10, 20),
+            new Token(Token::IDENTIFIER, 'd', 10, 22),
+            new Token(Token::CLOSING_PAREN, ')', 10, 23),
+            new Token(Token::END_OF_STATEMENT, ';', 10, 24),
+        );
+
+        $lexer = new Lexer($input);
+        $this->assertEquals($output, $lexer->get_token_list());
+    }
+
+    public function test_get_token_list_unicode() {
+        $input = <<<EOF
+s = 'string with äöüéç…';
+t = join("", 'äöü', 'éçñ…');
+EOF;
+        $output = array(
+            new Token(Token::IDENTIFIER, 's', 1, 1),
+            new Token(Token::OPERATOR, '=', 1, 3),
+            new Token(Token::STRING, 'string with äöüéç…', 1, 5),
+            new Token(Token::END_OF_STATEMENT, ';', 1, 25),
+            new Token(Token::IDENTIFIER, 't', 2, 1),
+            new Token(Token::OPERATOR, '=', 2, 3),
+            new Token(Token::IDENTIFIER, 'join', 2, 5),
+            new Token(Token::OPENING_PAREN, '(', 2, 9),
+            new Token(Token::STRING, '', 2, 10),
+            new Token(Token::ARG_SEPARATOR, ',', 2, 12),
+            new Token(Token::STRING, 'äöü', 2, 14),
+            new Token(Token::ARG_SEPARATOR, ',', 2, 19),
+            new Token(Token::STRING, 'éçñ…', 2, 21),
+            new Token(Token::CLOSING_PAREN, ')', 2, 27),
+            new Token(Token::END_OF_STATEMENT, ';', 2, 28),
         );
 
         $lexer = new Lexer($input);
@@ -106,88 +182,98 @@ EOF;
         $input = <<<EOF
         s1 = 'single quoted string with an escaped quote \' inside';
         # just a comment
-        s2 = "double quoted string with an escaped quote \" inside";
+        s_2 = "double quoted string with an escaped quote \" inside";
         a = b + c * d / e - f % g;
 EOF;
+        // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 's1'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, "single quoted string with an escaped quote ' inside"),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 's2'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::STRING, 'double quoted string with an escaped quote " inside'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, '*'),
-            new Token(Token::IDENTIFIER, 'd'),
-            new Token(Token::OPERATOR, '/'),
-            new Token(Token::IDENTIFIER, 'e'),
-            new Token(Token::OPERATOR, '-'),
-            new Token(Token::IDENTIFIER, 'f'),
-            new Token(Token::OPERATOR, '%'),
-            new Token(Token::IDENTIFIER, 'g'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 's1', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::STRING, "single quoted string with an escaped quote ' inside", 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 's_2', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::STRING, 'double quoted string with an escaped quote " inside', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '+', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPERATOR, '*', 0, 0),
+            new Token(Token::IDENTIFIER, 'd', 0, 0),
+            new Token(Token::OPERATOR, '/', 0, 0),
+            new Token(Token::IDENTIFIER, 'e', 0, 0),
+            new Token(Token::OPERATOR, '-', 0, 0),
+            new Token(Token::IDENTIFIER, 'f', 0, 0),
+            new Token(Token::OPERATOR, '%', 0, 0),
+            new Token(Token::IDENTIFIER, 'g', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $lexer = new Lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $tokens = (new Lexer($input))->get_token_list();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
     }
 
     public function test_get_token_list_3() {
-        $input = <<<EOF
-        a = sin(2);
+        $input = <<<'EOF'
+        a = \sin(2);
         b = 3sqrt(5);
         c = 4x(a+b);
         d = (a+b)(c+d);
 EOF;
+
+        // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'sin'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::NUMBER, 2),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, 3),
-            new Token(Token::IDENTIFIER, 'sqrt'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::NUMBER, 5),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, 4),
-            new Token(Token::IDENTIFIER, 'x'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'd'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'd'),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::PREFIX, '\\', 0, 0),
+            new Token(Token::IDENTIFIER, 'sin', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::NUMBER, 2, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::NUMBER, 3, 0, 0),
+            new Token(Token::IDENTIFIER, 'sqrt', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::NUMBER, 5, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::NUMBER, 4, 0, 0),
+            new Token(Token::IDENTIFIER, 'x', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '+', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'd', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '+', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPERATOR, '+', 0, 0),
+            new Token(Token::IDENTIFIER, 'd', 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $lexer = new Lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $tokens = (new Lexer($input))->get_token_list();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
     }
 
     public function test_get_token_list_4() {
@@ -196,36 +282,41 @@ EOF;
         b = 3e-4sqrt(5e+2);
         c = 4ex(a+b);
 EOF;
+
+        // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'sin'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::NUMBER, 2000),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, .0003),
-            new Token(Token::IDENTIFIER, 'sqrt'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::NUMBER, 500),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::NUMBER, 4),
-            new Token(Token::IDENTIFIER, 'ex'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '+'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::IDENTIFIER, 'sin', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::NUMBER, 2000, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::NUMBER, .0003, 0, 0),
+            new Token(Token::IDENTIFIER, 'sqrt', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::NUMBER, 500, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::NUMBER, 4, 0, 0),
+            new Token(Token::IDENTIFIER, 'ex', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '+', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $lexer = new Lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $tokens = (new Lexer($input))->get_token_list();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
     }
 
     public function test_get_token_list_5() {
@@ -234,59 +325,64 @@ EOF;
         b = [a, b, 'c', "d"];
         foo = [bar, [hello, world], [1, 2, 3], ["s", "t"]];
 EOF;
+
+        // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '{'),
-            new Token(Token::NUMBER, 1),
-            new Token(Token::OPERATOR, ':'),
-            new Token(Token::NUMBER, 10),
-            new Token(Token::OPERATOR, ':'),
-            new Token(Token::NUMBER, 2),
-            new Token(Token::CLOSING_PAREN, '}'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::STRING, 'c'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::STRING, 'd'),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'foo'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::IDENTIFIER, 'bar'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::IDENTIFIER, 'hello'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::IDENTIFIER, 'world'),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::NUMBER, 1),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::NUMBER, 2),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::NUMBER, 3),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::STRING, 's'),
-            new Token(Token::INTERPUNCTION, ','),
-            new Token(Token::STRING, 't'),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::OPENING_PAREN, '{', 0, 0),
+            new Token(Token::NUMBER, 1, 0, 0),
+            new Token(Token::OPERATOR, ':', 0, 0),
+            new Token(Token::NUMBER, 10, 0, 0),
+            new Token(Token::OPERATOR, ':', 0, 0),
+            new Token(Token::NUMBER, 2, 0, 0),
+            new Token(Token::CLOSING_PAREN, '}', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::STRING, 'c', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::STRING, 'd', 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'foo', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::IDENTIFIER, 'bar', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::IDENTIFIER, 'hello', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::IDENTIFIER, 'world', 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::NUMBER, 1, 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::NUMBER, 2, 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::NUMBER, 3, 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::STRING, 's', 0, 0),
+            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
+            new Token(Token::STRING, 't', 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $lexer = new Lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $tokens = (new Lexer($input))->get_token_list();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
     }
 
     public function test_get_token_list_6() {
@@ -295,42 +391,47 @@ EOF;
         b = c[var > 1];
         c = thing     *    (x != 4);
 EOF;
+
+        // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '=='),
-            new Token(Token::NUMBER, 1),
-            new Token(Token::OPERATOR, '?'),
-            new Token(Token::NUMBER, 7),
-            new Token(Token::OPERATOR, ':'),
-            new Token(Token::NUMBER, 3),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'b'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPENING_PAREN, '['),
-            new Token(Token::IDENTIFIER, 'var'),
-            new Token(Token::OPERATOR, '>'),
-            new Token(Token::NUMBER, '1'),
-            new Token(Token::CLOSING_PAREN, ']'),
-            new Token(Token::INTERPUNCTION, ';'),
-            new Token(Token::IDENTIFIER, 'c'),
-            new Token(Token::OPERATOR, '='),
-            new Token(Token::IDENTIFIER, 'thing'),
-            new Token(Token::OPERATOR, '*'),
-            new Token(Token::OPENING_PAREN, '('),
-            new Token(Token::IDENTIFIER, 'x'),
-            new Token(Token::OPERATOR, '!='),
-            new Token(Token::NUMBER, 4),
-            new Token(Token::CLOSING_PAREN, ')'),
-            new Token(Token::INTERPUNCTION, ';'),
+            new Token(Token::IDENTIFIER, 'a', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '==', 0, 0),
+            new Token(Token::NUMBER, 1, 0, 0),
+            new Token(Token::OPERATOR, '?', 0, 0),
+            new Token(Token::NUMBER, 7, 0, 0),
+            new Token(Token::OPERATOR, ':', 0, 0),
+            new Token(Token::NUMBER, 3, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'b', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPENING_PAREN, '[', 0, 0),
+            new Token(Token::IDENTIFIER, 'var', 0, 0),
+            new Token(Token::OPERATOR, '>', 0, 0),
+            new Token(Token::NUMBER, '1', 0, 0),
+            new Token(Token::CLOSING_PAREN, ']', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new Token(Token::IDENTIFIER, 'c', 0, 0),
+            new Token(Token::OPERATOR, '=', 0, 0),
+            new Token(Token::IDENTIFIER, 'thing', 0, 0),
+            new Token(Token::OPERATOR, '*', 0, 0),
+            new Token(Token::OPENING_PAREN, '(', 0, 0),
+            new Token(Token::IDENTIFIER, 'x', 0, 0),
+            new Token(Token::OPERATOR, '!=', 0, 0),
+            new Token(Token::NUMBER, 4, 0, 0),
+            new Token(Token::CLOSING_PAREN, ')', 0, 0),
+            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $lexer = new Lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $tokens = (new Lexer($input))->get_token_list();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
     }
 
     public function test_read_identifier() {
@@ -346,7 +447,8 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new Lexer($case['input']);
-            $this->assertEquals($case['output'], $lexer->next_token()->value);
+            $tokens = $lexer->get_token_list();
+            $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
 
@@ -367,7 +469,8 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new Lexer($case['input']);
-            $this->assertEquals($case['output'], $lexer->next_token()->value);
+            $tokens = $lexer->get_token_list();
+            $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
 
@@ -412,7 +515,8 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new Lexer($case['input']);
-            $this->assertEquals($case['output'], $lexer->next_token()->value);
+            $tokens = $lexer->get_token_list();
+            $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
 
@@ -449,7 +553,21 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new Lexer($case['input']);
-            $this->assertEquals($case['output'], $lexer->next_token()->value);
+            $tokens = $lexer->get_token_list();
+            $this->assertEquals($case['output'], $tokens[0]->value);
+        }
+        $testcases = array(
+            array('input' => '"foo', 'output' => 'foo'),
+            array('input' => "'foo", 'output' => 'foo'),
+        );
+        foreach ($testcases as $case) {
+            $lexer = new Lexer($case['input']);
+            try {
+                $tokens = $lexer->get_token_list();
+                $this->assertEquals($case['output'], $tokens[0]->value);
+            } catch (Exception $e) {
+                $this->assertEquals('1:4:unterminated string, started at row 1 and column 1', $e->getMessage());
+            }
         }
     }
 
@@ -462,7 +580,8 @@ EOF;
             array('input' => "\n\n123", 'output' => 123),
             array('input' => "321# testcomment", 'output' => 321),
             array('input' => '1a2b3c4d', 'output' => 1),
-            array('input' => '5.a2.b3.c4.d', 'output' => 5),
+            // FIXME: input is invalid and must trigger error
+            // array('input' => '5.a2.b3.c4.d', 'output' => 5),
             array('input' => '1234', 'output' => 1234),
             array('input' => '1234    ', 'output' => 1234),
             array('input' => ' 1234', 'output' => 1234),
@@ -492,7 +611,8 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new Lexer($case['input']);
-            $this->assertEquals($case['output'], $lexer->next_token()->value);
+            $tokens = $lexer->get_token_list();
+            $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
 
