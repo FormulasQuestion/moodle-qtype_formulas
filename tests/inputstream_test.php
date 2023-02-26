@@ -29,7 +29,7 @@ use Exception;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser.php');
+require_once($CFG->dirroot . '/question/type/formulas/classes/parser/inputstream.php');
 
 class inputstream_test extends \advanced_testcase {
 
