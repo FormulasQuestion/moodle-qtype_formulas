@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Parser for qtype_formulas
+ * Lexer for qtype_formulas
  *
  * @package    qtype_formulas
  * @copyright  2022 Philipp Imhof
@@ -36,14 +36,30 @@ defined('MOODLE_INTERNAL') || die();
 class Token {
     const NUMBER = 1;
     const STRING = 2;
-    const IDENTIFIER = 4;
-    const OPERATOR = 8;
-    const OPENING_PAREN = 16;
-    const CLOSING_PAREN = 32;
-    const INTERPUNCTION = 64;
+    const LIST = 4;
+    const SET = 8;
+    const PREFIX = 16;
+    const IDENTIFIER = 32;
+    const FUNCTION = 64;
+    const VARIABLE = 128;
+    const OPERATOR = 256;
+    const OPENING_PAREN = 512;
+    const CLOSING_PAREN = 1024;
+    const ARG_SEPARATOR = 2048;
+    const END_OF_STATEMENT = 4096;
+    const RESERVED_WORD = 8192;
 
+    /** @var mixed the token's content */
     public $value;
+
+    /** @var integer token type, e.g. number or string */
     public $type;
+
+    /** @var integer row in which the token starts */
+    public $row;
+
+    /** @var integer column in which the token starts */
+    public $column;
 
     /**
      * Constructor
@@ -51,9 +67,11 @@ class Token {
      * @param integer $type the type of the token
      * @param mixed $value the value (e.g. name of identifier, string content, number value, operator)
      */
-    public function __construct($type, $value) {
+    public function __construct($type, $value, $row = -1, $column = -1) {
         $this->value = $value;
         $this->type = $type;
+        $this->row = $row;
+        $this->column = $column;
     }
 }
 
@@ -85,12 +103,13 @@ class Lexer {
      * @return array list of tokens
      */
     public function get_token_list() {
-        $currenttoken = $this->next_token();
-        $tokenlist = array();
+        $currenttoken = $this->read_next_token();
+        $tokenlist = [];
         while ($currenttoken !== self::EOF) {
             $tokenlist[] = $currenttoken;
-            $currenttoken = $this->next_token();
+            $currenttoken = $this->read_next_token();
         }
+
         return $tokenlist;
     }
 
@@ -99,7 +118,7 @@ class Lexer {
      *
      * @return Token the token
      */
-    public function next_token() {
+    private function read_next_token() {
         // Check the next char and quit if we are at the end of the stream.
         $currentchar = $this->inputstream->peek();
         if ($currentchar === InputStream::EOF) {
@@ -112,6 +131,10 @@ class Lexer {
         if ($currentchar === '#') {
             $this->consume_comment();
             $currentchar = $this->inputstream->peek();
+        }
+        // If there is nothing after stripping whitespace and comments, we may quit.
+        if ($currentchar === InputStream::EOF) {
+            return self::EOF;
         }
         // If we have a " or ' character, this is the start of a string.
         if ($currentchar === '"' || $currentchar === "'") {
@@ -126,7 +149,7 @@ class Lexer {
             return $this->read_number();
         }
         // A letter indicates the start of an identifier, i. e. a variable or function name.
-        if (preg_match('/[A-Za-z]/', $currentchar)) {
+        if (preg_match('/[_A-Za-z]/', $currentchar)) {
             return $this->read_identifier();
         }
         // Operators always start with specific characters and may be up to two characters long.
@@ -136,17 +159,40 @@ class Lexer {
         // Brackets, braces and parentheses are tokens on their own, they are always returned as an individual token.
         // We will have a separate category for opening and closing brackets.
         if (preg_match('/[\[{(]/', $currentchar)) {
-            return new Token(Token::OPENING_PAREN, $this->inputstream->read());
+            return $this->read_single_char_token(Token::OPENING_PAREN);
         }
         if (preg_match('/[\]})]/', $currentchar)) {
-            return new Token(Token::CLOSING_PAREN, $this->inputstream->read());
+            return $this->read_single_char_token(Token::CLOSING_PAREN);
         }
-        // Finally, there might be some interpunction like the , or ; character.
-        if (preg_match('/[,;?:]/', $currentchar)) {
-            return new Token(Token::INTERPUNCTION, $this->inputstream->read());
+        // The comma is used as an argument separator (or similar) token.
+        if ($currentchar === ',') {
+            return $this->read_single_char_token(Token::ARG_SEPARATOR);
         }
-        // If we are still here, that's not good at all.
-        $this->inputstream->die('unknown input: "' . $currentchar . '"');
+        // The backslash can be used to access a function in case the user has defined
+        // a variable with the same name, e.g. variable sin and function \sin.
+        if ($currentchar === '\\') {
+            return $this->read_single_char_token(Token::PREFIX);
+        }
+        // Finally, it might be a semicolon a.k.a end-of-statement marker.
+        if ($currentchar === ';') {
+            return $this->read_single_char_token(Token::END_OF_STATEMENT);
+        }
+        // If we are still here, that's not good at all. We need to read the char (it is only peeked so far)
+        // in order for the inputstream to be at the right position.
+        $this->inputstream->read();
+        $this->inputstream->die('invalid input: "' . $currentchar . '"');
+    }
+
+    /**
+     * FIXME Undocumented function
+     *
+     * @param [type] $type
+     * @return void
+     */
+    private function read_single_char_token($type) {
+        $char = $this->inputstream->read();
+        $startingposition = $this->inputstream->get_position();
+        return new Token($type, $char, $startingposition['row'], $startingposition['column']);
     }
 
     /**
@@ -157,6 +203,9 @@ class Lexer {
     private function read_number() {
         // Start by reading the first char. If we are here, that means it was a number or a decimal point.
         $currentchar = $this->inputstream->read();
+
+        // Save starting position of the number.
+        $startingposition = $this->inputstream->get_position();
 
         // A number can only have one decimal point and one exponent (for scientific notation) at most.
         $hascomma = ($currentchar === '.');
@@ -202,7 +251,7 @@ class Lexer {
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
         }
-        return new Token(Token::NUMBER, floatval($result));
+        return new Token(Token::NUMBER, floatval($result), $startingposition['row'], $startingposition['column']);
     }
 
     /**
@@ -213,6 +262,9 @@ class Lexer {
     private function read_string() {
         // Start by reading the opening delimiter, either a " or a ' character.
         $opener = $this->inputstream->read();
+
+        // Record position of the opening delimiter.
+        $startingposition = $this->inputstream->get_position();
 
         $result = '';
         $currentchar = $this->inputstream->peek();
@@ -232,11 +284,15 @@ class Lexer {
                 }
             } else if ($nextchar === $opener) {
                 $this->inputstream->read();
-                return new Token(Token::STRING, $result);
+                return new Token(Token::STRING, $result, $startingposition['row'], $startingposition['column']);
             }
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
         }
+        // Still here? That means the string has not been closed.
+        $this->inputstream->die(
+            'unterminated string, started at row ' . $startingposition['row'] . ' and column ' . $startingposition['column']
+        );
     }
 
     /**
@@ -249,6 +305,9 @@ class Lexer {
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
 
+        // Record position of the opening delimiter.
+        $startingposition = $this->inputstream->get_position();
+
         while ($currentchar !== InputStream::EOF) {
             $nextchar = $this->inputstream->peek();
             // Identifiers may contain letters, digits or underscores.
@@ -258,7 +317,12 @@ class Lexer {
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
         }
-        return new Token(Token::IDENTIFIER, $result);
+        if ($result === 'for') {
+            $type = Token::RESERVED_WORD;
+        } else {
+            $type = Token::IDENTIFIER;
+        }
+        return new Token($type, $result, $startingposition['row'], $startingposition['column']);
     }
 
     /**
@@ -271,9 +335,14 @@ class Lexer {
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
 
-        // Some chars might be the start of a two-character operator.
+        // Record position of the opening delimiter.
+        $startingposition = $this->inputstream->get_position();
+
+        // Some chars might be the start of a two-character operator. Those are:
+        // ** << >> == != >= <= && ||
+        // Let's look at the following character...
         $followedby = $this->inputstream->peek();
-        if (preg_match('/[*=&|<>!]/', $followedby)) {
+        if (preg_match('/[*=&|<>]/', $followedby)) {
             // In most cases, two-character operators have the same character twice.
             // The only exceptions are !=, <= and >= where the second char is always the equal sign.
             if (($currentchar === $followedby)
@@ -281,7 +350,7 @@ class Lexer {
                 $result .= $this->inputstream->read();
             }
         }
-        return new Token(Token::OPERATOR, $result);
+        return new Token(Token::OPERATOR, $result, $startingposition['row'], $startingposition['column']);
     }
 
     /**
@@ -291,7 +360,7 @@ class Lexer {
      */
     private function consume_comment() {
         $currentchar = $this->inputstream->peek();
-        while ($currentchar !== "\n") {
+        while ($currentchar !== "\n" && $currentchar !== InputStream::EOF) {
             $currentchar = $this->inputstream->read();
         }
         // Eat up all white space following the comment.
@@ -311,90 +380,3 @@ class Lexer {
         }
     }
 }
-
-/**
- * Helper class to go through the input.
- */
-class InputStream {
-    const EOF = '';
-
-    /** @var integer current position in the input */
-    private $position = -1;
-
-    /** @var integer the row (line number) of the current character */
-    private $row = 1;
-
-    /** @var integer the column number of the current character */
-    private $column = 0;
-
-    /** @var integer the length of the input */
-    private $length = 0;
-
-    /** @var string the raw input */
-    private $input = '';
-
-    /**
-     * Constructor
-     *
-     * @param string $str the raw input
-     */
-    public function __construct($str) {
-        $this->length = strlen($str);
-        $this->input = $str;
-    }
-
-    /**
-     * Return the next character of the stream, without consuming it. The optional
-     * parameter allows to retrieve characters farther behind, if they exist.
-     *
-     * @param integer $skip skip a certain number of characters
-     * @return string
-     */
-    public function peek($skip = 0) {
-        if ($this->position < $this->length - $skip - 1) {
-            return $this->input[$this->position + $skip + 1];
-        }
-        return self::EOF;
-    }
-
-    /**
-     * Return the next character of the stream and move the position index one step forward.
-     *
-     * @return string
-     */
-    public function read() {
-        $nextchar = $this->peek();
-        if ($nextchar !== self::EOF) {
-            $this->advance($nextchar === "\n");
-        }
-        return $nextchar;
-    }
-
-    /**
-     * Advance the position index by one and keep row/column numbers in sync.
-     *
-     * @param boolean $newline
-     * @return void
-     */
-    private function advance($newline) {
-        $this->position++;
-        $this->column++;
-        if ($newline) {
-            $this->row++;
-            $this->column = 0;
-        }
-    }
-
-    /**
-     * Stop processing the input and indicate the position (row/column) where the error occurred.
-     *
-     * @param string $message error message
-     * @return void
-     * @throws Exception
-     */
-    public function die($message) {
-        throw new \Exception($this->row . ':' . $this->column . ':' . $message);
-    }
-}
-
-

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * COMPONENT External functions unit tests
+ * qtype_formulas unit tests for the InputStream class
  *
  * @package    qtype_formulas
  * @category   test
