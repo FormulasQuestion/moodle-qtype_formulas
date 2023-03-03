@@ -179,7 +179,6 @@ class Parser {
     // FIXME probably possible to remove parameter, because we always discard the end marker
     public function parse_assignment($discardendmarker = true) {
         // FIXME: take into account PREFIX \ modifier
-        // FIXME: implicit multiplication
         // FIXME: arrays
 
         // Start by reading the first token. If we are here, that means it was an IDENTIFIER.
@@ -194,7 +193,6 @@ class Parser {
                 // The last identifier of a statement cannot be a FUNCTION, because it would have
                 // to be followed by parens. We don't register it as a known variable, because it
                 // is not assigned a value at this moment.
-                // FIXME: maybe find a more elegant solution
                 if ($type === Token::IDENTIFIER) {
                     $currenttoken->type = Token::VARIABLE;
                 }
@@ -206,35 +204,39 @@ class Parser {
             // The criteria is as follows:
             // - if is is in the list of known variables, it must be a VARIABLE
             // - if it is not a known variable, but followed by an = operator, it must be a VARIABLE
-            // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION
             // - if it is not a known variable and not followed by a ( symbol, we assume it is a VARIABLE
+            // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION.
             if ($type === Token::IDENTIFIER) {
                 if (!$this->is_known_variable($currenttoken) && $nexttype === Token::OPENING_PAREN) {
                     print("changing token {$currenttoken->value}'s type to FUNCTION\n");
                     $type = ($currenttoken->type = Token::FUNCTION);
-
                 } else {
                     $this->register_variable($currenttoken);
                     print("changing token {$currenttoken->value}'s type to VARIABLE\n");
                     $type = ($currenttoken->type = Token::VARIABLE);
                 }
             }
-            // Add implicit multiplication signs:
-            // if the current token is an VARIABLE or a NUMBER or a ) symbol *and*
-            // the next token is an IDENTIFIER or a NUMBER or a ( symbol
-            // we insert a multiplication sign
-            if (in_array($type, [Token::NUMBER, Token::VARIABLE, Token::CLOSING_PAREN])) {
-                if (in_array($nexttype, [Token::NUMBER, Token::IDENTIFIER, Token::OPENING_PAREN])) {
-                    $this->insert_implicit_multiplication();
-                }
+
+            // We do not currently allow the short ternary operator aka "Elvis operator" (a ?: b)
+            // which is a short form for (a ? a : b).
+            if ($type === Token::OPERATOR && $value === '?' && $nexttype === Token::OPERATOR && $nextvalue === ':') {
+                // FIXME: die() with error, give row/col for next token.
+                print("syntax error in ternary operator, missinge the middle part");
+                die();
             }
 
-            // We read up to an end-of-statement marker.
+            // We do not allow two subsequent numbers, two subsequent strings or a string following a number
+            // (and vice versa), because that's probably a typo and we do not know for sure what to do with them.
+            // For numbers, it could be an implicit multiplication, but who knows...
+            if (in_array($type, [Token::NUMBER, Token::STRING]) && in_array($nexttype, [Token::NUMBER, Token::STRING])) {
+                // FIXME: die() with error, give row/col for next token.
+                print("syntax error, did you forget to put an operator?");
+                die();
+            }
+
+            // We read up to an end-of-statement marker, discarding it.
             if ($nexttype === Token::END_OF_STATEMENT) {
-                // FIXME: get rid of this and always discard the end marker
-                if ($discardendmarker) {
-                    $this->read_next();
-                }
+                $this->read_next();
                 break;
             }
             $currenttoken = $this->read_next();
@@ -252,11 +254,6 @@ class Parser {
             return $this->tokenlist[$this->position + $skip + 1];
         }
         return self::EOF;
-    }
-
-    private function insert_implicit_multiplication() {
-        array_splice($this->tokenlist, $this->position + 1, 0, [new Token(Token::OPERATOR, '*')]);
-        $this->count++;
     }
 
     private function read_next() {

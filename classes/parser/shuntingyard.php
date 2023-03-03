@@ -36,7 +36,7 @@ class ShuntingYard {
      */
     private static function get_precedence($operator) {
         switch ($operator) {
-            case '**':  // right-associative -> put onto stack
+            case '**':
                 return 160;
             case '_':
                 return 150;
@@ -75,7 +75,7 @@ class ShuntingYard {
             case '?':
             case ':':
                 return 20;
-            case '=':  // right-associative -> put onto stack
+            case '=':
                 return 10;
         }
     }
@@ -121,6 +121,7 @@ class ShuntingYard {
             // but many languages (e.g. JavaScript) define it to be right-associative which allows
             // for easy chaining, i.e. condition1 ? value1 : condition2 ? value2 : value 3.
             case '?':
+                return false;
             case ':':
                 return false;
         }
@@ -145,7 +146,8 @@ class ShuntingYard {
         }
         $head = end($input);
         while ($head !== false) {
-            if ($callback($head)) {
+            // Entries that do not follow the criteria will not be flushed.
+            if (!$callback($head)) {
                 break;
             }
             $out[] = $head;
@@ -160,6 +162,31 @@ class ShuntingYard {
         }
     }
 
+    private static function flush_ternary_part(&$opstack, &$output) {
+        self::flush_until($opstack, function($token) {
+            return $token->value !== '%%ternary';
+        }, $output);
+    }
+
+    private static function flush_higher_precedence(&$opstack, $precedence, &$output) {
+        self::flush_until($opstack, function($operator) use ($precedence) {
+            return $precedence <= self::get_precedence($operator->value);
+        }, $output);
+    }
+
+    private static function flush_until_token(&$opstack, $type, &$output) {
+        self::flush_until($opstack, function($operator) use ($type) {
+            return $operator->type !== $type;
+        }, $output, true, true);
+    }
+
+    private static function flush_all(&$opstack, &$output) {
+        self::flush_until($opstack, function() {
+            return true;
+        }, $output, true);
+    }
+
+
     /**
      * Translate statement from infix into RPN notation via Dijkstra's shunting yard algorithm,
      * because this makes evaluation much easier. The method is declared as static, because it
@@ -169,107 +196,160 @@ class ShuntingYard {
      * @return array
      */
     public static function shunting_yard($tokens) {
-        // FIXME: maybe include implicit multiplication here instead of in the parser
         $output = [];
         $opstack = [];
+        $funcargcounter = [];
+        $lasttoken = null;
+        $lasttype = null;
+        $unarypossible = true;
 
-        foreach ($tokens as $key => $token) {
+        foreach ($tokens as $token) {
             $type = $token->type;
             $value = $token->value;
-            if ($key === array_key_first($tokens)) {
+            if (!is_null($lasttoken)) {
+                $lasttype = $lasttoken->type;
+            }
+            // Unary + and - are possible after an operator and after an opening parenthesis.
+            // Also, in order to correctly interpret arrays and function calls, we must allow
+            // unary + and - after an opening bracket and after a comma.
+            if (in_array($lasttype, [Token::OPENING_PAREN, Token::ARG_SEPARATOR, Token::OPENING_BRACKET, Token::OPERATOR])) {
                 $unarypossible = true;
-                $implicitpossible = false;
             }
-            // Literals (numbers or strings) go straight to the output queue.
-            if ($type === Token::NUMBER || $type === Token::STRING) {
-                $output[] = $token;
-                $unarypossible = false;
-                $implicitpossible = true;
-                continue;
-            }
-            // Variable names go straight to the output queue.
-            if ($type === Token::VARIABLE) {
-                $output[] = $token;
-                $unarypossible = false;
-                $implicitpossible = true;
-                continue;
-            }
-            if ($type === Token::IDENTIFIER) {
-                // FIXME: die with error "unknown identifier"
-                print("why do I see an IDENTIFIER: $value\n");
-                $unarypossible = false;
-                $implicitpossible = true;
-                continue;
-            }
-            // Opening parenthesis goes straight to the operator stack.
-            if ($type === Token::OPENING_PAREN) {
-                $opstack[] = $token;
-                $unarypossible = true;
-                continue;
-            }
-            // Function name goes straight to the operator stack.
-            // FIXME implement function call and arguments
-            if ($type === Token::FUNCTION) {
-                $opstack[] = $token;
-                $unarypossible = false;
-                continue;
-            }
-            // Closing parenthesis means we flush all operators until we get to the
-            // matching opening parenthesis.
-            if ($type === Token::CLOSING_PAREN) {
-                self::flush_until($opstack, function($operator) {
-                    return $operator->value === '(';
-                }, $output, true, true);
-                // FIXME: error if no matching paren is found
-                // FIXME: treat case where opstack's head is function call (needs argument count)
-                $unarypossible = false;
-                $implicitpossible = true;
-                continue;
-            }
-            // FIXME: Ternary operator
-
-            // Classic operators are treated according to precedence.
-            if ($type === Token::OPERATOR) {
-                // First we check whether the operator could be unary. An unary + will be silently dropped.
-                // An unary - will be changed to negation.
-                if ($unarypossible) {
-                    if ($value === '+') {
-                        continue;
-                    }
-                    if ($value === '-') {
-                        $value = ($token->value = '_');
-                    }
+            // Insert inplicit multiplication sign, if
+            // - current token is a variable, a function name, a number or an opening parenthesis
+            // - last token was a variable, a number or a closing parenthesis
+            // For accurate error reporting (e.g. if the multiplication reveals itself as impossible
+            // during evaluation), the row and column number of the implicit multiplication token are
+            // copied over from the current token which triggered the multiplication.
+            if (in_array($type, [Token::VARIABLE, Token::FUNCTION, Token::NUMBER, Token::OPENING_PAREN])) {
+                if (in_array($lasttype, [Token::VARIABLE, Token::NUMBER, Token::CLOSING_PAREN])) {
+                    self::flush_higher_precedence($opstack, self::get_precedence('*'), $output);
+                    $opstack[] = new Token(Token::OPERATOR, '*', $token->row, $token->column);
                 }
-                // After an operator, it is always possible to have an unary operator in the next token.
-                $unarypossible = true;
-                $head = end($opstack);
-                // If operator stack is empty, push the new operator to the stack.
-                if ($head === false) {
+            }
+            switch ($type) {
+                // Literals (numbers or strings) and variable names go straight to the output queue.
+                case Token::NUMBER:
+                case Token::STRING:
+                case Token::VARIABLE:
+                    $output[] = $token;
+                    break;
+                // If we encounter an argument separator (,) *and* there is a pending function,
+                // we increase the last argument counter. Otherwise, this is a syntax error.
+                // FIXME: once arrays are set up to work, the comma is allowed in that context as well.
+                case Token::ARG_SEPARATOR:
+                    $index = count($funcargcounter);
+                    if ($index === 0) {
+                        print("syntax error, no argument separator expected");
+                        die();
+                    }
+                    ++$funcargcounter[$index - 1];
+                    break;
+                // Opening parenthesis goes straight to the operator stack.
+                case Token::OPENING_PAREN:
                     $opstack[] = $token;
-                    continue;
-                }
-                $thisprecedence = self::get_precedence($value);
-                // All stacked operators with higher precedence go to the output queue.
-                if (self::is_left_associative($value)) {
-                    self::flush_until($opstack, function($operator) use ($thisprecedence) {
-                        return $thisprecedence > self::get_precedence($operator->value);
-                    }, $output);
-                }
-                // Put this operator on the stack.
-                $opstack[] = $token;
-                continue;
+                    break;
+                // Function name goes straight to the operator stack. At the same time,
+                // we must set up a new function argument counter.
+                // FIXME: function call will be done in the evaluator.
+                case Token::FUNCTION:
+                    $opstack[] = $token;
+                    $funcargcounter[] = 0;
+                    break;
+                // Classic operators are treated according to precedence.
+                case Token::OPERATOR:
+                    // First we check whether the operator could be unary:
+                    // An unary + will be silently dropped, an unary - will be changed to negation.
+                    if ($unarypossible) {
+                        if ($value === '+') {
+                            // Jump straight to the next iteration of the loop with no further processing.
+                            continue 2;
+                        }
+                        if ($value === '-') {
+                            $value = ($token->value = '_');
+                        }
+                    }
+                    $thisprecedence = self::get_precedence($value);
+                    // For the ? part of a ternary operator, we
+                    // - flush all operators on the stack with lower precedence (if any)
+                    // - send the ? to the output queue
+                    // - put a pseudo-token on the operator stack as a sentinel
+                    // - break, in order to NOT put the ? on the operator stack.
+                    if ($value === '?') {
+                        self::flush_higher_precedence($opstack, $thisprecedence, $output);
+                        $output[] = $token;
+                        $opstack[] = new Token(Token::OPERATOR, '%%ternary');
+                        break;
+                    }
+                    // For the : part of a ternary operator, we
+                    // - flush all operators on the stack until we reach the ?
+                    // - do NOT flush the ? but leave it on the operator stack as a sentinel
+                    // - send the : to the output queue.
+                    // - break, in order to NOT put the : on the operator stack.
+                    if ($value === ':') {
+                        self::flush_ternary_part($opstack, $output);
+                        $output[] = $token;
+                        break;
+                    }
+                    // For left associative operators, all pending operators with higher precedence go
+                    // to the output queue first.
+                    if (self::is_left_associative($value)) {
+                        self::flush_higher_precedence($opstack, $thisprecedence, $output);
+                    }
+                    // Finally, put the operator on the stack.
+                    $opstack[] = $token;
+                    break;
+                // Closing parenthesis means we flush all operators until we get to the
+                // matching opening parenthesis.
+                case Token::CLOSING_PAREN:
+                    self::flush_until_token($opstack, Token::OPENING_PAREN, $output);
+                    $head = end($opstack);
+                    if ($head === false) {
+                        // FIXME: if $opstack is empty, we have an error, there should at least be the opening paren.
+                        print("\n no matching ( found");
+                        die();
+                    }
+                    if ($head->type === Token::FUNCTION) {
+                        // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
+                        $index = count($funcargcounter);
+                        if ($index === 0) {
+                            // FIXME: die with error.
+                            print("error: there should be an argument counter in place!");
+                            die();
+                        }
+                        if ($lasttype !== Token::OPENING_PAREN) {
+                            ++$funcargcounter[$index - 1];
+                        }
+                        // Remove last argument counter and put it to output queue, followed by the function name.
+                        $output[] = new Token(Token::NUMBER, array_pop($funcargcounter));
+                        $output[] = array_pop($opstack);
+                        // FIXME: raise error if no matching paren is found (could be none at all or another type).
+                    }
+                    break;
+                // At this point, all identifiers should have been classified as functions or variables.
+                // No token should have the general IDENTIFIER type anymore.
+                case Token::IDENTIFIER:
+                    // FIXME: die with error "unknown identifier".
+                    print("why do I see an IDENTIFIER: $value\n");
+                    die();
+                // We should not have to deal with multiple statements, so there should be no end-of-statement
+                // marker.
+                case Token::IDENTIFIER:
+                    // FIXME: die with error.
+                    print("\n\n **** should not have seen END OF STATEMENT ***\n\n");
+                    die();
+                default:
+                    // FIXME: raise error, because we have a token we do not know how to deal with.
+                    print("\nwhat is this?");
+                    die();
             }
-            // Ship out the statement if we reach a ; or if we are at the last token.
-            // The latter is useful to avoid code duplication after the loop.
-            if ($type === Token::END_OF_STATEMENT) {
-                // FIXME die with error message
-                print("\n\n **** should not have seen END OF STATEMENT ***\n\n");
-                die();
-            }
+            $lasttoken = $token;
+            // We have passed the first token, so generally there can be no unary operator.
+            // For the specific cases where unary operators are possible, this will be dealt with
+            // at the start of the loop.
+            $unarypossible = false;
         }
-        self::flush_until($opstack, function() {
-            return false;
-        }, $output, true);
+        self::flush_all($opstack, $output);
         return $output;
     }
 }
