@@ -37,31 +37,33 @@ require_once($CFG->dirroot . '/question/type/formulas/classes/parser/shuntingyar
 class tokenizer_test extends \advanced_testcase {
 
     public function test_basic_operations() {
-        //$input = 'for (i:1:4) { }';
-        //$tokens = (new Lexer($input))->get_token_list();
-        //print_r($tokens); return;
-
-        /*$input = '1*2-3/4+5*6-7*8+9/10';
-        $input = 'a(2)';
-        $input = 'a b';
-        $lexer = new Lexer($input);
-        $tokens = $lexer->get_token_list();
-        $parser = new Parser($tokens, true, ['a']);
-        $output = ShuntingYard::shunting_yard($parser->statements[0]);
-        print_r(array_map(function($el) { return $el->value; }, $output));
-        die();*/
-
         $input = 'a = 1+2*3';
-        $input = 'a = 1*(2+3)**2*4';
-        $input = 'a = 1*2+3';
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
-        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * d(4 + a) + e;';
         $input = 'a = 4; b = !a';
         $input = 'a = 1*2-3/4+5*6-7*8+9/10';
         $input = 'a = !a b 2';
+        $input = 'a = arctan(1,2,3) + sin(2,3) + cos(1) + pi()';
+        $input = 'a = arctan(sin(2,cos(pi())),4)';
+        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
+        $input = 'a = 2 sin(3b)(-3+b)';
+        $input = 'a = 1+2*3';
+        $input = 'a = (3**4)**5';
+        $input = 'a = 1 | 2 & ~3';
+        $input = 'a = "foo" 5';
+        $input = 'a = 5 5';
+        $input = 'a = 5 == 3 ? 1 + 2 : 2*(0 + 3)';
+        $input = 'a = 5 + (b == 1 ? 3 : 4) * 2';
+        $input = 'b ? 1 : b == d ? 2 : 0';
+        $input = 'a = b == c ? 1 : b == d ? 2 : 0';
+        $input = 'sqrt(sin(2))';
+        $input = 'a = 1*(2+3)**2*4';
+        $input = 'a = sin(2)';
+        $input = 'a = a[1][2]';
+        $input = 'a = [1, 2, [3, "four", 5], 6, [7]]';
 
         $lexer = new Lexer($input);
+        //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
         $parser = new Parser($lexer->get_token_list());
         foreach ($parser->statements as $statement) {
             $output = ShuntingYard::shunting_yard($statement);

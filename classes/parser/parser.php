@@ -37,17 +37,6 @@ TODO:
 * for loop
 * prefix access to functions
 
-* ternary operator in shunting yard:
-  - shorthand foo ? : bar  === foo ? foo : bar
-  - <condition> ? <true-value> : <false-value>
-  - precedence is low, only assignment = is lower, so <condition> left delimited by = or (
-  - <true-value>, if any, always enclosed between ? and :
-  - <false-value> left-delimited by : and right-delimited by ) or end-of-statement (; or EOF)
-  - if chained, <false-value> possibly right-delimited by ?
-
-  -> false-value right delimited by ; or EOF or ), may include (<ternary>) in parens
- -> <condition> ? <true-value> : <else-condition> ? <else-true-value> : <else-value>
-
 
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
@@ -234,6 +223,17 @@ class Parser {
                 die();
             }
 
+            // We do not allow to subsequent commas, a comma following an opening parenthesis/bracket
+            // or a comma followed by a closing parenthesis/bracket.
+            if (
+                (in_array($type, [Token::OPENING_PAREN, Token::OPENING_BRACKET]) && $nexttype === Token::ARG_SEPARATOR) ||
+                ($type === Token::ARG_SEPARATOR && in_array($nexttype, [Token::ARG_SEPARATOR, Token::CLOSING_BRACKET, Token::CLOSING_PAREN]))
+            ) {
+                // FIXME: die with error, give row/col of second token.
+                print("syntax error, nothing to separate // invalid use of separator token (,)");
+                die();
+            }
+
             // We read up to an end-of-statement marker, discarding it.
             if ($nexttype === Token::END_OF_STATEMENT) {
                 $this->read_next();
@@ -297,7 +297,6 @@ class Parser {
         while ($bracketlevel > 0 && $currenttoken !== self::EOF) {
             $currenttoken = $this->peek();
             $type = $currenttoken->type;
-            $value = $currenttoken->value;
             if ($type === Token::OPENING_BRACKET) {
                 $bracketlevel++;
                 // Recursively parse the sublist. The opening bracked will be consumed there.
