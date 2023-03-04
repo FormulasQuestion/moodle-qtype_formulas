@@ -198,9 +198,11 @@ class ShuntingYard {
     public static function shunting_yard($tokens) {
         $output = [];
         $opstack = [];
-        $funcargcounter = [];
+        $counters = ['functionargs' => [], 'arrayelements' => []];
+        $separatortype = [];
         $lasttoken = null;
         $lasttype = null;
+        $mostrecent = '';
         $unarypossible = true;
 
         foreach ($tokens as $token) {
@@ -234,27 +236,49 @@ class ShuntingYard {
                 case Token::VARIABLE:
                     $output[] = $token;
                     break;
-                // If we encounter an argument separator (,) *and* there is a pending function,
-                // we increase the last argument counter. Otherwise, this is a syntax error.
-                // FIXME: once arrays are set up to work, the comma is allowed in that context as well.
+                // If we encounter an argument separator (,) *and* there is a pending function or array,
+                // we increase the last argument or element counter. Otherwise, this is a syntax error.
                 case Token::ARG_SEPARATOR:
-                    $index = count($funcargcounter);
-                    if ($index === 0) {
-                        print("syntax error, no argument separator expected");
+                    $mostrecent = end($separatortype);
+                    if ($mostrecent === false) {
+                        // FIXME: die with error message.
+                        print("unexpected token: , ");
                         die();
                     }
-                    ++$funcargcounter[$index - 1];
+                    $index = count($counters[$mostrecent]);
+                    ++$counters[$mostrecent][$index - 1];
                     break;
                 // Opening parenthesis goes straight to the operator stack.
                 case Token::OPENING_PAREN:
                     $opstack[] = $token;
+                    break;
+                // Opening bracket goes straight to the operator stack. At the same time,
+                // we must set up a new array element counter.
+                // Also, we check whether this bracket means the start of a new array or
+                // rather an index to a variable, e.g. a[1].
+                case Token::OPENING_BRACKET:
+                    // By default, let's assume we are building a new array.
+                    $sentinel = new Token(Token::OPERATOR, '%%arraybuild', $token->row, $token->column);
+                    // An index is possible if the last token was a variable, the closing bracket
+                    // of an array (or other index, e.g. for a multi-dimensional array) or the closing
+                    // parenthesis of a function call which might return an array. We cannot reliably
+                    // know whether the parenthesis really comes from a function, but if it does not,
+                    // the user will run into an evaluation error later.
+                    if (in_array($lasttype, [Token::VARIABLE, Token::CLOSING_BRACKET, Token::CLOSING_PAREN])) {
+                        $sentinel->value = '%%arrayindex';
+                    }
+                    $opstack[] = $sentinel;
+                    $opstack[] = $token;
+                    $separatortype[] = 'arrayelements';
+                    $counters['arrayelements'][] = 0;
                     break;
                 // Function name goes straight to the operator stack. At the same time,
                 // we must set up a new function argument counter.
                 // FIXME: function call will be done in the evaluator.
                 case Token::FUNCTION:
                     $opstack[] = $token;
-                    $funcargcounter[] = 0;
+                    $separatortype[] = 'functionargs';
+                    $counters['functionargs'][] = 0;
                     break;
                 // Classic operators are treated according to precedence.
                 case Token::OPERATOR:
@@ -299,6 +323,48 @@ class ShuntingYard {
                     // Finally, put the operator on the stack.
                     $opstack[] = $token;
                     break;
+                // Closing bracket means we flush pending operators until we get to the
+                // matching opening bracket.
+                case Token::CLOSING_BRACKET:
+                    self::flush_until_token($opstack, Token::OPENING_BRACKET, $output);
+                    $head = end($opstack);
+                    if ($head === false) {
+                        // FIXME: if $opstack is empty, we have an error, there should at least be the opening bracket.
+                        print("\n no matching [ found");
+                        die();
+                    }
+                    $index = count($counters['arrayelements']);
+                    // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
+                    if ($index === 0) {
+                        // FIXME: die with error.
+                        print("error: there should be an array element counter in place!");
+                        die();
+                    }
+                    if ($lasttype !== Token::OPENING_BRACKET) {
+                        ++$counters['arrayelements'][$index - 1];
+                    }
+                    // FIXME:
+                    // - for %%arraybuild: put count and %%arraybuild to output queue, popping both
+                    // - for %%arrayindex: check count === 1, drop it, put %%arrayindex to output queue and pop it.
+                    // Remove last element counter.
+                    $numofelements = array_pop($counters['arrayelements']);
+                    if ($head->value === '%%arrayindex') {
+                        if ($numofelements !== 1) {
+                            // FIXME: die with error.
+                            print("error: only one index allowed when accessing array elements");
+                            die();
+                        }
+                    } else if ($head->value === '%%arraybuild') {
+                        $output[] = new Token(Token::NUMBER, $numofelements);
+                    } else {
+                        // FIXME: die with error, find better message. There should definitely be
+                        // no other token at the top of the operator stack.
+                        print("error: unknown parse error");
+                        die();
+                    }
+                    $output[] = array_pop($opstack);
+                    // FIXME: raise error if no matching bracket is found (could be none at all or another type).
+                    break;
                 // Closing parenthesis means we flush all operators until we get to the
                 // matching opening parenthesis.
                 case Token::CLOSING_PAREN:
@@ -311,17 +377,17 @@ class ShuntingYard {
                     }
                     if ($head->type === Token::FUNCTION) {
                         // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
-                        $index = count($funcargcounter);
+                        $index = count($counters['functionargs']);
                         if ($index === 0) {
                             // FIXME: die with error.
                             print("error: there should be an argument counter in place!");
                             die();
                         }
                         if ($lasttype !== Token::OPENING_PAREN) {
-                            ++$funcargcounter[$index - 1];
+                            ++$counters['functionargs'][$index - 1];
                         }
                         // Remove last argument counter and put it to output queue, followed by the function name.
-                        $output[] = new Token(Token::NUMBER, array_pop($funcargcounter));
+                        $output[] = new Token(Token::NUMBER, array_pop($counters['functionargs']));
                         $output[] = array_pop($opstack);
                         // FIXME: raise error if no matching paren is found (could be none at all or another type).
                     }
