@@ -42,6 +42,7 @@ class Token {
     const IDENTIFIER = 32;
     const FUNCTION = 64;
     const VARIABLE = 128;
+    const CONSTANT = 129;
     const OPERATOR = 256;
     const OPENING_PAREN = 512;
     const CLOSING_PAREN = 1024;
@@ -139,6 +140,10 @@ class Lexer {
         // If there is nothing after stripping whitespace and comments, we may quit.
         if ($currentchar === InputStream::EOF) {
             return self::EOF;
+        }
+        // If it is a π character, we will allow it.
+        if ($currentchar === 'π') {
+            return $this->read_single_char_token(Token::CONSTANT);
         }
         // If we have a " or ' character, this is the start of a string.
         if ($currentchar === '"' || $currentchar === "'") {
@@ -335,6 +340,9 @@ class Lexer {
         }
         if ($result === 'for') {
             $type = Token::RESERVED_WORD;
+        } else if (preg_match('/^(pi|PI|Pi)$/', $result)) {
+            $type = Token::CONSTANT;
+            $result = 'π';
         } else {
             $type = Token::IDENTIFIER;
         }
