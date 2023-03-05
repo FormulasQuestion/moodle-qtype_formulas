@@ -201,7 +201,7 @@ class Lexer {
         // If we are still here, that's not good at all. We need to read the char (it is only peeked so far)
         // in order for the inputstream to be at the right position.
         $this->inputstream->read();
-        $this->inputstream->die('invalid input: "' . $currentchar . '"');
+        $this->inputstream->die("unexpected input: '$currentchar'");
     }
 
     /**
@@ -312,7 +312,7 @@ class Lexer {
         }
         // Still here? That means the string has not been closed.
         $this->inputstream->die(
-            'unterminated string, started at row ' . $startingposition['row'] . ' and column ' . $startingposition['column']
+            "unterminated string, started at row {$startingposition['row']}, column {$startingposition['column']}"
         );
     }
 

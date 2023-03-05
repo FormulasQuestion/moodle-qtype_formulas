@@ -62,11 +62,12 @@ class tokenizer_test extends \advanced_testcase {
         $input = '';
         $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
         $input = 'a = \sin(2)';
-        $input = 'a = sin(π)';
+        $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
+        $input = 'a = a[1][2]';
 
         $lexer = new Lexer($input);
         //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new Parser($lexer->get_token_list(),true);
+        $parser = new Parser($lexer->get_token_list());
         foreach ($parser->statements as $statement) {
             $output = ShuntingYard::shunting_yard($statement);
             print_r(array_map(function($el) { return $el->value; }, $output));
@@ -79,7 +80,7 @@ class tokenizer_test extends \advanced_testcase {
         //$input = '[1, "a", 3]';
         //$input = '[1, ["x", "y"], 3]';
         //$input = '[[1,2]]';
-        $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
+        $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
 
         $lexer = new Lexer($input);
         $parser = new Parser($lexer->get_token_list());
@@ -570,7 +571,7 @@ EOF;
                 $tokens = $lexer->get_token_list();
                 $this->assertEquals($case['output'], $tokens[0]->value);
             } catch (Exception $e) {
-                $this->assertEquals('1:4:unterminated string, started at row 1 and column 1', $e->getMessage());
+                $this->assertEquals('1:4:unterminated string, started at row 1, column 1', $e->getMessage());
             }
         }
     }
