@@ -59,12 +59,13 @@ class tokenizer_test extends \advanced_testcase {
         $input = 'sqrt(sin(2))';
         $input = 'a = 1*(2+3)**2*4';
         $input = 'a = sin(2)';
-        $input = 'a = a[1][2]';
-        $input = 'a = [1, 2, [3, "four", 5], 6, [7]]';
+        $input = '';
+        $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
+        $input = 'a = \sin(2)';
 
         $lexer = new Lexer($input);
         //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new Parser($lexer->get_token_list());
+        $parser = new Parser($lexer->get_token_list(),true);
         foreach ($parser->statements as $statement) {
             $output = ShuntingYard::shunting_yard($statement);
             print_r(array_map(function($el) { return $el->value; }, $output));

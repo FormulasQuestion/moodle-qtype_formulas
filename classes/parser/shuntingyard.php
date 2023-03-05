@@ -326,6 +326,7 @@ class ShuntingYard {
                 // Closing bracket means we flush pending operators until we get to the
                 // matching opening bracket.
                 case Token::CLOSING_BRACKET:
+                    // FIXME: raise error if no matching bracket is found (could be none at all or another type).
                     self::flush_until_token($opstack, Token::OPENING_BRACKET, $output);
                     $head = end($opstack);
                     if ($head === false) {
@@ -343,10 +344,8 @@ class ShuntingYard {
                     if ($lasttype !== Token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
                     }
-                    // FIXME:
-                    // - for %%arraybuild: put count and %%arraybuild to output queue, popping both
-                    // - for %%arrayindex: check count === 1, drop it, put %%arrayindex to output queue and pop it.
-                    // Remove last element counter.
+                    // Pop the most recent array element counter. For %%arrayindex, we just check it's 1.
+                    // For %%arraybuild, we don't check it, but add it to the output queue.
                     $numofelements = array_pop($counters['arrayelements']);
                     if ($head->value === '%%arrayindex') {
                         if ($numofelements !== 1) {
@@ -362,12 +361,13 @@ class ShuntingYard {
                         print("error: unknown parse error");
                         die();
                     }
+                    // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
                     $output[] = array_pop($opstack);
-                    // FIXME: raise error if no matching bracket is found (could be none at all or another type).
                     break;
                 // Closing parenthesis means we flush all operators until we get to the
                 // matching opening parenthesis.
                 case Token::CLOSING_PAREN:
+                    // FIXME: raise error if no matching paren is found (could be none at all or another type).
                     self::flush_until_token($opstack, Token::OPENING_PAREN, $output);
                     $head = end($opstack);
                     if ($head === false) {
@@ -389,8 +389,10 @@ class ShuntingYard {
                         // Remove last argument counter and put it to output queue, followed by the function name.
                         $output[] = new Token(Token::NUMBER, array_pop($counters['functionargs']));
                         $output[] = array_pop($opstack);
-                        // FIXME: raise error if no matching paren is found (could be none at all or another type).
                     }
+                    break;
+                // The PREFIX token has already served its purpose, we can just ignore it.
+                case Token::PREFIX:
                     break;
                 // At this point, all identifiers should have been classified as functions or variables.
                 // No token should have the general IDENTIFIER type anymore.
@@ -400,13 +402,13 @@ class ShuntingYard {
                     die();
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
                 // marker.
-                case Token::IDENTIFIER:
+                case Token::END_OF_STATEMENT:
                     // FIXME: die with error.
                     print("\n\n **** should not have seen END OF STATEMENT ***\n\n");
                     die();
                 default:
                     // FIXME: raise error, because we have a token we do not know how to deal with.
-                    print("\nwhat is this?");
+                    print("\nwhat is this?"); print_r($token);
                     die();
             }
             $lasttoken = $token;
