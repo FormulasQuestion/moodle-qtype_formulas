@@ -152,25 +152,11 @@ class Parser {
                 $this->statements[] = $currentstatement;
                 return;
             }
-
-            // If we have a PREFIX token (\) followed by an identifier, this is a reference to a function.
-            // We drop the prefix, append a FUNCTION token to the current statement and add one to the index.
-            if ($type === Token::PREFIX && $followedby->type === Token::IDENTIFIER) {
-                $followedby->type = Token::FUNCTION;
-                $currentstatement[] = $followedby;
-                $i++;
-                continue;
-            }
-
         }
     }
 
-    // FIXME probably possible to remove parameter, because we always discard the end marker
-    public function parse_assignment($discardendmarker = true) {
-        // FIXME: take into account PREFIX \ modifier
-        // FIXME: arrays
-
-        // Start by reading the first token. If we are here, that means it was an IDENTIFIER.
+    public function parse_assignment() {
+        // Start by reading the first token.
         $currenttoken = $this->read_next();
         $assignment = [$currenttoken];
 
@@ -189,19 +175,30 @@ class Parser {
             }
             $nexttype = $nexttoken->type;
             $nextvalue = $nexttoken->value;
+
+            // If the current token is a PREFIX and the next one is an IDENTIFIER, we will consider
+            // that one as a FUNCTION. Otherwise, this is a syntax error.
+            if ($type === Token::PREFIX) {
+                if ($nexttype === Token::IDENTIFIER) {
+                    $nexttype = ($nexttoken->type = Token::FUNCTION);
+                } else {
+                    // FIXME: raise syntax error.
+                    print("syntax error: invalid use of prefix\n");
+                    die();
+                }
+            }
+
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
             // The criteria is as follows:
-            // - if is is in the list of known variables, it must be a VARIABLE
-            // - if it is not a known variable, but followed by an = operator, it must be a VARIABLE
+            // - if is is in the list of known variables and not preceded by the PREFIX, it must be a VARIABLE
+            // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION
             // - if it is not a known variable and not followed by a ( symbol, we assume it is a VARIABLE
-            // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION.
+            // Examples for the last point include identifiers followed by = for assignment or [ for indexation.
             if ($type === Token::IDENTIFIER) {
                 if (!$this->is_known_variable($currenttoken) && $nexttype === Token::OPENING_PAREN) {
-                    print("changing token {$currenttoken->value}'s type to FUNCTION\n");
                     $type = ($currenttoken->type = Token::FUNCTION);
                 } else {
                     $this->register_variable($currenttoken);
-                    print("changing token {$currenttoken->value}'s type to VARIABLE\n");
                     $type = ($currenttoken->type = Token::VARIABLE);
                 }
             }
@@ -233,12 +230,12 @@ class Parser {
                 print("syntax error, nothing to separate // invalid use of separator token (,)");
                 die();
             }
-
-            // We read up to an end-of-statement marker, discarding it.
+            // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
             if ($nexttype === Token::END_OF_STATEMENT) {
                 $this->read_next();
                 break;
             }
+            // Otherwise, let's read the next token and append it to the list of tokens for this statement.
             $currenttoken = $this->read_next();
             $assignment[] = $currenttoken;
         }
