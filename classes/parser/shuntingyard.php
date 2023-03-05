@@ -230,10 +230,11 @@ class ShuntingYard {
                 }
             }
             switch ($type) {
-                // Literals (numbers or strings) and variable names go straight to the output queue.
+                // Literals (numbers or strings), constants and variable names go straight to the output queue.
                 case Token::NUMBER:
                 case Token::STRING:
                 case Token::VARIABLE:
+                case Token::CONSTANT:
                     $output[] = $token;
                     break;
                 // If we encounter an argument separator (,) *and* there is a pending function or array,

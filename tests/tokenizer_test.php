@@ -62,6 +62,7 @@ class tokenizer_test extends \advanced_testcase {
         $input = '';
         $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
         $input = 'a = \sin(2)';
+        $input = 'a = sin(π)';
 
         $lexer = new Lexer($input);
         //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
