@@ -27,16 +27,14 @@ namespace qtype_formulas;
 /*
 
 TODO:
+* translate ^ to ** in certain contexts (backward compatibility)
 * variables stack
 * context -> already defined variables and their values
             + instantiated random values
             export (serialize) and import
 * parsing and instantiation of random vars
-* arrays
 * ranges / sets for random vars
 * for loop
-* prefix access to functions
-
 
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
@@ -80,7 +78,6 @@ class Parser {
         }
 
         // FIXME maybe add if / elseif / else clauses in the future?
-        // FIXME: allow constant PI and pi instead of pi()
         while ($currenttoken !== self::EOF) {
             $type = $currenttoken->type;
             $value = $currenttoken->value;
@@ -93,66 +90,30 @@ class Parser {
                     continue;
                 }
             } else if ($type === Token::RESERVED_WORD && $value === 'for') {
+                $this->parse_forloop();
                 // read until {  --> head of loop
                 // recursively read the body (may contain other loops)
             } else {
-                // FIXME: die with error "invalid statement"
-                print("other token: $value\n");
+                $this->die("invalid statement, starting with: '$value'", $currenttoken);
             }
 
             // Advance.
             $currenttoken = $this->read_next();
         }
-        return;
+    }
 
-        while ($currenttoken !== self::EOF) {
-            $type = $currenttoken->type;
-            $value = $currenttoken->value;
-            // If we are at the start of a list (array), we combine all relevant tokens into one
-            // and append it to the current statement.
-            if ($type === Token::OPENING_BRACKET) {
-                // An opening [ could also be the start of a range. In that case, the
-                // next but one token must be a colon.
-                $nextbutone = $this->peek(1);
-                if ($nextbutone->type === Token::OPERATOR && $nextbutone->value === ':') {
-                    $currentstatement[] = $this->parse_range();
-                } else {
-                    $currentstatement[] = $this->parse_list();
-                }
-                $this->statements[] = $currentstatement;
-                return;
-            }
-            $currenttoken = $this->read_next();
+    /**
+     * Stop processing and indicate the human readable position (row/column) where the error occurred.
+     *
+     * @param string $message error message
+     * @return void
+     * @throws Exception
+     */
+    private function die($message, $offendingtoken = null) {
+        if (is_null($offendingtoken)) {
+            $offendingtoken = $this->tokenlist[$this->position];
         }
-        return;
-
-        // The token list is currently in a "raw" form, e. g. an array [1, 2, 3] is built from
-        // its opening and closing bracket, the three number tokens and the two interpunction tokens.
-        // Before we continue, we must recompose those tokens to form the true syntax elements, e. g.
-        // ranges, sets and lists.
-        $cleanedlist = [];
-        $bracelevel = 0;
-        $bracketlevel = 0;
-        $count = count($tokenlist);
-        $currentstatement = [];
-        for ($i = 0; $i++; $i < $count) {
-            $currenttoken = $tokenlist[$i];
-            if ($i < $count - 1) {
-                $followedby = $tokenlist[$i + 1];
-            } else {
-                $followedby = null;
-            }
-            $type = $currenttoken->type;
-            $value = $currenttoken->value;
-            // If we are at the start of a list (array), we combine all relevant tokens into one
-            // and append it to the current statement.
-            if ($type === Token::OPENING_BRACKET) {
-                print('diving into list');
-                $currentstatement[] = $this->parse_list();
-                $this->statements[] = $currentstatement;
-                return;
-            }
-        }
+        throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
     public function parse_assignment() {
@@ -182,9 +143,7 @@ class Parser {
                 if ($nexttype === Token::IDENTIFIER) {
                     $nexttype = ($nexttoken->type = Token::FUNCTION);
                 } else {
-                    // FIXME: raise syntax error.
-                    print("syntax error: invalid use of prefix\n");
-                    die();
+                    $this->die('syntax error: invalid use of prefix character \\');
                 }
             }
 
@@ -206,18 +165,14 @@ class Parser {
             // We do not currently allow the short ternary operator aka "Elvis operator" (a ?: b)
             // which is a short form for (a ? a : b).
             if ($type === Token::OPERATOR && $value === '?' && $nexttype === Token::OPERATOR && $nextvalue === ':') {
-                // FIXME: die() with error, give row/col for next token.
-                print("syntax error in ternary operator, missinge the middle part");
-                die();
+                $this->die('syntax error: ternary operator missing middle part', $nexttoken);
             }
 
             // We do not allow two subsequent numbers, two subsequent strings or a string following a number
             // (and vice versa), because that's probably a typo and we do not know for sure what to do with them.
             // For numbers, it could be an implicit multiplication, but who knows...
             if (in_array($type, [Token::NUMBER, Token::STRING]) && in_array($nexttype, [Token::NUMBER, Token::STRING])) {
-                // FIXME: die() with error, give row/col for next token.
-                print("syntax error, did you forget to put an operator?");
-                die();
+                $this->die('syntax error: did you forget to put an operator?', $nexttoken);
             }
 
             // We do not allow to subsequent commas, a comma following an opening parenthesis/bracket
@@ -226,9 +181,7 @@ class Parser {
                 (in_array($type, [Token::OPENING_PAREN, Token::OPENING_BRACKET]) && $nexttype === Token::ARG_SEPARATOR) ||
                 ($type === Token::ARG_SEPARATOR && in_array($nexttype, [Token::ARG_SEPARATOR, Token::CLOSING_BRACKET, Token::CLOSING_PAREN]))
             ) {
-                // FIXME: die with error, give row/col of second token.
-                print("syntax error, nothing to separate // invalid use of separator token (,)");
-                die();
+                $this->die('syntax error: invalid use of separator token (,)', $nexttoken);
             }
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
             if ($nexttype === Token::END_OF_STATEMENT) {
@@ -333,9 +286,21 @@ class Parser {
     }
 
     public function parse_ifelse() {
-
     }
 
+    /**
+     * ... FIXME ...
+     * Notes on the syntax of for loops:
+     * - The variable will NOT be local to the loop. It will be visible in the entire scope and keep its last value.
+     * - It is possible to use a variable that has already been defined. In that case, it will be overwritten.
+     * - It is possible to use variables for the start and/or end of the range and also for the step size.
+     * - The range is evaluated ONLY ONCE at the initialization of the loop. So if you use variables in the range
+     * and you change those variables inside the loop, this will have no effect.
+     * - It is possible to change the value of the iterator variable inside the loop. However, at each iteration
+     * it will be set to the next planned value regardless of what you did to it.
+     *
+     * @return void
+     */
     public function parse_forloop() {
         $variable = null;
         $from = 0;
@@ -348,5 +313,9 @@ class Parser {
         // identifier
         // colon
         // bracket --> parse range
+        // closing paren
+        // opening brace
+        // statements --> recursive parsing (can contain other for loops)
+        // closing brace
     }
 }

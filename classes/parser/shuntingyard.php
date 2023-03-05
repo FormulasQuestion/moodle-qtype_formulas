@@ -202,7 +202,6 @@ class ShuntingYard {
         $separatortype = [];
         $lasttoken = null;
         $lasttype = null;
-        $mostrecent = '';
         $unarypossible = true;
 
         foreach ($tokens as $token) {
@@ -242,9 +241,7 @@ class ShuntingYard {
                 case Token::ARG_SEPARATOR:
                     $mostrecent = end($separatortype);
                     if ($mostrecent === false) {
-                        // FIXME: die with error message.
-                        print("unexpected token: , ");
-                        die();
+                        self::die('unexpected token: ,', $token);
                     }
                     $index = count($counters[$mostrecent]);
                     ++$counters[$mostrecent][$index - 1];
@@ -331,16 +328,14 @@ class ShuntingYard {
                     self::flush_until_token($opstack, Token::OPENING_BRACKET, $output);
                     $head = end($opstack);
                     if ($head === false) {
-                        // FIXME: if $opstack is empty, we have an error, there should at least be the opening bracket.
-                        print("\n no matching [ found");
-                        die();
+                        self::die('syntax error: no matching [ found for this bracket', $token);
                     }
                     $index = count($counters['arrayelements']);
                     // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
                     if ($index === 0) {
-                        // FIXME: die with error.
-                        print("error: there should be an array element counter in place!");
-                        die();
+                        self::die(
+                            'unknown error: there should be an array element counter in place! please file a bug report.', $token
+                        );
                     }
                     if ($lasttype !== Token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
@@ -350,17 +345,12 @@ class ShuntingYard {
                     $numofelements = array_pop($counters['arrayelements']);
                     if ($head->value === '%%arrayindex') {
                         if ($numofelements !== 1) {
-                            // FIXME: die with error.
-                            print("error: only one index allowed when accessing array elements");
-                            die();
+                            self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
                         }
                     } else if ($head->value === '%%arraybuild') {
                         $output[] = new Token(Token::NUMBER, $numofelements);
                     } else {
-                        // FIXME: die with error, find better message. There should definitely be
-                        // no other token at the top of the operator stack.
-                        print("error: unknown parse error");
-                        die();
+                        self::die('syntax error: unknown parse error', $token);
                     }
                     // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
                     $output[] = array_pop($opstack);
@@ -372,17 +362,16 @@ class ShuntingYard {
                     self::flush_until_token($opstack, Token::OPENING_PAREN, $output);
                     $head = end($opstack);
                     if ($head === false) {
-                        // FIXME: if $opstack is empty, we have an error, there should at least be the opening paren.
-                        print("\n no matching ( found");
-                        die();
+                        self::die('syntax error: no matching ( found for this parenthesis', $token);
                     }
                     if ($head->type === Token::FUNCTION) {
                         // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
                         $index = count($counters['functionargs']);
                         if ($index === 0) {
-                            // FIXME: die with error.
-                            print("error: there should be an argument counter in place!");
-                            die();
+                            self::die(
+                                'unknown error: there should be a function argument counter in place! please file a bug report.',
+                                $token
+                            );
                         }
                         if ($lasttype !== Token::OPENING_PAREN) {
                             ++$counters['functionargs'][$index - 1];
@@ -398,19 +387,16 @@ class ShuntingYard {
                 // At this point, all identifiers should have been classified as functions or variables.
                 // No token should have the general IDENTIFIER type anymore.
                 case Token::IDENTIFIER:
-                    // FIXME: die with error "unknown identifier".
-                    print("why do I see an IDENTIFIER: $value\n");
-                    die();
+                    self::die("syntax error: did not expect to see an unclassified identifier: $value", $token);
+                    break;
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
                 // marker.
                 case Token::END_OF_STATEMENT:
-                    // FIXME: die with error.
-                    print("\n\n **** should not have seen END OF STATEMENT ***\n\n");
-                    die();
+                    self::die('unexpected semicolon', $token);
+                    break;
                 default:
-                    // FIXME: raise error, because we have a token we do not know how to deal with.
-                    print("\nwhat is this?"); print_r($token);
-                    die();
+                    self::die("unexpected token: $value", $token);
+                    break;
             }
             $lasttoken = $token;
             // We have passed the first token, so generally there can be no unary operator.
@@ -421,4 +407,16 @@ class ShuntingYard {
         self::flush_all($opstack, $output);
         return $output;
     }
+
+    /**
+     * Stop processing and indicate the human readable position (row/column) where the error occurred.
+     *
+     * @param string $message error message
+     * @return void
+     * @throws Exception
+     */
+    private static function die($message, $offendingtoken) {
+        throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
+    }
+
 }
