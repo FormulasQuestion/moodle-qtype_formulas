@@ -141,10 +141,6 @@ class Lexer {
         if ($currentchar === InputStream::EOF) {
             return self::EOF;
         }
-        // If it is a π character, we will allow it.
-        if ($currentchar === 'π') {
-            return $this->read_single_char_token(Token::CONSTANT);
-        }
         // If we have a " or ' character, this is the start of a string.
         if ($currentchar === '"' || $currentchar === "'") {
             return $this->read_string();
@@ -165,38 +161,21 @@ class Lexer {
         if (preg_match('/[-+*\/%=&|~^<>!?:]/', $currentchar)) {
             return $this->read_operator();
         }
-        // Brackets, braces and parentheses are tokens on their own, they are always returned as an individual token.
-        // We will have a separate category for opening and closing brackets.
-        if ($currentchar === '(') {
-            return $this->read_single_char_token(Token::OPENING_PAREN);
-        }
-        if ($currentchar === ')') {
-            return $this->read_single_char_token(Token::CLOSING_PAREN);
-        }
-        if ($currentchar === '[') {
-            return $this->read_single_char_token(Token::OPENING_BRACKET);
-        }
-        if ($currentchar === ']') {
-            return $this->read_single_char_token(Token::CLOSING_BRACKET);
-        }
-        if ($currentchar === '{') {
-            return $this->read_single_char_token(Token::OPENING_BRACE);
-        }
-        if ($currentchar === '}') {
-            return $this->read_single_char_token(Token::CLOSING_BRACE);
-        }
-        // The comma is used as an argument separator (or similar) token.
-        if ($currentchar === ',') {
-            return $this->read_single_char_token(Token::ARG_SEPARATOR);
-        }
-        // The backslash can be used to access a function in case the user has defined
-        // a variable with the same name, e.g. variable sin and function \sin.
-        if ($currentchar === '\\') {
-            return $this->read_single_char_token(Token::PREFIX);
-        }
-        // Finally, it might be a semicolon a.k.a end-of-statement marker.
-        if ($currentchar === ';') {
-            return $this->read_single_char_token(Token::END_OF_STATEMENT);
+        // There are some single-character tokens...
+        if (preg_match('/[]\[(){},;\\\]/', $currentchar)) {
+            $types = [
+                '[' => Token::OPENING_BRACKET,
+                '(' => Token::OPENING_PAREN,
+                '{' => Token::OPENING_BRACE,
+                ']' => Token::CLOSING_BRACKET,
+                ')' => Token::CLOSING_PAREN,
+                '}' => Token::CLOSING_BRACE,
+                ',' => Token::ARG_SEPARATOR,
+                '\\' => Token::PREFIX,
+                ';' => Token::END_OF_STATEMENT,
+                'π' => Token::CONSTANT
+            ];
+            return $this->read_single_char_token($types[$currentchar]);
         }
         // If we are still here, that's not good at all. We need to read the char (it is only peeked so far)
         // in order for the inputstream to be at the right position.
