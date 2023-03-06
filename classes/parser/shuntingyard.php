@@ -174,14 +174,24 @@ class ShuntingYard {
         }, $output);
     }
 
-    private static function flush_until_token(&$opstack, $type, &$output) {
-        self::flush_until($opstack, function($operator) use ($type) {
+    private static function flush_until_paren(&$opstack, $type, &$output) {
+        // We are looking for a specific type of parenthesis. If we see another one before ours,
+        // this is a syntax error. So we first set up the list of forbidden parenthesis types.
+        $failif = array_diff([Token::OPENING_BRACE, Token::OPENING_BRACKET, Token::OPENING_PAREN], [$type]);
+        self::flush_until($opstack, function($operator) use ($type, $failif) {
+            if (in_array($operator->type, $failif)) {
+                self::die("mismatched parenthesis: {$operator->value}", $operator);
+            }
             return $operator->type !== $type;
         }, $output, true, true);
     }
 
     private static function flush_all(&$opstack, &$output) {
-        self::flush_until($opstack, function() {
+        self::flush_until($opstack, function($operator) {
+            // When flushing, we should not encounter any opening parenthesis.
+            if (in_array($operator->type, [Token::OPENING_BRACE, Token::OPENING_BRACKET, Token::OPENING_PAREN])) {
+                self::die("mismatched parenthesis: {$operator->value}", $operator);
+            }
             return true;
         }, $output, true);
     }
@@ -324,8 +334,7 @@ class ShuntingYard {
                 // Closing bracket means we flush pending operators until we get to the
                 // matching opening bracket.
                 case Token::CLOSING_BRACKET:
-                    // FIXME: raise error if no matching bracket is found (could be none at all or another type).
-                    self::flush_until_token($opstack, Token::OPENING_BRACKET, $output);
+                    self::flush_until_paren($opstack, Token::OPENING_BRACKET, $output);
                     $head = end($opstack);
                     if ($head === false) {
                         self::die('syntax error: no matching [ found for this bracket', $token);
@@ -358,8 +367,7 @@ class ShuntingYard {
                 // Closing parenthesis means we flush all operators until we get to the
                 // matching opening parenthesis.
                 case Token::CLOSING_PAREN:
-                    // FIXME: raise error if no matching paren is found (could be none at all or another type).
-                    self::flush_until_token($opstack, Token::OPENING_PAREN, $output);
+                    self::flush_until_paren($opstack, Token::OPENING_PAREN, $output);
                     $head = end($opstack);
                     if ($head === false) {
                         self::die('syntax error: no matching ( found for this parenthesis', $token);
