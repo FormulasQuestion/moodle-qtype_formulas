@@ -14,20 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas;
+
 /**
- * Lexer for qtype_formulas
+ * Helper class to go through the input, used by the tokenizer.
  *
  * @package    qtype_formulas
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qtype_formulas;
-
-/**
- * Helper class to go through the input.
- */
-class InputStream {
+class input_stream {
     const EOF = '';
 
     /** @var integer current position in the input */
@@ -50,7 +47,7 @@ class InputStream {
      *
      * @param string $str the raw input
      */
-    public function __construct($str) {
+    public function __construct(string $str) {
         // Input can contain unicode characters, so it's better to operate on an array of characters
         // rather than a string.
         $this->input = mb_str_split($str);
@@ -61,10 +58,10 @@ class InputStream {
      * Return the next character of the stream, without consuming it. The optional
      * parameter allows to retrieve characters farther behind, if they exist.
      *
-     * @param integer $skip skip a certain number of characters
+     * @param int $skip skip a certain number of characters
      * @return string
      */
-    public function peek($skip = 0) {
+    public function peek(int $skip = 0): string {
         if ($this->position < $this->length - $skip - 1) {
             return $this->input[$this->position + $skip + 1];
         }
@@ -76,7 +73,7 @@ class InputStream {
      *
      * @return string
      */
-    public function read() {
+    public function read(): string {
         $nextchar = $this->peek();
         if ($nextchar !== self::EOF) {
             $this->advance($nextchar === "\n");
@@ -87,10 +84,10 @@ class InputStream {
     /**
      * Advance the position index by one and keep row/column numbers in sync.
      *
-     * @param boolean $newline
+     * @param bool $newline whether we are jumping to the next line
      * @return void
      */
-    private function advance($newline) {
+    private function advance(bool $newline): void {
         $this->position++;
         $this->column++;
         if ($newline) {
@@ -106,18 +103,16 @@ class InputStream {
      * @return void
      * @throws Exception
      */
-    public function die($message) {
+    public function die(string $message): never {
         throw new \Exception($this->row . ':' . $this->column . ':' . $message);
     }
 
     /**
      * Return the human readable position (row/column) of the current character in the input stream
      *
-     * @return array position, associative array with keys 'row' and 'column'
+     * @return int[] position, associative array with keys 'row' and 'column'
      */
-    public function get_position() {
+    public function get_position(): array {
         return ['row' => $this->row, 'column' => $this->column];
     }
 }
-
-

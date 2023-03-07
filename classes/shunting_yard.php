@@ -14,27 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas;
+use Error;
+
 /**
- * Parser for qtype_formulas
+ * Helper class implementing Dijkstra's shunting yard algorithm.
  *
  * @package    qtype_formulas
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qtype_formulas;
-
-use Error;
-
-
-class ShuntingYard {
+class shunting_yard {
     /**
      * Return numeric precedence value for an operator
      *
      * @param string $operator operator or function name
-     * @return integer
+     * @return int
      */
-    private static function get_precedence($operator) {
+    private static function get_precedence(string $operator): int {
         switch ($operator) {
             case '**':
                 return 160;
@@ -83,10 +81,10 @@ class ShuntingYard {
     /**
      * Return whether an operator is left-associative
      *
-     * @param string $operator operator or function name
-     * @return boolean
+     * @param string $operator operator name
+     * @return bool
      */
-    private static function is_left_associative($operator) {
+    private static function is_left_associative(string $operator): bool {
         switch ($operator) {
             case '=':
             case '**':
@@ -128,19 +126,20 @@ class ShuntingYard {
     }
 
     /**
-     * Pop elements from the end of an array until the callback function returns true. If desired,
-     * popped elements can be appended to another array; otherwise they will be discarded. Also
+     * Pop elements from the end of an array as long as the callback function returns true. If desired,
+     * popped elements can be appended to another array; otherwise they will be discarded. Also,
      * the last element can be left in the input array or removed from it. If it is removed, it can be
-     * appended to the output or discarded. The function modifies the input array and resets its internal pointer.
+     * appended to the output or discarded. The function modifies the input array and resets its internal
+     * pointer.
      *
-     * @param array &$input input array, will be modified
+     * @param array &$input input array, will be modified and have its internal pointer reset
      * @param callable $callback custom comparison function
-     * @param array &$out optional output array, will be modified
+     * @param array &$out optional output array, will be modified and have its internal pointer reset
      * @param boolean $poplast whether the last element should be popped or not
      * @param boolean $discardlast whether the last element should be discarded when popping it
      * @throws Error if the last element should not be discarded, but is not to be popped
      */
-    private static function flush_until(&$input, $callback, &$out = null, $poplast = false, $discardlast = false) {
+    private static function flush_while(array &$input, callable $callback, ?array &$out = null, bool $poplast = false, bool $discardlast = false) {
         if (!$poplast && $discardlast) {
             throw new Error('Cannot move last element to output queue if it is not to be popped.');
         }
@@ -162,29 +161,64 @@ class ShuntingYard {
         }
     }
 
-    private static function flush_ternary_part(&$opstack, &$output) {
-        self::flush_until($opstack, function($token) {
+    /**
+     * Flush the operator queue until we reach the %%ternary sentinel pseudo-operator.
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param array $output output queue, will be modified
+     * @return void
+     */
+    private static function flush_ternary_part(array &$opstack, array &$output): void {
+        self::flush_while($opstack, function($token) {
             return $token->value !== '%%ternary';
         }, $output);
     }
 
-    private static function flush_higher_precedence(&$opstack, $precedence, &$output) {
-        self::flush_until($opstack, function($operator) use ($precedence) {
+    /**
+     * Flush operators with higher or same precedence from the operator stack.
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param integer $precedence precedence value to compare with
+     * @param array $output output queue, will be modified
+     * @return void
+     */
+    private static function flush_higher_precedence(array &$opstack, int $precedence, array &$output): void {
+        self::flush_while($opstack, function($operator) use ($precedence) {
             return $precedence <= self::get_precedence($operator->value);
         }, $output);
     }
 
-    private static function flush_all_operators(&$opstack, &$output) {
-        self::flush_until($opstack, function($operator) {
-            return $operator->type === Token::OPERATOR;
+    /**
+     * Flush all remaining operators (but not parens or functions) from the operator stack.
+     * FIXME: should probably flush functions as well...
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param array $output output queue, will be modified
+     * @return void
+     */
+    private static function flush_all_operators(array &$opstack, array &$output): void {
+        self::flush_while($opstack, function($operator) {
+            return $operator->type === token::OPERATOR;
         }, $output);
     }
 
-    private static function flush_until_paren(&$opstack, $type, &$output) {
+    /**
+     * Flush everything from the operator stack until we reach the desired (opening) parenthesis.
+     * The parenthesis itself will be popped and discarded.
+     * If another (opening) paren is seen, the function will die with an appropriate error message.
+     * FIXME: maybe remove this, because parenthesis matching is veryfied before.
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param integer $type type of (opening) parenthesis to look for
+     * @param array $output output queue, will be modified
+     * @return void
+     */
+    private static function flush_until_paren(array &$opstack, int $type, array &$output): void {
         // We are looking for a specific type of parenthesis. If we see another one before ours,
-        // this is a syntax error. So we first set up the list of forbidden parenthesis types.
-        $failif = array_diff([Token::OPENING_BRACE, Token::OPENING_BRACKET, Token::OPENING_PAREN], [$type]);
-        self::flush_until($opstack, function($operator) use ($type, $failif) {
+        // this is a syntax error. So we first set up the list of forbidden parenthesis types by
+        // taking all types and removing the requested one.
+        $failif = array_diff([token::OPENING_BRACE, token::OPENING_BRACKET, token::OPENING_PAREN], [$type]);
+        self::flush_while($opstack, function($operator) use ($type, $failif) {
             if (in_array($operator->type, $failif)) {
                 self::die("mismatched parenthesis: {$operator->value}", $operator);
             }
@@ -192,10 +226,17 @@ class ShuntingYard {
         }, $output, true, true);
     }
 
-    private static function flush_all(&$opstack, &$output) {
-        self::flush_until($opstack, function($operator) {
+    /**
+     * Flush everything from the operator stack to the output queue.
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param array $output output queue, will be modified
+     * @return void
+     */
+    private static function flush_all(array &$opstack, array &$output): void {
+        self::flush_while($opstack, function($operator) {
             // When flushing, we should not encounter any opening parenthesis.
-            if (in_array($operator->type, [Token::OPENING_BRACE, Token::OPENING_BRACKET, Token::OPENING_PAREN])) {
+            if (in_array($operator->type, [token::OPENING_BRACE, token::OPENING_BRACKET, token::OPENING_PAREN])) {
                 self::die("mismatched parenthesis: {$operator->value}", $operator);
             }
             return true;
@@ -210,7 +251,7 @@ class ShuntingYard {
      * @param array $tokens the tokens forming the statement that is to be translated
      * @return array
      */
-    public static function shunting_yard($tokens) {
+    public static function infix_to_rpn(array $tokens): array {
         $output = [];
         $opstack = [];
         $counters = ['functionargs' => [], 'arrayelements' => []];
@@ -228,7 +269,7 @@ class ShuntingYard {
             // Unary + and - are possible after an operator and after an opening parenthesis.
             // Also, in order to correctly interpret arrays and function calls, we must allow
             // unary + and - after an opening bracket and after a comma.
-            if (in_array($lasttype, [Token::OPENING_PAREN, Token::ARG_SEPARATOR, Token::OPENING_BRACKET, Token::OPERATOR])) {
+            if (in_array($lasttype, [token::OPENING_PAREN, token::ARG_SEPARATOR, token::OPENING_BRACKET, token::OPERATOR])) {
                 $unarypossible = true;
             }
             // Insert inplicit multiplication sign, if
@@ -237,23 +278,23 @@ class ShuntingYard {
             // For accurate error reporting (e.g. if the multiplication reveals itself as impossible
             // during evaluation), the row and column number of the implicit multiplication token are
             // copied over from the current token which triggered the multiplication.
-            if (in_array($type, [Token::VARIABLE, Token::FUNCTION, Token::NUMBER, Token::OPENING_PAREN])) {
-                if (in_array($lasttype, [Token::VARIABLE, Token::NUMBER, Token::CLOSING_PAREN])) {
+            if (in_array($type, [token::VARIABLE, token::FUNCTION, token::NUMBER, token::OPENING_PAREN])) {
+                if (in_array($lasttype, [token::VARIABLE, token::NUMBER, token::CLOSING_PAREN])) {
                     self::flush_higher_precedence($opstack, self::get_precedence('*'), $output);
-                    $opstack[] = new Token(Token::OPERATOR, '*', $token->row, $token->column);
+                    $opstack[] = new token(token::OPERATOR, '*', $token->row, $token->column);
                 }
             }
             switch ($type) {
                 // Literals (numbers or strings), constants and variable names go straight to the output queue.
-                case Token::NUMBER:
-                case Token::STRING:
-                case Token::VARIABLE:
-                case Token::CONSTANT:
+                case token::NUMBER:
+                case token::STRING:
+                case token::VARIABLE:
+                case token::CONSTANT:
                     $output[] = $token;
                     break;
                 // If we encounter an argument separator (,) *and* there is a pending function or array,
                 // we increase the last argument or element counter. Otherwise, this is a syntax error.
-                case Token::ARG_SEPARATOR:
+                case token::ARG_SEPARATOR:
                     $mostrecent = end($separatortype);
                     if ($mostrecent === false) {
                         self::die('unexpected token: ,', $token);
@@ -263,29 +304,29 @@ class ShuntingYard {
                     ++$counters[$mostrecent][$index - 1];
                     break;
                 // Opening parenthesis goes straight to the operator stack.
-                case Token::OPENING_PAREN:
+                case token::OPENING_PAREN:
                     $opstack[] = $token;
                     break;
                 // Opening bracket goes straight to the operator stack. At the same time,
                 // we must set up a new array element counter.
                 // Also, we check whether this bracket means the start of a new array or
                 // rather an index to a variable, e.g. a[1].
-                case Token::OPENING_BRACKET:
+                case token::OPENING_BRACKET:
                     // By default, let's assume we are building a new array, unless the parser marked
                     // the opening bracket as '[r' signalling we are building a range. In that case,
                     // we use a different sentinel and change the bracket back to its original value.
                     if ($value === '[r') {
-                        $sentinel = new Token(Token::OPERATOR, '%%rangebuild', $token->row, $token->column);
+                        $sentinel = new token(token::OPERATOR, '%%rangebuild', $token->row, $token->column);
                         $token->value = '[';
                     } else {
-                        $sentinel = new Token(Token::OPERATOR, '%%arraybuild', $token->row, $token->column);
+                        $sentinel = new token(token::OPERATOR, '%%arraybuild', $token->row, $token->column);
                     }
                     // An index is possible if the last token was a variable, the closing bracket
                     // of an array (or other index, e.g. for a multi-dimensional array) or the closing
                     // parenthesis of a function call which might return an array. We cannot reliably
                     // know whether the parenthesis really comes from a function, but if it does not,
                     // the user will run into an evaluation error later.
-                    if (in_array($lasttype, [Token::VARIABLE, Token::CLOSING_BRACKET, Token::CLOSING_PAREN])) {
+                    if (in_array($lasttype, [token::VARIABLE, token::CLOSING_BRACKET, token::CLOSING_PAREN])) {
                         $sentinel->value = '%%arrayindex';
                     }
                     $opstack[] = $sentinel;
@@ -296,13 +337,13 @@ class ShuntingYard {
                 // Function name goes straight to the operator stack. At the same time,
                 // we must set up a new function argument counter.
                 // FIXME: function call will be done in the evaluator.
-                case Token::FUNCTION:
+                case token::FUNCTION:
                     $opstack[] = $token;
                     $separatortype[] = 'functionargs';
                     $counters['functionargs'][] = 0;
                     break;
                 // Classic operators are treated according to precedence.
-                case Token::OPERATOR:
+                case token::OPERATOR:
                     // First we check whether the operator could be unary:
                     // An unary + will be silently dropped, an unary - will be changed to negation.
                     if ($unarypossible) {
@@ -323,7 +364,7 @@ class ShuntingYard {
                     if ($value === '?') {
                         self::flush_higher_precedence($opstack, $thisprecedence, $output);
                         $output[] = $token;
-                        $opstack[] = new Token(Token::OPERATOR, '%%ternary');
+                        $opstack[] = new token(token::OPERATOR, '%%ternary');
                         break;
                     }
                     // For the : part of a ternary operator, we
@@ -346,8 +387,8 @@ class ShuntingYard {
                     break;
                 // Closing bracket means we flush pending operators until we get to the
                 // matching opening bracket.
-                case Token::CLOSING_BRACKET:
-                    self::flush_until_paren($opstack, Token::OPENING_BRACKET, $output);
+                case token::CLOSING_BRACKET:
+                    self::flush_until_paren($opstack, token::OPENING_BRACKET, $output);
                     $head = end($opstack);
                     if ($head === false) {
                         self::die('syntax error: no matching [ found for this bracket', $token);
@@ -359,7 +400,7 @@ class ShuntingYard {
                             'unknown error: there should be an array element counter in place! please file a bug report.', $token
                         );
                     }
-                    if ($lasttype !== Token::OPENING_BRACKET) {
+                    if ($lasttype !== token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
                     }
                     // Pop the most recent array element counter. For %%arrayindex, we just check it's 1.
@@ -370,7 +411,7 @@ class ShuntingYard {
                             self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
                         }
                     } else if (in_array($head->value, ['%%arraybuild', '%%rangebuild'])) {
-                        $output[] = new Token(Token::NUMBER, $numofelements);
+                        $output[] = new token(token::NUMBER, $numofelements);
                     } else {
                         self::die('syntax error: unknown parse error', $token);
                     }
@@ -381,13 +422,13 @@ class ShuntingYard {
                     break;
                 // Closing parenthesis means we flush all operators until we get to the
                 // matching opening parenthesis.
-                case Token::CLOSING_PAREN:
-                    self::flush_until_paren($opstack, Token::OPENING_PAREN, $output);
+                case token::CLOSING_PAREN:
+                    self::flush_until_paren($opstack, token::OPENING_PAREN, $output);
                     $head = end($opstack);
                     if ($head === false) {
                         self::die('syntax error: no matching ( found for this parenthesis', $token);
                     }
-                    if ($head->type === Token::FUNCTION) {
+                    if ($head->type === token::FUNCTION) {
                         // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
                         $index = count($counters['functionargs']);
                         if ($index === 0) {
@@ -396,27 +437,27 @@ class ShuntingYard {
                                 $token
                             );
                         }
-                        if ($lasttype !== Token::OPENING_PAREN) {
+                        if ($lasttype !== token::OPENING_PAREN) {
                             ++$counters['functionargs'][$index - 1];
                         }
                         // Remove last argument counter and put it to output queue, followed by the function name.
-                        $output[] = new Token(Token::NUMBER, array_pop($counters['functionargs']));
+                        $output[] = new token(token::NUMBER, array_pop($counters['functionargs']));
                         $output[] = array_pop($opstack);
                         // Remove last separatortype.
                         array_pop($separatortype);
                     }
                     break;
                 // The PREFIX token has already served its purpose, we can just ignore it.
-                case Token::PREFIX:
+                case token::PREFIX:
                     break;
                 // At this point, all identifiers should have been classified as functions or variables.
                 // No token should have the general IDENTIFIER type anymore.
-                case Token::IDENTIFIER:
+                case token::IDENTIFIER:
                     self::die("syntax error: did not expect to see an unclassified identifier: $value", $token);
                     break;
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
                 // marker.
-                case Token::END_OF_STATEMENT:
+                case token::END_OF_STATEMENT:
                     self::die('unexpected semicolon', $token);
                     break;
                 default:
@@ -437,10 +478,11 @@ class ShuntingYard {
      * Stop processing and indicate the human readable position (row/column) where the error occurred.
      *
      * @param string $message error message
+     * @param token $offendingtoken the token that caused the error
      * @return void
      * @throws Exception
      */
-    private static function die($message, $offendingtoken) {
+    private static function die(string $message, token $offendingtoken): never {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 

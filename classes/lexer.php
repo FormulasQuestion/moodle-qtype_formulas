@@ -14,93 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Lexer for qtype_formulas
- *
- * @package    qtype_formulas
- * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
-
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Class for individual tokens
- *
- * @package    qtype_formulas
- * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class Token {
-    // Literals (string or number) will have their 1-bit set.
-    const ANY_LITERAL = 1;  //  00001
-    const NUMBER = 3;       //  00011
-    const STRING = 5;       //  00101
-
-    /* Parentheses are organised in groups, allowing for bitwise comparison.
-       We set the 8-bit for any parenthesis plus the 16-bit for opening and the 32-bit for closing parens.
-       examples: CLOSING_PAREN & ANY_PAREN = ANY_PAREN
-                 CLOSING_PAREN & ANY_CLOSING_PAREN = ANY_CLOSING_PAREN
-                 CLOSING_PAREN & OPEN_OR_CLOSE_PAREN = OPEN_OR_CLOSE_PAREN
-                 CLOSING_PAREN & CLOSING_BRACKET = ANY_PAREN | ANY_CLOSING_PAREN
-                 CLOSING_PAREN & ANY_OPENING_PAREN =
-    */
-    const ANY_PAREN = 8;                 //  0'00001000
-    const ANY_OPENING_PAREN = 16;        //  0'00010000
-    const ANY_CLOSING_PAREN = 32;        //  0'00100000
-    const OPEN_OR_CLOSE_PAREN = 64;      //  0'01000000
-    const OPEN_OR_CLOSE_BRACKET = 128;   //  0'10000000
-    const OPEN_OR_CLOSE_BRACE = 256;     //  1'00000000
-    const OPENING_PAREN = 88;            //  0'01011000
-    const CLOSING_PAREN = 104;           //  0'01101000
-    const OPENING_BRACKET = 152;         //  0'10011000
-    const CLOSING_BRACKET = 168;         //  0'10101000
-    const OPENING_BRACE = 280;           //  1'00011000
-    const CLOSING_BRACE = 296;           //  1'00101000
-    // Identifiers will have their 512-bit set.
-    const IDENTIFIER = 512;
-    const FUNCTION = 1536;
-    const VARIABLE = 2560;
-
-    // Other types.
-    const PREFIX = 4096;
-    const CONSTANT = 8192;
-    const OPERATOR = 16384;
-    const ARG_SEPARATOR = 32768;
-    const END_OF_STATEMENT = 65536;
-    const RESERVED_WORD = 131072;
-    const LIST = 262144;
-    const SET = 524288;
-
-
-
-    /** @var mixed the token's content */
-    public $value;
-
-    /** @var integer token type, e.g. number or string */
-    public $type;
-
-    /** @var integer row in which the token starts */
-    public $row;
-
-    /** @var integer column in which the token starts */
-    public $column;
-
-    /**
-     * Constructor
-     *
-     * @param integer $type the type of the token
-     * @param mixed $value the value (e.g. name of identifier, string content, number value, operator)
-     */
-    public function __construct($type, $value, $row = -1, $column = -1) {
-        $this->value = $value;
-        $this->type = $type;
-        $this->row = $row;
-        $this->column = $column;
-    }
-}
 
 /**
  * Formulas Question Lexer class
@@ -109,10 +23,11 @@ class Token {
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class Lexer {
-    const EOF = InputStream::EOF;
 
-    /** @var InputStream input stream */
+class lexer {
+    const EOF = null;
+
+    /** @var input_stream input stream */
     private $inputstream = null;
 
     /**
@@ -120,35 +35,35 @@ class Lexer {
      *
      * @param string $str the input to be tokenized
      */
-    public function __construct($str) {
-        $this->inputstream = new InputStream($str);
+    public function __construct(string $str) {
+        $this->inputstream = new input_stream($str);
     }
 
     /**
-     * Go through the entire input and fetch all non-comment tokens.
+     * Go through the entire input and fetch all tokens except comments and white space.
      *
-     * @return array list of tokens
+     * @return token[] list of tokens
      */
-    public function get_token_list() {
+    public function get_token_list(): array {
         $currenttoken = $this->read_next_token();
         $tokenlist = [];
         while ($currenttoken !== self::EOF) {
             $tokenlist[] = $currenttoken;
             $currenttoken = $this->read_next_token();
         }
-
         return $tokenlist;
     }
 
     /**
-     * Read the next token from the input stream. Making the method public for easier testing.
+     * Find out what type of token is next and read it from the input stream by calling the
+     * corresponding dedicated method.
      *
-     * @return Token the token
+     * @return ?token the token or null, if we have reached the end of the input stream
      */
-    private function read_next_token() {
+    private function read_next_token(): ?token {
         // Check the next char and quit if we are at the end of the stream.
         $currentchar = $this->inputstream->peek();
-        if ($currentchar === InputStream::EOF) {
+        if ($currentchar === input_stream::EOF) {
             return self::EOF;
         }
         // Skip all white space.
@@ -160,7 +75,7 @@ class Lexer {
             $currentchar = $this->inputstream->peek();
         }
         // If there is nothing after stripping whitespace and comments, we may quit.
-        if ($currentchar === InputStream::EOF) {
+        if ($currentchar === input_stream::EOF) {
             return self::EOF;
         }
         // If we have a " or ' character, this is the start of a string.
@@ -186,16 +101,16 @@ class Lexer {
         // There are some single-character tokens...
         if (preg_match('/[]\[(){},;π\\\]/', $currentchar)) {
             $types = [
-                '[' => Token::OPENING_BRACKET,
-                '(' => Token::OPENING_PAREN,
-                '{' => Token::OPENING_BRACE,
-                ']' => Token::CLOSING_BRACKET,
-                ')' => Token::CLOSING_PAREN,
-                '}' => Token::CLOSING_BRACE,
-                ',' => Token::ARG_SEPARATOR,
-                '\\' => Token::PREFIX,
-                ';' => Token::END_OF_STATEMENT,
-                'π' => Token::CONSTANT
+                '[' => token::OPENING_BRACKET,
+                '(' => token::OPENING_PAREN,
+                '{' => token::OPENING_BRACE,
+                ']' => token::CLOSING_BRACKET,
+                ')' => token::CLOSING_PAREN,
+                '}' => token::CLOSING_BRACE,
+                ',' => token::ARG_SEPARATOR,
+                '\\' => token::PREFIX,
+                ';' => token::END_OF_STATEMENT,
+                'π' => token::CONSTANT
             ];
             return $this->read_single_char_token($types[$currentchar]);
         }
@@ -206,23 +121,23 @@ class Lexer {
     }
 
     /**
-     * FIXME Undocumented function
+     * Read a single-char token from the input stream, e.g. a parenthesis or a comma.
      *
-     * @param [type] $type
-     * @return void
+     * @param int $type type to use when creating the new token
+     * @return token
      */
-    private function read_single_char_token($type) {
+    private function read_single_char_token(int $type): token {
         $char = $this->inputstream->read();
         $startingposition = $this->inputstream->get_position();
-        return new Token($type, $char, $startingposition['row'], $startingposition['column']);
+        return new token($type, $char, $startingposition['row'], $startingposition['column']);
     }
 
     /**
-     * Read a number token and return it as a float.
+     * Read a number token from the input stream.
      *
-     * @return Token the number token
+     * @return token the number token
      */
-    private function read_number() {
+    private function read_number(): token {
         // Start by reading the first char. If we are here, that means it was a number or a decimal point.
         $currentchar = $this->inputstream->read();
 
@@ -235,7 +150,7 @@ class Lexer {
 
         // Save the first character.
         $result = $currentchar;
-        while ($currentchar !== InputStream::EOF) {
+        while ($currentchar !== input_stream::EOF) {
             // Look at the next char and decide what to do.
             $nextchar = $this->inputstream->peek();
             if ($nextchar === '.') {
@@ -273,15 +188,15 @@ class Lexer {
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
         }
-        return new Token(Token::NUMBER, floatval($result), $startingposition['row'], $startingposition['column']);
+        return new token(token::NUMBER, floatval($result), $startingposition['row'], $startingposition['column']);
     }
 
     /**
-     * Read a string token
+     * Read a string token from the input stream.
      *
-     * @return Token the string token
+     * @return token the string token
      */
-    private function read_string() {
+    private function read_string(): token {
         // Start by reading the opening delimiter, either a " or a ' character.
         $opener = $this->inputstream->read();
 
@@ -290,7 +205,7 @@ class Lexer {
 
         $result = '';
         $currentchar = $this->inputstream->peek();
-        while ($currentchar !== InputStream::EOF) {
+        while ($currentchar !== input_stream::EOF) {
             $nextchar = $this->inputstream->peek();
             // A backslash could be used to escape the opening/closing delimiter inside the string.
             if ($nextchar == '\\') {
@@ -306,7 +221,7 @@ class Lexer {
                 }
             } else if ($nextchar === $opener) {
                 $this->inputstream->read();
-                return new Token(Token::STRING, $result, $startingposition['row'], $startingposition['column']);
+                return new token(token::STRING, $result, $startingposition['row'], $startingposition['column']);
             }
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
@@ -318,11 +233,12 @@ class Lexer {
     }
 
     /**
-     * Read an identifier token (function name, variable name).
+     * Read an identifier token (function name, variable name, reserved word or pre-defined constant like π)
+     * from the input stream.
      *
-     * @return Token the identifier token
+     * @return token the identifier token
      */
-    private function read_identifier() {
+    private function read_identifier(): token {
         // Start by reading the first char. If we are here, that means it was a number or a decimal point.
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
@@ -330,7 +246,7 @@ class Lexer {
         // Record position of the opening delimiter.
         $startingposition = $this->inputstream->get_position();
 
-        while ($currentchar !== InputStream::EOF) {
+        while ($currentchar !== input_stream::EOF) {
             $nextchar = $this->inputstream->peek();
             // Identifiers may contain letters, digits or underscores.
             if (!preg_match('/[A-Za-z0-9_]/', $nextchar)) {
@@ -340,22 +256,22 @@ class Lexer {
             $result .= $currentchar;
         }
         if ($result === 'for') {
-            $type = Token::RESERVED_WORD;
+            $type = token::RESERVED_WORD;
         } else if (preg_match('/^(pi|PI|Pi)$/', $result)) {
-            $type = Token::CONSTANT;
+            $type = token::CONSTANT;
             $result = 'π';
         } else {
-            $type = Token::IDENTIFIER;
+            $type = token::IDENTIFIER;
         }
-        return new Token($type, $result, $startingposition['row'], $startingposition['column']);
+        return new token($type, $result, $startingposition['row'], $startingposition['column']);
     }
 
     /**
-     * Read an operator token
+     * Read an operator token from the input stream.
      *
-     * @return Token the operator token
+     * @return token the operator token
      */
-    private function read_operator() {
+    private function read_operator(): token {
         // Start by reading the first char. If we are here, that means it was a number or a decimal point.
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
@@ -375,17 +291,17 @@ class Lexer {
                 $result .= $this->inputstream->read();
             }
         }
-        return new Token(Token::OPERATOR, $result, $startingposition['row'], $startingposition['column']);
+        return new token(token::OPERATOR, $result, $startingposition['row'], $startingposition['column']);
     }
 
     /**
-     * Read until the end of the line, because comments end with a newline character.
+     * Read until the end of the line, because comments always extend until the end of the line.
      *
      * @return void
      */
-    private function consume_comment() {
+    private function consume_comment(): void {
         $currentchar = $this->inputstream->peek();
-        while ($currentchar !== "\n" && $currentchar !== InputStream::EOF) {
+        while ($currentchar !== "\n" && $currentchar !== input_stream::EOF) {
             $currentchar = $this->inputstream->read();
         }
         // Eat up all white space following the comment.
@@ -397,7 +313,7 @@ class Lexer {
      *
      * @return void
      */
-    private function consume_whitespace() {
+    private function consume_whitespace(): void {
         $currentchar = $this->inputstream->peek();
         while (preg_match('/\s/', $currentchar)) {
             $this->inputstream->read();
