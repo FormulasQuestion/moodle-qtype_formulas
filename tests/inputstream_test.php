@@ -26,11 +26,6 @@
 namespace qtype_formulas;
 use Exception;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser/inputstream.php');
-
 class inputstream_test extends \advanced_testcase {
 
     /**
@@ -38,7 +33,7 @@ class inputstream_test extends \advanced_testcase {
      */
     public function test_read_peek() {
         $input = 'abcdefg0123456';
-        $reader = new InputStream($input);
+        $reader = new input_stream($input);
 
         $len = strlen($input);
         for ($i = 0; $i < $len; $i++) {
@@ -60,7 +55,7 @@ class inputstream_test extends \advanced_testcase {
      */
     public function test_die() {
         $input = "abcde\nfghij\nklmno";
-        $reader = new InputStream($input);
+        $reader = new input_stream($input);
 
         try {
             $reader->die('foo');

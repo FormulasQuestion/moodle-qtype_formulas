@@ -26,14 +26,6 @@
 namespace qtype_formulas;
 use Exception;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser/parser.php');
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser/lexer.php');
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser/inputstream.php');
-require_once($CFG->dirroot . '/question/type/formulas/classes/parser/shuntingyard.php');
-
 class tokenizer_test extends \advanced_testcase {
 
     public function test_basic_operations() {
@@ -65,11 +57,11 @@ class tokenizer_test extends \advanced_testcase {
         $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
         $input = 'a = [1:-5:-1]';
 
-        $lexer = new Lexer($input);
-        //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new Parser($lexer->get_token_list());
+        $lexer = new lexer($input);
+        //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
+        $parser = new parser($lexer->get_token_list());
         foreach ($parser->statements as $statement) {
-            $output = ShuntingYard::shunting_yard($statement);
+            $output = shunting_yard::infix_to_rpn($statement);
             print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
@@ -82,8 +74,8 @@ class tokenizer_test extends \advanced_testcase {
         //$input = '[[1,2]]';
         $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
 
-        $lexer = new Lexer($input);
-        $parser = new Parser($lexer->get_token_list());
+        $lexer = new lexer($input);
+        $parser = new parser($lexer->get_token_list());
         print_r($parser->statements);
     }
 
@@ -152,7 +144,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 10, 24),
         );
 
-        $lexer = new Lexer($input);
+        $lexer = new lexer($input);
         $this->assertEquals($output, $lexer->get_token_list());
     }
 
@@ -179,7 +171,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 2, 28),
         );
 
-        $lexer = new Lexer($input);
+        $lexer = new lexer($input);
         $this->assertEquals($output, $lexer->get_token_list());
     }
 
@@ -216,7 +208,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new Lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_token_list();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -274,7 +266,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new Lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_token_list();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -317,7 +309,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new Lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_token_list();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -383,7 +375,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new Lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_token_list();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -432,7 +424,7 @@ EOF;
             new Token(Token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new Lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_token_list();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -451,7 +443,7 @@ EOF;
         );
 
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             $tokens = $lexer->get_token_list();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
@@ -473,7 +465,7 @@ EOF;
         );
 
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             $tokens = $lexer->get_token_list();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
@@ -519,7 +511,7 @@ EOF;
         );
 
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             $tokens = $lexer->get_token_list();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
@@ -557,7 +549,7 @@ EOF;
         );
 
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             $tokens = $lexer->get_token_list();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
@@ -566,7 +558,7 @@ EOF;
             array('input' => "'foo", 'output' => 'foo'),
         );
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             try {
                 $tokens = $lexer->get_token_list();
                 $this->assertEquals($case['output'], $tokens[0]->value);
@@ -615,7 +607,7 @@ EOF;
         );
 
         foreach ($testcases as $case) {
-            $lexer = new Lexer($case['input']);
+            $lexer = new lexer($case['input']);
             $tokens = $lexer->get_token_list();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
@@ -626,7 +618,7 @@ EOF;
      */
     public function test_die() {
         $input = "abcde\nfghij\nklmno";
-        $reader = new InputStream($input);
+        $reader = new input_stream($input);
 
         try {
             $reader->die('foo');
