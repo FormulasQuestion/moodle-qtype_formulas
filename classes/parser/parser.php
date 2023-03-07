@@ -33,7 +33,7 @@ TODO:
             + instantiated random values
             export (serialize) and import
 * parsing and instantiation of random vars
-* ranges / sets for random vars
+* sets for random vars
 * for loop
 
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
@@ -69,6 +69,9 @@ class Parser {
         $this->count = count($tokenlist);
         $this->tokenlist = $tokenlist;
         $this->variableslist = $knownvariables;
+
+        $this->check_unbalanced_parens();
+
         $currenttoken = $this->peek();
 
         // If we parse a single expression, we can go ahead directly.
@@ -99,6 +102,43 @@ class Parser {
 
             // Advance.
             $currenttoken = $this->read_next();
+        }
+    }
+
+    /**
+     * Check whether all parenthesis are balanced. Otherweise, stop all further processing
+     * and output an error message.
+     *
+     * @return void
+     */
+    private function check_unbalanced_parens() {
+        $parenstack = [];
+        foreach ($this->tokenlist as $token) {
+            $type = $token->type;
+            // All opening parens will have the 16-bit set, other tokens won't.
+            if ($type & Token::ANY_OPENING_PAREN) {
+                $parenstack[] = $token;
+            }
+            // All closing parens will have the 32-bit set, other tokens won't.
+            if ($type & Token::ANY_CLOSING_PAREN) {
+                $top = end($parenstack);
+                // If stack is empty, we have a stray closing paren.
+                if (!($top instanceof Token)) {
+                    $this->die("unbalanced parentheses, stray '{$token->value}' found", $token);
+                }
+                // Let's check whether the opening and closing parenthesis have the same type.
+                // If they do, XORing them should leave just the 16- and the 32-bit. Otherwise,
+                // we can stop here.
+                if (($top->type ^ $type) !== 0b110000) {
+                    $this->die("mismatched parentheses, '{$token->value}' is closing '{$top->value}' from row {$top->row} and column {$top->column}", $token);
+                }
+                array_pop($parenstack);
+            }
+        }
+        // If the stack of parentheses is not empty now, we have an unmatched opening parenthesis.
+        if (!empty($parenstack)) {
+            $unmatched = end($parenstack);
+            $this->die("unbalanced parenthesis, '{$unmatched->value}' is never closed", $unmatched);
         }
     }
 
@@ -173,6 +213,7 @@ class Parser {
                 $colons = 0;
                 $numbers = 0;
                 $i = 1;
+                // Look ahead until we find the closing bracket. Or the end, but that would be bad syntax...
                 while ($lookahead !== self::EOF && $lookahead->type !== Token::CLOSING_BRACKET) {
                     $latype = $lookahead->type;
                     $lavalue = $lookahead->value;
