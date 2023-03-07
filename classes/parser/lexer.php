@@ -162,7 +162,7 @@ class Lexer {
             return $this->read_operator();
         }
         // There are some single-character tokens...
-        if (preg_match('/[]\[(){},;\\\]/', $currentchar)) {
+        if (preg_match('/[]\[(){},;π\\\]/', $currentchar)) {
             $types = [
                 '[' => Token::OPENING_BRACKET,
                 '(' => Token::OPENING_PAREN,

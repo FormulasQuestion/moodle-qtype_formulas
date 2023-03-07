@@ -162,6 +162,44 @@ class Parser {
                 }
             }
 
+            // We distinguish between normal arrays and a fixed-range interval as a short form
+            // for e.g. [1,2,3,...,9] by writing [1:10]. This has to be prepared here.
+            if ($type === Token::OPENING_BRACKET) {
+                // We do a simple analysis: any range MUST contain one or two colons and one more number
+                // than colons. It MUST NOT contain other operators than an (unary) minus and MUST NOT
+                // contain strings or argument separators. Our guess might be wrong, but then we just let
+                // the error happen during evaluation.
+                $lookahead = $nexttoken;
+                $colons = 0;
+                $numbers = 0;
+                $i = 1;
+                while ($lookahead !== self::EOF && $lookahead->type !== Token::CLOSING_BRACKET) {
+                    $latype = $lookahead->type;
+                    $lavalue = $lookahead->value;
+                    if ($latype === Token::OPERATOR && $lavalue === ':') {
+                        $colons++;
+                        $lookahead->value = ',';
+                        $lookahead->type = Token::ARG_SEPARATOR;
+                    } else if ($latype === Token::NUMBER) {
+                        $numbers++;
+                    } else if (
+                        ($latype === Token::OPERATOR && $lavalue !== '-') ||
+                        (in_array($latype, [Token::ARG_SEPARATOR, Token::STRING]))
+                      ) {
+                        $colons = 0;
+                        $numbers = 0;
+                        break;
+                    }
+                    $lookahead = $this->peek($i);
+                    $i++;
+                }
+                // Change the opening bracket's value. It will be interpreted by the shunting yard
+                // algorithm.
+                if (in_array($colons, [1, 2]) && $numbers === $colons + 1) {
+                    $currenttoken->value = '[r';
+                }
+            }
+
             // We do not currently allow the short ternary operator aka "Elvis operator" (a ?: b)
             // which is a short form for (a ? a : b).
             if ($type === Token::OPERATOR && $value === '?' && $nexttype === Token::OPERATOR && $nextvalue === ':') {
@@ -183,6 +221,7 @@ class Parser {
             ) {
                 $this->die('syntax error: invalid use of separator token (,)', $nexttoken);
             }
+
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
             if ($nexttype === Token::END_OF_STATEMENT) {
                 $this->read_next();
@@ -216,6 +255,8 @@ class Parser {
 
     // FIXME
     public function parse_range() {
+        // mixing of type 1 / type 2 is not possible for ranges
+
         // type 1:
         // opening bracket
         // number
