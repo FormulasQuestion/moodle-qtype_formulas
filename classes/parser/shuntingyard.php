@@ -174,6 +174,12 @@ class ShuntingYard {
         }, $output);
     }
 
+    private static function flush_all_operators(&$opstack, &$output) {
+        self::flush_until($opstack, function($operator) {
+            return $operator->type === Token::OPERATOR;
+        }, $output);
+    }
+
     private static function flush_until_paren(&$opstack, $type, &$output) {
         // We are looking for a specific type of parenthesis. If we see another one before ours,
         // this is a syntax error. So we first set up the list of forbidden parenthesis types.
@@ -253,6 +259,7 @@ class ShuntingYard {
                     if ($mostrecent === false) {
                         self::die('unexpected token: ,', $token);
                     }
+                    self::flush_all_operators($opstack, $output);
                     $index = count($counters[$mostrecent]);
                     ++$counters[$mostrecent][$index - 1];
                     break;
@@ -265,8 +272,15 @@ class ShuntingYard {
                 // Also, we check whether this bracket means the start of a new array or
                 // rather an index to a variable, e.g. a[1].
                 case Token::OPENING_BRACKET:
-                    // By default, let's assume we are building a new array.
-                    $sentinel = new Token(Token::OPERATOR, '%%arraybuild', $token->row, $token->column);
+                    // By default, let's assume we are building a new array, unless the parser marked
+                    // the opening bracket as '[r' signalling we are building a range. In that case,
+                    // we use a different sentinel and change the bracket back to its original value.
+                    if ($value === '[r') {
+                        $sentinel = new Token(Token::OPERATOR, '%%rangebuild', $token->row, $token->column);
+                        $token->value = '[';
+                    } else {
+                        $sentinel = new Token(Token::OPERATOR, '%%arraybuild', $token->row, $token->column);
+                    }
                     // An index is possible if the last token was a variable, the closing bracket
                     // of an array (or other index, e.g. for a multi-dimensional array) or the closing
                     // parenthesis of a function call which might return an array. We cannot reliably
@@ -356,13 +370,15 @@ class ShuntingYard {
                         if ($numofelements !== 1) {
                             self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
                         }
-                    } else if ($head->value === '%%arraybuild') {
+                    } else if (in_array($head->value, ['%%arraybuild', '%%rangebuild'])) {
                         $output[] = new Token(Token::NUMBER, $numofelements);
                     } else {
                         self::die('syntax error: unknown parse error', $token);
                     }
                     // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
                     $output[] = array_pop($opstack);
+                    // Remove last separatortype.
+                    array_pop($separatortype);
                     break;
                 // Closing parenthesis means we flush all operators until we get to the
                 // matching opening parenthesis.
@@ -387,6 +403,8 @@ class ShuntingYard {
                         // Remove last argument counter and put it to output queue, followed by the function name.
                         $output[] = new Token(Token::NUMBER, array_pop($counters['functionargs']));
                         $output[] = array_pop($opstack);
+                        // Remove last separatortype.
+                        array_pop($separatortype);
                     }
                     break;
                 // The PREFIX token has already served its purpose, we can just ignore it.

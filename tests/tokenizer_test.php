@@ -63,7 +63,7 @@ class tokenizer_test extends \advanced_testcase {
         $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
         $input = 'a = \sin(2)';
         $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-        $input = 'a = a[1][2]';
+        $input = 'a = [1:-5:-1]';
 
         $lexer = new Lexer($input);
         //$parser = new Parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
@@ -84,7 +84,7 @@ class tokenizer_test extends \advanced_testcase {
 
         $lexer = new Lexer($input);
         $parser = new Parser($lexer->get_token_list());
-        print_r($parser->get_statements());
+        print_r($parser->statements);
     }
 
     public function test_get_token_list_1() {
