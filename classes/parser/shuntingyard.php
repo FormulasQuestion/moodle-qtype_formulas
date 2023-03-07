@@ -202,7 +202,6 @@ class ShuntingYard {
         }, $output, true);
     }
 
-
     /**
      * Translate statement from infix into RPN notation via Dijkstra's shunting yard algorithm,
      * because this makes evaluation much easier. The method is declared as static, because it

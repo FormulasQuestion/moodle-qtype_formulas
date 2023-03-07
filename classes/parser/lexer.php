@@ -34,25 +34,47 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class Token {
-    const NUMBER = 1;
-    const STRING = 2;
-    const LIST = 4;
-    const SET = 8;
-    const PREFIX = 16;
-    const IDENTIFIER = 32;
-    const FUNCTION = 64;
-    const VARIABLE = 128;
-    const CONSTANT = 129;
-    const OPERATOR = 256;
-    const OPENING_PAREN = 512;
-    const CLOSING_PAREN = 1024;
-    const OPENING_BRACKET = 513;
-    const CLOSING_BRACKET = 1025;
-    const OPENING_BRACE = 514;
-    const CLOSING_BRACE = 1026;
-    const ARG_SEPARATOR = 2048;
-    const END_OF_STATEMENT = 4096;
-    const RESERVED_WORD = 8192;
+    // Literals (string or number) will have their 1-bit set.
+    const ANY_LITERAL = 1;  //  00001
+    const NUMBER = 3;       //  00011
+    const STRING = 5;       //  00101
+
+    /* Parentheses are organised in groups, allowing for bitwise comparison.
+       We set the 8-bit for any parenthesis plus the 16-bit for opening and the 32-bit for closing parens.
+       examples: CLOSING_PAREN & ANY_PAREN = ANY_PAREN
+                 CLOSING_PAREN & ANY_CLOSING_PAREN = ANY_CLOSING_PAREN
+                 CLOSING_PAREN & OPEN_OR_CLOSE_PAREN = OPEN_OR_CLOSE_PAREN
+                 CLOSING_PAREN & CLOSING_BRACKET = ANY_PAREN | ANY_CLOSING_PAREN
+                 CLOSING_PAREN & ANY_OPENING_PAREN =
+    */
+    const ANY_PAREN = 8;                 //  0'00001000
+    const ANY_OPENING_PAREN = 16;        //  0'00010000
+    const ANY_CLOSING_PAREN = 32;        //  0'00100000
+    const OPEN_OR_CLOSE_PAREN = 64;      //  0'01000000
+    const OPEN_OR_CLOSE_BRACKET = 128;   //  0'10000000
+    const OPEN_OR_CLOSE_BRACE = 256;     //  1'00000000
+    const OPENING_PAREN = 88;            //  0'01011000
+    const CLOSING_PAREN = 104;           //  0'01101000
+    const OPENING_BRACKET = 152;         //  0'10011000
+    const CLOSING_BRACKET = 168;         //  0'10101000
+    const OPENING_BRACE = 280;           //  1'00011000
+    const CLOSING_BRACE = 296;           //  1'00101000
+    // Identifiers will have their 512-bit set.
+    const IDENTIFIER = 512;
+    const FUNCTION = 1536;
+    const VARIABLE = 2560;
+
+    // Other types.
+    const PREFIX = 4096;
+    const CONSTANT = 8192;
+    const OPERATOR = 16384;
+    const ARG_SEPARATOR = 32768;
+    const END_OF_STATEMENT = 65536;
+    const RESERVED_WORD = 131072;
+    const LIST = 262144;
+    const SET = 524288;
+
+
 
     /** @var mixed the token's content */
     public $value;
