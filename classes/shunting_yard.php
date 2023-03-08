@@ -205,8 +205,6 @@ class shunting_yard {
     /**
      * Flush everything from the operator stack until we reach the desired (opening) parenthesis.
      * The parenthesis itself will be popped and discarded.
-     * If another (opening) paren is seen, the function will die with an appropriate error message.
-     * FIXME: maybe remove this, because parenthesis matching is veryfied before.
      *
      * @param array $opstack operator stack, will be modified
      * @param integer $type type of (opening) parenthesis to look for
@@ -214,14 +212,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_until_paren(array &$opstack, int $type, array &$output): void {
-        // We are looking for a specific type of parenthesis. If we see another one before ours,
-        // this is a syntax error. So we first set up the list of forbidden parenthesis types by
-        // taking all types and removing the requested one.
-        $failif = array_diff([token::OPENING_BRACE, token::OPENING_BRACKET, token::OPENING_PAREN], [$type]);
-        self::flush_while($opstack, function($operator) use ($type, $failif) {
-            if (in_array($operator->type, $failif)) {
-                self::die("mismatched parenthesis: {$operator->value}", $operator);
-            }
+        self::flush_while($opstack, function($operator) use ($type) {
             return $operator->type !== $type;
         }, $output, true, true);
     }
@@ -235,10 +226,6 @@ class shunting_yard {
      */
     private static function flush_all(array &$opstack, array &$output): void {
         self::flush_while($opstack, function($operator) {
-            // When flushing, we should not encounter any opening parenthesis.
-            if (in_array($operator->type, [token::OPENING_BRACE, token::OPENING_BRACKET, token::OPENING_PAREN])) {
-                self::die("mismatched parenthesis: {$operator->value}", $operator);
-            }
             return true;
         }, $output, true);
     }
@@ -390,6 +377,7 @@ class shunting_yard {
                 case token::CLOSING_BRACKET:
                     self::flush_until_paren($opstack, token::OPENING_BRACKET, $output);
                     $head = end($opstack);
+                    // This should not happen, because the parser already verified that all parens are balanced.
                     if ($head === false) {
                         self::die('syntax error: no matching [ found for this bracket', $token);
                     }
@@ -425,6 +413,7 @@ class shunting_yard {
                 case token::CLOSING_PAREN:
                     self::flush_until_paren($opstack, token::OPENING_PAREN, $output);
                     $head = end($opstack);
+                    // This should not happen, because the parser already verified that all parens are balanced.
                     if ($head === false) {
                         self::die('syntax error: no matching ( found for this parenthesis', $token);
                     }
