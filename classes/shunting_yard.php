@@ -139,7 +139,8 @@ class shunting_yard {
      * @param boolean $discardlast whether the last element should be discarded when popping it
      * @throws Error if the last element should not be discarded, but is not to be popped
      */
-    private static function flush_while(array &$input, callable $callback, ?array &$out = null, bool $poplast = false, bool $discardlast = false) {
+    private static function flush_while(array &$input, callable $callback, ?array &$out = null,
+            bool $poplast = false, bool $discardlast = false) {
         if (!$poplast && $discardlast) {
             throw new Error('Cannot move last element to output queue if it is not to be popped.');
         }

@@ -134,7 +134,11 @@ class parser {
                 // If they do, XORing them should leave just the 16- and the 32-bit. Otherwise,
                 // we can stop here.
                 if (($top->type ^ $type) !== 0b110000) {
-                    $this->die("mismatched parentheses, '{$token->value}' is closing '{$top->value}' from row {$top->row} and column {$top->column}", $token);
+                    $this->die(
+                        "mismatched parentheses, '{$token->value}' is closing '{$top->value}' " .
+                        "from row {$top->row} and column {$top->column}",
+                        $token
+                    );
                 }
                 array_pop($parenstack);
             }
@@ -260,10 +264,10 @@ class parser {
 
             // We do not allow to subsequent commas, a comma following an opening parenthesis/bracket
             // or a comma followed by a closing parenthesis/bracket.
-            if (
-                (in_array($type, [token::OPENING_PAREN, token::OPENING_BRACKET]) && $nexttype === token::ARG_SEPARATOR) ||
-                ($type === token::ARG_SEPARATOR && in_array($nexttype, [token::ARG_SEPARATOR, token::CLOSING_BRACKET, token::CLOSING_PAREN]))
-            ) {
+            $parenpluscomma = ($type & token::ANY_OPENING_PAREN) && $nexttype === token::ARG_SEPARATOR;
+            $commaplusparen = $type === token::ARG_SEPARATOR && ($nexttype & token::ANY_CLOSING_PAREN);
+            $twocommas = ($type === token::ARG_SEPARATOR && $nexttype === token::ARG_SEPARATOR);
+            if ($parenpluscomma || $commaplusparen || $twocommas) {
                 $this->die('syntax error: invalid use of separator token (,)', $nexttoken);
             }
 
