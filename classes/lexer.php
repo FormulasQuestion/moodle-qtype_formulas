@@ -30,6 +30,9 @@ class lexer {
     /** @var input_stream input stream */
     private $inputstream = null;
 
+    /** @var token[] list of all tokens in the input stream */
+    private $tokens = [];
+
     /**
      * Constructor
      *
@@ -37,21 +40,32 @@ class lexer {
      */
     public function __construct(string $str) {
         $this->inputstream = new input_stream($str);
+        $this->build_token_list();
+    }
+
+    /**
+     * Return the list of all tokens.
+     *
+     * @return array
+     */
+    public function get_tokens(): array {
+        return $this->tokens;
     }
 
     /**
      * Go through the entire input and fetch all tokens except comments and white space.
+     * Store them in the corresponding variable, so that they can be retrieved.
      *
-     * @return token[] list of tokens
+     * @return void
      */
-    public function get_token_list(): array {
+    private function build_token_list(): void {
         $currenttoken = $this->read_next_token();
-        $tokenlist = [];
+        $tokens = [];
         while ($currenttoken !== self::EOF) {
-            $tokenlist[] = $currenttoken;
+            $tokens[] = $currenttoken;
             $currenttoken = $this->read_next_token();
         }
-        return $tokenlist;
+        $this->tokens = $tokens;
     }
 
     /**

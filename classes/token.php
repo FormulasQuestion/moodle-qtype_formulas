@@ -90,4 +90,8 @@ class token {
         $this->row = $row;
         $this->column = $column;
     }
+
+    public function __toString() {
+        return (string)$this->value;
+    }
 }
