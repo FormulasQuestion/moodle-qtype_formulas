@@ -464,6 +464,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return array (number, integer) the fraction, and the state.
      */
     public function grade_response(array $response) {
+        global $OUTPUT;
+
         // We cant' rely on question defaultmark for restored questions.
         $totalvalue = 0;
         try {
@@ -477,7 +479,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                 $totalvalue += $part->answermark;
             }
         } catch (Exception $e) {
-            notify('Grading error! Probably result of incorrect import file or database corruption.');
+            $OUTPUT->notification(get_string('error_grading_error', 'qtype_formulas'), 'error');
             return false; // It should have no error when grading students question.
         }
 
@@ -857,7 +859,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * Class to represent a question subpart, loaded from the question_answers table
  * in the database.
  *
- * @copyright  2012 Jean-Michel Védrine
+ * @copyright  2012 Jean-Michel Vï¿½drine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {

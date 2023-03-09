@@ -241,6 +241,8 @@ $string['error_algebraic_var'] = 'Syntax error of defining algebraic variable.';
 $string['error_func_param'] = 'Wrong number or wrong type of parameters for the function {$a}()';
 $string['error_subexpression_empty'] = 'A subexpression is empty.';
 $string['error_eval_numerical'] = 'Some expressions cannot be evaluated numerically.';
+$string['error_question_damaged'] = 'Error: Question is damaged, number of text fragments and number of question parts are not equal.';
+$string['error_grading_error'] = 'Grading error! Probably result of incorrect import file or database corruption.';
 
 // The language strings for the renderer.
 $string['correctansweris'] = 'One possible correct answer is: {$a}';
