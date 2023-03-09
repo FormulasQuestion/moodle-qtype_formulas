@@ -28,6 +28,9 @@ namespace qtype_formulas;
 /*
 
 TODO:
+* ~ is unary -> check not used in binary context
+* same for !
+* pi() --> translate to π with no function call
 * translate ^ to ** in certain contexts (backward compatibility)
 * variables stack
 * context -> already defined variables and their values
@@ -221,18 +224,23 @@ class parser {
                 $colons = 0;
                 $numbers = 0;
                 $i = 1;
-                // Look ahead until we find the closing bracket. Or the end, but that would be bad syntax...
-                while ($lookahead !== self::EOF && $lookahead->type !== token::CLOSING_BRACKET) {
+                // Look ahead until we find the closing bracket. We can safely assume there is one, because
+                // the parser checks for unbalanced/unmatched parens very early.
+                while ($lookahead->type !== token::CLOSING_BRACKET) {
                     $latype = $lookahead->type;
                     $lavalue = $lookahead->value;
+                    // Colons and numbers (including a pre-defined constant like π) tokens will be counted.
+                    // If we see any operator other than an (unary) minus, an opening parenthesis, a string
+                    // or a comma, we stop immediately, because these are not allowed in a range.
                     if ($latype === token::OPERATOR && $lavalue === ':') {
                         $colons++;
                         $lookahead->value = ',';
                         $lookahead->type = token::ARG_SEPARATOR;
-                    } else if ($latype === token::NUMBER) {
+                    } else if (in_array($latype, [token::NUMBER, token::CONSTANT])) {
                         $numbers++;
                     } else if (
                         ($latype === token::OPERATOR && $lavalue !== '-') ||
+                        ($latype === token::OPENING_PAREN) ||
                         (in_array($latype, [token::ARG_SEPARATOR, token::STRING]))
                       ) {
                         $colons = 0;
@@ -242,8 +250,8 @@ class parser {
                     $lookahead = $this->peek($i);
                     $i++;
                 }
-                // Change the opening bracket's value. It will be interpreted by the shunting yard
-                // algorithm.
+                // If this is a range, we slightly change the opening bracket's value.
+                // It will be interpreted by the shunting yard algorithm.
                 if (in_array($colons, [1, 2]) && $numbers === $colons + 1) {
                     $currenttoken->value = '[r';
                 }
@@ -262,8 +270,8 @@ class parser {
                 $this->die('syntax error: did you forget to put an operator?', $nexttoken);
             }
 
-            // We do not allow to subsequent commas, a comma following an opening parenthesis/bracket
-            // or a comma followed by a closing parenthesis/bracket.
+            // We do not allow to subsequent commas, a comma following an opening parenthesis
+            // or a comma followed by a closing parenthesis.
             $parenpluscomma = ($type & token::ANY_OPENING_PAREN) && $nexttype === token::ARG_SEPARATOR;
             $commaplusparen = $type === token::ARG_SEPARATOR && ($nexttype & token::ANY_CLOSING_PAREN);
             $twocommas = ($type === token::ARG_SEPARATOR && $nexttype === token::ARG_SEPARATOR);

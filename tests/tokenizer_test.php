@@ -28,57 +28,6 @@ use Exception;
 
 class tokenizer_test extends \advanced_testcase {
 
-    public function test_basic_operations() {
-        $input = 'a = 1+2*3';
-        $input = 'a = 5 = 3';
-        $input = 'a = b = 7 + 1';
-        $input = 'a = 4; b = !a';
-        $input = 'a = 1*2-3/4+5*6-7*8+9/10';
-        $input = 'a = !a b 2';
-        $input = 'a = arctan(1,2,3) + sin(2,3) + cos(1) + pi()';
-        $input = 'a = arctan(sin(2,cos(pi())),4)';
-        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
-        $input = 'a = 2 sin(3b)(-3+b)';
-        $input = 'a = 1+2*3';
-        $input = 'a = (3**4)**5';
-        $input = 'a = 1 | 2 & ~3';
-        $input = 'a = "foo" 5';
-        $input = 'a = 5 5';
-        $input = 'a = 5 == 3 ? 1 + 2 : 2*(0 + 3)';
-        $input = 'a = 5 + (b == 1 ? 3 : 4) * 2';
-        $input = 'b ? 1 : b == d ? 2 : 0';
-        $input = 'a = b == c ? 1 : b == d ? 2 : 0';
-        $input = 'sqrt(sin(2))';
-        $input = 'a = 1*(2+3)**2*4';
-        $input = 'a = sin(2)';
-        $input = '';
-        $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
-        $input = 'a = \sin(2)';
-        $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-        $input = 'a = [1:-5:-1]';
-
-        $lexer = new lexer($input);
-        //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($lexer->get_token_list());
-        foreach ($parser->statements as $statement) {
-            $output = shunting_yard::infix_to_rpn($statement);
-            print_r(array_map(function($el) { return $el->value; }, $output));
-        }
-        //print_r($output);
-    }
-
-    public function test_parse_list() {
-        //$input = '[1, 2, 3]';
-        //$input = '[1, "a", 3]';
-        //$input = '[1, ["x", "y"], 3]';
-        //$input = '[[1,2]]';
-        $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_token_list());
-        print_r($parser->statements);
-    }
-
     public function test_get_token_list_1() {
         $input = <<<EOF
 this = that * other_thing;
@@ -93,59 +42,59 @@ f = 4g-e;
 test = (a == b ? c : d);
 EOF;
         $output = array(
-            new Token(Token::IDENTIFIER, 'this', 1, 1),
-            new Token(Token::OPERATOR, '=', 1, 6),
-            new Token(Token::IDENTIFIER, 'that', 1, 8),
-            new Token(Token::OPERATOR, '*', 1, 13),
-            new Token(Token::IDENTIFIER, 'other_thing', 1, 15),
-            new Token(Token::END_OF_STATEMENT, ';', 1, 26),
-            new Token(Token::IDENTIFIER, 's1', 2, 1),
-            new Token(Token::OPERATOR, '=', 2, 4),
-            new Token(Token::STRING, 'single quoted string with a double quote " inside', 2, 6),
-            new Token(Token::END_OF_STATEMENT, ';', 2, 57),
-            new Token(Token::IDENTIFIER, 's2', 4, 1),
-            new Token(Token::OPERATOR, '=', 4, 4),
-            new Token(Token::STRING, 'double quoted string with a single quote \' inside', 4, 6),
-            new Token(Token::END_OF_STATEMENT, ';', 4, 57),
-            new Token(Token::IDENTIFIER, 's3', 5, 1),
-            new Token(Token::OPERATOR, '=', 5, 4),
-            new Token(Token::STRING, "string\nwith a newline", 5, 6),
-            new Token(Token::END_OF_STATEMENT, ';', 5, 30),
-            new Token(Token::IDENTIFIER, '_s4', 6, 1),
-            new Token(Token::OPERATOR, '=', 6, 5),
-            new Token(Token::STRING, "string with a real\nnewline", 6, 7),
-            new Token(Token::END_OF_STATEMENT, ';', 7, 9),
-            new Token(Token::IDENTIFIER, 'x', 8, 1),
-            new Token(Token::OPERATOR, '=', 8, 3),
-            new Token(Token::NUMBER, 2, 8, 5),
-            new Token(Token::OPERATOR, '*', 8, 6),
-            new Token(Token::IDENTIFIER, 'x', 8, 7),
-            new Token(Token::OPERATOR, '+', 8, 8),
-            new Token(Token::IDENTIFIER, 'z', 8, 9),
-            new Token(Token::END_OF_STATEMENT, ';', 8, 10),
-            new Token(Token::IDENTIFIER, 'f', 9, 1),
-            new Token(Token::OPERATOR, '=', 9, 3),
-            new Token(Token::NUMBER, 4, 9, 5),
-            new Token(Token::IDENTIFIER, 'g', 9, 6),
-            new Token(Token::OPERATOR, '-', 9, 7),
-            new Token(Token::IDENTIFIER, 'e', 9, 8),
-            new Token(Token::END_OF_STATEMENT, ';', 9, 9),
-            new Token(Token::IDENTIFIER, 'test', 10, 1),
-            new Token(Token::OPERATOR, '=', 10, 6),
-            new Token(Token::OPENING_PAREN, '(', 10, 8),
-            new Token(Token::IDENTIFIER, 'a', 10, 9),
-            new Token(Token::OPERATOR, '==', 10, 11),
-            new Token(Token::IDENTIFIER, 'b', 10, 14),
-            new Token(Token::OPERATOR, '?', 10, 16),
-            new Token(Token::IDENTIFIER, 'c', 10, 18),
-            new Token(Token::OPERATOR, ':', 10, 20),
-            new Token(Token::IDENTIFIER, 'd', 10, 22),
-            new Token(Token::CLOSING_PAREN, ')', 10, 23),
-            new Token(Token::END_OF_STATEMENT, ';', 10, 24),
+            new token(token::IDENTIFIER, 'this', 1, 1),
+            new token(token::OPERATOR, '=', 1, 6),
+            new token(token::IDENTIFIER, 'that', 1, 8),
+            new token(token::OPERATOR, '*', 1, 13),
+            new token(token::IDENTIFIER, 'other_thing', 1, 15),
+            new token(token::END_OF_STATEMENT, ';', 1, 26),
+            new token(token::IDENTIFIER, 's1', 2, 1),
+            new token(token::OPERATOR, '=', 2, 4),
+            new token(token::STRING, 'single quoted string with a double quote " inside', 2, 6),
+            new token(token::END_OF_STATEMENT, ';', 2, 57),
+            new token(token::IDENTIFIER, 's2', 4, 1),
+            new token(token::OPERATOR, '=', 4, 4),
+            new token(token::STRING, 'double quoted string with a single quote \' inside', 4, 6),
+            new token(token::END_OF_STATEMENT, ';', 4, 57),
+            new token(token::IDENTIFIER, 's3', 5, 1),
+            new token(token::OPERATOR, '=', 5, 4),
+            new token(token::STRING, "string\nwith a newline", 5, 6),
+            new token(token::END_OF_STATEMENT, ';', 5, 30),
+            new token(token::IDENTIFIER, '_s4', 6, 1),
+            new token(token::OPERATOR, '=', 6, 5),
+            new token(token::STRING, "string with a real\nnewline", 6, 7),
+            new token(token::END_OF_STATEMENT, ';', 7, 9),
+            new token(token::IDENTIFIER, 'x', 8, 1),
+            new token(token::OPERATOR, '=', 8, 3),
+            new token(token::NUMBER, 2, 8, 5),
+            new token(token::OPERATOR, '*', 8, 6),
+            new token(token::IDENTIFIER, 'x', 8, 7),
+            new token(token::OPERATOR, '+', 8, 8),
+            new token(token::IDENTIFIER, 'z', 8, 9),
+            new token(token::END_OF_STATEMENT, ';', 8, 10),
+            new token(token::IDENTIFIER, 'f', 9, 1),
+            new token(token::OPERATOR, '=', 9, 3),
+            new token(token::NUMBER, 4, 9, 5),
+            new token(token::IDENTIFIER, 'g', 9, 6),
+            new token(token::OPERATOR, '-', 9, 7),
+            new token(token::IDENTIFIER, 'e', 9, 8),
+            new token(token::END_OF_STATEMENT, ';', 9, 9),
+            new token(token::IDENTIFIER, 'test', 10, 1),
+            new token(token::OPERATOR, '=', 10, 6),
+            new token(token::OPENING_PAREN, '(', 10, 8),
+            new token(token::IDENTIFIER, 'a', 10, 9),
+            new token(token::OPERATOR, '==', 10, 11),
+            new token(token::IDENTIFIER, 'b', 10, 14),
+            new token(token::OPERATOR, '?', 10, 16),
+            new token(token::IDENTIFIER, 'c', 10, 18),
+            new token(token::OPERATOR, ':', 10, 20),
+            new token(token::IDENTIFIER, 'd', 10, 22),
+            new token(token::CLOSING_PAREN, ')', 10, 23),
+            new token(token::END_OF_STATEMENT, ';', 10, 24),
         );
 
         $lexer = new lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $this->assertEquals($output, $lexer->get_tokens());
     }
 
     public function test_get_token_list_unicode() {
@@ -154,25 +103,25 @@ s = 'string with äöüéç…';
 t = join("", 'äöü', 'éçñ…');
 EOF;
         $output = array(
-            new Token(Token::IDENTIFIER, 's', 1, 1),
-            new Token(Token::OPERATOR, '=', 1, 3),
-            new Token(Token::STRING, 'string with äöüéç…', 1, 5),
-            new Token(Token::END_OF_STATEMENT, ';', 1, 25),
-            new Token(Token::IDENTIFIER, 't', 2, 1),
-            new Token(Token::OPERATOR, '=', 2, 3),
-            new Token(Token::IDENTIFIER, 'join', 2, 5),
-            new Token(Token::OPENING_PAREN, '(', 2, 9),
-            new Token(Token::STRING, '', 2, 10),
-            new Token(Token::ARG_SEPARATOR, ',', 2, 12),
-            new Token(Token::STRING, 'äöü', 2, 14),
-            new Token(Token::ARG_SEPARATOR, ',', 2, 19),
-            new Token(Token::STRING, 'éçñ…', 2, 21),
-            new Token(Token::CLOSING_PAREN, ')', 2, 27),
-            new Token(Token::END_OF_STATEMENT, ';', 2, 28),
+            new token(token::IDENTIFIER, 's', 1, 1),
+            new token(token::OPERATOR, '=', 1, 3),
+            new token(token::STRING, 'string with äöüéç…', 1, 5),
+            new token(token::END_OF_STATEMENT, ';', 1, 25),
+            new token(token::IDENTIFIER, 't', 2, 1),
+            new token(token::OPERATOR, '=', 2, 3),
+            new token(token::IDENTIFIER, 'join', 2, 5),
+            new token(token::OPENING_PAREN, '(', 2, 9),
+            new token(token::STRING, '', 2, 10),
+            new token(token::ARG_SEPARATOR, ',', 2, 12),
+            new token(token::STRING, 'äöü', 2, 14),
+            new token(token::ARG_SEPARATOR, ',', 2, 19),
+            new token(token::STRING, 'éçñ…', 2, 21),
+            new token(token::CLOSING_PAREN, ')', 2, 27),
+            new token(token::END_OF_STATEMENT, ';', 2, 28),
         );
 
         $lexer = new lexer($input);
-        $this->assertEquals($output, $lexer->get_token_list());
+        $this->assertEquals($output, $lexer->get_tokens());
     }
 
     public function test_get_token_list_2() {
@@ -184,31 +133,31 @@ EOF;
 EOF;
         // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 's1', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::STRING, "single quoted string with an escaped quote ' inside", 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 's_2', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::STRING, 'double quoted string with an escaped quote " inside', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '+', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPERATOR, '*', 0, 0),
-            new Token(Token::IDENTIFIER, 'd', 0, 0),
-            new Token(Token::OPERATOR, '/', 0, 0),
-            new Token(Token::IDENTIFIER, 'e', 0, 0),
-            new Token(Token::OPERATOR, '-', 0, 0),
-            new Token(Token::IDENTIFIER, 'f', 0, 0),
-            new Token(Token::OPERATOR, '%', 0, 0),
-            new Token(Token::IDENTIFIER, 'g', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 's1', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::STRING, "single quoted string with an escaped quote ' inside", 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 's_2', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::STRING, 'double quoted string with an escaped quote " inside', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPERATOR, '*', 0, 0),
+            new token(token::IDENTIFIER, 'd', 0, 0),
+            new token(token::OPERATOR, '/', 0, 0),
+            new token(token::IDENTIFIER, 'e', 0, 0),
+            new token(token::OPERATOR, '-', 0, 0),
+            new token(token::IDENTIFIER, 'f', 0, 0),
+            new token(token::OPERATOR, '%', 0, 0),
+            new token(token::IDENTIFIER, 'g', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -225,48 +174,48 @@ EOF;
 
         // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::PREFIX, '\\', 0, 0),
-            new Token(Token::IDENTIFIER, 'sin', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::NUMBER, 2, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::NUMBER, 3, 0, 0),
-            new Token(Token::IDENTIFIER, 'sqrt', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::NUMBER, 5, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::NUMBER, 4, 0, 0),
-            new Token(Token::IDENTIFIER, 'x', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '+', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'd', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '+', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPERATOR, '+', 0, 0),
-            new Token(Token::IDENTIFIER, 'd', 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::PREFIX, '\\', 0, 0),
+            new token(token::IDENTIFIER, 'sin', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::NUMBER, 2, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::NUMBER, 3, 0, 0),
+            new token(token::IDENTIFIER, 'sqrt', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::NUMBER, 5, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::NUMBER, 4, 0, 0),
+            new token(token::IDENTIFIER, 'x', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'd', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::IDENTIFIER, 'd', 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -282,34 +231,34 @@ EOF;
 
         // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::IDENTIFIER, 'sin', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::NUMBER, 2000, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::NUMBER, .0003, 0, 0),
-            new Token(Token::IDENTIFIER, 'sqrt', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::NUMBER, 500, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::NUMBER, 4, 0, 0),
-            new Token(Token::IDENTIFIER, 'ex', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '+', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::IDENTIFIER, 'sin', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::NUMBER, 2000, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::NUMBER, .0003, 0, 0),
+            new token(token::IDENTIFIER, 'sqrt', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::NUMBER, 500, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::NUMBER, 4, 0, 0),
+            new token(token::IDENTIFIER, 'ex', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -325,57 +274,57 @@ EOF;
 
         // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::OPENING_BRACE, '{', 0, 0),
-            new Token(Token::NUMBER, 1, 0, 0),
-            new Token(Token::OPERATOR, ':', 0, 0),
-            new Token(Token::NUMBER, 10, 0, 0),
-            new Token(Token::OPERATOR, ':', 0, 0),
-            new Token(Token::NUMBER, 2, 0, 0),
-            new Token(Token::CLOSING_BRACE, '}', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::STRING, 'c', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::STRING, 'd', 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'foo', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::IDENTIFIER, 'bar', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::IDENTIFIER, 'hello', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::IDENTIFIER, 'world', 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::NUMBER, 1, 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::NUMBER, 2, 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::NUMBER, 3, 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::STRING, 's', 0, 0),
-            new Token(Token::ARG_SEPARATOR, ',', 0, 0),
-            new Token(Token::STRING, 't', 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_BRACE, '{', 0, 0),
+            new token(token::NUMBER, 1, 0, 0),
+            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::NUMBER, 10, 0, 0),
+            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::NUMBER, 2, 0, 0),
+            new token(token::CLOSING_BRACE, '}', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::STRING, 'c', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::STRING, 'd', 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'foo', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::IDENTIFIER, 'bar', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::IDENTIFIER, 'hello', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::IDENTIFIER, 'world', 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::NUMBER, 1, 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::NUMBER, 2, 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::NUMBER, 3, 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::STRING, 's', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::STRING, 't', 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -391,40 +340,40 @@ EOF;
 
         // We are not testing the positions here.
         $output = array(
-            new Token(Token::IDENTIFIER, 'a', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '==', 0, 0),
-            new Token(Token::NUMBER, 1, 0, 0),
-            new Token(Token::OPERATOR, '?', 0, 0),
-            new Token(Token::NUMBER, 7, 0, 0),
-            new Token(Token::OPERATOR, ':', 0, 0),
-            new Token(Token::NUMBER, 3, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'b', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPENING_BRACKET, '[', 0, 0),
-            new Token(Token::IDENTIFIER, 'var', 0, 0),
-            new Token(Token::OPERATOR, '>', 0, 0),
-            new Token(Token::NUMBER, '1', 0, 0),
-            new Token(Token::CLOSING_BRACKET, ']', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
-            new Token(Token::IDENTIFIER, 'c', 0, 0),
-            new Token(Token::OPERATOR, '=', 0, 0),
-            new Token(Token::IDENTIFIER, 'thing', 0, 0),
-            new Token(Token::OPERATOR, '*', 0, 0),
-            new Token(Token::OPENING_PAREN, '(', 0, 0),
-            new Token(Token::IDENTIFIER, 'x', 0, 0),
-            new Token(Token::OPERATOR, '!=', 0, 0),
-            new Token(Token::NUMBER, 4, 0, 0),
-            new Token(Token::CLOSING_PAREN, ')', 0, 0),
-            new Token(Token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '==', 0, 0),
+            new token(token::NUMBER, 1, 0, 0),
+            new token(token::OPERATOR, '?', 0, 0),
+            new token(token::NUMBER, 7, 0, 0),
+            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::NUMBER, 3, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'b', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPENING_BRACKET, '[', 0, 0),
+            new token(token::IDENTIFIER, 'var', 0, 0),
+            new token(token::OPERATOR, '>', 0, 0),
+            new token(token::NUMBER, '1', 0, 0),
+            new token(token::CLOSING_BRACKET, ']', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
+            new token(token::IDENTIFIER, 'c', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::IDENTIFIER, 'thing', 0, 0),
+            new token(token::OPERATOR, '*', 0, 0),
+            new token(token::OPENING_PAREN, '(', 0, 0),
+            new token(token::IDENTIFIER, 'x', 0, 0),
+            new token(token::OPERATOR, '!=', 0, 0),
+            new token(token::NUMBER, 4, 0, 0),
+            new token(token::CLOSING_PAREN, ')', 0, 0),
+            new token(token::END_OF_STATEMENT, ';', 0, 0),
         );
 
-        $tokens = (new lexer($input))->get_token_list();
+        $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
             $this->assertEquals($output[$i]->type, $token->type);
             $this->assertEquals($output[$i]->value, $token->value);
@@ -444,7 +393,7 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
-            $tokens = $lexer->get_token_list();
+            $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
@@ -466,7 +415,7 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
-            $tokens = $lexer->get_token_list();
+            $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
@@ -512,7 +461,7 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
-            $tokens = $lexer->get_token_list();
+            $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
     }
@@ -550,18 +499,16 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
-            $tokens = $lexer->get_token_list();
+            $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
         $testcases = array(
-            array('input' => '"foo', 'output' => 'foo'),
-            array('input' => "'foo", 'output' => 'foo'),
+            array('input' => '"foo'),
+            array('input' => "'foo"),
         );
         foreach ($testcases as $case) {
-            $lexer = new lexer($case['input']);
             try {
-                $tokens = $lexer->get_token_list();
-                $this->assertEquals($case['output'], $tokens[0]->value);
+                $lexer = new lexer($case['input']);
             } catch (Exception $e) {
                 $this->assertEquals('1:4:unterminated string, started at row 1, column 1', $e->getMessage());
             }
@@ -569,7 +516,7 @@ EOF;
     }
 
     /**
-     * Test whether the read() function of the Tokenizer class correctly parses numbers.
+     * Test whether the read() function of the tokenizer class correctly parses numbers.
      */
     public function test_read_number() {
         $testcases = array(
@@ -577,8 +524,6 @@ EOF;
             array('input' => "\n\n123", 'output' => 123),
             array('input' => "321# testcomment", 'output' => 321),
             array('input' => '1a2b3c4d', 'output' => 1),
-            // FIXME: input is invalid and must trigger error
-            // array('input' => '5.a2.b3.c4.d', 'output' => 5),
             array('input' => '1234', 'output' => 1234),
             array('input' => '1234    ', 'output' => 1234),
             array('input' => ' 1234', 'output' => 1234),
@@ -608,8 +553,20 @@ EOF;
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
-            $tokens = $lexer->get_token_list();
+            $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
+        }
+
+        $testcases = array(
+            // Should be tokenized as 5. (number) - a2 (identifier) - . (unexpected!) and fail.
+            array('input' => '5.a2.b3.c4.d'),
+        );
+        foreach ($testcases as $case) {
+            try {
+                $lexer = new lexer($case['input']);
+            } catch (Exception $e) {
+                $this->assertEquals("1:5:unexpected input: '.'", $e->getMessage());
+            }
         }
     }
 
@@ -682,5 +639,4 @@ EOF;
             $this->assertEquals('3:5:shouldnotmovefarther', $e->getMessage());
         }
     }
-
 }

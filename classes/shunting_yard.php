@@ -75,6 +75,8 @@ class shunting_yard {
                 return 20;
             case '=':
                 return 10;
+            default:
+                return 0;
         }
     }
 
@@ -103,18 +105,21 @@ class shunting_yard {
             case '||':
                 return true;
             // The following operators are not associative at all, either
-            // because they are unary (like _ or ~ or !) or because associativity
-            // does not make sense for them.
+            // because they are unary (like _ or ~ or !).
             case '_':
             case '~':
             case '!':
+                return false;
+            // The following comparisons are not associative, because associativity
+            // does not make sense for them. We will still return true, because we want
+            // other operators with higher precedence to be flushed.
             case '<':
             case '>':
+            case '==':
             case '>=':
             case '<=':
             case '!=':
-            case '==':
-                return false;
+                return true;
             // In PHP, the ternary operator is not associative (it was left-associative before 8.0.0)
             // but many languages (e.g. JavaScript) define it to be right-associative which allows
             // for easy chaining, i.e. condition1 ? value1 : condition2 ? value2 : value 3.
@@ -151,8 +156,8 @@ class shunting_yard {
                 break;
             }
             $out[] = $head;
-            $head = prev($input);
             array_pop($input);
+            $head = end($input);
         }
         if ($poplast) {
             $tmp = array_pop($input);
@@ -191,10 +196,9 @@ class shunting_yard {
 
     /**
      * Flush all remaining operators (but not parens or functions) from the operator stack.
-     * FIXME: should probably flush functions as well...
      *
-     * @param array $opstack operator stack, will be modified
-     * @param array $output output queue, will be modified
+     * @param array &$opstack operator stack, will be modified
+     * @param array &$output output queue, will be modified
      * @return void
      */
     private static function flush_all_operators(array &$opstack, array &$output): void {
@@ -254,9 +258,9 @@ class shunting_yard {
             if (!is_null($lasttoken)) {
                 $lasttype = $lasttoken->type;
             }
-            // Unary + and - are possible after an operator and after an opening parenthesis.
+            // Unary operators (+, -, ~ and !) are possible after an operator and after an opening parenthesis.
             // Also, in order to correctly interpret arrays and function calls, we must allow
-            // unary + and - after an opening bracket and after a comma.
+            // unary operators after an opening bracket and after a comma.
             if (in_array($lasttype, [token::OPENING_PAREN, token::ARG_SEPARATOR, token::OPENING_BRACKET, token::OPERATOR])) {
                 $unarypossible = true;
             }
@@ -334,6 +338,7 @@ class shunting_yard {
                 case token::OPERATOR:
                     // First we check whether the operator could be unary:
                     // An unary + will be silently dropped, an unary - will be changed to negation.
+                    // The unary operators ! and ~ will be left unchanged, as they have no other meaning.
                     if ($unarypossible) {
                         if ($value === '+') {
                             // Jump straight to the next iteration of the loop with no further processing.
@@ -377,11 +382,6 @@ class shunting_yard {
                 // matching opening bracket.
                 case token::CLOSING_BRACKET:
                     self::flush_until_paren($opstack, token::OPENING_BRACKET, $output);
-                    $head = end($opstack);
-                    // This should not happen, because the parser already verified that all parens are balanced.
-                    if ($head === false) {
-                        self::die('syntax error: no matching [ found for this bracket', $token);
-                    }
                     $index = count($counters['arrayelements']);
                     // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
                     if ($index === 0) {
@@ -395,6 +395,9 @@ class shunting_yard {
                     // Pop the most recent array element counter. For %%arrayindex, we just check it's 1.
                     // For %%arraybuild, we don't check it, but add it to the output queue.
                     $numofelements = array_pop($counters['arrayelements']);
+                    // Fetch the operator stack's top element. There MUST be one, because we pushed a
+                    // sentinel token before the opening bracket.
+                    $head = end($opstack);
                     if ($head->value === '%%arrayindex') {
                         if ($numofelements !== 1) {
                             self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
@@ -414,9 +417,9 @@ class shunting_yard {
                 case token::CLOSING_PAREN:
                     self::flush_until_paren($opstack, token::OPENING_PAREN, $output);
                     $head = end($opstack);
-                    // This should not happen, because the parser already verified that all parens are balanced.
+                    // If the operator stack is empty, we are done here.
                     if ($head === false) {
-                        self::die('syntax error: no matching ( found for this parenthesis', $token);
+                        break;
                     }
                     if ($head->type === token::FUNCTION) {
                         // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
