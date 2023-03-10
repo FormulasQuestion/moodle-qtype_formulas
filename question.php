@@ -859,7 +859,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * Class to represent a question subpart, loaded from the question_answers table
  * in the database.
  *
- * @copyright  2012 Jean-Michel V�drine
+ * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {
