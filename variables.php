@@ -191,6 +191,58 @@ function fmod($x, $m) {
     return $x - $m * floor($x / $m);
 }
 
+/**
+ * Calculate the probability of exactly $x successful outcomes for
+ * $n trials under a binomial distribution with a probability of success
+ * of $p.
+ *
+ * @param int $n number of trials
+ * @param float $p probability of success for each trial
+ * @param int $x number of successful outcomes
+ *
+ * @return float probability for exactly $x successful outcomes
+ * @throws Exception
+ */
+function binomialpdf($n, $p, $x) {
+    // Probability must be 0 <= p <= 1.
+    if ($p < 0 || $p > 1) {
+        throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+    }
+    // Number of successful outcomes must be at least 0 and at most number of trials.
+    if ($x < 0 || $x > $n) {
+        throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+    }
+    return ncr($n, $x) * $p ** $x * (1 - $p) ** ($n - $x);
+}
+
+/**
+ * Calculate the probability of up to $x successful outcomes for
+ * $n trials under a binomial distribution with a probability of success
+ * of $p, known as the cumulative distribution function.
+ *
+ * @param int $n number of trials
+ * @param float $p probability of success for each trial
+ * @param int $x number of successful outcomes
+ *
+ * @return float probability for up to $x successful outcomes
+ * @throws Exception
+ */
+function binomialcdf($n, $p, $x) {
+    // Probability must be 0 <= p <= 1.
+    if ($p < 0 || $p > 1) {
+        throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+    }
+    // Number of successful outcomes must be at least 0 and at most number of trials.
+    if ($x < 0 || $x > $n) {
+        throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+    }
+    $res = 0;
+    for ($i = 0; $i <= $x; $i++) {
+        $res += binomialpdf($n, $p, $i);
+    }
+    return $res;
+}
+
 function npr($n, $r) {
     $n = (int)$n;
     $r = (int)$r;
@@ -410,7 +462,8 @@ class variables {
           array('log', 'round', 'atan2', 'fmod', 'pow', 'min', 'max', 'ncr', 'npr', 'gcd', 'lcm', 'sigfig', 'modinv')
         );
         $this->func_special = array_flip(
-          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly', 'normcdf', 'modpow')
+          array('fill', 'len', 'pick', 'sort', 'sublist', 'inv', 'map', 'sum', 'concat', 'join', 'str', 'diff', 'poly', 'normcdf',
+          'modpow', 'binomialpdf', 'binomialcdf')
         );
         $this->func_all = array_merge($this->func_const, $this->func_unary, $this->func_binary, $this->func_special);
         $this->binary_op_map = array_flip(
@@ -2110,6 +2163,8 @@ class variables {
 
                 // Functions that take three arguments.
                 case 'normcdf':
+                case 'binomialpdf':
+                case 'binomialcdf':
                 case 'modpow':
                     if (strlen($regs[6]) != 0 || strlen($regs[5]) == 0) {
                         return get_string('functiontakesthreeargs', 'qtype_formulas', $regs[2]);
