@@ -43,7 +43,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function formulation_and_controls(question_attempt $qa,
             question_display_options $options) {
-        global $CFG;
+        global $OUTPUT;
 
         $question = $qa->get_question();
 
@@ -51,7 +51,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // TODO: is this really necessary here ? If question is damaged it should have been detected before.
         if (count($question->textfragments) != $question->get_number_of_parts() + 1) {
-            notify('Error: Question is damaged, number of text fragments and number of question parts are not equal.');
+            $OUTPUT->notification(get_string('error_question_damaged', 'qtype_formulas'), 'error');
             return;
         }
 
