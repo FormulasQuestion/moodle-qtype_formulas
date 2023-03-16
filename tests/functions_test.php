@@ -534,6 +534,68 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * binomialpdf() test.
+     */
+    public function test_binomialpdf() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $qv->evaluate_assignments($v, 'a=binomialpdf(1, 1, 1);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
+        $testcases = [
+            [binomialpdf(1, 0, 1), 0],
+            [binomialpdf(1, 0, 0), 1],
+            [binomialpdf(1, 1, 1), 1],
+            [binomialpdf(1, 1, 0), 0],
+            [binomialpdf(3, 0.5, 0), 0.125],
+            [binomialpdf(3, 0.5, 1), 0.375],
+            [binomialpdf(3, 0.5, 2), 0.375],
+            [binomialpdf(3, 0.5, 3), 0.125],
+        ];
+        foreach ($testcases as $case) {
+            $this->assertEqualsWithDelta($case[1], $case[0], 1e-6);
+        }
+    }
+
+    /**
+     * binomialcdf() test.
+     */
+    public function test_binomialcdf() {
+        // Test if function is accepted and parsed.
+        $qv = new variables;
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $qv->evaluate_assignments($v, 'a=binomialcdf(1, 1, 1);');
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+
+        // Test if function works correctly.
+        $testcases = [
+            [binomialcdf(1, 0, 1), 1],
+            [binomialcdf(1, 0, 0), 1],
+            [binomialcdf(1, 1, 1), 1],
+            [binomialcdf(1, 1, 0), 0],
+            [binomialcdf(3, 0.5, 0), 0.125],
+            [binomialcdf(3, 0.5, 1), 0.5],
+            [binomialcdf(3, 0.5, 2), 0.875],
+            [binomialcdf(3, 0.5, 3), 1],
+        ];
+        foreach ($testcases as $case) {
+            $this->assertEqualsWithDelta($case[1], $case[0], 1e-6);
+        }
+    }
+
+    /**
      * Test number conversion functions decbin(), decoct(), octdec() and bindec()
      */
     public function test_number_conversions() {
