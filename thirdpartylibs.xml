@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>amd/src/tabulator.js</location>
+        <name>Tabulator</name>
+        <version>5.4</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>tabulator.css</location>
+        <name>Tabulator</name>
+        <version>5.4</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+</libraries>

@@ -6,11 +6,11 @@ Feature: Test importing Formulas questions
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname | email                |
-      | teacher1 | T1        | Teacher1 | teacher1@example.com |
+      | username |
+      | teacher1 |
     And the following "courses" exist:
-      | fullname | shortname | category |
-      | Course 1 | C1        | 0        |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
@@ -19,7 +19,7 @@ Feature: Test importing Formulas questions
 
   @javascript @_file_upload
   Scenario: import formulas question.
-    When I navigate to "Question bank > Import" in current page administration
+    When I am on the "Course 1" "core_question > course question import" page
     And I set the field "id_format_xml" to "1"
     And I upload "question/type/formulas/tests/fixtures/qtype_sample_formulas.xml" file to "Import" filemanager
     And I press "id_submitbutton"

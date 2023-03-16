@@ -85,7 +85,7 @@ functions and operators is given in the documentation.
 $string['varsglobal_link'] = 'https://moodleformulas.org/';
 // The language string for the display and flow options and common question parts settings.
 $string['mainq'] = 'Main question';
-$string['subqoptions'] = 'Extra options';
+$string['subqoptions'] = 'Unit settings';
 $string['choiceyes'] = 'Yes';
 $string['choiceno'] = 'No';
 
@@ -120,8 +120,8 @@ and their scope of visibility is limited to the part.';
 $string['answer'] = 'Answer*';
 $string['answercombinedunitmulti'] = 'Answer and unit for part {$a->part}';
 $string['answercombinedunitsingle'] = 'Answer and unit';
-$string['answercoordinatemulti'] = 'Answer for part {$a->part} and coordinate {$a->numanswer}';
-$string['answercoordinatesingle'] = 'Answer for coordinate {$a->numanswer}';
+$string['answercoordinatemulti'] = 'Answer field {$a->numanswer} for part {$a->part}';
+$string['answercoordinatesingle'] = 'Answer field {$a->numanswer}';
 $string['answermulti'] = 'Answer for part {$a->part}';
 $string['answersingle'] = 'Answer';
 $string['answerunitmulti'] = 'Unit for part {$a->part}';
@@ -143,7 +143,7 @@ range. Relative error cannot be used for algebraic answer type.
 For the precise definition of the relative error and absolute error when there is more than one answer field, see documentation.';
 $string['correctness_link'] = 'https://moodleformulas.org/';
 $string['correctnessexpert'] = 'Expert';
-$string['correctnesssimple'] = 'Simple';
+$string['correctnesssimple'] = 'Simplified mode';
 $string['relerror'] = 'Relative error';
 $string['abserror'] = 'Absolute error';
 $string['postunit'] = 'Unit';
@@ -179,9 +179,9 @@ $string['subqtext_help'] = 'Part text and answer fields places can be specified 
 
 <pre class="prettyprint">{_0}<br>{_1}<br>{_2}<br>...<br>{_u}</pre>
 
-The <tt> {_0}, {_1}, {_2} </tt> are the input fields for coordinates and <tt> {_u} </tt> is the input field for unit.
+The <tt> {_0}, {_1}, {_2} </tt> are the different input fields for values and <tt> {_u} </tt> is the input field for unit.
 
-All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one coordinate and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
+All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one answer field and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
 $string['feedback'] = 'Part general feedback';
 $string['feedback_help'] = 'This part feedback will be show to all students. It can include global and locals variables that will be replaced by their values';
 $string['incorrectfeedback'] = 'For any incorrect response';
@@ -190,16 +190,16 @@ $string['correctfeedback'] = 'For any correct response';
 $string['incorrectfeedback_help'] = 'This feedback will be show to students that don\'t get any mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['partiallycorrectfeedback_help'] = 'This feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
 $string['correctfeedback_help'] = 'This feedback will be show to students that get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
-$string['globaloptions'] = '[Global] - ';
 
 // The language string for the variables instantiation and preview.
 $string['checkvarshdr'] = 'Check variables instantiation';
 $string['instantiate'] = 'Instantiate';
-$string['numdataset'] = 'Number of dataset';
+$string['numdataset'] = 'Number of data sets';
 $string['renew'] = 'Update';
-$string['qtextpreview'] = 'Preview using dataset';
+$string['qtextpreview'] = 'Preview';
 $string['varsstatistics'] = 'Statistics';
-$string['varsdata'] = 'Instantiated dataset';
+$string['varsdata'] = 'Instantiated data sets';
+$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message:';
 
 // Errors message used by editing form's validation.
 $string['error_no_answer'] = 'At least one answer is required.';
@@ -254,6 +254,7 @@ $string['functiontakesonearg'] = 'The function {$a} must have exactly one argume
 $string['functiontakesoneortwoargs'] = 'The function {$a} must have either one or two arguments';
 $string['functiontakestwoargs'] = 'The function {$a} must have exactly two arguments';
 $string['functiontakesatleasttwo'] = 'The function {$a} must have at least two arguments';
+$string['functiontakesthreeargs'] = 'The function {$a} must have exactly three arguments';
 $string['unsupportedformulafunction'] = 'The function {$a} is not supported';
 
 // Strings for question settings.

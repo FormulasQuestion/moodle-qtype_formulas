@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,7 +37,7 @@ require_once($CFG->dirroot . '/question/engine/upgrade/tests/helper.php');
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_test_base {
+class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
     public function test_formulas_deferredfeedback_qsession2() {
         $quiz = (object) array(
             'id' => '1',
@@ -130,7 +131,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'ruleid' => '1',
                         'otherrule' => '',
                         'trialmarkseq' => '1, 0.8,',
-                        'subqtext' => 'If a car travel {s} m in {dt} s, what is the speed of the car?<br />{_0}{_u}<br />',
+                        'subqtext' => 'If a car travels {s} m in {dt} s, what is the speed of the car?<br />{_0}{_u}<br />',
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
@@ -153,7 +154,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'ruleid' => '1',
                         'otherrule' => '',
                         'trialmarkseq' => '1, 0.8,',
-                        'subqtext' => 'If a car travel {s} m in {dt} s, what is the speed of the car?<br /> {_0} {_u}<br />',
+                        'subqtext' => 'If a car travels {s} m in {dt} s, what is the speed of the car?<br /> {_0} {_u}<br />',
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
@@ -176,7 +177,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'ruleid' => '1',
                         'otherrule' => '',
                         'trialmarkseq' => '1, 0.8,',
-                        'subqtext' => 'If a car travel {s} m in {dt} s, what is the speed of the car?<br /> {_0} m/s<br />',
+                        'subqtext' => 'If a car travels {s} m in {dt} s, what is the speed of the car?<br /> {_0} m/s<br />',
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
@@ -199,7 +200,7 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
                         'ruleid' => '1',
                         'otherrule' => '',
                         'trialmarkseq' => '1, 0.8,',
-                        'subqtext' => 'If a car travel {s} m in {dt} s, what is the speed of the car?<br />speed = {_0} m/s<br />',
+                        'subqtext' => 'If a car travels {s} m in {dt} s, what is the speed of the car?<br />speed = {_0} m/s<br />',
                         'subqtextformat' => '0',
                         'feedback' => '',
                         'feedbackformat' => '0',
@@ -305,10 +306,10 @@ class qtype_formulas_attempt_upgrader_test extends question_attempt_upgrader_tes
             'flagged' => 0,
             'questionsummary' => '_ PLACEHOLDER OF ANSWER AND UNIT _:'
                     . 'This question shows different display methods of the answer and unit box.'
-                    . 'If a car travel {s} m in {dt} s, what is the speed of the car?
-            {_0}{_u}If a car travel {s} m in {dt} s, what is the speed of the car?
-            {_0} {_u}If a car travel {s} m in {dt} s, what is the speed of the car?
-            {_0} m/sIf a car travel {s} m in {dt} s, what is the speed of the car?
+                    . 'If a car travels {s} m in {dt} s, what is the speed of the car?
+            {_0}{_u}If a car travels {s} m in {dt} s, what is the speed of the car?
+            {_0} {_u}If a car travels {s} m in {dt} s, what is the speed of the car?
+            {_0} m/sIf a car travels {s} m in {dt} s, what is the speed of the car?
             speed = {_0} m/s (v=30;dt=3;)',
             'rightanswer' => '',
             'responsesummary' => '30m/s,40,m/s,30,40',

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<phpmd-baseline>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="backup/moodle1/lib.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle1/lib.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle2/backup_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle2/restore_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="db/upgradelib.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="question.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="question.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="question.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="question.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="question.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/questiontype_test.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="tests/variables_test.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/walkthrough_adaptive_test.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="variables.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="variables.php"/>
+</phpmd-baseline>

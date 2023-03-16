@@ -23,6 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qtype_formulas;
+use question_state;
+use test_question_maker;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,7 +42,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @copyright  2012 Jean-Michel Vedrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthrough_test_base {
+class walkthrough_adaptive_test extends walkthrough_test_base {
     /**
      * @return qtype_formulas_question the requested question object.
      */
@@ -49,7 +52,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
 
     public function test_test0_submit_right_first_time() {
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -95,7 +98,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
 
     public function test_test0_submit_wrong_submit_right() {
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -134,7 +137,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
     public function test_test0_submit_wrong_wrong_right() {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
@@ -184,7 +187,7 @@ class qtype_formulas_walkthrough_adaptive_test extends qtype_formulas_walkthroug
     public function test_test0_submit_wrong_same_wrong_right() {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
-        $q = $this->get_test_formulas_question('test0');
+        $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
 
         // Check the initial state.
