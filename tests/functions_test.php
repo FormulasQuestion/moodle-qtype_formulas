@@ -150,6 +150,8 @@ class functions_test extends \advanced_testcase {
             array(gcd(0, 0), 0),
             array(gcd(13, 13), 13),
             array(gcd(1, 0), 1),
+            array(gcd(10, 0), 10),
+            array(gcd(0, 10), 10),
             array(gcd(3, 2), 1),
             array(gcd(6, 3), 3),
             array(gcd(12, 9), 3),

@@ -220,14 +220,14 @@ function gcd($a, $b) {
     if ($a < 0) {
         $a = abs($a);
     }
-    if ($b < 0 ) {
+    if ($b < 0) {
         $b = abs($b);
     }
     if ($a == 0 && $b == 0) {
         return 0;
     }
-    if ($a == 0 xor $b == 0) {
-        return 1;
+    if ($a == 0 || $b == 0) {
+        return $a + $b;
     }
     if ($a == $b) {
         return $a;
