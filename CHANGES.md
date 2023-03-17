@@ -1,5 +1,10 @@
 # Changelog
 
+### 5.2.0 (2023-03-17)
+- new functions: binomialpdf() and binomialcdf()
+- bugfix: gcd() now gives correct result even if one argument is 0
+- internal: removed deprecated notify()
+
 ### 5.1.2 (2023-02-15)
 - bugfix: internal functions (e.g. sigfig) working with map() again
 
