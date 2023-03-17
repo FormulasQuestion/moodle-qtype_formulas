@@ -17,7 +17,7 @@ at the date of this writing. It was then upgraded to the new question engine int
 Jean-Michel Védrine.
 
 This version is compatible with Moodle 3.9 and newer. It has been tested with Moodle
-versions 3.11, 4.0 and 4.1. It has also been tested with PHP versions 7.4 and 8.0.
+versions 3.9, 3.11, 4.0 and 4.1. It has also been tested with PHP versions 7.4 and 8.0.
 
 
 ### Requirements
