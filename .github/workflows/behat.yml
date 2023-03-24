@@ -60,7 +60,7 @@ jobs:
 
       - name: Install plugins
         run: |
-          moodle-plugin-ci add-plugin moodlehq/moodle-local_moodleappbehat --branch integration
+          moodle-plugin-ci add-plugin moodlehq/moodle-local_moodleappbehat --branch main
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
 
       - name: Install moodle-plugin-ci
