@@ -278,9 +278,9 @@ EOF;
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::OPENING_BRACE, '{', 0, 0),
             new token(token::NUMBER, 1, 0, 0),
-            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::RANGE_SEPARATOR, ':', 0, 0),
             new token(token::NUMBER, 10, 0, 0),
-            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::RANGE_SEPARATOR, ':', 0, 0),
             new token(token::NUMBER, 2, 0, 0),
             new token(token::CLOSING_BRACE, '}', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
@@ -371,6 +371,47 @@ EOF;
             new token(token::NUMBER, 4, 0, 0),
             new token(token::CLOSING_PAREN, ')', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
+        );
+
+        $tokens = (new lexer($input))->get_tokens();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
+    }
+
+    public function test_get_token_list_7() {
+        $input = <<<EOF
+        a = { x == y ? x + 1 : x, 5:10:0.5, 10, 12:15 }
+EOF;
+
+        // We are not testing the positions here.
+        $output = array(
+            new token(token::IDENTIFIER, 'a', 0, 0),
+            new token(token::OPERATOR, '=', 0, 0),
+            new token(token::OPENING_BRACE, '{', 0, 0),
+            new token(token::IDENTIFIER, 'x', 0, 0),
+            new token(token::OPERATOR, '==', 0, 0),
+            new token(token::IDENTIFIER, 'y', 0, 0),
+            new token(token::OPERATOR, '?', 0, 0),
+            new token(token::IDENTIFIER, 'x', 0, 0),
+            new token(token::OPERATOR, '+', 0, 0),
+            new token(token::NUMBER, 1, 0, 0),
+            new token(token::OPERATOR, ':', 0, 0),
+            new token(token::IDENTIFIER, 'x', 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::NUMBER, 5, 0, 0),
+            new token(token::RANGE_SEPARATOR, ':', 0, 0),
+            new token(token::NUMBER, 10, 0, 0),
+            new token(token::RANGE_SEPARATOR, ':', 0, 0),
+            new token(token::NUMBER, 0.5, 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::NUMBER, 10, 0, 0),
+            new token(token::ARG_SEPARATOR, ',', 0, 0),
+            new token(token::NUMBER, 12, 0, 0),
+            new token(token::RANGE_SEPARATOR, ':', 0, 0),
+            new token(token::NUMBER, 15, 0, 0),
+            new token(token::CLOSING_BRACE, '}', 0, 0),
         );
 
         $tokens = (new lexer($input))->get_tokens();

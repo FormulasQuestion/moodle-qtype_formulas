@@ -224,28 +224,30 @@ class shunting_yard {
     }
 
 
-    private static function flush_range_separators(array &$opstack, array &$output): bool {
-        // FIXME: if head of opstack is not RANGE_SEPARATOR, there's nothing to do.
-        $parts = 1;
+    private static function flush_range_separators(array &$opstack, array &$output): void {
+        // If the opstack's top element is not a RANGE_SEPARATOR, there is nothing to
+        // do for us.
         $head = end($opstack);
         if ($head === false || $head->type !== token::RANGE_SEPARATOR) {
-            return false;
+            return;
         }
-        while ($head !== false) {
-            if ($head->type === token::RANGE_SEPARATOR) {
-                $parts++;
-                array_pop($opstack);
-                $head = end($opstack);
-            } else {
-                $head = prev($opstack);
-            }
+        // Save this RANGE_SEPARATOR token, in case of a syntax error.
+        $topmostcolon = $head;
+        $parts = 1;
+        // Since ranges are only allowed in sets and lists, there will always
+        // be a token on the opstack once all range separators are gone, so
+        // we can safely access the type attribute.
+        while ($head->type === token::RANGE_SEPARATOR) {
+            $parts++;
+            array_pop($opstack);
+            $head = end($opstack);
         }
-        if ($parts < 2 || $parts > 3) {
-            self::die("...FIXME... ($parts parts)", new token(0, '***'));
+        // Die with syntax error if there were more than two colons.
+        if ($parts > 3) {
+            self::die('syntax error in range definition', $topmostcolon);
         }
         $output[] = new token(token::NUMBER, $parts);
         $output[] = new token(token::OPERATOR, '%%rangebuild');
-        return true;
     }
 
     /**
@@ -287,7 +289,7 @@ class shunting_yard {
             // Unary operators (+, -, ~ and !) are possible after an operator and after an opening parenthesis.
             // Also, in order to correctly interpret arrays and function calls, we must allow
             // unary operators after an opening bracket and after a comma.
-            if (in_array($lasttype, [token::OPENING_PAREN, token::ARG_SEPARATOR, token::OPENING_BRACKET, token::OPERATOR])) {
+            if (in_array($lasttype, [token::OPENING_PAREN, token::ARG_SEPARATOR, token::OPENING_BRACKET, token::OPERATOR, token::RANGE_SEPARATOR])) {
                 $unarypossible = true;
             }
             // Insert inplicit multiplication sign, if
@@ -343,28 +345,21 @@ class shunting_yard {
                 // Also, we check whether this bracket means the start of a new array or
                 // rather an index to a variable, e.g. a[1].
                 case token::OPENING_BRACKET:
-                    // By default, let's assume we are building a new array, unless the parser marked
-                    // the opening bracket as '[r' signalling we are building a range. In that case,
-                    // we use a different sentinel and change the bracket back to its original value.
-                    // FIXME: after allowing mixed usage of range and elements, this must be removed
-                    /*if ($value === '[r') {
-                        $sentinel = new token(token::OPERATOR, '%%rangebuild', $token->row, $token->column);
-                        $token->value = '[';
-                    } else {
-                    }*/
-                    // Push the opening bracket to the output queue. It will mark the start of the
-                    // list during evaluation.
-                    $output[] = $token;
-                    // FIXME: Comment w.r.t. sentinel token on opstack
+                    // By default, let's assume we are building a new array.
                     $sentinel = new token(token::OPERATOR, '%%arraybuild', $token->row, $token->column);
-                    // An index is possible if the last token was a variable, the closing bracket
-                    // of an array (or other index, e.g. for a multi-dimensional array) or the closing
+                    // If the last token was a variable, the closing bracket of an array
+                    // (or another index, e.g. for a multi-dimensional array) or the closing
                     // parenthesis of a function call which might return an array. We cannot reliably
                     // know whether the parenthesis really comes from a function, but if it does not,
                     // the user will run into an evaluation error later.
                     if (in_array($lasttype, [token::VARIABLE, token::CLOSING_BRACKET, token::CLOSING_PAREN])) {
                         $sentinel->value = '%%arrayindex';
                     }
+                    // Push the opening bracket to the output queue. During evaluation, this will be used
+                    // in order to find the start of the list. For indexation, it is not necessary, but will
+                    // allow to verify that there is only one index, e.g. not a[1,2].
+                    $output[] = $token;
+                    // Push the sentinel and the opening bracket to the opstack for later.
                     $opstack[] = $sentinel;
                     $opstack[] = $token;
                     $separatortype[] = 'arrayelements';
@@ -437,15 +432,14 @@ class shunting_yard {
                     if ($lasttype !== token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
                     }
-                    // Pop the most recent array element counter. For %%arrayindex, we just check it's 1.
-                    // For %%arraybuild, we don't check it, but add it to the output queue.
-                    // FIXME: we do no longer added to output queue -> change comment
+                    // Pop the most recent array element counter. For %%arrayindex, we'll later check it's 1.
                     // FIXME: probably no need to check count === 1, because with new implementation,
                     // this can be done during evaluation.
                     $numofelements = array_pop($counters['arrayelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
                     $head = end($opstack);
+                    // FIXME: refactor this part
                     if ($head->value === '%%arrayindex') {
                         if ($numofelements !== 1) {
                             self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
@@ -484,7 +478,7 @@ class shunting_yard {
                     $numofelements = array_pop($counters['setelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
-                    // FIXME: update comment
+                    // FIXME: update comment (??)
                     $head = end($opstack);
                     if ($head->value !== '%%setbuild') {
                         self::die('syntax error: unknown parse error', $token);
@@ -538,7 +532,6 @@ class shunting_yard {
                 case token::RANGE_SEPARATOR:
                     self::flush_all_operators($opstack, $output);
                     $opstack[] = $token;
-                    print("\n\n range separator");
                     break;
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
                 // marker.
