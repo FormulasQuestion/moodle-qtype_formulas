@@ -27,7 +27,6 @@ namespace qtype_formulas;
 use Exception;
 
 class parser_test extends \advanced_testcase {
-
     /**
      * @dataProvider provide_simple_expressions
      */
@@ -68,6 +67,29 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement));
     }
 
+    /**
+     * @dataProvider provide_arrays
+     */
+    public function test_arrays($expected, $input): void {
+        $lexer = new lexer($input);
+        $parser = new parser($lexer->get_tokens(), true);
+        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        self::assertEquals($expected, implode(',', $statement));
+    }
+
+    public function provide_arrays(): array {
+        return [
+            'basic' => ['[,1,2,3,4,5,%%arraybuild', '[1,2,3,4,5]'],
+            'range without step' => ['[,1,10,2,%%rangebuild,%%arraybuild', '[1:10]'],
+            'range with step' => ['[,1,10,0.5,3,%%rangebuild,%%arraybuild', '[1:10:0.5]'],
+            'ranges and elements' => ['[,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%arraybuild', '[1,5:6:0.1,100,200:300,5]'],
+            'nested' => ['[,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%arraybuild', '[[1:10],[20:30],[40:50:2]]'],
+            'multiple ranges' => ['[,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%arraybuild', '[1:10,15:50:5,60:70:0.5,100:110,0:-10:-1]'],
+            'range with step, negatives' => ['[,1,_,10,_,0.5,_,3,%%rangebuild,%%arraybuild', '[-1:-10:-0.5]'],
+            'range with step, composed expressions' => ['[,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%arraybuild', '[1+sqrt(3):10+sin(5):1/5]'],
+        ];
+    }
+
     public function provide_ternary_expressions(): array {
         return [
             'basic' => ['1,5,==,?,2,:,3,%%ternary', '1 == 5 ? 2 : 3'],
@@ -88,7 +110,7 @@ class parser_test extends \advanced_testcase {
             'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
             'function in function' => ['2,1,sqrt,2,/,1,asin', 'asin(sqrt(2)/2)'],
             'operation in function' => ['1,2,3,*,+,4,5,**,-,3,2,round', 'round(1+2*3-4**5,3)'],
-            'function with array' => ['1,2,3,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
+            'function with array' => ['[,1,2,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
         ];
     }
 
@@ -157,16 +179,25 @@ class parser_test extends \advanced_testcase {
         $input = 'a = sin(2)';
         $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
         $input = 'a = \sin(2)';
+        $input = 'a = 1?a:';
         $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-        $input = 'a = [1:-5:-1]';
         $input = 'a = sin(sin(4),cos(5))';
+        $input = 'a = {1,-5,-3,2}';
+        $input = 'a = [1:-5:-1]';
+        $input = 'a = {1:-5:-1,9}';
+        $input = 'a = 5:4';
+        $input = 'a = {5:10:2,20,30:40:.5}';
+        $input = 'a = [5:10:2,20,30:40:.5]';
+        $input = '{3:5:0.5,10:15:0.5,1:3:4}';
+        $input = '{[1,2], [3,4]}';
+
 
         $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($lexer->get_tokens(), true);
         foreach ($parser->statements as $statement) {
             $output = shunting_yard::infix_to_rpn($statement);
-            //print_r(array_map(function($el) { return $el->value; }, $output));
+            print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
     }
