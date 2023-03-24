@@ -28,8 +28,11 @@ namespace qtype_formulas;
 /*
 
 TODO:
-* ~ is unary -> check not used in binary context
+* ~ is unary -> check not used in binary context (must not be used between two value tokens)
 * same for !
+
+* revisit splitting of statements?
+
 * pi() --> translate to π with no function call
 * translate ^ to ** in certain contexts (backward compatibility)
 * variables stack
@@ -183,6 +186,10 @@ class parser {
                 if ($type === token::IDENTIFIER) {
                     $currenttoken->type = token::VARIABLE;
                 }
+                // The last token must not be an OPERATOR, a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR.
+                if (in_array($type, [token::OPERATOR, token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR])) {
+                    $this->die("syntax error: unexpected end of expression after '$value'", $currenttoken);
+                }
                 break;
             }
             $nexttype = $nexttoken->type;
@@ -213,9 +220,85 @@ class parser {
                 }
             }
 
+            // If we have a RANGE_SEPARATOR (:) token, we look ahead until we find a closing brace
+            // or closing bracket, because ranges must not be used outside of sets or lists.
+            // As we know all parentheses are balanced, it is enough to look for the closing one.
+            if ($type === token::RANGE_SEPARATOR) {
+                $lookahead = $nexttoken;
+                $i = 1;
+                while ($lookahead !== self::EOF) {
+                    if (in_array($lookahead->type, [token::CLOSING_BRACE, token::CLOSING_BRACKET])) {
+                        break;
+                    }
+                    $lookahead = $this->peek($i);
+                    $i++;
+                }
+                // If we had to go all the way until the end of the token list, the range was not
+                // used inside a list or a set.
+                if ($lookahead === self::EOF) {
+                    $this->die('syntax error: ranges can only be used in {} or []', $currenttoken);
+                }
+            }
+
+            // FIXME: deactivated
+            // After OPENING_BRACKET or OPENING_BRACE, do not allow ? and change all : OPERATOR to ARG_SEPARATOR
+            // exception: VARIABLE + OPENING_BRACKET + expression + CLOSING_BRACKET -> access of array element
+            // similar: FUNCTION ... CLOSING_PAREN + OPENING_BRACKET + expression + CLOSING_BRACKET
+            // first colon -> %%to
+            // colon after colon -> %%step
+            // OPENING_{BRACE,BRACKET,PAREN} or ARG_SEPARATOR -> reset counter
+            if (in_array($type*0, [token::OPENING_BRACE, token::OPENING_BRACKET])) {
+                $lookahead = $nexttoken;
+                $i = 1;
+                // Look ahead until we find the matching closing parenthesis. We can safely assume it
+                // is there, because the parser checks for unbalanced/unmatched parens very early.
+                while (($lookahead->type ^ $type) === (token::ANY_CLOSING_PAREN | token::ANY_OPENING_PAREN)) {
+                    $latype = $lookahead->type;
+                    $lavalue = $lookahead->value;
+                    // Ternary operator is not allowed inside braces, if there is a : token , we
+                    // change its type to ARG_SEPARATOR. If we see a ? operator, we die with an error
+                    // message.
+                    if ($latype === token::OPERATOR && $lavalue === ':') {
+                        $lookahead->value = ':';
+                        $lookahead->type = token::ARG_SEPARATOR;
+                    } else if ($latype === token::OPERATOR && $lavalue === '?') {
+                        $this->die('syntax error: ternary operator not allowed in sets', $lookahead);
+                    }
+                    $lookahead = $this->peek($i);
+                    $i++;
+                }
+            }
+
+            // An opening brace starts the definition of a set. This needs some preparation work
+            // to be done.
+            // FIXME: deactivated
+            if ($type === token::OPENING_BRACE * 0) {
+                $lookahead = $nexttoken;
+                $i = 1;
+                // Look ahead until we find the closing brace. We can safely assume there is one, because
+                // the parser checks for unbalanced/unmatched parens very early.
+                while ($lookahead->type !== token::CLOSING_BRACE) {
+                    $latype = $lookahead->type;
+                    $lavalue = $lookahead->value;
+                    // Ternary operator is not allowed inside braces, if there is a : token , we
+                    // change its type to ARG_SEPARATOR. If we see a ? operator, we die with an error
+                    // message.
+                    if ($latype === token::OPERATOR && $lavalue === ':') {
+                        $lookahead->value = ':';
+                        $lookahead->type = token::ARG_SEPARATOR;
+                    } else if ($latype === token::OPERATOR && $lavalue === '?') {
+                        $this->die('syntax error: ternary operator not allowed in sets', $lookahead);
+                    }
+                    $lookahead = $this->peek($i);
+                    $i++;
+                }
+
+            }
+
             // We distinguish between normal arrays and a fixed-range interval as a short form
             // for e.g. [1,2,3,...,9] by writing [1:10]. This has to be prepared here.
-            if ($type === token::OPENING_BRACKET) {
+            // FIXME deactivated
+            if ($type === token::OPENING_BRACKET * 0) {
                 // We do a simple analysis: any range MUST contain one or two colons and one more number
                 // than colons. It MUST NOT contain other operators than an (unary) minus and MUST NOT
                 // contain strings or argument separators. Our guess might be wrong, but then we just let
@@ -257,10 +340,35 @@ class parser {
                 }
             }
 
+            // Check syntax for ternary operators:
             // We do not currently allow the short ternary operator aka "Elvis operator" (a ?: b)
-            // which is a short form for (a ? a : b).
-            if ($type === token::OPERATOR && $value === '?' && $nexttype === token::OPERATOR && $nextvalue === ':') {
-                $this->die('syntax error: ternary operator missing middle part', $nexttoken);
+            // which is a short form for (a ? a : b). Also, if we do not find a corresponding : part,
+            // we die with a syntax error.
+            if ($type === token::OPERATOR && $value === '?') {
+                if ($nexttype === token::OPERATOR && $nextvalue === ':') {
+                    $this->die('syntax error: ternary operator missing middle part', $nexttoken);
+                }
+                $latype = $nexttype;
+                $lavalue = $nextvalue;
+                $i = 1;
+                // Look ahead until we find the corresponding : part.
+                while ($latype !== token::OPERATOR && $lavalue !== ':') {
+                    // We have a syntax error, if...
+                    // - we come to another ?
+                    // - we come to an END_OF_STATEMENT marker
+                    // - we reach the end of the token list
+                    // before having seen the : part.
+                    $anotherquestionmark = ($latype === token::OPERATOR &&  $lavalue === '?');
+                    $endofstatement = ($latype === token::END_OF_STATEMENT);
+                    $endoflist = ($i + $this->position >= $this->count);
+                    if ($anotherquestionmark || $endofstatement || $endoflist) {
+                        $this->die('syntax error: missing : part for ternary operator', $currenttoken);
+                    }
+                    $lookahead = $this->peek($i);
+                    $latype = $lookahead->type;
+                    $lavalue = $lookahead->value;
+                    $i++;
+                }
             }
 
             // We do not allow two subsequent numbers, two subsequent strings or a string following a number
@@ -277,6 +385,15 @@ class parser {
             $twocommas = ($type === token::ARG_SEPARATOR && $nexttype === token::ARG_SEPARATOR);
             if ($parenpluscomma || $commaplusparen || $twocommas) {
                 $this->die('syntax error: invalid use of separator token (,)', $nexttoken);
+            }
+
+            // Similarly, We do not allow to subsequent colons, a colon following an opening parenthesis,
+            // or a colon followed by a closing parenthesis.
+            $parenpluscolon = ($type & token::ANY_OPENING_PAREN) && $nexttype === token::RANGE_SEPARATOR;
+            $colonplusparen = $type === token::RANGE_SEPARATOR && ($nexttype & token::ANY_CLOSING_PAREN);
+            $twocolons = ($type === token::RANGE_SEPARATOR && $nexttype === token::RANGE_SEPARATOR);
+            if ($parenpluscolon || $colonplusparen || $twocolons) {
+                $this->die('syntax error: invalid use of range separator (:)', $nexttoken);
             }
 
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
