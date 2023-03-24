@@ -35,6 +35,7 @@ class token {
                  CLOSING_PAREN & ANY_CLOSING_PAREN = ANY_CLOSING_PAREN
                  CLOSING_PAREN & OPEN_OR_CLOSE_PAREN = OPEN_OR_CLOSE_PAREN
                  CLOSING_PAREN & CLOSING_BRACKET = ANY_PAREN | ANY_CLOSING_PAREN
+                 OPENING_* ^ CLOSING_COUNTER_PART = ANY_CLOSING_PAREN | ANY_OPENING_PAREN
     */
     const ANY_PAREN = 8;
     const ANY_OPENING_PAREN = 16;
@@ -59,10 +60,11 @@ class token {
     const CONSTANT = 8192;
     const OPERATOR = 16384;
     const ARG_SEPARATOR = 32768;
-    const END_OF_STATEMENT = 65536;
-    const RESERVED_WORD = 131072;
-    const LIST = 262144;
-    const SET = 524288;
+    const RANGE_SEPARATOR = 65536;
+    const END_OF_STATEMENT = 131072;
+    const RESERVED_WORD = 262144;
+    const LIST = 524288;
+    const SET = 1048576;
 
     /** @var mixed the token's content */
     public $value;

@@ -33,6 +33,9 @@ class lexer {
     /** @var token[] list of all tokens in the input stream */
     private $tokens = [];
 
+    /** @var boolean whether we are in the middle of a ternary operator */
+    private $pendingternary = false;
+
     /**
      * Constructor
      *
@@ -108,8 +111,24 @@ class lexer {
         if (preg_match('/[_A-Za-z]/', $currentchar)) {
             return $this->read_identifier();
         }
+        // Unless we are in the middle of a ternary operator, we treat : as a RANGE_SEPARATOR.
+        if ($currentchar === ':' && !$this->pendingternary) {
+            return $this->read_single_char_token(token::RANGE_SEPARATOR);
+        }
         // Operators always start with specific characters and may be up to two characters long.
         if (preg_match('/[-+*\/%=&|~^<>!?:]/', $currentchar)) {
+            // After a ? operator, we expect a : to finish the ternary operator.
+            // Note: In case of a syntax error, this flag might remain set even after the end
+            // of a statement and we could therefore wrongfully interpret a : as an operator.
+            // We don't mind, because bad syntax of a ternary operator will lead to a syntax error
+            // anyway.
+            if ($currentchar === '?') {
+                $this->pendingternary = true;
+            }
+            // After a : operator, the ternary operator is no longer pending.
+            if ($currentchar === ':') {
+                $this->pendingternary = false;
+            }
             return $this->read_operator();
         }
         // There are some single-character tokens...

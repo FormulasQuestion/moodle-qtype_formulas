@@ -17,6 +17,8 @@
 namespace qtype_formulas;
 use Error;
 
+// FIXME / TODO: syntax error for nested sets and usage of set in array
+
 /**
  * Helper class implementing Dijkstra's shunting yard algorithm.
  *
@@ -124,7 +126,6 @@ class shunting_yard {
             // but many languages (e.g. JavaScript) define it to be right-associative which allows
             // for easy chaining, i.e. condition1 ? value1 : condition2 ? value2 : value 3.
             case '?':
-                return false;
             case ':':
                 return false;
         }
@@ -222,6 +223,31 @@ class shunting_yard {
         }, $output, true, true);
     }
 
+
+    private static function flush_range_separators(array &$opstack, array &$output): bool {
+        // FIXME: if head of opstack is not RANGE_SEPARATOR, there's nothing to do.
+        $parts = 1;
+        $head = end($opstack);
+        if ($head === false || $head->type !== token::RANGE_SEPARATOR) {
+            return false;
+        }
+        while ($head !== false) {
+            if ($head->type === token::RANGE_SEPARATOR) {
+                $parts++;
+                array_pop($opstack);
+                $head = end($opstack);
+            } else {
+                $head = prev($opstack);
+            }
+        }
+        if ($parts < 2 || $parts > 3) {
+            self::die("...FIXME... ($parts parts)", new token(0, '***'));
+        }
+        $output[] = new token(token::NUMBER, $parts);
+        $output[] = new token(token::OPERATOR, '%%rangebuild');
+        return true;
+    }
+
     /**
      * Flush everything from the operator stack to the output queue.
      *
@@ -246,7 +272,7 @@ class shunting_yard {
     public static function infix_to_rpn(array $tokens): array {
         $output = [];
         $opstack = [];
-        $counters = ['functionargs' => [], 'arrayelements' => []];
+        $counters = ['functionargs' => [], 'arrayelements' => [], 'setelements' => []];
         $separatortype = [];
         $lasttoken = null;
         $lasttype = null;
@@ -292,8 +318,21 @@ class shunting_yard {
                         self::die('unexpected token: ,', $token);
                     }
                     self::flush_all_operators($opstack, $output);
+                    self::flush_range_separators($opstack, $output);
                     $index = count($counters[$mostrecent]);
                     ++$counters[$mostrecent][$index - 1];
+                    break;
+                // Opening brace introduces definition of a set (for random variables) or an
+                // algebraic variable (in general context).
+                case token::OPENING_BRACE:
+                    // Push the opening brace to the output queue. It will mark the start of the
+                    // set during evaluation.
+                    $output[] = $token;
+                    $sentinel = new token(token::OPERATOR, '%%setbuild', $token->row, $token->column);
+                    $opstack[] = $sentinel;
+                    $opstack[] = $token;
+                    $separatortype[] = 'setelements';
+                    $counters['setelements'][] = 0;
                     break;
                 // Opening parenthesis goes straight to the operator stack.
                 case token::OPENING_PAREN:
@@ -307,12 +346,17 @@ class shunting_yard {
                     // By default, let's assume we are building a new array, unless the parser marked
                     // the opening bracket as '[r' signalling we are building a range. In that case,
                     // we use a different sentinel and change the bracket back to its original value.
-                    if ($value === '[r') {
+                    // FIXME: after allowing mixed usage of range and elements, this must be removed
+                    /*if ($value === '[r') {
                         $sentinel = new token(token::OPERATOR, '%%rangebuild', $token->row, $token->column);
                         $token->value = '[';
                     } else {
-                        $sentinel = new token(token::OPERATOR, '%%arraybuild', $token->row, $token->column);
-                    }
+                    }*/
+                    // Push the opening bracket to the output queue. It will mark the start of the
+                    // list during evaluation.
+                    $output[] = $token;
+                    // FIXME: Comment w.r.t. sentinel token on opstack
+                    $sentinel = new token(token::OPERATOR, '%%arraybuild', $token->row, $token->column);
                     // An index is possible if the last token was a variable, the closing bracket
                     // of an array (or other index, e.g. for a multi-dimensional array) or the closing
                     // parenthesis of a function call which might return an array. We cannot reliably
@@ -328,7 +372,6 @@ class shunting_yard {
                     break;
                 // Function name goes straight to the operator stack. At the same time,
                 // we must set up a new function argument counter.
-                // FIXME: function call will be done in the evaluator.
                 case token::FUNCTION:
                     $opstack[] = $token;
                     $separatortype[] = 'functionargs';
@@ -381,9 +424,11 @@ class shunting_yard {
                 // Closing bracket means we flush pending operators until we get to the
                 // matching opening bracket.
                 case token::CLOSING_BRACKET:
+                    self::flush_all_operators($opstack, $output);
+                    self::flush_range_separators($opstack, $output);
                     self::flush_until_paren($opstack, token::OPENING_BRACKET, $output);
                     $index = count($counters['arrayelements']);
-                    // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
+                    // Increase array element counter, unless closing bracket directly follows opening bracket.
                     if ($index === 0) {
                         self::die(
                             'unknown error: there should be an array element counter in place! please file a bug report.', $token
@@ -394,6 +439,9 @@ class shunting_yard {
                     }
                     // Pop the most recent array element counter. For %%arrayindex, we just check it's 1.
                     // For %%arraybuild, we don't check it, but add it to the output queue.
+                    // FIXME: we do no longer added to output queue -> change comment
+                    // FIXME: probably no need to check count === 1, because with new implementation,
+                    // this can be done during evaluation.
                     $numofelements = array_pop($counters['arrayelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
@@ -403,11 +451,45 @@ class shunting_yard {
                             self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
                         }
                     } else if (in_array($head->value, ['%%arraybuild', '%%rangebuild'])) {
-                        $output[] = new token(token::NUMBER, $numofelements);
+                        //$output[] = new token(token::NUMBER, $numofelements);
                     } else {
                         self::die('syntax error: unknown parse error', $token);
                     }
                     // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
+                    $output[] = array_pop($opstack);
+                    // Remove last separatortype.
+                    array_pop($separatortype);
+                    break;
+                // Closing brace means we flush pending operators until we get to the
+                // matching opening brace.
+                case token::CLOSING_BRACE:
+                    // Flush pending operators. This will stop at the last range separator (:)
+                    // or at the opening brace token.
+                    self::flush_all_operators($opstack, $output);
+                    // If we have a pending range, we need to terminate it now.
+                    self::flush_range_separators($opstack, $output);
+                    // Flush remaining stuff, if any.
+                    self::flush_until_paren($opstack, token::OPENING_BRACE, $output);
+                    $index = count($counters['setelements']);
+                    // Increase set element counter, unless closing brace directly follows opening brace.
+                    if ($index === 0) {
+                        self::die(
+                            'unknown error: there should be a set element counter in place! please file a bug report.', $token
+                        );
+                    }
+                    if ($lasttype !== token::OPENING_BRACE) {
+                        ++$counters['setelements'][$index - 1];
+                    }
+                    // Pop the most recent set element counter and add it to the output queue.
+                    $numofelements = array_pop($counters['setelements']);
+                    // Fetch the operator stack's top element. There MUST be one, because we pushed a
+                    // sentinel token before the opening bracket.
+                    // FIXME: update comment
+                    $head = end($opstack);
+                    if ($head->value !== '%%setbuild') {
+                        self::die('syntax error: unknown parse error', $token);
+                    }
+                    // Move the pseudo-token %%setbuild to the output queue.
                     $output[] = array_pop($opstack);
                     // Remove last separatortype.
                     array_pop($separatortype);
@@ -447,6 +529,16 @@ class shunting_yard {
                 // No token should have the general IDENTIFIER type anymore.
                 case token::IDENTIFIER:
                     self::die("syntax error: did not expect to see an unclassified identifier: $value", $token);
+                    break;
+
+                // If we see a range separator (:), we flush all pending operators and add the
+                // token to the operator stack. Note: as the range separator must not be used
+                // outside of sets or lists, flushing operators will stop -- at latest -- when
+                // we get to the opening bracket or brace.
+                case token::RANGE_SEPARATOR:
+                    self::flush_all_operators($opstack, $output);
+                    $opstack[] = $token;
+                    print("\n\n range separator");
                     break;
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
                 // marker.
