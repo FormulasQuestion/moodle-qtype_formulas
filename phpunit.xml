@@ -15,7 +15,6 @@
         stopOnSkipped="false"
         beStrictAboutTestsThatDoNotTestAnything="false"
         beStrictAboutOutputDuringTests="true"
-        testSuiteLoaderClass="phpunit_autoloader"
         >
 
     <php>
