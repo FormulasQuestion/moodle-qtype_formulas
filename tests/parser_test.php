@@ -24,7 +24,6 @@
  */
 
 namespace qtype_formulas;
-use Exception;
 
 class parser_test extends \advanced_testcase {
     /**
@@ -77,16 +76,59 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement));
     }
 
+    /**
+     * @dataProvider provide_sets
+     */
+    public function test_sets($expected, $input): void {
+        $lexer = new lexer($input);
+        $parser = new parser($lexer->get_tokens(), true);
+        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        self::assertEquals($expected, implode(',', $statement));
+    }
+
+    public function provide_sets(): array {
+        return [
+            'basic' => ['{,1,2,3,4,5,%%setbuild', '{1,2,3,4,5}'],
+            'range without step' => ['{,1,10,2,%%rangebuild,%%setbuild', '{1:10}'],
+            'range with step' => ['{,1,10,0.5,3,%%rangebuild,%%setbuild', '{1:10:0.5}'],
+            'ranges and elements' => [
+                '{,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%setbuild',
+                '{1,5:6:0.1,100,200:300,5}'
+            ],
+            'array in set' => [
+                '{,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%setbuild',
+                '{[1:10],[20:30],[40:50:2]}'
+            ],
+            'multiple ranges' => ['{,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%setbuild', '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}'],
+            'range with step, negatives' => ['{,1,_,10,_,0.5,_,3,%%rangebuild,%%setbuild', '{-1:-10:-0.5}'],
+            'range with step, composed expressions' => [
+                '{,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%setbuild',
+                '{1+sqrt(3):10+sin(5):1/5}'
+            ],
+        ];
+    }
     public function provide_arrays(): array {
         return [
             'basic' => ['[,1,2,3,4,5,%%arraybuild', '[1,2,3,4,5]'],
             'range without step' => ['[,1,10,2,%%rangebuild,%%arraybuild', '[1:10]'],
             'range with step' => ['[,1,10,0.5,3,%%rangebuild,%%arraybuild', '[1:10:0.5]'],
-            'ranges and elements' => ['[,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%arraybuild', '[1,5:6:0.1,100,200:300,5]'],
-            'nested' => ['[,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%arraybuild', '[[1:10],[20:30],[40:50:2]]'],
-            'multiple ranges' => ['[,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%arraybuild', '[1:10,15:50:5,60:70:0.5,100:110,0:-10:-1]'],
+            'ranges and elements' => [
+                '[,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%arraybuild',
+                '[1,5:6:0.1,100,200:300,5]'
+            ],
+            'nested' => [
+                '[,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%arraybuild',
+                '[[1:10],[20:30],[40:50:2]]'
+            ],
+            'multiple ranges' => [
+                '[,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%arraybuild',
+                '[1:10,15:50:5,60:70:0.5,100:110,0:-10:-1]'
+            ],
             'range with step, negatives' => ['[,1,_,10,_,0.5,_,3,%%rangebuild,%%arraybuild', '[-1:-10:-0.5]'],
-            'range with step, composed expressions' => ['[,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%arraybuild', '[1+sqrt(3):10+sin(5):1/5]'],
+            'range with step, composed expressions' => [
+                '[,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%arraybuild',
+                '[1+sqrt(3):10+sin(5):1/5]'
+            ],
         ];
     }
 
@@ -154,8 +196,14 @@ class parser_test extends \advanced_testcase {
         return [
             'constant' => ['a,1,=', 'a = 1'],
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
-            'arithmetic expression with ternary in parens' => ['a,5,b,1,==,?,3,:,4,%%ternary,2,*,+,=', 'a = 5 + (b == 1 ? 3 : 4) * 2'],
-            'arithmetic expression with double ternary' => ['a,b,c,==,?,1,:,b,d,==,?,2,:,0,%%ternary,%%ternary,=', 'a = b == c ? 1 : b == d ? 2 : 0'],
+            'arithmetic expression with ternary in parens' => [
+                'a,5,b,1,==,?,3,:,4,%%ternary,2,*,+,=',
+                'a = 5 + (b == 1 ? 3 : 4) * 2'
+            ],
+            'arithmetic expression with double ternary' => [
+                'a,b,c,==,?,1,:,b,d,==,?,2,:,0,%%ternary,%%ternary,=',
+                'a = b == c ? 1 : b == d ? 2 : 0'
+            ],
             'arithmetic expression with paren and power' => ['a,3,4,**,5,**,=', 'a = (3**4)**5'],
             'double assignment' => ['a,b,7,=,=', 'a = b = 7'],
             'assignment with implicit multiplication and functions' => ['a,2,3,b,*,1,sin,*,3,_,b,+,*,=', 'a = 2 sin(3b)(-3+b)'],
@@ -190,7 +238,9 @@ class parser_test extends \advanced_testcase {
         $input = 'a = [5:10:2,20,30:40:.5]';
         $input = '{3:5:0.5,10:15:0.5,1:3:4}';
         $input = '{[1,2], [3,4]}';
-
+        $input = '5~3';
+        $input = '{{1,2}}';
+        $input = '[{1,2}]';
 
         $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);

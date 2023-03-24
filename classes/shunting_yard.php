@@ -17,8 +17,6 @@
 namespace qtype_formulas;
 use Error;
 
-// FIXME / TODO: syntax error for nested sets and usage of set in array
-
 /**
  * Helper class implementing Dijkstra's shunting yard algorithm.
  *
@@ -286,10 +284,18 @@ class shunting_yard {
             if (!is_null($lasttoken)) {
                 $lasttype = $lasttoken->type;
             }
-            // Unary operators (+, -, ~ and !) are possible after an operator and after an opening parenthesis.
-            // Also, in order to correctly interpret arrays and function calls, we must allow
-            // unary operators after an opening bracket and after a comma.
-            if (in_array($lasttype, [token::OPENING_PAREN, token::ARG_SEPARATOR, token::OPENING_BRACKET, token::OPERATOR, token::RANGE_SEPARATOR])) {
+            // Unary operators (+, -, ~ and !) are possible after an operator and after an opening parenthesis
+            // of any type. It is also possible after a comma (argument/element separator) or after a colon
+            // serving as a range separator.
+            $allowunaryafter = [
+                token::OPENING_PAREN,
+                token::OPENING_BRACKET,
+                token::OPENING_BRACE,
+                token::ARG_SEPARATOR,
+                token::RANGE_SEPARATOR,
+                token::OPERATOR
+            ];
+            if (in_array($lasttype, $allowunaryafter)) {
                 $unarypossible = true;
             }
             // Insert inplicit multiplication sign, if
@@ -327,6 +333,12 @@ class shunting_yard {
                 // Opening brace introduces definition of a set (for random variables) or an
                 // algebraic variable (in general context).
                 case token::OPENING_BRACE:
+                    $mostrecent = end($separatortype);
+                    if ($mostrecent === 'setelements') {
+                        self::die('syntax error: sets cannot be nested', $token);
+                    } else if ($mostrecent === 'arrayelements') {
+                        self::die('syntax error: sets cannot be used inside of lists', $token);
+                    }
                     // Push the opening brace to the output queue. It will mark the start of the
                     // set during evaluation.
                     $output[] = $token;
@@ -385,7 +397,10 @@ class shunting_yard {
                         if ($value === '-') {
                             $value = ($token->value = '_');
                         }
+                    } else if ($value === '!' || $value === '~') {
+                        self::die("invalid use of unary operator: $value", $token);
                     }
+
                     $thisprecedence = self::get_precedence($value);
                     // For the ? part of a ternary operator, we
                     // - flush all operators on the stack with lower precedence (if any)
@@ -433,20 +448,15 @@ class shunting_yard {
                         ++$counters['arrayelements'][$index - 1];
                     }
                     // Pop the most recent array element counter. For %%arrayindex, we'll later check it's 1.
-                    // FIXME: probably no need to check count === 1, because with new implementation,
-                    // this can be done during evaluation.
+                    // FIXME: no need to check count === 1 anymore, can be done during evaluation of %%arrayindex
                     $numofelements = array_pop($counters['arrayelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
                     $head = end($opstack);
-                    // FIXME: refactor this part
-                    if ($head->value === '%%arrayindex') {
-                        if ($numofelements !== 1) {
-                            self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
-                        }
-                    } else if (in_array($head->value, ['%%arraybuild', '%%rangebuild'])) {
-                        //$output[] = new token(token::NUMBER, $numofelements);
-                    } else {
+                    if ($head->value === '%%arrayindex' && $numofelements !== 1) {
+                        self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
+                    }
+                    if (!in_array($head->value, ['%%arrayindex', '%%arraybuild'])) {
                         self::die('syntax error: unknown parse error', $token);
                     }
                     // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
@@ -478,7 +488,6 @@ class shunting_yard {
                     $numofelements = array_pop($counters['setelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
-                    // FIXME: update comment (??)
                     $head = end($opstack);
                     if ($head->value !== '%%setbuild') {
                         self::die('syntax error: unknown parse error', $token);

@@ -28,11 +28,8 @@ namespace qtype_formulas;
 /*
 
 TODO:
-* ~ is unary -> check not used in binary context (must not be used between two value tokens)
-* same for !
 
 * revisit splitting of statements?
-
 * pi() --> translate to π with no function call
 * translate ^ to ** in certain contexts (backward compatibility)
 * variables stack
@@ -42,7 +39,6 @@ TODO:
 * parsing and instantiation of random vars
 * for loop
 * units
-
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
 */
