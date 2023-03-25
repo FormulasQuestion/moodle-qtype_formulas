@@ -290,9 +290,6 @@ class lexer {
         }
         if ($result === 'for') {
             $type = token::RESERVED_WORD;
-        } else if (preg_match('/^(pi|PI|Pi)$/', $result)) {
-            $type = token::CONSTANT;
-            $result = 'π';
         } else {
             $type = token::IDENTIFIER;
         }

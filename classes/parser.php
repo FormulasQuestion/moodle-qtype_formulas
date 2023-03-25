@@ -176,15 +176,15 @@ class parser {
             $value = $currenttoken->value;
             $nexttoken = $this->peek();
             if ($nexttoken === self::EOF) {
+                // The last token must not be an OPERATOR, a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR.
+                if (in_array($type, [token::OPERATOR, token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR])) {
+                    $this->die("syntax error: unexpected end of expression after '$value'", $currenttoken);
+                }
                 // The last identifier of a statement cannot be a FUNCTION, because it would have
                 // to be followed by parens. We don't register it as a known variable, because it
                 // is not assigned a value at this moment.
                 if ($type === token::IDENTIFIER) {
                     $currenttoken->type = token::VARIABLE;
-                }
-                // The last token must not be an OPERATOR, a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR.
-                if (in_array($type, [token::OPERATOR, token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR])) {
-                    $this->die("syntax error: unexpected end of expression after '$value'", $currenttoken);
                 }
                 break;
             }
@@ -202,7 +202,7 @@ class parser {
             }
 
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
-            // The criteria is as follows:
+            // The criteria are as follows:
             // - if is is in the list of known variables and not preceded by the PREFIX, it must be a VARIABLE
             // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION
             // - if it is not a known variable and not followed by a ( symbol, we assume it is a VARIABLE
@@ -211,8 +211,14 @@ class parser {
                 if (!$this->is_known_variable($currenttoken) && $nexttype === token::OPENING_PAREN) {
                     $type = ($currenttoken->type = token::FUNCTION);
                 } else {
-                    $this->register_variable($currenttoken);
-                    $type = ($currenttoken->type = token::VARIABLE);
+                    // The identfier pi, if used like a variable, will be classified as CONSTANT.
+                    if ($value === 'pi') {
+                        $type = ($currenttoken->type = token::CONSTANT);
+                        $value = ($currenttoken->value = 'π');
+                    } else {
+                        $type = ($currenttoken->type = token::VARIABLE);
+                        $this->register_variable($currenttoken);
+                    }
                 }
             }
 
@@ -337,6 +343,7 @@ class parser {
     }
 
     private function register_variable(token $token): void {
+        // Do not register a variable twice.
         if ($this->is_known_variable($token)) {
             return;
         }
