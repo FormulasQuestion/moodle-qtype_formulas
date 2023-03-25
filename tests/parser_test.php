@@ -241,13 +241,15 @@ class parser_test extends \advanced_testcase {
         $input = '5~3';
         $input = '{{1,2}}';
         $input = '[{1,2}]';
+        $input = 'π + pi + pi()';
 
         $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
         $parser = new parser($lexer->get_tokens(), true);
         foreach ($parser->statements as $statement) {
             $output = shunting_yard::infix_to_rpn($statement);
-            print_r(array_map(function($el) { return $el->value; }, $output));
+            print_r($output);
+            //print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
     }
