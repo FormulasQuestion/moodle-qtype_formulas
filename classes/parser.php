@@ -29,15 +29,12 @@ namespace qtype_formulas;
 
 TODO:
 
-* revisit splitting of statements?
-* pi() --> translate to π with no function call
-* translate ^ to ** in certain contexts (backward compatibility)
+* translate ^ to ** for answer context (backward compatibility)
 * variables stack
 * context -> already defined variables and their values
             + instantiated random values
             export (serialize) and import
 * parsing and instantiation of random vars
-* for loop
 * units
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
@@ -68,46 +65,31 @@ class parser {
      * @param boolean $expressiononly will be used to parse an expression, e. g. an answer or calculation
      * @param [type] $knownvariables
      */
-    public function __construct(array $tokenlist, bool $expressiononly = false, array $knownvariables = []) {
+    public function __construct(array $tokenlist, array $knownvariables = []) {
         $this->count = count($tokenlist);
         $this->tokenlist = $tokenlist;
         $this->variableslist = $knownvariables;
 
         // Check for unbalanced / mismatched parentheses. There will be some redundancy, because
-        // the shunting yard algorithm will also do its own checks, but this check allows better
-        // and easier error reporting.
+        // the shunting yard algorithm will also do some checks on its own, but doing it here allows better
+        // and faster error reporting.
         $this->check_unbalanced_parens();
 
+        // Go through all tokens and read either general expressions (assignments or expressions)
+        // or for loops.
         $currenttoken = $this->peek();
-
-        // If we parse a single expression, we can go ahead directly.
-        if ($expressiononly) {
-            $this->statements[] = $this->parse_assignment($tokenlist);
-            return;
-        }
-
-        // FIXME maybe add if / elseif / else clauses in the future?
         while ($currenttoken !== self::EOF) {
-            $type = $currenttoken->type;
-            $value = $currenttoken->value;
+            $this->statements[] = $this->parse_the_right_thing($currenttoken);
+            $currenttoken = $this->peek();
+        }
+    }
 
-            if ($type === token::IDENTIFIER) {
-                $next = $this->peek(1);
-                if ($next->type === token::OPERATOR && $next->value === '=') {
-                    $this->statements[] = $this->parse_assignment();
-                    $currenttoken = $this->peek();
-                    continue;
-                }
-            } else if ($type === token::RESERVED_WORD && $value === 'for') {
-                $this->parse_forloop();
-                // read until {  --> head of loop
-                // recursively read the body (may contain other loops)
-            } else {
-                $this->die("invalid statement, starting with: '$value'", $currenttoken);
-            }
-
-            // Advance.
-            $currenttoken = $this->read_next();
+    private function parse_the_right_thing(token $token) {
+        // FIXME maybe add if / elseif / else clauses in the future?
+        if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
+            return $this->parse_forloop();
+        } else {
+            return $this->parse_general_expression();
         }
     }
 
@@ -166,12 +148,19 @@ class parser {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
-    public function parse_assignment(): array {
+    public function parse_answer_expression(): array {
+        // FIXME
+        // first: replace ^ token by **
+        // second call parse_general_expression
+        return [];
+    }
+
+    public function parse_general_expression(?int $stopat = null): array {
         // Start by reading the first token.
         $currenttoken = $this->read_next();
-        $assignment = [$currenttoken];
+        $expression = [$currenttoken];
 
-        while ($currenttoken !== self::EOF) {
+        while ($currenttoken !== self::EOF && $currenttoken->type !== $stopat) {
             $type = $currenttoken->type;
             $value = $currenttoken->value;
             $nexttoken = $this->peek();
@@ -306,9 +295,11 @@ class parser {
             }
             // Otherwise, let's read the next token and append it to the list of tokens for this statement.
             $currenttoken = $this->read_next();
-            $assignment[] = $currenttoken;
+            $expression[] = $currenttoken;
         }
-        return $assignment;
+
+        // Feed the expression to the shunting yard algorithm and return the result.
+        return shunting_yard::infix_to_rpn($expression);
     }
 
     public function get_statements(): array {
@@ -367,20 +358,79 @@ class parser {
      * @return void
      */
     public function parse_forloop() {
+        // FIXME: better error reporting (row/col number of error)
+        // FIXME: IDENTIFIER must be changed to VARIABLE
         $variable = null;
-        $from = 0;
-        $to = 0;
-        $step = 1;
+        $range = [];
         $statements = [];
 
-        // for
-        // opening paren
-        // identifier
-        // colon
-        // bracket --> parse range
-        // closing paren
-        // opening brace
-        // statements --> recursive parsing (can contain other for loops)
-        // closing brace
+        // Consume the 'for' token.
+        $currenttoken = $this->read_next();
+
+        // Next must be an opening parenthesis.
+        $currenttoken = $this->peek();
+        if (!$currenttoken || $currenttoken->type !== token::OPENING_PAREN) {
+            $this->die('syntax error: ( expected after for');
+        }
+        // Consume the opening parenthesis.
+        $currenttoken = $this->read_next();
+
+        // Next must be a variable name.
+        $currenttoken = $this->peek();
+        if (!$currenttoken || $currenttoken->type !== token::IDENTIFIER) {
+            $this->die('syntax error: identifier expected');
+        }
+        $currenttoken = $this->read_next();
+        $currenttoken->type = token::VARIABLE;
+        $variable = $currenttoken->value;
+
+        // Next must be a colon.
+        $currenttoken = $this->peek();
+        if (!$currenttoken || $currenttoken->type !== token::RANGE_SEPARATOR) {
+            $this->die('syntax error: : expected');
+        }
+        $currenttoken = $this->read_next();
+
+        // Next must be an opening bracket.
+        $currenttoken = $this->peek();
+        if (!$currenttoken || $currenttoken->type !== token::OPENING_BRACKET) {
+            $this->die('syntax error: [ expected');
+        }
+
+        // Read up to the closing bracket. We are sure there is one, because the parser has already
+        // checked for mismatched / unbalanced parens.
+        $range = $this->parse_general_expression(token::CLOSING_BRACKET);
+        // FIXME: feed the range to the shunting yard algorithm
+
+        // Next must be a closing parenthesis.
+        $currenttoken = $this->peek();
+        if (!$currenttoken || $currenttoken->type !== token::CLOSING_PAREN) {
+            $this->die('syntax error: ) expected');
+        }
+        $currenttoken = $this->read_next();
+
+        // Next must either be an opening brace or the start of a statement.
+        $currenttoken = $this->peek();
+        if (!$currenttoken) {
+            $this->die('syntax error: { or statement expected');
+        }
+
+        // If the token is an opening brace, we have to recursively read upcoming lines,
+        // because there might be nested for loops. Otherwise, we read one single statement.
+        if ($currenttoken->type === token::OPENING_BRACE) {
+            // Consume the brace.
+            $this->read_next();
+            // Parse each statement.
+            while ($currenttoken && $currenttoken->type !== token::CLOSING_BRACE) {
+                $statements[] = $this->parse_the_right_thing($currenttoken);
+                $currenttoken = $this->peek();
+            }
+            // Consume the closing brace.
+            $this->read_next();
+        } else {
+            $statements[] = $this->parse_general_expression();
+        }
+
+        return new for_loop($variable, $range, $statements);
     }
 }

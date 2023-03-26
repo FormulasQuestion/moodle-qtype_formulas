@@ -31,8 +31,8 @@ class parser_test extends \advanced_testcase {
      */
     public function test_simple_expressions($expected, $input): void {
         $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens(), true);
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $parser = new parser($lexer->get_tokens());
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -41,8 +41,8 @@ class parser_test extends \advanced_testcase {
      */
     public function test_expressions_with_functions($expected, $input): void {
         $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens(), true);
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $parser = new parser($lexer->get_tokens());
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -51,8 +51,8 @@ class parser_test extends \advanced_testcase {
      */
     public function test_ternary_expression($expected, $input): void {
         $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens(), true);
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $parser = new parser($lexer->get_tokens());
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -62,7 +62,7 @@ class parser_test extends \advanced_testcase {
     public function test_assignments($expected, $input): void {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -71,8 +71,8 @@ class parser_test extends \advanced_testcase {
      */
     public function test_arrays($expected, $input): void {
         $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens(), true);
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $parser = new parser($lexer->get_tokens());
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -81,8 +81,8 @@ class parser_test extends \advanced_testcase {
      */
     public function test_sets($expected, $input): void {
         $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens(), true);
-        $statement = shunting_yard::infix_to_rpn($parser->get_statements()[0]);
+        $parser = new parser($lexer->get_tokens());
+        $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement));
     }
 
@@ -220,7 +220,6 @@ class parser_test extends \advanced_testcase {
         $input = 'a = !a b 2';
         $input = 'a = arctan(1,2,3) + sin(2,3) + cos(1) + pi()';
         $input = 'a = arctan(sin(2,cos(pi())),4)';
-        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
         $input = 'a = "foo" 5';
         $input = 'a = 5 5';
         $input = 'a = 5 == 3 ? 1 + 2 : 2*(0 + 3)';
@@ -242,16 +241,25 @@ class parser_test extends \advanced_testcase {
         $input = '{{1,2}}';
         $input = '[{1,2}]';
         $input = 'π + pi + pi()';
+        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
 
         $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($lexer->get_tokens(), true);
+        $parser = new parser($lexer->get_tokens());
         foreach ($parser->statements as $statement) {
-            $output = shunting_yard::infix_to_rpn($statement);
+            $output = $statement;
             print_r($output);
             //print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
+    }
+
+    public function test_for_loop() {
+        $input = 'for (a:[1:23,5]) { a = 5; b = 3;}';
+
+        $lexer = new lexer($input);
+        $parser = new parser($lexer->get_tokens());
+        print_r($parser->statements);
     }
 
     public function test_parse_list() {
