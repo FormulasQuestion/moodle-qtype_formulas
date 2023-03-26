@@ -155,7 +155,7 @@ class parser {
         return [];
     }
 
-    public function parse_general_expression(?int $stopat = null): array {
+    public function parse_general_expression(?int $stopat = null): expression {
         // Start by reading the first token.
         $currenttoken = $this->read_next();
         $expression = [$currenttoken];
@@ -299,7 +299,7 @@ class parser {
         }
 
         // Feed the expression to the shunting yard algorithm and return the result.
-        return shunting_yard::infix_to_rpn($expression);
+        return new expression(shunting_yard::infix_to_rpn($expression));
     }
 
     public function get_statements(): array {
@@ -355,9 +355,9 @@ class parser {
      * - It is possible to change the value of the iterator variable inside the loop. However, at each iteration
      * it will be set to the next planned value regardless of what you did to it.
      *
-     * @return void
+     * @return for_loop
      */
-    public function parse_forloop() {
+    public function parse_forloop(): for_loop {
         // FIXME: better error reporting (row/col number of error)
         // FIXME: IDENTIFIER must be changed to VARIABLE
         $variable = null;

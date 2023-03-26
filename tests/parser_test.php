@@ -33,7 +33,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     /**
@@ -43,7 +43,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     /**
@@ -53,7 +53,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     /**
@@ -63,7 +63,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     /**
@@ -73,7 +73,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     /**
@@ -83,7 +83,7 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement));
+        self::assertEquals($expected, implode(',', $statement->body));
     }
 
     public function provide_sets(): array {
