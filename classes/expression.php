@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * for loop for qtype_formulas parser
+ * expression or statement for qtype_formulas parser
  *
  * @package    qtype_formulas
  * @copyright  2022 Philipp Imhof
@@ -24,19 +24,11 @@
 
 namespace qtype_formulas;
 
-class for_loop {
-    /** @var string name of the for loop's iteration variable */
-    private string $variable = '';
+class expression {
+    /** @var array the expression or statement in RPN notation */
+    public array $body = [];
 
-    /** @var expression values the loop will iterate over */
-    private expression $range;
-
-    /** @var array statements of the loop */
-    private array $body = [];
-
-    public function __construct(string $var, expression $range, array $body) {
-        $this->variable = $var;
-        $this->range = $range;
+    public function __construct(array $body) {
         $this->body = $body;
     }
 }
