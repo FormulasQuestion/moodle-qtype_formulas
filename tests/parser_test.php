@@ -197,11 +197,11 @@ class parser_test extends \advanced_testcase {
             'constant' => ['a,1,=', 'a = 1'],
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
             'arithmetic expression with ternary in parens' => [
-                'a,5,b,1,==,?,3,:,4,%%ternary,2,*,+,=',
+                'a,5,b,1,==,3,4,%%ternary,2,*,+,=',
                 'a = 5 + (b == 1 ? 3 : 4) * 2'
             ],
             'arithmetic expression with double ternary' => [
-                'a,b,c,==,?,1,:,b,d,==,?,2,:,0,%%ternary,%%ternary,=',
+                'a,b,c,==,1,b,d,==,2,0,%%ternary,%%ternary,=',
                 'a = b == c ? 1 : b == d ? 2 : 0'
             ],
             'arithmetic expression with paren and power' => ['a,3,4,**,5,**,=', 'a = (3**4)**5'],
