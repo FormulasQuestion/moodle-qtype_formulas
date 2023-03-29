@@ -404,23 +404,23 @@ class shunting_yard {
                     $thisprecedence = self::get_precedence($value);
                     // For the ? part of a ternary operator, we
                     // - flush all operators on the stack with lower precedence (if any)
-                    // - send the ? to the output queue
+                    // - send the ? to the output queue --> not anymore FIXME
                     // - put a pseudo-token on the operator stack as a sentinel
                     // - break, in order to NOT put the ? on the operator stack.
                     if ($value === '?') {
                         self::flush_higher_precedence($opstack, $thisprecedence, $output);
-                        $output[] = $token;
+                        //FIXME not necessary $output[] = $token;
                         $opstack[] = new token(token::OPERATOR, '%%ternary');
                         break;
                     }
                     // For the : part of a ternary operator, we
                     // - flush all operators on the stack until we reach the ?
                     // - do NOT flush the ? but leave it on the operator stack as a sentinel
-                    // - send the : to the output queue.
+                    // - send the : to the output queue. --> not anymore FIXME
                     // - break, in order to NOT put the : on the operator stack.
                     if ($value === ':') {
                         self::flush_ternary_part($opstack, $output);
-                        $output[] = $token;
+                        // FIXME not necessary $output[] = $token;
                         break;
                     }
                     // For left associative operators, all pending operators with higher precedence go
@@ -519,7 +519,7 @@ class shunting_yard {
                             ++$counters['functionargs'][$index - 1];
                         }
                         // Remove last argument counter and put it to output queue, followed by the function name.
-                        $output[] = new token(token::NUMBER, array_pop($counters['functionargs']));
+                        $output[] = new token(token::NUMBER, array_pop($counters['functionargs']), $head->row, $head->column);
                         $output[] = array_pop($opstack);
                         // Remove last separatortype.
                         array_pop($separatortype);
