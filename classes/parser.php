@@ -29,7 +29,8 @@ namespace qtype_formulas;
 
 TODO:
 
-* translate ^ to ** for answer context (backward compatibility)
+* special variables like _err and _relerr; _0, _1 etc., _a, _r and _d:
+*   -> must not be LHS in assignment, can only be used in certain contexts
 * variables stack
 * context -> already defined variables and their values
             + instantiated random values
@@ -62,7 +63,6 @@ class parser {
      * FIXME Undocumented function
      *
      * @param [type] $tokenlist
-     * @param boolean $expressiononly will be used to parse an expression, e. g. an answer or calculation
      * @param [type] $knownvariables
      */
     public function __construct(array $tokenlist, array $knownvariables = []) {
@@ -148,12 +148,21 @@ class parser {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
-    public function parse_answer_expression(): array {
-        // FIXME
-        // first: replace ^ token by **
-        // second call parse_general_expression
-        return [];
-    }
+    /*public function parse_answer_expression(): expression {
+        // Walk through all tokens and search for a ^ operator (XOR). In order to maintain backwards
+        // compatibility, it will be replaced by the ** operator (exponentiation).
+        $currenttoken = $this->peek();
+        $i = 1;
+        while ($currenttoken !== self::EOF) {
+            if ($currenttoken->type === token::OPERATOR && $currenttoken->value === '^') {
+                $currenttoken->value = '**';
+            }
+            $currenttoken = $this->peek($i);
+            $i++;
+        }
+        // Now that this is done, we can parse the expression normally.
+        return $this->parse_general_expression();
+    }*/
 
     public function parse_general_expression(?int $stopat = null): expression {
         // Start by reading the first token.
@@ -319,13 +328,6 @@ class parser {
             $this->position++;
         }
         return $nexttoken;
-    }
-
-    // FIXME: will be in evaluator class
-    public function execute_function(string $funcname, array $params): void {
-        if (in_array($funcname, $this->ownfunctions)) {
-            call_user_func_array(__NAMESPACE__ . '\Functions::' . $funcname, $params);
-        }
     }
 
     // FIXME doc

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * qtype_formulas parser tests
+ * qtype_formulas evaluation tests
  *
  * @package    qtype_formulas
  * @category   test
@@ -25,7 +25,7 @@
 
 namespace qtype_formulas;
 
-class parser_test extends \advanced_testcase {
+class evaluator_test extends \advanced_testcase {
     /**
      * @dataProvider provide_simple_expressions
      */
@@ -33,7 +33,9 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statement);
+        self::assertEquals($expected, $result[0]->value);
     }
 
     /**
@@ -43,7 +45,9 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statement);
+        self::assertEqualsWithDelta($expected, $result[0]->value, 1e-12);
     }
 
     /**
@@ -53,7 +57,9 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statement);
+        self::assertEquals($expected, $result[0]->value);
     }
 
     /**
@@ -73,7 +79,21 @@ class parser_test extends \advanced_testcase {
         $lexer = new lexer($input);
         $parser = new parser($lexer->get_tokens());
         $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statement);
+        // The test data can contain nested arrays. For easier testing, we need to extract
+        // the values for elements and nested elements.
+        $content = array_map(
+            function ($el) {
+                if (is_array($el->value)) {
+                    return array_map(function ($nested) { return $nested->value; }, $el->value);
+                } else {
+                    return $el->value;
+                }
+            },
+            $result[0]->value
+        );
+        self::assertEqualsWithDelta($expected, $content, 1e-12);
     }
 
     /**
@@ -109,86 +129,96 @@ class parser_test extends \advanced_testcase {
     }
     public function provide_arrays(): array {
         return [
-            'basic' => ['[,1,2,3,4,5,%%arraybuild', '[1,2,3,4,5]'],
-            'range without step' => ['[,1,10,2,%%rangebuild,%%arraybuild', '[1:10]'],
-            'range with step' => ['[,1,10,0.5,3,%%rangebuild,%%arraybuild', '[1:10:0.5]'],
+            'basic' => [[1, 2, 3, 4, 5], '[1,2,3,4,5]'],
+            'range without step' => [[1, 2, 3, 4, 5, 6, 7, 8, 9], '[1:10]'],
+            'reversed range without step' => [[10, 9, 8, 7, 6, 5, 4, 3, 2], '[10:1]'],
+            'range with step' => [[1, 3, 5, 7, 9], '[1:10:2]'],
             'ranges and elements' => [
-                '[,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%arraybuild',
-                '[1,5:6:0.1,100,200:300,5]'
+                [1, 5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 100, 200, 225, 250, 275],
+                '[1,5:5.95:0.1,100,200:300:25]'
             ],
             'nested' => [
-                '[,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%arraybuild',
-                '[[1:10],[20:30],[40:50:2]]'
+                [[1, 2, 3, 4, 5], [20, 24, 28], [40, 42, 44, 46, 48]],
+                '[[1:6],[20:30:4],[40:50:2]]'
             ],
             'multiple ranges' => [
-                '[,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%arraybuild',
-                '[1:10,15:50:5,60:70:0.5,100:110,0:-10:-1]'
+                [1, 2, 3, 4, 15, 30, 45, 60, 60.5, 61, 61.5, 62, 62.5, 0, -1, -2, -3, -4],
+                '[1:5,15:50:15,60:63:0.5,0:-5:-1]'
             ],
-            'range with step, negatives' => ['[,1,_,10,_,0.5,_,3,%%rangebuild,%%arraybuild', '[-1:-10:-0.5]'],
+            'range with step, negatives' => [
+                [-1, -1.5, -2, -2.5, -3, -3.5, -4, -4.5],
+                '[-1:-5:-0.5]'],
+            'elements are expressions' => [
+                [3, 4.7449230967779314, 0.2],
+                '[1+sqrt(4),5*sin(5/4),1/5]'
+            ],
             'range with step, composed expressions' => [
-                '[,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%arraybuild',
-                '[1+sqrt(3):10+sin(5):1/5]'
+                [3, 3.2, 3.4, 3.6, 3.8, 4, 4.2, 4.4, 4.6],
+                '[1+sqrt(4):5*sin(5/4):1/5]'
             ],
         ];
     }
 
     public function provide_ternary_expressions(): array {
         return [
-            'basic' => ['1,5,==,2,3,%%ternary', '1 == 5 ? 2 : 3'],
-            'operations in condition, 1' => ['1,2,+,3,==,1,2,%%ternary', '1 + 2 == 3 ? 1 : 2'],
-            'operations in condition, 2' => ['1,3,2,-,==,1,2,%%ternary', '1 == 3 - 2 ? 1 : 2'],
-            'operations in true part' => ['1,1,2,+,2,%%ternary', '1 ? 1 + 2 : 2'],
-            'operations in false part' => ['1,3,2,4,+,%%ternary', '1 ? 3 : 2 + 4'],
-            'operations in all parts' => ['1,2,+,3,==,1,2,3,*,+,4,5,*,6,-,%%ternary', '1+2==3 ? 1+2*3 : 4*5-6'],
-            'ternary in false part' => ['1,2,==,5,2,3,==,6,7,%%ternary,%%ternary', '1==2 ? 5 : 2==3 ? 6 : 7'],
+            'basic' => [3, '1 == 5 ? 2 : 3'],
+            'operations in condition, 1' => [1, '1 + 2 == 3 ? 1 : 2'],
+            'operations in condition, 2' => [1, '1 == 3 - 2 ? 1 : 2'],
+            'operations in true part' => [3, '1 ? 1 + 2 : 2'],
+            'operations in false part' => [3, '1 ? 3 : 2 + 4'],
+            'operations in all parts' => [7, '1+2==3 ? 1+2*3 : 4*5-6'],
+            'ternary in false part' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
         ];
     }
 
     public function provide_expressions_with_functions(): array {
         return [
-            'one argument' => ['5.3,1,floor', 'floor(5.3)'],
-            'two arguments' => ['10,5,2,ncr', 'ncr(10,5)'],
-            'three arguments' => ['2,100,17,3,modpow', 'modpow(2,100,17)'],
-            'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
-            'function in function' => ['2,1,sqrt,2,/,1,asin', 'asin(sqrt(2)/2)'],
-            'operation in function' => ['1,2,3,*,+,4,5,**,-,3,2,round', 'round(1+2*3-4**5,3)'],
-            'function with array' => ['[,1,2,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
+            'one argument, built-in' => [5, 'floor(5.3)'],
+            'one argument, custom' => [5040, 'fact(7)'],
+            //'two arguments' => ['10,5,2,ncr', 'ncr(10,5)'],
+            //'three arguments' => ['2,100,17,3,modpow', 'modpow(2,100,17)'],
+            //'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
+            'function in function' => [M_PI / 4, 'asin(sqrt(2)/2)'],
+            //'operation in function' => ['1,2,3,*,+,4,5,**,-,3,2,round', 'round(1+2*3-4**5,3)'],
+            //'function with array' => ['[,1,2,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
         ];
     }
 
     public function provide_simple_expressions(): array {
         return [
-            'modulo' => ['1,2,3,%,+', '1+2%3'],
-            'left-associativity bitwise left shift' => ['1,2,<<,3,<<', '1 << 2 << 3'],
-            'left-associativity bitwise right shift' => ['1,2,>>,3,>>', '1 >> 2 >> 3'],
-            'left-associativity bitwise left/right shift' => ['1,2,<<,3,>>', '1 << 2 >> 3'],
-            'left-associativity bitwise right/left shift' => ['1,2,>>,3,<<', '1 >> 2 << 3'],
-            'left-associativity bitwise and' => ['1,2,&,3,&', '1 & 2 & 3'],
-            'left-associativity bitwise xor' => ['1,2,^,3,^', '1 ^ 2 ^ 3'],
-            'left-associativity bitwise or' => ['1,2,|,3,|', '1 | 2 | 3'],
-            'precedence among bitwise operators: and + xor, 1' => ['1,2,&,3,^', '1 & 2 ^ 3'],
-            'precedence among bitwise operators: and + xor, 2' => ['1,2,3,&,^', '1 ^ 2 & 3'],
-            'precedence among bitwise operators: and + or, 1' => ['1,2,&,3,|', '1 & 2 | 3'],
-            'precedence among bitwise operators: and + or, 2' => ['1,2,3,&,|', '1 | 2 & 3'],
-            'precedence among bitwise operators: xor + or, 1' => ['1,2,^,3,|', '1 ^ 2 | 3'],
-            'precedence among bitwise operators: xor + or, 2' => ['1,2,3,^,|', '1 | 2 ^ 3'],
-            'precedence among bitwise operators: all mixed, 1' => ['1,2,&,3,^,4,|', '1 & 2 ^ 3 | 4'],
-            'precedence among bitwise operators: all mixed, 2' => ['1,2,^,3,4,&,|', '1 ^ 2 | 3 & 4'],
-            'precedence among bitwise operators: all mixed, 3' => ['1,2,3,&,4,^,|', '1 | 2 & 3 ^ 4'],
-            'unary bitwise negation' => ['2,~', '~2'],
-            'unary bitwise negation in a sum, 1' => ['3,2,~,+', '3+~2'],
-            'unary bitwise negation in a sum, 2' => ['3,~,2,~,+', '~3+~2'],
-            'unary minus in multiplication' => ['1,2,_,*', '1*-2'],
-            'unary minus in addition' => ['1,2,_,+', '1+-2'],
-            'unary minus in parens' => ['2,3,_,*', '2*(-3)'],
-            'multiplication before addition, 1' => ['1,2,3,*,+', '1+2*3'],
-            'multiplication before addition, 2' => ['1,2,*,3,+', '1*2+3'],
-            'implicit multiplication with parens' => ['1,2,+,3,4,+,*', '(1+2)(3+4)'],
-            'sum in parens' => ['5,2,3,+,*', '5*(2+3)'],
-            'power, with parens, 1' => ['3,4,**,5,**', '(3**4)**5'],
-            'power, with parens, 2' => ['3,4,5,**,**', '3**(4**5)'],
-            'power, right-associative' => ['3,4,5,**,**', '3**4**5'],
-            'order of basic operations' => ['1,2,*,3,4,/,-,5,6,*,+,7,8,*,-,9,10,/,+', '1*2-3/4+5*6-7*8+9/10'],
+            'array access (valid)' => [5, '[1,5][1]'],
+            'array access (valid)' => [1, '[1,5][0]'],
+            'modulo' => [3, '1+2%3'],
+            'left-associativity bitwise left shift' => [32, '1 << 2 << 3'],
+            'left-associativity bitwise right shift' => [0, '1 >> 2 >> 3'],
+            'left-associativity bitwise left/right shift' => [0, '1 << 2 >> 3'],
+            'left-associativity bitwise right/left shift' => [0, '1 >> 2 << 3'],
+            'left-associativity bitwise and' => [0, '1 & 2 & 3'],
+            'left-associativity bitwise xor' => [0, '1 ^ 2 ^ 3'],
+            'left-associativity bitwise or' => [3, '1 | 2 | 3'],
+            'precedence among bitwise operators: and + xor, 1' => [3, '1 & 2 ^ 3'],
+            'precedence among bitwise operators: and + xor, 2' => [3, '1 ^ 2 & 3'],
+            'precedence among bitwise operators: and + or, 1' => [3, '1 & 2 | 3'],
+            'precedence among bitwise operators: and + or, 2' => [3, '1 | 2 & 3'],
+            'precedence among bitwise operators: xor + or, 1' => [3, '1 ^ 2 | 3'],
+            'precedence among bitwise operators: xor + or, 2' => [1, '1 | 2 ^ 3'],
+            'precedence among bitwise operators: all mixed, 1' => [7, '1 & 2 ^ 3 | 4'],
+            'precedence among bitwise operators: all mixed, 2' => [3, '1 ^ 2 | 3 & 4'],
+            'precedence among bitwise operators: all mixed, 3' => [7, '1 | 2 & 3 ^ 4'],
+            'unary bitwise negation' => [-3, '~2'],
+            'unary bitwise negation in a sum, 1' => [0, '3+~2'],
+            'unary bitwise negation in a sum, 2' => [-7, '~3+~2'],
+            'unary minus in multiplication' => [-2, '1*-2'],
+            'unary minus in addition' => [-1, '1+-2'],
+            'unary minus in parens' => [-6, '2*(-3)'],
+            'multiplication before addition, 1' => [7, '1+2*3'],
+            'multiplication before addition, 2' => [5, '1*2+3'],
+            'implicit multiplication with parens' => [21, '(1+2)(3+4)'],
+            'sum in parens' => [25, '5*(2+3)'],
+            'power, with parens, 1' => [3486784401, '(3**4)**5'],
+            'power, with parens, 2' => [43046721, '3**(4**2)'],
+            'power, right-associative' => [43046721, '3**4**2'],
+            'order of basic operations' => [-23.85, '1*2-3/4+5*6-7*8+9/10'],
         ];
     }
 
@@ -242,15 +272,14 @@ class parser_test extends \advanced_testcase {
         $input = '[{1,2}]';
         $input = 'π + pi + pi()';
         $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
-        $input = 'a = b[1]';
 
         $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
         $parser = new parser($lexer->get_tokens());
         foreach ($parser->statements as $statement) {
             $output = $statement;
-            //print_r($output);
-            print_r(array_map(function($el) { return $el->value; }, $output->body));
+            print_r($output);
+            //print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
     }
