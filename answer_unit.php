@@ -52,12 +52,18 @@ class answer_unit_conversion {
     private $default_last_id;   // Dimension class id counter.
     private $default_id;        // Id of the default rule.
     private $default_rules;     // String of the default rule in a particular format.
+    private $part_unit;         // String of the unit of a part, given.
     // @codingStandardsIgnoreLine
     public static $unit_exclude_symbols = '][)(}{><0-9.,:;`~!@#^&*\/?|_=+ -';
     public static $prefix_scale_factors = array('d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
-        'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9, 'p' => 1e-12, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,
-        'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,  'E' => 1e18,  'Z' => 1e21,  'Y' => 1e24);
-    // For convenience, u is used for micro-, rather than "mu", which has multiple similar UTF representations.
+        'm' => 1e-3, 'u' => 1e-6, 'µ' => 1e-6, 'μ' => 1e-6,  'n' => 1e-9, 'p' => 1e-12,
+        'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,
+        'E' => 1e18, 'Z' => 1e21, 'Y' => 1e24, 'f' => 1e-15, 'a' => 1e-18, 'z' => 1e-21, 'y' => 1e-24,
+        'R' => 1e27, 'Q' => 1e30, 'r' => 1e-27, 'q' => 1e-30 );
+    // For convenience, u can be used for micro-, rather than "mu", which has multiple similar UTF representations.
+    // Note: All UTF representations of µ can be used too.
+    public static $units_special = array('mol','min','cd');
+    public static $prefix_all = 'k M G T P E Z Y m u µ μ n p f a z y R Q r q d c da h';
 
     // Initialize the internal conversion rule to empty. No exception raised.
     public function __construct() {
@@ -66,8 +72,28 @@ class answer_unit_conversion {
         $this->default_mapping = null;
         $this->mapping = null;
         $this->additional_rules = '';
+        $this->part_unit = '';
     }
 
+    /**
+     * Parse a unit into prefix and SI unit
+     * 
+     * @param string $unit get the unit with prefix and SI unit
+     * @return string SI unit only
+     */
+    public function parse_prefix_unit($unit) {
+        if ((strlen($unit) < 2) ||
+            (in_array($unit, static::$units_special))) {
+            return $unit;
+        }
+        foreach (static::$prefix_scale_factors as $i => $prefix) {
+            if (str_starts_with($unit,$i)) {
+                $unit = substr($unit, strlen($i));
+                break;
+            }
+        }
+        return $unit;
+    }
 
     /**
      * It assign default rules to this class. It will also reset the mapping. No exception raised.
@@ -75,11 +101,17 @@ class answer_unit_conversion {
      * @param string $default_id id of the default rule. Use to avoid reinitialization same rule set
      * @param string $default_rules default rules
      */
-    public function assign_default_rules($default_id, $default_rules) {
-        if ($this->default_id == $default_id) {
+    public function assign_default_rules($default_id, $default_rules, $part_unit = '') {
+        if (($default_id == 2) && ($part_unit != $this->part_unit)) {
+            $default_rules = $this->parse_prefix_unit($part_unit);
+            if ($default_rules != '') {
+                $default_rules .= ':' . static::$prefix_all;
+            }
+        } elseif ($this->default_id == $default_id) {
             return;  // Do nothing if the rules are unchanged.
         }
         $this->default_id = $default_id;
+        $this->part_unit = $part_unit;
         $this->default_rules = $default_rules;
         $this->default_mapping = null;
         $this->mapping = null;
@@ -115,23 +147,6 @@ class answer_unit_conversion {
             $this->parse_rules($tmp_mapping, $tmp_counter, $this->additional_rules);
             $this->mapping = $tmp_mapping;
         }
-    }
-
-
-    // Return the current unit mapping in this class.
-    public function get_unit_mapping() {
-        return $this->mapping;
-    }
-
-
-    // Return a dimension classes list for current mapping. Each class is an array of $unit to $scale mapping.
-    public function get_dimension_list() {
-        $dimension_list = array();
-        foreach ($this->mapping as $unit => $class_scale) {
-            list($class, $scale) = $class_scale;
-            $dimension_list[$class][$unit] = $scale;
-        }
-        return $dimension_list;
     }
 
 
@@ -247,7 +262,7 @@ class answer_unit_conversion {
      * @return array(conversion factor, unit exponent) if it can be converted, otherwise null.
      */
     private function attempt_conversion($test_unit_name, $base_unit_array) {
-        $oclass = $this->mapping[$test_unit_name];
+        $oclass = $this->mapping[$test_unit_name] ?? null;
         if (!isset($oclass)) {
             return null;  // It does not exist in the mapping implies it is not convertible.
         }

@@ -619,7 +619,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // Step 2: Use the unit system to check whether the unit in student responses is *convertible* to the true unit.
         $conversionrules = new unit_conversion_rules;
         $entry = $conversionrules->entry($part->ruleid);
-        $checkunit->assign_default_rules($part->ruleid, $entry[1]);
+        $checkunit->assign_default_rules($part->ruleid, $entry[1], $part->postunit);
         $checkunit->assign_additional_rules($part->otherrule);
         $checked = $checkunit->check_convertibility($postunit, $part->postunit);
         $cfactor = $checked->cfactor;

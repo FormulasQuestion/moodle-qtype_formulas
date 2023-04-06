@@ -1,5 +1,9 @@
 # Changelog
 
+- new feature: possiblity to enter µ (mu, and greek letter) in addition to u
+- new feature: conversion rules: add fullsiunit beside of commonsiunit and none.
+- removed: not used function get_unit_mapping(), and get_dimension_list()
+
 ### 5.2.0 (2023-03-17)
 - new functions: binomialpdf() and binomialcdf()
 - bugfix: gcd() now gives correct result even if one argument is 0
