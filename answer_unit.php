@@ -55,6 +55,7 @@ class answer_unit_conversion {
     private $part_unit;         // String of the unit of a part, given.
     // @codingStandardsIgnoreLine
     public static $unit_exclude_symbols = '][)(}{><0-9.,:;`~!@#^&*\/?|_=+ -';
+    public static $rule_exclude_symbols = '][}{><,:;`~!@#&*?|_=';
     public static $prefix_scale_factors = array('d' => 1e-1, 'c' => 1e-2, 'da' => 1e1, 'h' => 1e2,
         'm' => 1e-3, 'u' => 1e-6, 'µ' => 1e-6, 'μ' => 1e-6,  'n' => 1e-9, 'p' => 1e-12,
         'k' => 1e3,  'M' => 1e6,  'G' => 1e9,  'T' => 1e12,  'P' => 1e15,
@@ -62,7 +63,7 @@ class answer_unit_conversion {
         'R' => 1e27, 'Q' => 1e30, 'r' => 1e-27, 'q' => 1e-30 );
     // For convenience, u can be used for micro-, rather than "mu", which has multiple similar UTF representations.
     // Note: All UTF representations of µ can be used too.
-    public static $units_special = array('mol','min','cd');
+    public static $units_special = array('mol','min','cd'); /* all units >= 2 characters starting with prefix */
     public static $prefix_all = 'k M G T P E Z Y m u µ μ n p f a z y R Q r q d c da h';
 
     // Initialize the internal conversion rule to empty. No exception raised.
@@ -78,12 +79,19 @@ class answer_unit_conversion {
     /**
      * Parse a unit into prefix and SI unit
      * 
-     * @param string $unit get the unit with prefix and SI unit
+     * @param string $unit get the unit with prefix and SI unit, must be trimmed before
      * @return string SI unit only
      */
     public function parse_prefix_unit($unit) {
-        if ((strlen($unit) < 2) ||
-            (in_array($unit, static::$units_special))) {
+        if (is_array($unit)) {
+            throw new Exception('parse_prefix_unit does not handle arrays!');
+            return '';
+        }
+        $pattern = '/^([\wµμ]*).*/';  /* get only first word, accept also µ μ */
+        $replacement = '${1}';
+        $shu = preg_replace($pattern, $replacement, $unit);
+        if ( (strlen($shu) < 2) ||
+            (in_array($shu, static::$units_special) )) {
             return $unit;
         }
         foreach (static::$prefix_scale_factors as $i => $prefix) {
@@ -103,9 +111,17 @@ class answer_unit_conversion {
      */
     public function assign_default_rules($default_id, $default_rules, $part_unit = '') {
         if (($default_id == 2) && ($part_unit != $this->part_unit)) {
-            $default_rules = $this->parse_prefix_unit($part_unit);
-            if ($default_rules != '') {
-                $default_rules .= ':' . static::$prefix_all;
+            var_dump("part_unit:", $part_unit);
+            $default_rules = '';
+            // $_units = $this->parse_targets($part_unit); // does not work as expected
+            $_units = array_map('trim', explode('=', $part_unit));
+            var_dump("_units after array_map/trim:", $_units);
+            foreach ($_units as $_unit) {
+                //$_key = array_key_first($_unit);
+                $unit = $this->parse_prefix_unit($_unit);
+                if ($unit != '') {
+                    $default_rules .= $unit . ':' . static::$prefix_all . ';';
+                }
             }
         } elseif ($this->default_id == $default_id) {
             return;  // Do nothing if the rules are unchanged.
@@ -396,8 +412,8 @@ class answer_unit_conversion {
                     throw new Exception('Syntax error of SI prefix');
                 } else if (count($e) == 2) {
                     $unit_name = trim($e[0]);
-                    if (preg_match('/['.self::$unit_exclude_symbols.']+/', $unit_name)) {
-                        throw new Exception('"'.$unit_name.'" unit contains unaccepted character.');
+                    if (preg_match('/['.self::$rule_exclude_symbols.']+/', $unit_name)) {
+                        throw new Exception('"'.$unit_name.'" rule contains unaccepted character.');
                     }
                     $unit_scales[$unit_name] = 1.0;    // The original unit.
                     $si_prefixes = explode(' ', $e[1]);
