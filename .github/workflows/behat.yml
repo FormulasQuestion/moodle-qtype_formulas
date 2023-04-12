@@ -26,12 +26,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0']
+        php: ['7.4', '8.0', '8.1']
         moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'master']
         database: [mariadb]
         exclude:
           - moodle-branch: 'MOODLE_39_STABLE'
             php: '8.0'
+          - moodle-branch: 'MOODLE_39_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_311_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.1'
           - moodle-branch: 'master'
             php: '7.4'
 
