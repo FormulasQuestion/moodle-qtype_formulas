@@ -1,5 +1,16 @@
 Formulas question type for Moodle
 ---------------------------------
+
+APRIL 12, 2023
+--------------
+DynamicCourseware.org, containing full documentation for the Formulas question type,
+is currently being updated including Ubuntu, PhP and Moodle,
+which requires some time offline. The site should be back online soon.
+We apologize for any inconvenience and thank you for your understanding.
+
+
+--------------
+
 [![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20code%20checks/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+code+checks%22+branch%3Amaster) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20acceptance%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+acceptance+tests%22+branch%3Amaster)  [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20unit%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+unit+tests%22+branch%3Amaster) [![GitHub
 Release](https://img.shields.io/github/release/FormulasQuestion/moodle-qtype_formulas.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/releases)
 
