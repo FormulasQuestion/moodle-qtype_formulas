@@ -41,7 +41,7 @@ x = 2*x+z;
 f = 4g-e;
 test = (a == b ? c : d);
 EOF;
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'this', 1, 1),
             new token(token::OPERATOR, '=', 1, 6),
             new token(token::IDENTIFIER, 'that', 1, 8),
@@ -91,7 +91,7 @@ EOF;
             new token(token::IDENTIFIER, 'd', 10, 22),
             new token(token::CLOSING_PAREN, ')', 10, 23),
             new token(token::END_OF_STATEMENT, ';', 10, 24),
-        );
+        ];
 
         $lexer = new lexer($input);
         $this->assertEquals($output, $lexer->get_tokens());
@@ -102,7 +102,7 @@ EOF;
 s = 'string with äöüéç…';
 t = join("", 'äöü', 'éçñ…');
 EOF;
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 's', 1, 1),
             new token(token::OPERATOR, '=', 1, 3),
             new token(token::STRING, 'string with äöüéç…', 1, 5),
@@ -118,7 +118,7 @@ EOF;
             new token(token::STRING, 'éçñ…', 2, 21),
             new token(token::CLOSING_PAREN, ')', 2, 27),
             new token(token::END_OF_STATEMENT, ';', 2, 28),
-        );
+        ];
 
         $lexer = new lexer($input);
         $this->assertEquals($output, $lexer->get_tokens());
@@ -132,7 +132,7 @@ EOF;
         a = b + c * d / e - f % g;
 EOF;
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 's1', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::STRING, "single quoted string with an escaped quote ' inside", 0, 0),
@@ -155,7 +155,7 @@ EOF;
             new token(token::OPERATOR, '%', 0, 0),
             new token(token::IDENTIFIER, 'g', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
-        );
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
@@ -173,7 +173,7 @@ EOF;
 EOF;
 
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'a', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::PREFIX, '\\', 0, 0),
@@ -213,7 +213,7 @@ EOF;
             new token(token::IDENTIFIER, 'd', 0, 0),
             new token(token::CLOSING_PAREN, ')', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
-        );
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
@@ -230,7 +230,7 @@ EOF;
 EOF;
 
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'a', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::IDENTIFIER, 'sin', 0, 0),
@@ -256,7 +256,7 @@ EOF;
             new token(token::IDENTIFIER, 'b', 0, 0),
             new token(token::CLOSING_PAREN, ')', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
-        );
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
@@ -273,7 +273,7 @@ EOF;
 EOF;
 
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'a', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::OPENING_BRACE, '{', 0, 0),
@@ -322,7 +322,7 @@ EOF;
             new token(token::CLOSING_BRACKET, ']', 0, 0),
             new token(token::CLOSING_BRACKET, ']', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
-        );
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
@@ -339,7 +339,7 @@ EOF;
 EOF;
 
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'a', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::OPENING_PAREN, '(', 0, 0),
@@ -371,7 +371,7 @@ EOF;
             new token(token::NUMBER, 4, 0, 0),
             new token(token::CLOSING_PAREN, ')', 0, 0),
             new token(token::END_OF_STATEMENT, ';', 0, 0),
-        );
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {
@@ -386,7 +386,7 @@ EOF;
 EOF;
 
         // We are not testing the positions here.
-        $output = array(
+        $output = [
             new token(token::IDENTIFIER, 'a', 0, 0),
             new token(token::OPERATOR, '=', 0, 0),
             new token(token::OPENING_BRACE, '{', 0, 0),
@@ -459,15 +459,15 @@ EOF;
     }
 
     public function test_read_identifier() {
-        $testcases = array(
-            array('input' => 'abc_', 'output' => 'abc_'),
-            array('input' => 'a1', 'output' => 'a1'),
-            array('input' => 'ab-', 'output' => 'ab'),
-            array('input' => 'ABCabc', 'output' => 'ABCabc'),
-            array('input' => 'ABC___abc', 'output' => 'ABC___abc'),
-            array('input' => 'abc1*', 'output' => 'abc1'),
-            array('input' => 'abc(x)', 'output' => 'abc'),
-        );
+        $testcases = [
+            ['input' => 'abc_', 'output' => 'abc_'],
+            ['input' => 'a1', 'output' => 'a1'],
+            ['input' => 'ab-', 'output' => 'ab'],
+            ['input' => 'ABCabc', 'output' => 'ABCabc'],
+            ['input' => 'ABC___abc', 'output' => 'ABC___abc'],
+            ['input' => 'abc1*', 'output' => 'abc1'],
+            ['input' => 'abc(x)', 'output' => 'abc'],
+        ];
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
@@ -477,19 +477,19 @@ EOF;
     }
 
     public function test_read_parens() {
-        $testcases = array(
-            array('input' => ';', 'output' => ';'),
-            array('input' => '(', 'output' => '('),
-            array('input' => '[', 'output' => '['),
-            array('input' => '{', 'output' => '{'),
-            array('input' => '(a', 'output' => '('),
-            array('input' => '[   asd', 'output' => '['),
-            array('input' => ')', 'output' => ')'),
-            array('input' => ']', 'output' => ']'),
-            array('input' => '}', 'output' => '}'),
-            array('input' => '}a', 'output' => '}'),
-            array('input' => ']   asd', 'output' => ']'),
-        );
+        $testcases = [
+            ['input' => ';', 'output' => ';'],
+            ['input' => '(', 'output' => '('],
+            ['input' => '[', 'output' => '['],
+            ['input' => '{', 'output' => '{'],
+            ['input' => '(a', 'output' => '('],
+            ['input' => '[   asd', 'output' => '['],
+            ['input' => ')', 'output' => ')'],
+            ['input' => ']', 'output' => ']'],
+            ['input' => '}', 'output' => '}'],
+            ['input' => '}a', 'output' => '}'],
+            ['input' => ']   asd', 'output' => ']'],
+        ];
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
@@ -499,43 +499,43 @@ EOF;
     }
 
     public function test_read_operator() {
-        $testcases = array(
-            array('input' => '+', 'output' => '+'),
-            array('input' => '+*', 'output' => '+'),
-            array('input' => '+ ', 'output' => '+'),
-            array('input' => '-', 'output' => '-'),
-            array('input' => '*', 'output' => '*'),
-            array('input' => '/', 'output' => '/'),
-            array('input' => '%', 'output' => '%'),
-            array('input' => '**', 'output' => '**'),
-            array('input' => '***', 'output' => '**'),
-            array('input' => '=', 'output' => '='),
-            array('input' => '&', 'output' => '&'),
-            array('input' => '|', 'output' => '|'),
-            array('input' => '~', 'output' => '~'),
-            array('input' => '^', 'output' => '^'),
-            array('input' => '<<', 'output' => '<<'),
-            array('input' => '>>', 'output' => '>>'),
-            array('input' => '==', 'output' => '=='),
-            array('input' => '===', 'output' => '=='),
-            array('input' => '!=', 'output' => '!='),
-            array('input' => '!+', 'output' => '!'),
-            array('input' => '!==', 'output' => '!='),
-            array('input' => '>', 'output' => '>'),
-            array('input' => '<', 'output' => '<'),
-            array('input' => '<=', 'output' => '<='),
-            array('input' => '<==', 'output' => '<='),
-            array('input' => '>=', 'output' => '>='),
-            array('input' => '>==', 'output' => '>='),
-            array('input' => '&&', 'output' => '&&'),
-            array('input' => '&&&', 'output' => '&&'),
-            array('input' => '||', 'output' => '||'),
-            array('input' => '|*|', 'output' => '|'),
-            array('input' => '|||', 'output' => '||'),
-            array('input' => '!', 'output' => '!'),
-            array('input' => '?', 'output' => '?'),
-            array('input' => ':', 'output' => ':'),
-        );
+        $testcases = [
+            ['input' => '+', 'output' => '+'],
+            ['input' => '+*', 'output' => '+'],
+            ['input' => '+ ', 'output' => '+'],
+            ['input' => '-', 'output' => '-'],
+            ['input' => '*', 'output' => '*'],
+            ['input' => '/', 'output' => '/'],
+            ['input' => '%', 'output' => '%'],
+            ['input' => '**', 'output' => '**'],
+            ['input' => '***', 'output' => '**'],
+            ['input' => '=', 'output' => '='],
+            ['input' => '&', 'output' => '&'],
+            ['input' => '|', 'output' => '|'],
+            ['input' => '~', 'output' => '~'],
+            ['input' => '^', 'output' => '^'],
+            ['input' => '<<', 'output' => '<<'],
+            ['input' => '>>', 'output' => '>>'],
+            ['input' => '==', 'output' => '=='],
+            ['input' => '===', 'output' => '=='],
+            ['input' => '!=', 'output' => '!='],
+            ['input' => '!+', 'output' => '!'],
+            ['input' => '!==', 'output' => '!='],
+            ['input' => '>', 'output' => '>'],
+            ['input' => '<', 'output' => '<'],
+            ['input' => '<=', 'output' => '<='],
+            ['input' => '<==', 'output' => '<='],
+            ['input' => '>=', 'output' => '>='],
+            ['input' => '>==', 'output' => '>='],
+            ['input' => '&&', 'output' => '&&'],
+            ['input' => '&&&', 'output' => '&&'],
+            ['input' => '||', 'output' => '||'],
+            ['input' => '|*|', 'output' => '|'],
+            ['input' => '|||', 'output' => '||'],
+            ['input' => '!', 'output' => '!'],
+            ['input' => '?', 'output' => '?'],
+            ['input' => ':', 'output' => ':'],
+        ];
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
@@ -545,45 +545,44 @@ EOF;
     }
 
     public function test_read_string() {
-        $testcases = array(
-            array('input' => "'foo'", 'output' => 'foo'),
-            array('input' => '"foo"', 'output' => 'foo'),
+        $testcases = [
+            ['input' => "'foo'", 'output' => 'foo'],
+            ['input' => '"foo"', 'output' => 'foo'],
             // Test a single quote string with a linebreak.
-            array('input' => "'foo\nbar'", 'output' => "foo\nbar"),
+            ['input' => "'foo\nbar'", 'output' => "foo\nbar"],
             // Test usage of a double quote in a single quote string.
-            array('input' => "'foo\"bar'", 'output' => "foo\"bar"),
+            ['input' => "'foo\"bar'", 'output' => "foo\"bar"],
             // Test usage of an escaped double quote in a double quote string.
-            array('input' => '"foo\"bar"', 'output' => 'foo"bar'),
+            ['input' => '"foo\"bar"', 'output' => 'foo"bar'],
             // Test useage of a single quote in a double quote string.
-            array('input' => '"foo\'bar"', 'output' => "foo'bar"),
+            ['input' => '"foo\'bar"', 'output' => "foo'bar"],
             // Test usage of the escape sequence \n in a single quote string.
-            array('input' => "'foo\\nbar'", 'output' => "foo\nbar"),
+            ['input' => "'foo\\nbar'", 'output' => "foo\nbar"],
             // Test usage of the escape sequence \n in a double quote string.
-            array('input' => '"foo\nbar"', 'output' => "foo\nbar"),
+            ['input' => '"foo\nbar"', 'output' => "foo\nbar"],
             // Test usage of the escape sequence \t in a single quote string.
-            array('input' => "'foo\\tbar'", 'output' => "foo\tbar"),
+            ['input' => "'foo\\tbar'", 'output' => "foo\tbar"],
             // Test usage of the escape sequence \t in a double quote string.
-            array('input' => '"foo\tbar"', 'output' => "foo\tbar"),
+            ['input' => '"foo\tbar"', 'output' => "foo\tbar"],
             // Test usage of an unescaped backslash in a double quote string.
-            array('input' => '"foo\bar"', 'output' => 'foo\bar'),
+            ['input' => '"foo\bar"', 'output' => 'foo\bar'],
             // Test usage of an unescaped backslash in single quote string.
-            array('input' => "'foo\\bar'", 'output' => 'foo\bar'),
+            ['input' => "'foo\\bar'", 'output' => 'foo\bar'],
             // Test usage of an escaped backslash in a double quote string.
-            array('input' => '"foo\\\\bar"', 'output' => 'foo\\\\bar'),
+            ['input' => '"foo\\\\bar"', 'output' => 'foo\\\\bar'],
             // Test usage of an escaped backslash in single quote string.
-            array('input' => "'foo\\\\bar'", 'output' => 'foo\\\\bar'),
-
-        );
+            ['input' => "'foo\\\\bar'", 'output' => 'foo\\\\bar'],
+        ];
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
             $tokens = $lexer->get_tokens();
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
-        $testcases = array(
-            array('input' => '"foo'),
-            array('input' => "'foo"),
-        );
+        $testcases = [
+            ['input' => '"foo'],
+            ['input' => "'foo"],
+        ];
         foreach ($testcases as $case) {
             try {
                 $lexer = new lexer($case['input']);
@@ -597,37 +596,37 @@ EOF;
      * Test whether the read() function of the tokenizer class correctly parses numbers.
      */
     public function test_read_number() {
-        $testcases = array(
-            array('input' => "\n123", 'output' => 123),
-            array('input' => "\n\n123", 'output' => 123),
-            array('input' => "321# testcomment", 'output' => 321),
-            array('input' => '1a2b3c4d', 'output' => 1),
-            array('input' => '1234', 'output' => 1234),
-            array('input' => '1234    ', 'output' => 1234),
-            array('input' => ' 1234', 'output' => 1234),
-            array('input' => ' 123 4', 'output' => 123),
-            array('input' => '1234aaaaa', 'output' => 1234),
-            array('input' => "    \n\n\t\r   1234", 'output' => 1234),
-            array('input' => '.12', 'output' => 0.12),
-            array('input' => '     .123', 'output' => 0.123),
-            array('input' => '0.111', 'output' => 0.111),
-            array('input' => '12.34', 'output' => 12.34),
-            array('input' => '12.34e2', 'output' => 1234),
-            array('input' => '1E3e2', 'output' => 1000),
-            array('input' => '1E5', 'output' => 100000),
-            array('input' => '1e4', 'output' => 10000),
-            array('input' => '1e', 'output' => 1),
-            array('input' => '1ex', 'output' => 1),
-            array('input' => '12e ', 'output' => 12),
-            array('input' => '1e-2', 'output' => 0.01),
-            array('input' => '1e+2', 'output' => 100),
-            array('input' => '1e-2+', 'output' => 0.01),
-            array('input' => '1e+2-', 'output' => 100),
-            array('input' => '12e+', 'output' => 12),
-            array('input' => '15e-', 'output' => 15),
-            array('input' => '17e-+', 'output' => 17),
-            array('input' => '23e+-', 'output' => 23),
-        );
+        $testcases = [
+            ['input' => "\n123", 'output' => 123],
+            ['input' => "\n\n123", 'output' => 123],
+            ['input' => "321# testcomment", 'output' => 321],
+            ['input' => '1a2b3c4d', 'output' => 1],
+            ['input' => '1234', 'output' => 1234],
+            ['input' => '1234    ', 'output' => 1234],
+            ['input' => ' 1234', 'output' => 1234],
+            ['input' => ' 123 4', 'output' => 123],
+            ['input' => '1234aaaaa', 'output' => 1234],
+            ['input' => "    \n\n\t\r   1234", 'output' => 1234],
+            ['input' => '.12', 'output' => 0.12],
+            ['input' => '     .123', 'output' => 0.123],
+            ['input' => '0.111', 'output' => 0.111],
+            ['input' => '12.34', 'output' => 12.34],
+            ['input' => '12.34e2', 'output' => 1234],
+            ['input' => '1E3e2', 'output' => 1000],
+            ['input' => '1E5', 'output' => 100000],
+            ['input' => '1e4', 'output' => 10000],
+            ['input' => '1e', 'output' => 1],
+            ['input' => '1ex', 'output' => 1],
+            ['input' => '12e ', 'output' => 12],
+            ['input' => '1e-2', 'output' => 0.01],
+            ['input' => '1e+2', 'output' => 100],
+            ['input' => '1e-2+', 'output' => 0.01],
+            ['input' => '1e+2-', 'output' => 100],
+            ['input' => '12e+', 'output' => 12],
+            ['input' => '15e-', 'output' => 15],
+            ['input' => '17e-+', 'output' => 17],
+            ['input' => '23e+-', 'output' => 23],
+        ];
 
         foreach ($testcases as $case) {
             $lexer = new lexer($case['input']);
@@ -635,10 +634,10 @@ EOF;
             $this->assertEquals($case['output'], $tokens[0]->value);
         }
 
-        $testcases = array(
+        $testcases = [
             // Should be tokenized as 5. (number) - a2 (identifier) - . (unexpected!) and fail.
-            array('input' => '5.a2.b3.c4.d'),
-        );
+            ['input' => '5.a2.b3.c4.d'],
+        ];
         foreach ($testcases as $case) {
             try {
                 $lexer = new lexer($case['input']);
