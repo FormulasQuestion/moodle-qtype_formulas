@@ -412,7 +412,44 @@ EOF;
             new token(token::RANGE_SEPARATOR, ':', 0, 0),
             new token(token::NUMBER, 15, 0, 0),
             new token(token::CLOSING_BRACE, '}', 0, 0),
-        );
+        ];
+
+        $tokens = (new lexer($input))->get_tokens();
+        foreach ($tokens as $i => $token) {
+            $this->assertEquals($output[$i]->type, $token->type);
+            $this->assertEquals($output[$i]->value, $token->value);
+        }
+    }
+
+    public function test_pi() {
+        $input = 'π + π(1 + 2) + pi + pi() + pi(2) + pi(1 + 2)';
+
+        $output = [
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPERATOR, '+'),
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPENING_PAREN, '('),
+            new token(token::NUMBER, '1'),
+            new token(token::OPERATOR, '+'),
+            new token(token::NUMBER, '2'),
+            new token(token::CLOSING_PAREN, ')'),
+            new token(token::OPERATOR, '+'),
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPERATOR, '+'),
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPERATOR, '+'),
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPENING_PAREN, '('),
+            new token(token::NUMBER, '2'),
+            new token(token::CLOSING_PAREN, ')'),
+            new token(token::OPERATOR, '+'),
+            new token(token::CONSTANT, 'π'),
+            new token(token::OPENING_PAREN, '('),
+            new token(token::NUMBER, '1'),
+            new token(token::OPERATOR, '+'),
+            new token(token::NUMBER, '2'),
+            new token(token::CLOSING_PAREN, ')'),
+        ];
 
         $tokens = (new lexer($input))->get_tokens();
         foreach ($tokens as $i => $token) {

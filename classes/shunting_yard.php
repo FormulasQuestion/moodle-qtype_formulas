@@ -299,13 +299,13 @@ class shunting_yard {
                 $unarypossible = true;
             }
             // Insert inplicit multiplication sign, if
-            // - current token is a variable, a function name, a number or an opening parenthesis
-            // - last token was a variable, a number or a closing parenthesis
+            // - current token is a variable, a constant, a function name, a number or an opening parenthesis
+            // - last token was a variable, a constant, a number or a closing parenthesis
             // For accurate error reporting (e.g. if the multiplication reveals itself as impossible
             // during evaluation), the row and column number of the implicit multiplication token are
             // copied over from the current token which triggered the multiplication.
-            if (in_array($type, [token::VARIABLE, token::FUNCTION, token::NUMBER, token::OPENING_PAREN])) {
-                if (in_array($lasttype, [token::VARIABLE, token::NUMBER, token::CLOSING_PAREN])) {
+            if (in_array($type, [token::VARIABLE, token::CONSTANT, token::FUNCTION, token::NUMBER, token::OPENING_PAREN])) {
+                if (in_array($lasttype, [token::VARIABLE, token::CONSTANT, token::NUMBER, token::CLOSING_PAREN])) {
                     self::flush_higher_precedence($opstack, self::get_precedence('*'), $output);
                     $opstack[] = new token(token::OPERATOR, '*', $token->row, $token->column);
                 }
