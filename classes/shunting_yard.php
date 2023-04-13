@@ -359,12 +359,12 @@ class shunting_yard {
                 case token::OPENING_BRACKET:
                     // By default, let's assume we are building a new array.
                     $sentinel = new token(token::OPERATOR, '%%arraybuild', $token->row, $token->column);
-                    // If the last token was a variable, the closing bracket of an array
+                    // If the last token was a variable, a string, the closing bracket of an array
                     // (or another index, e.g. for a multi-dimensional array) or the closing
                     // parenthesis of a function call which might return an array. We cannot reliably
                     // know whether the parenthesis really comes from a function, but if it does not,
                     // the user will run into an evaluation error later.
-                    if (in_array($lasttype, [token::VARIABLE, token::CLOSING_BRACKET, token::CLOSING_PAREN])) {
+                    if (in_array($lasttype, [token::VARIABLE, token::STRING, token::CLOSING_BRACKET, token::CLOSING_PAREN])) {
                         $sentinel->value = '%%arrayindex';
                     }
                     // Push the opening bracket to the output queue. During evaluation, this will be used

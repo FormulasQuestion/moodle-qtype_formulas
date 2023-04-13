@@ -69,7 +69,6 @@ class evaluator {
         'max' => [1, INF],
         'min' => [1, INF],
         'octdec' => [1, 1],
-        'pi' => [0, 0],
         'pow' => [2, 2],
         'rad2deg' => [1, 1],
         'round' => [2, 2],
@@ -80,8 +79,8 @@ class evaluator {
         'tanh' => [1, 1],
     ];
 
-    private $ownfunctions = ['fact'];
     private $variableslist = [];
+
     private $constants = [
         'π' => M_PI,
     ];
@@ -130,6 +129,8 @@ class evaluator {
                 continue;
             }
 
+
+
             if ($type === token::OPERATOR) {
                 if ($this->is_unary_operator($token)) {
                     $this->stack[] = $this->execute_unary_operator($token);
@@ -148,7 +149,7 @@ class evaluator {
                 }
                 if ($value === '%%rangebuild') {
                     $elements = $this->build_range();
-                    $this->stack = array_merge($this->stack, $elements);
+                    array_push($this->stack, ...$elements);
                 }
             }
 
@@ -177,13 +178,14 @@ class evaluator {
 
         $arraytoken = array_pop($this->stack);
 
-        // FIXME: maybe allow access to string character? (would have to be read only)
-        if ($arraytoken->type !== token::LIST) {
+        if (!in_array($arraytoken->type, [token::LIST, token::STRING])) {
+            // FIXME: change error message?
             $this->die('evaluation error: trying to access array offset on a scalar value', $nexttoken);
         }
 
         // FIXME: check if out of range
-        $element = $arraytoken->value[$indextoken->value];
+        $element = $arraytoken->value[intval($indextoken->value)];
+        // different return value for array or string access
         return $element;
     }
 
@@ -200,7 +202,7 @@ class evaluator {
 
         // Step must not be zero.
         if ($step === 0) {
-            $this->die('syntax error: step size of a range cannot be zero', $step);
+            $this->die('syntax error: step size of a range cannot be zero', $steptoken);
         }
 
         // Fetch start and end of the range. Conserve token for the end value, in case of an error.
