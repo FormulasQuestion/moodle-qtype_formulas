@@ -290,6 +290,16 @@ class lexer {
         }
         if ($result === 'for') {
             $type = token::RESERVED_WORD;
+        } else if ($result === 'pi') {
+            $type = token::CONSTANT;
+            $result = 'π';
+            // If we have the legacy syntax pi(), we drop the two parens.
+            $next = $this->inputstream->peek();
+            $nextbutone = $this->inputstream->peek(1);
+            if ($next === '(' && $nextbutone === ')') {
+                $this->inputstream->read();
+                $this->inputstream->read();
+            }
         } else {
             $type = token::IDENTIFIER;
         }

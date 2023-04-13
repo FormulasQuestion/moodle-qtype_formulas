@@ -209,14 +209,8 @@ class parser {
                 if (!$this->is_known_variable($currenttoken) && $nexttype === token::OPENING_PAREN) {
                     $type = ($currenttoken->type = token::FUNCTION);
                 } else {
-                    // The identfier pi, if used like a variable, will be classified as CONSTANT.
-                    if ($value === 'pi') {
-                        $type = ($currenttoken->type = token::CONSTANT);
-                        $value = ($currenttoken->value = 'π');
-                    } else {
-                        $type = ($currenttoken->type = token::VARIABLE);
-                        $this->register_variable($currenttoken);
-                    }
+                    $type = ($currenttoken->type = token::VARIABLE);
+                    $this->register_variable($currenttoken);
                 }
             }
 
