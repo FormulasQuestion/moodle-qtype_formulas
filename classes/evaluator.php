@@ -163,29 +163,60 @@ class evaluator {
 
     private function fetch_array_element() {
         $indextoken = array_pop($this->stack);
+        $index = $indextoken->value;
         $nexttoken = array_pop($this->stack);
 
-        // FIXME: if index is not numeric, try to convert to number
+        // Check if the index is a number. If it is not, try to convert it.
+        // If conversion fails, throw an error.
         if ($indextoken->type !== token::NUMBER) {
-            $this->die("evaluation error: expected numerical index, found '{$indextoken->value}'", $indextoken);
+            if (!is_numeric($index)) {
+                $this->die("evaluation error: expected numerical index, found '{$index}'", $indextoken);
+            }
+            $index = floatval($index);
         }
 
-        // FIXME: check if index is int, otherwise truncate
+        // If the index is not a whole number, throw an error. A whole number in float
+        // representation is fine, though.
+        if (abs($index - intval($index)) > 1e-6) {
+            $this->die("evaluation error: index should be an integer, found '{$index}'", $indextoken);
+        }
+        $index = intval($index);
 
+        // Make sure there is only one index.
         if ($nexttoken->type !== token::OPENING_BRACKET) {
             $this->die('evaluation error: only one index supported when accessing array elements', $indextoken);
         }
 
+        // Fetch the array or string from the stack.
         $arraytoken = array_pop($this->stack);
-
         if (!in_array($arraytoken->type, [token::LIST, token::STRING])) {
-            // FIXME: change error message?
-            $this->die('evaluation error: trying to access array offset on a scalar value', $nexttoken);
+            $this->die('evaluation error: indexing is only possible with arrays (lists) and strings', $nexttoken);
+        }
+        $array = $arraytoken->value;
+
+        // Fetch the length of the array or string.
+        if ($arraytoken->type === token::STRING) {
+            $len = strlen($array);
+        } else {
+            $len = count($array);
+        }
+        // Negative indices can be used to count "from the end". For strings, this is
+        // directly supported in PHP, but not for arrays. So for the sake of simplicity,
+        // we do our own preprocessing.
+        if ($index < 0) {
+            $index = $index + $len;
+        }
+        // Now check if the index is out of range. We use the original value from the token.
+        if ($index > $len - 1 || $index < 0) {
+            $this->die("evaluation error: index out of range: {$indextoken->value}", $indextoken);
         }
 
-        // FIXME: check if out of range
-        $element = $arraytoken->value[intval($indextoken->value)];
-        // different return value for array or string access
+        $element = $array[$index];
+        // If we are accessing a string's char, we create a new string token.
+        if ($arraytoken->type === token::STRING) {
+            return new token(token::STRING, $element, $arraytoken->row, $arraytoken->column + $index);
+        }
+        // Otherwise, the element is already wrapped in a token.
         return $element;
     }
 
