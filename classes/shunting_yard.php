@@ -404,23 +404,19 @@ class shunting_yard {
                     $thisprecedence = self::get_precedence($value);
                     // For the ? part of a ternary operator, we
                     // - flush all operators on the stack with lower precedence (if any)
-                    // - send the ? to the output queue --> not anymore FIXME
                     // - put a pseudo-token on the operator stack as a sentinel
                     // - break, in order to NOT put the ? on the operator stack.
                     if ($value === '?') {
                         self::flush_higher_precedence($opstack, $thisprecedence, $output);
-                        //FIXME not necessary $output[] = $token;
                         $opstack[] = new token(token::OPERATOR, '%%ternary');
                         break;
                     }
                     // For the : part of a ternary operator, we
                     // - flush all operators on the stack until we reach the ?
                     // - do NOT flush the ? but leave it on the operator stack as a sentinel
-                    // - send the : to the output queue. --> not anymore FIXME
                     // - break, in order to NOT put the : on the operator stack.
                     if ($value === ':') {
                         self::flush_ternary_part($opstack, $output);
-                        // FIXME not necessary $output[] = $token;
                         break;
                     }
                     // For left associative operators, all pending operators with higher precedence go
@@ -447,15 +443,11 @@ class shunting_yard {
                     if ($lasttype !== token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
                     }
-                    // Pop the most recent array element counter. For %%arrayindex, we'll later check it's 1.
-                    // FIXME: no need to check count === 1 anymore, can be done during evaluation of %%arrayindex
+                    // Pop the most recent array element counter.
                     $numofelements = array_pop($counters['arrayelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
                     $head = end($opstack);
-                    if ($head->value === '%%arrayindex' && $numofelements !== 1) {
-                        self::die('syntax error: when accessing array elements, only one index is allowed at a time', $token);
-                    }
                     if (!in_array($head->value, ['%%arrayindex', '%%arraybuild'])) {
                         self::die('syntax error: unknown parse error', $token);
                     }
