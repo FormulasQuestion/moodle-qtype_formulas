@@ -289,7 +289,7 @@ class evaluator {
     }
 
     private function needs_numeric_input($token) {
-        $operators = ['**', '*', '/', '%', '-', '<<', '>>', '&', '^', '|', '&&', '||'];
+        $operators = ['_', '~', '**', '*', '/', '%', '-', '<<', '>>', '&', '^', '|', '&&', '||'];
         return in_array($token->value, $operators);
     }
 
@@ -311,7 +311,7 @@ class evaluator {
         $input = array_pop($this->stack);
         // Check if the input is numeric. Boolean values are internally treated as 1 and 0 for
         // backwards compatibility.
-        if ($input->type !== token::NUMBER) {
+        if ($this->needs_numeric_input($token) && $input->type !== token::NUMBER) {
             $this->die("evaluation error: numerical value expected, got '{$input->value}'", $input);
         }
         $value = $input->value;
@@ -321,7 +321,7 @@ class evaluator {
                 $output = (-1) * $value;
                 break;
             case '!':
-                $output = ($value ? 1 : 0);
+                $output = ($value ? 0 : 1);
                 break;
             case '~':
                 $output = ~ $value;
@@ -355,10 +355,16 @@ class evaluator {
                 // FIXME: set $outtype according to type of $second
                 break;
             case '**':
-                // FIXME checks:
-                // - negative exponent -> base ≠ 0
-                // - 0 ** 0
-                // - negative base -> exponent must be integer
+                // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
+                if ($first == 0 && $second == 0) {
+                    $this->die('power 0^0 is not defined', $token);
+                }
+                if ($first < 0 && $second == 0) {
+                    $this->die('division by zero is not defined, so base cannot be zero for negative exponents', $token);
+                }
+                if ($second < 0 && intval($first) != $first) {
+                    $this->die('base cannot be negative with fractional exponent', $token);
+                }
                 $output = $second ** $first;
                 break;
             case '*':
@@ -389,11 +395,6 @@ class evaluator {
                 $output = $second - $first;
                 break;
             case '<<':
-                // FIXME: checks
-                // - args must be integer (truncate if necessary)
-                // - second must be non-negative
-                $output = $second << $first;
-                break;
             case '>>':
                 if (intval($first) != $first || intval($second) != $second) {
                     $this->die('bit shift operator should only be used with integers', $token);
@@ -449,6 +450,11 @@ class evaluator {
             case '!=':
                 $output = ($second != $first ? 1 : 0);
                 break;
+        }
+        // One last safety check: numeric results must not be NAN or INF.
+        // This should never be triggered.
+        if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
+            $this->die('evaluation error', $token);
         }
         return new token($outtype, $output, $token->row, $token->column);
     }
