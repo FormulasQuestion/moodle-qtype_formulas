@@ -30,6 +30,8 @@ use Throwable, Exception;
 
 TODO:
 
+ * set value for individual array element / make %%arrayindex aware of variables vs. literals
+
 */
 
 class evaluator {
@@ -79,7 +81,7 @@ class evaluator {
         'tanh' => [1, 1],
     ];
 
-    private $variableslist = [];
+    private $variables = [];
 
     private $constants = [
         'π' => M_PI,
@@ -91,8 +93,97 @@ class evaluator {
      * FIXME Undocumented function
      *
      */
-    public function __construct() {
+    public function __construct(?string $context = null) {
+        // If a context is given, we initialize our variables accordingly.
+        if (is_string($context)) {
+            $this->import_variable_context($context);
+        }
+    }
 
+    public function export_variable_context(): string {
+        return serialize($this->variables);
+    }
+
+    /**
+     * Import an existing variable context, e.g. from another evaluator class.
+     * If the same variable exists in our context and the incoming context, the
+     * incoming context will overwrite our data. This can be avoided by setting
+     * the optional parameter to false.
+     *
+     * @param string $data serialized variable context exported from another evaluator
+     * @param boolean $overwrite whether to overwrite existing data with incoming context
+     * @return void
+     */
+    public function import_variable_context(string $data, bool $overwrite = true) {
+        $incoming = unserialize($data, ['allowed_classes' => ['qtype_formulas\variable']]);
+        if ($incoming === false) {
+            throw new Exception('invalid variable context given, aborting import');
+        }
+        foreach ($incoming as $name => $var) {
+            // New variables are added.
+            // Existing variables are only overwritten, if $overwrite is true.
+            $notknownyet = !array_key_exists($name, $this->variables);
+            if ($notknownyet || $overwrite) {
+                $this->variables[$name] = $var;
+            }
+        }
+    }
+
+    /**
+     * Check if the token $token or, in case we are dealing with a VARIABLE,
+     * the value stored in that variable, has one of the types defined in $types.
+     * For convenience, $types can also be a single type.
+     *
+     * @param token $token the token to check
+     * @param int|array $types one single type or an array of types
+     * @return boolean
+     */
+    private function is_type(token $token, $types): bool {
+        // If one type is given, turn it into an array.
+        if (is_int($types)) {
+            $types = [$types];
+        }
+        // If the token is a variable, we try to fetch its type.
+        if ($token->type === token::VARIABLE) {
+            $name = $token->value;
+            if (!array_key_exists($name, $this->variables)) {
+                $this->die("unknown variable: $name", $token);
+            }
+            return in_array($this->variables[$name]->type, $types);
+        }
+        // Otherwise, the type is stored in the token.
+        return in_array($token->type, $types);
+    }
+
+    /**
+     * Set the variable defined in $token to the value $value and correctly set
+     * it's $type attribute.
+     *
+     * @param token $variable
+     * @param token $value
+     * @return void
+     */
+    private function set_variable_to_value(token $vartoken, token $value): void {
+        // TODO / FIXME: allow to set individual elements of an array variable.
+        $name = $vartoken->value;
+        $this->variables[$name] = new variable($name, $value->value, $value->type);
+    }
+
+    /**
+     * Get the value token that is stored in a variable. If the token is a literal
+     * (number, string, array, set), just return the value directly.
+     *
+     * @param token $variable
+     * @return token
+     */
+    private function get_variable_value(token $variable): token {
+        // TODO / FIXME: allow to get array elements.
+        $name = $variable->value;
+        if (!array_key_exists($name, $this->variables)) {
+            $this->die("unknown variable: $name", $variable);
+        }
+        $result = $this->variables[$name];
+        return new token($result->type, $result->value);
     }
 
     /**
@@ -116,9 +207,10 @@ class evaluator {
 
             $isliteral = ($type & token::ANY_LITERAL);
             $isopening = ($type === token::OPENING_BRACE || $type === token::OPENING_BRACKET);
+            $isvariable = ($type === token::VARIABLE);
 
             // Many tokens go directly to the stack.
-            if ($isliteral || $isopening) {
+            if ($isliteral || $isopening || $isvariable) {
                 $this->stack[] = $token;
                 continue;
             }
@@ -129,13 +221,14 @@ class evaluator {
                 continue;
             }
 
-
-
             if ($type === token::OPERATOR) {
                 if ($this->is_unary_operator($token)) {
                     $this->stack[] = $this->execute_unary_operator($token);
                 }
-                if ($this->is_binary_operator($token)) {
+                // The = operator is binary, but we treat it separately.
+                if ($value === '=') {
+                    $this->stack[] = $this->execute_assignment();
+                } else if ($this->is_binary_operator($token)) {
                     $this->stack[] = $this->execute_binary_operator($token);
                 }
                 if ($value === '%%ternary') {
@@ -158,6 +251,8 @@ class evaluator {
             }
 
         }
+        // FIXME: if stack only contains one single variable token, return its content instead
+        // the name.
         return $this->stack;
     }
 
@@ -300,6 +395,22 @@ class evaluator {
         return in_array($token->value, $binaryoperators);
     }
 
+    private function execute_assignment() {
+        $what = array_pop($this->stack);
+        $destination = array_pop($this->stack);
+
+        // The destination must be a variable token.
+        if ($destination->type !== token::VARIABLE) {
+            $this->die('left-hand side of assignment must be a variable', $destination);
+        }
+        // If the value we want to assign is a variable, we fetch its content.
+        if ($what->type === token::VARIABLE) {
+            $what = $this->get_variable_value($what);
+        }
+        $this->set_variable_to_value($destination, $what);
+        return $what;
+    }
+
     private function execute_ternary_operator() {
         $else = array_pop($this->stack);
         $then = array_pop($this->stack);
@@ -309,6 +420,10 @@ class evaluator {
 
     private function execute_unary_operator($token) {
         $input = array_pop($this->stack);
+        // If the input is a variable, we fetch its content.
+        if ($input->type === token::VARIABLE) {
+            $input = $this->get_variable_value($input);
+        }
         // Check if the input is numeric. Boolean values are internally treated as 1 and 0 for
         // backwards compatibility.
         if ($this->needs_numeric_input($token) && $input->type !== token::NUMBER) {
@@ -333,6 +448,15 @@ class evaluator {
     private function execute_binary_operator($token) {
         $first = array_pop($this->stack);
         $second = array_pop($this->stack);
+
+        // If the input is a variable, we fetch its content.
+        if ($first->type === token::VARIABLE) {
+            $first = $this->get_variable_value($first);
+        }
+        // If the input is a variable, we fetch its content.
+        if ($second->type === token::VARIABLE) {
+            $second = $this->get_variable_value($second);
+        }
 
         if ($this->needs_numeric_input($token)) {
             if ($first->type !== token::NUMBER) {
@@ -522,17 +646,4 @@ class evaluator {
             $this->die('evaluation error: ' . $e->getMessage(), $token);
         }
     }
-
-    private function is_known_variable(token $token): bool {
-        return in_array($token->value, $this->variableslist);
-    }
-
-    private function register_variable(token $token): void {
-        // Do not register a variable twice.
-        if ($this->is_known_variable($token)) {
-            return;
-        }
-        $this->variableslist[] = $token->value;
-    }
-
 }
