@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace qtype_formulas;
-use Throwable;
+use Throwable, Exception;
 
 /**
  * Evaluator for qtype_formulas
@@ -102,7 +102,7 @@ class evaluator {
      * @throws Exception
      */
     private function die(string $message, token $offendingtoken): never {
-        throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
+        throw new Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
     private function at_least_on_stack(int $n): bool {
@@ -142,7 +142,7 @@ class evaluator {
                     $this->stack[] = $this->execute_ternary_operator();
                 }
                 if ($value === '%%arrayindex') {
-                    $this->stack[] = $this->fetch_array_element();
+                    $this->stack[] = $this->fetch_array_element_or_char();
                 }
                 if ($value === '%%setbuild' || $value === '%%arraybuild') {
                     $this->stack[] = $this->build_set_or_array($value);
@@ -161,7 +161,7 @@ class evaluator {
         return $this->stack;
     }
 
-    private function fetch_array_element() {
+    private function fetch_array_element_or_char(): token {
         $indextoken = array_pop($this->stack);
         $index = $indextoken->value;
         $nexttoken = array_pop($this->stack);
@@ -365,17 +365,25 @@ class evaluator {
                 $output = $first * $second;
                 break;
             case '/':
-                // FIXME check: $second ≠ 0
-                $output = $second / $first;
-                break;
             case '%':
-                // FIXME check: $second ≠ 0
-                $output = $second % $first;
+                if ($first == 0) {
+                    $this->die('division by zero is not defined', $token);
+                }
+                if ($token->value === '/') {
+                    $output = $second / $first;
+                } else {
+                    $output = $second % $first;
+                }
                 break;
             case '+':
-                // FIXME: with strings -> concatenation
-                // if string -> set $outtype
-                $output = $second + $first;
+                // If at least one operand is a string, we use concatenation instead
+                // of addition.
+                if (is_string($first) || is_string($second)) {
+                    $output = $second . $first;
+                    $outtype = token::STRING;
+                } else {
+                    $output = $second + $first;
+                }
                 break;
             case '-':
                 $output = $second - $first;
@@ -387,19 +395,34 @@ class evaluator {
                 $output = $second << $first;
                 break;
             case '>>':
-                // FIXME: checks as for <<
-                $output = $second >> $first;
+                if (intval($first) != $first || intval($second) != $second) {
+                    $this->die('bit shift operator should only be used with integers', $token);
+                }
+                if ($first < 0) {
+                    $this->die("bit shift by negative number $first is not allowed", $token);
+                }
+                if ($token->value === '<<') {
+                    $output = (int)$second << (int)$first;
+                } else {
+                    $output = (int)$second >> (int)$first;
+                }
                 break;
             case '&':
-                // FIXME: checks
+                if (intval($first) != $first || intval($second) != $second) {
+                    $this->die('bitwise AND should only be used with integers', $token);
+                }
                 $output = $second & $first;
                 break;
             case '^':
-                // FIXME: checks
+                if (intval($first) != $first || intval($second) != $second) {
+                    $this->die('bitwise XOR should only be used with integers', $token);
+                }
                 $output = $second ^ $first;
                 break;
             case '|':
-                // FIXME: checks
+                if (intval($first) != $first || intval($second) != $second) {
+                    $this->die('bitwise OR should only be used with integers', $token);
+                }
                 $output = $second | $first;
                 break;
             case '&&':
