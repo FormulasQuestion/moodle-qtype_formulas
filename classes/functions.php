@@ -32,6 +32,7 @@ class functions {
         'binomialpdf' => [3, 3],
         'fact' => [1, 1],
         'fmod' => [2, 2],
+        'fqversionnumber' => [0, 0],
         'gcd' => [2, 2],
         'lcm' => [2, 2],
         'modinv' => [2, 2],
@@ -42,6 +43,17 @@ class functions {
         'stdnormcdf' => [1, 1],
         'stdnormpdf' => [1, 1],
     ];
+
+    /**
+     * Return the plugin's version number. This is intended for users without
+     * administration access who want to check whether their installation offers
+     * a certain feature or is affected by a certain bug.
+     *
+     * @return string
+     */
+    public static function fqversionnumber(): string {
+        return get_config('qtype_formulas')->version;
+    }
 
     /**
      * Calculate the factorial n! of a number.
