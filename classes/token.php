@@ -66,16 +66,16 @@ class token {
     const LIST = 524288;
     const SET = 1048576;
 
-    /** @var mixed the token's content */
+    /** @var mixed the token's content, will be the name for identifiers */
     public $value;
 
-    /** @var integer token type, e.g. number or string */
+    /** @var int token type, e.g. number or string */
     public $type;
 
-    /** @var integer row in which the token starts */
+    /** @var int row in which the token starts */
     public $row;
 
-    /** @var integer column in which the token starts */
+    /** @var int column in which the token starts */
     public $column;
 
     /**
