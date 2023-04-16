@@ -29,25 +29,28 @@ class unit_conversion_rules {
     public function __construct() {
         $this->basicunitconversionrule[0] = array(get_string('none', 'qtype_formulas'), '');
         $this->basicunitconversionrule[1] = array(get_string('commonsiunit', 'qtype_formulas'), '
-m: k c d m u n p f;
-s: m u n p f;
-g: k m u n p f;
-mol: m u n p;
-N: k m u n p f;
-A: m u n p f;
-J: k M G T P m u n p f;
+m: k c d m u µ μ n p f;
+s: m u µ μ n p f;
+g: k m u µ μ n p f;
+mol: m u µ μ n p;
+N: k m u µ μ n p f;
+A: k m u µ μ n p f;
+J: k M G T P m u µ μ n p f;
 J = 6.24150947e+18 eV;
-eV: k M G T P m u;
-W: k M G T P m u n p f;
+eV: k M G T P m u µ μ;
+W: k M G T P m u µ μ n p f;
 Pa: k M G T P;
 Hz: k M G T P E;
-C: k m u n p f;
-V: k M G m u n p f;
+C: k m u µ μ n p f;
+V: k M G m u µ μ n p f;
 ohm: m k M G T P;
-F: m u n p f;
-T: k m u n p;
-H: k m u n p;
+Ω: u µ μ m k M G T P;
+F: m u µ μ n p f;
+T: k m u µ μ n p;
+H: k m u µ μ n p;
 ');
+
+        $this->basicunitconversionrule[2] = array(get_string('allsiunits', 'qtype_formulas'), '');
 
         /* You can define your own rules here, for instance:
          * $this->basicunitconversionrule[100] = array(

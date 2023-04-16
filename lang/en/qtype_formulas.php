@@ -168,10 +168,14 @@ $string['ruleid'] = 'Basic conversion rules';
 $string['ruleid_help'] = 'This question type has a build-in unit conversion system and has basic conversion rules.
 
 The basic one is the "Common SI unit" rules that will convert standard units
-such as unit for length, say, km, m, cm and mm. This option has no
-effect if no unit has been used.';
+such as unit for length, say, km, m, cm and mm.
+The "All SI units" rules converts all given units with its SI prefixes including u and µ (Greek letter),
+see https://en.wikipedia.org/wiki/Metric_prefix.
+Those options have no effect if no unit has been used.';
+
 $string['none'] = 'None';
 $string['commonsiunit'] = 'Common SI unit';
+$string['allsiunits'] = 'All SI units';
 $string['otherrule'] = 'Other rules';
 $string['otherrule_help'] = 'Here the question\' author can define additional  conversion rules for other accepted base units. See documentation for the advanced usages.';
 $string['subqtext'] = 'Part\'s text';

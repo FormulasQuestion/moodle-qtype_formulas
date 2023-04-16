@@ -913,7 +913,7 @@ class qtype_formulas extends question_type {
                 if ($entry === null || $entry[1] === null) {
                     throw new Exception(get_string('error_ruleid', 'qtype_formulas'));
                 }
-                $unitcheck->assign_default_rules($ans->ruleid, $entry[1]);
+                $unitcheck->assign_default_rules($ans->ruleid, $entry[1], $ans->postunit);
                 $unitcheck->reparse_all_rules();
             } catch (Exception $e) {
                 $errors["ruleid[$idx]"] = $e->getMessage();
