@@ -31,13 +31,11 @@ TODO:
 
 * special variables like _err and _relerr; _0, _1 etc., _a, _r and _d:
 *   -> must not be LHS in assignment, can only be used in certain contexts
-* variables stack
-* context -> already defined variables and their values
-            + instantiated random values
-            export (serialize) and import
 * parsing and instantiation of random vars
 * units
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
+
+* assignment to array element, e.g. a=[1,2,3]; a[1]=9; b=a[1]; (already possible in legacy)
 
 */
 
@@ -65,9 +63,10 @@ class parser {
      * @param [type] $tokenlist
      * @param [type] $knownvariables
      */
-    public function __construct(array $tokenlist, array $knownvariables = []) {
-        $this->count = count($tokenlist);
-        $this->tokenlist = $tokenlist;
+    public function __construct(string $input, array $knownvariables = []) {
+        $lexer = new lexer($input);
+        $this->tokenlist = $lexer->get_tokens();
+        $this->count = count($this->tokenlist);
         $this->variableslist = $knownvariables;
 
         // Check for unbalanced / mismatched parentheses. There will be some redundancy, because
@@ -131,6 +130,32 @@ class parser {
         if (!empty($parenstack)) {
             $unmatched = end($parenstack);
             $this->die("unbalanced parenthesis, '{$unmatched->value}' is never closed", $unmatched);
+        }
+    }
+
+    private function find_closing_paren(token $opener) {
+        $openertype = $opener->type;
+        $i = 0;
+        $nested = 0;
+        $token = $this->peek();
+        while ($token !== self::EOF) {
+            $type = $token->type;
+            // If we see the same type of opening paren, we enter a new nested level.
+            if ($type === $openertype) {
+                $nested++;
+            }
+            // XORing an opening paren's and its closing counterpart's type will have
+            // the 16- and the 32-bit set.
+            if (($type ^ $openertype) === 0b110000) {
+                $nested--;
+            }
+            // We already know that parens are balanced, so a negative level of nesting
+            // means we have reached the closing paren we were looking for.
+            if ($nested < 0) {
+                return $token;
+            }
+            $i++;
+            $token = $this->peek($i);
         }
     }
 
@@ -292,7 +317,7 @@ class parser {
             }
 
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
-            if ($nexttype === token::END_OF_STATEMENT) {
+            if ($nexttype === token::END_OF_STATEMENT || $nexttype === token::END_GROUP) {
                 $this->read_next();
                 break;
             }
@@ -354,19 +379,17 @@ class parser {
      * @return for_loop
      */
     public function parse_forloop(): for_loop {
-        // FIXME: better error reporting (row/col number of error)
-        // FIXME: IDENTIFIER must be changed to VARIABLE
         $variable = null;
         $range = [];
         $statements = [];
 
         // Consume the 'for' token.
-        $currenttoken = $this->read_next();
+        $fortoken = $this->read_next();
 
         // Next must be an opening parenthesis.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::OPENING_PAREN) {
-            $this->die('syntax error: ( expected after for');
+            $this->die('syntax error: ( expected after for', $currenttoken);
         }
         // Consume the opening parenthesis.
         $currenttoken = $this->read_next();
@@ -374,57 +397,64 @@ class parser {
         // Next must be a variable name.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::IDENTIFIER) {
-            $this->die('syntax error: identifier expected');
+            $this->die('syntax error: identifier expected', $currenttoken);
         }
         $currenttoken = $this->read_next();
         $currenttoken->type = token::VARIABLE;
-        $variable = $currenttoken->value;
+        $variable = $currenttoken;
 
         // Next must be a colon.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::RANGE_SEPARATOR) {
-            $this->die('syntax error: : expected');
+            $this->die('syntax error: : expected', $currenttoken);
         }
         $currenttoken = $this->read_next();
 
         // Next must be an opening bracket.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::OPENING_BRACKET) {
-            $this->die('syntax error: [ expected');
+            $this->die('syntax error: [ expected', $currenttoken);
         }
 
         // Read up to the closing bracket. We are sure there is one, because the parser has already
         // checked for mismatched / unbalanced parens.
         $range = $this->parse_general_expression(token::CLOSING_BRACKET);
-        // FIXME: feed the range to the shunting yard algorithm
 
         // Next must be a closing parenthesis.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::CLOSING_PAREN) {
-            $this->die('syntax error: ) expected');
+            $this->die('syntax error: ) expected', $currenttoken);
         }
         $currenttoken = $this->read_next();
 
         // Next must either be an opening brace or the start of a statement.
         $currenttoken = $this->peek();
         if (!$currenttoken) {
-            $this->die('syntax error: { or statement expected');
+            $this->die('syntax error: { or statement expected', $currenttoken);
         }
 
-        // If the token is an opening brace, we have to recursively read upcoming lines,
-        // because there might be nested for loops. Otherwise, we read one single statement.
+        // If the token is an opening brace, we have to parse all upcoming lines until the
+        // matching closing brace. Otherwise, we parse one single line. In any case,
+        // what we read might be a nested for loop, so we process everything recursively.
         if ($currenttoken->type === token::OPENING_BRACE) {
             // Consume the brace.
             $this->read_next();
+            $closer = $this->find_closing_paren($currenttoken);
+            $closer->type = token::END_GROUP;
+            $currenttoken = $this->peek();
             // Parse each statement.
-            while ($currenttoken && $currenttoken->type !== token::CLOSING_BRACE) {
+            while ($currenttoken && $currenttoken->type !== token::END_GROUP) {
                 $statements[] = $this->parse_the_right_thing($currenttoken);
                 $currenttoken = $this->peek();
             }
             // Consume the closing brace.
             $this->read_next();
         } else {
-            $statements[] = $this->parse_general_expression();
+            $statements[] = $this->parse_the_right_thing($currenttoken);
+        }
+
+        if (count($statements) === 0) {
+            $this->die('syntax error: empty for loop', $fortoken);
         }
 
         return new for_loop($variable, $range, $statements);

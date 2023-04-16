@@ -50,17 +50,13 @@ class variable {
     }
 
     public function __toString() {
-        // Arrays are printed in their [...] form.
-        if (gettype($this->value) === 'array') {
-            return $this->stringify_array($this->value);
-        }
-
-        // Sets are printed in their {...} form. Note: Sets are internally stored
-        // as arrays, so we process them in the same way and simply replace the leading
-        // and final brackets by braces.
+        // Arrays are printed in their [...] form, sets are printed as {...}.
         if (gettype($this->value) === 'array') {
             $result = $this->stringify_array($this->value);
-            return '{' . substr($result, 1, -1) . '}';
+            if ($this->type === self::SET) {
+                return '{' . substr($result, 1, -1) . '}';
+            }
+            return $result;
         }
 
         // For booleans, we cannot use strval() directly, because strval(false) is ''.

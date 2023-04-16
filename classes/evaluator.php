@@ -100,6 +100,10 @@ class evaluator {
         }
     }
 
+    private function clear_stack(): void {
+        $this->stack = [];
+    }
+
     public function export_variable_context(): string {
         return serialize($this->variables);
     }
@@ -115,7 +119,7 @@ class evaluator {
      * @return void
      */
     public function import_variable_context(string $data, bool $overwrite = true) {
-        $incoming = unserialize($data, ['allowed_classes' => ['qtype_formulas\variable']]);
+        $incoming = unserialize($data, ['allowed_classes' => ['qtype_formulas\variable', 'qtype_formulas\token']]);
         if ($incoming === false) {
             throw new Exception('invalid variable context given, aborting import');
         }
@@ -127,32 +131,6 @@ class evaluator {
                 $this->variables[$name] = $var;
             }
         }
-    }
-
-    /**
-     * Check if the token $token or, in case we are dealing with a VARIABLE,
-     * the value stored in that variable, has one of the types defined in $types.
-     * For convenience, $types can also be a single type.
-     *
-     * @param token $token the token to check
-     * @param int|array $types one single type or an array of types
-     * @return boolean
-     */
-    private function is_type(token $token, $types): bool {
-        // If one type is given, turn it into an array.
-        if (is_int($types)) {
-            $types = [$types];
-        }
-        // If the token is a variable, we try to fetch its type.
-        if ($token->type === token::VARIABLE) {
-            $name = $token->value;
-            if (!array_key_exists($name, $this->variables)) {
-                $this->die("unknown variable: $name", $token);
-            }
-            return in_array($this->variables[$name]->type, $types);
-        }
-        // Otherwise, the type is stored in the token.
-        return in_array($token->type, $types);
     }
 
     /**
@@ -183,7 +161,8 @@ class evaluator {
             $this->die("unknown variable: $name", $variable);
         }
         $result = $this->variables[$name];
-        return new token($result->type, $result->value);
+        // FIXME: if type is SET, this is either an algebraic variable or an uninstantiated random variable
+        return new token($result->type, $result->value, $variable->row, $variable->column);
     }
 
     /**
@@ -196,11 +175,63 @@ class evaluator {
         throw new Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
-    private function at_least_on_stack(int $n): bool {
-        return count($this->stack) >= $n;
+    /**
+     * Pop top element from the stack. If the token is a literal (number, string, list etc.), return it
+     * directly. If it is a variable, resolve it and return its content.
+     *
+     * @return token
+     */
+    private function pop_real_value(): token {
+        $token = array_pop($this->stack);
+        if ($token->type === token::VARIABLE) {
+            return $this->get_variable_value($token);
+        }
+        return $token;
     }
 
-    public function evaluate(expression $expression) {
+    private function evaluate_the_right_thing($input) {
+        if ($input instanceof expression) {
+            return $this->evaluate_single_expression($input);
+        }
+        if ($input instanceof for_loop) {
+            return $this->evaluate_for_loop($input);
+        }
+        throw new Exception('bad invocation of evaluate(), expected expression or for loop');
+    }
+
+    /**
+     * Evaluate a single expression or an array of expressions.
+     *
+     * @param expression|array $input
+     * @return token|array
+     */
+    public function evaluate($input) {
+        if (($input instanceof expression) || ($input instanceof for_loop)) {
+            return $this->evaluate_the_right_thing($input);
+        }
+        if (!is_array($input)) {
+            throw new Exception('bad invocation of evaluate(), expected an expression or a list of expressions');
+        }
+        $result = [];
+        foreach ($input as $single) {
+            $result[] = $this->evaluate_the_right_thing($single);
+        }
+        return $result;
+    }
+
+    private function evaluate_for_loop(for_loop $loop) {
+        $rangetoken = $this->evaluate_single_expression($loop->range);
+        $range = $rangetoken->value;
+        $result = null;
+        foreach ($range as $iterationvalue) {
+            $this->set_variable_to_value($loop->variable, $iterationvalue);
+            $result = $this->evaluate($loop->body);
+        }
+        $this->clear_stack();
+        return end($result);
+    }
+
+    private function evaluate_single_expression(expression $expression) {
         foreach ($expression->body as $token) {
             $type = $token->type;
             $value = $token->value;
@@ -251,9 +282,15 @@ class evaluator {
             }
 
         }
-        // FIXME: if stack only contains one single variable token, return its content instead
-        // the name.
-        return $this->stack;
+        // If the stack contains more than one element, there must have been a problem somewhere.
+        if (count($this->stack) !== 1) {
+            // FIXME: for debugging only.
+            print_r($this->stack);
+            throw new Exception("stack should contain exactly one element after evaluation");
+        }
+        // If the stack only contains one single variable token, return its content.
+        // Otherwise, return the token.
+        return $this->pop_real_value();
     }
 
     private function fetch_array_element_or_char(): token {
@@ -322,7 +359,9 @@ class evaluator {
         $step = 1;
         // If we have 3 parts, extract the step size. Conserve the token in case of an error.
         if ($parts === 3) {
-            $steptoken = array_pop($this->stack);
+            $steptoken = $this->pop_real_value();
+            // Abort with nice error message, if step is not numeric.
+            $this->abort_if_not_scalar($steptoken);
             $step = $steptoken->value;
         }
 
@@ -332,9 +371,14 @@ class evaluator {
         }
 
         // Fetch start and end of the range. Conserve token for the end value, in case of an error.
-        $endtoken = array_pop($this->stack);
+        $endtoken = $this->pop_real_value();
         $end = $endtoken->value;
-        $start = array_pop($this->stack)->value;
+        $starttoken = $this->pop_real_value();
+        $start = $starttoken->value;
+
+        // Abort with nice error message, if start or end is not numeric.
+        $this->abort_if_not_scalar($starttoken);
+        $this->abort_if_not_scalar($endtoken);
 
         if ($start === $end) {
             $this->die('syntax error: start end end of range must not be equal', $endtoken);
@@ -357,7 +401,6 @@ class evaluator {
     }
 
     private function build_set_or_array(string $type) {
-        // FIXME: remove type / conserve only value for elements ?
         if ($type === '%%setbuild') {
             $delimitertype = token::OPENING_BRACE;
             $outputtype = token::SET;
@@ -379,16 +422,40 @@ class evaluator {
         return new token($outputtype, array_reverse($elements));
     }
 
-    private function is_unary_operator($token) {
+    private function is_unary_operator(token $token): bool {
         return in_array($token->value, ['_', '!', '~']);
     }
 
-    private function needs_numeric_input($token) {
+    private function needs_numeric_input(token $token): bool {
         $operators = ['_', '~', '**', '*', '/', '%', '-', '<<', '>>', '&', '^', '|', '&&', '||'];
         return in_array($token->value, $operators);
     }
 
-    private function is_binary_operator($token) {
+    /**
+     * In many cases, operators need a numeric or at least a scalar operand to work properly.
+     * This function does the necessary check and prepares a human-friendly error message
+     * if the conditions are not met.
+     *
+     * @param token $token the token to check
+     * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
+     * @return void
+     * @throws Exception
+     */
+    private function abort_if_not_scalar(token $token, bool $enforcenumeric = true): void {
+        if ($token->type !== token::NUMBER) {
+            if ($token->type === token::SET) {
+                $value = "'{...}'";
+            } else if ($token->type === token::LIST) {
+                $value = "'[...]'";
+            } else if ($enforcenumeric) {
+                $value = "'{$token->value}'";
+            }
+            $expected = ($enforcenumeric ? 'numeric' : 'scalar');
+            $this->die("evaluation error: $expected value expected, got $value", $token);
+        }
+    }
+
+    private function is_binary_operator(token $token): bool {
         $binaryoperators = ['=', '**', '*', '/', '%', '+', '-', '<<', '>>', '&', '^',
             '|', '&&', '||', '<', '>', '==', '>=', '<=', '!='];
 
@@ -396,16 +463,12 @@ class evaluator {
     }
 
     private function execute_assignment() {
-        $what = array_pop($this->stack);
+        $what = $this->pop_real_value();
         $destination = array_pop($this->stack);
 
         // The destination must be a variable token.
         if ($destination->type !== token::VARIABLE) {
             $this->die('left-hand side of assignment must be a variable', $destination);
-        }
-        // If the value we want to assign is a variable, we fetch its content.
-        if ($what->type === token::VARIABLE) {
-            $what = $this->get_variable_value($what);
         }
         $this->set_variable_to_value($destination, $what);
         return $what;
@@ -419,15 +482,11 @@ class evaluator {
     }
 
     private function execute_unary_operator($token) {
-        $input = array_pop($this->stack);
-        // If the input is a variable, we fetch its content.
-        if ($input->type === token::VARIABLE) {
-            $input = $this->get_variable_value($input);
-        }
+        $input = $this->pop_real_value();
         // Check if the input is numeric. Boolean values are internally treated as 1 and 0 for
         // backwards compatibility.
-        if ($this->needs_numeric_input($token) && $input->type !== token::NUMBER) {
-            $this->die("evaluation error: numerical value expected, got '{$input->value}'", $input);
+        if ($this->needs_numeric_input($token)) {
+            $this->abort_if_not_scalar($input);
         }
         $value = $input->value;
         $output = null;
@@ -445,49 +504,33 @@ class evaluator {
         return new token(token::NUMBER, $output, $token->row, $token->column);
     }
 
-    private function execute_binary_operator($token) {
-        $first = array_pop($this->stack);
-        $second = array_pop($this->stack);
+    private function execute_binary_operator($optoken) {
+        $firsttoken = $this->pop_real_value();
+        $secondtoken = $this->pop_real_value();
 
-        // If the input is a variable, we fetch its content.
-        if ($first->type === token::VARIABLE) {
-            $first = $this->get_variable_value($first);
-        }
-        // If the input is a variable, we fetch its content.
-        if ($second->type === token::VARIABLE) {
-            $second = $this->get_variable_value($second);
+        // Abort with nice error message, if arguments should be numeric but are not.
+        if ($this->needs_numeric_input($optoken)) {
+            $this->abort_if_not_scalar($firsttoken);
+            $this->abort_if_not_scalar($secondtoken);
         }
 
-        if ($this->needs_numeric_input($token)) {
-            if ($first->type !== token::NUMBER) {
-                $this->die("evaluation error: numerical value expected, got '{$first->value}'", $first);
-            }
-            if ($second->type !== token::NUMBER) {
-                $this->die("evaluation error: numerical value expected, got '{$second->value}'", $second);
-            }
-        }
-
-        $first = $first->value;
-        $second = $second->value;
+        $first = $firsttoken->value;
+        $second = $secondtoken->value;
 
         $output = null;
         // Many results will be numeric, so we set this as the default here.
         $outtype = token::NUMBER;
-        switch ($token->value) {
-            case '=':
-                $output = $this->assign_value($second, $first);
-                // FIXME: set $outtype according to type of $second
-                break;
+        switch ($optoken->value) {
             case '**':
                 // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
                 if ($first == 0 && $second == 0) {
-                    $this->die('power 0^0 is not defined', $token);
+                    $this->die('power 0^0 is not defined', $optoken);
                 }
                 if ($first < 0 && $second == 0) {
-                    $this->die('division by zero is not defined, so base cannot be zero for negative exponents', $token);
+                    $this->die('division by zero is not defined, so base cannot be zero for negative exponents', $optoken);
                 }
                 if ($second < 0 && intval($first) != $first) {
-                    $this->die('base cannot be negative with fractional exponent', $token);
+                    $this->die('base cannot be negative with fractional exponent', $optoken);
                 }
                 $output = $second ** $first;
                 break;
@@ -497,9 +540,9 @@ class evaluator {
             case '/':
             case '%':
                 if ($first == 0) {
-                    $this->die('division by zero is not defined', $token);
+                    $this->die('division by zero is not defined', $optoken);
                 }
-                if ($token->value === '/') {
+                if ($optoken->value === '/') {
                     $output = $second / $first;
                 } else {
                     $output = $second % $first;
@@ -509,11 +552,17 @@ class evaluator {
                 // If at least one operand is a string, we use concatenation instead
                 // of addition.
                 if (is_string($first) || is_string($second)) {
+                    $this->abort_if_not_scalar($firsttoken, false);
+                    $this->abort_if_not_scalar($secondtoken, false);
                     $output = $second . $first;
                     $outtype = token::STRING;
-                } else {
-                    $output = $second + $first;
+                    break;
                 }
+                // In all other cases, addition must (currently) be numeric, so we abort
+                // if the arguments are not numbers.
+                $this->abort_if_not_scalar($firsttoken);
+                $this->abort_if_not_scalar($secondtoken);
+                $output = $second + $first;
                 break;
             case '-':
                 $output = $second - $first;
@@ -521,12 +570,12 @@ class evaluator {
             case '<<':
             case '>>':
                 if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bit shift operator should only be used with integers', $token);
+                    $this->die('bit shift operator should only be used with integers', $optoken);
                 }
                 if ($first < 0) {
-                    $this->die("bit shift by negative number $first is not allowed", $token);
+                    $this->die("bit shift by negative number $first is not allowed", $optoken);
                 }
-                if ($token->value === '<<') {
+                if ($optoken->value === '<<') {
                     $output = (int)$second << (int)$first;
                 } else {
                     $output = (int)$second >> (int)$first;
@@ -534,19 +583,19 @@ class evaluator {
                 break;
             case '&':
                 if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise AND should only be used with integers', $token);
+                    $this->die('bitwise AND should only be used with integers', $optoken);
                 }
                 $output = $second & $first;
                 break;
             case '^':
                 if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise XOR should only be used with integers', $token);
+                    $this->die('bitwise XOR should only be used with integers', $optoken);
                 }
                 $output = $second ^ $first;
                 break;
             case '|':
                 if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise OR should only be used with integers', $token);
+                    $this->die('bitwise OR should only be used with integers', $optoken);
                 }
                 $output = $second | $first;
                 break;
@@ -578,9 +627,9 @@ class evaluator {
         // One last safety check: numeric results must not be NAN or INF.
         // This should never be triggered.
         if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
-            $this->die('evaluation error', $token);
+            $this->die('evaluation error', $optoken);
         }
-        return new token($outtype, $output, $token->row, $token->column);
+        return new token($outtype, $output, $optoken->row, $optoken->column);
     }
 
     private function assign_value($var, $value) {
