@@ -25,16 +25,16 @@
 namespace qtype_formulas;
 
 class for_loop {
-    /** @var string name of the for loop's iteration variable */
-    private string $variable = '';
+    /** @var token variable token for the loop's iterator variable */
+    public token $variable;
 
     /** @var expression values the loop will iterate over */
-    private expression $range;
+    public expression $range;
 
     /** @var array statements of the loop */
-    private array $body = [];
+    public array $body = [];
 
-    public function __construct(string $var, expression $range, array $body) {
+    public function __construct(token $var, expression $range, array $body) {
         $this->variable = $var;
         $this->range = $range;
         $this->body = $body;

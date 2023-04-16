@@ -30,8 +30,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_simple_expressions
      */
     public function test_simple_expressions($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -40,8 +39,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_expressions_with_functions
      */
     public function test_expressions_with_functions($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -50,8 +48,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_ternary_expressions
      */
     public function test_ternary_expression($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -60,8 +57,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_assignments
      */
     public function test_assignments($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -70,8 +66,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_arrays
      */
     public function test_arrays($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -80,8 +75,7 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_sets
      */
     public function test_sets($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -240,16 +234,16 @@ class parser_test extends \advanced_testcase {
         $input = '5~3';
         $input = '{{1,2}}';
         $input = '[{1,2}]';
-        $input = 'π + pi + pi()';
         $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
         $input = 'a = b[1]';
+        $input = 'π + pi + pi() + pi(2+3)';
+        $input = '"foo"[1]';
 
-        $lexer = new lexer($input);
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         foreach ($parser->statements as $statement) {
             $output = $statement;
-            //print_r($output);
+            print_r($output);
             print_r(array_map(function($el) { return $el->value; }, $output->body));
         }
         //print_r($output);
@@ -258,16 +252,15 @@ class parser_test extends \advanced_testcase {
     public function test_for_loop() {
         $input = 'for (a:[1:23,5]) { a = 5; b = 3;}';
 
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         print_r($parser->statements);
     }
 
     public function test_answer_expression() {
+        return;
         $input = '2^3';
 
-        $lexer = new lexer($input);
-        $parser = new answer_parser($lexer->get_tokens());
+        $parser = new answer_parser($input);
         print_r($parser->statements);
     }
 
@@ -278,8 +271,7 @@ class parser_test extends \advanced_testcase {
         //$input = '[[1,2]]';
         $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
 
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
        // print_r($parser->statements);
     }
 }

@@ -65,6 +65,8 @@ class token {
     const RESERVED_WORD = 262144;
     const LIST = 524288;
     const SET = 1048576;
+    const START_GROUP = 2097152;
+    const END_GROUP = 4194304;
 
     /** @var mixed the token's content, will be the name for identifiers */
     public $value;

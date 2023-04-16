@@ -26,48 +26,43 @@
 namespace qtype_formulas;
 
 class evaluator_test extends \advanced_testcase {
-    /**
-     * @dataProvider provide_simple_expressions
-     */
-    public function test_simple_expressions($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
-        $statement = $parser->get_statements()[0];
-        $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statement);
-        self::assertEquals($expected, $result[0]->value);
-    }
 
     /**
      * @dataProvider provide_expressions_with_functions
+     * @dataProvider provide_simple_expressions
+     * @dataProvider provide_ternary_expressions
+     * @dataProvider provide_for_loops
      */
-    public function test_expressions_with_functions($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
-        $statement = $parser->get_statements()[0];
+    public function test_expressions_with_numeric_result($expected, $input): void {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
         $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statement);
-        self::assertEqualsWithDelta($expected, $result[0]->value, 1e-12);
+        $result = $evaluator->evaluate($statements);
+        self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
-    /**
-     * @dataProvider provide_ternary_expressions
-     */
-    public function test_ternary_expression($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
-        $statement = $parser->get_statements()[0];
-        $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statement);
-        self::assertEquals($expected, $result[0]->value);
+    public function provide_for_loops(): array {
+        return [
+            'one statement' => [45, 'res = 0; for (i:[1:10]) res = res + i'],
+            'one statement in braces, without semicolon' => [45, 'res = 0; for (i:[1:10]) {res = res + i}'],
+            'one statement in braces, with semicolon' => [45, 'res = 0; for (i:[1:10]) {res = res + i;}'],
+            'two statements' => [90, 'res = 0; for (i:[1:10]) {i = i * 2; res = res + i;}'],
+            'nested without braces' => [810, 'res = 0; for (a:[1:10]) for (b:[1:10]) res = res + a + b'],
+            'nested without braces inner' => [810, 'res = 0; for (a:[1:10]) for (b:[1:10]) { res = res + a + b }'],
+            'nested with braces outer' => [810, 'res = 0; for (a:[1:10]) { for (b:[1:10]) res = res + a + b }'],
+            'nested with braces' => [810, 'res = 0; for (a:[1:10]) { for (b:[1:10]) { res = res + a + b } }'],
+            'one statement with variable range' => [10, 'a = 1; b = 5; res = 0; for (i:[a:b]) res = res + i'],
+            'one statement with variable range and step' => [22, 'a = 1; b = 5; c = 0.5; res = 0; for (i:[a:b:c]) res = res + i'],
+            'one statement with expression in range' => [22, 'a = 0.5; b = 10; c = 1/4; res = 0; for (i:[a*2:b/2:c+c]) res = res + i'],
+        ];
     }
 
     /**
      * @dataProvider provide_assignments
      */
     public function test_assignments($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        // TODO
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -76,8 +71,7 @@ class evaluator_test extends \advanced_testcase {
      * @dataProvider provide_arrays
      */
     public function test_arrays($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         $evaluator = new evaluator();
         $result = $evaluator->evaluate($statement);
@@ -91,7 +85,7 @@ class evaluator_test extends \advanced_testcase {
                     return $el->value;
                 }
             },
-            $result[0]->value
+            $result->value
         );
         self::assertEqualsWithDelta($expected, $content, 1e-12);
     }
@@ -100,8 +94,8 @@ class evaluator_test extends \advanced_testcase {
      * @dataProvider provide_sets
      */
     public function test_sets($expected, $input): void {
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        // TODO
+        $parser = new parser($input);
         $statement = $parser->get_statements()[0];
         self::assertEquals($expected, implode(',', $statement->body));
     }
@@ -175,12 +169,12 @@ class evaluator_test extends \advanced_testcase {
         return [
             'one argument, built-in' => [5, 'floor(5.3)'],
             'one argument, custom' => [5040, 'fact(7)'],
-            //'two arguments' => ['10,5,2,ncr', 'ncr(10,5)'],
-            //'three arguments' => ['2,100,17,3,modpow', 'modpow(2,100,17)'],
+            'two arguments' => [252, 'ncr(10,5)'],
+            'three arguments' => [16, 'modpow(2,100,17)'],
             //'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
             'function in function' => [M_PI / 4, 'asin(sqrt(2)/2)'],
-            //'operation in function' => ['1,2,3,*,+,4,5,**,-,3,2,round', 'round(1+2*3-4**5,3)'],
-            //'function with array' => ['[,1,2,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
+            'operation in function' => [-1.02, 'round((1+2*3-4**5)/1000,2)'],
+            //'function with array' => [6, 'sum([1,2,3])'],
         ];
     }
 
@@ -243,6 +237,26 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
+    public function test_random_vars() {
+        return;
+        $input = 'a = shuffle([1,2,3])';
+        $input = 'a = {1,-5,-3,2}';
+
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new random_evaluator();
+        //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
+        //$evaluator->import_variable_context($context);
+        foreach ($statements as $st) {
+            $result = $evaluator->evaluate($st);
+            print_r($result);
+        }
+        // $context = $evaluator->export_variable_context();
+        // print_r($context);
+        $evaluator->instantiate_random_variables();
+        return;
+    }
+
     public function test_basic_operations() {
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
@@ -272,10 +286,30 @@ class evaluator_test extends \advanced_testcase {
         $input = '[{1,2}]';
         $input = 'π + pi + pi()';
         $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
+        $input = '"abc"[2]';
+        $input = '0**0';
+        $input = '[1,2,"3"][2]';
+        $input = 'fqversionnumber()';
+        $input = 'c=2*a + b';
+        $input = 'a="foo"; b="foox"; a == b';
+        $input = 'a = {1,2,3}; 2*a;';
+        $input = 'a = [1,2,3]; "2"+a';
+        $input = 'a = "fooo"; 2*a';
+        $input = 'a = 2; b = 3; c = 4; d = a * b; d';
 
-        $lexer = new lexer($input);
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
+        //$evaluator->import_variable_context($context);
+        $result = $evaluator->evaluate($statements);
+        print_r($result);
+        $context = $evaluator->export_variable_context();
+        print_r($context);
+        return;
+
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
         foreach ($parser->statements as $statement) {
             $output = $statement;
             print_r($output);
@@ -285,18 +319,20 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_for_loop() {
-        $input = 'for (a:[1:23,5]) { a = 5; b = 3;}';
+        $input = 'b = 0; for (a:[1:23,5]) { x = {1,2}; b = b + a;}';
 
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
-        print_r($parser->statements);
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statements);
+        print_r($result);
     }
 
     public function test_answer_expression() {
+        return;
         $input = '2^3';
 
-        $lexer = new lexer($input);
-        $parser = new answer_parser($lexer->get_tokens());
+        $parser = new answer_parser($input);
         print_r($parser->statements);
     }
 
@@ -307,8 +343,7 @@ class evaluator_test extends \advanced_testcase {
         //$input = '[[1,2]]';
         $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
 
-        $lexer = new lexer($input);
-        $parser = new parser($lexer->get_tokens());
+        $parser = new parser($input);
        // print_r($parser->statements);
     }
 }
