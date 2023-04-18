@@ -58,7 +58,6 @@ class evaluator {
         'expm1' => [1, 1],
         'fdiv' => [2, 2],
         'floor' => [1, 1],
-        'fmod' => [2, 2], // FIXME: own implementation!
         'hexdec' => [1, 1],
         'hypot' => [2, 2],
         'intdiv' => [2, 2],
@@ -81,7 +80,8 @@ class evaluator {
         'tanh' => [1, 1],
     ];
 
-    private $variables = [];
+    // FIXME: temporarily, for testing debugging
+    public $variables = [];
 
     private $constants = [
         'π' => M_PI,
@@ -94,6 +94,12 @@ class evaluator {
      *
      */
     public function __construct(?string $context = null) {
+        $this->reinitialize($context);
+    }
+
+    public function reinitialize(?string $context = null) {
+        $this->clear_stack();
+
         // If a context is given, we initialize our variables accordingly.
         if (is_string($context)) {
             $this->import_variable_context($context);
@@ -142,9 +148,35 @@ class evaluator {
      * @return void
      */
     private function set_variable_to_value(token $vartoken, token $value): void {
-        // TODO / FIXME: allow to set individual elements of an array variable.
-        $name = $vartoken->value;
-        $this->variables[$name] = new variable($name, $value->value, $value->type);
+        $rawname = $vartoken->value;
+        // If there are no indices, we set the variable as requested.
+        if (strpos($rawname, '[') === false) {
+            $this->variables[$rawname] = new variable($rawname, $value->value, $value->type);
+            return;
+        }
+
+        // If there is an index, but the variable is a string, we throw an error. Setting
+        // characters of a string in this way is not allowed.
+        $basename = strstr($rawname, '[', true);
+        if ($this->variables[$basename]->type === variable::STRING) {
+            $this->die('individual chars of a string cannot be modified', $value);
+        }
+
+        // Otherwise, we try to get the variable's value. The function will
+        // - resolve indices correctly
+        // - throw an error, if the variable does not exist
+        // so we can just rely on that.
+        $current = $this->get_variable_value($vartoken);
+
+        // Array elements are stored as tokens rather than just values (because
+        // each element can have a different type). That means, we received an
+        // object or rather a reference to an object. Thus, if we change the value and
+        // type attribute of that token object, it will automatically be changed
+        // inside the array itself.
+        $current->value = $value->value;
+        $current->type = $value->type;
+        $current->row = $value->row;
+        $current->column = $value->column;
     }
 
     /**
@@ -155,14 +187,41 @@ class evaluator {
      * @return token
      */
     private function get_variable_value(token $variable): token {
-        // TODO / FIXME: allow to get array elements.
-        $name = $variable->value;
+        // The raw name may contain indices, e.g. a[1][2]. We split at the [ and
+        // take the first chunk as the true variable name. If there are no brackets,
+        // there will be only one chunk and everything is fine.
+        $rawname = $variable->value;
+        $parts = explode('[', $rawname);
+        $name = array_shift($parts);
         if (!array_key_exists($name, $this->variables)) {
             $this->die("unknown variable: $name", $variable);
         }
         $result = $this->variables[$name];
+
+        // If we access the variable as a whole, we return a new token
+        // created from the stored value and tye.
+        if (count($parts) === 0) {
+            $value = $result->value;
+            $type = $result->type;
+            return new token($type, $value, $variable->row, $variable->column);
+        }
+
+        // If we do have indices, we access them one by one. The ] at the end of each
+        // part must be stripped.
+        foreach ($parts as $part) {
+            $result = $result->value[substr($part, 0, -1)];
+        }
+
+        // When accessing an array, the elements are already stored as tokens, so we return them
+        // as they are. This allows the receiver to change values inside the array, because
+        // objects are passed by reference.
+        // For strings, we must create a new token, because we only get a character.
+        if (is_string($result)) {
+            return new token(token::STRING, $result, $variable->row, $variable->column);
+        }
+        return $result;
+
         // FIXME: if type is SET, this is either an algebraic variable or an uninstantiated random variable
-        return new token($result->type, $result->value, $variable->row, $variable->column);
     }
 
     /**
@@ -284,8 +343,6 @@ class evaluator {
         }
         // If the stack contains more than one element, there must have been a problem somewhere.
         if (count($this->stack) !== 1) {
-            // FIXME: for debugging only.
-            print_r($this->stack);
             throw new Exception("stack should contain exactly one element after evaluation");
         }
         // If the stack only contains one single variable token, return its content.
@@ -294,7 +351,7 @@ class evaluator {
     }
 
     private function fetch_array_element_or_char(): token {
-        $indextoken = array_pop($this->stack);
+        $indextoken = $this->pop_real_value();
         $index = $indextoken->value;
         $nexttoken = array_pop($this->stack);
 
@@ -321,6 +378,12 @@ class evaluator {
 
         // Fetch the array or string from the stack.
         $arraytoken = array_pop($this->stack);
+        // If it is a variable, we do lazy evaluation: just append the index and wait. It might be used
+        // as a left-hand side in an assignment. If it is not, it will be resolved later.
+        if ($arraytoken->type === token::VARIABLE) {
+            $name = $arraytoken->value . "[$index]";
+            return new token(token::VARIABLE, $name, $arraytoken->row, $arraytoken->column);
+        }
         if (!in_array($arraytoken->type, [token::LIST, token::STRING])) {
             $this->die('evaluation error: indexing is only possible with arrays (lists) and strings', $nexttoken);
         }
@@ -632,11 +695,6 @@ class evaluator {
         return new token($outtype, $output, $optoken->row, $optoken->column);
     }
 
-    private function assign_value($var, $value) {
-        // FIXME
-        return $value;
-    }
-
     private function is_valid_num_of_params(token $function, int $count): bool {
         $funcname = $function->value;
         $min = INF;
@@ -679,7 +737,7 @@ class evaluator {
         }
         $params = array_reverse($params);
 
-        // FIXME: return correct type
+        // FIXME: return correct type according to function
         // If something goes wrong, e. g. wrong type of parameter, functions will throw a TypeError (built-in)
         // or an Exception (custom functions). We catch the exception and build a nice error message.
         try {
