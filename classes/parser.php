@@ -54,19 +54,22 @@ class parser {
     /** @var array list of all (parsed) statements */
     public $statements = [];
 
-    private $ownfunctions = ['fact'];
     private $variableslist = [];
 
     /**
      * FIXME Undocumented function
      *
-     * @param [type] $tokenlist
+     * @param [type] $tokenlist list of tokens as returned from the lexer or input string
      * @param [type] $knownvariables
      */
-    public function __construct(string $input, array $knownvariables = []) {
-        $lexer = new lexer($input);
-        $this->tokenlist = $lexer->get_tokens();
-        $this->count = count($this->tokenlist);
+    public function __construct($tokenlist, array $knownvariables = []) {
+        // If the input is given as a string, run it through the lexer first.
+        if (is_string($tokenlist)) {
+            $lexer = new lexer($tokenlist);
+            $tokenlist = $lexer->get_tokens();
+        }
+        $this->tokenlist = $tokenlist;
+        $this->count = count($tokenlist);
         $this->variableslist = $knownvariables;
 
         // Check for unbalanced / mismatched parentheses. There will be some redundancy, because
@@ -172,22 +175,6 @@ class parser {
         }
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
-
-    /*public function parse_answer_expression(): expression {
-        // Walk through all tokens and search for a ^ operator (XOR). In order to maintain backwards
-        // compatibility, it will be replaced by the ** operator (exponentiation).
-        $currenttoken = $this->peek();
-        $i = 1;
-        while ($currenttoken !== self::EOF) {
-            if ($currenttoken->type === token::OPERATOR && $currenttoken->value === '^') {
-                $currenttoken->value = '**';
-            }
-            $currenttoken = $this->peek($i);
-            $i++;
-        }
-        // Now that this is done, we can parse the expression normally.
-        return $this->parse_general_expression();
-    }*/
 
     public function parse_general_expression(?int $stopat = null): expression {
         // Start by reading the first token.
@@ -349,7 +336,6 @@ class parser {
         return $nexttoken;
     }
 
-    // FIXME doc
     private function is_known_variable(token $token): bool {
         return in_array($token->value, $this->variableslist);
     }

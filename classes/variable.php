@@ -26,7 +26,6 @@ namespace qtype_formulas;
 
 class variable {
     const UNDEFINED = 0;
-    const BOOLEAN = 0; // This type is not currently used.
     const NUMERIC = token::NUMBER;
     const STRING = token::STRING;
     const LIST = token::LIST;
@@ -57,11 +56,6 @@ class variable {
                 return '{' . substr($result, 1, -1) . '}';
             }
             return $result;
-        }
-
-        // For booleans, we cannot use strval() directly, because strval(false) is ''.
-        if ($this->type === self::BOOLEAN) {
-            return ($this->value ? '1' : '0');
         }
 
         // For algebraic variables, we just return their name, because they do not
