@@ -125,7 +125,7 @@ class evaluator {
      * @return void
      */
     public function import_variable_context(string $data, bool $overwrite = true) {
-        $incoming = unserialize($data, ['allowed_classes' => ['qtype_formulas\variable', 'qtype_formulas\token']]);
+        $incoming = unserialize($data, ['allowed_classes' => [variable::class, token::class]]);
         if ($incoming === false) {
             throw new Exception('invalid variable context given, aborting import');
         }
@@ -749,19 +749,32 @@ class evaluator {
         $params = array_reverse($params);
 
         // FIXME: return correct type according to function
+        // -> own functions should have possibility to return token; in this case, use it
+        // -> if function returns value (PHP function or simple own function), wrap it into token
         // If something goes wrong, e. g. wrong type of parameter, functions will throw a TypeError (built-in)
         // or an Exception (custom functions). We catch the exception and build a nice error message.
         try {
-            // If we have our own implementation, execute that one and quit.
-            // Otherwise, call PHP's built-in function.
+            // If we have our own implementation, execute that one. Otherwise, use PHP's built-in function.
+            $prefix = '';
             if (array_key_exists($funcname, functions::FUNCTIONS)) {
-                return new token(token::NUMBER, call_user_func_array(__NAMESPACE__ . '\functions::' . $funcname, $params));
+                $prefix = functions::class . '::';
             }
-            if (array_key_exists($funcname, self::PHPFUNCTIONS)) {
-                return new token(token::NUMBER, call_user_func_array($funcname, $params));
-            }
+            $result = call_user_func_array($prefix . $funcname, $params);
         } catch (Throwable $e) {
             $this->die('evaluation error: ' . $e->getMessage(), $token);
         }
+
+        // Some of our own functions may return a token. In those cases, we reset
+        // the row and column value, because they are no longer accurate. Once that
+        // is done, we return the token.
+        if ($result instanceof token) {
+            $result->row = -1;
+            $result->column = -1;
+            return $result;
+        }
+
+        // Most of the time, the return value will not be a token. In those cases,
+        // we have to wrap it up before returning.
+        return token::wrap($result);
     }
 }

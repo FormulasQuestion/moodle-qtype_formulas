@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace qtype_formulas;
+use Exception;
 
 /**
  * Class for individual tokens
@@ -98,4 +99,24 @@ class token {
     public function __toString() {
         return (string)$this->value;
     }
+
+    public static function wrap($value) {
+        // If the value is already a token, we do nothing.
+        if ($value instanceof token) {
+            return $value;
+        }
+        // Otherwise, we choose the appropriate type.
+        if (is_string($value)) {
+            $type = self::STRING;
+        } else if (is_float($value) || is_int($value)) {
+            $type = self::NUMBER;
+        } else if (is_array($value)) {
+            // FIXME: this probably needs some more treatment
+            $type = self::LIST;
+        } else {
+            throw new Exception("the given value '$value' has an invalid data type an cannot be converted to a token");
+        }
+        return new token($type, $value);
+    }
+
 }
