@@ -25,23 +25,43 @@
 namespace qtype_formulas;
 use Exception;
 
+/*
+
+TODO:
+- diff (special function, cannot be used in evaluation context)
+- inv
+- map
+
+*/
+
 class functions {
     /* function name => [min params, max params] */
     const FUNCTIONS = [
         'binomialcdf' => [3, 3],
         'binomialpdf' => [3, 3],
+        'concat' => [2, INF],
         'fact' => [1, 1],
+        'fill' => [2, 2],
         'fmod' => [2, 2],
         'fqversionnumber' => [0, 0],
         'gcd' => [2, 2],
+        'join' => [2, INF],
         'lcm' => [2, 2],
+        'len' => [1, 1],
         'modinv' => [2, 2],
         'modpow' => [3, 3],
         'ncr' => [2, 2],
         'normcdf' => [3, 3],
         'npr' => [2, 2],
+        'pick' => [2, INF],
+        'poly' => [1, 3],
+        'sigfig' => [2, 2],
+        'sort' => [1, 2],
         'stdnormcdf' => [1, 1],
         'stdnormpdf' => [1, 1],
+        'str' => [1, 1],
+        'sublist' => [2, 2],
+        'sum' => [1, 1],
     ];
 
     /**
@@ -53,6 +73,358 @@ class functions {
      */
     public static function fqversionnumber(): string {
         return get_config('qtype_formulas')->version;
+    }
+
+    public static function concat(...$arrays): array {
+        $result = [];
+
+        // Iterate over each array ...
+        foreach ($arrays as $array) {
+            if (!is_array($array)) {
+                throw new Exception("concat() expects its arguments to be lists, found '$array'");
+            }
+            // ... and over each element of every array.
+            foreach ($array as $element) {
+                $result[] = $element;
+            }
+        }
+
+        return $result;
+    }
+
+    public static function sort($tosort, $order = null): array {
+        // The first argument must be an array.
+        if (!is_array($tosort)) {
+            throw new Exception('sort() expects it first argument to be a list');
+        }
+
+        // If we have one list, we use natural sorting.
+        if ($order === null) {
+            $tmp = $tosort;
+            // We can use natsort() directly, because the token has a __tostring() method.
+            natsort($tmp);
+            return $tmp;
+        }
+
+        // If two arguments are given, the second must be an array.
+        if (!is_array($order)) {
+            throw new Exception('when calling sort() with two arguments, they must both be lists');
+        }
+
+        // If we have two lists, they must have the same number of elements.
+        if (count($tosort) !== count($order)) {
+            throw new Exception('when calling sort() with two lists, they must have the same size');
+        }
+
+        // Still here? That means we have two lists of the same size. Use the latter
+        // as the sort order.
+        $tmp = $tosort;
+        uksort($tmp, function($a, $b) use ($order) {
+            return strnatcmp($order[$a], $order[$b]);
+        });
+        return array_values($tmp);
+    }
+
+    /**
+     * wrapper for the poly() function which can be invoked in many different ways:
+     * - list of numbers => polynomial with variable x
+     * - number => force + sign if number > 0
+     * - string, number => combine
+     * - string, list of numbers => polynomial with variable from string
+     * - list of strings, list of numbers => linear combination
+     * - string, number, string => combine them and, if appropriate, force + sign
+     * - string, list of numbers, string => polynomial (one var) using third argument as separator (e.g. &)
+     * - list of strings, list of numbers, string => linear combination using third argument as separator
+     * - list of numbers, string => polynomial with x using third argument as separator
+     * will call the poly_formatter() accordingly
+     */
+    public static function poly(...$args) {
+        $numargs = count($args);
+        switch ($numargs) {
+            case 1:
+                $argument = $args[0];
+                // For backwards compatibility: if called with just a list of numbers, use x as variable.
+                if (is_array($argument)) {
+                    return self::poly_formatter('x', $argument);
+                }
+                // If called with just a number, force the plus sign (if the number is positive) to be shown.
+                // Basically, there is no other reason one would call this function with just one number.
+                return self::poly_formatter('', $argument, '+');
+            case 2:
+                $first = $args[0];
+                $second = $args[1];
+                // If called with a string and one number, combine them.
+                if (is_string($first) && is_float($second)) {
+                    return self::poly_formatter([$first], [$second]);
+                }
+                // If called with a list of numbers and a string, use x as default variable for the polynomial and use the
+                // third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                if (is_array($first) && is_string($second)) {
+                    return self::poly_formatter('x', $first, '', $second);
+                }
+                // All other invocations with two arguments will automatically be handled correctly.
+                return self::poly_formatter($args[0], $args[1]);
+            case 3:
+                $first = $args[0];
+                $second = $args[1];
+                $third = $args[2];
+                // If called with a string, a number and another string, combine them while using the third argument
+                // to e. g. force a "+" on positive numbers.
+                if (is_string($first) && is_float($second) && is_string($third)) {
+                    return self::poly_formatter([$first], [$second], $third);
+                }
+                // If called with a string (or list of strings), a list of numbers and another string, combine them
+                // while using the third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
+                return self::poly_formatter($first, $second, '', $third);
+        }
+    }
+
+    /**
+     * format a polynomial to be display with LaTeX / MathJax
+     * can also be used to force the plus sign for a single number
+     * can also be used for arbitrary linear combinations
+     *
+     * @param mixed $variables one variable (as a string) or a list of variables (array of strings)
+     * @param mixed $coefficients one number or an array of numbers to be used as coefficients
+     * @param string $forceplus symbol to be used for the normally invisible leading plus, optional
+     * @param string $additionalseparator symbol to be used as separator between the terms, optional
+     * @return string  the formatted string
+     */
+    private static function poly_formatter($variables, $coefficients = null, $forceplus = '', $additionalseparator = '') {
+        // If no variable is given and there is just one single number, simply force the plus sign
+        // on positive numbers.
+        if ($variables === '' && is_numeric($coefficients)) {
+            if ($coefficients > 0) {
+                return $forceplus . $coefficients;
+            }
+            return $coefficients;
+        }
+
+        $numberofterms = count($coefficients);
+        // By default, we think that a final coefficient == 1 is not to be shown, because it is a true coefficient
+        // and not a constant term. Also, terms with coefficient == zero should generally be completely omitted.
+        $constantone = false;
+        $omitzero = true;
+
+        // If the variable is left empty, but there is a list of coefficients, we build an empty array
+        // of the same size as the number of coefficients. This can be used to pretty-print matrix rows.
+        // In that case, the numbers 1 and 0 should never be omitted.
+        if ($variables === '') {
+            $variables = array_fill(0, $numberofterms, '');
+            $constantone = true;
+            $omitzero = false;
+        }
+
+        // If there is just one variable, we blow it up to an array of the correct size and descending exponents.
+        if (gettype($variables) === 'string' && $variables !== '') {
+            // As we have just one variable, we are building a standard polynomial where the last coefficient
+            // is not a real coefficient, but a constant term that has to be printed.
+            $constantone = true;
+            $tmp = $variables;
+            $variables = array();
+            for ($i = 0; $i < $numberofterms; $i++) {
+                if ($i == $numberofterms - 2) {
+                    $variables[$i] = $tmp;
+                } else if ($i == $numberofterms - 1) {
+                    $variables[$i] = '';
+                } else {
+                    $variables[$i] = $tmp . '^{' . ($numberofterms - 1 - $i) . '}';
+                }
+            }
+        }
+        // If the list of variables is shorter than the list of coefficients, just start over again.
+        if (count($variables) < $numberofterms) {
+            $numberofvars = count($variables);
+            for ($i = count($variables); $i < $numberofterms; $i++) {
+                $variables[$i] = $variables[$i % $numberofvars];
+            }
+        }
+
+        // If the separator is "doubled", e.g. &&, we put one half before and one half after the
+        // operator. By default, we have the entire separator before the operator. Also, we do not
+        // change anything if we are building a matrix row, because there are no operators. (They are signs.)
+        $separatorlength = strlen($additionalseparator);
+        $separatorbefore = $additionalseparator;
+        $separatorafter = '';
+        if ($separatorlength > 0 && $separatorlength % 2 === 0 && $omitzero) {
+            $tmpbefore = substr($additionalseparator, 0, $separatorlength / 2);
+            $tmpafter = substr($additionalseparator, $separatorlength / 2);
+            // If the separator just has even length, but is not "doubled", we don't touch it.
+            if ($tmpbefore === $tmpafter) {
+                $separatorbefore = $tmpbefore;
+                $separatorafter = $tmpafter;
+            }
+        }
+
+        $result = '';
+        // First term should not have a leading plus sign, unless user wants to force it.
+        foreach ($coefficients as $i => $coef) {
+            $thisseparatorbefore = ($i == 0 ? '' : $separatorbefore);
+            $thisseparatorafter = ($i == 0 ? '' : $separatorafter);
+            // Terms with coefficient == 0 are generally not shown. But if we use a separator, it must be printed anyway.
+            if ($coef == 0) {
+                if ($i > 0) {
+                    $result .= $thisseparatorbefore . $thisseparatorafter;
+                }
+                if ($omitzero) {
+                    continue;
+                }
+            }
+            // Put a + or - sign according to value of coefficient and replace the coefficient
+            // by its absolute value, as we don't need the sign anymore after this step.
+            // If the coefficient is 0 and we force its output, do it now. However, do not put a sign,
+            // as the only documented usage of this is for matrix rows and the like.
+            if ($coef < 0) {
+                $result .= $thisseparatorbefore . '-' . $thisseparatorafter;
+                $coef = abs($coef);
+            } else if ($coef > 0) {
+                // If $omitzero is false, we are building a matrix row, so we don't put plus signs.
+                $result .= $thisseparatorbefore . ($omitzero ? '+' : '') . $thisseparatorafter;
+            }
+            // Put the coefficient. If the coefficient is +1 or -1, we don't put the number,
+            // unless we're at the last term. The sign is already there, so we use the absolute value.
+            // Never omit 1's if building a matrix row.
+            if ($coef == 1) {
+                $coef = (!$omitzero || ($i == $numberofterms - 1 && $constantone) ? '1' : '');
+            }
+            $result .= $coef . $variables[$i];
+        }
+        // If the resulting string is empty (or empty with just alignment separators), add a zero at the end.
+        if ($result === '' || $result === str_repeat($additionalseparator, $numberofterms - 1)) {
+            $result .= '0';
+        }
+        // Strip leading + and replace by $forceplus (which will be '' or '+' most of the time).
+        if ($result[0] == '+') {
+            $result = $forceplus . substr($result, 1);
+        }
+        // If we have nothing but separators before the leading +, replace that + by $forceplus.
+        if ($separatorbefore !== '' && preg_match("/^($separatorbefore+)\+/", $result)) {
+            $result = preg_replace("/^($separatorbefore+)\+/", "\\1$forceplus", $result);
+        }
+        return $result;
+    }
+
+    public static function sublist($list, $indices): array {
+        if (!is_array($list) || !is_array($indices)) {
+            throw new Exception('sublist() expects its arguments to be lists');
+        }
+
+        $result = [];
+        foreach ($indices as $i) {
+            $i = $i->value;
+            if (!is_numeric($i)) {
+                throw new Exception("sublist() expects the indices to be integers, found '$i'");
+            }
+            $i = intval($i);
+            if ($i > count($list) - 1 || $i < 0) {
+                throw new Exception("index $i out of range in sublist()");
+            }
+            $result[] = $list[$i];
+        }
+        return $result;
+    }
+
+    public static function sigfig($number, $precision): string {
+        if (!is_numeric($number)) {
+            throw new Exception('sigfig() expects its first argument to be a number');
+        }
+        $number = floatval($number);
+        $precision = intval($precision);
+
+        // First, we calculate how many digits we have before the decimal point.
+        $digitsbefore = 1;
+        if ($number != 0) {
+            $digitsbefore = floor(log10(abs($number))) + 1;
+        }
+        // Now, we determine the number of decimals (digits after the point). This
+        // number might be negative, e.g. if we want to have 12345 with 3 significant
+        // figures. Or it might be zero, e.g. if 12345 must be brought to 5 significant
+        // figures.
+        $digitsafter = $precision - $digitsbefore;
+
+        // We round the number as desired. This might add zeroes, e.g. 12345 will become
+        // 12300 when rounded to -2 digits.
+        $number = round($number, $digitsafter);
+
+        // We only request decimals if $digitsafter is greater than zero.
+        $digitsafter = max(0, $digitsafter);
+
+        return number_format($number, $digitsafter, '.', '');
+    }
+
+    public static function len($arg): int {
+        if (is_array($arg)) {
+            return count($arg);
+        }
+        if (is_string($arg)) {
+            return strlen($arg);
+        }
+        throw new Exception('len() expects a list or a string');
+    }
+
+    public static function fill($count, $value): array {
+        // If $count is invalid, it will be converted to 0 which will then lead to an error.
+        $count = intval($count);
+        if ($count < 1) {
+            throw new Exception('fill() expects the first argument to be a positive integer');
+        }
+        return array_fill(0, $count, token::wrap($value));
+    }
+
+    public static function sum($array): float {
+        $result = 0;
+        foreach ($array as $token) {
+            $value = $token->value;
+            if (!is_numeric($value)) {
+                throw new Exception('sum() expects a list of numbers');
+            }
+            $result += floatval($value);
+        }
+        return $result;
+    }
+
+    public static function str($value): string {
+        if (!is_scalar($value)) {
+            throw new Exception('str() expects a scalar argument, e.g. a number');
+        }
+        return strval($value);
+    }
+
+    public static function join($separator, ...$values): string {
+        $result = [];
+        array_walk_recursive($values, function($val, $idx) use (&$result) {
+            $result[] = $val;
+        });
+        return implode($separator, $result);
+    }
+
+    public static function pick($index, ...$data) {
+        // If the index is a float, it will be truncated. This is needed for
+        // backward compatibility.
+        $index = intval($index);
+
+        $count = count($data);
+
+        // The $data parameter will always be an array and will contain
+        // - one single array for the pick(index, list) usage
+        // - the various values for the pick(index, val1, val2, val3, ...) usage.
+        if ($count === 1) {
+            if (!is_array($data[0])) {
+                throw new Exception("when called with two arguments, pick() expects the second parameter to be a list");
+            }
+            // We set $data to the given array and update the count.
+            $data = $data[0];
+            $count = count($data);
+        }
+
+        // For backwards compatibility, we always take the first element if the index is
+        // out of range. Indexing "from the end" is not allowed.
+        if ($index > $count - 1 || $index < 0) {
+            $index = 0;
+        }
+
+        // We can either return a a token or a value and let the caller wrap it into a token.
+        return $data[$index];
     }
 
     /**
