@@ -148,16 +148,27 @@ class evaluator {
      * @return void
      */
     private function set_variable_to_value(token $vartoken, token $value): void {
-        $rawname = $vartoken->value;
+        // Get the "basename" of the variable, e.g. foo in case of foo[1][2].
+        $basename = $vartoken->value;
+        if (strpos($basename, '[') !== false) {
+            $basename = strstr($basename, '[', true);
+        }
+
+        // Some variables are reserved and cannot be used as left-hand side in an assignment.
+        $isreserved = in_array($basename, ['_err', '_relerr', '_a', '_r', '_d', '_u']);
+        $isanswer = preg_match('/^_\d+$/', $basename);
+        if ($isreserved || $isanswer) {
+            $this->die("you cannot assign values to the special variable '$basename'", $value);
+        }
+
         // If there are no indices, we set the variable as requested.
-        if (strpos($rawname, '[') === false) {
-            $this->variables[$rawname] = new variable($rawname, $value->value, $value->type);
+        if ($basename === $vartoken->value) {
+            $this->variables[$basename] = new variable($basename, $value->value, $value->type);
             return;
         }
 
         // If there is an index, but the variable is a string, we throw an error. Setting
         // characters of a string in this way is not allowed.
-        $basename = strstr($rawname, '[', true);
         if ($this->variables[$basename]->type === variable::STRING) {
             $this->die('individual chars of a string cannot be modified', $value);
         }
