@@ -27,8 +27,12 @@ still available at the [original author's website](https://code.google.com/p/moo
 at the date of this writing. It was then upgraded to the new question engine introduced in Moodle 2.1 by
 Jean-Michel Védrine.
 
-This version is compatible with Moodle 3.9 and newer. It has been tested with Moodle
-versions 3.9, 3.11, 4.0 and 4.1. It has also been tested with PHP versions 7.4 and 8.0.
+This version is compatible with Moodle 3.9 and newer. It has been tested with:
+- Moodle 3.9 using PHP 7.4
+- Moodle 3.11 using PHP 7.4 and PHP 8.0
+- Moodle 4.0 using PHP 7.4 and PHP 8.0
+- Moodle 4.1 using PHP 7.4, PHP 8.0 and PHP 8.1
+- Moodle 4.2 using PHP 8.0 and PHP 8.1
 
 
 ### Requirements

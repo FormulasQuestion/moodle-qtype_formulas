@@ -651,9 +651,13 @@ class variables {
     // Return the text with the variables, or evaluable expressions, substituted by their values.
     public function substitute_variables_in_text(&$vstack, $text) {
         $funcpattern = '/(\{=[^{}]+\}|\{([A-Za-z][A-Za-z0-9_]*)(\[([0-9]+)\])?\})/';
-        $results = array();
-        // @codingStandardsIgnoreLine
-        $ts = explode("\n`", $text);     // The ` is the separator, so split it first.
+        $results = [];
+        if (is_string($text)) {
+            // @codingStandardsIgnoreLine
+            $ts = explode("\n`", $text);     // The ` is the separator, so split it first.
+        } else {
+            $ts = [];
+        }
         foreach ($ts as $text) {
             // @codingStandardsIgnoreLine
             $splitted = explode("\n`", preg_replace($funcpattern, "\n`$1\n`", $text));
@@ -715,7 +719,11 @@ class variables {
 
     // Replace the strings in the $text.
     private function substitute_strings_by_placholders(&$vstack, $text) {
-        $text = stripcslashes($text);
+        if (is_string($text)) {
+            $text = stripcslashes($text);
+        } else {
+            $text = '';
+        }
         $splitted = explode("\"", $text);
         if (mycount($splitted) % 2 == 0) {
             throw new Exception(get_string('error_vars_string', 'qtype_formulas'));

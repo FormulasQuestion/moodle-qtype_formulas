@@ -29,13 +29,16 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
-require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class externallib_test extends \externallib_advanced_testcase {
+    public function setUp(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
+    }
 
-    /**
-     * Test
-     */
     public function test_check_random_global_vars() {
         $this->resetAfterTest(true);
 
