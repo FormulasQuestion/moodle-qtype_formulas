@@ -16,6 +16,8 @@
 
 namespace qtype_formulas;
 
+use Exception;
+
 /**
  * Parser for qtype_formulas
  *
@@ -35,8 +37,6 @@ TODO:
 * units
 * possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
-* assignment to array element, e.g. a=[1,2,3]; a[1]=9; b=a[1]; (already possible in legacy)
-
 */
 
 class parser {
@@ -54,6 +54,7 @@ class parser {
     /** @var array list of all (parsed) statements */
     public $statements = [];
 
+    /** @var array list of known variables */
     private $variableslist = [];
 
     /**
@@ -96,7 +97,7 @@ class parser {
     }
 
     /**
-     * Check whether all parenthesis are balanced. Otherweise, stop all further processing
+     * Check whether all parentheses are balanced. Otherweise, stop all further processing
      * and output an error message.
      *
      * @return void
@@ -136,7 +137,13 @@ class parser {
         }
     }
 
-    private function find_closing_paren(token $opener) {
+    /**
+     * Undocumented function
+     *
+     * @param token $opener
+     * @return token
+     */
+    private function find_closing_paren(token $opener): token {
         $openertype = $opener->type;
         $i = 0;
         $nested = 0;
@@ -160,6 +167,9 @@ class parser {
             $i++;
             $token = $this->peek($i);
         }
+
+        // This cannot happen, because we have already checked that parens are balanced.
+        $this->die("syntax error: could not find closing parenthesis for '$opener->value'", $opener);
     }
 
     /**
@@ -212,13 +222,19 @@ class parser {
             }
 
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
-            // The criteria are as follows:
-            // - if is is in the list of known variables and not preceded by the PREFIX, it must be a VARIABLE
-            // - if it is not a known variable, but followed by a ( symbol, we assume it is a FUNCTION
-            // - if it is not a known variable and not followed by a ( symbol, we assume it is a VARIABLE
-            // Examples for the last point include identifiers followed by = for assignment or [ for indexation.
+            // In order to be classified as a function, it must meet the following criteria:
+            // - not be a known variable (unless preceded by the PREFIX, see above)
+            // - be a known function name
+            // - be followed by an opening paren
+            // In all other cases, it will be classified as a VARIABLE. Note that being a known function
+            // name alone is not enough, because we allow the user to define variables that have the same
+            // name as predefined functions to ensure that the introduction of new functions will not
+            // break existing questions.
             if ($type === token::IDENTIFIER) {
-                if (!$this->is_known_variable($currenttoken) && $nexttype === token::OPENING_PAREN) {
+                $isnotavariable = !$this->is_known_variable($currenttoken);
+                $isknownfunction = array_key_exists($value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS);
+                $nextisparen = $nexttype === token::OPENING_PAREN;
+                if ($isnotavariable && $isknownfunction && $nextisparen) {
                     $type = ($currenttoken->type = token::FUNCTION);
                 } else {
                     $type = ($currenttoken->type = token::VARIABLE);
@@ -346,6 +362,15 @@ class parser {
             return;
         }
         $this->variableslist[] = $token->value;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function export_known_variables(): array {
+        return $this->variableslist;
     }
 
     public function parse_ifelse() {
