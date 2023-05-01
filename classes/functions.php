@@ -55,6 +55,8 @@ class functions {
         'npr' => [2, 2],
         'pick' => [2, INF],
         'poly' => [1, 3],
+        'rshuffle' => [1, 1],
+        'shuffle' => [1, 1],
         'sigfig' => [2, 2],
         'sort' => [1, 2],
         'stdnormcdf' => [1, 1],
@@ -242,7 +244,7 @@ class functions {
 
         // If the separator is "doubled", e.g. &&, we put one half before and one half after the
         // operator. By default, we have the entire separator before the operator. Also, we do not
-        // change anything if we are building a matrix row, because there are no operators. (They are signs.)
+        // change anything if we are building a matrix row, because there are no operators, just signs.
         $separatorlength = strlen($additionalseparator);
         $separatorbefore = $additionalseparator;
         $separatorafter = '';
@@ -425,6 +427,26 @@ class functions {
 
         // We can either return a a token or a value and let the caller wrap it into a token.
         return $data[$index];
+    }
+
+    public static function shuffle(array $ar): array {
+        shuffle($ar);
+        return $ar;
+    }
+
+    public static function rshuffle(array $ar): array {
+        // First, we shuffle the array.
+        shuffle($ar);
+
+        // Now, we iterate over all elements and check whether they are nested arrays.
+        // If they are, we shuffle them recursively.
+        foreach ($ar as $element) {
+            if (is_array($element->value)) {
+                $element->value = self::shuffle($element->value);
+            }
+        }
+
+        return $ar;
     }
 
     /**
