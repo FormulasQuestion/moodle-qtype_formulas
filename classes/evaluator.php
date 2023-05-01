@@ -560,6 +560,11 @@ class evaluator {
         $what = $this->pop_real_value();
         $destination = array_pop($this->stack);
 
+        // When storing a value in a variable, the row and column should be
+        // set to the row and column of the variable token.
+        $what->row = $destination->row;
+        $what->column = $destination->column;
+
         // The destination must be a variable token.
         if ($destination->type !== token::VARIABLE) {
             $this->die('left-hand side of assignment must be a variable', $destination);
