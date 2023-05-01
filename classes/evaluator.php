@@ -82,6 +82,7 @@ class evaluator {
 
     // FIXME: temporarily, for testing debugging
     public $variables = [];
+    private $randomvariables = [];
 
     private $constants = [
         'π' => M_PI,
@@ -145,9 +146,10 @@ class evaluator {
      *
      * @param token $variable
      * @param token $value
+     * @param bool $israndomvar
      * @return void
      */
-    private function set_variable_to_value(token $vartoken, token $value): void {
+    private function set_variable_to_value(token $vartoken, token $value, $israndomvar = false): token {
         // Get the "basename" of the variable, e.g. foo in case of foo[1][2].
         $basename = $vartoken->value;
         if (strpos($basename, '[') !== false) {
@@ -163,8 +165,24 @@ class evaluator {
 
         // If there are no indices, we set the variable as requested.
         if ($basename === $vartoken->value) {
-            $this->variables[$basename] = new variable($basename, $value->value, $value->type);
-            return;
+            // If we are assigning to a random variable, we create a new instance and
+            // return the value of the first instantiation.
+            if ($israndomvar) {
+                $useshuffle = $value->type === variable::LIST;
+                $randomvar = new random_variable($basename, $value->value, $useshuffle);
+                $this->randomvariables[$basename] = $randomvar;
+                return token::wrap($randomvar->value);
+            }
+
+            // Otherwise we return the stored value.
+            $var = new variable($basename, $value->value, $value->type);
+            $this->variables[$basename] = $var;
+            return token::wrap($var->value);
+        }
+
+        // If there is an index and we are setting a random variable, we throw an error.
+        if ($israndomvar) {
+            $this->die('setting individual list elements is not supported for random variables', $value);
         }
 
         // If there is an index, but the variable is a string, we throw an error. Setting
@@ -186,8 +204,9 @@ class evaluator {
         // inside the array itself.
         $current->value = $value->value;
         $current->type = $value->type;
-        $current->row = $value->row;
-        $current->column = $value->column;
+
+        // Finally, we return what has been stored.
+        return $current;
     }
 
     /**
@@ -327,8 +346,9 @@ class evaluator {
                     $this->stack[] = $this->execute_unary_operator($token);
                 }
                 // The = operator is binary, but we treat it separately.
-                if ($value === '=') {
-                    $this->stack[] = $this->execute_assignment();
+                if ($value === '=' || $value === 'r=') {
+                    $israndomvar = ($value === 'r=');
+                    $this->stack[] = $this->execute_assignment($israndomvar);
                 } else if ($this->is_binary_operator($token)) {
                     $this->stack[] = $this->execute_binary_operator($token);
                 }
@@ -536,7 +556,7 @@ class evaluator {
         return in_array($token->value, $binaryoperators);
     }
 
-    private function execute_assignment() {
+    private function execute_assignment($israndomvar = false): token {
         $what = $this->pop_real_value();
         $destination = array_pop($this->stack);
 
@@ -544,8 +564,7 @@ class evaluator {
         if ($destination->type !== token::VARIABLE) {
             $this->die('left-hand side of assignment must be a variable', $destination);
         }
-        $this->set_variable_to_value($destination, $what);
-        return $what;
+        return $this->set_variable_to_value($destination, $what, $israndomvar);
     }
 
     private function execute_ternary_operator() {

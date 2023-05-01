@@ -74,6 +74,7 @@ class shunting_yard {
             case ':':
                 return 20;
             case '=':
+            case 'r=':
                 return 10;
             default:
                 return 0;
@@ -89,6 +90,7 @@ class shunting_yard {
     private static function is_left_associative(string $operator): bool {
         switch ($operator) {
             case '=':
+            case 'r=':
             case '**':
                 return false;
             case '*':
