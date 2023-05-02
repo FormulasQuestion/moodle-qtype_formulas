@@ -45,6 +45,7 @@ class functions {
         'fmod' => [2, 2],
         'fqversionnumber' => [0, 0],
         'gcd' => [2, 2],
+        'inv' => [1, 1],
         'join' => [2, INF],
         'lcm' => [2, 2],
         'len' => [1, 1],
@@ -75,6 +76,49 @@ class functions {
      */
     public static function fqversionnumber(): string {
         return get_config('qtype_formulas')->version;
+    }
+
+    public static function inv($list): array {
+        // First, we check that the array contains only numbers. If necessary,
+        // floats will be converted to integers by truncation. Note: number tokens
+        // always store their value as float, so we have to apply the conversion to
+        // all numbers, because we cannot know whether they really are of type float or int.
+        foreach ($list as $entry) {
+            $value = $entry->value;
+            if (!is_float($value)) {
+                throw new Exception("inv() expects all elements of the list to be integers, found '{$entry->value}'");
+            }
+            $entry->value = intval($value);
+        }
+
+        // Now we check that the same number does not appear twice.
+        $tmp = array_unique($list);
+        if (count($tmp) !== count($list)) {
+            throw new Exception('when using inv(), the list must not contain the same number multiple times');
+        }
+        // Finally, we make sure the numbers are consecutive from 0 to n-1 or from 1 to n with
+        // n being the number of elements in the list. We can use min() and max(), because the
+        // token has a __tostring() method and numeric strings are compared numerically.
+        $min = min($list);
+        $max = max($list);
+        if ($min->value > 1 || $min->value < 0) {
+            throw new Exception('when using inv(), the smallest number in the list must be 0 or 1');
+        }
+        if ($max->value - $min->value + 1 !== count($list)) {
+            throw new Exception('when using inv(), the numbers in the list must be consecutive');
+        }
+
+        // Create array from minimum to maximum value and then use the given list as the sort order.
+        $result = [];
+        for ($i = $min->value; $i <= $max->value; $i++) {
+            $result[] = new token(token::NUMBER, $i);
+        }
+        uksort($result, function($a, $b) use ($list) {
+            return $list[$a] <=> $list[$b];
+        });
+
+        // Forget about the keys and re-index the sorted array from 0.
+        return array_values($result);
     }
 
     public static function concat(...$arrays): array {
