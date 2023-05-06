@@ -252,6 +252,14 @@ class variables_test extends \advanced_testcase {
                     's' => (object) array('type' => 'ls', 'value' => array('C', 'A', 'B')),
                     )
             ),
+            array(true, 's=sort([-3,-2,4,2,3,1,0,-1,-4,5]);', array(
+                    's' => (object) array('type' => 'ln', 'value' => array(-4, -3, -2, -1, 0, 1, 2, 3, 4, 5)),
+                    )
+            ),
+            array(true, 's=sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]);', array(
+                    's' => (object) array('type' => 'ls', 'value' => array('-3', '-2', '-1', '0', '1', '2', '3', 'A', 'B', 'a', 'b')),
+                    )
+            ),
             array(true, 's=sublist(["A","B","C","D"],[1,3]);', array(
                     's' => (object) array('type' => 'ls', 'value' => array('B', 'D')),
                     )

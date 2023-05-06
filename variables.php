@@ -1377,11 +1377,8 @@ class variables {
                     break;
                 }
                 if ($sz == 1) {
-                    // If we have one list, we use natural sorting.
-                    $tmp = $values[0];
-                    natsort($tmp);
-                    $this->replace_middle($vstack, $expression, $l, $r, $types[0], array_values($tmp));
-                    return true;
+                    // If we have one list, we duplicate it.
+                    $values[1] = $values[0];
                 }
                 if (mycount($values[0]) != mycount($values[1])) {
                     break;
@@ -1391,7 +1388,14 @@ class variables {
                 $tmp = $values[0];
                 $order = $values[1];
                 uksort($tmp, function($a, $b) use ($order) {
-                    return strnatcmp($order[$a], $order[$b]);
+                    $first = $order[$a];
+                    $second = $order[$b];
+                    // If both elements are numeric, we compare their numerical value.
+                    if (is_numeric($first) && is_numeric($second)) {
+                        return floatval($first) <=> floatval($second);
+                    }
+                    // Otherwise, we use natural sorting.
+                    return strnatcmp($first, $second);
                 });
                 $this->replace_middle($vstack, $expression, $l, $r, $types[0], array_values($tmp));
                 return true;
