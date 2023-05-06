@@ -144,12 +144,9 @@ class functions {
             throw new Exception('sort() expects it first argument to be a list');
         }
 
-        // If we have one list, we use natural sorting.
+        // If we have one list only, we duplicate it.
         if ($order === null) {
-            $tmp = $tosort;
-            // We can use natsort() directly, because the token has a __tostring() method.
-            natsort($tmp);
-            return $tmp;
+            $order = $tosort;
         }
 
         // If two arguments are given, the second must be an array.
@@ -162,11 +159,17 @@ class functions {
             throw new Exception('when calling sort() with two lists, they must have the same size');
         }
 
-        // Still here? That means we have two lists of the same size. Use the latter
-        // as the sort order.
+        // Now sort the first array, using the second as the sort order.
         $tmp = $tosort;
         uksort($tmp, function($a, $b) use ($order) {
-            return strnatcmp($order[$a], $order[$b]);
+            $first = $order[$a]->value;
+            $second = $order[$b]->value;
+            // If both elements are numeric, we compare their numerical value.
+            if (is_numeric($first) && is_numeric($second)) {
+                return floatval($first) <=> floatval($second);
+            }
+            // Otherwise, we use natural sorting.
+            return strnatcmp($first, $second);
         });
         return array_values($tmp);
     }
