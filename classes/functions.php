@@ -29,8 +29,6 @@ use Exception;
 
 TODO:
 - diff (special function, cannot be used in evaluation context)
-- inv
-- map
 
 */
 
@@ -49,6 +47,7 @@ class functions {
         'join' => [2, INF],
         'lcm' => [2, 2],
         'len' => [1, 1],
+        'map' => [2, 3],
         'modinv' => [2, 2],
         'modpow' => [3, 3],
         'ncr' => [2, 2],
@@ -76,6 +75,130 @@ class functions {
      */
     public static function fqversionnumber(): string {
         return get_config('qtype_formulas')->version;
+    }
+
+    public static function map(string $what, $first, $second = null): array {
+        // List of allowed binary operators, i. e. all but the assignment.
+        $binaryops = ['**', '*', '/', '%', '+', '-', '<<', '>>', '&', '^',
+            '|', '&&', '||', '<', '>', '==', '>=', '<=', '!='];
+
+        // List of allowed unary operators.
+        $unaryops = ['_', '!', '~'];
+
+        // List of all functions.
+        $allfunctions = self::FUNCTIONS + evaluator::PHPFUNCTIONS;
+
+        // If the operator is '-', we first check the parameters to find out whether
+        // it is subtraction (encoded as '-') or negation (encoded as '_').
+        if ($what === '-' && $second === null) {
+            $what = '_';
+        }
+
+        // In order to perform the necessary pre-checks, we have to determine what operation
+        // type is requested: binary operation, unary operation, function with one argument
+        // or function with two arguments.
+        $usebinaryop = in_array($what, $binaryops);
+        $useunaryop = in_array($what, $unaryops);
+        $useunaryfunc = false;
+        $usebinaryfunc = false;
+
+        // If $what is neither a valid operator nor a function, throw an error.
+        if (!$usebinaryop && !$useunaryop) {
+            if (!array_key_exists($what, $allfunctions)) {
+                throw new Exception(("evaluation error: '$what' is not a legal first argument for the map() function"));
+            }
+            // Fetch the number of arguments for the given function name.
+            $min = $allfunctions[$what][0];
+            $max = $allfunctions[$what][1];
+            if ($min < 1) {
+                throw new Exception(("the function '$what' cannot be used with map(), because it accepts no arguments"));
+            }
+            if ($min > 2) {
+                throw new Exception(("the function '$what' cannot be used with map(), because it expects more than two arguments"));
+            }
+            // Some functions are clearly unary.
+            if ($min <= 1 && $max === 1) {
+                $useunaryfunc = true;
+                $usebinaryfunc = false;
+            }
+            // Other functions are clearly binary.
+            if ($min === 2 && $max >= 2) {
+                $useunaryfunc = false;
+                $usebinaryfunc = true;
+            }
+            // If the function can be unary or binary, we have to check the arguments.
+            if ($min <= 1 && $max >= 2) {
+                $useunaryfunc = ($second === null);
+                $usebinaryfunc = !$useunaryfunc;
+            }
+        }
+
+        // Check arguments for unary operators or functions: we need exactly one list.
+        if ($useunaryop || $useunaryfunc) {
+            $type = $useunaryop ? 'operator' : 'function';
+            if ($second !== null) {
+                throw new Exception("when using map() with the unary $type '$what', only one list is accepted");
+            }
+            if (!is_array($first)) {
+                throw new Exception("when using map() with the unary $type '$what', the argument must be a list");
+            }
+        }
+
+        // Check arguments for binary operators or functions: we expect (a) one scalar and one list or
+        // (b) two lists of the same size.
+        if ($usebinaryop || $usebinaryfunc) {
+            $type = $usebinaryop ? 'operator' : 'function';
+            if ($second === null) {
+                throw new Exception("when using map() with the binary $type '$what', two arguments are expected");
+            }
+            if (is_scalar($first) && is_scalar($second)) {
+                throw new Exception("when using map() with the binary $type '$what', at least one argument must be a list");
+            }
+            if (is_array($first) && is_array($second) && count($first) != count($second)) {
+                throw new Exception("when using map() with two lists, they must both have the same size");
+            }
+            // We do now know that we are using a binary operator or function and that we have at least one list.
+            // If the other argument is a scalar, we blow it up to an array of the same size as the other list.
+            if (is_scalar($first)) {
+                $first = array_fill(0, count($second), token::wrap($first));
+            }
+            if (is_scalar($second)) {
+                $second = array_fill(0, count($first), token::wrap($second));
+            }
+        }
+
+        // Now we are all set to apply the operator or execute the function. We are going to use
+        // our own for loop instead of PHP's array_walk() or array_map(). For better error reporting,
+        // we use a try-catch construct.
+        $result = [];
+        try {
+            $count = count($first);
+            for ($i = 0; $i < $count; $i++) {
+                if ($useunaryop) {
+                    $tmp = self::apply_unary_operator($what, $first[$i]->value);
+                } else if ($usebinaryop) {
+                    $tmp = self::apply_binary_operator($what, $first[$i]->value, $second[$i]->value);
+                } else if ($useunaryfunc || $usebinaryfunc) {
+                    // For function calls, we distinguish between our own functions and PHP's built-in functions.
+                    $prefix = '';
+                    if (array_key_exists($what, self::FUNCTIONS)) {
+                        $prefix = self::class . '::';
+                    }
+                    // The params must be wrapped in an array. There is at least one parameter ...
+                    $params = [$first[$i]->value];
+                    // ... and there's a second one for binary functions.
+                    if ($usebinaryfunc) {
+                        $params[] = $second[$i]->value;
+                    }
+                    $tmp = call_user_func_array($prefix . $what, $params);
+                }
+                $result[] = token::wrap($tmp);
+            }
+        } catch (Exception $e) {
+            throw new Exception('evaluation error in map(): ' . $e->getMessage());
+        }
+
+        return $result;
     }
 
     public static function inv($list): array {
@@ -773,5 +896,169 @@ class functions {
             return 0;
         }
         return $a * $b / self::gcd($a, $b);
+    }
+
+    private static function abort_if_not_scalar($value, string $who = '', bool $enforcenumeric = true): void {
+        $message = 'expected ';
+        if ($who !== '') {
+            $message = "$who expects ";
+        }
+        $message = $message . ($enforcenumeric ? 'a number' : 'a scalar value');
+
+        if (!is_scalar($value)) {
+            throw new Exception($message);
+        }
+        $isnumber = is_float($value) || is_int($value);
+        if ($enforcenumeric && !$isnumber) {
+            throw new Exception("$message, found '$value'");
+        }
+    }
+
+    public static function apply_unary_operator($op, $input) {
+        // Abort with nice error message, if argument should be numeric but is not.
+        if ($op === '_' || $op === '~') {
+            self::abort_if_not_scalar($input, $op);
+        }
+
+        $output = null;
+        switch ($op) {
+            // If we already know that an unary operator was requested, we accept - instead of _
+            // for negation.
+            case '-':
+            case '_':
+                $output = (-1) * $input;
+                break;
+            case '!':
+                $output = ($input ? 0 : 1);
+                break;
+            case '~':
+                $output = ~ $input;
+                break;
+        }
+        return $output;
+    }
+
+    public static function apply_binary_operator($op, $first, $second) {
+        // Binary operators that need numeric input. Note: + is not here, because it
+        // can be used to concatenate strings.
+        $neednumeric = ['**', '*', '/', '%', '-', '<<', '>>', '&', '^', '|', '&&', '||'];
+
+        // Abort with nice error message, if arguments should be numeric but are not.
+        if (in_array($op, $neednumeric)) {
+            self::abort_if_not_scalar($first, $op);
+            self::abort_if_not_scalar($second, $op);
+        }
+
+        $output = null;
+        // Many results will be numeric, so we set this as the default here.
+        switch ($op) {
+            case '**':
+                // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
+                if ($first == 0 && $second == 0) {
+                    throw new Exception('power 0^0 is not defined');
+                }
+                if ($first == 0 && $second < 0) {
+                    throw new Exception('division by zero is not defined, so base cannot be zero for negative exponents');
+                }
+                if ($first < 0 && intval($second) != $second) {
+                    throw new Exception('base cannot be negative with fractional exponent');
+                }
+                $output = $first ** $second;
+                break;
+            case '*':
+                $output = $first * $second;
+                break;
+            case '/':
+            case '%':
+                if ($second == 0) {
+                    throw new Exception('division by zero is not defined');
+                }
+                if ($op === '/') {
+                    $output = $first / $second;
+                } else {
+                    $output = $first % $second;
+                }
+                break;
+            case '+':
+                // If at least one operand is a string, we use concatenation instead
+                // of addition.
+                if (is_string($first) || is_string($second)) {
+                    self::abort_if_not_scalar($first, 'string concatenation', false);
+                    self::abort_if_not_scalar($second, 'string concatenation', false);
+                    $output = $first . $second;
+                    break;
+                }
+                // In all other cases, addition must (currently) be numeric, so we abort
+                // if the arguments are not numbers.
+                self::abort_if_not_scalar($first, '+');
+                self::abort_if_not_scalar($second, '+');
+                $output = $first + $second;
+                break;
+            case '-':
+                $output = $first - $second;
+                break;
+            case '<<':
+            case '>>':
+                if (intval($first) != $first || intval($second) != $second) {
+                    throw new Exception('bit shift operator should only be used with integers');
+                }
+                if ($first < 0) {
+                    throw new Exception("bit shift by negative number $first is not allowed");
+                }
+                if ($op === '<<') {
+                    $output = (int)$first << (int)$second;
+                } else {
+                    $output = (int)$first >> (int)$second;
+                }
+                break;
+            case '&':
+                if (intval($first) != $first || intval($second) != $second) {
+                    throw new Exception('bitwise AND should only be used with integers');
+                }
+                $output = $first & $second;
+                break;
+            case '^':
+                if (intval($first) != $first || intval($second) != $second) {
+                    throw new Exception('bitwise XOR should only be used with integers');
+                }
+                $output = $first ^ $second;
+                break;
+            case '|':
+                if (intval($first) != $first || intval($second) != $second) {
+                    throw new Exception('bitwise OR should only be used with integers');
+                }
+                $output = $first | $second;
+                break;
+            case '&&':
+                $output = ($first && $second ? 1 : 0);
+                break;
+            case '||':
+                $output = ($first || $second ? 1 : 0);
+                break;
+            case '<':
+                $output = ($first < $second ? 1 : 0);
+                break;
+            case '>':
+                $output = ($first > $second ? 1 : 0);
+                break;
+            case '==':
+                $output = ($first == $second ? 1 : 0);
+                break;
+            case '>=':
+                $output = ($first >= $second ? 1 : 0);
+                break;
+            case '<=':
+                $output = ($first <= $second ? 1 : 0);
+                break;
+            case '!=':
+                $output = ($first != $second ? 1 : 0);
+                break;
+        }
+        // One last safety check: numeric results must not be NAN or INF.
+        // This should never be triggered.
+        if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
+            throw new Exception('unknown evaluation error');
+        }
+        return $output;
     }
 }
