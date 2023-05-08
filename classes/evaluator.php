@@ -147,7 +147,7 @@ class evaluator {
      * @param token $variable
      * @param token $value
      * @param bool $israndomvar
-     * @return void
+     * @return token
      */
     private function set_variable_to_value(token $vartoken, token $value, $israndomvar = false): token {
         // Get the "basename" of the variable, e.g. foo in case of foo[1][2].
@@ -581,30 +581,26 @@ class evaluator {
 
     private function execute_unary_operator($token) {
         $input = $this->pop_real_value();
+
         // Check if the input is numeric. Boolean values are internally treated as 1 and 0 for
-        // backwards compatibility.
+        // backwards compatibility. The function apply_unary_operator() will do its own check,
+        // but we can have a better error message, if we do it here.
         if ($this->needs_numeric_input($token)) {
             $this->abort_if_not_scalar($input);
         }
-        $value = $input->value;
-        $output = null;
-        switch ($token->value) {
-            case '_':
-                $output = (-1) * $value;
-                break;
-            case '!':
-                $output = ($value ? 0 : 1);
-                break;
-            case '~':
-                $output = ~ $value;
-                break;
+
+        try {
+            $result = functions::apply_unary_operator($token->value, $input->value);
+        } catch (Exception $e) {
+            $this->die($e->getMessage(), $token);
         }
-        return new token(token::NUMBER, $output, $token->row, $token->column);
+        return token::wrap($result);
     }
 
     private function execute_binary_operator($optoken) {
-        $firsttoken = $this->pop_real_value();
+        // The stack is LIFO, so we pop the second operand first.
         $secondtoken = $this->pop_real_value();
+        $firsttoken = $this->pop_real_value();
 
         // Abort with nice error message, if arguments should be numeric but are not.
         if ($this->needs_numeric_input($optoken)) {
@@ -615,119 +611,29 @@ class evaluator {
         $first = $firsttoken->value;
         $second = $secondtoken->value;
 
-        $output = null;
-        // Many results will be numeric, so we set this as the default here.
-        $outtype = token::NUMBER;
-        switch ($optoken->value) {
-            case '**':
-                // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
-                if ($first == 0 && $second == 0) {
-                    $this->die('power 0^0 is not defined', $optoken);
-                }
-                if ($first < 0 && $second == 0) {
-                    $this->die('division by zero is not defined, so base cannot be zero for negative exponents', $optoken);
-                }
-                if ($second < 0 && intval($first) != $first) {
-                    $this->die('base cannot be negative with fractional exponent', $optoken);
-                }
-                $output = $second ** $first;
-                break;
-            case '*':
-                $output = $first * $second;
-                break;
-            case '/':
-            case '%':
-                if ($first == 0) {
-                    $this->die('division by zero is not defined', $optoken);
-                }
-                if ($optoken->value === '/') {
-                    $output = $second / $first;
-                } else {
-                    $output = $second % $first;
-                }
-                break;
-            case '+':
-                // If at least one operand is a string, we use concatenation instead
-                // of addition.
-                if (is_string($first) || is_string($second)) {
-                    $this->abort_if_not_scalar($firsttoken, false);
-                    $this->abort_if_not_scalar($secondtoken, false);
-                    $output = $second . $first;
-                    $outtype = token::STRING;
-                    break;
-                }
-                // In all other cases, addition must (currently) be numeric, so we abort
-                // if the arguments are not numbers.
-                $this->abort_if_not_scalar($firsttoken);
-                $this->abort_if_not_scalar($secondtoken);
-                $output = $second + $first;
-                break;
-            case '-':
-                $output = $second - $first;
-                break;
-            case '<<':
-            case '>>':
-                if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bit shift operator should only be used with integers', $optoken);
-                }
-                if ($first < 0) {
-                    $this->die("bit shift by negative number $first is not allowed", $optoken);
-                }
-                if ($optoken->value === '<<') {
-                    $output = (int)$second << (int)$first;
-                } else {
-                    $output = (int)$second >> (int)$first;
-                }
-                break;
-            case '&':
-                if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise AND should only be used with integers', $optoken);
-                }
-                $output = $second & $first;
-                break;
-            case '^':
-                if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise XOR should only be used with integers', $optoken);
-                }
-                $output = $second ^ $first;
-                break;
-            case '|':
-                if (intval($first) != $first || intval($second) != $second) {
-                    $this->die('bitwise OR should only be used with integers', $optoken);
-                }
-                $output = $second | $first;
-                break;
-            case '&&':
-                $output = ($second && $first ? 1 : 0);
-                break;
-            case '||':
-                $output = ($second || $first ? 1 : 0);
-                break;
-            case '<':
-                $output = ($second < $first ? 1 : 0);
-                break;
-            case '>':
-                $output = ($second > $first ? 1 : 0);
-                break;
-            case '==':
-                $output = ($second == $first ? 1 : 0);
-                break;
-            case '>=':
-                $output = ($second >= $first ? 1 : 0);
-                break;
-            case '<=':
-                $output = ($second <= $first ? 1 : 0);
-                break;
-            case '!=':
-                $output = ($second != $first ? 1 : 0);
-                break;
+        // For + (string concatenation or addition) we check the arguments here, even if another
+        // check is done in functions::apply_binary_operator(), because this allows for better
+        // error reporting.
+        if ($optoken->value === '+') {
+            // If at least one operand is a string, both values must be scalar, but
+            // not necessarily we use concatenation instead
+            // of addition.
+            if (is_string($first) || is_string($second)) {
+                $this->abort_if_not_scalar($firsttoken, false);
+                $this->abort_if_not_scalar($secondtoken, false);
+            }
+            // In all other cases, addition must (currently) be numeric, so we abort
+            // if the arguments are not numbers.
+            $this->abort_if_not_scalar($firsttoken);
+            $this->abort_if_not_scalar($secondtoken);
         }
-        // One last safety check: numeric results must not be NAN or INF.
-        // This should never be triggered.
-        if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
-            $this->die('evaluation error', $optoken);
+
+        try {
+            $result = functions::apply_binary_operator($optoken->value, $first, $second);
+        } catch (Exception $e) {
+            $this->die($e->getMessage(), $optoken);
         }
-        return new token($outtype, $output, $optoken->row, $optoken->column);
+        return token::wrap($result);
     }
 
     private function is_valid_num_of_params(token $function, int $count): bool {
