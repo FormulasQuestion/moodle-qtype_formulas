@@ -674,7 +674,7 @@ class evaluator {
         // Fetch the params from the stack and reverse their order, because the stack is LIFO.
         $params = [];
         for ($i = 0; $i < $numparams; $i++) {
-            $params[] = array_pop($this->stack)->value;
+            $params[] = $this->pop_real_value()->value;
         }
         $params = array_reverse($params);
 
