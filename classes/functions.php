@@ -631,7 +631,10 @@ class functions {
             return 1;
         }
         $result = 1;
-        for ($i = $n; $i > 1; $i--) {
+        for ($i = 1; $i <= $n; $i++) {
+            if ($result > PHP_INT_MAX / $i) {
+                throw new Exception("fact() cannot compute $n! on this platform, the result is bigger than PHP_MAX_INT");
+            }
             $result *= $i;
         }
         return $result;
