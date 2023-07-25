@@ -51,7 +51,7 @@ class variable {
     public function __toString() {
         // Arrays are printed in their [...] form, sets are printed as {...}.
         if (gettype($this->value) === 'array') {
-            $result = $this->stringify_array($this->value);
+            $result = token::stringify_array($this->value);
             if ($this->type === self::SET) {
                 return '{' . substr($result, 1, -1) . '}';
             }
@@ -68,23 +68,4 @@ class variable {
         return strval($this->value);
     }
 
-    /**
-     * Recursively convert an array to a string.
-     *
-     * @param array $arr the array to be converted
-     */
-    private function stringify_array($arr) {
-        $result = '[';
-        foreach ($arr as $element) {
-            if (gettype($element) === 'array') {
-                $result .= $this->stringify_array($element);
-            } else {
-                $result .= strval($element);
-            }
-            $result .= ', ';
-        }
-        $result .= ']';
-        $result = str_replace(', ]', ']', $result);
-        return $result;
-    }
 }

@@ -666,7 +666,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
         $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
 
-        $qdata->options->answers = array(
+        $qdata->answers = array(
             14 => (object) array(
                 'id' => 14,
                 'placeholder' => '',

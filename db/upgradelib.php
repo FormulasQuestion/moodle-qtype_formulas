@@ -51,7 +51,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         $summary = array();
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
-        foreach ($this->question->options->answers as $part) {
+        foreach ($this->question->answers as $part) {
             if ($this->has_combined_unit_field($part)) {
                 $summary [] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];;
             } else {
@@ -74,7 +74,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
 
         // Now that we know random and global variables, we can do our best for question summary.
         $summary = $this->to_text($this->question->questiontext, $this->question->questiontextformat);
-        foreach ($this->question->options->answers as $part) {
+        foreach ($this->question->answers as $part) {
             $answerbit = $this->to_text($part->subqtext, $part->subqtextformat);
             if ($part->placeholder != '') {
                 $summary = str_replace('{' . $part->placeholder . '}', $answerbit, $summary);
@@ -99,7 +99,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
     public function set_data_elements_for_step($state, &$data) {
         $parsedanswer = $this->parse_answer($state->answer);
         $responses = $parsedanswer['responses'];
-        foreach ($this->question->options->answers as $part) {
+        foreach ($this->question->answers as $part) {
             if ($this->has_combined_unit_field($part)) {
                 // If part has a combined unit field we need to group answer and unit.
                 $data[$part->partindex . '_'] = $responses[$part->partindex . '_0'] . $responses[$part->partindex . '_1'];
@@ -136,7 +136,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         }
         $grading = array();
         $responses = array();
-        foreach ($this->question->options->answers as $i => $part) {
+        foreach ($this->question->answers as $i => $part) {
             $grading[$i] = array_key_exists($i, $details) ? explode(',', $details[$i]) : array(0, 0, 0, 0);
             foreach (range(0, $part->numbox) as $j) {
                 $responses["{$i}_$j"] = array_key_exists("{$i}_$j", $details) ? $details["{$i}_$j"] : '';

@@ -121,6 +121,7 @@ class evaluator_test extends \advanced_testcase {
             ],
         ];
     }
+
     public function provide_arrays(): array {
         return [
             'basic' => [[1, 2, 3, 4, 5], '[1,2,3,4,5]'],
@@ -237,6 +238,40 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * @dataProvider provide_numbers_and_units
+     */
+    public function test_unit_split($expected, $input): void {
+        $parser = new answer_parser($input);
+        $index = $parser->find_start_of_units();
+        $number = substr($input, 0, $index);
+        $unit = substr($input, $index);
+
+        self::assertEquals($expected[0], trim($number));
+        self::assertEquals($expected[1], $unit);
+
+    }
+
+
+    public function provide_numbers_and_units(): array {
+        return [
+            'missing unit' => [['123', ''], '123'],
+            'missing number' => [['', 'm/s'], 'm/s'],
+            'length 1' => [['100', 'm'], '100 m'],
+            'length 1' => [['100', 'cm'], '100cm'],
+            'length 2' => [['1.05', 'mm'], '1.05 mm'],
+            'length 3' => [['-1.3', 'nm'], '-1.3 nm'],
+            'area' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2', ],
+            'area' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV', ],
+            'speed' => [['1', 'km/s'], '1 km/s'],
+            'combination 1' => [['1', 'm g/us'], '1 m g/us'],
+            'combination 2' => [['1', 'kPa s^-2'], '1 kPa s^-2'],
+            'combination 3' => [['1', 'm kg s^-2'], '1 m kg s^-2'],
+            'numerical' => [['12 + 3 * 4/8', 'm^2'], '12 + 3 * 4/8 m^2'],
+            'numerical formula' => [['12 * sqrt(3)', 'kg/s'], '12 * sqrt(3) kg/s'],
+        ];
+    }
+
     public function test_random_vars() {
         return;
         $input = 'a = shuffle([1,2,3])';
@@ -255,6 +290,78 @@ class evaluator_test extends \advanced_testcase {
         // print_r($context);
         $evaluator->instantiate_random_variables();
         return;
+    }
+
+    public function test_pick() {
+        $testcases = [
+            ['pick(3,[0,1,2,3,4,5]);', 3],
+            ['pick(3.9,[0,1,2,3,4,5]);', 3],
+            ['pick(10,[0,1,2,3,4,5]);', 0],
+            ['pick(10.9,[0,1,2,3,4,5]);', 0],
+            ['pick(3,[0,1,2,3,4,5]);', 3],
+            ['pick(3.9,0,1,2,3,4,5);', 3],
+            ['pick(10,0,1,2,3,4,5);', 0],
+            ['pick(3,["A","B","C","D","E","F"]);', 'D'],
+            ['pick(3.9,["A","B","C","D","E","F"]);', 'D'],
+            ['pick(10,["A","B","C","D","E","F"]);', 'A'],
+            ['pick(3,"A","B","C","D","E","F");', 'D'],
+            ['pick(3.9,"A","B","C","D","E","F");', 'D'],
+            ['pick(10,"A","B","C","D","E","F");', 'A'],
+            ['pick(10.9,"A","B","C","D","E","F");', 'A'],
+            ['pick(3,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [3, 3]],
+            ['pick(3.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [3, 3]],
+            ['pick(10,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [0, 0]],
+            ['pick(10.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [0, 0]],
+            ['pick(3,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['D', 'D']],
+            ['pick(3.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['D', 'D']],
+            ['pick(10,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['A', 'A']],
+            ['pick(10.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['A', 'A']],
+        ];
+
+        foreach ($testcases as $case) {
+            $parser = new parser($case[0]);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+            $value = end($result)->value;
+            if (is_array($value)) {
+                $value = array_map(function ($el) { return $el->value; }, $value);
+            }
+            self::assertEqualsWithDelta($case[1], $value, 1e-12);
+        }
+    }
+
+    public function test_sigfig() {
+        $testcases = [
+            ['sigfig(.012345, 3)', '0.0123'],
+            ['sigfig(.012345, 4)', '0.01235'],
+            ['sigfig(.012345, 6)', '0.0123450'],
+            ['sigfig(-.012345, 3)', '-0.0123'],
+            ['sigfig(-.012345, 4)', '-0.01235'],
+            ['sigfig(-.012345, 6)', '-0.0123450'],
+            ['sigfig(123.45, 2)', '120'],
+            ['sigfig(123.45, 4)', '123.5'],
+            ['sigfig(123.45, 6)', '123.450'],
+            ['sigfig(-123.45, 2)', '-120'],
+            ['sigfig(-123.45, 4)', '-123.5'],
+            ['sigfig(-123.45, 6)', '-123.450'],
+            ['sigfig(.005, 1)', '0.005'],
+            ['sigfig(.005, 2)', '0.0050'],
+            ['sigfig(.005, 3)', '0.00500'],
+            ['sigfig(-.005, 1)', '-0.005'],
+            ['sigfig(-.005, 2)', '-0.0050'],
+            ['sigfig(-.005, 3)', '-0.00500'],
+        ];
+
+        foreach ($testcases as $case) {
+            $parser = new parser($case[0]);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+            //var_dump(end($result));
+            $value = end($result)->value;
+            self::assertEqualsWithDelta($case[1], $value, 1e-12);
+        }
     }
 
     public function test_basic_operations() {
@@ -296,16 +403,57 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = [1,2,3]; "2"+a';
         $input = 'a = "fooo"; 2*a';
         $input = 'a = 2; b = 3; c = 4; d = a * b; d';
+        $input = 'a = [[1,2],[3,4],[5,6]]; a[1][0];';
+        $input = 'a = [[1,2],[2,3]]; a[1] = 9; a[1]';
+        $input = 'a = "foo"; a[1] = "x"';
+        $input = 'a = [1,2]; a';
+        $input = '_err = 1';
+        $input = 'p=pick(3.9,[0,1,2,3,4,5]);';
+        $input = 'fqversionnumber()';
+        $input = 'join("x", 8, 7, [5,9])';
+        $input = 'sum([1,2,3, "4", [1]])';
+        $input = 'fill("3", "a")';
+        $input = 'sort([3,12,5], [3,5,0])';
+        $input = 'sublist(["A","B","C","D"],[1,3])';
+        $input = 'concat([1,2,3], [4,5,6], [[1,2]], [7,8])';
+        $input = 'poly("x", -5)';
+        $input = 'shuffle([1,2,3,[4,5,6]])';
+        $input = 'sin = 2; \sin(x)';
+        $input = 'a = shuffle([1,2,3])';
+        $input = 'inv([2, 7, 4, 9, 8, 3, 5, 0, 6, 1])';
+        $input = 'inv([0,1,2,3,4])';
+        $input = 'sort([1,-2,-3,2,"A","B"],["A","1","-1","-2","20","-5"])';
+        $input = 'sort([1,-2,-3,2,"A","B"])';
+        $input = 'sort([-20,3,1,5,2,4,-1,-4,-20,0])';
+        $input = 'map("ncr", 10, [1,2,3])';
+        $input = 'map("map", "-", [[1,2],[3,4]])';
+        $input = 'a = 2; sin(a)';
+        $input = 'fact(6)';
+        $input = 'a = {1,2,3}; b=shuffle([4,5,6,8,9,10]);';
+        $input = 'a = [1,2]; a';
+        $input = 'a = 1; [a,2]; a';
+        //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
+        //$parser = new random_parser($input);
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
-        //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
-        //$evaluator->import_variable_context($context);
         $result = $evaluator->evaluate($statements);
         print_r($result);
+        die();
+        //print("how many? " . $evaluator->get_number_of_variants() . "\n");
+        $evaluator->instantiate_random_variables();
+        //print_r($result);
+        var_dump(end($result));
+        //die($evaluator->export_randomvars_for_step_data());
         $context = $evaluator->export_variable_context();
         print_r($context);
+        return;
+        $evaluator = new evaluator();
+        //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
+        //$evaluator->import_variable_context($context);
+        print_r($result);
+        var_dump($evaluator->variables);
         return;
 
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
@@ -329,10 +477,11 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_answer_expression() {
-        return;
         $input = '2^3';
+        $input = '1.5e3 m^2';
 
         $parser = new answer_parser($input);
+        print('unit starts at index: ' . $parser->find_start_of_units());
         print_r($parser->statements);
     }
 

@@ -25,14 +25,8 @@ use Throwable, Exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+ // TODO: add method to export list of known variables in order to feed them to a new parser
 
-/*
-
-TODO:
-
- * set value for individual array element / make %%arrayindex aware of variables vs. literals
-
-*/
 
 class evaluator {
     /* function name => [min params, max params] */
@@ -82,13 +76,16 @@ class evaluator {
 
     // FIXME: temporarily, for testing debugging
     public $variables = [];
-    private $randomvariables = [];
+    public $randomvariables = [];
 
     private $constants = [
         'π' => M_PI,
     ];
 
     private array $stack = [];
+
+    /* if true, it is possible to assign values to reserved variables */
+    private bool $godmode = false;
 
     /**
      * FIXME Undocumented function
@@ -97,6 +94,56 @@ class evaluator {
     public function __construct(?string $context = null) {
         $this->reinitialize($context);
     }
+
+    /**
+     * Substitute placeholders like {a} or {=a*b} in a text by evaluating the corresponding
+     * expressions in the current evaluator.
+     *
+     * @param string $text the text to be formatted
+     * @return string
+     */
+    public function substitute_variables_in_text(string $text): string {
+        // We have three sorts of placeholders: "naked" variables like {a},
+        // variables with a numerical index like {a[1]} or more complex
+        // expressions like {=a+b} or {=a[b]}.
+        $varpattern = '[_A-Za-z]\w*';
+        $arraypattern = '[_A-Za-z]\w*\[\d+\]';
+        $expressionpattern = '=[^}]+';
+
+        $matches = [];
+        preg_match_all("/\{($varpattern|$arraypattern|$expressionpattern)\}/", $text, $matches);
+
+        // We have the variable names or expressions in $matches[1]. Let's first filter out the
+        // duplicates.
+        $matches = array_unique($matches[1]);
+
+        foreach ($matches as $match) {
+            $input = $match;
+            // For expressions, we have to remove the = sign.
+            if ($input[0] === '=') {
+                $input = substr($input, 1);
+            }
+            // We could resolve variables like {a} or {b[1]} directly and it would probably be faster
+            // to do so, but the code is much simpler if we just feed everything to the evaluator.
+            // If there is an evaluation error, we simply do not replace do placeholder.
+            try {
+                $parser = new parser($input);
+                // Before evaluating an expression, we want to make sure it does not contain
+                // an assignment operator, because that could overwrite values in the evaluator's
+                // variable context.
+                if ($input !== $match && $parser->has_token_in_tokenlist(token::OPERATOR, '=')) {
+                    continue;
+                }
+                $result = $this->evaluate($parser->get_statements());
+                $text = str_replace("{{$match}}", strval(end($result)), $text);
+            } catch (Exception $e) {
+                unset($e);
+            }
+        }
+
+        return $text;
+    }
+
 
     public function reinitialize(?string $context = null) {
         $this->clear_stack();
@@ -113,6 +160,44 @@ class evaluator {
 
     public function export_variable_context(): string {
         return serialize($this->variables);
+    }
+
+    /**
+     * FIXME: doc
+     *
+     * @return string
+     */
+    public function export_randomvars_for_step_data(): string {
+        $result = '';
+        foreach ($this->randomvariables as $var) {
+            $result .= $var->get_instantiated_definition();
+        }
+        return $result;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return integer
+     */
+    public function get_number_of_variants(): int {
+        $result = 1;
+        foreach ($this->randomvariables as $var) {
+            $num = $var->how_many();
+            if ($num > PHP_INT_MAX / $result) {
+                return PHP_INT_MAX;
+            }
+            $result = $result * $num;
+        }
+        return $result;
+    }
+
+    public function instantiate_random_variables(int $seed = 1): void {
+        mt_srand($seed);
+        foreach ($this->randomvariables as $var) {
+            $value = $var->instantiate();
+            $this->set_variable_to_value(token::wrap($var->name, token::VARIABLE), $value);
+        }
     }
 
     /**
@@ -156,10 +241,11 @@ class evaluator {
             $basename = strstr($basename, '[', true);
         }
 
-        // Some variables are reserved and cannot be used as left-hand side in an assignment.
+        // Some variables are reserved and cannot be used as left-hand side in an assignment,
+        // unless the evaluator is currently in god mode.
         $isreserved = in_array($basename, ['_err', '_relerr', '_a', '_r', '_d', '_u']);
         $isanswer = preg_match('/^_\d+$/', $basename);
-        if ($isreserved || $isanswer) {
+        if (!$this->godmode && ($isreserved || $isanswer)) {
             $this->die("you cannot assign values to the special variable '$basename'", $value);
         }
 
@@ -171,7 +257,7 @@ class evaluator {
                 $useshuffle = $value->type === variable::LIST;
                 $randomvar = new random_variable($basename, $value->value, $useshuffle);
                 $this->randomvariables[$basename] = $randomvar;
-                return token::wrap($randomvar->value);
+                return token::wrap($randomvar->reservoir);
             }
 
             // Otherwise we return the stored value.
@@ -278,11 +364,14 @@ class evaluator {
         return $token;
     }
 
-    private function evaluate_the_right_thing($input) {
+    private function evaluate_the_right_thing($input, bool $godmode = false) {
         if ($input instanceof expression) {
-            return $this->evaluate_single_expression($input);
+            return $this->evaluate_single_expression($input, $godmode);
         }
         if ($input instanceof for_loop) {
+            if ($godmode) {
+                throw new Exception('for loops cannot be evaluated in god mode');
+            }
             return $this->evaluate_for_loop($input);
         }
         throw new Exception('bad invocation of evaluate(), expected expression or for loop');
@@ -292,18 +381,19 @@ class evaluator {
      * Evaluate a single expression or an array of expressions.
      *
      * @param expression|array $input
+     * @param bool $godmode whether to run the evaluation in god mode
      * @return token|array
      */
-    public function evaluate($input) {
+    public function evaluate($input, bool $godmode = false) {
         if (($input instanceof expression) || ($input instanceof for_loop)) {
-            return $this->evaluate_the_right_thing($input);
+            return $this->evaluate_the_right_thing($input, $godmode);
         }
         if (!is_array($input)) {
             throw new Exception('bad invocation of evaluate(), expected an expression or a list of expressions');
         }
         $result = [];
         foreach ($input as $single) {
-            $result[] = $this->evaluate_the_right_thing($single);
+            $result[] = $this->evaluate_the_right_thing($single, $godmode);
         }
         return $result;
     }
@@ -320,7 +410,7 @@ class evaluator {
         return end($result);
     }
 
-    private function evaluate_single_expression(expression $expression) {
+    private function evaluate_single_expression(expression $expression, bool $godmode = false) {
         foreach ($expression->body as $token) {
             $type = $token->type;
             $value = $token->value;
@@ -348,7 +438,9 @@ class evaluator {
                 // The = operator is binary, but we treat it separately.
                 if ($value === '=' || $value === 'r=') {
                     $israndomvar = ($value === 'r=');
+                    $this->godmode = $godmode;
                     $this->stack[] = $this->execute_assignment($israndomvar);
+                    $this->godmode = false;
                 } else if ($this->is_binary_operator($token)) {
                     $this->stack[] = $this->execute_binary_operator($token);
                 }
@@ -509,7 +601,7 @@ class evaluator {
                 array_pop($this->stack);
                 break;
             }
-            $elements[] = array_pop($this->stack);
+            $elements[] = $this->pop_real_value();
             $head = end($this->stack);
         }
         // Return reversed list, because the stack ist LIFO.
@@ -661,6 +753,7 @@ class evaluator {
 
     public function execute_function(token $token) {
         $funcname = $token->value;
+
         // Fetch the number of params from the stack. Keep the token in case of an error.
         $numparamstoken = array_pop($this->stack);
         $numparams = $numparamstoken->value;
@@ -691,6 +784,7 @@ class evaluator {
             }
             $result = call_user_func_array($prefix . $funcname, $params);
         } catch (Throwable $e) {
+            // FIXME: maybe change message and remove "evaluation error"
             $this->die('evaluation error: ' . $e->getMessage(), $token);
         }
 

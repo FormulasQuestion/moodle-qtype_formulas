@@ -39,11 +39,24 @@ class random_parser extends parser {
             $tokenlist = $lexer->get_tokens();
         }
 
-        // When parsing random variables, we change the assignment operator from '=' to 'r=' in order
-        // for the evaluator to know it has to store them as random variables.
+        // We scan all tokens in order to make a few modifications that are specific
+        // to random variables.
         foreach ($tokenlist as $token) {
+            // When parsing random variables, we change the assignment operator from '=' to 'r=' in order
+            // for the evaluator to know it has to store them as random variables.
             if ($token->type === token::OPERATOR && $token->value === '=') {
                 $token->value = 'r=';
+            }
+
+            // In legacy code, arrays in random variables always had to be used together with
+            // the shuffle() function, e.g. ar = shuffle([1,2,3]) and shuffle() could *only* be
+            // used to define random variables. We keep this syntax, but allow defining shuffled
+            // arrays without actually writing the function, because if the user did not want the
+            // array to be shuffled, they would define it in the global section rather than the
+            // random section. Therefore, we silently drop the function while parsing.
+            if ($token->type === token::IDENTIFIER && $token->value === 'shuffle') {
+                $token->value = '';
+                $token->type = token::FUNCTION;
             }
         }
 

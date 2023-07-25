@@ -30,27 +30,24 @@ class random_variable extends variable {
     public $name;
 
     /** @var array the set of possible values to choose from */
-    private $reservoir = [];
+    public $reservoir = [];
 
     /** @var int the variable's data type */
     public $type;
 
     /** @var mixed the variable's content */
-    public $value;
+    public $value = null;
 
     /** @var bool if the variable is a shuffled array */
     private $shuffle;
 
-    public function __construct(string $name, array $reservoir, bool $useshuffle) {
+    public function __construct(string $name, array $reservoir, bool $useshuffle, int $seed = 1) {
         $this->name = $name;
         $this->shuffle = $useshuffle;
         $this->reservoir = $reservoir;
-
-        // Instantiate the newly created variable.
-        $this->instantiate();
     }
 
-    public function instantiate() {
+    public function instantiate(): token {
         // We have two types of random variables. One is a list that will be shuffled.
         // The other is a set where we pick one random element.
         if ($this->shuffle) {
@@ -62,5 +59,41 @@ class random_variable extends variable {
             $this->value = $this->reservoir[$i]->value;
             $this->type = $this->reservoir[$i]->type;
         }
+        return token::wrap($this->value, $this->type);
+    }
+
+    public function how_many(): int {
+        if ($this->shuffle) {
+            try {
+                $result = functions::fact(count($this->reservoir));
+            } catch (Exception $e) {
+                return PHP_INT_MAX;
+            }
+            return $result;
+        }
+        return count($this->reservoir);
+    }
+
+    /**
+     * Return a string that can be used to set the variable to its instantiated value.
+     * This is needed to assure proper review for questions with random variables:
+     * when the student starts a new attempt, the random values are saved in the
+     * table question_attempt_step_data. For backwards compatibility, we continue to
+     * use the existing format, i. e. <variablename> = <instantiated-value>; for every random
+     * variable.
+     *
+     * @return string
+     */
+    public function get_instantiated_definition(): string {
+        if ($this->value === null) {
+            return '';
+        }
+        $definition = $this->name . '=';
+        if (is_array($this->value)) {
+            $definition .= '[' . implode(',', $this->value) . ']';
+        } else {
+            $definition .= $this->value;
+        }
+        return $definition . ';';
     }
 }

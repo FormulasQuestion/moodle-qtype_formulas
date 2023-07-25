@@ -382,6 +382,12 @@ class shunting_yard {
                 // Function name goes straight to the operator stack. At the same time,
                 // we must set up a new function argument counter.
                 case token::FUNCTION:
+                    // The parser for random variables removes the legacy usage of the shuffle()
+                    // function by setting the name to the empty string. So if we have an empty
+                    // function name, we simply do nothing.
+                    if ($token->value === '') {
+                        break;
+                    }
                     $opstack[] = $token;
                     $separatortype[] = 'functionargs';
                     $counters['functionargs'][] = 0;

@@ -35,7 +35,6 @@ TODO:
 *   -> must not be LHS in assignment, can only be used in certain contexts
 * parsing and instantiation of random vars
 * units
-* possibly class RandomVariable -> instantiate() -> set one value with mt_rand
 
 */
 
@@ -43,7 +42,7 @@ class parser {
     const EOF = null;
 
     /** @var array list of all (raw) tokens */
-    private $tokenlist;
+    protected $tokenlist;
 
     /** @var integer number of (raw) tokens */
     private $count;
@@ -184,6 +183,16 @@ class parser {
             $offendingtoken = $this->tokenlist[$this->position];
         }
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
+    }
+
+    public function has_token_in_tokenlist(int $type, $value): bool {
+        foreach ($this->tokenlist as $token) {
+            // We do not use strict comparison for the value.
+            if ($token->type === $type && $token->value == $value) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function parse_general_expression(?int $stopat = null): expression {

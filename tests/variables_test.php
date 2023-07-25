@@ -41,6 +41,23 @@ require_once($CFG->dirroot . '/question/type/formulas/variables.php');
  */
 
 class variables_test extends \advanced_testcase {
+
+    public function test_dummy() {
+        $qv = new variables();
+        $input = '2^3';
+
+        $errmsg = null;
+        try {
+            $v = $qv->vstack_create();
+            $result = $qv->evaluate_general_expression($v, $input);
+        } catch (Exception $e) {
+            $errmsg = $e->getMessage();
+        }
+        $this->assertNull($errmsg);
+        $this->assertEqualsWithDelta(8, $result->value, 1e-8);
+        $this->assertEquals('n', $result->type);
+    }
+
     /**
      * Test 1: get_expressions_in_bracket() test.
      */
