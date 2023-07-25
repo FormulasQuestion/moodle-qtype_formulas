@@ -257,7 +257,6 @@ class parser_test extends \advanced_testcase {
     }
 
     public function test_answer_expression() {
-        return;
         $input = '2^3';
 
         $parser = new answer_parser($input);

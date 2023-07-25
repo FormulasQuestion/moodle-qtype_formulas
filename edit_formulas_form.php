@@ -289,7 +289,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         if (isset($question->options)) {
             $defaultvalues = array();
             if (count($question->options->answers)) {
-                $tags = question_bank::get_qtype($question->qtype)->part_tags();
+                $tags = qtype_formulas::PART_BASIC_FIELDS;
                 foreach ($question->options->answers as $key => $answer) {
 
                     foreach ($tags as $tag) {
@@ -336,7 +336,8 @@ class qtype_formulas_edit_form extends question_edit_form {
         $errors = parent::validation($fromform, $files);
         // Use the validation defined in the question type, check by instantiating one variable set.
         $data = (object)$fromform;
-        $instantiationresult = question_bank::get_qtype($this->qtype())->validate($data);
+        $qtype = new qtype_formulas();
+        $instantiationresult = $qtype->validate($data);
         if (isset($instantiationresult->errors)) {
             $errors = array_merge($errors, $instantiationresult->errors);
         }

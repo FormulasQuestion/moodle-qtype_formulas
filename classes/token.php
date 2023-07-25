@@ -97,13 +97,27 @@ class token {
     }
 
     public function __toString() {
-        return (string)$this->value;
+        // Arrays are printed in their [...] form, sets are printed as {...}.
+        if (gettype($this->value) === 'array') {
+            $result = self::stringify_array($this->value);
+            if ($this->type === self::SET) {
+                return '{' . substr($result, 1, -1) . '}';
+            }
+            return $result;
+        }
+
+        // For everything else, we use PHP's string conversion.
+        return strval($this->value);
     }
 
-    public static function wrap($value) {
+    public static function wrap($value, $type = null) {
         // If the value is already a token, we do nothing.
         if ($value instanceof token) {
             return $value;
+        }
+        // If a specific type is requested, we create a token with that type.
+        if ($type !== null) {
+            return new token($type, $value);
         }
         // Otherwise, we choose the appropriate type.
         if (is_string($value)) {
@@ -117,6 +131,26 @@ class token {
             throw new Exception("the given value '$value' has an invalid data type an cannot be converted to a token");
         }
         return new token($type, $value);
+    }
+
+    /**
+     * Recursively convert an array to a string.
+     *
+     * @param array $arr the array to be converted
+     */
+    public static function stringify_array($arr): string {
+        $result = '[';
+        foreach ($arr as $element) {
+            if (gettype($element) === 'array') {
+                $result .= self::stringify_array($element);
+            } else {
+                $result .= strval($element);
+            }
+            $result .= ', ';
+        }
+        $result .= ']';
+        $result = str_replace(', ]', ']', $result);
+        return $result;
     }
 
 }

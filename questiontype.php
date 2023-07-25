@@ -15,504 +15,591 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Moodle formulas question type class.
+ * Question type class for the Formulas question type.
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
+ * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
  * @author Hon Wai, Lau <lau65536@gmail.com>
+ * @author Philipp Imhof
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  * @package qtype_formulas
  */
 
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\unit_conversion_rules;
+use qtype_formulas\evaluator;
+use qtype_formulas\random_parser;
+use qtype_formulas\answer_parser;
+use qtype_formulas\parser;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/questionlib.php');
 require_once($CFG->dirroot . '/question/engine/lib.php');
-require_once("$CFG->dirroot/question/type/formulas/variables.php");
-require_once("$CFG->dirroot/question/type/formulas/answer_unit.php");
-require_once("$CFG->dirroot/question/type/formulas/conversion_rules.php");
+require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
+require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
 require_once($CFG->dirroot . '/question/type/formulas/question.php');
 
 /**
- * The formulas question class
+ * Question type class for the Formulas question type.
  *
- * TODO give an overview of how the class works here.
+ * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
+ * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class qtype_formulas extends question_type {
-    private $qv;
-
-
-    public function __construct() {
-        $this->qv = new qtype_formulas\variables();
-    }
+    const ANSWER_TYPE_NUMBER = 0;
+    const ANSWER_TYPE_NUMERIC = 10;
+    const ANSWER_TYPE_NUMERICAL_FORMULA = 100;
+    const ANSWER_TYPE_ALGEBRAIC = 1000;
 
     /**
-     * column names of qtype_formulas_answers table (apart from id and questionid)
-     * WARNING qtype_formulas_answers is NOT an extension of answers table
-     * so we can't use extra_answer_fields here.
-     * subqtext, subqtextformat, feedback and feedbackformat and all part's combined
-     * feedback fields are not included as their handling is special
-     * @return array.
-     */
-    public function part_tags() {
-        return array('placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2', 'correctness'
-            , 'unitpenalty', 'postunit', 'ruleid', 'otherrule');
-    }
-
-    /**
-     * If you use extra_question_fields, overload this function to return question id field name
-     *  in case you table use another name for this column
-     */
-    public function questionid_column_name() {
-        return 'questionid';
-    }
-
-    /**
-     * If your question type has a table that extends the question table, and
-     * you want the base class to automatically save, backup and restore the extra fields,
-     * override this method to return an array where the first element is the table name,
-     * and the subsequent entries are the column names (apart from id and questionid).
+     * The following array contains some of the column names of the table qtype_formulas_answers,
+     * the table that holds the parts (not just answers) of a question:
      *
-     * @return mixed array as above, or null to tell the base class to do nothing.
+     * - placeholder: the part's placeholder to be used in the main question text, e. g. #1
+     * - answermark: grade awarded for this part, if answer is fully correct
+     * - numbox: number of answers for this part, not including a possible unit field
+     * - vars1: the part's local variables
+     * - answer: the model answer(s) for this part
+     * - vars2: the part's grading variables
+     * - correctness: the part's grading criterion
+     * - unitpenalty: deduction to be made for wrong units
+     * - postunit: the unit in which the model answer has been entered
+     * - ruleid: ruleset used for unit conversion
+     * - otherrule: additional rules for unit conversion
+     *
+     * These columns undergo similar validation, so they are grouped in this array. Some columns are not
+     * listed here, namely the texts (part's text, part's feedback) and their formatting option, because
+     * they are validated separately.
+     */
+    const PART_BASIC_FIELDS = ['placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
+        'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
+
+    /**
+     * This function returns the "simple" additional fields defined in the qtype_formulas_options
+     * table. It is called by Moodle's core in order to have those fields automatically saved
+     * backed up and restored. The basic fields like id and questionid do not need to included.
+     * Also, we do not include the more "complex" feedback fields (correct, partially correct, incorrect),
+     * as they need special treatment, because they can contain references to uploaded files.
+     *
+     * @return string[]
      */
     public function extra_question_fields() {
-        return array('qtype_formulas_options', 'varsrandom', 'varsglobal', 'answernumbering');
+        return ['qtype_formulas_options', 'varsrandom', 'varsglobal', 'shownumcorrect', 'answernumbering'];
     }
 
     /**
-     * Move all the files belonging to this question from one context to another.
-     * @param int $questionid the question being moved.
-     * @param int $oldcontextid the context it is moving from.
-     * @param int $newcontextid the context it is moving to.
+     * Fetch the ID for every part of a given question.
+     *
+     * @param int $questionid
+     * @return int[]
      */
-    public function move_files($questionid, $oldcontextid, $newcontextid) {
-        $fs = get_file_storage();
+    public function fetch_part_ids_for_question(int $questionid): array {
+        global $DB;
 
-        parent::move_files($questionid, $oldcontextid, $newcontextid);
-        $fs->move_area_files_to_new_context($oldcontextid,
-            $newcontextid, 'qtype_formulas', 'answersubqtext', $questionid);
-        $fs->move_area_files_to_new_context($oldcontextid,
-            $newcontextid, 'qtype_formulas', 'answerfeedback', $questionid);
-        $fs->move_area_files_to_new_context($oldcontextid,
-            $newcontextid, 'qtype_formulas', 'partcorrectfb', $questionid);
-        $fs->move_area_files_to_new_context($oldcontextid,
-            $newcontextid, 'qtype_formulas', 'partpartiallycorrectfb', $questionid);
-        $fs->move_area_files_to_new_context($oldcontextid,
-            $newcontextid, 'qtype_formulas', 'partincorrectfb', $questionid);
-        $this->move_files_in_combined_feedback($questionid, $oldcontextid, $newcontextid);
-        $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
+        // Fetch the parts from the DB. The result will be an associative array with
+        // the parts' IDs as keys.
+        $parts = $DB->get_records('qtype_formulas_answers', ['questionid' => $questionid]);
+
+        return array_keys($parts);
     }
 
     /**
-     * Delete all the files belonging to this question.
+     * Move all the files belonging to this question (and its parts) from one context to another.
+     *
+     * @param int $questionid the question being moved.
+     * @param int $oldid the context it is moving from.
+     * @param int $newid the context it is moving to.
+     */
+    public function move_files($questionid, $oldid, $newid): void {
+        // Fetch the part IDs for every part of this question.
+        $partids = $this->fetch_part_ids_for_question($questionid);
+
+        // Move files for all areas and all parts.
+        $fs = get_file_storage();
+        $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
+        foreach ($areas as $area) {
+            foreach ($partids as $partid) {
+                $fs->move_area_files_to_new_context($oldid, $newid, 'qtype_formulas', $area, $partid);
+            }
+        }
+
+        $this->move_files_in_combined_feedback($questionid, $oldid, $newid);
+        $this->move_files_in_hints($questionid, $oldid, $newid);
+
+        // The parent method will move files from the question text and the
+        // general feedback. Note that we do not use the latter.
+        parent::move_files($questionid, $oldid, $newid);
+    }
+
+    /**
+     * Delete all the files belonging to this question (and its parts).
+     *
      * @param int $questionid the question being deleted.
      * @param int $contextid the context the question is in.
      */
-    protected function delete_files($questionid, $contextid) {
-        $fs = get_file_storage();
+    protected function delete_files($questionid, $contextid): void {
+        // Fetch the part IDs for every part of this question.
+        $partids = $this->fetch_part_ids_for_question($questionid);
 
-        parent::delete_files($questionid, $contextid);
+        // Delete files for all areas and all parts.
+        $fs = get_file_storage();
+        $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
+        foreach ($areas as $area) {
+            foreach ($partids as $partid) {
+                $fs->delete_area_files($contextid, 'qtype_formulas', $area, $partid);
+            }
+        }
+
         $this->delete_files_in_combined_feedback($questionid, $contextid);
         $this->delete_files_in_hints($questionid, $contextid);
-        $fs->delete_area_files($contextid, 'question', 'correctfeedback', $questionid);
-        $fs->delete_area_files($contextid, 'question', 'partiallycorrectfeedback', $questionid);
-        $fs->delete_area_files($contextid, 'question', 'incorrectfeedback', $questionid);
-        $fs->delete_area_files($contextid, 'qtype_formulas', 'answersubqtext', $questionid);
-        $fs->delete_area_files($contextid, 'qtype_formulas', 'answerfeedback', $questionid);
-        $fs->delete_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $questionid);
-        $fs->delete_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $questionid);
-        $fs->delete_area_files($contextid, 'qtype_formulas', 'partincorrectfb', $questionid);
+
+        // The parent method will delete files from the question text and the
+        // general feedback. Note that we do not use the latter.
+        parent::delete_files($questionid, $contextid);
     }
 
     /**
      * Loads the question type specific options for the question.
+     * $question already contains the question's general data from the question table when
+     * this function is called.
      *
      * This function loads any question type specific options for the
      * question from the database into the question object. This information
      * is placed in the $question->options field. A question type is
      * free, however, to decide on a internal structure of the options field.
-     * @return bool            Indicates success or failure.
      * @param object $question The question object for the question. This object
      *                         should be updated to include the question type
      *                         specific information (it is passed by reference).
+     * @return bool            Indicates success or failure.
      */
-    public function get_question_options($question) {
+    public function get_question_options($question): bool {
         global $DB;
 
+        // Fetch options from the table qtype_formulas_options. The DB engine will automatically
+        // return a standard class where the attribute names match the column names.
         $question->options = $DB->get_record('qtype_formulas_options', ['questionid' => $question->id]);
 
+        // In case of a DB error (e. g. missing record), get_record() returns false. In that case, we
+        // create default options.
         if ($question->options === false) {
-            // If this has happened, then we have a problem.
-            // For the user to be able to edit or delete this question, we need options.
-            debugging("Formulas question ID {$question->id} was missing an options record. Using default.", DEBUG_DEVELOPER);
-
-            $question->options = $this->create_default_options($question);
+            debugging(get_string('error_db_missing_options', 'qtype_formulas', $question->id), DEBUG_DEVELOPER);
+            $question->options = (object)[
+                'questionid' => $question->id,
+                'varsrandom' => '',
+                'varsglobal' => '',
+                'correctfeedback' => get_string('correctfeedbackdefault', 'question'),
+                'correctfeedbackformat' => FORMAT_HTML,
+                'partiallycorrectfeedback' => get_string('partiallycorrectfeedbackdefault', 'question'),
+                'partiallycorrectfeedbackformat' => FORMAT_HTML,
+                'incorrectfeedback' => get_string('incorrectfeedbackdefault', 'question'),
+                'incorrectfeedbackformat' => FORMAT_HTML,
+                'shownumcorrect' => 0,
+                'answernumbering' => 'none',
+            ];
         }
 
         parent::get_question_options($question);
-        $question->options->answers = $DB->get_records(
-          'qtype_formulas_answers',
-          array('questionid' => $question->id), 'partindex ASC'
-        );
-        $question->options->numpart = count($question->options->answers);
+
+        // Fetch parts' data and remove existing array indices (starting from first part's id) in order
+        // to have the array indices start from 0.
+        $question->options->answers = $DB->get_records('qtype_formulas_answers', ['questionid' => $question->id], 'partindex ASC');
         $question->options->answers = array_values($question->options->answers);
+
+        // Correctly set the number of parts for this question.
+        $question->options->numparts = count($question->options->answers);
+
         return true;
     }
 
     /**
-     * Create a default options object for the provided question.
+     * Helper function to save files that are embedded in e. g. part's text or
+     * feedback, avoids to set 'qtype_formulas' for every invocation.
      *
-     * @param object $question The question we are working with.
-     * @return object The options object.
+     * @param array $array the data from the form (or from import). This will
+     *      normally have come from the formslib editor element, so it will be an
+     *      array with keys 'text', 'format' and 'itemid'. However, when we are
+     *      importing, it will be an array with keys 'text', 'format' and 'files'
+     * @param object $context the context the question is in.
+     * @param string $filearea indentifies the file area questiontext,
+     *      generalfeedback, answerfeedback, etc.
+     * @param int $itemid identifies the file area.
+     *
+     * @return string the text for this field, after files have been processed.
      */
-    protected function create_default_options($question) {
-        // Create a default question options record.
-        $options = new stdClass();
-        $options->questionid = $question->id;
-        $options->varsrandom = '';
-        $options->varsglobal = '';
-
-        // Get the default strings and just set the format.
-        $options->correctfeedback = get_string('correctfeedbackdefault', 'question');
-        $options->correctfeedbackformat = FORMAT_HTML;
-        $options->partiallycorrectfeedback = get_string('partiallycorrectfeedbackdefault', 'question');;
-        $options->partiallycorrectfeedbackformat = FORMAT_HTML;
-        $options->incorrectfeedback = get_string('incorrectfeedbackdefault', 'question');
-        $options->incorrectfeedbackformat = FORMAT_HTML;
-
-        $options->answernumbering = 'none';
-        $options->shownumcorrect = 0;
-
-        return $options;
+    protected function save_file_helper(array $array, object $context, string $filearea, int $itemid): string {
+        return $this->import_or_save_files($array, $context, 'qtype_formulas', $filearea, $itemid);
     }
 
     /**
      * Saves question-type specific options
      *
      * This is called by {@link save_question()} to save the question-type specific data
-     * @return object $result->error or $result->noticeyesno or $result->notice
-     * @param object $question  This holds the information from the editing form,
+     * @param object $formdata  This holds the information from the editing form,
      *      it is not a standard question object.
+     * @return object $result->error or $result->notice
+     * @throws Exception
      */
-    public function save_question_options($question) {
+    public function save_question_options($formdata) {
         global $DB;
 
-        $context = $question->context;
-        $result = new stdClass();
+        // Fetch existing parts from the DB.
+        $existingparts = $DB->get_records('qtype_formulas_answers', ['questionid' => $formdata->id], 'partindex ASC');
 
-        $oldanswers = $DB->get_records('qtype_formulas_answers', array('questionid' => $question->id), 'partindex ASC');
-        try {
-            $filtered = $this->validate($question); // Data from the web input interface should be validated.
-            if (count($filtered->errors) > 0) {  // There may be errors from import or restore.
-                throw new Exception('Format error! Probably imported/restored formulas questions have been damaged.');
-            }
-            $answersorder = $this->reorder_answers($question->questiontext, $filtered->answers);
-            // Reorder the answers, so that answer's order is the same as the placeholder's order in questiontext.
-            $newanswers = array();
-            foreach ($answersorder as $newloc) {
-                $newanswers[] = $filtered->answers[$newloc];
-            }
-            $idcount = 0;
-            foreach ($newanswers as $i => $ans) {
-                $ans->partindex = $i;
-                $ans->questionid = $question->id;
-                // Save all editors content (arrays).
-                $subqtextarr = $ans->subqtext;
-                $ans->subqtext = $subqtextarr['text'];
-                $ans->subqtextformat = $subqtextarr['format'];
-                $feedbackarr = $ans->feedback;
-                $ans->feedback = $feedbackarr['text'];
-                $ans->feedbackformat = $feedbackarr['format'];
-                $correctfbarr = $ans->partcorrectfb;
-                $ans->partcorrectfb = $correctfbarr['text'];
-                $ans->partcorrectfbformat = $correctfbarr['format'];
-                $partiallycorrectfbarr = $ans->partpartiallycorrectfb;
-                $ans->partpartiallycorrectfb = $partiallycorrectfbarr['text'];
-                $ans->partpartiallycorrectfbformat = $partiallycorrectfbarr['format'];
-                $incorrectfbarr = $ans->partincorrectfb;
-                $ans->partincorrectfb = $incorrectfbarr['text'];
-                $ans->partincorrectfbformat = $incorrectfbarr['format'];
-                // Update an existing answer if possible.
-                $answer = array_shift($oldanswers);
-                if (!$answer) {
-                    $answer = new stdClass();
-                    $answer->questionid = $question->id;
-                    $answer->answermark = 1;
-                    $answer->numbox = 1;
-                    $answer->answer = '';
-                    $answer->answernotunique = 1;
-                    $answer->correctness = '';
-                    $answer->ruleid = 1;
-                    $answer->trialmarkseq = '';
-                    $answer->subqtextformat = 0;
-                    $answer->feedbackformat = 0;
-                    $answer->partcorrectfb = '';
-                    $answer->partcorrectfbformat = 0;
-                    $answer->partpartiallycorrectfb = '';
-                    $answer->partpartiallycorrectfbformat = 0;
-                    $answer->partincorrectfb = '';
-                    $answer->partincorrectfbformat = 0;
+        // Validate the data from the edit form.
+        $filtered = $this->validate($formdata);
+        if (!empty($filtered->errors)) {
+            return (object)['error' => get_string('error_damaged_question', 'qtype_formulas')];
+        }
 
-                    $ans->id = $DB->insert_record('qtype_formulas_answers', $answer);
-                } else {
-                    $ans->id = $answer->id;
+        // Order the parts according to how they appear in the question.
+        $filtered->answers = $this->reorder_parts($formdata->questiontext, $filtered->answers);
+
+        foreach ($filtered->answers as $i => $part) {
+            $part->questionid = $formdata->id;
+            $part->partindex = $i;
+
+            // Try to take the first existing part.
+            $parttoupdate = array_shift($existingparts);
+
+            // If there is currently no part, we create an empty one, store it in the DB
+            // and retrieve its ID.
+            if (empty($parttoupdate)) {
+                $parttoupdate = (object)[
+                    'questionid' => $formdata->id,
+                    'answermark' => 1,
+                    'numbox' => 1,
+                    'answer' => '',
+                    'answernotunique' => 1,
+                    'correctness' => '',
+                    'ruleid' => 1,
+                    'subqtext' => '',
+                    'subqtextformat' => FORMAT_HTML,
+                    'feedback' => '',
+                    'feedbackformat' => FORMAT_HTML,
+                    'partcorrectfb' => '',
+                    'partcorrectfbformat' => FORMAT_HTML,
+                    'partpartiallycorrectfb' => '',
+                    'partpartiallycorrectfbformat' => FORMAT_HTML,
+                    'partincorrectfb' => '',
+                    'partincorrectfbformat' => FORMAT_HTML,
+                ];
+
+                try {
+                    $parttoupdate->id = $DB->insert_record('qtype_formulas_answers', $parttoupdate);
+                } catch (Exception $e) {
+                    // TODO: change to non-capturing catch when dropping support for PHP 7.4.
+                    return (object)['error' => get_string('error_db_write', 'qtype_formulas', 'qtype_formulas_answers')];
                 }
-                $ans->subqtext = $this->import_or_save_files($subqtextarr, $context, 'qtype_formulas', 'answersubqtext', $ans->id);
-                $ans->feedback = $this->import_or_save_files($feedbackarr, $context, 'qtype_formulas', 'answerfeedback', $ans->id);
-                $ans->partcorrectfb = $this->import_or_save_files(
-                  $correctfbarr, $context,
-                  'qtype_formulas',
-                  'partcorrectfb',
-                  $ans->id
-                );
-                $ans->partpartiallycorrectfb = $this->import_or_save_files(
-                  $partiallycorrectfbarr,
-                  $context,
-                  'qtype_formulas',
-                  'partpartiallycorrectfb',
-                  $ans->id
-                );
-                $ans->partincorrectfb = $this->import_or_save_files(
-                  $incorrectfbarr,
-                  $context,
-                  'qtype_formulas',
-                  'partincorrectfb',
-                  $ans->id
-                );
-                $DB->update_record('qtype_formulas_answers', $ans);
             }
 
-            // Delete any left over old answer records.
-            $fs = get_file_storage();
-            foreach ($oldanswers as $oldanswer) {
-                $fs->delete_area_files($context->id, 'qtype_formulas', 'answersubqtext', $oldanswer->id);
-                $fs->delete_area_files($context->id, 'qtype_formulas', 'answerfeedback', $oldanswer->id);
-                $fs->delete_area_files($context->id, 'qtype_formulas', 'partcorrectfb', $oldanswer->id);
-                $fs->delete_area_files($context->id, 'qtype_formulas', 'partpartiallycorrectfb', $oldanswer->id);
-                $fs->delete_area_files($context->id, 'qtype_formulas', 'partincorrectfb', $oldanswer->id);
-                $DB->delete_records('qtype_formulas_answers', array('id' => $oldanswer->id));
+            // Finally, set the ID for the newpart.
+            $part->id = $parttoupdate->id;
+
+            // Now that we have the ID, we can deal with the text fields that might contain files,
+            // i. e. the part's text and the feedbacks (general, correct, partially correct, incorrect).
+            // We need the current question's context. Also, we must split up the form's text editor
+            // data (text and format in one array) into separate text and format properties. Moodle does
+            // its magic when saving the files, so we first do that and keep the modified text.
+            $context = $formdata->context;
+
+            $tmp = $part->subqtext;
+            $part->subqtext = $this->save_file_helper($tmp, $context, 'answersubqtext', $part->id);
+            $part->subqtextformat = $tmp['format'];
+
+            $tmp = $part->feedback;
+            $part->feedback = $this->save_file_helper($tmp, $context, 'answerfeedback', $part->id);
+            $part->feedbackformat = $tmp['format'];
+
+            $tmp = $part->partcorrectfb;
+            $part->partcorrectfb = $this->save_file_helper($tmp, $context, 'partcorrectfb', $part->id);
+            $part->partcorrectfbformat = $tmp['format'];
+
+            $tmp = $part->partpartiallycorrectfb;
+            $part->partpartiallycorrectfb = $this->save_file_helper($tmp, $context, 'partpartiallycorrectfb', $part->id);
+            $part->partpartiallycorrectfbformat = $tmp['format'];
+
+            $tmp = $part->partincorrectfb;
+            $part->partincorrectfb = $this->save_file_helper($tmp, $context, 'partincorrectfb', $part->id);
+            $part->partincorrectfbformat = $tmp['format'];
+
+            try {
+                $DB->update_record('qtype_formulas_answers', $part);
+            } catch (Exception $e) {
+                // TODO: change to non-capturing catch when dropping support for PHP 7.4.
+                return (object)['error' => get_string('error_db_write', 'qtype_formulas', 'qtype_formulas_answers')];
             }
-        } catch (Exception $e) {
-            return (object)array('error' => $e->getMessage());
         }
-        // Save the question options.
-        $options = $DB->get_record('qtype_formulas_options', array('questionid' => $question->id));
-        if (!$options) {
-            $options = new stdClass();
-            $options->questionid = $question->id;
-            $options->correctfeedback = '';
-            $options->partiallycorrectfeedback = '';
-            $options->incorrectfeedback = '';
-            $options->answernumbering = 'none';
-            $options->id = $DB->insert_record('qtype_formulas_options', $options);
+
+        $options = $DB->get_record('qtype_formulas_options', ['questionid' => $formdata->id]);
+
+        // If there are no options yet (i. e. we are saving a new question) or if the fetch was not
+        // successful, create new options with default values.
+        if (empty($options) || $options === false) {
+            $options = (object)[
+                'questionid' => $formdata->id,
+                'correctfeedback' => '',
+                'partiallycorrectfeedback' => '',
+                'incorrectfeedback' => '',
+                'answernumbering' => 'none'
+            ];
+
+            try {
+                $options->id = $DB->insert_record('qtype_formulas_options', $options);
+            } catch (Exception $e) {
+                return (object)['error' => get_string('error_db_write', 'qtype_formulas', 'qtype_formulas_options')];
+            }
         }
+
+        // Do all the magic for the question's combined feedback fields (correct, partially correct, incorrect).
+        $options = $this->save_combined_feedback_helper($options, $formdata, $formdata->context, true);
+
+        // Get the extra fields we have for our question type. Drop the first entry, because
+        // it contains the table name.
         $extraquestionfields = $this->extra_question_fields();
         array_shift($extraquestionfields);
-        foreach ($extraquestionfields as $extra) {
-            if (property_exists($question, $extra)) {
-                $options->$extra = $question->$extra;
+
+        // Assign the values from the form.
+        foreach ($extraquestionfields as $extrafield) {
+            if (isset($formdata->$extrafield)) {
+                $options->$extrafield = $formdata->$extrafield;
             }
         }
 
-        $options = $this->save_combined_feedback_helper($options, $question, $context, true);
+        // Finally, update the existing (or just recently created) record with the values from the form.
+        try {
+            $DB->update_record('qtype_formulas_options', $options);
+        } catch (Exception $e) {
+            return (object)['error' => get_string('error_db_write', 'qtype_formulas', 'qtype_formulas_options')];
+        }
 
-        $DB->update_record('qtype_formulas_options', $options);
+        // Save the hints, if they exist.
+        $this->save_hints($formdata, true);
 
-        $this->save_hints($question, true);
-        return true;
+        // If there are no existing parts left to be updated, we may leave.
+        if (!$existingparts) {
+            return;
+        }
+
+        // Still here? Then we must remove remaining parts and their files (if there are), because the
+        // user seems to have deleted them in the form.
+        $fs = get_file_storage();
+        foreach ($existingparts as $leftover) {
+            $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
+            foreach ($areas as $area) {
+                $fs->delete_area_files($context->id, 'qtype_formulas', $area, $leftover->id);
+            }
+            try {
+                $DB->delete_records('qtype_formulas_answers', array('id' => $leftover->id));
+            } catch (Exception $e) {
+                return (object)['error' => get_string('error_db_delete', 'qtype_formulas', 'qtype_formulas_answers')];
+            }
+        }
     }
 
-
-    // Override the parent save_question in order to change the defaultmark.
-    public function save_question($question, $form) {
-        $form->defaultmark = 0;
-        foreach ($form->answermark as $key => $data) {
-            if (trim($form->answermark[$key]) == '' || trim($form->answer[$key]) == '') {
+    /**
+     * Save a question. Overriding the parent method, because we have to calculate the
+     * defaultmark and we need to propagate the global settings for unitpenalty and ruleid
+     * to every part.
+     *
+     * @param object $question
+     * @param object $formdata
+     * @return object
+     */
+    public function save_question($question, $formdata) {
+        // Question's default mark is the total of all non empty parts's marks.
+        $formdata->defaultmark = 0;
+        foreach (array_keys($formdata->answermark) as $key) {
+            // Do nothing if the part has no mark or no answer.
+            if (trim($formdata->answermark[$key]) === '' || trim($formdata->answer[$key]) === '') {
                 continue;
             }
-            // Question's default mark is the total of all non empty parts's marks.
-            $form->defaultmark += $form->answermark[$key];
+            $formdata->defaultmark += $formdata->answermark[$key];
         }
-        // Add the unitpenalty and ruleid to each part, from the global option.
-        $form->unitpenalty = array_fill(0, count($form->answer), $form->globalunitpenalty);
-        $form->ruleid = array_fill(0, count($form->answer), $form->globalruleid);
 
-        $question = parent::save_question($question, $form);
-        return $question;
+        // Add the global unitpenalty and ruleid to each part. Using the answertype field as
+        // the counter reference, because it is always set.
+        $count = count($formdata->answertype);
+        $formdata->unitpenalty = array_fill(0, $count, $formdata->globalunitpenalty);
+        $formdata->ruleid = array_fill(0, $count, $formdata->globalruleid);
+
+        // Preparation work is done, let the parent method do the rest.
+        return parent::save_question($question, $formdata);
     }
 
+    /**
+     * Create a question_hint. Overriding the parent method, because our
+     * question type can have multiple parts.
+     *
+     * @param object $hint the DB row from the question hints table.
+     * @return question_hint
+     */
     protected function make_hint($hint) {
         return question_hint_with_parts::load_from_record($hint);
     }
 
-    // Delete question from the question-type specific tables with $questionid.
+    /**
+     * Delete the question from the database, together with its options and parts.
+     *
+     * @param int $questionid
+     * @param int $contextid
+     * @return void
+     */
     public function delete_question($questionid, $contextid) {
         global $DB;
-        // The qtype_formulas records are deleted in parent as extra_question_fields records.
-        // But we need to take care of qtype_formulas_answers as they are not real answers.
-        $DB->delete_records('qtype_formulas_answers', array('questionid' => $questionid));
+
+        // First, we call the parent method. It will delete the question itself (from question)
+        // and its options (from qtype_formulas_options).
+        // Note: This will also trigger the delete_files() method which, in turn, needs the question's
+        // parts to be available, so we MUST NOT remove the parts before this.
         parent::delete_question($questionid, $contextid);
+
+        // Finally, remove the related parts from the qtype_formulas_answers table.
+        $DB->delete_records('qtype_formulas_answers', ['questionid' => $questionid]);
     }
 
     /**
-     * Split the main question text according to the placeholders.
+     * Split the main question text into fragments that will later enclose the various parts'
+     * text. As an example, 'foo {#1} bar' will become 'foo ' and ' bar'. The function will
+     * return one more fragment than the number of parts. The last fragment can be empty, e. g.
+     * if we have a part with no placeholder. Such parts are placed at the very end, so there will
+     * no fragment of the question's main text after them.
      *
-     * @param string $questiontext The main question text containing all placeholders.
-     * @param array $answers array of answers with placeholder (can be empty string)
-     * @return  array of text fragments with count($answers) + 1 elements.
+     * @param string $questiontext main question tex
+     * @param qtype_formulas_part[] $parts
+     * @return string[] fragments (one more than the number of parts
      */
-    public function split_questiontext($questiontext, $answers) {
-        // TODO Simplify this now that answers are in right order in data structure.
-        $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
-        foreach ($answers as $idx => $answer) {
-            if (strlen($answer->placeholder) != 0) {
-                $locations[] = 1000 * strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
-            }
-        }
-        sort($locations);       // Performs stable sort of location and answerorder pairs.
+    public function split_questiontext(string $questiontext, array $parts): array {
+        // Make sure the parts are ordered according to the position of their placeholders
+        // in the main question text.
+        $parts = $this->reorder_parts($questiontext, $parts);
 
-        $fragments = array();
-        foreach ($locations as $i => $location) {
-            $answerorder = $location % 1000;
-            list($fragments[$i], $questiontext) = explode('{'.$answers[$answerorder]->placeholder.'}', $questiontext);
-        }
-        foreach ($answers as $answer) {
-            if (strlen($answer->placeholder) == 0) { // Add the parts with empty placeholder at the end.
+        $fragments = [];
+        foreach ($parts as $part) {
+            // Since the parts are ordered, we know that parts with placeholders come first.
+            // When we see the first part without a placeholder, we can add the remaining question
+            // text to the fragments. We then set the question text to the empty string, in order
+            // to add empty fragments for each subsequent part.
+            if (empty($part->placeholder)) {
                 $fragments[] = $questiontext;
                 $questiontext = '';
+                continue;
             }
+            $pos = strpos($questiontext, "{{$part->placeholder}}");
+            $fragments[] = substr($questiontext, 0, $pos);
+            $questiontext = substr($questiontext, $pos + strlen($part->placeholder) + 2);
         }
-        $fragments[] = $questiontext;  // Add the post-question text, if any.
+
+        // Add the remainder of the question text after the last part; this might be an empty string.
+        $fragments[] = $questiontext;
 
         return $fragments;
     }
 
     /**
-     * Initialise the question_definition fields.
-     * @param question_definition $question the question_definition we are creating.
-     * @param object $questiondata the question data loaded from the database.
+     * Initialise instante of the qtype_formulas_question class and its parts which, in turn,
+     * are instances of the qtype_formulas_part class.
+     *
+     * @param qtype_formulas_question $question instance of a Formulas question
+     * @param object $questiondata question data as stored in the DB
      */
     protected function initialise_question_instance(question_definition $question, $questiondata) {
+        // All the classical fields (e. g. category, context or id) are filled by the parent method.
         parent::initialise_question_instance($question, $questiondata);
-        $question->parts = array();
-        if (!empty($questiondata->options->answers)) {
-            foreach ($questiondata->options->answers as $ans) {
-                $part = new qtype_formulas_part();
-                foreach ($ans as $key => $value) {
-                    $part->{$key} = $value;
-                }
-                $question->parts[$part->partindex] = $part;
-            }
-        }
+
+        // First, copy some data for the main question.
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
         $question->answernumbering = $questiondata->options->answernumbering;
-        $question->qv = new qtype_formulas\variables();
-        $question->numpart = $questiondata->options->numpart;
-        if ($question->numpart != 0) {
-            $question->fractions = array_fill(0, $question->numpart, 0);
-            $question->anscorrs = array_fill(0, $question->numpart, 0);
-            $question->unitcorrs = array_fill(0, $question->numpart, 0);
+        $question->numparts = $questiondata->options->numparts;
+
+        // The attribute $questiondata->options->answers stores all information for the parts. Despite
+        // its name, it does not only contain the model answers, but also e.g. local or grading vars.
+        foreach ($questiondata->options->answers as $partdata) {
+            $questionpart = new qtype_formulas_part();
+
+            // Copy the data fields fetched from the DB to the question part object.
+            foreach ($partdata as $key => $value) {
+                $questionpart->{$key} = $value;
+            }
+
+            // And finally store the populated part in the main question instance.
+            $question->parts[$partdata->partindex] = $questionpart;
         }
+
+        // Split the main question text into fragments that will later surround the parts' texts.
         $question->textfragments = $this->split_questiontext($question->questiontext, $question->parts);
+
+        // The combined feedback will be initialised by the parent class, because we do not override
+        // this method.
         $this->initialise_combined_feedback($question, $questiondata, true);
     }
 
     /**
-     * This method should return all the possible types of response that are
-     * recognised for this question.
+     * Return all possible types of response. They are used e. g. reports.
      *
-     * The question is modelled as comprising one or more subparts. For each
-     * subpart, there are one or more classes that that students response
-     * might fall into, each of those classes earning a certain score.
-     *
-     * For example, in a shortanswer question, there is only one subpart, the
-     * text entry field. The response the student gave will be classified according
-     * to which of the possible $question->options->answers it matches.
-     *
-     * For the matching question type, there will be one subpart for each
-     * question stem, and for each stem, each of the possible choices is a class
-     * of student's response.
-     *
-     * A response is an object with two fields, ->responseclass is a string
-     * presentation of that response, and ->fraction, the credit for a response
-     * in that class.
-     *
-     * Array keys have no specific meaning, but must be unique, and must be
-     * the same if this function is called repeatedly.
-     *
-     * @param object $question the question definition data.
-     * @return array keys are part partindex, values are arrays of possible
-     *      responses to that question part.
+     * @param object $questiondata question definition data
+     * @return array possible responses for every part
      */
     public function get_possible_responses($questiondata) {
-        $resp = array();
+        $responses = [];
 
-        $q = $this->make_question($questiondata);
+        $question = $this->make_question($questiondata);
 
-        foreach ($q->parts as $part) {
-            if ($part->postunit == '') {
-                $resp[$part->partindex] = array(
-                    'wrong' => new question_possible_response(
-                            'Wrong', 0),
-                    'right' => new question_possible_response(
-                            'Right', 1),
-                    null              => question_possible_response::no_response()
-                );
+        foreach ($question->parts as $part) {
+            if ($part->postunit === '') {
+                $responses[$part->partindex] = [
+                    'wrong' => new question_possible_response(get_string('response_wrong', 'qtype_formulas'), 0),
+                    'right' => new question_possible_response(get_string('response_right', 'qtype_formulas'), 1),
+                    null => question_possible_response::no_response(),
+                ];
             } else {
-                 $resp[$part->partindex] = array(
-                    'wrong' => new question_possible_response(
-                            'Wrong', 0),
-                    'right' => new question_possible_response(
-                            'Right', 1),
-                    'wrongvalue' => new question_possible_response(
-                            'Wrong value right unit', 0),
+                $responses[$part->partindex] = [
+                    'wrong' => new question_possible_response(get_string('response_wrong', 'qtype_formulas'), 0),
+                    'right' => new question_possible_response(get_string('response_right', 'qtype_formulas'), 1),
+                    'wrongvalue' => new question_possible_response(get_string('response_wrong_value', 'qtype_formulas'), 0),
                     'wrongunit' => new question_possible_response(
-                            'Right value wrong unit', 1 - $part->unitpenalty),
-                    null => question_possible_response::no_response()
-                 );
+                        get_string('response_wrong_unit', 'qtype_formulas'), 1 - $part->unitpenalty
+                    ),
+                    null => question_possible_response::no_response(),
+                ];
             }
         }
 
-        return $resp;
+        return $responses;
     }
+
     /**
-     * Imports the question from Moodle XML format.
+     * Imports the question from Moodle XML format. Overriding the parent function is necessary,
+     * because a Formulas question contains subparts.
      *
-     * @param $xml structure containing the XML data
-     * @param $fromform question object to fill: ignored by this function (assumed to be null)
-     * @param $format format class exporting the question
+     * @param array $xml structure containing the XML data
+     * @param $question question object to fill
+     * @param qformat_xml $format format class exporting the question
      * @param $extra extra information (not required for importing this question in this format)
      */
-    public function import_from_xml($xml, $fromform, qformat_xml $format, $extra=null) {
+    public function import_from_xml($xml, $question, qformat_xml $format, $extra = null) {
         // Return if data type is not our own one.
         if (!isset($xml['@']['type']) || $xml['@']['type'] != $this->name()) {
             return false;
         }
 
-        // Import the common question headers and set the corresponding field,
-        // Unfortunately we can't use the parent method because it will try to import answers,
-        // and fails as formulas "answers" are not real answers but formulas question parts !!
-        $fromform = $format->import_headers($xml);
-        $fromform->qtype = $this->name();
-        $format->import_combined_feedback($fromform, $xml, true);
-        $format->import_hints($fromform, $xml, true);
+        // Import the common question headers and set the corresponding field.
+        $question = $format->import_headers($xml);
+        $question->qtype = $this->name();
+        $format->import_combined_feedback($question, $xml, true);
+        $format->import_hints($question, $xml, true);
 
-        $fromform->varsrandom = $format->getpath($xml, array('#', 'varsrandom', 0, '#', 'text', 0, '#'), '', true);
-        $fromform->varsglobal = $format->getpath($xml, array('#', 'varsglobal', 0, '#', 'text', 0, '#'), '', true);
-        $fromform->answernumbering = $format->getpath($xml, array('#', 'answernumbering', 0, '#', 'text', 0, '#'), 'none', true);
+        $question->varsrandom = $format->getpath($xml, ['#', 'varsrandom', 0, '#', 'text', 0, '#'], '', true);
+        $question->varsglobal = $format->getpath($xml, ['#', 'varsglobal', 0, '#', 'text', 0, '#'], '', true);
+        $question->answernumbering = $format->getpath($xml, ['#', 'answernumbering', 0, '#', 'text', 0, '#'], 'none', true);
 
         // Loop over each answer block found in the XML.
-        $tags = $this->part_tags();
-        $anscount = 0;
-        foreach ($xml['#']['answers'] as $answer) {
-            $partindex = $format->getpath($answer, array('#', 'partindex', 0 , '#' , 'text' , 0 , '#'), false);
+        foreach ($xml['#']['answers'] as $i => $part) {
+            $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
             if ($partindex) {
-                $fromform->partindex[$anscount] = $partindex;
+                $question->partindex[$i] = $partindex;
             }
-            foreach ($tags as $tag) {
+            foreach (self::PART_BASIC_FIELDS as $field) {
                 // Older questions do not have this field, so we do not want to issue an error message.
                 // Also, for maximum backwards compatibility, we set the default value to 1. With this,
                 // nothing changes for old questions.
@@ -520,397 +607,439 @@ class qtype_formulas extends question_type {
                     $ifnotexists = '';
                     $default = '1';
                 } else {
-                    $ifnotexists = 'error';
+                    $ifnotexists = get_string('error_import_missing_field', 'qtype_formulas', $field);
                     $default = '0';
                 }
-                $fromform->{$tag}[$anscount] = $format->getpath(
-                  $answer,
-                  array('#', $tag, 0 , '#' , 'text' , 0 , '#'),
-                  $default,
-                  false,
-                  $ifnotexists
+                $question->{$field}[$i] = $format->getpath(
+                    $part,
+                    ['#', $field, 0 , '#' , 'text' , 0 , '#'],
+                    $default,
+                    false,
+                    $ifnotexists
                 );
             }
 
-            $subqxml = $format->getpath($answer, array('#', 'subqtext', 0), array());
-            $fromform->subqtext[$anscount] = $format->import_text_with_files($subqxml,
-                        array(), '', $format->get_format($fromform->questiontextformat));
+            $subqxml = $format->getpath($part, ['#', 'subqtext', 0], []);
+            $question->subqtext[$i] = $format->import_text_with_files($subqxml,
+                        [], '', $format->get_format($question->questiontextformat));
 
-            $feedbackxml = $format->getpath($answer, array('#', 'feedback', 0), array());
-            $fromform->feedback[$anscount] = $format->import_text_with_files($feedbackxml,
-                        array(), '', $format->get_format($fromform->questiontextformat));
+            $feedbackxml = $format->getpath($part, ['#', 'feedback', 0], []);
+            $question->feedback[$i] = $format->import_text_with_files($feedbackxml,
+                        [], '', $format->get_format($question->questiontextformat));
 
-            $feedbackxml = $format->getpath($answer, array('#', 'correctfeedback', 0), array());
-            $fromform->partcorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
-                        array(), '', $format->get_format($fromform->questiontextformat));
-            $feedbackxml = $format->getpath($answer, array('#', 'partiallycorrectfeedback', 0), array());
-            $fromform->partpartiallycorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
-                        array(), '', $format->get_format($fromform->questiontextformat));
-            $feedbackxml = $format->getpath($answer, array('#', 'incorrectfeedback', 0), array());
-            $fromform->partincorrectfb[$anscount] = $format->import_text_with_files($feedbackxml,
-                        array(), '', $format->get_format($fromform->questiontextformat));
-            ++$anscount;
+            $feedbackxml = $format->getpath($part, ['#', 'correctfeedback', 0], []);
+            $question->partcorrectfb[$i] = $format->import_text_with_files($feedbackxml,
+                        [], '', $format->get_format($question->questiontextformat));
+            $feedbackxml = $format->getpath($part, ['#', 'partiallycorrectfeedback', 0], []);
+            $question->partpartiallycorrectfb[$i] = $format->import_text_with_files($feedbackxml,
+                        [], '', $format->get_format($question->questiontextformat));
+            $feedbackxml = $format->getpath($part, ['#', 'incorrectfeedback', 0], []);
+            $question->partincorrectfb[$i] = $format->import_text_with_files($feedbackxml,
+                        [], '', $format->get_format($question->questiontextformat));
         }
-        $fromform->defaultmark = array_sum($fromform->answermark); // Make the defaultmark consistent if not specified.
 
-        return $fromform;
+        // Make the defaultmark consistent if not specified.
+        $question->defaultmark = array_sum($question->answermark);
+
+        return $question;
     }
-
 
     /**
      * Exports the question to Moodle XML format.
      *
-     * @param $question question to be exported into XML format
-     * @param $format format class exporting the question
+     * @param object $question question to be exported into XML format
+     * @param qformat_xml $format format class exporting the question
      * @param $extra extra information (not required for exporting this question in this format)
-     * @return text string containing the question data in XML format
+     * @return string containing the question data in XML format
      */
-    public function export_to_xml($question, qformat_xml $format, $extra=null) {
-        $expout = '';
-        $fs = get_file_storage();
+    public function export_to_xml($question, qformat_xml $format, $extra = null) {
+        $output = '';
         $contextid = $question->contextid;
-        $expout .= $format->write_combined_feedback($question->options,
-                                                    $question->id,
-                                                    $question->contextid);
+        $output .= $format->write_combined_feedback($question->options, $question->id, $question->contextid);
+
+        // Get the extra fields we have for our question type. Drop the first entry, because
+        // it contains the table name.
         $extraquestionfields = $this->extra_question_fields();
         array_shift($extraquestionfields);
-        foreach ($extraquestionfields as $extra) {
-            $expout .= "<$extra>".$format->writetext($question->options->$extra)."</$extra>\n";
+        foreach ($extraquestionfields as $extrafield) {
+            $output .= "<$extrafield>" . $format->writetext($question->options->$extrafield) . "</$extrafield>\n";
         }
 
-        $tags = $this->part_tags();
-        foreach ($question->options->answers as $answer) {
-            $expout .= "<answers>\n";
-            $expout .= " <partindex>\n  ".$format->writetext($answer->partindex)." </partindex>\n";
-            foreach ($tags as $tag) {
-                $expout .= " <$tag>\n  ".$format->writetext($answer->$tag)." </$tag>\n";
+        $fs = get_file_storage();
+        foreach ($question->options->answers as $part) {
+            $output .= "<answers>\n";
+            $output .= " <partindex>\n  " . $format->writetext($part->partindex) . " </partindex>\n";
+
+            foreach (self::PART_BASIC_FIELDS as $tag) {
+                $output .= " <$tag>\n  " . $format->writetext($part->$tag) . " </$tag>\n";
             }
 
-            $subqfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'answersubqtext', $answer->id);
-            $subqtextformat = $format->get_format($answer->subqtextformat);
-            $expout .= " <subqtext format=\"$subqtextformat\">\n";
-            $expout .= $format->writetext($answer->subqtext);
-            $expout .= $format->write_files($subqfiles);
-            $expout .= " </subqtext>\n";
+            $subqfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'answersubqtext', $part->id);
+            $subqtextformat = $format->get_format($part->subqtextformat);
+            $output .= " <subqtext format=\"$subqtextformat\">\n";
+            $output .= $format->writetext($part->subqtext);
+            $output .= $format->write_files($subqfiles);
+            $output .= " </subqtext>\n";
 
-            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'answerfeedback', $answer->id);
-            $feedbackformat = $format->get_format($answer->feedbackformat);
-            $expout .= " <feedback format=\"$feedbackformat\">\n";
-            $expout .= $format->writetext($answer->feedback);
-            $expout .= $format->write_files($fbfiles);
-            $expout .= " </feedback>\n";
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'answerfeedback', $part->id);
+            $feedbackformat = $format->get_format($part->feedbackformat);
+            $output .= " <feedback format=\"$feedbackformat\">\n";
+            $output .= $format->writetext($part->feedback);
+            $output .= $format->write_files($fbfiles);
+            $output .= " </feedback>\n";
 
-            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $answer->id);
-            $feedbackformat = $format->get_format($answer->partcorrectfbformat);
-            $expout .= " <correctfeedback format=\"$feedbackformat\">\n";
-            $expout .= $format->writetext($answer->partcorrectfb);
-            $expout .= $format->write_files($fbfiles);
-            $expout .= " </correctfeedback>\n";
-            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $answer->id);
-            $feedbackformat = $format->get_format($answer->partpartiallycorrectfbformat);
-            $expout .= " <partiallycorrectfeedback format=\"$feedbackformat\">\n";
-            $expout .= $format->writetext($answer->partpartiallycorrectfb);
-            $expout .= $format->write_files($fbfiles);
-            $expout .= " </partiallycorrectfeedback>\n";
-            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partincorrectfb', $answer->id);
-            $feedbackformat = $format->get_format($answer->partincorrectfbformat);
-            $expout .= " <incorrectfeedback format=\"$feedbackformat\">\n";
-            $expout .= $format->writetext($answer->partincorrectfb);
-            $expout .= $format->write_files($fbfiles);
-            $expout .= " </incorrectfeedback>\n";
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partcorrectfb', $part->id);
+            $feedbackformat = $format->get_format($part->partcorrectfbformat);
+            $output .= " <correctfeedback format=\"$feedbackformat\">\n";
+            $output .= $format->writetext($part->partcorrectfb);
+            $output .= $format->write_files($fbfiles);
+            $output .= " </correctfeedback>\n";
 
-            $expout .= "</answers>\n";
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partpartiallycorrectfb', $part->id);
+            $feedbackformat = $format->get_format($part->partpartiallycorrectfbformat);
+            $output .= " <partiallycorrectfeedback format=\"$feedbackformat\">\n";
+            $output .= $format->writetext($part->partpartiallycorrectfb);
+            $output .= $format->write_files($fbfiles);
+            $output .= " </partiallycorrectfeedback>\n";
+
+            $fbfiles = $fs->get_area_files($contextid, 'qtype_formulas', 'partincorrectfb', $part->id);
+            $feedbackformat = $format->get_format($part->partincorrectfbformat);
+            $output .= " <incorrectfeedback format=\"$feedbackformat\">\n";
+            $output .= $format->writetext($part->partincorrectfb);
+            $output .= $format->write_files($fbfiles);
+            $output .= " </incorrectfeedback>\n";
+
+            $output .= "</answers>\n";
         }
-        return $expout;
+
+        return $output;
     }
 
     /**
-     * Check if placeholders in answers are correct and compatible with questiontext.
+     * Check if part placeholders are correctly formatted and unique and if each
+     * placeholder appears exactly once in the main question text.
      *
-     * @param $questiontext string text of the main question
-     * @param $answers array of objects only the placeholder is used
-     * @return $errors array
+     * @param string $questiontext main question text
+     * @param object[] $parts data relative to each part, coming from the edit form
+     * @return array $errors possible error messages for each part's placeholder field
      */
-    public function check_placeholder($questiontext, $answers) {
-        $placeholderformat = '#\w+';
-        $placeholders = array();
-        foreach ($answers as $idx => $answer) {
-            if ( strlen($answer->placeholder) == 0 ) {
-                continue; // No error if answer's placeholder is empty.
+    public function check_placeholders(string $questiontext, array $parts): array {
+        // Store possible error messages for every part.
+        $errors = [];
+
+        // List of placeholders in order to spot duplicates.
+        $knownplaceholders = [];
+
+        foreach ($parts as $i => $part) {
+            // No error if part's placeholder is empty.
+            if (empty($part->placeholder)) {
+                continue;
             }
-            $errstr = array();
-            if ( strlen($answer->placeholder) >= 40 ) {
-                $errstr[] = get_string('error_placeholder_too_long', 'qtype_formulas');
+
+            $errormsgs = [];
+
+            // Maximal length for placeholders is limited to 40.
+            if (strlen($part->placeholder) > 40) {
+                $errormsgs[] = get_string('error_placeholder_too_long', 'qtype_formulas');
             }
-            if ( !preg_match('/^'.$placeholderformat.'$/', $answer->placeholder) ) {
-                $errstr[] = get_string('error_placeholder_format', 'qtype_formulas');
+            // Placeholders must start with # and contain only alphanumeric characters or underscores.
+            if (!preg_match('/^#\w+$/', $part->placeholder) ) {
+                $errormsgs[] = get_string('error_placeholder_format', 'qtype_formulas');
             }
-            if ( array_key_exists($answer->placeholder, $placeholders) ) {
-                $errstr[] = get_string('error_placeholder_sub_duplicate', 'qtype_formulas');
+            // Placeholders must be unique.
+            if (in_array($part->placeholder, $knownplaceholders)) {
+                $errormsgs[] = get_string('error_placeholder_sub_duplicate', 'qtype_formulas');
             }
-            $placeholders[$answer->placeholder] = true;
-            $count = substr_count($questiontext, '{'.$answer->placeholder.'}');
+            // Add this placeholder to the list of known values.
+            $knownplaceholders[] = $part->placeholder;
+
+            // Each placeholder must appear exactly once in the main question text.
+            $count = substr_count($questiontext, "{{$part->placeholder}}");
             if ($count < 1) {
-                $errstr[] = get_string('error_placeholder_missing', 'qtype_formulas');
+                $errormsgs[] = get_string('error_placeholder_missing', 'qtype_formulas');
             }
             if ($count > 1) {
-                $errstr[] = get_string('error_placeholder_main_duplicate', 'qtype_formulas');
+                $errormsgs[] = get_string('error_placeholder_main_duplicate', 'qtype_formulas');
             }
-            if (!empty($errstr)) {
-                $errors["placeholder[$idx]"] = implode(' ', $errstr);
+
+            // Concatenate all error messages and store them, so they can be shown in the edit form.
+            // The corresponding field's name is 'placeholder[...]', so we use that as the array key.
+            if (!empty($errormsgs)) {
+                $errors["placeholder[$i]"] = implode(' ', $errormsgs);
             }
         }
-        return isset($errors) ? $errors : array();
+
+        // Return the errors. The array will be empty, if everything was fine.
+        return $errors;
     }
 
     /**
-     * Check that all required fields have been filled and return the filtered classes of the answers.
+     * For each part, check that all required fields have been filled and that they are valid.
+     * Return the filtered data for all parts.
      *
-     * @param $form all the input form data
-     * @return an object with a field 'answers' containing valid answers. Otherwise, the 'errors' field will be set
+     * @param object $data data from the edit form (or an import)
+     * @return object stdClass with properties 'errors' (for errors) and 'parts' (array of stdClass, data for each part)
      */
-    public function check_and_filter_answers($form) {
+    public function check_and_filter_parts(object $data): object {
         // This function is also called when importing a question.
         // The answers of imported questions already have their unitpenalty and ruleid set.
-        $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
-        $tags = $this->part_tags();
-        $res = (object)array('answers' => array());
-        foreach ($form->answermark as $i => $a) {
-            if ((strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0)
-                    && (strlen(trim($form->subqtext[$i]['text'])) != 0
-                    || strlen(trim($form->feedback[$i]['text'])) != 0
-                    || strlen(trim($form->vars1[$i])) != 0
-                    )
-                ) {
-                $res->errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
-                $skip = true;
+        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+
+        $partdata = [];
+        $errors = [];
+
+        foreach (array_keys($data->answermark) as $i) {
+            $nomark = empty(trim($data->answermark[$i]));
+            $noanswer = empty(trim($data->answer[$i]));
+
+            // Data from the editors are stored in an array with the keys text, format and itemid.
+            $noparttext = empty(trim($data->subqtext[$i]['text']));
+            $nogeneralfb = empty(trim($data->subqtext[$i]['text']));
+            $nolocalvars = empty(trim($data->vars1[$i]));
+            $emptypart = $noparttext && $nogeneralfb && $nolocalvars;
+
+            if ($nomark && !$emptypart) {
+                $errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
             }
-            if (strlen(trim($form->answermark[$i])) == 0 || strlen(trim($form->answer[$i])) == 0) {
-                continue;   // If no mark or no answer, then skip this answer.
+            if ($noanswer && !$emptypart) {
+                $errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
             }
-            if (floatval($form->answermark[$i]) <= 0) {
-                $res->errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
+
+            // No need to validate the remainder of this part if there is no answer or no mark.
+            if ($noanswer || $nomark) {
+                continue;
             }
-            $skip = false;
-            if (strlen(trim($form->correctness[$i])) == 0) {
-                $res->errors["correctness[$i]"] = get_string('error_criterion', 'qtype_formulas');
-                $skip = true;
+
+            // The mark must be strictly positive.
+            if (floatval($data->answermark[$i]) <= 0) {
+                $errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
             }
-            if ($skip) {
-                continue;   // If no answer or correctness conditions, it cannot check other parts, so skip.
+
+            // The grading criterion must not be empty. Also, if there is no grading criterion, it does
+            // not make sense to continue the validation.
+            if (empty(trim($data->correctness[$i]))) {
+                $errors["correctness[$i]"] = get_string('error_criterion_empty', 'qtype_formulas');
+                continue;
             }
-            $res->answers[$i] = new stdClass();
-            $res->answers[$i]->questionid = $form->id;
-            foreach ($tags as $tag) {
-                // The unitpenalty and ruleid are set via a global option,
-                // but stored with each part. When importing questions,
-                // this is not the case.
-                if (!$isfromimport && ($tag === 'unitpenalty' || $tag === 'ruleid')) {
-                    $res->answers[$i]->{$tag} = trim($form->{'global' . $tag});
+
+            // Create a stdClass for each part, start by setting the questionid property which is
+            // common for all parts.
+            $partdata[$i] = (object)['questionid' => $data->id];
+            // Set the basic fields, e.g. mark, placeholder or definition of local variables.
+            foreach (self::PART_BASIC_FIELDS as $field) {
+                // In the edit form, the part's 'unitpenalty' and 'ruleid' are set via the global options
+                // 'globalunitpenalty' and 'globalruleid'. When importing a question, these fields are
+                // already present in each part, so they can be copied over like all the others.
+                if ($isfromimport) {
+                    $partdata[$i]->$field = trim($data->{$field}[$i]);
                 } else {
-                    $res->answers[$i]->{$tag} = trim($form->{$tag}[$i]);
+                    if ($field === 'unitpenalty') {
+                        $partdata[$i]->unitpenalty = trim($data->globalunitpenalty);
+                    }
+                    if ($field === 'ruleid') {
+                        $partdata[$i]->ruleid = trim($data->globalruleid);
+                    }
                 }
             }
 
-            $subqtext = array();
-            $subqtext['text'] = $form->subqtext[$i]['text'];
-            $subqtext['format'] = $form->subqtext[$i]['format'];
-            if (isset($form->subqtext[$i]['itemid'])) {
-                $subqtext['itemid'] = $form->subqtext[$i]['itemid'];
-            }
-            $res->answers[$i]->subqtext = $subqtext;
-
-            $fb = array();
-            $fb['text'] = $form->feedback[$i]['text'];
-            $fb['format'] = $form->feedback[$i]['format'];
-            if (isset($form->feedback[$i]['itemid'])) {
-                $fb['itemid'] = $form->feedback[$i]['itemid'];
-            }
-            $res->answers[$i]->feedback = $fb;
-
-            $fb = array();
-            $fb['text'] = $form->partcorrectfb[$i]['text'];
-            $fb['format'] = $form->partcorrectfb[$i]['format'];
-            if (isset($form->partcorrectfb[$i]['itemid'])) {
-                $fb['itemid'] = $form->partcorrectfb[$i]['itemid'];
-            }
-            $res->answers[$i]->partcorrectfb = $fb;
-
-            $fb = array();
-            $fb['text'] = $form->partpartiallycorrectfb[$i]['text'];
-            $fb['format'] = $form->partpartiallycorrectfb[$i]['format'];
-            if (isset($form->partpartiallycorrectfb[$i]['itemid'])) {
-                $fb['itemid'] = $form->partpartiallycorrectfb[$i]['itemid'];
-            }
-            $res->answers[$i]->partpartiallycorrectfb = $fb;
-
-            $fb = array();
-            $fb['text'] = $form->partincorrectfb[$i]['text'];
-            $fb['format'] = $form->partincorrectfb[$i]['format'];
-            if (isset($form->partincorrectfb[$i]['itemid'])) {
-                $fb['itemid'] = $form->partincorrectfb[$i]['itemid'];
-            }
-            $res->answers[$i]->partincorrectfb = $fb;
-        }
-        if (count($res->answers) == 0) {
-            $res->errors["answermark[0]"] = get_string('error_no_answer', 'qtype_formulas');
+            // The various texts are stored as arrays with the keys 'text', 'format' and (if coming from
+            // the edit form) 'itemid'. We can just copy that over.
+            $partdata[$i]->subqtext = $data->subqtext[$i];
+            $partdata[$i]->feedback = $data->feedback[$i];
+            $partdata[$i]->partcorrectfb = $data->partcorrectfb[$i];
+            $partdata[$i]->partpartiallycorrectfb = $data->partpartiallycorrectfb[$i];
+            $partdata[$i]->partincorrectfb = $data->partincorrectfb[$i];
         }
 
-        return $res;
+        // If we do not have at least one valid part, output an error message. Attach
+        // it to the field where the user can define the answer for the first part.
+        if (count($partdata) === 0) {
+            $errors['answer[0]'] = get_string('error_no_answer', 'qtype_formulas');
+        }
+
+        return (object)['errors' => $errors, 'parts' => $partdata];
     }
 
-    // It checks basic errors as well as formula errors by evaluating one instantiation.
-    public function validate($form) {
-        $errors = array();
-        $answerschecked = $this->check_and_filter_answers($form);
-        if (isset($answerschecked->errors)) {
-            $errors = array_merge($errors, $answerschecked->errors);
-        }
-        $validanswers = $answerschecked->answers;
-        // The value from the globalunitpenalty field is only used to set
-        // the penalty for each part. Is has to be validated separately.
-        // The same is true for the globalruleid, but as this is a select
-        // field, there is no need to validate it.
+    /**
+     * Check the data from the edit form (or an XML import): parts, answer box placeholders,
+     * part placeholders and definitions of variables and expressions. At the same time, calculate
+     * the number of expected answers for every part.
+     *
+     * @param object $data
+     * @return object
+     */
+    public function validate(object $data): object {
+        // Collect all error messages in an associative array of the form 'fieldname' => 'error'.
+        $errors = [];
+
+        // The value from the globalunitpenalty field is only used to set the penalty
+        // for each part. Is has to be validated separately. The same is true for the
+        // globalruleid, but we do not validate it here, because it is a select field, so
+        // errors are less likely.
         // If we are importing a question, there will be no globalunitpenalty or globalruleid,
-        // because the question will already have those values in its parts.
-        // No validation is needed in that case, as the parts have been checked before.
-        if (!property_exists($form, 'unitpenalty') || !property_exists($form, 'ruleid')) {
-            if ($form->globalunitpenalty < 0 || $form->globalunitpenalty > 1) {
+        // because the question already has those options stored in its parts.
+        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+        if (!$isfromimport) {
+            if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
                 $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
             }
         }
-        foreach ($validanswers as $idx => $part) {
+
+        // Check the parts. We get a stdClass with the properties 'errors' (a possibly empty array)
+        // and 'parts' (an array of stdClass objects, one per part).
+        $partcheckresult = $this->check_and_filter_parts($data);
+        $errors += $partcheckresult->errors;
+        $parts = $partcheckresult->parts;
+
+        // Make sure that answer box placeholders (if used) are unique for each part.
+        // TODO: change to non-capturing catch when dropping support for PHP 7.4.
+        foreach ($parts as $i => $part) {
             try {
-                $pattern = '\{(_[0-9u][0-9]*)(:[^{}]+)?\}';
-                preg_match_all('/'.$pattern.'/', $part->subqtext['text'], $matches);
-                $boxes = array();
-                foreach ($matches[1] as $j => $match) {
-                    if (array_key_exists($match, $boxes)) {
-                        throw new Exception(get_string('error_answerbox_duplicate', 'qtype_formulas'));
-                    } else {
-                        $boxes[$match] = 1;
-                    }
-                }
-            } catch (Exception $e) {
-                $errors["subqtext[$idx]"] = $e->getMessage();
+                qtype_formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
+            } catch (Exception $ingored) {
+                $errors["subqtext[$i]"] = get_string('error_answerbox_duplicate', 'qtype_formulas');
             }
         }
 
-        $placeholdererrors = $this->check_placeholder(
-          is_string($form->questiontext) ? $form->questiontext : $form->questiontext['text'],
-          $validanswers
+        // Separately validate the part placeholders. If we are importing, the question text
+        // will be a string. If the data comes from the edit from, it is in the editor's
+        // array structure (text, format, itemid).
+        $errors += $this->check_placeholders(
+            $isfromimport ? $data->questiontext : $data->questiontext['text'],
+            $parts
         );
-        $errors = array_merge($errors, $placeholdererrors);
 
-        $instantiationerrors = $this->validate_instantiation($form, $validanswers);
-        $errors = array_merge($errors, $instantiationerrors);
+        // Finally, check definition of variables (local, grading), various expressions
+        // depending on those variables (model answers, correctness criterion) and unit
+        // stuff. This check also allows us to calculate the number of answers for each part,
+        // a value that we store as 'numbox'.
+        $evaluationresult = $this->check_variables_and_expressions($data, $parts);
+        $errors += $evaluationresult->errors;
+        $parts = $evaluationresult->parts;
 
-        return (object)array('errors' => $errors, 'answers' => $validanswers);
+        return (object)array('errors' => $errors, 'answers' => $parts);
     }
 
 
-    // Validating the data from the client, and return errors.
-    // If no errors, the $validanswers should be appended by numbox variables.
-    public function validate_instantiation($form, &$validanswers) {
+    /**
+     * Check definition of variables (local vars, grading vars), various expressions
+     * like model answers or correctness criterion and unit stuff. At the same time,
+     * calculate the number of answers boxes (to be stored in part->numbox) once the
+     * model answers are evaluated. Possible errors are returned in the 'errors' property
+     * of the return object. The updated part data (now containing the numbox value)
+     * is in the 'parts' property, as an array of objects (one object per part).
+     *
+     * @param object $data
+     * @param object[] $parts
+     * @return object stdClass with 'errors' and 'parts'
+     */
+    public function check_variables_and_expressions(object $data, array $parts): object {
+        // Collect all errors.
+        $errors = [];
 
-        $errors = array();
+        // Check random variables. If there is an error, we do not continue, because
+        // other variables or answers might depend on these definitions.
+        // FIXME: do not validate if empty
+        $randomparser = new random_parser($data->varsrandom);
+        $evaluator = new evaluator();
+        try {
+            $evaluator->evaluate($randomparser->get_statements());
+            $evaluator->instantiate_random_variables();
+        } catch (Exception $e) {
+            $errors['varsrandom'] = $e->getMessage();
+            return (object)['errors' => $errors, 'parts' => $parts];
+        }
 
-        // Create a formulas question so we can use its methods for validation.
-        $qo = new qtype_formulas_question;
-        // This is legacy code and it will iterate over a whole lot of form fields, assigning
-        // values to undeclared class properties ("dynamic properties"). This is deprecated as
-        // of PHP 8.2, so for the time being, filter them out. This will not be needed once the
-        // new parser is finished.
-        $keystoskip = ['sesskey', 'correctness_simple_tol', 'correctness_simple_type', 'correctness_simple_comp', 'template',
-                'tags', 'oldparent', 'context', '_qf__qtype_formulas_edit_form', 'numdataset', 'multiplier', 'import_process',
-                'inpopup', 'cmid', 'courseid', 'returnurl', 'scrollpos', 'appendqnumstring', 'usecase', 'export_process',
-                'makecopy', 'submitbutton', 'status', 'shownumcorrect', 'correctness_simple_mode', 'mdlscrollto', 'image',
-                'coursetags', 'answernotunique'];
-        foreach ($form as $key => $value) {
-            if (in_array($key, $keystoskip)) {
+        // Check global variables. If there is an error, we do not continue, because
+        // other variables or answers might depend on these definitions.
+        // FIXME: do not validate if empty
+        try {
+            $globalparser = new parser($data->varsglobal, $randomparser->export_known_variables());
+            $evaluator->evaluate($globalparser->get_statements());
+        } catch (Exception $e) {
+            $errors['varsglobal'] = $e->getMessage();
+            return $errors;
+        }
+
+        // Check local variables, model answers and grading criterion for each part.
+        $numberofparts = count($parts);
+        for ($i = 0; $i < $numberofparts; $i++) {
+            $partevaluator = clone $evaluator;
+
+            // Validate the local variables for this part. In case of an error, skip the
+            // rest of the part, because there might be dependencies.
+            $partparser = null;
+            if (!empty($data->vars1[$i])) {
+                try {
+                    $partparser = new parser($data->vars1[$i], $globalparser->export_known_variables());
+                    $partevaluator->evaluate($partparser->get_statements());
+                } catch (Exception $e) {
+                    $errors["vars1[$i]"] = $e->getMessage();
+                    continue;
+                }
+            }
+
+            $knownvars = [];
+            if ($partparser !== null) {
+                $knownvars = $partparser->export_known_variables();
+            }
+
+            if (!empty($data->answer[$i])) {
+                try {
+                    $answerparser = new answer_parser($data->answer[$i], $knownvars);
+                    $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
+                    // Now that we know the model answers, we can set the $numbox property for the part,
+                    // i. e. the number of answer boxes that are to be shown.
+                    if (is_array($modelanswers->value)) {
+                        $parts[$i]->numbox = count($modelanswers->value);
+                    } else {
+                        $parts[$i]->numbox = 1;
+                    }
+                } catch (Exception $e) {
+                    $errors["answer[$i]"] = $e->getMessage();
+                    continue;
+                }
+            }
+
+            // Validate grading variables.
+            if (!empty($data->vars2[$i])) {
+                try {
+                    $partparser = new parser($data->vars2[$i], $knownvars);
+                    // Update the list of known variables.
+                    $knownvars = $partparser->export_known_variables();
+                    $partevaluator->evaluate($partparser->get_statements());
+                } catch (Exception $e) {
+                    $errors["vars2[$i]"] = $e->getMessage();
+                    continue;
+                }
+            }
+
+            // FIXME: we do not yet validate the grading criterion for algebraic answers.
+            if ($data->answertype === self::ANSWER_TYPE_ALGEBRAIC) {
                 continue;
             }
-            $qo->$key = $value;
-        }
-        $tags = $this->part_tags();
 
-        $qo->options = new stdClass();
-        $extraquestionfields = $this->extra_question_fields();
-        array_shift($extraquestionfields);
-        foreach ($extraquestionfields as $field) {
-            if (isset($form->{$field})) {
-                $qo->{$field} = $form->{$field};
-                $qo->options->{$field} = $form->{$field};
+            // FIXME: temporary / we do not yet validate the correctness, because we
+            // must first set the special variables.
+            continue;
+
+            // Check grading criterion for each part. We use the model answers, so
+            // the grading criterion should always evaluate to 1 (or more).
+            // Check, if grading criterion is OK for answer type, e.g. no _relerr for
+            // algebraic formula.
+            // FIXME: need to set the special vars like _a, _d etc. and update $knownvars
+            try {
+                $partparser = new parser($data->correctness[$i], $knownvars);
+                $partevaluator->evaluate($partparser->get_statements());
+            } catch (Exception $e) {
+                $errors["correctness[$i]"] = $e->getMessage();
+                continue;
             }
+
+            // TODO: validation of unit stuff
         }
 
-        if (count($form->answer)) {
-            // This function is also called when importing a question.
-            // The answers of imported questions already have their unitpenalty and ruleid set.
-            $isfromimport = property_exists($form, 'unitpenalty') && property_exists($form, 'ruleid');
-            foreach ($form->answer as $key => $answer) {
-                $ans = new stdClass();
-                foreach ($tags as $tag) {
-                    // The unitpenalty and ruleid are set via a global option,
-                    // but stored with each part. When importing questions,
-                    // this is not the case.
-                    if (!$isfromimport && ($tag == 'unitpenalty' || $tag == 'ruleid')) {
-                        $ans->{$tag} = $form->{'global'.$tag};
-                    } else {
-                        $ans->{$tag} = $form->{$tag}[$key];
-                    }
-                }
-                $ans->subqtext = $form->subqtext[$key];
-                $ans->feedback = $form->feedback[$key];
-                $ans->partcorrectfb = $form->partcorrectfb[$key];
-                $ans->partpartiallycorrectfb = $form->partpartiallycorrectfb[$key];
-                $ans->partincorrectfb = $form->partincorrectfb[$key];
-                $qo->options->answers[] = $ans;
-            }
-        }
-        $qo->parts = array();
-        if (!empty($qo->options->answers)) {
-            foreach ($qo->options->answers as $i => $ans) {
-                $ans->partindex = $i;
-                $ans->subqtextformat = $ans->subqtext['format'];
-                $ans->subqtext = $ans->subqtext['text'];
-                $ans->feedbackformat = $ans->feedback['format'];
-                $ans->feedback = $ans->feedback['text'];
-                $ans->partcorrectfbformat = $ans->partcorrectfb['format'];
-                $ans->partcorrectfb = $ans->partcorrectfb['text'];
-                $ans->partpartiallycorrectfbformat = $ans->partpartiallycorrectfb['format'];
-                $ans->partpartiallycorrectfb = $ans->partpartiallycorrectfb['text'];
-                $ans->partincorrectfbformat = $ans->partincorrectfb['format'];
-                $ans->partincorrectfb = $ans->partincorrectfb['text'];
-
-                $qo->parts[$i] = new qtype_formulas_part();
-                foreach ($ans as $key => $value) {
-                    $qo->parts[$i]->$key = $value;
-                    // TODO verify if part id is set (but do we actually need it here?).
-                }
-            }
-        }
-        $qo->qv = new qtype_formulas\variables();
-        $qo->options->numpart = count($qo->options->answers);
-        $qo->numpart = $qo->options->numpart;
-        $qo->fractions = array_fill(0, $qo->numpart, 0);
-        $qo->anscorrs = array_fill(0, $qo->numpart, 0);
-        $qo->unitcorrs = array_fill(0, $qo->numpart, 0);
-
-        try {
-            $vstack = $qo->qv->parse_random_variables($qo->varsrandom);
-            $qo->randomsvars = $qo->qv->instantiate_random_variables($vstack); // Instantiate a set of random variables.
-        } catch (Exception $e) {
-            $errors["varsrandom"] = $e->getMessage();
-            return $errors;
-        }
-
-        try {
-            $qo->globalvars = $qo->qv->evaluate_assignments($qo->randomsvars, $qo->varsglobal);
-        } catch (Exception $e) {
-            $errors["varsglobal"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-            return $errors;
-        }
+        return (object)['errors' => $errors, 'parts' => $parts];
 
         // Attempt to compute answers to see if they are wrong or not.
         foreach ($validanswers as $idx => $ans) {
@@ -943,20 +1072,13 @@ class qtype_formulas extends question_type {
             }
 
             try {
-                $vars = $qo->qv->evaluate_assignments($qo->globalvars, $ans->vars1);
-            } catch (Exception $e) {
-                $errors["vars1[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
-            }
-
-            try {
                 $modelanswers = $qo->get_evaluated_answer($ans);
                 $cloneanswers = $modelanswers;
                 // Set the number of 'coordinates' which is used to display all answer boxes.
                 $ans->numbox = count($modelanswers);
                 $gradingtype = $ans->answertype;
             } catch (Exception $e) {
-                $errors["answer[$idx]"] = $e->getMessage();
+                $errors["answer[$idx]"] = 'XXXX' . $e->getMessage();
                 continue;
             }
 
@@ -971,16 +1093,18 @@ class qtype_formulas extends question_type {
             }
 
             try {
-                $qo->add_special_correctness_variables($vars, $modelanswers, $cloneanswers, $dres->diff, $dres->is_number);
-                $qo->qv->evaluate_assignments($vars, $ans->vars2);
+                // $qo->add_special_correctness_variables($vars, $modelanswers, $cloneanswers, $dres->diff, $dres->is_number);
+                // $qo->qv->evaluate_assignments($vars, $ans->vars2);
+                $FIXME = 'this is dummy code to be fixed later';
             } catch (Exception $e) {
                 $errors["vars2[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
                 continue;
             }
 
             try {
-                $responses = $qo->get_correct_responses_individually($ans);
-                $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck);
+                $FIXME = 'this is dummy code to be fixed later';
+                // $responses = $qo->get_correct_responses_individually($ans);
+                // $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck);
             } catch (Exception $e) {
                 $errors["correctness[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
                 continue;
@@ -991,32 +1115,39 @@ class qtype_formulas extends question_type {
     }
 
     /**
-     * Reorder the answers according to the order of placeholders in main question text.
-     * The check_placeholder() function should be called before.
+     * Reorder the parts according to the order of placeholders in main question text.
+     * Note: the check_placeholder() function should be called before.
      *
-     * @param string $questiontext The main question text containing the placeholders.
-     * @param array $answers array of answers, containing the placeholder name  (must not be empty).
-     * @return  array answersorder.
+     * @param string $questiontext main question text, containing the placeholders
+     * @param object[] $parts part data
+     * @return object[] sorted parts
      */
-    public function reorder_answers($questiontext, $answers) {
-        $locations = array();   // Store the (scaled) location of the *named* placeholder in the main text.
-        foreach ($answers as $idx => $answer) {
-            if (strlen($answer->placeholder) != 0) {
-                $locations[] = 1000 * strpos($questiontext, '{'.$answer->placeholder.'}') + $idx; // Store the pair (location, idx).
-            }
-        }
-        sort($locations);       // Performs stable sort of locations.
+    public function reorder_parts(string $questiontext, array $parts): array {
+        // Scan question text for part placeholders; $matches[1] will contain a list of
+        // the matches in the order of appearance.
+        $matches = [];
+        preg_match_all('/\{(#\w+)\}/', $questiontext, $matches);
 
-        $ss = new stdClass();
-        $answersorder = array();
-        foreach ($locations as $i => $location) {
-            $answersorder[] = $location % 1000;   // Store the new location of the answer in the main text.
-        }
-        foreach ($answers as $idx => $answer) {
-            if (strlen($answer->placeholder) == 0) { // Add the empty placeholder at the end.
-                $answersorder[] = $idx;
+        $ordered = [];
+
+        // First, add the parts with a placeholder, ordered by their appearance.
+        foreach ($parts as $part) {
+            $newindex = array_search($part->placeholder, $matches[1]);
+            if ($newindex !== false) {
+                $ordered[$newindex] = $part;
             }
         }
-        return $answersorder;
+
+        // Now, append all remaining parts that do not have a placeholder.
+        foreach ($parts as $part) {
+            if (empty($part->placeholder)) {
+                $ordered[] = $part;
+            }
+        }
+
+        // Sort the parts by their index and assign result.
+        ksort($ordered);
+
+        return $ordered;
     }
 }

@@ -204,6 +204,12 @@ $string['varsdata'] = 'Instantiated data sets';
 $string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message:';
 
 // Errors message used by editing form's validation.
+$string['error_import_missing_field'] = 'Import error. Missing field: {$a} ';
+$string['error_damaged_question'] = 'Invalid data. The Formulas question might have been damaged, e. g. during a failed import or restore process.';
+$string['error_db_read'] = 'Could not read from to the database, table {$a}.';
+$string['error_db_write'] = 'Could not write to the database, table {$a}.';
+$string['error_db_delete'] = 'Could not delete record from the database, table {$a}.';
+$string['error_db_missing_options'] = 'Formulas question ID {$a} was missing an options record. Using default.';
 $string['error_no_answer'] = 'At least one answer is required.';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
 $string['error_placeholder_too_long'] = 'The placeholder\'s length is limited to 40 characters.';
@@ -214,6 +220,7 @@ $string['error_placeholder_sub_duplicate'] = 'This placeholder has already been 
 $string['error_answerbox_duplicate'] = 'Each answer field placeholder can only be used once in a part.';
 $string['error_answertype_mistmatch'] = 'Answer type mismatch: Numerical answer type requires number and algebraic answer type requires string';
 $string['error_answer_missing'] = 'No answer has been defined.';
+$string['error_criterion_empty'] = 'The grading criterion must not be empty.';
 $string['error_criterion'] = 'The grading criterion must be evaluated to a single number.';
 $string['error_forbid_char'] = 'Formula or expression contains forbidden characters or operators.';
 $string['error_unit'] = 'Unit parsing error! ';
@@ -271,3 +278,8 @@ $string['defaultanswermark'] = 'Default part\'s mark';
 $string['defaultanswermark_desc'] = 'Default part\'s mark for new question\'s parts';
 $string['defaultunitpenalty'] = 'Default unit penalty';
 $string['defaultunitpenalty_desc'] = 'Default penalty for wrong unit (0-1)';
+
+$string['response_wrong'] = 'Wrong';
+$string['response_right'] = 'Right';
+$string['response_wrong_value'] = 'Wrong value, right unit';
+$string['response_wrong_unit'] = 'Right value, wrong unit';
