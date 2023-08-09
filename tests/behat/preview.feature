@@ -1,8 +1,8 @@
 @qtype @qtype_formulas
 Feature: Preview a Formulas question
-  As a teacher
-  In order to check my Formulas questions will work for students
-  I need to preview them
+    As a teacher
+    In order to check my Formulas questions will work for students
+    I need to preview them
 
   Background:
     Given the following "users" exist:
@@ -18,11 +18,11 @@ Feature: Preview a Formulas question
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype      | name         | template           |
-      | Test questions   | formulas   | formulas-001 | testmethodsinparts |
+      | questioncategory | qtype    | name         | template           |
+      | Test questions   | formulas | formulas-001 | testmethodsinparts |
     And the following "activities" exist:
-      | activity   | name   | course | idnumber |
-      | quiz       | Quiz 1 | C1     | quiz1    |
+      | activity | name   | course | idnumber |
+      | quiz     | Quiz 1 | C1     | quiz1    |
     And quiz "Quiz 1" contains the following questions:
       | question     | page |
       | formulas-001 | 1    |
@@ -34,7 +34,7 @@ Feature: Preview a Formulas question
     And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
-    And I press "Start again with these options"
+    And I press "id_saverestart"
     And I set the field "Answer and unit for part 1" to "40 m/s"
     And I set the field "Answer for part 2" to "40"
     And I set the field "Unit for part 2" to "m/s"
@@ -52,7 +52,7 @@ Feature: Preview a Formulas question
     And I should see "If a car travels 120 m in 3 s, what is the speed of the car"
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
-    And I press "Start again with these options"
+    And I press "id_saverestart"
     And I set the field "Answer and unit for part 1" to "40 m/s"
     And I set the field "Answer for part 2" to "40"
     And I set the field "Unit for part 2" to "km"
