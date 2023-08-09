@@ -57,6 +57,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /** These array may be used some day to store results ? */
     public $evaluatedanswer = array();
     public $fractions = array();
+    public $raw_grades = array();
     public $anscorrs = array();
     public $unitcorrs = array();
 
