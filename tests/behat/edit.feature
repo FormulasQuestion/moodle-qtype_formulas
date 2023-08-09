@@ -1,8 +1,8 @@
 @qtype @qtype_formulas
 Feature: Test editing a Formulas question
-  As a teacher
-  In order to be able to update my Formulas question
-  I need to edit them
+    As a teacher
+    In order to be able to update my Formulas question
+    I need to edit them
 
   Background:
     Given the following "users" exist:
@@ -18,8 +18,8 @@ Feature: Test editing a Formulas question
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype       | name                      | template       |
-      | Test questions   | formulas     | formulas-001 for editing | testthreeparts |
+      | questioncategory | qtype    | name                     | template       |
+      | Test questions   | formulas | formulas-001 for editing | testthreeparts |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
@@ -35,15 +35,15 @@ Feature: Test editing a Formulas question
     Then I should see "Edited formulas-001 name"
     When I am on the "Edited formulas-001 name" "core_question > edit" page logged in as teacher1
     And I set the following fields to these values:
-      | Question name | Edited formulas-001 name2 |
-      | Random variables     | v = {40:120:10}; dt = {2:6};  |
+      | Question name    | Edited formulas-001 name2    |
+      | Random variables | v = {40:120:10}; dt = {2:6}; |
     And I press "id_submitbutton"
     Then I should see "Edited formulas-001 name2"
     When I am on the "Edited formulas-001 name2" "core_question > preview" page logged in as teacher1
     Then I should see "Multiple parts : --"
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
-    And I press "Start again with these options"
+    And I press "id_saverestart"
     And I press "Check"
     And I should see "Please put an answer in each input field."
     And I press "Start again"
