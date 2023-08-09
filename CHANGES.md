@@ -1,5 +1,11 @@
 # Changelog
 
+### 5.2.2 (2023-08-09)
+- bugfix: wrong sort order for negative numbers in sort()
+- bugfix: some input fields in edit form too small with TinyMCE in Moodle 4.2+
+- internal: fix in legacy code (indirect modification of overloaded property)
+- internal: changes to behat tests for compatibility with 4.3
+
 ### 5.2.1 (2023-04-22)
 - assure compatibility with Moodle 4.2
 - internal: changes for compatibility with PHP 8.1
