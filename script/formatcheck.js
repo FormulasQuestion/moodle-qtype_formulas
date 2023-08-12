@@ -51,10 +51,13 @@ function formulas_format_check() {
 
     // The list of allowable (single parameter) function and their evaluation replacement.
     var funclist = {'sin': 1, 'cos': 1, 'tan': 1, 'asin': 1, 'acos': 1, 'atan': 1, 'exp': 1,
-        'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact':1};
+        'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact': 1};
 
     // The replacement list used when preform trial evaluation, note it is not the same as dispreplacelist
-    var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log'}; // Natural log and log with base 10, no log allowed to avoid ambiguity.
+    // Replace 'fact' (factorial) by 'abs', because JS does not have a factorial function and
+    // therefore, an expression containing fact() will always be considered as invalid. We use abs(),
+    // because we just need some replacement function and are not interested in the actual result.
+    var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log', 'fact': 'abs'}; // Natural log and log with base 10, no log allowed to avoid ambiguity.
 
     // The replacement list used when the formula is displayed on the screen.
     var dispreplacelist = {'log10': 'log<sub>10</sub>', '3.14159265358979323846': '<i>π</i>'};
