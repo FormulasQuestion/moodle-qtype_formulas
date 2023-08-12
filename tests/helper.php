@@ -515,7 +515,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = 'abc';
         $form->noanswers = 3;
         $form->answer = array('5', '6', '7');
-        $form->answer = array('1', '1', '1');
+        $form->answernotunique = array('1', '1', '1');
         $form->answermark = array('2', '2', '2');
         $form->numbox = array(1, 1, 1);
         $form->placeholder = array('#1', '#2', '#3');

@@ -930,6 +930,7 @@ class qtype_formulas_part {
     public $vars1;
     public $vars2;
     public $answer;
+    public $answernotunique;
     public $correctness;
     public $unitpenalty;
     public $postunit;
