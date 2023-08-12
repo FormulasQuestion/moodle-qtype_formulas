@@ -485,7 +485,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $correctanswer = $question->format_text($question->correct_response_formatted($part),
                 $part->subqtextformat , $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
-        return html_writer::nonempty_tag('div', get_string('correctansweris', 'qtype_formulas', $correctanswer),
+
+        if ($part->answernotunique) {
+            $string = 'correctansweris';
+        } else {
+            $string = 'uniquecorrectansweris';
+        }
+        return html_writer::nonempty_tag('div', get_string($string, 'qtype_formulas', $correctanswer),
                     array('class' => 'formulaspartcorrectanswer'));
     }
 
