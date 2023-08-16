@@ -79,7 +79,7 @@ Feature: Mobile compatibility
     And I set the field "Answer" to "5" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -90,7 +90,7 @@ Feature: Mobile compatibility
     And I set the field "Answer field 2" to "3" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -100,7 +100,7 @@ Feature: Mobile compatibility
     And I set the field "Answer" to "5 m/s" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -111,7 +111,7 @@ Feature: Mobile compatibility
     And I set the field "Unit" to "m/s" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -123,7 +123,7 @@ Feature: Mobile compatibility
     And I set the field "Answer for part 3" to "7" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Part 1 correct feedback." in the app
     And I should find "Part 2 correct feedback." in the app
     And I should find "Part 3 correct feedback." in the app
@@ -135,7 +135,7 @@ Feature: Mobile compatibility
     And I press "Cat" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -146,7 +146,7 @@ Feature: Mobile compatibility
     And I set the field "Answer" to "Cat"
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
   @app @javascript
@@ -157,7 +157,7 @@ Feature: Mobile compatibility
     And I set the field "Answer field 1 for part 2" to "Blue"
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your first answer is correct." in the app
     And I should find "Your second answer is correct." in the app
 
@@ -169,7 +169,7 @@ Feature: Mobile compatibility
     And I press "Blue" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your first answer is correct." in the app
     And I should find "Your second answer is correct." in the app
 
@@ -183,6 +183,6 @@ Feature: Mobile compatibility
     And I set the field "Answer field 2 for part 2" to "4" in the app
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
-    And I press "OK"
+    And I press "Submit" near "Once you submit" in the app
     Then I should find "Your answers in part 1 are correct." in the app
     And I should find "Your answers in part 2 are correct." in the app
