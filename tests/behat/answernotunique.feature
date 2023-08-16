@@ -34,10 +34,11 @@ Feature: Test different feedback for questions with unique / non-unique answer
   @javascript
   Scenario: Question with one correct answers
     When I am on the "formulas-001" "core_question > edit" page logged in as teacher1
+    And I set the field "Question name" to "Edited formulas-001"
     And I follow "Part 1"
     And I click on "There are other correct answers." "checkbox"
     And I press "id_submitbutton"
-    And I am on the "formulas-001" "core_question > preview" page logged in as teacher1
+    And I am on the "Edited formulas-001" "core_question > preview" page logged in as teacher1
     And I set the following fields to these values:
       | behaviour | immediatefeedback |
     And I press "id_saverestart"
