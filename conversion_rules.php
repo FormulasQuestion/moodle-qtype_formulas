@@ -33,7 +33,7 @@ m: k c d m u n p f;
 s: m u n p f;
 g: k m u n p f;
 mol: m u n p;
-N: k m u n p f;
+N: M k m u n p f;
 A: m u n p f;
 J: k M G T P m u n p f;
 J = 6.24150947e+18 eV;
