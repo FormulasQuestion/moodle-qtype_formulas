@@ -39,6 +39,8 @@ jobs:
             php: '8.1'
           - moodle-branch: 'MOODLE_402_STABLE'
             php: '7.4'
+          - moodle-branch: 'MOODLE_403_STABLE'
+            php: '7.4'
           - moodle-branch: 'master'
             php: '7.4'
 
@@ -79,9 +81,10 @@ jobs:
 
       - name: Keep only mobile behat features
         run: |
-          mv moodle/question/type/formulas/tests/behat/mobile.feature moodle/question/type/formulas/tests/behat/mobile.bak
-          rm moodle/question/type/formulas/tests/behat/*.feature
-          mv moodle/question/type/formulas/tests/behat/mobile.bak moodle/question/type/formulas/tests/behat/mobile.feature
+          cd moodle/question/type/formulas/tests/behat
+          mv mobile.feature mobile.bak
+          rm *.feature
+          mv mobile.bak mobile.feature
 
       - name: Behat features
         if: ${{ always() }}
