@@ -343,20 +343,25 @@ function formulas_format_check() {
             return splitted.join('');
         },
 
-        // replace the expression x^y by pow(x,y)
+        // replace the expression x^y or x**y by pow(x,y)
         replace_caret_by_power : function(fn, vstack, text) {
             while (true){
                 var loc = text.lastIndexOf('^');    // from right to left
+                var oplen = 1;
+                if (loc < 0) {
+                    loc = text.lastIndexOf('**');
+                    oplen = 2;
+                }
                 if (loc < 0)  break;
 
                 // search for the expression of the exponent
                 var rloc = loc;
-                if (rloc+1 < text.length && text[rloc+1] == '-')  rloc += 1;
-                var r = fn.get_next_variable(fn, vstack, text, rloc+1);
-                if (r != null)  rloc = r.endloc-1;
+                if (rloc+oplen < text.length && text[rloc+oplen] == '-')  rloc += 1;
+                var r = fn.get_next_variable(fn, vstack, text, rloc+oplen);
+                if (r != null)  rloc = r.endloc-oplen;
                 if (r == null || (r != null && r.variable.type == 'f')) {
-                    var rtmp = fn.get_expressions_in_bracket(text, rloc+1, '(', {'(': ')'});
-                    if (rtmp == null || rtmp.openloc != rloc+1)  throw 'Expression expected';
+                    var rtmp = fn.get_expressions_in_bracket(text, rloc+oplen, '(', {'(': ')'});
+                    if (rtmp == null || rtmp.openloc != rloc+oplen)  throw 'Expression expected';
                     rloc = rtmp.closeloc;
                 }
 
@@ -367,16 +372,16 @@ function formulas_format_check() {
                     lloc = l.startloc;
                 else {
                     var reverse = text.split('').reverse().join('');
-                    var ltmp = fn.get_expressions_in_bracket(reverse, text.length-1-loc+1, ')', {')': '('});
-                    if (ltmp == null || ltmp.openloc != text.length-1-loc+1)  throw 'Expression expected';
-                    var lfunc = fn.get_previous_variable(fn, vstack, text, text.length-1-ltmp.closeloc);
-                    lloc = (lfunc==null || lfunc.variable.type!='f') ? text.length-1-ltmp.closeloc : lfunc.startloc;
+                    var ltmp = fn.get_expressions_in_bracket(reverse, text.length-loc, ')', {')': '('});
+                    if (ltmp == null || ltmp.openloc != text.length-loc)  throw 'Expression expected';
+                    var lfunc = fn.get_previous_variable(fn, vstack, text, text.length-oplen-ltmp.closeloc);
+                    lloc = (lfunc==null || lfunc.variable.type!='f') ? text.length-oplen-ltmp.closeloc : lfunc.startloc;
                 }
 
                 // replace the exponent notation by the pow function
                 var name = fn.vstack_add_temporary_variable(vstack, 'f', 'pow');
                 text = text.substr(0,lloc) + name + '(' + text.substr(lloc,loc-lloc) + ', '
-                    + text.substr(loc+1, rloc-loc) + ')' + text.substr(rloc+1);
+                    + text.substr(loc+oplen, rloc-loc) + ')' + text.substr(rloc+oplen);
             }
             return text;
         },
