@@ -22,7 +22,8 @@ This version is compatible with Moodle 3.9 and newer. It has been tested with:
 - Moodle 3.11 using PHP 7.4 and PHP 8.0
 - Moodle 4.0 using PHP 7.4 and PHP 8.0
 - Moodle 4.1 using PHP 7.4, PHP 8.0 and PHP 8.1
-- Moodle 4.2 using PHP 8.0 and PHP 8.1
+- Moodle 4.2 using PHP 8.0, PHP 8.1 and PHP 8.2
+- Moodle 4.3 using PHP 8.0, PHP 8.1 and PHP 8.2
 
 
 ### Requirements
