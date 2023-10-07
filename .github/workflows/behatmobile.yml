@@ -26,7 +26,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'master']
+        php: ['7.4', '8.0', '8.1']
+        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'master']
+        exclude:
+          - moodle-branch: 'MOODLE_39_STABLE'
+            php: '8.0'
+          - moodle-branch: 'MOODLE_39_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_311_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_402_STABLE'
+            php: '7.4'
+          - moodle-branch: 'master'
+            php: '7.4'
 
     steps:
       - name: Check out repository code
@@ -34,10 +48,10 @@ jobs:
         with:
           path: plugin
 
-      - name: Setup PHP 8.0
+      - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.0
+          php-version: ${{ matrix.php }}
           ini-values: max_input_vars=5000
           coverage: none
 
