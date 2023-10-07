@@ -20,11 +20,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: ${{ matrix.extensions }}
           ini-values: max_input_vars=5000
           coverage: none
           tools: phpmd
 
       - name: PHP Mess Detector
         continue-on-error: true
-        run: phpmd . github cleancode, codesize, controversial, design, naming, unusedcode --baseline-file .phpmd/phpmd.baseline.xml
+        run: phpmd . github cleancode,codesize,controversial,design,naming,unusedcode --baseline-file .phpmd/phpmd.baseline.xml
