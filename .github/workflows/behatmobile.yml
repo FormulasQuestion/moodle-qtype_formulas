@@ -65,10 +65,9 @@ jobs:
 
       - name: Keep only mobile behat features
         run: |
-          ls -lR
-          mv tests/behat/mobile.feature tests/behat/mobile.bak
-          rm tests/behat/*.feature
-          mv tests/behat/mobile.bak tests/behat/mobile.feature
+          mv moodle/question/type/formulas/tests/behat/mobile.feature moodle/question/type/formulas/tests/behat/mobile.bak
+          rm moodle/question/type/formulas/tests/behat/*.feature
+          mv moodle/question/type/formulas/tests/behat/mobile.bak moodle/question/type/formulas/tests/behat/mobile.feature
 
       - name: Behat features
         if: ${{ always() }}
