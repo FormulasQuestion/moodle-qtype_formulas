@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/formulas/db" VERSION="20230812" COMMENT="XMLDB file for Moodle question/type/formulas"
+<XMLDB PATH="question/type/formulas/db" VERSION="20231008" COMMENT="XMLDB file for Moodle question/type/formulas"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
