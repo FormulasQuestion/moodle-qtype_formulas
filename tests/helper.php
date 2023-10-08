@@ -91,6 +91,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->vars1 = '';
         $p->vars2 = '';
         $p->answer = '1';
+        $p->answernotunique = '1';
         $p->correctness = '_relerr < 0.01';
         $p->unitpenalty = 1;
         $p->postunit = '';
@@ -130,6 +131,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->placeholder = '';
         $p->answermark = 2;
         $p->answer = '5';
+        $p->answernotunique = '1';
         $p->subqtext = '';
         $p->partcorrectfb = 'Your answer is correct.';
         $p->partpartiallycorrectfb = 'Your answer is partially correct.';
@@ -148,6 +150,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-0';
         $form->noanswers = 1;
         $form->answer = array('5');
+        $form->answernotunique = array('1');
         $form->answermark = array(2);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -210,6 +213,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->placeholder = '';
         $p->answermark = 2;
         $p->answer = '5';
+        $p->answernotunique = '1';
         $p->postunit = 'm/s';
         $p->subqtext = '{_0}{_u}';
         $p->partcorrectfb = 'Your answer is correct.';
@@ -229,6 +233,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-0';
         $form->noanswers = 1;
         $form->answer = array('5');
+        $form->answernotunique = array('1');
         $form->answermark = array(2);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -291,6 +296,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->placeholder = '';
         $p->answermark = 2;
         $p->answer = '5';
+        $p->answernotunique = '1';
         $p->postunit = 'm/s';
         $p->subqtext = '{_0} {_u}';
         $p->partcorrectfb = 'Your answer is correct.';
@@ -310,6 +316,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-0';
         $form->noanswers = 1;
         $form->answer = array('5');
+        $form->answernotunique = array('1');
         $form->answermark = array(2);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -372,6 +379,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->placeholder = '';
         $p->answermark = 2;
         $p->answer = '[2, 3]';
+        $p->answernotunique = '1';
         $p->subqtext = '';
         $p->partcorrectfb = 'Your answer is correct.';
         $p->partpartiallycorrectfb = 'Your answer is partially correct.';
@@ -390,6 +398,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-1';
         $form->noanswers = 1;
         $form->answer = array('[2, 3]');
+        $form->answernotunique = array('1');
         $form->answermark = array(2);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -454,6 +463,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->id = 14;
         $p0->answermark = 2;
         $p0->answer = '5';
+        $p0->answernotunique = '1';
         $p0->subqtext = 'This is first part.';
         $p0->partcorrectfb = 'Part 1 correct feedback.';
         $p0->partpartiallycorrectfb = 'Part 1 partially correct feedback.';
@@ -465,6 +475,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->partindex = 1;
         $p1->answermark = 2;
         $p1->answer = '6';
+        $p1->answernotunique = '1';
         $p1->subqtext = 'This is second part.';
         $p1->partcorrectfb = 'Part 2 correct feedback.';
         $p1->partpartiallycorrectfb = 'Part 2 partially correct feedback.';
@@ -476,6 +487,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->partindex = 2;
         $p2->answermark = 2;
         $p2->answer = '7';
+        $p2->answernotunique = '1';
         $p2->subqtext = 'This is third part.';
         $p2->partcorrectfb = 'Part 3 correct feedback.';
         $p2->partpartiallycorrectfb = 'Part 3 partially correct feedback.';
@@ -503,6 +515,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = 'abc';
         $form->noanswers = 3;
         $form->answer = array('5', '6', '7');
+        $form->answernotunique = array('1', '1', '1');
         $form->answermark = array('2', '2', '2');
         $form->numbox = array(1, 1, 1);
         $form->placeholder = array('#1', '#2', '#3');
@@ -581,6 +594,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->answermark = 2;
         $p0->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
+        $p0->answernotunique = '1';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
         $p1 = self::make_a_formulas_part();
@@ -589,6 +603,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answermark = 2;
         $p1->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
+        $p1->answernotunique = '1';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
         $p2 = self::make_a_formulas_part();
@@ -598,6 +613,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         // As postunit is empty {_u} should be ignored.
         $p2->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';
         $p2->answer = 'v';
+        $p2->answernotunique = '1';
         $p2->postunit = '';
         $q->parts[2] = $p2;
         $p3 = self::make_a_formulas_part();
@@ -607,6 +623,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         // As postunit is empty {_u} should be ignored.
         $p3->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';
         $p3->answer = 'v';
+        $p3->answernotunique = '1';
         $p3->postunit = '';
         $q->parts[3] = $p3;
 
@@ -659,6 +676,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'vars1' => '',
                 'vars2' => '',
                 'answer' => 'v',
+                'answernotunique' => '1',
                 'correctness' => '_relerr < 0.01',
                 'unitpenalty' => 1,
                 'postunit' => 'm/s',
@@ -685,6 +703,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'vars1' => '',
                 'vars2' => '',
                 'answer' => 'v',
+                'answernotunique' => '1',
                 'correctness' => '_relerr < 0.01',
                 'unitpenalty' => 1,
                 'postunit' => 'm/s',
@@ -711,6 +730,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'vars1' => '',
                 'vars2' => '',
                 'answer' => 'v',
+                'answernotunique' => '1',
                 'correctness' => '_relerr < 0.01',
                 'unitpenalty' => 1,
                 'postunit' => '',
@@ -737,6 +757,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'vars1' => '',
                 'vars2' => '',
                 'answer' => 'v',
+                'answernotunique' => '1',
                 'correctness' => '_relerr < 0.01',
                 'unitpenalty' => 1,
                 'postunit' => '',
@@ -800,6 +821,12 @@ class qtype_formulas_test_helper extends question_test_helper {
             1 => 'v',
             2 => 'v',
             3 => 'v',
+        );
+        $form->answernotunique = array(
+            0 => '1',
+            1 => '1',
+            2 => '1',
+            3 => '1',
         );
         $form->answermark = array(
             0 => 2,
@@ -943,6 +970,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->id = 17;
         $p->answermark = 2;
         $p->answer = '0';
+        $p->answernotunique = '1';
         $q->parts[0] = $p;
 
         return $q;
@@ -958,6 +986,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-3';
         $form->noanswers = 1;
         $form->answer = array('0');
+        $form->answernotunique = array('1');
         $form->answermark = array(2);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -1027,6 +1056,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p0->answermark = 2;
         $p0->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0}{_u}</p>';      // Combined unit.
         $p0->answer = 'v';
+        $p0->answernotunique = '1';
         $p0->postunit = 'm/s';
         $q->parts[0] = $p0;
         $p1 = self::make_a_formulas_part();
@@ -1035,12 +1065,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answermark = 2;
         $p1->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';     // Separated unit.
         $p1->answer = 'v';
+        $p1->answernotunique = '1';
         $p1->postunit = 'm/s';
         $q->parts[1] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 20;
         $p2->partindex = 2;
         $p2->answermark = 2;
+        $p2->answernotunique = '1';
         // As postunit is empty {_u} should be ignored.
         $p2->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? {_0} {_u}</p>';
         $p2->answer = 'v';
@@ -1053,6 +1085,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         // As postunit is empty {_u} should be ignored.
         $p3->subqtext = '<p>If a car travels {s} m in {dt} s, what is the speed of the car? speed = {_0}{_u}</p>';
         $p3->answer = 'v';
+        $p3->answernotunique = '1';
         $p3->postunit = '';
         $q->parts[3] = $p3;
 
@@ -1077,6 +1110,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = 'abc';
         $form->noanswers = 4;
         $form->answer = array('v', 'v', 'v', 'v');
+        $form->answernotunique = array('1', '1', '1', '1');
         $form->answermark = array('2', '2', '2', '2');
         $form->numbox = array(1, 1, 1, 1);
         $form->placeholder = array('', '', '', '');
@@ -1164,6 +1198,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->id = 14;
         $p->answermark = 1;
         $p->answer = '1';
+        $p->answernotunique = '1';
         $p->subqtext = '{_0:mychoices:MC}';
         $q->parts[0] = $p;
 
@@ -1180,6 +1215,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-5';
         $form->noanswers = 1;
         $form->answer = array('1');
+        $form->answernotunique = array('1');
         $form->answermark = array(1);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -1242,6 +1278,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->id = 14;
         $p->answermark = 1;
         $p->answer = '1';
+        $p->answernotunique = '1';
         $p->subqtext = '{_0:mychoices:MCE}';
         $q->parts[0] = $p;
 
@@ -1258,6 +1295,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'test-5';
         $form->noanswers = 1;
         $form->answer = array('1');
+        $form->answernotunique = array('1');
         $form->answermark = array(1);
         $form->answertype = array(0);
         $form->correctness = array('_relerr < 0.01');
@@ -1323,12 +1361,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 14;
         $p1->answermark = 1;
         $p1->answer = '1';
+        $p1->answernotunique = '1';
         $p1->subqtext = '{_0:choices1:MCE}';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
         $p2->answermark = 1;
         $p2->answer = '1';
+        $p2->answernotunique = '1';
         $p2->subqtext = '{_0:choices2:MCE}';
         $q->parts[1] = $p2;
 
@@ -1345,6 +1385,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'testmcetwoparts';
         $form->noanswers = 2;
         $form->answer = array('1', '1');
+        $form->answernotunique = array('1', '1');
         $form->answermark = array(1, 1);
         $form->answertype = array(0, 0);
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');
@@ -1416,12 +1457,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 14;
         $p1->answermark = 1;
         $p1->answer = '1';
+        $p1->answernotunique = '1';
         $p1->subqtext = 'Part 1 -- {_0:choices1:MCE}';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
         $p2->answermark = 1;
         $p2->answer = '1';
+        $p2->answernotunique = '1';
         $p2->subqtext = 'Part 2 -- {_0:choices2:MCE}';
         $q->parts[1] = $p2;
 
@@ -1438,6 +1481,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'testmcetwoparts';
         $form->noanswers = 2;
         $form->answer = array('1', '1');
+        $form->answernotunique = array('1', '1');
         $form->answermark = array(1, 1);
         $form->answertype = array(0, 0);
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');
@@ -1508,12 +1552,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->id = 14;
         $p1->answermark = 1;
         $p1->answer = ['1', '2'];
+        $p1->answernotunique = '1';
         $p1->subqtext = 'Part 1 -- {_0} -- {_1}';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
         $p2->answermark = 1;
         $p2->answer = ['3', '4'];
+        $p2->answernotunique = '1';
         $p2->subqtext = 'Part 2 -- {_0} -- {_1}';
         $q->parts[1] = $p2;
 
@@ -1530,6 +1576,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->name = 'testtwoandtwo';
         $form->noanswers = 4;
         $form->answer = array(0 => '[1, 2]', 1 => '[3, 4]');
+        $form->answernotunique = array('1', '1');
         $form->answermark = array(0 => 1, 1 => 1);
         $form->answertype = array(0, 0);
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');

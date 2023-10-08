@@ -153,6 +153,13 @@ class qtype_formulas_edit_form extends question_edit_form {
             array('size' => 80));
         $repeatedoptions['answer']['helpbutton'] = array('answer', 'qtype_formulas');
         $repeatedoptions['answer']['type'] = PARAM_RAW;
+        // Whether the question has multiple answers.
+        $repeated[] = $mform->createElement(
+            'advcheckbox',
+            'answernotunique',
+            get_string('answernotunique', 'qtype_formulas')
+        );
+        $repeatedoptions['answernotunique']['helpbutton'] = array('answernotunique', 'qtype_formulas');
         // Part's unit.
         $repeated[] = $mform->createElement('text', 'postunit', get_string('postunit', 'qtype_formulas'),
             array('size' => 60, 'class' => 'formulas_editing_unit'));

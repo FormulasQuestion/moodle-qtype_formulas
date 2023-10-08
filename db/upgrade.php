@@ -368,5 +368,22 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         // Formulas savepoint reached.
         upgrade_plugin_savepoint(true, 2018080300, 'qtype', 'formulas');
     }
+
+    if ($oldversion < 2023100800) {
+        // Define field answernotunique to be added to qtype_formulas_answers.
+        $table = new xmldb_table('qtype_formulas_answers');
+        $field = new xmldb_field('answernotunique', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1', 'answer');
+
+        // Conditionally add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            // Now fill it with '1' for compatibility with existing questions'.
+            $DB->set_field('qtype_formulas_answers', 'answernotunique', '1');
+        }
+
+        // Formulas savepoint reached.
+        upgrade_plugin_savepoint(true, 2023100800, 'qtype', 'formulas');
+    }
+
     return true;
 }
