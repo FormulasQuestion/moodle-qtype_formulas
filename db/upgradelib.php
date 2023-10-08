@@ -139,7 +139,7 @@ class qtype_formulas_qe2_attempt_updater extends question_qtype_attempt_updater 
         foreach ($this->question->options->answers as $i => $part) {
             $grading[$i] = array_key_exists($i, $details) ? explode(',', $details[$i]) : array(0, 0, 0, 0);
             foreach (range(0, $part->numbox) as $j) {
-                $responses["${i}_$j"] = array_key_exists("${i}_$j", $details) ? $details["${i}_$j"] : '';
+                $responses["{$i}_$j"] = array_key_exists("{$i}_$j", $details) ? $details["{$i}_$j"] : '';
             }
         }
         $subanum = intval($lines[$counter + 1]);

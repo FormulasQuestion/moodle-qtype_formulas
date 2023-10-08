@@ -806,7 +806,19 @@ class qtype_formulas extends question_type {
 
         // Create a formulas question so we can use its methods for validation.
         $qo = new qtype_formulas_question;
+        // This is legacy code and it will iterate over a whole lot of form fields, assigning
+        // values to undeclared class properties ("dynamic properties"). This is deprecated as
+        // of PHP 8.2, so for the time being, filter them out. This will not be needed once the
+        // new parser is finished.
+        $keystoskip = ['sesskey', 'correctness_simple_tol', 'correctness_simple_type', 'correctness_simple_comp', 'template',
+                'tags', 'oldparent', 'context', '_qf__qtype_formulas_edit_form', 'numdataset', 'multiplier', 'import_process',
+                'inpopup', 'cmid', 'courseid', 'returnurl', 'scrollpos', 'appendqnumstring', 'usecase', 'export_process',
+                'makecopy', 'submitbutton', 'status', 'shownumcorrect', 'correctness_simple_mode', 'mdlscrollto', 'image',
+                'coursetags'];
         foreach ($form as $key => $value) {
+            if (in_array($key, $keystoskip)) {
+                continue;
+            }
             $qo->$key = $value;
         }
         $tags = $this->part_tags();

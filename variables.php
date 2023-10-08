@@ -452,6 +452,17 @@ class variables {
     private static $maxdataset = 2e9;      // It is the upper limit for the exhaustive enumeration.
     private static $listmaxsize = 1000;
 
+    /* Defining legacy properties here for compatibility with PHP 8.2 */
+    private $func_const = [];
+    private $func_unary = [];
+    private $func_binary = [];
+    private $func_special = [];
+    private $func_all = [];
+    private $binary_op_map = [];
+    private $func_algebraic = [];
+    private $constlist = ['pi' => '3.14159265358979323846'];
+    private $evalreplacelist = ['ln' => 'log', 'log10' => '(1./log(10.))*log'];
+
     private function initialize_function_list() {
         $this->func_const = array_flip( array('pi', 'fqversionnumber'));
         $this->func_unary = array_flip( array('abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
@@ -474,9 +485,7 @@ class variables {
         // Note that the implementation is exactly the same as the client so the behaviour should be the same.
         $this->func_algebraic = array_flip( array('sin', 'cos', 'tan', 'asin', 'acos', 'atan',
                                                   'exp', 'log10', 'ln', 'sqrt', 'abs', 'ceil', 'floor', 'fact'));
-        $this->constlist = array('pi' => '3.14159265358979323846');
         // Natural log and log with base 10, no log allowed to avoid ambiguity.
-        $this->evalreplacelist = array('ln' => 'log', 'log10' => '(1./log(10.))*log');
     }
 
     public function __construct() {

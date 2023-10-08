@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
+        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'master']
         database: [mariadb]
         exclude:
           - moodle-branch: 'MOODLE_39_STABLE'
@@ -40,8 +40,20 @@ jobs:
             php: '8.1'
           - moodle-branch: 'MOODLE_402_STABLE'
             php: '7.4'
+          - moodle-branch: 'MOODLE_403_STABLE'
+            php: '7.4'
           - moodle-branch: 'master'
             php: '7.4'
+        include:
+          - php: '8.2'
+            moodle-branch: 'MOODLE_402_STABLE'
+            database: 'mariadb'
+          - php: '8.2'
+            moodle-branch: 'MOODLE_403_STABLE'
+            database: 'mariadb'
+          - php: '8.2'
+            moodle-branch: 'master'
+            database: 'mariadb'
 
     steps:
       - name: Check out repository code

@@ -1,37 +1,554 @@
 <?xml version="1.0"?>
 <phpmd-baseline>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="assign_default_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="assign_default_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="assign_default_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="assign_additional_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="assign_additional_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="assign_additional_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="reparse_all_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="reparse_all_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="get_unit_mapping"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="get_dimension_list"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="get_dimension_list"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="check_convertibility"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="check_convertibility"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="answer_unit.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="parse_targets"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="parse_targets"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="check_convertibility_parsed"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="check_convertibility_parsed"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="check_convertibility_parsed"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="attempt_conversion"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="attempt_conversion"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="attempt_conversion"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="split_number_unit"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="answer_unit.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="answer_unit.php" method="parse_unit"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="answer_unit.php" method="parse_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="parse_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="parse_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="parse_unit"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="answer_unit.php" method="parse_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="answer_unit.php" method="parse_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="answer_unit.php" method="parse_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="answer_unit.php" method="parse_rules"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="backup/moodle1/lib.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle1/lib.php" method="get_question_subpaths"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle1/lib.php" method="process_question"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="backup/moodle1/lib.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="backup/moodle1/lib.php"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle1/lib.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="backup/moodle2/backup_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/backup_qtype_formulas_plugin.class.php" method="define_question_plugin_structure"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle2/backup_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/backup_qtype_formulas_plugin.class.php" method="get_qtype_fileareas"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="define_question_plugin_structure"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="backup/moodle2/restore_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="process_formulas"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="process_formulas"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="backup/moodle2/restore_qtype_formulas_plugin.class.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="process_formulas_answer"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="process_formulas_answer"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="backup/moodle2/restore_qtype_formulas_plugin.class.php" method="define_decode_contents"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="remove_duplicated_variables"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="classes/external/instantiation.php" method="fetch_one_instance"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="classes/external/instantiation.php" method="fetch_one_instance"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="fetch_one_instance"/>
+  <violation rule="PHPMD\Rule\Naming\LongVariable" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="instantiate_parameters"/>
+  <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="classes/external/instantiation.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="instantiate_returns"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_random_global_vars_parameters"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_random_global_vars"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_random_global_vars_returns"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_local_vars_parameters"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_local_vars"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="check_local_vars_returns"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="render_question_text_parameters"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="render_question_text"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/external/instantiation.php" method="render_question_text_returns"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="classes/output/mobile.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/output/mobile.php" method="mobile_get_formulas"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="classes/output/mobile.php" method="mobile_get_formulas"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="classes/output/mobile.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="classes/privacy/provider.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="classes/privacy/provider.php" method="get_reason"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="conversion_rules.php"/>
+  <violation rule="PHPMD\Rule\Naming\LongVariable" file="conversion_rules.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="conversion_rules.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="db/upgrade.php"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="db/upgrade.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="db/upgradelib.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="right_answer"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="question_summary"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="was_answered"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="response_summary"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="db/upgradelib.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="set_first_step_data_elements"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="supply_missing_first_step_data"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="set_data_elements_for_step"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="parse_answer"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="db/upgradelib.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="has_separate_unit_field"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="db/upgradelib.php" method="has_combined_unit_field"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="edit_formulas_form.php" method="definition_inner"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="edit_formulas_form.php" method="definition_inner"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="edit_formulas_form.php"/>
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="edit_formulas_form.php" method="get_per_answer_fields"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="edit_formulas_form.php" method="get_per_answer_fields"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="edit_formulas_form.php" method="add_per_answer_fields"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="edit_formulas_form.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="edit_formulas_form.php" method="get_more_choices_string"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="edit_formulas_form.php" method="data_preprocessing"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="edit_formulas_form.php" method="data_preprocessing"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="lib.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="lib.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="lib.php"/>
+  <violation rule="PHPMD\Rule\ExcessivePublicCount" file="question.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyFields" file="question.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="question.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="question.php"/>
+  <violation rule="PHPMD\Rule\Naming\LongVariable" file="question.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="make_behaviour"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_expected_data"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="start_attempt"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="apply_attempt_state"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="formulas_format_text"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="format_generalfeedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_question_summary"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="clear_wrong_from_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_number_of_parts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_num_parts_right"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_correct_response"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="question.php" method="is_complete_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="is_complete_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="is_same_response"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="is_same_response_for_part"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="summarise_response"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="question.php" method="classify_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="classify_response"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="question.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="question.php" method="is_gradable_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="is_gradable_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_validation_error"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="grade_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="question.php" method="grade_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_correct_responses_individually"/>
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="question.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="correct_response_formatted"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="add_special_correctness_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="question.php" method="add_special_correctness_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="question.php" method="add_special_correctness_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="compute_response_difference"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="question.php" method="grade_responses_individually"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="question.php" method="grade_responses_individually"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="grade_responses_individually"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="question.php" method="grade_responses_individually"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="rationalize_responses_for_part"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="rationalize_responses"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_global_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_local_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="grade_parts_that_can_be_graded"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_parts_and_weights"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="is_any_part_invalid"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="get_evaluated_answer"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="question.php" method="check_file_access"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="check_file_access"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="compute_final_grade"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_has_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_has_separate_unit_field"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_has_combined_unit_field"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_is_same_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_get_expected_data"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_answer_boxes"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_has_multichoice_coordinate"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_summarise_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_is_gradable_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_is_complete_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="question.php" method="part_is_unanswered"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="questiontype.php"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="part_tags"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="questionid_column_name"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="extra_question_fields"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="move_files"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="delete_files"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="get_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="questiontype.php" method="get_question_options"/>
+  <violation rule="PHPMD\Rule\Naming\BooleanGetMethodName" file="questiontype.php" method="get_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="create_default_options"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="questiontype.php" method="save_question_options"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="questiontype.php" method="save_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="save_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="questiontype.php" method="save_question_options"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Naming\LongVariable" file="questiontype.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="save_question"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="make_hint"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="delete_question"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="questiontype.php" method="delete_question"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="split_questiontext"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="initialise_question_instance"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="get_possible_responses"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="import_from_xml"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="export_to_xml"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="questiontype.php" method="check_placeholder"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="questiontype.php" method="check_placeholder"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="check_placeholder"/>
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="questiontype.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="questiontype.php" method="check_and_filter_answers"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="questiontype.php" method="check_and_filter_answers"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="check_and_filter_answers"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="questiontype.php" method="validate"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="questiontype.php" method="validate_instantiation"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="questiontype.php" method="validate_instantiation"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="questiontype.php" method="validate_instantiation"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="validate_instantiation"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="questiontype.php" method="reorder_answers"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="formulation_and_controls"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="renderer.php" method="formulation_and_controls"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="renderer.php"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="head_code"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="part_formulation_and_controls"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="get_part_image_and_class"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="number_in_style"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="renderer.php" method="get_part_formulation"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="renderer.php" method="get_part_formulation"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="renderer.php" method="get_part_formulation"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="get_part_formulation"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="renderer.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="choice_wrapper_start"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="choice_wrapper_end"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="all_choices_wrapper_start"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="all_choices_wrapper_end"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="correct_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="part_correct_response"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="num_parts_correct"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="combined_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="specific_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="part_general_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="renderer.php" method="part_combined_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/attempt_upgrader_test.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/attempt_upgrader_test.php" method="test_formulas_deferredfeedback_qsession2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/attempt_upgrader_test.php" method="test_formulas_deferredfeedback_qsession2"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/attempt_upgrader_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/behat/behat_qtype_formulas.php" method="get_partial_named_selectors"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/behat/behat_qtype_formulas.php" method="i_click_on_row_number_of_the_formulas_question_instantiation_table"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/behat/behat_qtype_formulas.php" method="i_should_see_in_the_field_of_row_of_the_formulas_question_instatiation_table"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/behat/behat_qtype_formulas.php" method="i_confirm_the_quiz_submission_in_the_modal_dialog"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="tests/behat/behat_qtype_formulas.php" method="i_confirm_the_quiz_submission_in_the_modal_dialog"/>
+  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="tests/behat/behat_qtype_formulas.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/externallib_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="tests/externallib_test.php" method="setUp"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/externallib_test.php" method="test_check_random_global_vars"/>
+  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/externallib_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/externallib_test.php" method="test_check_local_vars"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/externallib_test.php" method="test_render_question_text"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/externallib_test.php" method="test_instantiate"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/externallib_test.php" method="test_instantiate"/>
+  <violation rule="PHPMD\Rule\Design\LongClass" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_ncr"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_npr"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_fact"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_gcd"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_lcm"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/functions_test.php" method="test_pick"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_pick"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_sigfig"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_modinv"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_modpow"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_stdnormpdf"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_stdnormcdf"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_normcdf"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_binomialpdf"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_binomialcdf"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_number_conversions"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_invocation_trigonometric"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="tests/functions_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_invocation_combinatorial"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/functions_test.php" method="test_invocation_algebraic"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_invocation_algebraic"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_invocation_string_array"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/functions_test.php" method="test_poly"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_poly"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_fqversionnumber"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/functions_test.php" method="test_fmod"/>
+  <violation rule="PHPMD\Rule\Design\LongClass" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_test_questions"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_a_formulas_question"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/helper.php"/>
   <violation rule="PHPMD\Rule\CleanCode\MissingImport" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_a_formulas_part"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testsinglenum"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testsinglenum"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testsinglenumunit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testsinglenumunit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testsinglenumunitsep"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testsinglenumunitsep"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testtwonums"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testtwonums"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testthreeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testthreeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/helper.php" method="get_formulas_question_data_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_data_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="tests/helper.php" method="get_formulas_question_data_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="tests/helper.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/helper.php" method="get_formulas_question_form_data_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testmethodsinparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testzero"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testzero"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_test4"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_test4"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testmc"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testmc"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testmce"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testmce"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testmcetwoparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testmcetwoparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testmctwoparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testmctwoparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="make_formulas_question_testtwoandtwo"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/helper.php" method="get_formulas_question_form_data_testtwoandtwo"/>
+  <violation rule="PHPMD\Rule\Design\TooManyMethods" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="get_test_formulas_question"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_expected_data_test0"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/question_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_expected_data_testthreeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_expected_data_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_is_complete_response_test0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_is_complete_response_threeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_question_summary_test0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_question_summary_threeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_question_summary_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_correct_response_test0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_correct_response_threeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_correct_response_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_correct_response_test3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_is_same_response_for_part_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_grade_parts_that_can_be_graded_test1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_grade_parts_that_can_be_graded_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_grade_parts_that_can_be_graded_test3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_grade_parts_that_can_be_graded_test4"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_grade_parts_that_can_be_graded_test5"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_parts_and_weights_test0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_parts_and_weights_threeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_get_parts_and_weights_test2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_compute_final_grade_threeparts_1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_compute_final_grade_threeparts_2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_part_has_multichoice_coordinate0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_part_has_multichoice_coordinate1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_summarise_response_threeparts"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_summarise_response_test1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_is_complete_response_test3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/question_test.php" method="test_is_gradable_response_test3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/questiontype_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="get_test_formulas_question"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/questiontype_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_name"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_can_analyse_responses"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_reorder_answers0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_reorder_answers1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_reorder_answers2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_check_placeholder0"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_split_questiontext0"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/questiontype_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_split_questiontext1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/questiontype_test.php" method="test_get_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="tests/questiontype_test.php" method="test_get_question_options"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="get_tag_matcher"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_contains_text_input"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_contains_part_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_does_not_contain_part_feedback"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_does_not_contain_stray_placeholders"/>
+  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_contains_lang_string"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/test_base.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/test_base.php" method="check_output_does_not_contain_lang_string"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/unit_conversion_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/unit_conversion_test.php" method="test_common_si_units"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/unit_conversion_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/unit_conversion_test.php" method="provide_numbers_and_units"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="tests/variables_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/variables_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_get_expressions_in_bracket"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/variables_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_evaluate_general_expression"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_evaluate_assignments_1"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="tests/variables_test.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="tests/variables_test.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/variables_test.php" method="test_evaluate_assignments_2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_evaluate_assignments_2"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="tests/variables_test.php" method="test_evaluate_assignments_3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_evaluate_assignments_3"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_parse_random_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_substitute_variables_in_text"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_numerical_formula_1"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_numerical_formula_2"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_algebraic_formula"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/variables_test.php" method="test_split_formula_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="tests/walkthrough_adaptive_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/walkthrough_adaptive_test.php" method="get_test_formulas_question"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="tests/walkthrough_adaptive_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/walkthrough_adaptive_test.php" method="test_test0_submit_right_first_time"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="tests/walkthrough_adaptive_test.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/walkthrough_adaptive_test.php" method="test_test0_submit_wrong_submit_right"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/walkthrough_adaptive_test.php" method="test_test0_submit_wrong_wrong_right"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="tests/walkthrough_adaptive_test.php" method="test_test0_submit_wrong_same_wrong_right"/>
+  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="variables.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="variables.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\LongClass" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyMethods" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseClassName" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="initialize_function_list"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_create"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_serialization"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_number_of_dataset"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_number_of_dataset_with_shuffle"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_has_shuffle"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_names"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_get_variable"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="vstack_update_variable"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_update_variable"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_mark_current_top"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_restore_previous_top"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_add_temporary_variable"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="vstack_clean_temporary"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_variables_in_text"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_placeholders_in_text"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_vname_by_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_strings_by_placholders"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_fixed_ranges_by_placeholders"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_numbers_by_placeholders"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="variables.php"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_functions_by_placeholders"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_constants_by_placeholders"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_variables_by_placeholders"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="parse_fixed_range"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="parse_fixed_range"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="parse_fixed_range"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="parse_random_variables"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="parse_random_variables"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="variables.php" method="parse_random_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="parse_random_variables"/>
+  <violation rule="PHPMD\Rule\Naming\LongVariable" file="variables.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="instantiate_random_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="instantiate_random_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="evaluate_assignments"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="evaluate_general_expression"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="evaluate_assignments_substituted"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="evaluate_assignments_substituted"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="variables.php" method="evaluate_assignments_substituted"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="evaluate_assignments_substituted"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="evaluate_general_expression_substituted_recursively"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="get_variable_name_index"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="parse_algebraic_variable"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="handle_square_bracket_syntax"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="handle_square_bracket_syntax"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="handle_square_bracket_syntax"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="handle_special_functions"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="handle_special_functions"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="variables.php" method="handle_special_functions"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="handle_special_functions"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="variables.php" method="handle_special_functions"/>
+  <violation rule="PHPMD\Rule\Design\EvalExpression" file="variables.php"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="evaluate_numerical_expression"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="evaluate_numerical_expression"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="evaluate_numerical_expression"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="get_expressions_in_bracket"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="get_expressions_in_bracket"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="get_expressions_in_bracket"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="get_previous_variable"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="get_next_variable"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="replace_middle"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="trim_comments"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="get_formula_information"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="split_formula_unit"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="replace_evaluation_formula"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="replace_vstack_variables"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="insert_multiplication_for_juxtaposition"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="replace_caret_by_power"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="replace_caret_by_power"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="replace_caret_by_power"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="compute_numerical_formula_value"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="compute_numerical_formula_value"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="compute_numerical_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="variables.php" method="compute_numerical_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="variables.php" method="compute_numerical_formula_difference"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="compute_algebraic_formula_difference"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="compute_algebraic_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="compute_algebraic_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="variables.php" method="compute_algebraic_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="variables.php" method="compute_algebraic_formula_difference"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="substitute_partial_formula"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="variables.php" method="find_formula_errors"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="variables.php" method="find_formula_errors"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="variables.php" method="find_formula_errors"/>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseMethodName" file="variables.php" method="find_formula_errors"/>
 </phpmd-baseline>

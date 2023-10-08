@@ -176,7 +176,6 @@ class questiontype_test extends \advanced_testcase {
         $formdata->id = 0;
         qtype_formulas_edit_form::mock_submit((array)$formdata);
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        $form->id = 0;
         $this->assertTrue($form->is_validated());
 
         $fromform = $form->get_data();
