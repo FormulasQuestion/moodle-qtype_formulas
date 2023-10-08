@@ -1,0 +1,91 @@
+name: Automated mobile acceptance tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Automated mobile acceptance tests
+    runs-on: ubuntu-22.04
+
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_USER: 'root'
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
+          MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+      moodleapp:
+        image: moodlehq/moodleapp:next-test
+        ports:
+          - 8100:80
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1']
+        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'master']
+        exclude:
+          - moodle-branch: 'MOODLE_39_STABLE'
+            php: '8.0'
+          - moodle-branch: 'MOODLE_39_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_311_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_402_STABLE'
+            php: '7.4'
+          - moodle-branch: 'MOODLE_403_STABLE'
+            php: '7.4'
+          - moodle-branch: 'master'
+            php: '7.4'
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          path: plugin
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          ini-values: max_input_vars=5000
+          coverage: none
+
+      - name: Initialise moodle-plugin-ci
+        run: |
+          git clone https://github.com/NoelDeMartin/moodle-plugin-ci --branch moodle-app-wip ci
+          composer install -d ./ci
+          echo $(cd ci/bin; pwd) >> $GITHUB_PATH
+          echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
+
+      - name: Install plugins
+        run: |
+          moodle-plugin-ci add-plugin moodlehq/moodle-local_moodleappbehat --branch main
+          moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
+
+      - name: Install moodle-plugin-ci
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+        env:
+          DB: mariadb
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+          MOODLE_BEHAT_IONIC_WWWROOT: http://localhost:8100
+          MOODLE_BEHAT_DEFAULT_BROWSER: chrome
+
+      - name: Keep only mobile behat features
+        run: |
+          cd moodle/question/type/formulas/tests/behat
+          mv mobile.feature mobile.bak
+          rm *.feature
+          mv mobile.bak mobile.feature
+
+      - name: Behat features
+        if: ${{ always() }}
+        run: moodle-plugin-ci behat --profile chrome
