@@ -1,5 +1,15 @@
 # Changelog
 
+### 5.3.0 (2023-10-09)
+- assure compatibility with Moodle 4.3 and PHP 8.2
+- enhancement: different feedback for unique / non-unique correct answer
+- enhancement: allow M (mega) prefix for unit Newton
+- bugfix: remove wrongful warning triangle when using fact() in answer
+- bugfix: nice formatting of preview for exponentiation, e.g. 4**3
+- internal: update GitHub actions (moodle-plugin-ci v4, PHP 8.2, Moodle 4.3)
+- internal: change mobile behat tests to work with updated labels in the app
+- internal: add separate workflow for mobile behat (only PHP <8.2) with moodle-plugin-ci v3
+
 ### 5.2.2 (2023-08-09)
 - bugfix: wrong sort order for negative numbers in sort()
 - bugfix: some input fields in edit form too small with TinyMCE in Moodle 4.2+

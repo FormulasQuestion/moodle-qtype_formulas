@@ -1,7 +1,7 @@
 Formulas question type for Moodle
 ---------------------------------
 
-[![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20code%20checks/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+code+checks%22+branch%3Amaster) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20acceptance%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+acceptance+tests%22+branch%3Amaster)  [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20unit%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+unit+tests%22+branch%3Amaster) [![GitHub
+[![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20code%20checks/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+code+checks%22+branch%3Amaster) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20acceptance%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+acceptance+tests%22+branch%3Amaster) [![Automated mobile acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20mobile%20acceptance%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+mobile+acceptance+tests%22+branch%3Amaster) [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/workflows/Automated%20unit%20tests/badge.svg?branch=master)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions?query=workflow%3A%22Automated+unit+tests%22+branch%3Amaster) [![GitHub
 Release](https://img.shields.io/github/release/FormulasQuestion/moodle-qtype_formulas.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/releases)
 
 This is a question type plugin for Moodle with random values and multiple answer fields.
@@ -22,7 +22,8 @@ This version is compatible with Moodle 3.9 and newer. It has been tested with:
 - Moodle 3.11 using PHP 7.4 and PHP 8.0
 - Moodle 4.0 using PHP 7.4 and PHP 8.0
 - Moodle 4.1 using PHP 7.4, PHP 8.0 and PHP 8.1
-- Moodle 4.2 using PHP 8.0 and PHP 8.1
+- Moodle 4.2 using PHP 8.0, PHP 8.1 and PHP 8.2
+- Moodle 4.3 using PHP 8.0, PHP 8.1 and PHP 8.2
 
 
 ### Requirements
