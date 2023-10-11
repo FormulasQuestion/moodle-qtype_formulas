@@ -138,7 +138,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['placeholder']['type'] = PARAM_RAW;
         // Part's text.
         $repeated[] = $mform->createElement('editor', 'subqtext', get_string('subqtext', 'qtype_formulas'),
-            array(), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['subqtext']['helpbutton'] = array('subqtext', 'qtype_formulas');
         // Part's answer type (0, 10, 100, 1000).
         $repeated[] = $mform->createElement('select', 'answertype', get_string('answertype', 'qtype_formulas'),
@@ -225,25 +225,25 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['otherrule']['advanced'] = true;
         // Part's feedback.
         $repeated[] = $mform->createElement('editor', 'feedback', get_string('feedback', 'qtype_formulas'),
-            array('rows' => 10), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['feedback']['helpbutton'] = array('feedback', 'qtype_formulas');
         $repeatedoptions['feedback']['advanced'] = true;
         // Part's combined feedback.
         $repeated[] = $mform->createElement('editor', 'partcorrectfb', get_string('correctfeedback', 'qtype_formulas'),
-            array('rows' => 10), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['partcorrectfb']['helpbutton'] = array('correctfeedback', 'qtype_formulas');
         $repeatedoptions['partcorrectfb']['advanced'] = true;
         $repeated[] = $mform->createElement(
           'editor',
           'partpartiallycorrectfb',
           get_string('partiallycorrectfeedback', 'qtype_formulas'),
-          array('rows' => 10),
+          array('rows' => 3),
           $this->editoroptions
         );
         $repeatedoptions['partpartiallycorrectfb']['helpbutton'] = array('partiallycorrectfeedback', 'qtype_formulas');
         $repeatedoptions['partpartiallycorrectfb']['advanced'] = true;
         $repeated[] = $mform->createElement('editor', 'partincorrectfb', get_string('incorrectfeedback', 'qtype_formulas'),
-            array('rows' => 10), $this->editoroptions);
+            array('rows' => 3), $this->editoroptions);
         $repeatedoptions['partincorrectfb']['helpbutton'] = array('incorrectfeedback', 'qtype_formulas');
         $repeatedoptions['partincorrectfb']['advanced'] = true;
         $answersoption = 'answers';
