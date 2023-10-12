@@ -27,7 +27,6 @@ Feature: Preview a Formulas question
       | question     | page |
       | formulas-001 | 1    |
 
-  @javascript @_switch_window
   Scenario: Preview a formulas question with correct answer
     When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."
@@ -45,7 +44,6 @@ Feature: Preview a Formulas question
     And I should see "This is the general feedback."
     And I should see "One possible correct answer is: 40 m/s"
 
-  @javascript @_switch_window
   Scenario: Preview an formulas question with incorrect answer
     When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     Then I should see "This question shows different display methods of the answer and unit box."

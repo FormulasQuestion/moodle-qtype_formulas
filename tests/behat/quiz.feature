@@ -71,7 +71,6 @@ Feature: Usage in quiz
     And I log in as "student"
     And I am on "Course 1" course homepage
 
-  @javascript
   Scenario: Try to answer a question with one part and one answer field
     When I follow "Quiz 1"
     And I press "Attempt quiz"
@@ -83,7 +82,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with one part and two answer fields
     When I follow "Quiz 2"
     And I press "Attempt quiz"
@@ -94,7 +92,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with one combined answer+unit field
     When I follow "Quiz 3"
     And I press "Attempt quiz"
@@ -104,7 +101,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with one answer + one unit field
     When I follow "Quiz 4"
     And I press "Attempt quiz"
@@ -115,7 +111,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with three parts and one answer field each
     When I follow "Quiz 5"
     And I press "Attempt quiz"
@@ -129,7 +124,6 @@ Feature: Usage in quiz
     And I should see "Part 2 correct feedback."
     And I should see "Part 3 correct feedback."
 
-  @javascript
   Scenario: Try to answer a radiobutton multiple choice formula question
     When I follow "Quiz 6"
     And I press "Attempt quiz"
@@ -139,7 +133,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a drowdown multiple choice formula question
     When I follow "Quiz 7"
     And I press "Attempt quiz"
@@ -149,7 +142,6 @@ Feature: Usage in quiz
     And I confirm the quiz submission in the modal dialog
     Then I should see "Your answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with two parts, one drowdown multiple choice in each of them
     When I follow "Quiz 8"
     And I press "Attempt quiz"
@@ -161,7 +153,6 @@ Feature: Usage in quiz
     Then I should see "Your first answer is correct."
     And I should see "Your second answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with two parts, one radio multiple choice in each of them
     When I follow "Quiz 9"
     And I press "Attempt quiz"
@@ -173,7 +164,6 @@ Feature: Usage in quiz
     Then I should see "Your first answer is correct."
     And I should see "Your second answer is correct."
 
-  @javascript
   Scenario: Try to answer a question with two parts, two numbers in each of them
     When I follow "Quiz 10"
     And I press "Attempt quiz"

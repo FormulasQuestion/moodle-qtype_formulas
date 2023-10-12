@@ -24,7 +24,6 @@ Feature: Test editing a Formulas question
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
 
-  @javascript @_switch_window
   Scenario: Edit a Formulas question
     When I am on the "formulas-001 for editing" "core_question > edit" page logged in as teacher1
     And I set the field "Question name" to ""

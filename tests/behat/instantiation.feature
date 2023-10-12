@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test instantiation and inline preview while editing a question
 
   Background:
@@ -22,7 +22,6 @@ Feature: Test instantiation and inline preview while editing a question
     And I navigate to "Question bank" in current page administration
     And I am on the "test" "core_question > edit" page logged in as teacher1
 
-  @javascript
   Scenario: Instantiate and preview
     When I set the following fields to these values:
       | id_varsglobal   | a=3;                          |
@@ -41,7 +40,6 @@ Feature: Test instantiation and inline preview while editing a question
     When I click on row number "2" of the Formulas Question instantiation table
     Then I should not see "Part 1" in the "#qtextpreview_display" "css_element"
 
-  @javascript
   Scenario: Try to instantiate with invalid data
     When I set the following fields to these values:
       | id_varsglobal   | a=x+;                         |
