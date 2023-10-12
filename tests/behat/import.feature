@@ -1,8 +1,8 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript @_file_upload
 Feature: Test importing Formulas questions
-  As a teacher
-  In order to reuse my Formulas questions
-  I need to import them
+    As a teacher
+    In order to reuse my Formulas questions
+    I need to import them
 
   Background:
     Given the following "users" exist:
@@ -17,7 +17,6 @@ Feature: Test importing Formulas questions
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
 
-  @javascript @_file_upload
   Scenario: import formulas question.
     When I am on the "Course 1" "core_question > course question import" page
     And I set the field "id_format_xml" to "1"

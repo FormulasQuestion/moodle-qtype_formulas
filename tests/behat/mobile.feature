@@ -72,7 +72,6 @@ Feature: Mobile compatibility
     And I log in as "student"
     And I entered the course "Course 1" in the app
 
-  @app @javascript
   Scenario: Try to answer a question with one part and one answer field
     When I press "Quiz 1" in the app
     And I press "Attempt quiz now" in the app
@@ -82,7 +81,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with one part and two answer fields
     When I press "Quiz 2" in the app
     And I press "Attempt quiz now" in the app
@@ -93,7 +91,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with one combined answer+unit field
     When I press "Quiz 3" in the app
     And I press "Attempt quiz now" in the app
@@ -103,7 +100,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with one answer + one unit field
     When I press "Quiz 4" in the app
     And I press "Attempt quiz now" in the app
@@ -114,7 +110,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with three parts and one answer field each
     When I press "Quiz 5" in the app
     And I press "Attempt quiz now" in the app
@@ -128,7 +123,6 @@ Feature: Mobile compatibility
     And I should find "Part 2 correct feedback." in the app
     And I should find "Part 3 correct feedback." in the app
 
-  @app @javascript
   Scenario: Try to answer a radiobutton multiple choice formula question
     When I press "Quiz 6" in the app
     And I press "Attempt quiz now" in the app
@@ -138,7 +132,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a drowdown multiple choice formula question
     When I press "Quiz 7" in the app
     And I press "Attempt quiz now" in the app
@@ -149,7 +142,6 @@ Feature: Mobile compatibility
     And I press "OK" near "Once you submit" in the app
     Then I should find "Your answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with two parts, one drowdown multiple choice in each of them
     When I press "Quiz 8" in the app
     And I press "Attempt quiz now" in the app
@@ -161,7 +153,6 @@ Feature: Mobile compatibility
     Then I should find "Your first answer is correct." in the app
     And I should find "Your second answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with two parts, one radio multiple choice in each of them
     When I press "Quiz 9" in the app
     And I press "Attempt quiz now" in the app
@@ -173,7 +164,6 @@ Feature: Mobile compatibility
     Then I should find "Your first answer is correct." in the app
     And I should find "Your second answer is correct." in the app
 
-  @app @javascript
   Scenario: Try to answer a question with two parts, two numbers in each of them
     When I press "Quiz 10" in the app
     And I press "Attempt quiz now" in the app

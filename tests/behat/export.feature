@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript @_file_upload
 Feature: Test exporting Formulas questions
     As a teacher
     In order to be able to reuse my Formulas questions
@@ -23,7 +23,6 @@ Feature: Test exporting Formulas questions
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
 
-  @javascript @_file_upload
   Scenario: Export a Formulas question
     When I am on the "Course 1" "core_question > course question export" page
     And I set the field "id_format_xml" to "1"

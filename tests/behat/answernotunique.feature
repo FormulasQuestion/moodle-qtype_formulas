@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test different feedback for questions with unique / non-unique answer
 
   Background:
@@ -21,7 +21,6 @@ Feature: Test different feedback for questions with unique / non-unique answer
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
 
-  @javascript
   Scenario: Question with multiple correct answers
     When I am on the "formulas-001" "core_question > preview" page logged in as teacher1
     And I set the following fields to these values:
@@ -31,7 +30,6 @@ Feature: Test different feedback for questions with unique / non-unique answer
     And I press "Check"
     Then I should see "One possible correct answer is"
 
-  @javascript
   Scenario: Question with one correct answers
     When I am on the "formulas-001" "core_question > edit" page logged in as teacher1
     And I set the field "Question name" to "Edited formulas-001"

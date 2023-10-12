@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test on-the-fly validation of variables while editing a question
 
   Background:
@@ -22,7 +22,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     And I navigate to "Question bank" in current page administration
     And I am on the "test" "core_question > edit" page logged in as teacher1
 
-  @javascript
   Scenario: Validate random variables
     When I follow "Variables"
     And I set the field "Random variables" to "a=+"
@@ -32,7 +31,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     And I take focus off "id_varsrandom" "field"
     Then I should not see "1: a: Syntax error."
 
-  @javascript
   Scenario: Validate global variables
     When I follow "Variables"
     And I set the field "Global variables" to "a=+"
@@ -51,7 +49,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     And I take focus off "id_varsglobal" "field"
     Then I should not see "1: Variable 'b' has not been defined. in substitute_vname_by_variables"
 
-  @javascript
   Scenario: Validate global variables with prior error in random variables
     When I follow "Variables"
     And I set the following fields to these values:
@@ -61,7 +58,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     Then I should see "1: a: Syntax error." in the "#id_error_varsrandom" "css_element"
     And the focused element is "id_varsrandom" "field"
 
-  @javascript
   Scenario: Validate local variables
     When I follow "Part 1"
     And I follow "Show more..."
@@ -89,7 +85,6 @@ Feature: Test on-the-fly validation of variables while editing a question
     And I take focus off "id_vars1_0" "field"
     Then I should not see "1: Variable 'c' has not been defined. in substitute_vname_by_variables"
 
-  @javascript
   Scenario: Validate local variables with prior error in random or global variables
     When I follow "Variables"
     And I set the following fields to these values:

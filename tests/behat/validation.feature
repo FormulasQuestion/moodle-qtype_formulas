@@ -4,22 +4,22 @@ Feature: Validation of input
   Background:
     Given the following "users" exist:
       | username |
-      | student |
+      | student  |
     And the following "courses" exist:
       | fullname | shortname |
       | Course 1 | C1        |
     And the following "course enrolments" exist:
-      | user     | course | role           |
-      | student  | C1     | student |
+      | user    | course | role    |
+      | student | C1     | student |
     And the following "question categories" exist:
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
     And the following "questions" exist:
-      | questioncategory | qtype      | name         | template           |
-      | Test questions   | formulas   | formulas-001 | testmethodsinparts |
+      | questioncategory | qtype    | name         | template           |
+      | Test questions   | formulas | formulas-001 | testmethodsinparts |
     And the following "activities" exist:
-      | activity   | name   | course | idnumber |
-      | quiz       | Quiz 1 | C1     | quiz1    |
+      | activity | name   | course | idnumber |
+      | quiz     | Quiz 1 | C1     | quiz1    |
     And quiz "Quiz 1" contains the following questions:
       | question     | page |
       | formulas-001 | 1    |
@@ -27,7 +27,6 @@ Feature: Validation of input
     And I am on the "Quiz 1" "mod_quiz > View" page logged in as "student"
     And I press "Attempt quiz"
 
-  @javascript
   Scenario: Check validation of input works
     When I set the field "Answer for part 2" to "1+"
     # First make sure the script has been loaded and parsed

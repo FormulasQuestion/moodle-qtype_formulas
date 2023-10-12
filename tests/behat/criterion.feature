@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test setting the grading criterion in different modes
 
   Background:
@@ -22,7 +22,6 @@ Feature: Test setting the grading criterion in different modes
     And I navigate to "Question bank" in current page administration
     And I am on the "test" "core_question > edit" page logged in as teacher1
 
-  @javascript
   Scenario: Set a simple grading criterion
     When I follow "Part 1"
     Then the following fields match these values:
@@ -44,7 +43,6 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_comp[0] | ==             |
       | correctness_simple_tol[0]  | 0.02           |
 
-  @javascript
   Scenario: Set an expert grading criterion
     When I follow "Part 1"
     And I click on "Simplified mode" "checkbox"
@@ -75,7 +73,6 @@ Feature: Test setting the grading criterion in different modes
       | correctness[0] | _err == 0 && 1 == 1 |
     And the "Simplified mode" "checkbox" should be disabled
 
-  @javascript
   Scenario: Switch from easy to expert
     When I follow "Part 1"
     And I click on "Simplified mode" "checkbox"
@@ -93,7 +90,6 @@ Feature: Test setting the grading criterion in different modes
     Then the following fields match these values:
       | correctness[0] | _err == 0 |
 
-  @javascript
   Scenario: Switch from expert to easy
     When I follow "Part 1"
     And I click on "Simplified mode" "checkbox"
