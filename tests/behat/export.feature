@@ -1,4 +1,4 @@
-@qtype @qtype_formulas @javascript @_file_upload
+@qtype @qtype_formulas @_file_upload
 Feature: Test exporting Formulas questions
     As a teacher
     In order to be able to reuse my Formulas questions

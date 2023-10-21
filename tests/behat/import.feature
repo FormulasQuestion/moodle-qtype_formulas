@@ -20,6 +20,8 @@ Feature: Test importing Formulas questions
   Scenario: import formulas question.
     When I am on the "Course 1" "core_question > course question import" page
     And I set the field "id_format_xml" to "1"
+    # Uploading needs JS enabled, because the code is written in a way that would
+    # allow overwriting an existing file by pressing a button in a warning dialog.
     And I upload "question/type/formulas/tests/fixtures/qtype_sample_formulas.xml" file to "Import" filemanager
     And I press "id_submitbutton"
     Then I should see "Parsing questions from import file."
