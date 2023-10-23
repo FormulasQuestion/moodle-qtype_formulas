@@ -1,4 +1,4 @@
-@qtype @qtype_formulas @javascript
+@qtype @qtype_formulas
 Feature: Test different feedback for questions with unique / non-unique answer
 
   Background:
@@ -30,10 +30,12 @@ Feature: Test different feedback for questions with unique / non-unique answer
     And I press "Check"
     Then I should see "One possible correct answer is"
 
+  @javascript
   Scenario: Question with one correct answers
     When I am on the "formulas-001" "core_question > edit" page logged in as teacher1
     And I set the field "Question name" to "Edited formulas-001"
     And I follow "Part 1"
+    # Using the click step to test accessibility as well.
     And I click on "There are other correct answers." "checkbox"
     And I press "id_submitbutton"
     And I am on the "Edited formulas-001" "core_question > preview" page logged in as teacher1
