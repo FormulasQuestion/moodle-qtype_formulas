@@ -29,32 +29,94 @@ class answer_parser extends parser {
     /**
      * FIXME Undocumented function
      *
-     * @param [type] $tokenlist list of tokens as returned from the lexer or input string
-     * @param [type] $knownvariables
+     * @param string|array $tokenlist list of tokens as returned from the lexer or input string
+     * @param array $knownvariables
+     * @param bool $shortpower whether ^ should be interpreted as exponentiation operator
      */
-    public function __construct($tokenlist, array $knownvariables = []) {
+    public function __construct($tokenlist, array $knownvariables = [], bool $expcaret = true) {
         // If the input is given as a string, run it through the lexer first.
         if (is_string($tokenlist)) {
             $lexer = new lexer($tokenlist);
             $tokenlist = $lexer->get_tokens();
         }
 
-        // When parsing an answer expression, we have to replace all ^ operators (XOR) by
-        // ** operators (exponentiation) in order to maintain backwards compatibility.
-        foreach ($tokenlist as $token) {
-            if ($token->type === token::OPERATOR && $token->value === '^') {
-                $token->value = '**';
+        // In the context of student answers, the caret (^) *always* means exponentiation (**) instead
+        // of XOR. The same is true for algebraic formulas. In model answers entered by the teacher,
+        // the caret *only* means exponentiation for algebraic formulas, but not for the other answer
+        // types.
+        if ($expcaret) {
+            foreach ($tokenlist as $token) {
+                if ($token->type === token::OPERATOR && $token->value === '^') {
+                    $token->value = '**';
+                }
             }
         }
 
-        // TODO/FIXME: add some filtering, according to answer type, e.g.
-        // * number, no operators and stuff at all, except for unary +/- (at start) and e (scientific notation with +/-)
-        // * numeric, allow +, -, *, /, ** or ^, parens and pi, but no functions
-        // * numerical formula, allow some functions; cf. func_algebraic in legacy variables.php
-        // * algebraic formula, allow everything, but with ^ still being **
+        // FIXME: stop at first semicolon, because answers must be single expressions?
+
+        // FIXME: Filtering?
 
         // Once this is done, we can parse the expression normally.
         parent::__construct($tokenlist, $knownvariables);
+    }
+
+    /**
+     * Check whether the given answer contains only valid tokens for the answer type NUMBER, i. e.
+     * - just a number, possibly with a decimal point
+     * - no operators, except unary + or - at start
+     * - possibly followed by e/E (maybe followed by + or -) plus an integer
+     *
+     * @return boolean
+     */
+    public function is_valid_number(): bool {
+
+    }
+
+    /**
+     * Check whether the given answer contains only valid tokens for the answer type NUMERIC, i. e.
+     * - numbers
+     * - operators +, -, *, ** or ^
+     * - round parens ( and )
+     * - pi or pi() or π
+     * - no functions
+     * - no variables
+     *
+     * @return boolean
+     */
+    public function is_valid_numeric(): bool {
+
+    }
+
+    /**
+     * Check whether the given answer contains only valid tokens for the answer type NUMERICAL_FORMULA, i. e.
+     * - numerical expression, including π, pi or pi()
+     * - plus functions: sin, cos, tan, asin, acos, atan, atan2, sinh, cosh, tanh, asinh, acosh, atanh
+     * - plus functions: sqrt, exp, log, log10, ln
+     * - plus functions: abs, ceil, floor
+     * - plus functions: fact, ncr, npr
+     * - no variables
+     *
+     * @return boolean
+     */
+    public function is_valid_numerical_formula(): bool {
+
+    }
+
+    /**
+     * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
+     * - everything allowed for numerical formulas
+     * - all functions and operators except assignment =
+     * - variables
+     *
+     * @return boolean
+     */
+    public function is_valid_algebraic(): bool {
+        // Algebraic expressions MUST NOT contain the assignment operator =.
+        if ($this->has_token_in_tokenlist(token::OPERATOR, '=')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -73,9 +135,7 @@ class answer_parser extends parser {
                 return $token->column - 1;
             }
         }
-        // Still here? That means there is no unit, so it starts very, very
-        // far away...
+        // Still here? That means there is no unit, so it starts very, very far away...
         return PHP_INT_MAX;
     }
-
 }

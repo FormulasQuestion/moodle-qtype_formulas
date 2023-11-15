@@ -25,19 +25,29 @@
 namespace qtype_formulas;
 use Exception;
 
-/*
-
-TODO:
-- diff (special function, cannot be used in evaluation context)
-
-*/
+// TODO: add function randint
+// TODO: add some string functions, e.g. upper/lower case, repeat char
+// TODO: add missing phpdoc
 
 class functions {
-    /* function name => [min params, max params] */
+    /**
+     * List of all functions exported by this class.
+     *
+     * The function name (as is) is used as the array key. The array value
+     * is another array of two numbers, i. e. the minimum and the maximum number
+     * of parameters arguments supported by this function. If there is no
+     * maximum, INF is used.
+     *
+     * Examples:
+     * - function foo() with no arguments: 'foo' => [0, 0]
+     * - function bar() with at least 1 argument: 'bar' => [1, INF]
+     * - functino baz() with 2 or 3 arguments: 'baz' => [2, 3]
+     */
     const FUNCTIONS = [
         'binomialcdf' => [3, 3],
         'binomialpdf' => [3, 3],
         'concat' => [2, INF],
+        'diff' => [2, 3],
         'fact' => [1, 1],
         'fill' => [2, 2],
         'fmod' => [2, 2],
@@ -77,6 +87,31 @@ class functions {
         return get_config('qtype_formulas')->version;
     }
 
+    /**
+     * The special function diff() is defined in the evaluator class. It is listed
+     * here to avoid any confusion.
+     *
+     * @return void
+     */
+    public static function diff(): void {
+    }
+
+    /**
+     * Apply an unary operator or function to one array or a binary operator or function
+     * to two arrays and return the result. When working with binary operators or functions,
+     * one of the two arrays may be a constant and will be inflated to a list of the
+     * correct size.
+     *
+     * Examples:
+     * - map("+", [1, 2, 3], 1) -> [2, 3, 4]
+     * - map("+", [1, 2, 3], [4, 5, 6]) -> [5, 7, 9]
+     * - map("sqrt", [1, 4, 9]) -> [1, 2, 3]
+     *
+     * @param string $what operator or function to be applied
+     * @param mixed $first list or constant (number, string)
+     * @param mixed $second list of the same size or constant
+     * @return array
+     */
     public static function map(string $what, $first, $second = null): array {
         // List of allowed binary operators, i. e. all but the assignment.
         $binaryops = ['**', '*', '/', '%', '+', '-', '<<', '>>', '&', '^',
@@ -104,7 +139,7 @@ class functions {
 
         // If $what is neither a valid operator nor a function, throw an error.
         if (!$usebinaryop && !$useunaryop) {
-            if (!array_key_exists($what, $allfunctions)) {
+            if (!array_key_exists($what, $allfunctions) || $what === 'diff') {
                 throw new Exception(("evaluation error: '$what' is not a legal first argument for the map() function"));
             }
             // Fetch the number of arguments for the given function name.
@@ -201,6 +236,16 @@ class functions {
         return $result;
     }
 
+    /**
+     * Given a permutation, find its inverse.
+     *
+     * Example:
+     * - The permutation [2, 0, 1] would transform ABC to CAB.
+     * - Its inverse is [1, 2, 0] which transforms CAB to ABC again.
+     *
+     * @param array $list list of consecutive integers, starting at 0
+     * @return array inverse permutation
+     */
     public static function inv($list): array {
         // First, we check that the array contains only numbers. If necessary,
         // floats will be converted to integers by truncation. Note: number tokens
@@ -244,6 +289,12 @@ class functions {
         return array_values($result);
     }
 
+    /**
+     * Concatenate multiple lists into one.
+     *
+     * @param array ...$arrays two or more lists
+     * @return array concetanation of all given lists
+     */
     public static function concat(...$arrays): array {
         $result = [];
 
@@ -261,6 +312,17 @@ class functions {
         return $result;
     }
 
+    /**
+     * Sort a given list using natural sort order. Optionally, a second list may be given
+     * to indicate the sort order.
+     *
+     * Examples:
+     * - FIXME
+     *
+     * @param array $tosort list to be sorted
+     * @param ?array $order sort order
+     * @return array sorted list
+     */
     public static function sort($tosort, $order = null): array {
         // The first argument must be an array.
         if (!is_array($tosort)) {
@@ -298,7 +360,7 @@ class functions {
     }
 
     /**
-     * wrapper for the poly() function which can be invoked in many different ways:
+     * Wrapper for the poly() function which can be invoked in many different ways:
      * - list of numbers => polynomial with variable x
      * - number => force + sign if number > 0
      * - string, number => combine
@@ -308,7 +370,8 @@ class functions {
      * - string, list of numbers, string => polynomial (one var) using third argument as separator (e.g. &)
      * - list of strings, list of numbers, string => linear combination using third argument as separator
      * - list of numbers, string => polynomial with x using third argument as separator
-     * will call the poly_formatter() accordingly
+     *
+     * This will call the poly_formatter() function accordingly.
      */
     public static function poly(...$args) {
         $numargs = count($args);
@@ -352,9 +415,10 @@ class functions {
     }
 
     /**
-     * format a polynomial to be display with LaTeX / MathJax
-     * can also be used to force the plus sign for a single number
-     * can also be used for arbitrary linear combinations
+     * Format a polynomial to be display with LaTeX / MathJax. The function can also be
+     * used to force the plus sign for a single number or to format arbitrary linear combinations.
+     *
+     * This function will be called by the public poly() function.
      *
      * @param mixed $variables one variable (as a string) or a list of variables (array of strings)
      * @param mixed $coefficients one number or an array of numbers to be used as coefficients
@@ -524,6 +588,12 @@ class functions {
         return number_format($number, $digitsafter, '.', '');
     }
 
+    /**
+     * Return the number of elements in a list or the length of a string.
+     *
+     * @param array|string $arg list or string
+     * @return int number of elements or length
+     */
     public static function len($arg): int {
         if (is_array($arg)) {
             return count($arg);
@@ -534,6 +604,18 @@ class functions {
         throw new Exception('len() expects a list or a string');
     }
 
+    /**
+     * Create an array of a given size, filled with a given value.
+     *
+     * Examples:
+     * - fill(5, 1) -> [1, 1, 1, 1, 1]
+     * - fill(3, "a") -> ["a", "a", "a"]
+     * - fill(4, [1, 2]) -> [[1, 2], [1, 2], [1, 2], [1, 2]]
+     *
+     * @param int $count number of elements
+     * @param mixed $value value to use
+     * @return array
+     */
     public static function fill($count, $value): array {
         // If $count is invalid, it will be converted to 0 which will then lead to an error.
         $count = intval($count);
@@ -543,6 +625,12 @@ class functions {
         return array_fill(0, $count, token::wrap($value));
     }
 
+    /**
+     * Calculate the sum of all elements in an array.
+     *
+     * @param array $array list of numbers
+     * @return float sum
+     */
     public static function sum($array): float {
         $result = 0;
         foreach ($array as $token) {
@@ -555,6 +643,12 @@ class functions {
         return $result;
     }
 
+    /**
+     * Convert number to string.
+     *
+     * @param float $value number
+     * @return string
+     */
     public static function str($value): string {
         if (!is_scalar($value)) {
             throw new Exception('str() expects a scalar argument, e.g. a number');
@@ -901,6 +995,17 @@ class functions {
         return $a * $b / self::gcd($a, $b);
     }
 
+    /**
+     * In many cases, operators need a numeric or at least a scalar operand to work properly.
+     * This function does the necessary check and prepares a human-friendly error message
+     * if the conditions are not met.
+     *
+     * @param mixed $value the value to check
+     * @param string $who the operator or function we perform the check for
+     * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
+     * @return void
+     * @throws Exception
+     */
     private static function abort_if_not_scalar($value, string $who = '', bool $enforcenumeric = true): void {
         $message = 'expected ';
         if ($who !== '') {
@@ -917,6 +1022,13 @@ class functions {
         }
     }
 
+    /**
+     * Apply an unary operator to a given argument.
+     *
+     * @param string $op operator, e.g. - or !
+     * @param mixed $first argument
+     * @return mixed
+     */
     public static function apply_unary_operator($op, $input) {
         // Abort with nice error message, if argument should be numeric but is not.
         if ($op === '_' || $op === '~') {
@@ -941,6 +1053,14 @@ class functions {
         return $output;
     }
 
+    /**
+     * Apply a binary operator to two given arguments.
+     *
+     * @param string $op operator, e.g. + or **
+     * @param mixed $first first argument
+     * @param mixed $second second argument
+     * @return mixed
+     */
     public static function apply_binary_operator($op, $first, $second) {
         // Binary operators that need numeric input. Note: + is not here, because it
         // can be used to concatenate strings.

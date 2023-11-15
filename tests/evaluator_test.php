@@ -67,6 +67,35 @@ class evaluator_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
+    public function test_diff(): void {
+        global $CFG, $SITE;
+
+        //print_r(get_config('filter_mathjaxloader'));
+        print_r(array_keys(get_object_vars($SITE)));
+        die();
+        $parser = new parser('');
+        print_r($parser->get_statements());
+        die();
+
+        $parser = new parser('a = 4; b={1,2}; c = "a" + b; d = diff([a, 1], [5, 6])');
+        $parser = new parser('x = {1:10}; y = {1:10}; d = diff(["x"], ["y"])');
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statements);
+        print_r(end($result));
+    }
+
+    public function test_algebra(): void {
+        $parser = new parser('a = 7; b = {1:5}; 2*b');
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statements);
+        $evaluator->calculate_algebraic_expression_at_random_point('2*a');
+        print_r($result);
+    }
+
+
+
     /**
      * @dataProvider provide_arrays
      */
@@ -432,6 +461,8 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = {1,2,3}; b=shuffle([4,5,6,8,9,10]);';
         $input = 'a = [1,2]; a';
         $input = 'a = 1; [a,2]; a';
+        $input = 'a = 5; fill((a-1)/2, "a")';
+        $input = 'wrong = 0; yes = "yes"; no = "no"; (wrong ? yes : no)';
         //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
         //$parser = new random_parser($input);

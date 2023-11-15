@@ -535,7 +535,7 @@ class qtype_formulas extends question_type {
     }
 
     /**
-     * Return all possible types of response. They are used e. g. reports.
+     * Return all possible types of response. They are used e. g. in reports.
      *
      * @param object $questiondata question definition data
      * @return array possible responses for every part
@@ -939,7 +939,6 @@ class qtype_formulas extends question_type {
 
         // Check random variables. If there is an error, we do not continue, because
         // other variables or answers might depend on these definitions.
-        // FIXME: do not validate if empty
         $randomparser = new random_parser($data->varsrandom);
         $evaluator = new evaluator();
         try {
@@ -952,7 +951,6 @@ class qtype_formulas extends question_type {
 
         // Check global variables. If there is an error, we do not continue, because
         // other variables or answers might depend on these definitions.
-        // FIXME: do not validate if empty
         try {
             $globalparser = new parser($data->varsglobal, $randomparser->export_known_variables());
             $evaluator->evaluate($globalparser->get_statements());
@@ -984,6 +982,7 @@ class qtype_formulas extends question_type {
                 $knownvars = $partparser->export_known_variables();
             }
 
+            // FIXME: do not use answer_parser here, b/c on the teacher side ^ means XOR (except in alg. form.)
             if (!empty($data->answer[$i])) {
                 try {
                     $answerparser = new answer_parser($data->answer[$i], $knownvars);
@@ -1001,13 +1000,19 @@ class qtype_formulas extends question_type {
                 }
             }
 
+            // In order to prepare the grading variables, we need to have the special vars like
+            // _a and _r or _0, _1, ... or _err and _relerr. We will simulate this part by copying
+            // the model answers and thus setting _err and _relerr to 0.
+            // FIXME: implement that; update $knownvars
+
             // Validate grading variables.
             if (!empty($data->vars2[$i])) {
                 try {
                     $partparser = new parser($data->vars2[$i], $knownvars);
                     // Update the list of known variables.
                     $knownvars = $partparser->export_known_variables();
-                    $partevaluator->evaluate($partparser->get_statements());
+                    // FIXME: bring this back later
+                    //$partevaluator->evaluate($partparser->get_statements());
                 } catch (Exception $e) {
                     $errors["vars2[$i]"] = $e->getMessage();
                     continue;
@@ -1027,7 +1032,6 @@ class qtype_formulas extends question_type {
             // the grading criterion should always evaluate to 1 (or more).
             // Check, if grading criterion is OK for answer type, e.g. no _relerr for
             // algebraic formula.
-            // FIXME: need to set the special vars like _a, _d etc. and update $knownvars
             try {
                 $partparser = new parser($data->correctness[$i], $knownvars);
                 $partevaluator->evaluate($partparser->get_statements());
@@ -1069,45 +1073,6 @@ class qtype_formulas extends question_type {
                 $unitcheck->reparse_all_rules();
             } catch (Exception $e) {
                 $errors["ruleid[$idx]"] = $e->getMessage();
-            }
-
-            try {
-                $modelanswers = $qo->get_evaluated_answer($ans);
-                $cloneanswers = $modelanswers;
-                // Set the number of 'coordinates' which is used to display all answer boxes.
-                $ans->numbox = count($modelanswers);
-                $gradingtype = $ans->answertype;
-            } catch (Exception $e) {
-                $errors["answer[$idx]"] = 'XXXX' . $e->getMessage();
-                continue;
-            }
-
-            try {
-                $dres = $qo->compute_response_difference($vars, $modelanswers, $cloneanswers, 1, $gradingtype);
-                if ($dres === null) {
-                    throw new Exception();
-                }
-            } catch (Exception $e) {
-                $errors["answer[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
-            }
-
-            try {
-                // $qo->add_special_correctness_variables($vars, $modelanswers, $cloneanswers, $dres->diff, $dres->is_number);
-                // $qo->qv->evaluate_assignments($vars, $ans->vars2);
-                $FIXME = 'this is dummy code to be fixed later';
-            } catch (Exception $e) {
-                $errors["vars2[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
-            }
-
-            try {
-                $FIXME = 'this is dummy code to be fixed later';
-                // $responses = $qo->get_correct_responses_individually($ans);
-                // $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck);
-            } catch (Exception $e) {
-                $errors["correctness[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
             }
 
         }

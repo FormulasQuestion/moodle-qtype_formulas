@@ -133,6 +133,24 @@ class token {
         return new token($type, $value);
     }
 
+    public static function unpack($token) {
+        // If the token value is a literal (number or string), return it directly.
+        if (in_array($token->type, [self::NUMBER, self::STRING])) {
+            return $token->value;
+        }
+
+        // If the token is an array, we have to unpack all elements separately and recursively.
+        if ($token->type === self::LIST) {
+            $result = [];
+            foreach ($token->value as $value) {
+                $result[] = self::unpack($value);
+            }
+        }
+        return $result;
+
+
+    }
+
     /**
      * Recursively convert an array to a string.
      *
