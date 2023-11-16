@@ -980,7 +980,7 @@ class qtype_formulas extends question_type {
 
             try {
                 $responses = $qo->get_correct_responses_individually($ans);
-                $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck);
+                $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck, true);
             } catch (Exception $e) {
                 $errors["correctness[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
                 continue;

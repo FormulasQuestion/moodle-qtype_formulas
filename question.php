@@ -511,21 +511,25 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         // We cant' rely on question defaultmark for restored questions.
         $totalvalue = 0;
-        try {
-            $this->rationalize_responses($response);      // May throw if subqtext have changed.
-            $checkunit = new answer_unit_conversion; // Defined here for the possibility of reusing parsed default set.
-            foreach ($this->parts as $part) {
+        $this->rationalize_responses($response);
+        $checkunit = new answer_unit_conversion(); // Defined here for the possibility of reusing parsed default set.
+        foreach ($this->parts as $part) {
+            try {
                 list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
                         = $this->grade_responses_individually($part, $response, $checkunit);
-                $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
-                                                     ? 1
-                                                     : (1 - $part->unitpenalty));
-                $this->raw_grades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
-                $totalvalue += $part->answermark;
+            } catch (Exception $e) {
+                // There should normally be no error, but if there is, we display it here.
+                // This will not terminate the script, so the attempt should be in a valid state.
+                $OUTPUT->notification(get_string('error_grading_error', 'qtype_formulas'), 'error');
+                // We consider this part as wrong.
+                $this->anscorrs[$part->partindex] = 0;
+                $this->unitcorrs[$part->partindex] = 0;
             }
-        } catch (Exception $e) {
-            $OUTPUT->notification(get_string('error_grading_error', 'qtype_formulas'), 'error');
-            return false; // It should have no error when grading students question.
+            $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
+                                                    ? 1
+                                                    : (1 - $part->unitpenalty));
+            $this->raw_grades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
+            $totalvalue += $part->answermark;
         }
 
         $fraction = array_sum($this->raw_grades) / $totalvalue;
@@ -647,7 +651,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     // Grade response for part, and return a list with answer correctness and unit correctness.
-    public function grade_responses_individually($part, $response, &$checkunit) {
+    public function grade_responses_individually($part, $response, &$checkunit, $forvalidation = false) {
         // Step 1: Split the student's responses to the part into coordinates and unit.
         $coordinates = array();
         $i = $part->partindex;
@@ -705,9 +709,18 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         // Step 7: Evaluate the grading variables and grading criteria to determine whether the answer is correct.
         $vars = $this->qv->evaluate_assignments($vars, $part->vars2);
-        $correctness = $this->qv->evaluate_general_expression($vars, $part->correctness);
-        if ($correctness->type != 'n') {
-            throw new Exception(get_string('error_criterion', 'qtype_formulas'));
+        try {
+            $correctness = $this->qv->evaluate_general_expression($vars, $part->correctness);
+        } catch (Throwable $t) {
+            // If the criterion cannot be evaluated (possible e.g. if the teacher uses part of the student's
+            // response in a denominator), we consider the answer to be wrong. We store the error message in
+            // case it is needed for the form validation.
+            $correctness = (object)['type' => 'n', 'value' => 0, 'error' => $t->getMessage()];
+        }
+        // If this has been called for validation, we need to throw the exception again, in order
+        // for the error message to be shown in the edit form.
+        if (isset($correctness->error) && $forvalidation) {
+            throw new Exception($correctness->error);
         }
 
         // Step 8: Restrict the correctness value within 0 and 1 (inclusive). Also, all non-finite numbers are incorrect.
