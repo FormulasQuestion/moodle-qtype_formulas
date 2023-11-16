@@ -322,7 +322,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $response;
     }
 
-    /** FIXME: not finished yet
+    /**
      * Return the number of parts that have been correctly answered. The renderer will call this function
      * when the question is attempted in interactive mode with multiple tries *and* it is setup to show
      * the number of correct responses.
@@ -630,8 +630,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         try {
             $checkunit = new answer_unit_conversion; // Defined here for the possibility of reusing parsed default set.
             foreach ($this->parts as $part) {
-                list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
-                        = $this->grade_responses_individually($part, $response, $checkunit); // May throw exception.
+                //list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
+                //        = $this->grade_responses_individually($part, $response, $checkunit); // May throw exception.
                 $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
                                                      ? 1
                                                      : (1 - $part->unitpenalty));
@@ -647,7 +647,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return array($fraction, question_state::graded_state_for_fraction($fraction));
     }
 
-    /** FIXME: not treated yet
+    /**
      * This method is called in multipart adaptive mode to grade the of the question
      * that can be graded. It returns the grade and penalty for each part, if (and only if)
      * the answer to that part has been changed since the last try. For parts that were
@@ -676,16 +676,16 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                 continue;
             }
 
-            // Otherwise, we calculate the grade.
-            // FIXME: analyse & refactor this
-            // ---> $grade = $part->grade($response);
-            //          ==>  $grade['answer'], $grade['unit']
-            // unit -> stick to boolean
+            $partsgrade = $part->grade($response);
+            if ($partsgrade['unit']) {
+                $fraction = $partsgrade['answer'];
+            } else {
+                $fraction = $partsgrade['answer'] * (1 - $part->unitpenalty);
+            }
 
-            list($anscorr, $unitcorr) = $this->grade_responses_individually($part, $response, $checkunit);
-            $fraction = $anscorr * ($unitcorr ? 1 : (1 - $part->unitpenalty));
             $partresults[$part->partindex] = new qbehaviour_adaptivemultipart_part_result(
-                $part->partindex, $fraction, $this->penalty);
+                $part->partindex, $fraction, $this->penalty
+            );
         }
 
         return $partresults;
@@ -736,8 +736,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return bool returning false
      */
     public function is_any_part_invalid(array $response): bool {
-        // FIXME: maybe mark part invalid if answer contains invalid tokens,
-        // e.g. algebraic formula with assignment (=) or number with operators
+        // FIXME: mark part invalid if evaluation of answer fails, e.g. due to invalid tokens
+        // like algebraic formula with assignment (=) or number with operators
         // in that case, we must probably get_validation_error() accordingly
         return false;
     }
@@ -1119,7 +1119,7 @@ class qtype_formulas_part {
     /**
      * Whether or not a unit field is used in this part.
      *
-     * @return boolean
+     * @return bool
      */
     public function has_unit(): bool {
         return $this->postunit !== '';
@@ -1216,6 +1216,7 @@ class qtype_formulas_part {
      * keys 'placeholder' (the entire placeholder), 'options' (the name of the variable containing
      * the options for the radio list or the dropdown) and 'dropdown' (true or false).
      * TODO: implement test
+     * TODO: allow {_n|50px} or {_n|10} to control size of the input field
      *
      * @param $text string to be parsed.
      * @return array.
@@ -1241,6 +1242,7 @@ class qtype_formulas_part {
             // boxes or the drop down list.
             // Finally, the array $matches[4] will contain ':MCE' in case this has been specified. Otherwise,
             // there will be an empty string.
+            // TODO: add option 'size' (for characters) or 'width' (for pixel width)
             $boxes[$match] = [
                 'placeholder' => $matches[0][$i],
                 'options' => $matches[3][$i],
@@ -1254,6 +1256,7 @@ class qtype_formulas_part {
      * Whether or not the part contains at least one answer with a drop down or
      * radio list.
      * TODO: implement test for this
+     * FIXME: this function seems to be unused
      *
      * @return bool
      */
@@ -1329,12 +1332,12 @@ class qtype_formulas_part {
                 $result[$name] = trim($response[$name]);
             } else {
                 $result[$name] = '';
-                // $summary [] = '';  --- FIXME: where did that come from?
             }
 
-            // For backwards compatibility, we restrict the answer's length to
-            // 128 characters.
-            // FIXME: maybe get rid of this
+            // Restrict the answer's length to 128 characters. There is no real need
+            // for this, but it was done in the first versions, so we'll keep it for
+            // backwards compatibility.
+            // TODO: get rid of this and maybe add option to input field to restrict length
             if (strlen($result[$name]) > 128) {
                 $result[$name] = substr($result[$name], 0, 128);
             }
@@ -1349,9 +1352,9 @@ class qtype_formulas_part {
      * least some field has been filled.
      *
      * @param array $response
-     * @return boolean
+     * @return bool
      */
-    public function is_gradable_response(array $response) {
+    public function is_gradable_response(array $response): bool {
         return !$this->is_unanswered($response);
     }
 
@@ -1360,21 +1363,19 @@ class qtype_formulas_part {
      * i. e. if all fields have been filled.
      *
      * @param array $response
-     * @return boolean
+     * @return bool
      */
-    public function is_complete_response(array $response) {
-        $name = "{$this->partindex}_";
-
+    public function is_complete_response(array $response): bool {
         // First, we check if there is a combined unit field. In that case, there will
         // be only one field to verify.
         if ($this->has_combined_unit_field()) {
-            return !empty($response[$name]);
+            return !empty($response["{$this->partindex}_"]);
         }
 
         // If we are still here, we do now check all "normal" fields. If one is empty,
         // we can return early.
         for ($i = 0; $i < $this->numbox; $i++) {
-            if (empty($response["$name$i"])) {
+            if (empty($response["{$this->partindex}_{$i}"])) {
                 return false;
             }
         }
@@ -1382,7 +1383,7 @@ class qtype_formulas_part {
         // Finally, we check whether there is a separate unit field and, if necessary,
         // make sure it is not empty.
         if ($this->has_separate_unit_field()) {
-            return empty($response["$name{$this->numbox}"]);
+            return empty($response["{$this->partindex}_{$this->numbox}"]);
         }
 
         // Still here? That means no expected field was missing and no fields were empty.
@@ -1393,22 +1394,20 @@ class qtype_formulas_part {
      * Determines whether the part (as a whole) is unanswered.
      *
      * @param array $response
-     * @return boolean
+     * @return bool
      */
     public function is_unanswered(array $response): bool {
-        $name = "{$this->partindex}";
-
         // If there is a combined number/unit answer, we know that there are no other
         // answers, so we just check this one.
         if ($this->has_combined_unit_field()) {
-            return empty($response[$name]);
+            return empty($response["{$this->partindex}_"]);
         }
 
         // Otherwise, we check all answer boxes (including unit, if it exists) of this part.
         // If at least one is not empty, the part has been answered.
         // Note that $response will contain *all* answers for *all* parts.
         for ($i = 0; $i <= $this->numbox; $i++) {
-            if (!empty($response["{$name}_{$i}"])) {
+            if (!empty($response["{$this->partindex}_{$i}"])) {
                 return false;
             }
         }
@@ -1455,42 +1454,7 @@ class qtype_formulas_part {
     }
 
     /**
-     * do the evaluation of model answers or student response
-     *
-     * @param [type] $answer
-     * @return array
-     */
-    private function evaluate_answers($answer, $knownvars, $fromstudent = false): array {
-        // Prepare data: model answer (single, multiple), student answer (single, multiple)
-        // --> must be a single string
-
-        $result = [];
-
-        $parser = new parser($answer);
-        $result = $this->evaluator->evaluate($parser->get_statements())[0];
-
-        // If we have one single answer, we wrap it into an array (FIXME: maybe drop this)
-        // and return that.
-        if (is_scalar($result->value)) {
-            $this->evaluatedanswers = [$result->value];
-            return $this->evaluatedanswers;
-        }
-
-        // If we have multiple answers, we must convert the array of tokens to an array of literals.
-        $this->evaluatedanswers = array_map(function ($element) {
-            return $element->value;
-        }, $result->value);
-        return $this->evaluatedanswers;
-
-        // FIXME: not ready yet for answer type algebraic formula
-        // in that case, also check that answer is string
-        if ($this->answertype == 1000 && false) {
-            throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
-        }
-    }
-
-    /**
-     * Undocumented function
+     * TODO: Undocumented function, clean up
      *
      * @param [type] $response (already evaluated, normal array indices)
      * @return void
@@ -1637,9 +1601,6 @@ class qtype_formulas_part {
         // FIXME: legacy code used to set $unitcorrect = 1 if all answers == 0.0
 
         // if not possible to evaluate grading crit. or if result NaN --> error message
-        // if _relerr used with algebraic answer --> error message
-
-        //list($anscorr, $unitcorr) = $this->grade_response($response, $checkunit);
 
         return ['answer' => $evaluatedgrading, 'unit' => $unitcorrect];
     }
@@ -1677,7 +1638,6 @@ class qtype_formulas_part {
 
         // If we have a combined unit field, we return the model answer plus the unit
         // in "i_".
-        // FIXME: check if postunit is empty?
         if ($this->has_combined_unit_field()) {
             return ["{$this->partindex}_" => trim($answers[0] . ' ' . $this->postunit)];
         }

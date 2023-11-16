@@ -31,9 +31,9 @@ class answer_parser extends parser {
      *
      * @param string|array $tokenlist list of tokens as returned from the lexer or input string
      * @param array $knownvariables
-     * @param bool $shortpower whether ^ should be interpreted as exponentiation operator
+     * @param bool $caretmeanspower whether ^ should be interpreted as exponentiation operator
      */
-    public function __construct($tokenlist, array $knownvariables = [], bool $expcaret = true) {
+    public function __construct($tokenlist, array $knownvariables = [], bool $caretmeanspower = true) {
         // If the input is given as a string, run it through the lexer first.
         if (is_string($tokenlist)) {
             $lexer = new lexer($tokenlist);
@@ -44,7 +44,7 @@ class answer_parser extends parser {
         // of XOR. The same is true for algebraic formulas. In model answers entered by the teacher,
         // the caret *only* means exponentiation for algebraic formulas, but not for the other answer
         // types.
-        if ($expcaret) {
+        if ($caretmeanspower) {
             foreach ($tokenlist as $token) {
                 if ($token->type === token::OPERATOR && $token->value === '^') {
                     $token->value = '**';

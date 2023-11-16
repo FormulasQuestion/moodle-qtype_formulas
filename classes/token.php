@@ -147,8 +147,6 @@ class token {
             }
         }
         return $result;
-
-
     }
 
     /**
