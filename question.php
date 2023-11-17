@@ -708,8 +708,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $this->add_special_correctness_variables($vars, $modelanswers, $coordinates, $dres->diff, $dres->is_number);
 
         // Step 7: Evaluate the grading variables and grading criteria to determine whether the answer is correct.
-        $vars = $this->qv->evaluate_assignments($vars, $part->vars2);
+        // Both steps can be in the same try-catch block, because upon validation, the grading vars
+        // are checked by another method and *before* the grading criterion. If they are invalid,
+        // the form validation stops therefore stops before validation the grading criterion and
+        // the error will not be linked to the wrong field.
         try {
+            $vars = $this->qv->evaluate_assignments($vars, $part->vars2);
             $correctness = $this->qv->evaluate_general_expression($vars, $part->correctness);
         } catch (Throwable $t) {
             // If the criterion cannot be evaluated (possible e.g. if the teacher uses part of the student's
