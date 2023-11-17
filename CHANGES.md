@@ -1,5 +1,9 @@
 # Changelog
 
+### 5.3.2 (2023-11-17)
+- bugfix: also improve robustness against risky grading variables
+- internal: additional tests
+
 ### 5.3.1 (2023-11-16)
 - bugfix: make sure risky grading criterion cannot break question
 - bugfix: make sure grading does not lead to invalid question state
