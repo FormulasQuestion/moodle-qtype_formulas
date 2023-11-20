@@ -24,6 +24,7 @@ namespace qtype_formulas;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+ /* TODO: make validation functions with units */
 
 class answer_parser extends parser {
     /**
@@ -41,9 +42,8 @@ class answer_parser extends parser {
         }
 
         // In the context of student answers, the caret (^) *always* means exponentiation (**) instead
-        // of XOR. The same is true for algebraic formulas. In model answers entered by the teacher,
-        // the caret *only* means exponentiation for algebraic formulas, but not for the other answer
-        // types.
+        // of XOR. In model answers entered by the teacher, the caret *only* means exponentiation
+        // for algebraic formulas, but not for the other answer types.
         if ($caretmeanspower) {
             foreach ($tokenlist as $token) {
                 if ($token->type === token::OPERATOR && $token->value === '^') {
@@ -69,7 +69,33 @@ class answer_parser extends parser {
      * @return boolean
      */
     public function is_valid_number(): bool {
+        // The statement list must contain exactly one expression object.
+        if (count($this->statements) !== 1) {
+            return false;
+        }
 
+        $answertokens = $this->statements[0]->body;
+
+        // The first element of the answer expression must be a token of type NUMBER.
+        // Note: if the user has entered -5, this has now become [5, _].
+        if ($answertokens[0]->type !== token::NUMBER) {
+            return false;
+        }
+        array_shift($answertokens);
+
+        // If there are no tokens left, everything is fine.
+        if (empty($answertokens)) {
+            return true;
+        }
+
+        // We accept one more token: an unary minus sign (OPERATOR '_'). An unary plus sign
+        // would be possible, but it would already have been dropped. For backwards compatibility,
+        // we do not accept multiple unary minus signs.
+        if (count($answertokens) > 1) {
+            return false;
+        }
+        $token = $answertokens[0];
+        return ($token->type === token::OPERATOR && $token->value === '_');
     }
 
     /**
@@ -84,12 +110,44 @@ class answer_parser extends parser {
      * @return boolean
      */
     public function is_valid_numeric(): bool {
+        // If it's a valid number expression, we have nothing to do.
+        if ($this->is_valid_number()) {
+            return true;
+        }
 
+        // The statement list must contain exactly one expression object.
+        if (count($this->statements) !== 1) {
+            return false;
+        }
+
+        $answertokens = $this->statements[0]->body;
+
+        // Iterate over all tokens.
+        foreach ($answertokens as $token) {
+            // If we find a FUNCTION or VARIABLE token, we can stop, because those are not
+            // allowed in the numeric answer type.
+            if ($token->type === token::FUNCTION || $token->typen === token::VARIABLE) {
+                return false;
+            }
+            // If it is an OPERATOR, it has to be +, -, *, /, ^, ** or the unary minus _.
+            $allowedoperators = ['+', '-', '*', '/', '^', '**', '_'];
+            if ($token->type === token::OPERATOR && !in_array($token->value, $allowedoperators)) {
+                return false;
+            }
+            $isparen = ($token->type & token::ANY_PAREN);
+            // Only round parentheses are allowed.
+            if ($isparen && !in_array($token->value, ['(', ')'])) {
+                return false;
+            }
+        }
+
+        // Still here? Then it's all good.
+        return true;
     }
 
     /**
      * Check whether the given answer contains only valid tokens for the answer type NUMERICAL_FORMULA, i. e.
-     * - numerical expression, including π, pi or pi()
+     * - numerical expression
      * - plus functions: sin, cos, tan, asin, acos, atan, atan2, sinh, cosh, tanh, asinh, acosh, atanh
      * - plus functions: sqrt, exp, log, log10, ln
      * - plus functions: abs, ceil, floor
@@ -99,14 +157,29 @@ class answer_parser extends parser {
      * @return boolean
      */
     public function is_valid_numerical_formula(): bool {
+        if ($this->is_valid_number() || $this->is_valid_numeric()) {
+            return true;
+        }
 
+        $answertokens = $this->statements[0]->body;
+
+        // Iterate over all tokens. If we find a VARIABLE token, we can stop. If we find
+        // a FUNCTION token, we check whether it is in the white list.
+        foreach ($answertokens as $token) {
+            if ($token->type === token::FUNCTION || $token->typen === token::VARIABLE) {
+                return false;
+            }
+        }
+
+        // Still here? Then it's all good.
+        return true;
     }
 
     /**
      * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
      * - everything allowed for numerical formulas
      * - all functions and operators except assignment =
-     * - variables
+     * - variables (maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @return boolean
      */

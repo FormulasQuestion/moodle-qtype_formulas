@@ -976,10 +976,16 @@ class qtype_formulas extends question_type {
                     continue;
                 }
             }
-            $knownvars = $partparser->export_known_variables();
+
+            $knownvars = [];
+            // If there were no local variables, the partparser has not been initialized yet.
+            // Otherwise, we export its known variables.
+            if ($partparser !== null) {
+                $knownvars = $partparser->export_known_variables();
+            }
 
             // Check whether the part uses the algebraic answer type.
-            $isalgebraic = $data->answertype[$i] === self::ANSWER_TYPE_ALGEBRAIC;
+            $isalgebraic = $data->answertype[$i] == self::ANSWER_TYPE_ALGEBRAIC;
 
             // Try evaluating the model answers. If this fails, don't validate the rest of
             // this part, because there are dependencies.
@@ -989,7 +995,15 @@ class qtype_formulas extends question_type {
                 $answerparser = new answer_parser($data->answer[$i], $knownvars, $isalgebraic);
                 $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
             } catch (Exception $e) {
-                $errors["answer[$i]"] = $e->getMessage();
+                // If the answer type is algebraic, the model answer field must contain one string (with quotes)
+                // or an array of strings. Thus, evaluation of the field's content as done above cannot fail,
+                // unless that syntax constraint has not been respected by the user.
+                if ($isalgebraic) {
+                    // TODO: externalise string
+                    $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                } else {
+                    $errors["answer[$i]"] = $e->getMessage();
+                }
                 continue;
             }
 
@@ -1004,6 +1018,44 @@ class qtype_formulas extends question_type {
             } else {
                 $parts[$i]->numbox = 1;
                 $modelanswers = [$modelanswers->value];
+            }
+
+            // If the answer type is algebraic and the user provided a valid numerical expression (possibly
+            // containing non-algebraic variables), evaluation did not fail, so we still find ourselves with
+            // invalid model answers. Furthermore, we must now try to do algebraic evaluation of each answer
+            // to check for bad formulas.
+            // Finally, if the user correctly specified strings, the quotes have been stripped, so we need to
+            // add them again.
+            if ($isalgebraic) {
+                foreach ($modelanswers as $k => &$answer) {
+                    // After the first probelmatic answer, we do not need to check the rest, so we break.
+                    if (!is_string($answer)) {
+                        $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                        break;
+                    }
+
+                    // Evaluating the string should give us a numeric value.
+                    try {
+                        $result = $partevaluator->calculate_algebraic_expression($answer);
+                    } catch (Exception $e) {
+                        $answerno = $k + 1;
+                        // The error message may contain line and column numbers, but they don't make
+                        // sense in this context, so we'd rather remove them.
+                        $message = preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage());
+                        $errors["answer[$i]"] = "error in answer #{$answerno}: $message";
+                        break;
+                    }
+
+                    // Add quotes around the answer.
+                    $answer = '"' . $answer . '"';
+                }
+                // In case we later write to $answer, this would alter the last entry of the $modelanswers
+                // array, so we'd better remove the reference to make sure this won't happend.
+                unset($answer);
+                // If there was an error, we do not continue the validation.
+                if (!empty($errors["answer[$i]"])) {
+                    continue;
+                }
             }
 
             // In order to prepare the grading variables, we need to have the special vars like
@@ -1038,11 +1090,6 @@ class qtype_formulas extends question_type {
             // Update the list of known variables.
             $knownvars = $partparser->export_known_variables();
 
-            // FIXME: we do not yet validate the grading criterion for algebraic answers.
-            if ($data->answertype === self::ANSWER_TYPE_ALGEBRAIC) {
-                continue;
-            }
-
             // Check grading criterion.
             $grade = 0;
             try {
@@ -1055,6 +1102,9 @@ class qtype_formulas extends question_type {
                 }
                 $grade = $result[0]->value;
             } catch (Exception $e) {
+                // FIXME: if 'unknown variable: _relerr' and algebraic formula: change error message
+                // to something like 'relative error (_relerr) cannot be used with this answer type'
+                // FIXME: if teacher uses simplified form, error might not show up --> modify editform.js accordingly
                 $errors["correctness[$i]"] = $e->getMessage();
                 continue;
             }

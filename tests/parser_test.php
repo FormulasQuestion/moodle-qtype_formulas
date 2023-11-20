@@ -269,8 +269,9 @@ class parser_test extends \advanced_testcase {
         //$input = '[1, ["x", "y"], 3]';
         //$input = '[[1,2]]';
         $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
+        $input = '-123.541e-13; 4';
 
-        $parser = new parser($input);
-       // print_r($parser->statements);
+        $parser = new answer_parser($input);
+        print_r($parser->statements);
     }
 }
