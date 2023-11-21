@@ -903,7 +903,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             // FIXME: ********* do like in questiontype.php's validation --> algebraic answers! ******
             // we should probably use get_evaluated_answers instead, because it does some error checking
             // and does careful evaluation
-            $this->get_evaluated_answers();
+            $part->get_evaluated_answers();
             continue;
             $parser = new parser($part->answer);
             $modelanswers = token::unpack($part->evaluator->evaluate($parser->get_statements())[0]);
