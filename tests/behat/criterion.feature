@@ -33,15 +33,17 @@ Feature: Test setting the grading criterion in different modes
       | name                       | test2          |
       | correctness_simple_type[0] | Absolute error |
       | correctness_simple_comp[0] | ==             |
-      | correctness_simple_tol[0]  | 0.02           |
+      | correctness_simple_tol[0]  | 0              |
     And I press "id_submitbutton"
+    # FIXME: this will fail, because the grading criterion does not give 1 for correct answer
+    # --> change the test
     And I wait until the page is ready
     And I am on the "test2" "core_question > edit" page logged in as teacher1
     Then the following fields match these values:
       | correctness_simple_mode[0] | 1              |
       | correctness_simple_type[0] | Absolute error |
       | correctness_simple_comp[0] | ==             |
-      | correctness_simple_tol[0]  | 0.02           |
+      | correctness_simple_tol[0]  | 0              |
 
   Scenario: Set an expert grading criterion
     When I follow "Part 1"
@@ -54,7 +56,10 @@ Feature: Test setting the grading criterion in different modes
       | correctness[0] |       |
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "The grading criterion must be evaluated to a single number."
+    # FIX: with invalid criterion and only one part, might give error "At least one answer is required."
+    # even though an answer is there
+    Then I should see "The grading criterion must not be empty."
+    # Then I should see "The grading criterion must be evaluated to a single number."
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be enabled
