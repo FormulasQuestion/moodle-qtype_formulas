@@ -174,6 +174,10 @@ class evaluator {
         return array_keys($this->variables);
     }
 
+    public function export_single_variable(string $varname) {
+        $result = $this->get_variable_value(token::wrap($varname));
+        return $result;
+    }
     /**
      * FIXME: doc
      *

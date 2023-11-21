@@ -281,87 +281,85 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $stexts = null;
             if (strlen($boxes[$placeholder]['options']) != 0) { // Then it's a multichoice answer..
                 try {
-                    $stexts = $question->qv->evaluate_general_expression($vars, substr($boxes[$placeholder]['options'], 1));
+                    $stexts = $part->evaluator->export_single_variable($boxes[$placeholder]['options']);
                 } catch (Exception $e) { // @codingStandardsIgnoreLine
                     // The $stexts variable will be null if evaluation fails.
                 }
             }
             // Coordinate as multichoice options.
             if ($stexts != null) {
-                if ($boxes[$placeholder]->stype != ':SL') {
-                    if ($boxes[$placeholder]->stype == ':MCE') {
-                        // Select menu.
-                        if ($options->readonly) {
-                            $inputattributes['disabled'] = 'disabled';
-                        }
-                        $choices = array();
-                        foreach ($stexts->value as $x => $mctxt) {
-                            $choices[$x] = $question->format_text($mctxt, $part->subqtextformat , $qa,
-                                    'qtype_formulas', 'answersubqtext', $part->id, false);
-                        }
-                        $select = html_writer::select($choices, $inputname,
-                                $currentanswer, array('' => ''), $inputattributes);
-                        $output = html_writer::start_tag('span', array('class' => 'formulas_menu'));
-                        $a = new stdClass();
-                        $a->numanswer = $j + 1;
-                        $a->part = $i + 1;
-                        if (count($question->parts) > 1) {
-                            $labeltext = get_string('answercoordinatemulti', 'qtype_formulas', $a);
+                if ($boxes[$placeholder]['dropdown']) {
+                    // Select menu.
+                    if ($options->readonly) {
+                        $inputattributes['disabled'] = 'disabled';
+                    }
+                    $choices = array();
+                    foreach ($stexts->value as $x => $mctxt) {
+                        $choices[$x] = $question->format_text($mctxt, $part->subqtextformat , $qa,
+                                'qtype_formulas', 'answersubqtext', $part->id, false);
+                    }
+                    $select = html_writer::select($choices, $inputname,
+                            $currentanswer, array('' => ''), $inputattributes);
+                    $output = html_writer::start_tag('span', array('class' => 'formulas_menu'));
+                    $a = new stdClass();
+                    $a->numanswer = $j + 1;
+                    $a->part = $i + 1;
+                    if (count($question->parts) > 1) {
+                        $labeltext = get_string('answercoordinatemulti', 'qtype_formulas', $a);
+                    } else {
+                        $labeltext = get_string('answercoordinatesingle', 'qtype_formulas', $a);
+                    }
+                    $output .= html_writer::tag(
+                        'label',
+                        $labeltext,
+                        array(
+                            'class' => 'subq accesshide',
+                            'for' => $inputattributes['id'],
+                            'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
+                        )
+                    );
+                    $output .= $select;
+                    $output .= html_writer::end_tag('span');
+                    $inputs[$placeholder] = $output;
+                } else {
+                    // Multichoice single question.
+                    $inputattributes['type'] = 'radio';
+                    if ($options->readonly) {
+                        $inputattributes['disabled'] = 'disabled';
+                    }
+                    $output = $this->all_choices_wrapper_start();
+                    foreach ($stexts->value as $x => $mctxt) {
+                        $mctxt = html_writer::span($this->number_in_style($x, $question->answernumbering), 'answernumber')
+                                . $question->format_text($mctxt, $part->subqtextformat , $qa,
+                                'qtype_formulas', 'answersubqtext', $part->id, false);
+                        $inputattributes['id'] = $inputname.'_'.$x;
+                        $inputattributes['value'] = $x;
+                        $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
+                        $isselected = ($currentanswer != '' && $x == $currentanswer);
+                        $class = 'r' . ($x % 2);
+                        if ($isselected) {
+                            $inputattributes['checked'] = 'checked';
                         } else {
-                            $labeltext = get_string('answercoordinatesingle', 'qtype_formulas', $a);
+                            unset($inputattributes['checked']);
                         }
+                        if ($options->correctness && $isselected) {
+                            $class .= ' ' . $sub->feedbackclass;
+                        }
+                        $output .= $this->choice_wrapper_start($class);
+                        $output .= html_writer::empty_tag('input', $inputattributes);
                         $output .= html_writer::tag(
                             'label',
-                            $labeltext,
+                            $mctxt,
                             array(
-                                'class' => 'subq accesshide',
                                 'for' => $inputattributes['id'],
+                                'class' => 'm-l-1',
                                 'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
                             )
                         );
-                        $output .= $select;
-                        $output .= html_writer::end_tag('span');
-                        $inputs[$placeholder] = $output;
-                    } else {
-                        // Multichoice single question.
-                        $inputattributes['type'] = 'radio';
-                        if ($options->readonly) {
-                            $inputattributes['disabled'] = 'disabled';
-                        }
-                        $output = $this->all_choices_wrapper_start();
-                        foreach ($stexts->value as $x => $mctxt) {
-                            $mctxt = html_writer::span($this->number_in_style($x, $question->answernumbering), 'answernumber')
-                                    . $question->format_text($mctxt, $part->subqtextformat , $qa,
-                                    'qtype_formulas', 'answersubqtext', $part->id, false);
-                            $inputattributes['id'] = $inputname.'_'.$x;
-                            $inputattributes['value'] = $x;
-                            $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
-                            $isselected = ($currentanswer != '' && $x == $currentanswer);
-                            $class = 'r' . ($x % 2);
-                            if ($isselected) {
-                                $inputattributes['checked'] = 'checked';
-                            } else {
-                                unset($inputattributes['checked']);
-                            }
-                            if ($options->correctness && $isselected) {
-                                $class .= ' ' . $sub->feedbackclass;
-                            }
-                            $output .= $this->choice_wrapper_start($class);
-                            $output .= html_writer::empty_tag('input', $inputattributes);
-                            $output .= html_writer::tag(
-                                'label',
-                                $mctxt,
-                                array(
-                                    'for' => $inputattributes['id'],
-                                    'class' => 'm-l-1',
-                                    'id' => 'lbl_' . str_replace(':', '__', $inputattributes['id'])
-                                )
-                            );
-                            $output .= $this->choice_wrapper_end();
-                        }
-                        $output .= $this->all_choices_wrapper_end();
-                        $inputs[$placeholder] = $output;
+                        $output .= $this->choice_wrapper_end();
                     }
+                    $output .= $this->all_choices_wrapper_end();
+                    $inputs[$placeholder] = $output;
                 }
                 continue;
             }
