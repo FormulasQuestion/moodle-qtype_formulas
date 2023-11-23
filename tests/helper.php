@@ -1199,7 +1199,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->answermark = 1;
         $p->answer = '1';
         $p->answernotunique = '1';
-        $p->subqtext = '{_0:mychoices:MC}';
+        $p->subqtext = '{_0:mychoices}';
         $q->parts[0] = $p;
 
         return $q;
@@ -1228,7 +1228,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->postunit = array('');
         $form->otherrule = array('');
         $form->subqtext = array(
-            array('text' => '{_0:mychoices:MC}', 'format' => FORMAT_HTML)
+            array('text' => '{_0:mychoices}', 'format' => FORMAT_HTML)
         );
         $form->feedback = array(
             array('text' => '', 'format' => FORMAT_HTML)
@@ -1448,8 +1448,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->varsglobal .= 'choices2=["Red","Blue","Green","Yellow"];';
         $q->penalty = 0.3; // Non-zero and not the default.
         $q->textfragments = array(0 => '<p>This question has two parts with a multichoice answer in each of them.</p>',
-                                  1 => 'Part 1 -- {_0:choices1:MC}',
-                                  2 => 'Part 2 -- {_0:choices2:MC}'
+                                  1 => 'Part 1 -- {_0:choices1}',
+                                  2 => 'Part 2 -- {_0:choices2}'
                             );
         $q->numpart = 1;
         $q->defaultmark = 2;
@@ -1458,14 +1458,14 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answermark = 1;
         $p1->answer = '1';
         $p1->answernotunique = '1';
-        $p1->subqtext = 'Part 1 -- {_0:choices1:MCE}';
+        $p1->subqtext = 'Part 1 -- {_0:choices1}';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
         $p2->answermark = 1;
         $p2->answer = '1';
         $p2->answernotunique = '1';
-        $p2->subqtext = 'Part 2 -- {_0:choices2:MCE}';
+        $p2->subqtext = 'Part 2 -- {_0:choices2}';
         $q->parts[1] = $p2;
 
         return $q;
@@ -1494,8 +1494,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->postunit = array('', '');
         $form->otherrule = array('', '');
         $form->subqtext = array(
-            0 => array('text' => 'Part 1 -- {_0:choices1:MC}', 'format' => FORMAT_HTML),
-            1 => array('text' => 'Part 2 -- {_0:choices2:MC}', 'format' => FORMAT_HTML)
+            0 => array('text' => 'Part 1 -- {_0:choices1}', 'format' => FORMAT_HTML),
+            1 => array('text' => 'Part 2 -- {_0:choices2}', 'format' => FORMAT_HTML)
         );
         $form->feedback = array(
             0 => array('text' => '', 'format' => FORMAT_HTML),
