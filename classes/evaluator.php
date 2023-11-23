@@ -440,6 +440,38 @@ class evaluator {
     }
 
     /**
+     * Takes a string represantation of an algebraic formula, e.g. "a*x^2 + b" and
+     * replace the non-algebraic variables by their numerical value. Return the resulting
+     * string.
+     *
+     * @return string
+     */
+    public function substitute_variables_in_algebraic_formula(string $formula): string {
+        // We do not use the answer parser, because we do not actually evaluate the formula,
+        // and if it is needed for later output (e.g. "the correct answer is ..."), there is
+        // no need to replace ^ by **.
+        $parser = new parser($formula, $this->export_variable_list());
+
+        $tokens = $parser->get_tokens();
+        foreach ($tokens as &$token) {
+            // If we have a VARIABLE token, we fetch its value and check whether it is
+            // an algebraic variable (i. e. the value is of type SET) or not. We will only
+            // replace literals by their value.
+            if ($token->type === token::VARIABLE) {
+                $value = $this->get_variable_value($token);
+                if ($value->type === token::SET) {
+                    continue;
+                }
+                // Note: the value of a variable is always stored as a token.
+                $token = $value;
+            }
+        }
+        unset($token);
+
+        return implode('', $tokens);
+    }
+
+    /**
      * The diff() function calculates absolute differences between numerical or algebraic
      * expressions.
      *

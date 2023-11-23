@@ -481,4 +481,13 @@ class parser {
 
         return new for_loop($variable, $range, $statements);
     }
+
+    /**
+     * Return the token list.
+     *
+     * @return array
+     */
+    public function get_tokens(): array {
+        return $this->tokenlist;
+    }
 }

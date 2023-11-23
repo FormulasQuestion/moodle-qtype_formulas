@@ -56,7 +56,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness[0] |       |
     And I press "id_submitbutton"
     And I wait until the page is ready
-    # FIX: with invalid criterion and only one part, might give error "At least one answer is required."
+    # FIXME: with invalid criterion and only one part, might give error "At least one answer is required."
     # even though an answer is there
     Then I should see "The grading criterion must not be empty."
     # Then I should see "The grading criterion must be evaluated to a single number."
@@ -66,7 +66,8 @@ Feature: Test setting the grading criterion in different modes
     When I set the field "Grading criterion*" to "a"
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "Try evalution error! Variable 'a' has not been defined."
+    # Then I should see "Try evalution error! Variable 'a' has not been defined."
+    Then I should see "unknown variable: a"
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be disabled

@@ -281,6 +281,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $stexts = null;
             if (strlen($boxes[$placeholder]['options']) != 0) { // Then it's a multichoice answer..
                 try {
+                    // TODO: clean up etc.
                     $stexts = $part->evaluator->export_single_variable($boxes[$placeholder]['options']);
                 } catch (Exception $e) { // @codingStandardsIgnoreLine
                     // The $stexts variable will be null if evaluation fails.
@@ -479,18 +480,20 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment.
      */
     public function part_correct_response($i, question_attempt $qa) {
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
-        $part = $question->parts[$i];
+        $answers = $question->parts[$i]->get_correct_response();
+        $answertext = implode(', ', $answers);
+        //$part = $question->parts[$i]; //->get_correct_response();
 
-        $correctanswer = $question->format_text($question->correct_response_formatted($part),
-                $part->subqtextformat , $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
+        $correctanswer = $question->correct_response_formatted($question->parts[$i]);
 
-        if ($part->answernotunique) {
+        if ($question->parts[$i]->answernotunique) {
             $string = 'correctansweris';
         } else {
             $string = 'uniquecorrectansweris';
         }
-        return html_writer::nonempty_tag('div', get_string($string, 'qtype_formulas', $correctanswer),
+        return html_writer::nonempty_tag('div', get_string($string, 'qtype_formulas', $answertext),
                     array('class' => 'formulaspartcorrectanswer'));
     }
 

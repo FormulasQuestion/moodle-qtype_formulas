@@ -463,6 +463,7 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = 1; [a,2]; a';
         $input = 'a = 5; fill((a-1)/2, "a")';
         $input = 'wrong = 0; yes = "yes"; no = "no"; (wrong ? yes : no)';
+        $input = 'a = 5; x={1:10};';
         //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
         //$parser = new random_parser($input);
@@ -470,7 +471,8 @@ class evaluator_test extends \advanced_testcase {
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
         $result = $evaluator->evaluate($statements);
-        print_r($result);
+        print($evaluator->substitute_variables_in_algebraic_formula("a*x^2"));
+        //print_r($result);
         die();
         //print("how many? " . $evaluator->get_number_of_variants() . "\n");
         $evaluator->instantiate_random_variables();

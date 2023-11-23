@@ -899,18 +899,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             // Parse, evaluate and store the model answers. They will be returned as tokens,
             // so we need to "unpack" them. We always store the model answers as an array; if
             // there is only one answer, we wrap the value into an array.
-            // FIXME: maybe add error checking w.r.t. answer type?
-            // FIXME: ********* do like in questiontype.php's validation --> algebraic answers! ******
-            // we should probably use get_evaluated_answers instead, because it does some error checking
-            // and does careful evaluation
             $part->get_evaluated_answers();
-            continue;
-            $parser = new parser($part->answer);
-            $modelanswers = token::unpack($part->evaluator->evaluate($parser->get_statements())[0]);
-            if (is_scalar($modelanswers)) {
-                $modelanswers = [$modelanswers];
-            }
-            $part->evaluatedanswers = $modelanswers;
         }
     }
 
@@ -1008,12 +997,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * Fetch evaluated answers for each part and return the overview of all parts.
-     * FIXME: not mandatory, own implementation
+     * FIXME: not mandatory, own implementation, maybe remove this later
      * @param qtype_formulas_part $part
      * @return array
      */
-    // FIXME: stray comment?
-    // Return the evaluated answer array (number will be converted to array). Throw on error.
     public function get_evaluated_answers(): array {
         // If we already know the evaluated answers for this part, we can simply return them.
         if (!empty($this->evaluatedanswers)) {
@@ -1389,7 +1376,7 @@ class qtype_formulas_part {
         // Finally, we check whether there is a separate unit field and, if necessary,
         // make sure it is not empty.
         if ($this->has_separate_unit_field()) {
-            return empty($response["{$this->partindex}_{$this->numbox}"]);
+            return !empty($response["{$this->partindex}_{$this->numbox}"]);
         }
 
         // Still here? That means no expected field was missing and no fields were empty.
@@ -1425,6 +1412,8 @@ class qtype_formulas_part {
     /**
      * TODO: Undocumented function
      *
+     * FIXME: for algebraic answers: replace non-algebraic variables by their numerical value
+     *
      * @return array
      */
     public function get_evaluated_answers(): array {
@@ -1442,24 +1431,22 @@ class qtype_formulas_part {
         $parser = new parser($this->answer);
         $result = $this->evaluator->evaluate($parser->get_statements())[0];
 
-        // If we have one single answer, we wrap it into an array (FIXME: maybe drop this)
-        // and return that.
-        // FIXME: put quotes if algebraic
-        if (is_scalar($result->value)) {
+        // The $result will now be a token with its value being either a literal (string, number)
+        // or an array of literal tokens. If we have one single answer, we wrap it into an array
+        // before continuing. Otherwise we convert the array of tokens into an array of literals.
+        if ($result->type & token::ANY_LITERAL) {
             $this->evaluatedanswers = [$result->value];
-            return $this->evaluatedanswers;
+        } else {
+            $this->evaluatedanswers = array_map(function ($element) {
+                return $element->value;
+            }, $result->value);
         }
 
-        // If we have multiple answers, we must convert the array of tokens to an array of literals.
-        $this->evaluatedanswers = array_map(function ($element) {
-            return $element->value;
-        }, $result->value);
-
-        // If the answer type is algebraic, the quotes have been stripped during evaluation,
-        // so we need to add them again.
+        // If the answer type is algebraic, substitute all non-algebraic variables by
+        // their numerical value.
         if ($isalgebraic) {
             foreach ($this->evaluatedanswers as &$answer) {
-                $answer = '"' . $answer . '"';
+                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
             }
             // In case we later write to $answer, this would alter the last entry of the $modelanswers
             // array, so we'd better remove the reference to make sure this won't happend.
@@ -1470,30 +1457,57 @@ class qtype_formulas_part {
     }
 
     /**
+     * FIXME: doc
+     *
+     * @param array $answers
+     * @return void
+     */
+    private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
+        foreach ($formulas as &$formula) {
+            $formula = '"' . $formula . '"';
+        }
+        // In case we later write to $formula, this would alter the last entry of the $formulas
+        // array, so we'd better remove the reference to make sure this won't happen.
+        unset($formula);
+
+        return $formulas;
+    }
+
+    /**
      * TODO: Undocumented function, clean up
      *
      * @param [type] $response (already evaluated, normal array indices)
      * @return void
      */
     public function add_special_variables($studentanswers, $conversionfactor) {
+        $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
+
         // First, we set _a to the array of model answers. We can use the
         // evaluated answers. The function get_evaluated_answers() uses a cache.
-        $command = '_a = [' . implode(',', $this->get_evaluated_answers()) . '];';
+        // Answers of type alebraic formula must be wrapped in quotes.
+        $modelanswers = $this->get_evaluated_answers();
+        if ($isalgebraic) {
+            $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
+        }
+        $command = '_a = [' . implode(',', $modelanswers ). '];';
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
         // individual answers.
+        if ($isalgebraic) {
+            $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);
+        }
         $ssqstudentanswer = 0;
-        foreach ($studentanswers as $i => &$answer) {
+        foreach ($studentanswers as $i => &$studentanswer) {
             // We only do the calculation if the answer type is not algebraic. For algebraic
             // answers, we don't do anything, because quotes have already been added.
-            if ($this->answertype != qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
-                $answer = $conversionfactor * $answer;
-                $ssqstudentanswer += $answer ** 2;
+            if (!$isalgebraic) {
+                $studentanswer = $conversionfactor * $studentanswer;
+                $ssqstudentanswer += $studentanswer ** 2;
             }
-            $command .= "_{$i} = {$answer};";
+            $command .= "_{$i} = {$studentanswer};";
         }
-        unset($answer);
+        unset($studentanswer);
         $command .= '_r = [' . implode(',', $studentanswers) . '];';
 
         // The variable _d will contain the absolute differences between the model answer
@@ -1505,7 +1519,7 @@ class qtype_formulas_part {
         $command .= "_err = sqrt(sum(map('*', _d, _d)));";
 
         // Finally, calculate the relative error, unless the question uses an algebraic answer.
-        if ($this->answertype != qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+        if (!$isalgebraic) {
             // We calculate the sum of squares of all model answers.
             $ssqmodelanswer = 0;
             foreach ($this->get_evaluated_answers() as $answer) {
@@ -1552,12 +1566,9 @@ class qtype_formulas_part {
         // FIXME: the student responses must be parsed according to the answer type, e. g.
         // answer type number MUST NOT contain operators etc.
         // algebraic answers must not be evaluated, but parsed in order to make sure they are valid
-        $evaluatedresponse = [];
-        if ($isalgebraic) {
-            foreach ($response as $r) {
-                $evaluatedresponse[] = '"' . $r . '"';
-            }
-        } else {
+        // TODO: update comment
+        $evaluatedresponse = $response;
+        if (!$isalgebraic) {
             $parser = new answer_parser('[' . implode(',', $response) . ']');
             $evaluatedresponse = $this->evaluator->evaluate($parser->get_statements())[0];
 
@@ -1566,9 +1577,6 @@ class qtype_formulas_part {
                 return $element->value;
             }, $evaluatedresponse->value);
         }
-
-        // TODO: do we make sure that algebraic answers cannot pollute the evaluator?
-
 
         $conversionfactor = $this->is_compatible_unit($studentsunit);
         // If the units are not compatible, we set the conversion factor to 1.
@@ -1649,16 +1657,19 @@ class qtype_formulas_part {
     }
 
     /**
-     * TODO: phpdoc
+     * Return an array containing the correct answers for this question part like they are
+     * shown e.g. in the feedback or on the review page of a question attempt.
+     *
+     * TODO: complete doc
      */
     public function get_correct_response(): array {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
 
-        // FIXME: deal with algebraic answer type
+        // FIXME: deal with algebraic answer type (should be taken care of by get_evaluated_answers)
 
-        // If we have a combined unit field, we return the model answer plus the unit
-        // in "i_".
+        // If we have a combined unit field, we return both the model answer plus the unit
+        // in "i_". Combined fields are only possible for parts with one signle answer.
         if ($this->has_combined_unit_field()) {
             return ["{$this->partindex}_" => trim($answers[0] . ' ' . $this->postunit)];
         }
