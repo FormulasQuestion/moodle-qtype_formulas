@@ -94,7 +94,6 @@ question_automatically_gradable_with_multiple_parts
 use qtype_formulas\answer_parser;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\evaluator;
-use qtype_formulas\evaluator_test;
 use qtype_formulas\random_parser;
 use qtype_formulas\parser;
 use qtype_formulas\token;
@@ -149,15 +148,23 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public array $textfragments;
 
-    // .......................
+    /** @var string combined feedback for correct answer */
+    public string $correctfeedback;
 
-    /** These array may be used some day to store results ? */
-    public $fractions = array();
-    public $raw_grades = array();
-    public $anscorrs = array();
-    public $unitcorrs = array();
+    /** @var string format of combined feedback for correct answer */
+    public int $correctfeedbackformat;
 
-    public $localvars = array();
+    /** @var string combined feedback for partially correct answer */
+    public string $partiallycorrectfeedback;
+
+    /** @var string format of combined feedback for partially correct answer */
+    public int $partiallycorrectfeedbackformat;
+
+    /** @var string combined feedback for in correct answer */
+    public string $incorrectfeedback;
+
+    /** @var string format of combined feedback for incorrect answer */
+    public int $incorrectfeedbackformat;
 
     /**
      * Create the appropriate behaviour for an attempt at this question.
@@ -1034,6 +1041,9 @@ class qtype_formulas_part {
     /** @var int the part's id */
     public $id;
 
+    /** @var int the parents question's id */
+    public $questionid;
+
     /** @var int the part's position among all parts of the question */
     public $partindex;
 
@@ -1057,6 +1067,9 @@ class qtype_formulas_part {
 
     /** @var string definition of the model answer(s) */
     public $answer;
+
+    /** @var int whether there are multiple possible answers */
+    public $answernotunique;
 
     /** @var string definition of the grading criterion */
     public $correctness;
