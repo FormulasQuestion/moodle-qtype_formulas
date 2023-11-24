@@ -1136,7 +1136,7 @@ class qtype_formulas_part {
         // Furthermore, there must be either a {_0}{_u} without whitespace in the part's text
         // (meaning the user explicitly wants a combined unit field) or no answer box placeholders
         // at all, neither for the answer nor for the unit.
-        $combinedrequested = strpos($this->subqtext, '{_0}{_u}');
+        $combinedrequested = strpos($this->subqtext, '{_0}{_u}') !== false;
         $noplaceholders = strpos($this->subqtext, '{_0}') === false && strpos($this->subqtext, '{_u}') === false;
         return $combinedrequested || $noplaceholders;
     }
