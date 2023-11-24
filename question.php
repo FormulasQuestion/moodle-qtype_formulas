@@ -1353,7 +1353,9 @@ class qtype_formulas_part {
 
     /**
      * Determines whether the student has provided a complete answer to this part,
-     * i. e. if all fields have been filled.
+     * i. e. if all fields have been filled. This method can be called before the
+     * response is normalized, so we cannot be sure all array keys exist as we would
+     * expect them.
      *
      * @param array $response
      * @return bool
@@ -1362,13 +1364,13 @@ class qtype_formulas_part {
         // First, we check if there is a combined unit field. In that case, there will
         // be only one field to verify.
         if ($this->has_combined_unit_field()) {
-            return !empty($response["{$this->partindex}_"]);
+            return !empty($response["{$this->partindex}_"]) && strlen($response["{$this->partindex}_"]) > 0;
         }
 
         // If we are still here, we do now check all "normal" fields. If one is empty,
         // we can return early.
         for ($i = 0; $i < $this->numbox; $i++) {
-            if (empty($response["{$this->partindex}_{$i}"])) {
+            if (!isset($response["{$this->partindex}_{$i}"]) || strlen($response["{$this->partindex}_{$i}"]) == 0) {
                 return false;
             }
         }
@@ -1376,7 +1378,8 @@ class qtype_formulas_part {
         // Finally, we check whether there is a separate unit field and, if necessary,
         // make sure it is not empty.
         if ($this->has_separate_unit_field()) {
-            return !empty($response["{$this->partindex}_{$this->numbox}"]);
+            return !empty($response["{$this->partindex}_{$this->numbox}"])
+                && strlen($response["{$this->partindex}_{$this->numbox}"]) > 0;
         }
 
         // Still here? That means no expected field was missing and no fields were empty.
