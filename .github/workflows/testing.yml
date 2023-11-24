@@ -45,6 +45,8 @@ jobs:
             php: '7.4'
           - moodle-branch: 'master'
             php: '7.4'
+          - moodle-branch: 'master'
+            php: '8.0'
         include:
           - php: '7.4'
             moodle-branch: 'MOODLE_39_STABLE'
