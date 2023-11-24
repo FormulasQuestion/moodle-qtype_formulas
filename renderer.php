@@ -484,9 +484,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $answers = $question->parts[$i]->get_correct_response();
         $answertext = implode(', ', $answers);
-        //$part = $question->parts[$i]; //->get_correct_response();
-
-        $correctanswer = $question->correct_response_formatted($question->parts[$i]);
 
         if ($question->parts[$i]->answernotunique) {
             $string = 'correctansweris';

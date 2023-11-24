@@ -1208,6 +1208,8 @@ class qtype_formulas_part {
      * Every answer box in the array will itself be an associative array with the
      * keys 'placeholder' (the entire placeholder), 'options' (the name of the variable containing
      * the options for the radio list or the dropdown) and 'dropdown' (true or false).
+     * The method is declared static in order to allow its usage during form validation when
+     * there is no actual question object.
      * TODO: implement test
      * TODO: allow {_n|50px} or {_n|10} to control size of the input field
      *
@@ -1665,7 +1667,7 @@ class qtype_formulas_part {
      *
      * TODO: complete doc
      */
-    public function get_correct_response(): array {
+    public function get_correct_response(bool $forfeedback = false): array {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
 
@@ -1688,7 +1690,43 @@ class qtype_formulas_part {
             $res["{$this->partindex}_{$this->numbox}"] = $this->postunit;
         }
 
+        $res = $this->translate_mc_answers_for_feedback($res);
+
         return $res;
+    }
+
+    /**
+     * TODO: doc
+     */
+    public function translate_mc_answers_for_feedback(array $response): array {
+        // First, we fetch all answer boxes.
+        $boxes = self::scan_for_answer_boxes($this->subqtext);
+
+        foreach ($boxes as $i => $box) {
+            // If it is not a multiple choice answer, we have nothing to do.
+            if ($box['options'] === '') {
+                continue;
+            }
+
+            // Name of the array containing the choices.
+            $source = $box['options'];
+
+            // Student's choice.
+            $userschoice = $response["{$this->partindex}$i"];
+
+            // Fetch the value.
+            $parser = new parser("{$source}[$userschoice]");
+            try {
+                $result = $this->evaluator->evaluate($parser->get_statements()[0]);
+                $response["{$this->partindex}$i"] = $result->value;
+            } catch (Exception $e) {
+                // If there was an error, we leave the value as it is. This should
+                // not happen, because upon creation of the question, we check whether
+                // the variable containing the choices exists.
+            }
+        }
+
+        return $response;
     }
 
 
