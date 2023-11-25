@@ -27,7 +27,8 @@ use qtype_formulas\unit_conversion_rules;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/question/type/edit_question_form.php');
+require_once($CFG->dirroot . '/question/type/edit_question_form.php');
+require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
 
 /**
  * coodinate question type editing form definition.
@@ -66,7 +67,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->addHelpButton('varsglobal', 'varsglobal', 'qtype_formulas');
         $mform->insertElementBefore($mform->createElement('header', 'mainq', get_string('mainq', 'qtype_formulas'),
             ''), 'questiontext');
-        $numberingoptions = question_bank::get_qtype('multichoice')->get_numbering_styles();
+        $numberingoptions = qtype_multichoice::get_numbering_styles();
         $mform->addElement('select', 'answernumbering',
                 get_string('answernumbering', 'qtype_multichoice'), $numberingoptions);
         $mform->setDefault('answernumbering', get_config('qtype_multichoice', 'answernumbering'));

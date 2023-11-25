@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test editing a Formulas question
     As a teacher
     In order to be able to update my Formulas question
@@ -57,3 +57,14 @@ Feature: Test editing a Formulas question
     And I set the field "Answer for part 3" to "7"
     And I press "Check"
     And I should see "Correct"
+
+  Scenario: Check validation of grading vars
+    When I am on the "formulas-001 for editing" "core_question > edit" page logged in as teacher1
+    And I set the following fields to these values:
+      | Grading variables | test = 1/0; |
+    And I press "id_submitbutton"
+    Then I should see "division by zero is not defined"
+    And I set the following fields to these values:
+      | Grading variables | test = 2; |
+    And I press "id_submitbutton"
+    Then I should not see "division by zero is not defined"

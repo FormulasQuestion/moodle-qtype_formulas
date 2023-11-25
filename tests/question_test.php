@@ -229,6 +229,49 @@ class question_test extends \basic_testcase {
         $this->assertEquals($expected, $partscores);
     }
 
+    public function test_with_invalidated_grading_vars() {
+        $q = $this->get_test_formulas_question('testtwonums');
+
+        // Set the grading vars to _0/_1 which will be invalid if the student
+        // enters 0 as their second answer.
+        $q->parts[0]->vars2 = 'test = _0/_1';
+        $q->parts[0]->correctness = 'test';
+        $q->parts[0]->numbox = 2;
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        // The invalid grading criterion should not lead to an exception, but get
+        // 0 marks.
+        $response = ['0_0' => 1, '0_1' => 0];
+        $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
+        $this->assertEquals(0, $partscores[0]->rawfraction);
+
+        // This time the grading criterion can be evaluated.
+        $response = ['0_0' => 1, '0_1' => 2];
+        $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
+        $this->assertEquals(0.5, $partscores[0]->rawfraction);
+    }
+
+    public function test_with_invalidated_grading_criterion() {
+        $q = $this->get_test_formulas_question('testtwonums');
+
+        // Set the grading criterion to _0/_1 which will be invalid if the student
+        // enters 0 as their second answer.
+        $q->parts[0]->correctness = '_0/_1';
+        $q->parts[0]->numbox = 2;
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        // The invalid grading criterion should not lead to an exception, but get
+        // 0 marks.
+        $response = ['0_0' => 1, '0_1' => 0];
+        $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
+        $this->assertEquals(0, $partscores[0]->rawfraction);
+
+        // This time the grading criterion can be evaluated.
+        $response = ['0_0' => 1, '0_1' => 2];
+        $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
+        $this->assertEquals(0.5, $partscores[0]->rawfraction);
+    }
+
     public function test_grade_parts_that_can_be_graded_test4() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);

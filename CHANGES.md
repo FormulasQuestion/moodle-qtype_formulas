@@ -1,5 +1,16 @@
 # Changelog
 
+### 5.3.2 (2023-11-17)
+- bugfix: also improve robustness against risky grading variables
+- internal: additional tests
+
+### 5.3.1 (2023-11-16)
+- bugfix: make sure risky grading criterion cannot break question
+- bugfix: make sure grading does not lead to invalid question state
+- revert workaround from 5.2.2 (TinyMCE too small), as bug was fixed upstream
+- internal: improvements to some tests
+- internal: update GitHub actions
+
 ### 5.3.0 (2023-10-09)
 - assure compatibility with Moodle 4.3 and PHP 8.2
 - enhancement: different feedback for unique / non-unique correct answer

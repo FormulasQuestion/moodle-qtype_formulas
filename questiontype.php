@@ -535,7 +535,7 @@ class qtype_formulas extends question_type {
     }
 
     /**
-     * Return all possible types of response. They are used e. g. reports.
+     * Return all possible types of response. They are used e. g. in reports.
      *
      * @param object $questiondata question definition data
      * @return array possible responses for every part
@@ -603,7 +603,7 @@ class qtype_formulas extends question_type {
                 // Older questions do not have this field, so we do not want to issue an error message.
                 // Also, for maximum backwards compatibility, we set the default value to 1. With this,
                 // nothing changes for old questions.
-                if ($tag === 'answernotunique') {
+                if ($field === 'answernotunique') {
                     $ifnotexists = '';
                     $default = '1';
                 } else {
@@ -939,7 +939,6 @@ class qtype_formulas extends question_type {
 
         // Check random variables. If there is an error, we do not continue, because
         // other variables or answers might depend on these definitions.
-        // FIXME: do not validate if empty
         $randomparser = new random_parser($data->varsrandom);
         $evaluator = new evaluator();
         try {
@@ -952,7 +951,6 @@ class qtype_formulas extends question_type {
 
         // Check global variables. If there is an error, we do not continue, because
         // other variables or answers might depend on these definitions.
-        // FIXME: do not validate if empty
         try {
             $globalparser = new parser($data->varsglobal, $randomparser->export_known_variables());
             $evaluator->evaluate($globalparser->get_statements());
@@ -980,67 +978,149 @@ class qtype_formulas extends question_type {
             }
 
             $knownvars = [];
+            // If there were no local variables, the partparser has not been initialized yet.
+            // Otherwise, we export its known variables.
             if ($partparser !== null) {
                 $knownvars = $partparser->export_known_variables();
             }
 
-            if (!empty($data->answer[$i])) {
-                try {
-                    $answerparser = new answer_parser($data->answer[$i], $knownvars);
-                    $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
-                    // Now that we know the model answers, we can set the $numbox property for the part,
-                    // i. e. the number of answer boxes that are to be shown.
-                    if (is_array($modelanswers->value)) {
-                        $parts[$i]->numbox = count($modelanswers->value);
-                    } else {
-                        $parts[$i]->numbox = 1;
-                    }
-                } catch (Exception $e) {
+            // Check whether the part uses the algebraic answer type.
+            $isalgebraic = $data->answertype[$i] == self::ANSWER_TYPE_ALGEBRAIC;
+
+            // Try evaluating the model answers. If this fails, don't validate the rest of
+            // this part, because there are dependencies.
+            try {
+                // If (and only if) the answer is algebraic, the answer parser should
+                // interpret ^ as **.
+                $answerparser = new answer_parser($data->answer[$i], $knownvars, $isalgebraic);
+                $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
+            } catch (Exception $e) {
+                // If the answer type is algebraic, the model answer field must contain one string (with quotes)
+                // or an array of strings. Thus, evaluation of the field's content as done above cannot fail,
+                // unless that syntax constraint has not been respected by the user.
+                if ($isalgebraic) {
+                    // TODO: externalise string
+                    $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                } else {
                     $errors["answer[$i]"] = $e->getMessage();
+                }
+                continue;
+            }
+
+            // Now that we know the model answers, we can set the $numbox property for the part,
+            // i. e. the number of answer boxes that are to be shown. Also, we make sure that
+            // $modelanswers becomes an array (possibly of one value) of literals.
+            if (is_array($modelanswers->value)) {
+                $parts[$i]->numbox = count($modelanswers->value);
+                $modelanswers = array_map(function ($element) {
+                    return $element->value;
+                }, $modelanswers->value);
+            } else {
+                $parts[$i]->numbox = 1;
+                $modelanswers = [$modelanswers->value];
+            }
+
+            // If the answer type is algebraic and the user provided a valid numerical expression (possibly
+            // containing non-algebraic variables), evaluation did not fail, so we still find ourselves with
+            // invalid model answers. Furthermore, we must now try to do algebraic evaluation of each answer
+            // to check for bad formulas.
+            // Finally, if the user correctly specified strings, the quotes have been stripped, so we need to
+            // add them again.
+            if ($isalgebraic) {
+                foreach ($modelanswers as $k => &$answer) {
+                    // After the first probelmatic answer, we do not need to check the rest, so we break.
+                    if (!is_string($answer)) {
+                        $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                        break;
+                    }
+
+                    // Evaluating the string should give us a numeric value.
+                    try {
+                        $result = $partevaluator->calculate_algebraic_expression($answer);
+                    } catch (Exception $e) {
+                        $answerno = $k + 1;
+                        // The error message may contain line and column numbers, but they don't make
+                        // sense in this context, so we'd rather remove them.
+                        $message = preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage());
+                        $errors["answer[$i]"] = "error in answer #{$answerno}: $message";
+                        break;
+                    }
+
+                    // Add quotes around the answer.
+                    $answer = '"' . $answer . '"';
+                }
+                // In case we later write to $answer, this would alter the last entry of the $modelanswers
+                // array, so we'd better remove the reference to make sure this won't happend.
+                unset($answer);
+                // If there was an error, we do not continue the validation.
+                if (!empty($errors["answer[$i]"])) {
                     continue;
                 }
             }
+
+            // In order to prepare the grading variables, we need to have the special vars like
+            // _a and _r or _0, _1, ... or _err and _relerr. We will simulate this part by copying
+            // the model answers and thus setting _err and _relerr to 0.
+            $command = '_a = [' . implode(',', $modelanswers) . '];';
+            $command .= '_r = [' . implode(',', $modelanswers) . '];';
+            for ($k = 0; $k < $parts[$i]->numbox; $k++) {
+                $command .= "_{$k} = {$modelanswers[$k]};";
+            }
+            $command .= '_diff = [' . implode(',', array_fill(0, $parts[$i]->numbox, '0')) . '];';
+            $command .= '_err = 0;';
+            if (!$isalgebraic) {
+                $command .= '_relerr = 0;';
+            }
+            $partparser = new parser($command, $knownvars);
+            // Evaluate all that in God mode, because we set special variables.
+            $partevaluator->evaluate($partparser->get_statements(), true);
+            // Update the list of known variables.
+            $knownvars = $partparser->export_known_variables();
 
             // Validate grading variables.
             if (!empty($data->vars2[$i])) {
                 try {
                     $partparser = new parser($data->vars2[$i], $knownvars);
-                    // Update the list of known variables.
-                    $knownvars = $partparser->export_known_variables();
                     $partevaluator->evaluate($partparser->get_statements());
                 } catch (Exception $e) {
                     $errors["vars2[$i]"] = $e->getMessage();
                     continue;
                 }
             }
+            // Update the list of known variables.
+            $knownvars = $partparser->export_known_variables();
 
-            // FIXME: we do not yet validate the grading criterion for algebraic answers.
-            if ($data->answertype === self::ANSWER_TYPE_ALGEBRAIC) {
-                continue;
-            }
-
-            // FIXME: temporary / we do not yet validate the correctness, because we
-            // must first set the special variables.
-            continue;
-
-            // Check grading criterion for each part. We use the model answers, so
-            // the grading criterion should always evaluate to 1 (or more).
-            // Check, if grading criterion is OK for answer type, e.g. no _relerr for
-            // algebraic formula.
-            // FIXME: need to set the special vars like _a, _d etc. and update $knownvars
+            // Check grading criterion.
+            $grade = 0;
             try {
                 $partparser = new parser($data->correctness[$i], $knownvars);
-                $partevaluator->evaluate($partparser->get_statements());
+                $result = $partevaluator->evaluate($partparser->get_statements());
+                $num = count($result);
+                if ($num > 1) {
+                    // TODO: externalise the string
+                    $errors["correctness[$i]"] = "The grading criterion should be one single expression. Found $num statements instead.";
+                }
+                $grade = $result[0]->value;
             } catch (Exception $e) {
+                // FIXME: if 'unknown variable: _relerr' and algebraic formula: change error message
+                // to something like 'relative error (_relerr) cannot be used with this answer type'
+                // FIXME: if teacher uses simplified form, error might not show up --> modify editform.js accordingly
                 $errors["correctness[$i]"] = $e->getMessage();
                 continue;
             }
 
-            // TODO: validation of unit stuff
+            // We used the model answers, so the grading criterion should always evaluate to 1 (or more).
+            if ($grade < 0.999) {
+                // TODO: externalise the string
+                $errors["correctness[$i]"] = "The grading criterion should evaluate to 1 for correct answers. Found $grade instead.";
+            }
+
+            // FIXME - TODO: validation of unit stuff
         }
 
         return (object)['errors' => $errors, 'parts' => $parts];
 
+        // ************* FIXME: clean up the rest *********
         // Attempt to compute answers to see if they are wrong or not.
         foreach ($validanswers as $idx => $ans) {
             $ans->partindex = $idx;
@@ -1069,45 +1149,6 @@ class qtype_formulas extends question_type {
                 $unitcheck->reparse_all_rules();
             } catch (Exception $e) {
                 $errors["ruleid[$idx]"] = $e->getMessage();
-            }
-
-            try {
-                $modelanswers = $qo->get_evaluated_answer($ans);
-                $cloneanswers = $modelanswers;
-                // Set the number of 'coordinates' which is used to display all answer boxes.
-                $ans->numbox = count($modelanswers);
-                $gradingtype = $ans->answertype;
-            } catch (Exception $e) {
-                $errors["answer[$idx]"] = 'XXXX' . $e->getMessage();
-                continue;
-            }
-
-            try {
-                $dres = $qo->compute_response_difference($vars, $modelanswers, $cloneanswers, 1, $gradingtype);
-                if ($dres === null) {
-                    throw new Exception();
-                }
-            } catch (Exception $e) {
-                $errors["answer[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
-            }
-
-            try {
-                // $qo->add_special_correctness_variables($vars, $modelanswers, $cloneanswers, $dres->diff, $dres->is_number);
-                // $qo->qv->evaluate_assignments($vars, $ans->vars2);
-                $FIXME = 'this is dummy code to be fixed later';
-            } catch (Exception $e) {
-                $errors["vars2[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
-            }
-
-            try {
-                $FIXME = 'this is dummy code to be fixed later';
-                // $responses = $qo->get_correct_responses_individually($ans);
-                // $correctness = $qo->grade_responses_individually($ans, $responses, $unitcheck);
-            } catch (Exception $e) {
-                $errors["correctness[$idx]"] = get_string('error_validation_eval', 'qtype_formulas') . $e->getMessage();
-                continue;
             }
 
         }

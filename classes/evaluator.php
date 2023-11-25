@@ -25,9 +25,6 @@ use Throwable, Exception;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- // TODO: add method to export list of known variables in order to feed them to a new parser
-
-
 class evaluator {
     /* function name => [min params, max params] */
     const PHPFUNCTIONS = [
@@ -75,17 +72,28 @@ class evaluator {
     ];
 
     // FIXME: temporarily, for testing debugging
-    public $variables = [];
-    public $randomvariables = [];
+    public array $variables = [];
+    public array $randomvariables = [];
 
-    private $constants = [
+    private array $constants = [
         'π' => M_PI,
     ];
 
     private array $stack = [];
 
+    /*
+     * @var int seed used when picking a random value for algebraic variables
+     *
+     * This is used, because we want the same variable to be resolved to the same
+     * value when evaluating any given expression.
+     */
+    private int $seed = 0;
+
     /* if true, it is possible to assign values to reserved variables */
     private bool $godmode = false;
+
+    /* if true, algebraic variables are replaced by a random value among their reservoir */
+    private bool $algebraicmode = false;
 
     /**
      * FIXME Undocumented function
@@ -137,13 +145,13 @@ class evaluator {
                 $result = $this->evaluate($parser->get_statements());
                 $text = str_replace("{{$match}}", strval(end($result)), $text);
             } catch (Exception $e) {
+                // TODO: use non-capturing exception when we drop support for old PHP
                 unset($e);
             }
         }
 
         return $text;
     }
-
 
     public function reinitialize(?string $context = null) {
         $this->clear_stack();
@@ -162,6 +170,14 @@ class evaluator {
         return serialize($this->variables);
     }
 
+    public function export_variable_list(): array {
+        return array_keys($this->variables);
+    }
+
+    public function export_single_variable(string $varname) {
+        $result = $this->get_variable_value(token::wrap($varname));
+        return $result;
+    }
     /**
      * FIXME: doc
      *
@@ -315,10 +331,28 @@ class evaluator {
         $result = $this->variables[$name];
 
         // If we access the variable as a whole, we return a new token
-        // created from the stored value and tye.
+        // created from the stored value and type.
         if (count($parts) === 0) {
-            $value = $result->value;
             $type = $result->type;
+            // In algebraic mode, an algebraic variable will resolve to a random value
+            // from its reservoir.
+            if ($this->algebraicmode && $type === token::SET) {
+                // We re-seed the random generator with a preset value and the CRC32 of the
+                // variable's name. The preset will be changed by the calculate_algebraic_expression()
+                // function. This makes sure that while evaluating one single expression, we will
+                // get the same value for the same variable. Adding the variable name into the seed
+                // gives the chance to not have the same value for different variables with the
+                // same reservoir, even though this is not guaranteed, especially if the reservoir is
+                // small.
+                mt_srand($this->seed + crc32($name));
+
+                $randomindex = mt_rand(0, count($result->value) - 1);
+                $randomelement = $result->value[$randomindex];
+                $value = $randomelement->value;
+                $type = $randomelement->type;
+            } else {
+                $value = $result->value;
+            }
             return new token($type, $value, $variable->row, $variable->column);
         }
 
@@ -362,6 +396,155 @@ class evaluator {
             return $this->get_variable_value($token);
         }
         return $token;
+    }
+
+    /**
+     * Take an algebraic expression, resolve its variables and calculate its value. For each
+     * algebraic variable, a random value among its possible values will be taken.
+     *
+     * @param string $expression algebraic expression
+     * @return token
+     */
+    public function calculate_algebraic_expression(string $expression): token {
+        // If the string is empty, throw an error.
+        if (strlen(trim($expression)) === 0) {
+            throw new Exception('cannot evaluate an empty formula');
+        }
+
+        // Parse the expression. It will parsed by the answer parser, i. e. the ^ operator
+        // will mean exponentiation rather than XOR, as per the documented behaviour.
+        $parser = new answer_parser($expression, $this->export_variable_list());
+        if (!$parser->is_valid_algebraic()) {
+            throw new Exception("'$expression' is not a valid algebraic expression");
+        }
+
+        // Setting the evaluator's seed to the current time. If the function is called several
+        // times in short intervals, we want to make sure the seed still changes.
+        $lastseed = $this->seed;
+        $this->seed = time();
+        if ($lastseed >= $this->seed) {
+            $this->seed = $lastseed + 1;
+            $lastseed = $this->seed;
+        }
+
+        // Now evaluate the expression and return the result. By saving the stack and restoring
+        // it afterwards, we create an empty substack for this evaluation only.
+        $this->algebraicmode = true;
+        $oldstack = $this->stack;
+        $this->clear_stack();
+        $result = $this->evaluate($parser->get_statements()[0]);
+        $this->stack = $oldstack;
+        $this->algebraicmode = false;
+
+        return $result;
+    }
+
+    /**
+     * Takes a string represantation of an algebraic formula, e.g. "a*x^2 + b" and
+     * replace the non-algebraic variables by their numerical value. Return the resulting
+     * string.
+     *
+     * @return string
+     */
+    public function substitute_variables_in_algebraic_formula(string $formula): string {
+        // We do not use the answer parser, because we do not actually evaluate the formula,
+        // and if it is needed for later output (e.g. "the correct answer is ..."), there is
+        // no need to replace ^ by **.
+        $parser = new parser($formula, $this->export_variable_list());
+
+        $tokens = $parser->get_tokens();
+        foreach ($tokens as &$token) {
+            // If we have a VARIABLE token, we fetch its value and check whether it is
+            // an algebraic variable (i. e. the value is of type SET) or not. We will only
+            // replace literals by their value.
+            if ($token->type === token::VARIABLE) {
+                $value = $this->get_variable_value($token);
+                if ($value->type === token::SET) {
+                    continue;
+                }
+                // Note: the value of a variable is always stored as a token.
+                $token = $value;
+            }
+        }
+        unset($token);
+
+        return implode('', $tokens);
+    }
+
+    /**
+     * The diff() function calculates absolute differences between numerical or algebraic
+     * expressions.
+     *
+     * @param array $first first list
+     * @param array $second second list
+     * @param int $n number of points where algebraic expressions will be evaluated
+     * @return array
+     */
+    public function diff(array $first, array $second, ?int $n = null) {
+        // FIXME: maybe allow invocation with num/num or string/string/n for convenience.
+
+        // First, we check that $first and $second are lists of the same size.
+        if (!is_array($first)) {
+            throw new Exception("the first argument of diff() must be a list");
+        }
+        if (!is_array($second)) {
+            throw new Exception("the second argument of diff() must be a list");
+        }
+        $count = count($first);
+        if (count($second) !== $count) {
+            throw new Exception("diff() expects two lists of the same size");
+        }
+
+        // Now make sure the lists do contain one single data type (only numbers or only strings).
+        // This is needed for the diff() function, because strings are evaluated as algebraic
+        // formulas, i. e. in a completely different way. Also, both lists must have the same data
+        // type.
+        $type = $first[0]->type;
+        if (!in_array($type, [token::NUMBER, token::STRING])) {
+            throw new Exception("when using diff(), the first list must contain only numbers or only strings");
+        }
+        for ($i = 0; $i < $count; $i++) {
+            if ($first[$i]->type !== $type) {
+                throw new Exception("diff(): type mismatch for element #{$i} (zero-indexed) of the first list");
+            }
+            if ($second[$i]->type !== $type) {
+                throw new Exception("diff(): type mismatch for element #{$i} (zero-indexed) of the second list");
+            }
+        }
+
+        // If we are working with numbers, we can directly calculate the differences and return.
+        if ($type === token::NUMBER) {
+            // The user should not specify a third argument when working with numbers.
+            if ($n !== null) {
+                throw new Exception("diff(): the third argument can only be used with lists of strings");
+            }
+
+            $result = [];
+            for ($i = 0; $i < $count; $i++) {
+                $diff = abs($first[$i]->value - $second[$i]->value);
+                $result[$i] = token::wrap($diff);
+            }
+            return $result;
+        }
+
+        // If the user did not specify $n, we set it to 100, for backwards compatibility.
+        if ($n === null) {
+            $n = 100;
+        }
+
+        $result = [];
+        // Iterate over all strings and calculate the root mean square difference between the two expressions.
+        for ($i = 0; $i < $count; $i++) {
+            $result[$i] = 0;
+            $expression = "({$first[$i]}) - ({$second[$i]})";
+            for ($j = 0; $j < $n; $j++) {
+                $difference = $this->calculate_algebraic_expression($expression);
+                $result[$i] += $difference->value ** 2;
+            }
+            $result[$i] = token::wrap(sqrt($result[$i] / $n), token::NUMBER);
+        }
+
+        return $result;
     }
 
     private function evaluate_the_right_thing($input, bool $godmode = false) {
@@ -630,11 +813,13 @@ class evaluator {
     private function abort_if_not_scalar(token $token, bool $enforcenumeric = true): void {
         if ($token->type !== token::NUMBER) {
             if ($token->type === token::SET) {
-                $value = "'{...}'";
+                $value = "algebraic variable'";
             } else if ($token->type === token::LIST) {
-                $value = "'[...]'";
+                $value = "list";
             } else if ($enforcenumeric) {
                 $value = "'{$token->value}'";
+            } else if ($token->type === token::STRING) {
+                return;
             }
             $expected = ($enforcenumeric ? 'numeric' : 'scalar');
             $this->die("evaluation error: $expected value expected, got $value", $token);
@@ -667,7 +852,7 @@ class evaluator {
     private function execute_ternary_operator() {
         $else = array_pop($this->stack);
         $then = array_pop($this->stack);
-        $condition = array_pop($this->stack);
+        $condition = $this->pop_real_value();
         return ($condition->value ? $then : $else);
     }
 
@@ -708,16 +893,12 @@ class evaluator {
         // error reporting.
         if ($optoken->value === '+') {
             // If at least one operand is a string, both values must be scalar, but
-            // not necessarily we use concatenation instead
-            // of addition.
-            if (is_string($first) || is_string($second)) {
-                $this->abort_if_not_scalar($firsttoken, false);
-                $this->abort_if_not_scalar($secondtoken, false);
-            }
+            // not necessarily numeric; we use concatenation instead of addition.
             // In all other cases, addition must (currently) be numeric, so we abort
             // if the arguments are not numbers.
-            $this->abort_if_not_scalar($firsttoken);
-            $this->abort_if_not_scalar($secondtoken);
+            $acceptstring = is_string($first) || is_string($second);
+            $this->abort_if_not_scalar($firsttoken, !$acceptstring);
+            $this->abort_if_not_scalar($secondtoken, !$acceptstring);
         }
 
         try {
@@ -778,8 +959,11 @@ class evaluator {
         // or an Exception (custom functions). We catch the exception and build a nice error message.
         try {
             // If we have our own implementation, execute that one. Otherwise, use PHP's built-in function.
+            // The special function diff() is defined in the evaluator, so it needs special treatment.
             $prefix = '';
-            if (array_key_exists($funcname, functions::FUNCTIONS)) {
+            if ($funcname === 'diff') {
+                $prefix = self::class . '::';
+            } else if (array_key_exists($funcname, functions::FUNCTIONS)) {
                 $prefix = functions::class . '::';
             }
             $result = call_user_func_array($prefix . $funcname, $params);

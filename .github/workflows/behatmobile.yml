@@ -43,6 +43,8 @@ jobs:
             php: '7.4'
           - moodle-branch: 'master'
             php: '7.4'
+          - moodle-branch: 'master'
+            php: '8.0'
 
     steps:
       - name: Check out repository code

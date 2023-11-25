@@ -31,9 +31,11 @@ use Exception;
 
 TODO:
 
-* special variables like _err and _relerr; _0, _1 etc., _a, _r and _d:
-*   -> must not be LHS in assignment, can only be used in certain contexts
-* parsing and instantiation of random vars
+* maybe add possibility for /* and * / delimited comments ?
+* _randomsvars_text in attempt_step_data --> prepend _version = 5; (incompat with legacy, so we know it's recent)
+      (alternative: 'version=5' or "version=5")
+*
+
 * units
 
 */
@@ -478,5 +480,14 @@ class parser {
         }
 
         return new for_loop($variable, $range, $statements);
+    }
+
+    /**
+     * Return the token list.
+     *
+     * @return array
+     */
+    public function get_tokens(): array {
+        return $this->tokenlist;
     }
 }
