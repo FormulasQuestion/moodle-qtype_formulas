@@ -53,8 +53,10 @@ class qtype_formulas extends question_type {
 
     /**
      * The following array contains some of the column names of the table qtype_formulas_answers,
-     * the table that holds the parts (not just answers) of a question:
-     *
+     * the table that holds the parts (not just answers) of a question. These columns undergo similar
+     * validation, so they are grouped in this array. Some columns are not listed here, namely
+     * the texts (part's text, part's feedback) and their formatting option, because they are
+     * validated separately:
      * - placeholder: the part's placeholder to be used in the main question text, e. g. #1
      * - answermark: grade awarded for this part, if answer is fully correct
      * - numbox: number of answers for this part, not including a possible unit field
@@ -66,10 +68,6 @@ class qtype_formulas extends question_type {
      * - postunit: the unit in which the model answer has been entered
      * - ruleid: ruleset used for unit conversion
      * - otherrule: additional rules for unit conversion
-     *
-     * These columns undergo similar validation, so they are grouped in this array. Some columns are not
-     * listed here, namely the texts (part's text, part's feedback) and their formatting option, because
-     * they are validated separately.
      */
     const PART_BASIC_FIELDS = ['placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
         'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
@@ -1000,7 +998,7 @@ class qtype_formulas extends question_type {
                 // unless that syntax constraint has not been respected by the user.
                 if ($isalgebraic) {
                     // TODO: externalise string
-                    $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                    $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
                 } else {
                     $errors["answer[$i]"] = $e->getMessage();
                 }
@@ -1030,7 +1028,7 @@ class qtype_formulas extends question_type {
                 foreach ($modelanswers as $k => &$answer) {
                     // After the first probelmatic answer, we do not need to check the rest, so we break.
                     if (!is_string($answer)) {
-                        $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or an array of strings, each wrapped in quotes.';
+                        $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
                         break;
                     }
 

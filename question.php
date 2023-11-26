@@ -118,16 +118,17 @@ require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.ph
 class qtype_formulas_question extends question_graded_automatically_with_countback
         implements question_automatically_gradable_with_multiple_parts {
 
-    /** @var seed used to initialize the RNG; needed to restore an attempt state */
+    /** @var int seed used to initialize the RNG; needed to restore an attempt state */
     public int $seed;
 
-    /** @var evaluator class, this is where the evaluation stuff happens */
+    /** @var ?evaluator evaluator class, this is where the evaluation stuff happens */
     public ?evaluator $evaluator = null;
 
-    /** @var definition text for random variables, as entered in the edit form */
+    /**
+     * @var string $varsrandom definition text for random variables, as entered in the edit form
+     * @var string $varsglobal definition text for the question's global variables, as entered in the edit form
+     */
     public string $varsrandom;
-
-    /** @var definition text for the question's global variables, as entered in the edit form */
     public string $varsglobal;
 
     /** @var qtype_formulas_part[] parts of the question */
@@ -136,34 +137,31 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /** @var string numbering (if any) of answers */
     public string $answernumbering;
 
-    /** @var array evaluated answers for each part, two dimensional array */
+    /** @var string[] evaluated answers for each part, two dimensional array */
     public array $evaluatedanswers = [];
 
     /** @var int number of parts in this question, used e.g. by the renderer */
     public int $numparts;
 
     /**
-     * @var array strings (one more than $numpart) containing fragments from the question's main text
-     *            that surround the parts' subtexts; used by the renderer
+     * @var string[] strings (one more than $numpart) containing fragments from the question's main text
+     *               that surround the parts' subtexts; used by the renderer
      */
     public array $textfragments;
 
-    /** @var string combined feedback for correct answer */
+    /**
+     * @var string $correctfeedback combined feedback for correct answer
+     * @var int $correctfeedbackformat format of combined feedback for correct answer
+     * @var string $partiallycorrectfeedback combined feedback for partially correct answer
+     * @var int $partiallycorrectfeedbackformat format of combined feedback for partially correct answer
+     * @var string $incorrectfeedback combined feedback for in correct answer
+     * @var int $incorrectfeedbackformat format of combined feedback for incorrect answer
+     */
     public string $correctfeedback;
-
-    /** @var string format of combined feedback for correct answer */
     public int $correctfeedbackformat;
-
-    /** @var string combined feedback for partially correct answer */
     public string $partiallycorrectfeedback;
-
-    /** @var string format of combined feedback for partially correct answer */
     public int $partiallycorrectfeedbackformat;
-
-    /** @var string combined feedback for in correct answer */
     public string $incorrectfeedback;
-
-    /** @var string format of combined feedback for incorrect answer */
     public int $incorrectfeedbackformat;
 
     /**
@@ -245,7 +243,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         } else {
             // Fetch the stored definition of the previously instantiated random variables
             // and send them to the evaluator. They will be evaluated as *global* variables,
-            // because there is no randomness anymore.
+            // because there is no randomness anymore. The data was created by the old
+            // variables:vstack_get_serialization() function, so we know that every statement
+            // ends with a semicolon and we can simply concatenate random and global vars definition.
             $randominstantiated = $step->get_qt_var('_randomsvars_text');
             $this->varsglobal = $step->get_qt_var('_varsglobal');
             $parser = new parser($randominstantiated . $this->varsglobal);
@@ -540,7 +540,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             list($anscorr, $unitcorr)
                     = $this->grade_responses_individually($part, $response, $checkunit);
 
-
             // TODO: For questions with unit:
             // fully correct (unit + value)
             // correct unit, partially correct value (>= 50%)
@@ -602,12 +601,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return get_string('pleaseputananswer', 'qtype_formulas');
     }
 
-    /** FIXME: not treated yet; used e.g. with immediate feedback, adaptive or interactive mode; called after "submit and finish" with deferred feedback
-     * Grade a response to the question, returning a fraction between
-     * get_min_fraction() and 1.0, and the corresponding {@link question_state}
-     * right, partial or wrong.
-     * @param array $response responses, as returned by
-     *      {@link question_attempt_step::get_qt_data()}.
+    /**
+     * Grade a response to the question, returning a fraction between get_min_fraction()
+     * and 1.0, and the corresponding {@link question_state} right, partial or wrong. This
+     * method is used with immediate feedback, with adaptive mode and with interactive mode. It
+     * is called after the studenet clicks "submit and finish" when deferred feedback is active.
+     *
+     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}.
      * @return array (number, integer) the fraction, and the state.
      */
     public function grade_response(array $response) {
@@ -615,44 +615,27 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         $totalpossible = 0;
         $achievedmarks = 0;
+        // Separately grade each part.
         foreach ($this->parts as $part) {
+            // Count the total number of points for this part.
             $totalpossible += $part->answermark;
 
             $partsgrade = $part->grade($response);
-            if ($partsgrade['unit']) {
-                $fraction = $partsgrade['answer'];
-            } else {
-                $fraction = $partsgrade['answer'] * (1 - $part->unitpenalty);
+            $fraction = $partsgrade['answer'];
+            // If unit is wrong, make the necessary deduction.
+            if ($partsgrade['unit'] === false) {
+                $fraction = $fraction * (1 - $part->unitpenalty);
             }
+
+            // Add the number of points achieved to the total.
             $achievedmarks += $part->answermark * $fraction;
         }
 
+        // Finally, calculate the overall fraction of points received vs. possible points
+        // and return the fraction together with the correct question state (i. e. correct,
+        // partiall correct or wrong).
         $fraction = $achievedmarks / $totalpossible;
         return [$fraction, question_state::graded_state_for_fraction($fraction)];
-
-        /*********************************** old stuff *******************/
-        // We cant' rely on question defaultmark for restored questions.
-        global $OUTPUT;
-
-        $totalvalue = 0;
-        try {
-            $checkunit = new answer_unit_conversion; // Defined here for the possibility of reusing parsed default set.
-            foreach ($this->parts as $part) {
-                //list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
-                //        = $this->grade_responses_individually($part, $response, $checkunit); // May throw exception.
-                $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
-                                                     ? 1
-                                                     : (1 - $part->unitpenalty));
-                $rawgrades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
-                $totalvalue += $part->answermark;
-            }
-        } catch (Exception $e) {
-            $OUTPUT->notification(get_string('error_grading_error', 'qtype_formulas'), 'error');
-            return false; // It should have no error when grading students question.
-        }
-
-        $fraction = array_sum($rawgrades) / $totalvalue;
-        return array($fraction, question_state::graded_state_for_fraction($fraction));
     }
 
     /**
@@ -668,7 +651,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function grade_parts_that_can_be_graded(array $response, array $lastgradedresponse, $finalsubmit) {
         $partresults = [];
-        $checkunit = new answer_unit_conversion();
 
         // Every entry from the $lastgradedresponse array contains the same fields (for the entire
         // question) and the values are all the same, so we just take the last array entry.
@@ -685,10 +667,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
 
             $partsgrade = $part->grade($response);
-            if ($partsgrade['unit']) {
-                $fraction = $partsgrade['answer'];
-            } else {
-                $fraction = $partsgrade['answer'] * (1 - $part->unitpenalty);
+            $fraction = $partsgrade['answer'];
+            // If unit is wrong, make the necessary deduction.
+            if ($partsgrade['unit'] === false) {
+                $fraction = $fraction * (1 - $part->unitpenalty);
             }
 
             $partresults[$part->partindex] = new qbehaviour_adaptivemultipart_part_result(
@@ -783,80 +765,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $fractionsum / $fractionmax;
     }
 
-    // Compute the correct response for the given question part.
-    // FIXME: this should go to the part; not a mandatory method
-    public function get_correct_responses_individually($part) {
-        $res = $this->get_evaluated_answers()[$part->partindex];
-        /*try {
-            // If the answer is algebraic formulas (i.e. string), then replace the variable with numeric value by their number.
-            $localvars = $this->get_local_variables($part);
-            if (is_string($res[0])) {
-                $res = $this->qv->substitute_partial_formula($localvars, $res);
-            }
-        } catch (Exception $e) {
-            return null;
-        }*/
-
-        foreach (range(0, count($res) - 1) as $j) {
-            $responses[$part->partindex."_$j"] = $res[$j]; // Coordinates.
-        }
-        $tmp = explode('=', $part->postunit, 2);
-        $responses[$part->partindex."_".count($res)] = $tmp[0];  // Postunit.
-        return $responses;
-    }
-
-    // Compute the correct response for the given question part.
-    // Formatted for display.
-    // FIXME: this should go to the part, used by the renderer (not mandatory)
-    public function correct_response_formatted($part) {
-        $tmp = $this->get_correct_responses_individually($part);
-        // Get all part's answer boxes.
-        $boxes = $part->scan_for_answer_boxes($part->subqtext);
-
-        // Find all multichoice coordinates in the part.
-        foreach ($boxes as $key => $box) {
-            if (strlen($box['options']) != 0) { // It's a multichoice coordinate.
-                // Calculate all the choices.
-                try {
-                    // Remove the : at the beginning of options and evaluate it.
-                    // $stexts = $this->qv->evaluate_general_expression($localvars, substr($box->options, 1));
-                    $stexts = (object)['value' => 'FIXME'];
-                } catch (Exception $e) {
-                    // The $stexts variable will be null if evaluation fails.
-                    $stexts = null;
-                }
-                if ($stexts != null) {
-                    // Replace index with calculated choice.
-                     $tmp["{$part->partindex}". $key] = $stexts->value[$tmp["{$part->partindex}". $key]];
-                }
-            }
-
-        }
-        if ($part->has_combined_unit_field()) {
-            $correctanswer = implode(' ', $tmp);
-        } else {
-            if (!$part->has_separate_unit_field()) {
-                unset($tmp["{$part->partindex}_" . (count($tmp) - 1)]);
-            }
-            $correctanswer = implode(', ', $tmp);
-        }
-        return $correctanswer;
-    }
-
-    /**
-     * Undocumented function
-     * FIXME: not mandatory, own implementation
-     *
-     * @param [type] $response
-     * @return void
-     */
-    public function add_special_variables($response) {
-        foreach ($this->parts as $part) {
-            // FIXME: conversion factor must be given later
-            $part->add_special_variables($response, 1);
-        }
-    }
-
     // FIXME: this has to go to the part, own implementation
     // Check whether the format of the response is correct and evaluate the corresponding expression
     // @return difference between coordinate and model answer. null if format incorrect.
@@ -890,7 +798,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      *
      * @return void
      */
-    public function initialize_part_evaluators() {
+    public function initialize_part_evaluators(): void {
         // For every part, we clone the question's evaluator in order to have the
         // same set of (instantiated) random and global variables.
         foreach ($this->parts as $part) {
@@ -1004,8 +912,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * Fetch evaluated answers for each part and return the overview of all parts.
-     * FIXME: not mandatory, own implementation, maybe remove this later
-     * @param qtype_formulas_part $part
+     * FIXME: remove this after refactoring is done (called from grade_responses_individually)
+     *
      * @return array
      */
     public function get_evaluated_answers(): array {
@@ -1715,7 +1623,7 @@ class qtype_formulas_part {
         // First, we fetch all answer boxes.
         $boxes = self::scan_for_answer_boxes($this->subqtext);
 
-        foreach ($boxes as $i => $box) {
+        foreach ($boxes as $key => $box) {
             // If it is not a multiple choice answer, we have nothing to do.
             if ($box['options'] === '') {
                 continue;
@@ -1725,17 +1633,19 @@ class qtype_formulas_part {
             $source = $box['options'];
 
             // Student's choice.
-            $userschoice = $response["{$this->partindex}$i"];
+            $userschoice = $response["{$this->partindex}$key"];
 
             // Fetch the value.
             $parser = new parser("{$source}[$userschoice]");
             try {
                 $result = $this->evaluator->evaluate($parser->get_statements()[0]);
-                $response["{$this->partindex}$i"] = $result->value;
+                $response["{$this->partindex}$key"] = $result->value;
             } catch (Exception $e) {
                 // If there was an error, we leave the value as it is. This should
                 // not happen, because upon creation of the question, we check whether
                 // the variable containing the choices exists.
+                debugging('Could not translate multiple choice index back to its value. This should not happen. ' .
+                    'Please file a bug report.');
             }
         }
 

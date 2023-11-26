@@ -41,14 +41,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return string HTML fragment.
+     * @return ?string HTML fragment.
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options): ?string {
         // First, fetch the instantiated question from the attempt.
+        /** @var qtype_formulas_question */
         $question = $qa->get_question();
 
         // TODO: is this really necessary here ? If question is damaged it should have been detected before.
-        if (count($question->textfragments) != $question->numparts + 1) {
+        if (count($question->textfragments) !== $question->numparts + 1) {
             $this->output->notification(get_string('error_question_damaged', 'qtype_formulas'), 'error');
             return null;
         }
@@ -57,7 +58,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         foreach ($question->parts as $part) {
             $questiontext .= $question->format_text(
                 $question->textfragments[$part->partindex],
-                FORMAT_HTML,
+                $question->questiontextformat,
                 $qa,
                 'question',
                 'questiontext',
@@ -68,7 +69,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
         $questiontext .= $question->format_text(
             $question->textfragments[$question->numparts],
-            FORMAT_HTML,
+            $question->questiontextformat,
             $qa,
             'question',
             'questiontext',
@@ -109,6 +110,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $sub
         );
         // Place for the right/wrong feeback image or appended at part's end.
+        // TODO: this is not documented anywhere
         if (strpos($output, '{_m}') !== false) {
             $output = str_replace('{_m}', $sub->feedbackimage, $output);
         } else {
