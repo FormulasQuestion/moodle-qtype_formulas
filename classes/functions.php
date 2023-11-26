@@ -277,9 +277,10 @@ class functions {
         }
 
         // Create array from minimum to maximum value and then use the given list as the sort order.
+        // Note: number tokens should have their value stored as floats
         $result = [];
         for ($i = $min->value; $i <= $max->value; $i++) {
-            $result[] = new token(token::NUMBER, $i);
+            $result[] = new token(token::NUMBER, floatval($i));
         }
         uksort($result, function($a, $b) use ($list) {
             return $list[$a] <=> $list[$b];

@@ -432,15 +432,28 @@ class parser {
         }
         $currenttoken = $this->read_next();
 
-        // Next must be an opening bracket.
+        // Next must be an opening bracket or a variable. The variable should contain a list,
+        // but we cannot check that at this point. Note that at this point, IDENTIFIER tokens
+        // have not yet been classified into VARIABLE or FUNCTION tokens.
         $currenttoken = $this->peek();
-        if (!$currenttoken || $currenttoken->type !== token::OPENING_BRACKET) {
-            $this->die('syntax error: [ expected', $currenttoken);
+        $isbracket = ($currenttoken->type === token::OPENING_BRACKET);
+        $isvariable = ($currenttoken->type === token::IDENTIFIER);
+        if (empty($currenttoken) || (!$isbracket && !$isvariable)) {
+            $this->die('syntax error: [ or variable name expected', $currenttoken);
         }
 
-        // Read up to the closing bracket. We are sure there is one, because the parser has already
-        // checked for mismatched / unbalanced parens.
-        $range = $this->parse_general_expression(token::CLOSING_BRACKET);
+        if ($isbracket) {
+            // If we had an opening bracket, read up to the closing bracket. We are sure there
+            // is one, because the parser has already checked for mismatched / unbalanced parens.
+            $range = $this->parse_general_expression(token::CLOSING_BRACKET);
+        } else {
+            // Otherwise, we set the token's type to VARIABLE, as it must be one and things will
+            // blow up later during evaluation if it is not. Then, we define the range to be
+            // an expression of just this one token. And we don't forget to consume the token.
+            $currenttoken->type = token::VARIABLE;
+            $range = new expression([$currenttoken]);
+            $this->read_next();
+        }
 
         // Next must be a closing parenthesis.
         $currenttoken = $this->peek();
@@ -471,12 +484,18 @@ class parser {
             }
             // Consume the closing brace.
             $this->read_next();
+            // Check whether the next token (if it exists) is a semicolon. If it is, we consume it also.
+            $nexttoken = $this->peek();
+            if (isset($nexttoken) && $nexttoken->type === token::END_OF_STATEMENT) {
+                $this->read_next();
+            }
         } else {
             $statements[] = $this->parse_the_right_thing($currenttoken);
         }
 
         if (count($statements) === 0) {
-            $this->die('syntax error: empty for loop', $fortoken);
+            // We do not disallow empty for loops for backward compatibility.
+            // $this->die('syntax error: empty for loop', $fortoken);
         }
 
         return new for_loop($variable, $range, $statements);

@@ -25,6 +25,8 @@
 
 namespace qtype_formulas;
 
+use \Exception;
+
 class evaluator_test extends \advanced_testcase {
 
     /**
@@ -57,26 +59,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    /**
-     * @dataProvider provide_assignments
-     */
-    public function test_assignments($expected, $input): void {
-        // TODO
-        $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
-    }
-
     public function test_diff(): void {
-        global $CFG, $SITE;
-
-        //print_r(get_config('filter_mathjaxloader'));
-        print_r(array_keys(get_object_vars($SITE)));
-        die();
-        $parser = new parser('');
-        print_r($parser->get_statements());
-        die();
-
         $parser = new parser('a = 4; b={1,2}; c = "a" + b; d = diff([a, 1], [5, 6])');
         $parser = new parser('x = {1:10}; y = {1:10}; d = diff(["x"], ["y"])');
         $statements = $parser->get_statements();
@@ -86,6 +69,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_algebra(): void {
+        return;
         $parser = new parser('a = 7; b = {1:5}; 2*b');
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -93,8 +77,6 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->calculate_algebraic_expression_at_random_point('2*a');
         print_r($result);
     }
-
-
 
     /**
      * @dataProvider provide_arrays
@@ -246,24 +228,537 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_assignments(): array {
+    // TODO: reorder those tests later; some are unit tests for the functions and should go there
+    public function provide_valid_assignments(): array {
         return [
-            'constant' => ['a,1,=', 'a = 1'],
-            'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
-            'arithmetic expression with ternary in parens' => [
-                'a,5,b,1,==,3,4,%%ternary,2,*,+,=',
-                'a = 5 + (b == 1 ? 3 : 4) * 2'
+            'one number' => [
+                ['a' => new variable('a', 1, token::NUMBER)],
+                'a = 1;'
             ],
-            'arithmetic expression with double ternary' => [
-                'a,b,c,==,1,b,d,==,2,0,%%ternary,%%ternary,=',
-                'a = b == c ? 1 : b == d ? 2 : 0'
+            'two numbers' => [
+                [
+                    'a' => new variable('a', 1, token::NUMBER),
+                    'b' => new variable('b', 4, token::NUMBER)
+                ],
+                'a = 1; b = 4;'
             ],
-            'arithmetic expression with paren and power' => ['a,3,4,**,5,**,=', 'a = (3**4)**5'],
-            'double assignment' => ['a,b,7,=,=', 'a = b = 7'],
-            'assignment with implicit multiplication and functions' => ['a,2,3,b,*,1,sin,*,3,_,b,+,*,=', 'a = 2 sin(3b)(-3+b)'],
-            'bitwise, 1' => ['a,1,2,3,~,&,|,=', 'a = 1 | 2 & ~3'],
-            'bitwise, 2' => ['a,1,2,3,~,&,5,~,^,|,=', 'a = 1 | 2 & ~3 ^ ~5'],
-            'double assignment with expression' => ['a,b,7.3,1,floor,15,2,**,+,=,=', 'a = b = floor(7.3)+15**2'],
+            'number with comment' => [
+                ['a' => new variable('a', 1, token::NUMBER)],
+                'a = 1; # This is a comment! So it will be skipped. '
+            ],
+            'one expression' => [
+                ['c' => new variable('c', 4.14, token::NUMBER)],
+                'c = cos(0)+3.14;'
+            ],
+            'one string with double quotes' => [
+                ['d' => new variable('d', 'Hello!', token::STRING)],
+                'd = "Hello!";'
+            ],
+            'one string with single quotes' => [
+                ['d' => new variable('d', 'Hello!', token::STRING)],
+                "d = 'Hello!';"
+            ],
+            'list of numbers' => [
+                ['e' => new variable('e', [1, 2, 3, 4], token::LIST)],
+                'e =[1,2,3,4];'
+            ],
+            'list of strings' => [
+                ['f' => new variable('f', ['A', 'B', 'C'], token::LIST)],
+                'f =["A", "B", "C"];'
+            ],
+            'composed expression with vars' => [
+                [
+                    'a' => new variable('a', 1, token::NUMBER),
+                    'b' => new variable('b', 4, token::NUMBER),
+                    'c' => new variable('c', 4, token::NUMBER),
+                    'g' => new variable('g', [1, 47 , 2 , 2.718281828459, 16], token::LIST),
+                ],
+                'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];'
+            ],
+            'list with expressions + list element reference' => [
+                [
+                    'h' => new variable('h', [1, 5 , -0.7568024953079282, 5], token::LIST),
+                    'j' => new variable('j', 5, token::NUMBER),
+                ],
+                'h = [1,2+3,sin(4),5]; j=h[1];'
+            ],
+            'assign list element' => [
+                ['e' => new variable('e', 2, token::NUMBER)],
+                'e = [1,2,3,4][1];'
+            ],
+            'assign to list element' => [
+                [
+                    'e' => new variable('e', [1, 2 , 111 , 4], token::LIST),
+                ],
+                'e = [1,2,3,4]; e[2]=111;'
+            ],
+            'assign to list element with variable as index' => [
+                [
+                    'a' => new variable('a', 1, token::NUMBER),
+                    'e' => new variable('e', [1, 111 , 3 , 4], token::LIST),
+                ],
+                'e = [1,2,3,4]; a=1; e[a]=111;'
+            ],
+            'assign to list element with calculated variable as index' => [
+                [
+                    'a' => new variable('a', 0, token::NUMBER),
+                    'e' => new variable('e', [111, 2 , 3 , 4], token::LIST),
+                ],
+                'e = [1,2,3,4]; a=1-1; e[a]=111;'
+            ],
+            'assign only element from list of length 1' => [
+                ['g' => new variable('g', 3, token::NUMBER)],
+                'g = [3][0];'
+            ],
+            'assign from array where element is itself element from a list' => [
+                [
+                    'a' => new variable('a', [7, 8, 9], token::LIST),
+                    'g' => new variable('g', 8, token::NUMBER),
+                ],
+                'a = [7,8,9]; g = [a[1]][0];'
+            ],
+            'assign with ranges' => [
+                [
+                    'h' => new variable('h', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], token::LIST),
+                    'k' => new variable('k', [4, 5, 6, 7], token::LIST),
+                    'm' => new variable('m', [-20, -18.5, -17, -15.5, -14, -12.5, -11], token::LIST),
+                ],
+                'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'
+            ],
+            'assign lists and composed expressions' => [
+                [
+                    'a' => new variable('a', [1, 2, 3], token::LIST),
+                    's' => new variable('s', [2, 0, 1], token::LIST),
+                    'n' => new variable('n', [9, 3, 54], token::LIST),
+                ],
+                'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];'
+            ],
+            'assign with exponentiation' => [
+                ['a' => new variable('a', 6561, token::NUMBER)],
+                'a=3**8;'
+            ],
+            'assign with fill()' => [
+                [
+                    'a' => new variable('a', 4, token::NUMBER),
+                    'A' => new variable('A', [0, 0], token::LIST),
+                    'B' => new variable('B', ['Hello', 'Hello', 'Hello'], token::LIST),
+                    'C' => new variable('C', [4, 4, 4, 4], token::LIST),
+                ],
+                'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);'
+            ],
+            'assign with indirect fill()' => [
+                [
+                    'a' => new variable('a', [1, 2, 3, 4], token::LIST),
+                    'b' => new variable('b', 4, token::NUMBER),
+                    'c' => new variable('c', ['rr', 'rr', 'rr', 'rr'], token::LIST),
+                ],
+                'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")'
+            ],
+            'assignment with sort() (numbers)' => [
+                [
+                    's' => new variable('s', [2, 3, 5, 7, 11], token::LIST),
+                ],
+                's=sort([7,5,3,11,2]);'
+            ],
+            'assignment with sort() (strings)' => [
+                [
+                    's' => new variable('s', ['A1', 'A2', 'A10', 'A100'], token::LIST),
+                ],
+                's=sort(["A1","A10","A2","A100"]);'
+            ],
+            'assignment with sort() (two args)' => [
+                [
+                    's' => new variable('s', [2, 3, 1], token::LIST),
+                ],
+                's=sort([1,2,3], ["A10","A1","A2"]);'
+            ],
+            'assignment with sort() (numbers again)' => [
+                [
+                    's' => new variable('s', [1, 3, 5, 10], token::LIST),
+                ],
+                's=sort([1,10,5,3]);'
+            ],
+            'assignment with sort() (numeric strings and letters)' => [
+                [
+                    's' => new variable('s', ['1', '2', '3', '4', 'A', 'B', 'C', 'a', 'b', 'c'], token::LIST),
+                ],
+                's=sort(["4","3","A","a","B","2","1","b","c","C"]);'
+            ],
+            'assignment with sort() (letters)' => [
+                [
+                    's' => new variable('s', ['A', 'B', 'B', 'C'], token::LIST),
+                ],
+                's=sort(["B","C","A","B"]);'
+            ],
+            'assignment with sort() (numeric strings and letters again)' => [
+                [
+                    's' => new variable('s', ['0', '1', '2', '3', 'A', 'B', 'C', 'a', 'b', 'c'], token::LIST),
+                ],
+                's=sort(["B","3","1","0","A","C","c","b","2","a"]);'
+            ],
+            'assignment with sort() (strings)' => [
+                [
+                    's' => new variable('s', ['A1', 'A2', 'B'], token::LIST),
+                ],
+                's=sort(["B","A2","A1"]);'
+            ],
+            'assignment with sort() (strings, two params)' => [
+                [
+                    's' => new variable('s', ['B', 'A', 'C'], token::LIST),
+                ],
+                's=sort(["B","C","A"],[0,2,1]);'
+            ],
+            'assignment with sort() (strings, two params again)' => [
+                [
+                    's' => new variable('s', ['A1', 'B', 'A2'], token::LIST),
+                ],
+                's=sort(["B","A2","A1"],[2,4,1]);'
+            ],
+            'assignment with sort() (both arguments are strings)' => [
+                [
+                    's' => new variable('s', ['C', 'A', 'B'], token::LIST),
+                ],
+                's=sort(["A","B","C"],["A2","A10","A1"]);'
+            ],
+            'assignment with sort() (positive and negative numbers)' => [
+                [
+                    's' => new variable('s', [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5], token::LIST),
+                ],
+                's=sort([-3,-2,4,2,3,1,0,-1,-4,5]);'
+            ],
+            'assignment with sort() (positive and negative numbers as strings)' => [
+                [
+                    's' => new variable('s', ['-3', '-2', '-1', '0', '1', '2', '3', 'A', 'B', 'a', 'b'], token::LIST),
+                ],
+                's=sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]);'
+            ],
+            'assignment with sublist()' => [
+                [
+                    's' => new variable('s', ['B', 'D'], token::LIST),
+                ],
+                's=sublist(["A","B","C","D"],[1,3]);'
+            ],
+            'assignment with sublist(), same element twice' => [
+                [
+                    's' => new variable('s', ['A', 'A', 'C', 'D'], token::LIST),
+                ],
+                's=sublist(["A","B","C","D"],[0,0,2,3]);'
+            ],
+            'assignment with inv()' => [
+                [
+                    's' => new variable('s', [1, 3, 0, 2], token::LIST),
+                ],
+                's=inv([2,0,3,1]);'
+            ],
+            'assignment with inv(inv())' => [
+                [
+                    's' => new variable('s', [2, 0, 3, 1], token::LIST),
+                ],
+                's=inv(inv([2,0,3,1]));'
+            ],
+            'assignment with sublist() and inv()' => [
+                [
+                    'A' => new variable('A', ['A', 'B', 'C', 'D'], token::LIST),
+                    'B' => new variable('B', [2, 0, 3, 1], token::LIST),
+                    's' => new variable('s', ['A', 'B', 'C', 'D'], token::LIST),
+                ],
+                'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));'
+            ],
+            'assignment with map() and "exp"' => [
+                [
+                    'a' => new variable('a', [1, 2, 3], token::LIST),
+                    'A' => new variable('A', [2.718281828459, 7.3890560989307, 20.085536923188], token::LIST),
+                ],
+                'a=[1,2,3]; A=map("exp",a);'
+            ],
+            'assignment with map() and "+" with constant' => [
+                [
+                    'a' => new variable('a', [1, 2, 3], token::LIST),
+                    'A' => new variable('A', [3.3, 4.3, 5.3], token::LIST),
+                ],
+                'a=[1,2,3]; A=map("+",a,2.3);'
+            ],
+            'assignment with map() and "+" with two arrays' => [
+                [
+                    'a' => new variable('a', [1, 2, 3], token::LIST),
+                    'b' => new variable('b', [4, 5, 6], token::LIST),
+                    'A' => new variable('A', [5, 7, 9], token::LIST),
+                ],
+                'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);'
+            ],
+            'assignment with map() and "pow" with two arrays' => [
+                [
+                    'a' => new variable('a', [1, 2, 3], token::LIST),
+                    'b' => new variable('b', [4, 5, 6], token::LIST),
+                    'A' => new variable('A', [1, 32, 729], token::LIST),
+                ],
+                'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);'
+            ],
+            'assignment with sum()' => [
+                [
+                    'r' => new variable('r', 15, token::NUMBER),
+                ],
+                'r=sum([4,5,6]);'
+            ],
+            'assignment with sum(), fill() and operations' => [
+                [
+                    'r' => new variable('r', -4, token::NUMBER),
+                ],
+                'r=3+sum(fill(10,-1))+3;'
+            ],
+            'assignment with concat() and lists of numbers' => [
+                [
+                    's' => new variable('s', [1, 2, 3, 4, 5, 6, 7, 8], token::LIST),
+                ],
+                's=concat([1,2,3], [4,5,6], [7,8]);'
+            ],
+            'assignment with concat() and lists of strings' => [
+                [
+                    's' => new variable('s', ['A', 'B', 'X', 'Y', 'Z', 'Hello'], token::LIST),
+                ],
+                's=concat(["A","B"],["X","Y","Z"],["Hello"]);'
+            ],
+            'assignment with join() and list of numbers' => [
+                [
+                    's' => new variable('s', '1~2~3', token::STRING),
+                ],
+                's=join("~", [1,2,3]);'
+            ],
+            'assignment with str()' => [
+                [
+                    's' => new variable('s', '45', token::STRING),
+                ],
+                's=str(45);'
+            ],
+            'assignment with nested join() and list' => [
+                [
+                    'a' => new variable('a', [4, 5], token::LIST),
+                    's' => new variable('s', 'A,B,1,5,3,4+5+?,9', token::STRING),
+                ],
+                'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);'
+            ],
+            'assignment with references and sum() containing a range' => [
+                [
+                    'A' => new variable('A', 1, token::NUMBER),
+                    'Z' => new variable('Z', 4, token::NUMBER),
+                    'Y' => new variable('Y', 'Hello!', token::STRING),
+                    'X' => new variable('X', 31, token::NUMBER),
+                ],
+                'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;'
+            ],
+            'implicit assignment via empty for loop index' => [
+                [
+                    'i' => new variable('i', 3, token::NUMBER),
+                ],
+                'for(i:[1,2,3]){ };'
+            ],
+            'implicit assignment via for loop index, other input format' => [
+                [
+                    'i' => new variable('i', 3, token::NUMBER),
+                ],
+                'for ( i : [1,2,3] ) {};'
+            ],
+            'assignment involving for loop with single statement and list from variable' => [
+                [
+                    'z' => new variable('z', 6, token::NUMBER),
+                    'i' => new variable('i', 3, token::NUMBER),
+                    'A' => new variable('A', [1, 2, 3], token::LIST),
+                ],
+                'z = 0; A=[1,2,3]; for(i:A) z=z+i;'
+            ],
+            'assignment involving for loop with single statement in braces' => [
+                [
+                    'z' => new variable('z', 10, token::NUMBER),
+                    'i' => new variable('i', 4, token::NUMBER),
+                ],
+                'z = 0; for(i: [0:5]){z = z + i;}'
+            ],
+            'assignment involving for loop iterating over list of strings' => [
+                [
+                    's' => new variable('s', 'ABC', token::STRING),
+                    'i' => new variable('i', 'C', token::STRING),
+                ],
+                's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }'
+            ],
+            'assignment involving nested for loops' => [
+                [
+                    'z' => new variable('z', 30, token::NUMBER),
+                    'i' => new variable('i', 4, token::NUMBER),
+                    'j' => new variable('j', 2, token::NUMBER),
+                ],
+                'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;'
+            ],
+            'assignment involving nested for loops' => [
+                [
+                    's' => new variable('s', [0], token::LIST),
+                ],
+                's=diff([3*3+3],[3*4]);'
+            ],
+        ];
+
+    }
+
+    /**
+     * @dataProvider provide_valid_assignments
+     */
+    public function test_assignments($expected, $input): void {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        foreach ($expected as $key => $variable) {
+            self::assertArrayHasKey($key, $evaluator->variables);
+            $stored = $evaluator->variables[$key];
+            self::assertEquals($variable->name, $stored->name);
+            self::assertEquals($variable->type, $stored->type);
+            // If the value is a list, its elements are tokens. We will only compare the
+            // token values to the expected values. For scalar variables, we can directly
+            // compare the values.
+            if ($stored->type === token::LIST) {
+                foreach ($stored->value as $i => $token) {
+                    self::assertEqualsWithDelta($variable->value[$i], $token->value, 1e-8);
+                }
+            } else {
+                self::assertEqualsWithDelta($variable->value, $stored->value, 1e-8);
+            }
+        }
+    }
+
+    public function provide_invalid_assignments(): array {
+        return [
+            'missing operator between numbers' => [
+                '1:5:syntax error: did you forget to put an operator?',
+                'a=3 6;'
+            ],
+            'unknown char in expression' => [
+                "1:4:unexpected input: '«'",
+                'a=3«6;'
+            ],
+            'not subscriptable' => [
+                'Trying to access array offset on value of type float',
+                'f=1; g=f[1];'
+            ],
+            'assignment of empty list' => [
+                '', // FIXME: put this to valid assignments, it is no error anymore.
+                'e=[];'
+            ],
+            'invalid index: array' => [
+                'evaluation error: only one index supported when accessing array elements',
+                'e=[1,2,3][4,5];'
+            ],
+            'invalid index: array (indirect)' => [
+                'evaluation error: only one index supported when accessing array elements',
+                'e=[1,2,3]; f=e[4,5]'
+            ],
+            'multiply array with number' => [
+                '1:16:evaluation error: numeric value expected, got list',
+                'e=[1,2,3,4]; f=e*2;'
+            ],
+            'multiply array with number' => [
+                '', // FIXME: put this to valid assignments, it is no error anymore.
+                'e=[0:10,"k"];'
+            ],
+            'multiply array with number' => [
+                '1:18:evaluation error: only one index supported when accessing array elements',
+                'e=[1,2,3][1][4,5,6][2];'
+            ],
+            'fill with count == 0' => [
+                '1:3:evaluation error: fill() expects the first argument to be a positive integer',
+                'c=fill(0,"rr")'
+            ],
+            'fill with count == 10000' => [
+                '', // FIXME: this is not an error anymore
+                'c=fill(10000,"rr")'
+            ],
+            'closing parenthesis when not opened' => [
+                "1:7:unbalanced parentheses, stray ')' found",
+                's=fill);'
+            ],
+            'opening parenthesis not closed' => [
+                "1:7:unbalanced parenthesis, '(' is never closed",
+                's=fill(10,"rr";'
+            ],
+            'xxx' => [
+                '', // FIXME: move to valid tests, no error anymore
+                'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'
+            ],
+            'invalid invocation of concat(), number' => [
+                "1:3:evaluation error: concat() expects its arguments to be lists, found '0'",
+                's=concat(0, [1,2,3], [5,6], 100);'
+            ],
+            'invalid invocation of concat()' => [
+                '', // FIXME: no error anymore, because lists can contain different types
+                's=concat([1,2,3], ["A","B"]);'
+            ],
+            'invalid for loop: no variable' => [
+                '1:12:syntax error: identifier expected',
+                'z = 0; for(: [0:5]) z=z+i;'
+            ],
+            'invalid for loop: no list' => [
+                '1:14:syntax error: [ or variable name expected',
+                'z = 0; for(i:) z=z+i;'
+            ],
+            'invalid for loop: no statement or brace' => [
+                'syntax error: { or statement expected',
+                'z = 0; for(i: [0:5]) '
+            ],
+            'invalid for loop: missing colon in nested loop' => [
+                '1:28:syntax error: : expected',
+                'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;'
+            ],
+            'invalid for loop: missing colon in nested loop' => [
+                '', // FIXME: this is no error anymore
+                'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];'
+            ],
+            'invalid invocation of diff(), mismatching lengths' => [
+                '1:3:evaluation error: diff() expects two lists of the same size',
+                's=diff([3*3+3,0],[3*4]);'
+            ],
+            'algebraic variable with strings instead of numbers' => [
+                '', // FIXME: this is no error anymore; should it be?
+                'x = {"A", "B"};'
+            ],
+
+
+        ];
+
+    }
+
+
+    /**
+     * @dataProvider provide_invalid_assignments
+     */
+    public function test_invalid_stuff($expected, $input): void {
+        $error = '';
+        try {
+            $parser = new parser($input);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+
+        self::assertStringEndsWith($expected, $error);
+    }
+
+    /**
+     * @dataProvider provide_general_expressions
+     */
+    public function test_general_expressions($expected, $input): void {
+        $parser = new parser($input);
+        $statement = $parser->get_statements()[0];
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statement);
+
+        $this->assertEqualsWithDelta($expected, $result->value, 1e-8);
+    }
+
+    public function provide_general_expressions(): array {
+        return [
+            [-0.35473297204849, 'sin(4) + exp(cos(4+5))'],
+
         ];
     }
 
@@ -278,7 +773,6 @@ class evaluator_test extends \advanced_testcase {
 
         self::assertEquals($expected[0], trim($number));
         self::assertEquals($expected[1], $unit);
-
     }
 
 
@@ -298,6 +792,32 @@ class evaluator_test extends \advanced_testcase {
             'combination 3' => [['1', 'm kg s^-2'], '1 m kg s^-2'],
             'numerical' => [['12 + 3 * 4/8', 'm^2'], '12 + 3 * 4/8 m^2'],
             'numerical formula' => [['12 * sqrt(3)', 'kg/s'], '12 * sqrt(3) kg/s'],
+
+            'old unit tests, 1' => [['.3', ''], '.3'],
+            'old unit tests, 2' => [['3.1', ''], '3.1'],
+            'old unit tests, 3' => [['3.1e-10', ''], '3.1e-10'],
+            'old unit tests, 4' => [['3', 'm'], '3m'],
+            'old unit tests, 5' => [['3', 'kg m/s'], '3kg m/s'],
+            'old unit tests, 6' => [['3.', 'm/s'], '3.m/s'],
+            'old unit tests, 7' => [['3.e-10', 'm/s'], '3.e-10m/s'],
+            'old unit tests, 8' => [['- 3', 'm/s'], '- 3m/s'],
+            'old unit tests, 9' => [['3', 'e10 m/s'], '3 e10 m/s'],
+            'old unit tests, 10' => [['3', 'e 10 m/s'], '3e 10 m/s'],
+            'old unit tests, 11' => [['3e8', 'e8 m/s'], '3e8e8 m/s'],
+            'old unit tests, 12' => [['3+10*4', 'm/s'], '3+10*4 m/s'],
+            'old unit tests, 13' => [['3+10^4', 'm/s'], '3+10^4 m/s'],
+            'old unit tests, 14' => [['sin(3)', 'm/s'], 'sin(3) m/s'],
+            'old unit tests, 15' => [['3+exp(4)', 'm/s'], '3+exp(4) m/s'],
+            'old unit tests, 16' => [['3*4*5', 'm/s'], '3*4*5 m/s'],
+
+            // FIXME: The following is invalid, because 3 4 5 is not a number
+            // 'old unit tests, 17' => [['3 4 5 ', 'm/s'], '3 4 5 m/s'],
+            'old unit tests, 18' => [['', 'm/s'], 'm/s'],
+
+            // FIXME: The following is invalid, because 3+4 5+10^4 is not a valid numerical expression
+            // 'old unit tests, 19' => [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
+
+            'old unit tests, 20' => [['sin(3)', 'kg m/s'], 'sin(3)kg m/s'],
         ];
     }
 
@@ -473,7 +993,7 @@ class evaluator_test extends \advanced_testcase {
         $result = $evaluator->evaluate($statements);
         print($evaluator->substitute_variables_in_algebraic_formula("a*x^2"));
         //print_r($result);
-        die();
+        return;
         //print("how many? " . $evaluator->get_number_of_variants() . "\n");
         $evaluator->instantiate_random_variables();
         //print_r($result);
