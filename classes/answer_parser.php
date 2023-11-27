@@ -76,9 +76,10 @@ class answer_parser extends parser {
 
         $answertokens = $this->statements[0]->body;
 
-        // The first element of the answer expression must be a token of type NUMBER.
+        // The first element of the answer expression must be a token of type NUMBER or
+        // CONSTANT, e.g. pi or π; we currently do not have other named constants.
         // Note: if the user has entered -5, this has now become [5, _].
-        if ($answertokens[0]->type !== token::NUMBER) {
+        if (!in_array($answertokens[0]->type, [token::NUMBER, token::CONSTANT])) {
             return false;
         }
         array_shift($answertokens);
@@ -126,7 +127,7 @@ class answer_parser extends parser {
         foreach ($answertokens as $token) {
             // If we find a FUNCTION or VARIABLE token, we can stop, because those are not
             // allowed in the numeric answer type.
-            if ($token->type === token::FUNCTION || $token->typen === token::VARIABLE) {
+            if ($token->type === token::FUNCTION || $token->type === token::VARIABLE) {
                 return false;
             }
             // If it is an OPERATOR, it has to be +, -, *, /, ^, ** or the unary minus _.
@@ -161,14 +162,13 @@ class answer_parser extends parser {
             return true;
         }
 
-        $answertokens = $this->statements[0]->body;
+        if (!$this->is_valid_algebraic_formula(true)) {
+            return false;
+        }
 
-        // Iterate over all tokens. If we find a VARIABLE token, we can stop. If we find
-        // a FUNCTION token, we check whether it is in the white list.
-        foreach ($answertokens as $token) {
-            if ($token->type === token::FUNCTION || $token->typen === token::VARIABLE) {
-                return false;
-            }
+        // The statement list must contain exactly one expression object.
+        if (count($this->statements) !== 1) {
+            return false;
         }
 
         // Still here? Then it's all good.
@@ -181,14 +181,51 @@ class answer_parser extends parser {
      * - all functions and operators except assignment =
      * - variables (maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
+     * @param bool $disallowvariables whether we disallow the usage of variables
      * @return boolean
      */
-    public function is_valid_algebraic(): bool {
-        // Algebraic expressions MUST NOT contain the assignment operator =.
-        if ($this->has_token_in_tokenlist(token::OPERATOR, '=')) {
+    public function is_valid_algebraic_formula(bool $disallowvariables = false): bool {
+        if ($this->is_valid_number() || $this->is_valid_numeric()) {
+            return true;
+        }
+
+        // The statement list must contain exactly one expression object.
+        if (count($this->statements) !== 1) {
             return false;
         }
 
+        $answertokens = $this->statements[0]->body;
+
+        // Iterate over all tokens. If we find a FUNCTION token, we check whether it is in the white list.
+        $functionwhitelist = [
+            'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+            'sqrt', 'exp', 'log', 'log10', 'ln', 'abs', 'ceil', 'floor', 'fact', 'ncr', 'npr'
+        ];
+        $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
+        foreach ($answertokens as $token) {
+            // Cut short, if it is a NUMBER token.
+            if ($token->type === token::NUMBER) {
+                continue;
+            }
+            if ($token->type === token::VARIABLE) {
+                if ($disallowvariables) {
+                    return false;
+                }
+                /* TODO: maybe we should reject unknown variables, because that avoids mistakes
+                         like a(x+y) = ax + ay instead of a*x or a x.
+                if (!$this->is_known_variable($token)) {
+                    return false;
+                }*/
+            }
+            if ($token->type === token::FUNCTION && !in_array($token->value, $functionwhitelist)) {
+                return false;
+            }
+            if ($token->type === token::OPERATOR && !in_array($token->value, $operatorwhitelist)) {
+                return false;
+            }
+        }
+
+        // Still here? Then it's all good.
         return true;
     }
 
