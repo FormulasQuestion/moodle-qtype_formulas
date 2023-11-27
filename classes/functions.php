@@ -57,6 +57,7 @@ class functions {
         'join' => [2, INF],
         'lcm' => [2, 2],
         'len' => [1, 1],
+        'ln' => [1, 1],
         'map' => [2, 3],
         'modinv' => [2, 2],
         'modpow' => [3, 3],
@@ -906,6 +907,19 @@ class functions {
             $res += self::binomialpdf($n, $p, $i);
         }
         return $res;
+    }
+
+    /**
+     * Calculate the natural logarithm of a number.
+     *
+     * @param float $x number
+     * @return float
+     */
+    public static function ln(float $x): float {
+        if ($x <= 0) {
+            throw new Exception('ln() expects its argument to be positive');
+        }
+        return log($x);
     }
 
     /**
