@@ -266,6 +266,10 @@ class evaluator_test extends \advanced_testcase {
                 ['f' => new variable('f', ['A', 'B', 'C'], token::LIST)],
                 'f =["A", "B", "C"];'
             ],
+            'list with numbers and string' => [
+                ['e' => new variable('e', [1, 2, 'A'], token::LIST)],
+                'e=[1,2,"A"];'
+            ],
             'composed expression with vars' => [
                 [
                     'a' => new variable('a', 1, token::NUMBER),
@@ -291,6 +295,13 @@ class evaluator_test extends \advanced_testcase {
                     'e' => new variable('e', [1, 2 , 111 , 4], token::LIST),
                 ],
                 'e = [1,2,3,4]; e[2]=111;'
+            ],
+            'assign to list element with variable index' => [
+                [
+                    'a' => new variable('a', 0, token::NUMBER),
+                    'e' => new variable('e', ['A', 2 , 3 , 4], token::LIST),
+                ],
+                'e=[1,2,3,4]; a=1-1; e[a]="A";'
             ],
             'assign to list element with variable as index' => [
                 [
@@ -596,6 +607,84 @@ class evaluator_test extends \advanced_testcase {
             ],
         ];
 
+    }
+
+    public function provide_random_variables(): array {
+        return [
+            'three numbers' => [
+                ['name' => 'x', 'count' => 3, 'min' => 1, 'max' => 3, 'shuffle' => false],
+                'x = {1,2,3};'
+            ],
+            'three letters' => [
+                ['name' => 'a', 'count' => 3, 'min' => 'A', 'max' => 'C', 'shuffle' => false],
+                'a = {"A","B","C"}'
+            ],
+            'two lists with numbers' => [
+                ['name' => 'a', 'count' => 2, 'min' => null, 'max' => null, 'shuffle' => false],
+                'a = {[1,2], [3,4]}'
+            ],
+            'two lists with letters' => [
+                ['name' => 'a', 'count' => 2, 'min' => null, 'max' => null, 'shuffle' => false],
+                'a = {["A","B"],["C","D"]}'
+            ],
+            'three values, more whitespace' => [
+                ['name' => 'x', 'count' => 3, 'min' => 1, 'max' => 3, 'shuffle' => false],
+                'x = { 1 , 2 , 3 };'
+            ],
+            'three ranges' => [
+                ['name' => 'x', 'count' => 16, 'min' => 1, 'max' => 9.5, 'shuffle' => false],
+                'x = {1:3, 4:5:0.1 , 8:10:0.5 };'
+            ],
+            'values and ranges' => [
+                ['name' => 'a', 'count' => 42, 'min' => 0, 'max' => 10, 'shuffle' => false],
+                'a = {0, 1:3:0.1, 10:30, 100}'
+            ],
+            'shuffle with strings' => [
+                ['name' => 'a', 'count' => 3, 'shuffle' => true],
+                'a = shuffle (["A", "B", "C"])'
+            ],
+        ];
+    }
+
+    // TODO: test for "randomness"
+
+    /**
+     * @dataProvider provide_random_variables
+     */
+    public function test_assignments_of_random_variables($expected, $input): void {
+        $randomparser = new random_parser($input);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+
+        // First, we check whether the random variable has been created and registered.
+        // Unless it is a "shuffle" case, we also check whether the reservoir has the correct size.
+        $key = $expected['name'];
+        self::assertArrayHasKey($key, $evaluator->randomvariables);
+        if ($expected['shuffle'] === false) {
+            self::assertEquals($expected['count'], $evaluator->randomvariables[$key]->how_many());
+        }
+
+        // Now, we instantiate the random variable. We check that a "normal" variable is
+        // created.
+        $evaluator->instantiate_random_variables();
+        self::assertArrayHasKey($key, $evaluator->variables);
+
+        // FIXME: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
+
+        // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
+        // value is within those boundaries. For shuffled lists, we only check the size.
+        // In some cases, >= and <= comparison does not make sense, e.g. when elements are lists.
+        $stored = $evaluator->variables[$key];
+        if ($expected['shuffle'] === false) {
+            if (isset($expected['min'])) {
+                self::assertGreaterThanOrEqual($expected['min'], $stored->value);
+            }
+            if (isset($expected['max'])) {
+                self::assertLessThanOrEqual($expected['max'], $stored->value);
+            }
+        } else {
+            self::assertEquals($expected['count'], count($stored->value));
+        }
     }
 
     /**
@@ -984,6 +1073,9 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = 5; fill((a-1)/2, "a")';
         $input = 'wrong = 0; yes = "yes"; no = "no"; (wrong ? yes : no)';
         $input = 'a = 5; x={1:10};';
+        $input = '1+ln(3)';
+        $input = 'a*sin';
+        return;
         //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
         //$parser = new random_parser($input);
@@ -1048,4 +1140,283 @@ class evaluator_test extends \advanced_testcase {
         $parser = new parser($input);
        // print_r($parser->statements);
     }
+
+    public function provide_numbers(): array {
+        return [
+            [3, '3'],
+            [3, '3.'],
+            [0.3, '.3'],
+            [3.1, '3.1'],
+            [3.1e-10, '3.1e-10'],
+            [30000000000, '3.e10'],
+            [3000000000, '.3e10'],
+            [-3, '-3'],
+            [3, '+3'],
+            [-30000000000, '-3.e10'],
+            [-3000000000, '-.3e10'],
+            [M_PI, 'pi'],
+            [M_PI, 'π'],
+            [-M_PI, '-pi'],
+            [-M_PI, '-π'],
+            // [false, '- 3'], FIXME: This is allowed now
+            // [false, '+ 3'], FIXME: This is allowed now
+            [false, '3 e10'],
+            [false, '3e 10'],
+            [false, '3e8e8'],
+            [false, '3+10*4'],
+            [false, '3+10^4'],
+            [false, 'sin(3)'],
+            [false, '3+exp(4)'],
+            [false, '3*4*5'],
+            [false, '3 4 5'],
+            [false, 'a*b'],
+            [false, '#'],
+        ];
+    }
+
+    // TODO: add more cases
+    public function provide_numeric_answers(): array {
+        return [
+            [3.004, '3+10*4/10^4'],
+            [false, 'sin(3)'],
+            [false, '3+exp(4)'],
+        ];
+    }
+
+    public function provide_numerical_formulas(): array {
+        return [
+            [3.1e-10, '3.1e-10'],
+            [-3, '- 3'],
+            [3.004, '3+10*4/10^4'],
+            [51.739270041204, 'sin(3)-3+exp(4)'],
+            [60, '3*4*5'],
+            [1.5000000075E+25, '3e8(4.e8+2)(.5e8/2)5'],
+            [1.5000000075E+25, '3e8(4.e8+2) (.5e8/2)5'],
+            [1.5000000075E+25, '3e8 (4.e8+2)(.5e8/2) 5'],
+            [1.5000000075E+25, '3e8 (4.e8+2) (.5e8/2) 5'],
+            [4.5000000225E+25, '3(4.e8+2)3e8(.5e8/2)5'],
+            [262147, '3+4^9'],
+            [387420492, '3+(4+5)^9'],
+            [2541865828332, '3+(4+5)^(6+7)'],
+            [3.0000098920712, '3+sin(4+5)^(6+7)'],
+            [46.881961305748, '3+exp(4+5)^sin(6+7)'],
+            [3.0000038146973, '3+4^-(9)'],
+            [3.0000038146973, '3+4^-9'],
+            [3.0227884071323, '3+exp(4+5)^-sin(6+7)'],
+            [2.0986122886681, '1+ln(3)'],
+            [1.4771212547197, '1+log10(3)'],
+            [M_PI, 'pi'],
+            [M_PI, 'pi()'],
+            [false, '3 4 5'], // FIXME: this used to be valid for *student* input
+            [false, '3 e10'],
+            [false, '3e 10'],
+            [false, '3e8e8'],
+            [false, '3e8e8e8'],
+            [false, '3e8 4.e8 .5e8'], // FIXME: this used to be valid for *student* input
+        ];
+
+    }
+
+    public function provide_algebraic_formulas(): array {
+        return [
+            [true, 'sin(a)-a+exp(b)'],
+            [true, '- 3'],
+            [true, '3e 10'],
+            [true, 'sin(3)-3+exp(4)'],
+            // [true, '3e8 4.e8 .5e8'], FIXME: this is invalid (implicit multiplication with numbers)
+            [true, '3e8(4.e8+2)(.5e8/2)5'],
+            [true, '3+exp(4+5)^sin(6+7)'],
+            [true, '3+4^-(9)'],
+            [true, 'sin(a)-a+exp(b)'],
+            [true, 'a*b*c'],
+            [true, 'a b c'],
+            [true, 'a(b+c)(x/y)d'],
+            [true, 'a(b+c) (x/y)d'],
+            [true, 'a (b+c)(x/y) d'],
+            [true, 'a (b+c) (x/y) d'],
+            [true, 'a(4.e8+2)3e8(.5e8/2)d'],
+            [true, 'pi'],
+            [true, 'a+x^y'],
+            [true, '3+x^-(y)'],
+            [true, '3+x^-y'],
+            [true, '3+(u+v)^x'],
+            [true, '3+(u+v)^(x+y)'],
+            [true, '3+sin(u+v)^(x+y)'],
+            [true, '3+exp(u+v)^sin(x+y)'],
+            [true, 'a+exp(a)(u+v)^sin(1+2)(b+c)'],
+            [true, 'a+exp(u+v)^-sin(x+y)'],
+            // [true, 'a+b^c^d+f'], // FIXME: fails
+            // [true, 'a+b^(c^d)+f'], // FIXME: fails
+            [true, 'a+(b^c)^d+f'],
+            [true, 'a+b^c^-d'],
+            [true, '1+ln(a)+log10(b)'],
+            // [true, 'asin(w t)'], // FIXME: fails
+            [true, 'a sin(w t)+ b cos(w t)'],
+            [true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
+            [true, 'a**b'],
+            //[false, '3 e10'], // FIXME: this is valid: 3*e*10 (if e is known)
+            //[false, '3e8e8'], // FIXME: this is valid: 3*e*8*e*8 (if e is known)
+            //[false, '3e8e8e8'], // FIXME: this is valid: 3*e*8*e*8*e*8 (if e is known)
+            [false, 'a/(b-b)'],
+            [false, 'a-'],
+            [false, '*a'],
+            [false, 'a+^c+f'],
+            [false, 'a+b^^+f'],
+            [false, 'a+(b^c)^+f'],
+            [false, 'a+((b^c)^d+f'],
+            [false, 'a+(b^c+f'],
+            [false, 'a+b^c)+f'],
+            [false, 'a+b^(c+f'],
+            [false, 'a+b)^c+f'],
+            [false, 'pi()'],
+            [false, 'sin 3'],
+            [false, '1+sin*(3)+2'],
+            [false, '1+sin^(3)+2'],
+            [false, 'a sin w t'],
+            [false, '1==2?3:4'],
+            [false, 'a=b'],
+            [false, '3&4'],
+            [false, '3==4'],
+            [false, '3&&4'],
+            [false, '3!'],
+            [false, '@'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_algebraic_formulas
+     */
+    public function test_algebraic_formulas($expected, $input): void {
+        // Define a set of algebraic variables first and prepare the evaluator.
+        $algebraicvars = 'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10};';
+        $algebraicvars .= 't={1:10}; u={1:10}; v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};';
+        $parser = new parser($algebraicvars);
+        $knownvars = $parser->export_known_variables();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($parser->get_statements());
+
+        try {
+            $parser = new answer_parser($input, $knownvars);
+        } catch (Exception $e) {
+            // If there was an exception already during the creation of the parser,
+            // it is not initialized yet. In that case, we create a new, empty parser.
+            // In such a case, is_valid_number() will fail, as expected.
+            $parser = new answer_parser('');
+        }
+
+        // If we expect the expression to be valid, is must pass this first test.
+        $isvalidsyntax = $parser->is_valid_algebraic_formula();
+        if ($expected === true) {
+            self::assertTrue($isvalidsyntax);
+        }
+        // If the syntax is not valid, that should have been expected. Note that some
+        // expressions are expected to be invalid, but they will pass the first test,
+        // because they are be *syntactically* valid.
+        if (!$isvalidsyntax) {
+            self::assertFalse($expected);
+        }
+
+        // If we expect the expression to be invalid, we do not continue, because it
+        // should not be possible to evaluate it anyway.
+        if ($expected === false) {
+            return;
+        }
+
+        // Calculate the difference between the expression and a copy of itself. We speed up
+        // the tests by evaluating only 20 data points at most.
+        $command = "diff(['{$input}'], ['{$input}'], 20)";
+        $parser = new parser($command, $knownvars);
+        $differences = $evaluator->evaluate($parser->get_statements());
+        $diff = $differences[0]->value;
+
+        self::assertEqualsWithDelta(0, $diff[0]->value, 1e-8);
+    }
+
+    /**
+     * @dataProvider provide_numerical_formulas
+     */
+    public function test_numerical_formulas($expected, $input): void {
+        try {
+            $parser = new answer_parser($input);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            // If there was an exception already during the creation of the parser,
+            // it is not initialized yet. In that case, we create a new, empty parser.
+            // In such a case, is_valid_number() will fail, as expected.
+            if (!isset($parser)) {
+                $parser = new answer_parser('');
+            }
+        }
+
+        if ($expected === false) {
+            self::assertFalse($parser->is_valid_numerical_formula());
+            return;
+        }
+
+        self::assertTrue($parser->is_valid_numerical_formula());
+        self::assertIsArray($result);
+        self::assertEquals(1, count($result));
+        self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
+    }
+
+    /**
+     * @dataProvider provide_numeric_answers
+     */
+    public function test_numeric_answer($expected, $input): void {
+        try {
+            $parser = new answer_parser($input);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            // If there was an exception already during the creation of the parser,
+            // it is not initialized yet. In that case, we create a new, empty parser.
+            // In such a case, is_valid_number() will fail, as expected.
+            if (!isset($parser)) {
+                $parser = new answer_parser('');
+            }
+        }
+
+        if ($expected === false) {
+            self::assertFalse($parser->is_valid_numeric());
+            return;
+        }
+
+        self::assertTrue($parser->is_valid_numeric());
+        self::assertIsArray($result);
+        self::assertEquals(1, count($result));
+        self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
+    }
+
+    /**
+     * @dataProvider provide_numbers
+     */
+    public function test_number($expected, $input): void {
+        try {
+            $parser = new answer_parser($input);
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            // If there was an exception already during the creation of the parser,
+            // it is not initialized yet. In that case, we create a new, empty parser.
+            // In such a case, is_valid_number() will fail, as expected.
+            if (!isset($parser)) {
+                $parser = new answer_parser('');
+            }
+        }
+
+        if ($expected === false) {
+            self::assertFalse($parser->is_valid_number());
+            return;
+        }
+
+        self::assertTrue($parser->is_valid_number());
+        self::assertIsArray($result);
+        self::assertEquals(1, count($result));
+        self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
+    }
+
 }
