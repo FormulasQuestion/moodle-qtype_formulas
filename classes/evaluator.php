@@ -414,7 +414,7 @@ class evaluator {
         // Parse the expression. It will parsed by the answer parser, i. e. the ^ operator
         // will mean exponentiation rather than XOR, as per the documented behaviour.
         $parser = new answer_parser($expression, $this->export_variable_list());
-        if (!$parser->is_valid_algebraic()) {
+        if (!$parser->is_valid_algebraic_formula()) {
             throw new Exception("'$expression' is not a valid algebraic expression");
         }
 
@@ -538,7 +538,16 @@ class evaluator {
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
             for ($j = 0; $j < $n; $j++) {
-                $difference = $this->calculate_algebraic_expression($expression);
+                try {
+                    $difference = $this->calculate_algebraic_expression($expression);
+                } catch (Exception $e) {
+                    // If evaluation failed, there is no need to evaluate any further. Instead,
+                    // we set the difference for this expression to PHP_FLOAT_MAX and leave
+                    // the inner loop. By choosing PHP_FLOAT_MAX instead of INF we make sure
+                    // that the result is still a float.
+                    $result[$i] = PHP_FLOAT_MAX;
+                    break;
+                }
                 $result[$i] += $difference->value ** 2;
             }
             $result[$i] = token::wrap(sqrt($result[$i] / $n), token::NUMBER);
