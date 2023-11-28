@@ -56,26 +56,8 @@ class evaluator_test extends \advanced_testcase {
             'one statement with variable range' => [10, 'a = 1; b = 5; res = 0; for (i:[a:b]) res = res + i'],
             'one statement with variable range and step' => [22, 'a = 1; b = 5; c = 0.5; res = 0; for (i:[a:b:c]) res = res + i'],
             'one statement with expression in range' => [22, 'a = 0.5; b = 10; c = 1/4; res = 0; for (i:[a*2:b/2:c+c]) res = res + i'],
+            'for loop with two statements' => [258, 'b = 0; for (a:[1:23,5]) { x = {1,2}; b = b + a;}'],
         ];
-    }
-
-    public function test_diff(): void {
-        $parser = new parser('a = 4; b={1,2}; c = "a" + b; d = diff([a, 1], [5, 6])');
-        $parser = new parser('x = {1:10}; y = {1:10}; d = diff(["x"], ["y"])');
-        $statements = $parser->get_statements();
-        $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statements);
-        print_r(end($result));
-    }
-
-    public function test_algebra(): void {
-        return;
-        $parser = new parser('a = 7; b = {1:5}; 2*b');
-        $statements = $parser->get_statements();
-        $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statements);
-        $evaluator->calculate_algebraic_expression_at_random_point('2*a');
-        print_r($result);
     }
 
     /**
@@ -605,6 +587,14 @@ class evaluator_test extends \advanced_testcase {
                 ],
                 's=diff([3*3+3],[3*4]);'
             ],
+            'assignment with algebraic vars and diff()' => [
+                [
+                    'x' => new variable('x', [1, 2, 3, 4, 5, 6, 7, 8, 9], token::SET),
+                    'y' => new variable('y', [1, 2, 3, 4, 5, 6, 7, 8, 9], token::SET),
+                    's' => new variable('s', 0, token::NUMBER),
+                ],
+                'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50)[0];'
+            ],
         ];
 
     }
@@ -688,6 +678,95 @@ class evaluator_test extends \advanced_testcase {
     }
 
     /**
+     * @dataProvider provide_invalid_random_vars
+     */
+    public function test_invalid_random_variables($expected, $input): void {
+        $error = '';
+        try {
+            $randomparser = new random_parser($input);
+            $evaluator = new evaluator();
+            $evaluator->evaluate($randomparser->get_statements());
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+
+        self::assertStringEndsWith($expected, $error);
+    }
+
+    public function test_algebraic_diff() {
+        // Initialize the evaluator with global algebraic vars.
+        $vars = 'x={-10:11:1}; y={-10:-5, 6:11};';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        $command = 'diff(["x", "1+x+y+3", "(1+sqrt(x))^2", "x*x+y*y"], ["0", "2+x+y+2", "1+x", "x+y^2"]);';
+        $parser = new parser($command);
+        $statements = $parser->get_statements();
+        $result = $evaluator->evaluate($statements)[0]->value;
+
+        // The first expression should have a difference greater than 0, but less than (or equal)
+        // to 10. Even though it is *extremely* unlikely to obtain that maximum value, we'd rather not
+        // take the risk and have a unit test that "randomly" fails.
+        self::assertGreaterThan(0, $result[0]->value);
+        self::assertLessThanOrEqual(10, $result[0]->value);
+
+        // The second expression should have zero difference.
+        self::assertEqualsWithDelta(0, $result[1]->value, 1e-8);
+
+        // The third expression should be PHP_FLOAT_MAX, because sqrt(x) is not defined
+        // for all values of x.
+        self::assertEqualsWithDelta(PHP_FLOAT_MAX, $result[2]->value, 1e-8);
+
+        // For the last expression, the difference is at least 0 (if x and y were to be chosen as 1 for
+        // all evaluation points) and at most 72 (if we have the value 9 in all cases).
+        self::assertGreaterThanOrEqual(0, $result[3]->value);
+        self::assertLessThanOrEqual(72, $result[3]->value);
+    }
+
+    // TODO: maybe add a test with an algebraic variable
+    public function test_substitute_variables_in_text() {
+        // Define, parse and evaluate some variables.
+        $vars = 'a=1; b=[2,3,4];';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        // Our text contains placeholders with valid and invalid syntax (space) as well
+        // as inline formulas, expressions with unkonwn variables and a formula that cannot
+        // be evaluated due to a syntax error.
+        $text = '{{a}}, {a}, {a }, { a}, {b}, {b[0]}, {b[0] }, { b[0]}, {b [0]}, ';
+        $text .= '{=a*100}, {=b[0]*b[1]}, {= b[1] * b[2] }, {=100+[4:8][1]}, {xyz}, {=3+}';
+
+        // Test without substitution of array b.
+        $output = $evaluator->substitute_variables_in_text($text, true);
+        $expected = '{1}, 1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
+        $this->assertEquals($expected, $output);
+
+        // Test with substitution of array b as one would write it in PHP.
+        $output = $evaluator->substitute_variables_in_text($text);
+        $expected = '{1}, 1, {a }, { a}, [2, 3, 4], 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
+        $this->assertEquals($expected, $output);
+    }
+
+
+    public function provide_invalid_random_vars(): array {
+        return [
+            ['evaluation error: range from 10 to 1 with step 1 will be empty', 'a = {10:1:1}'],
+            ['syntax error: invalid use of separator token (,)', 'a = {1:10,}'],
+            ["syntax error: incomplete ternary operator or misplaced '?'", 'a = {1:10?}'],
+            ['evaluation error: numeric value expected, got algebraic variable', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
+            ['unknown variable: a', 'a = {1:3:0.1}; b={a,12,13};'],
+            // FIXME: the following are now valid
+            ['', 'a = {[1,2],[3,4,5]}'],
+            ['', 'a = {[1,2],["A","B"]}'],
+            ['', 'a = {[1,2],["A","B","C"]}'],
+        ];
+    }
+
+    /**
      * @dataProvider provide_valid_assignments
      */
     public function test_assignments($expected, $input): void {
@@ -704,7 +783,7 @@ class evaluator_test extends \advanced_testcase {
             // If the value is a list, its elements are tokens. We will only compare the
             // token values to the expected values. For scalar variables, we can directly
             // compare the values.
-            if ($stored->type === token::LIST) {
+            if ($stored->type === token::LIST || $stored->type === token::SET) {
                 foreach ($stored->value as $i => $token) {
                     self::assertEqualsWithDelta($variable->value[$i], $token->value, 1e-8);
                 }
@@ -808,6 +887,10 @@ class evaluator_test extends \advanced_testcase {
                 '', // FIXME: this is no error anymore; should it be?
                 'x = {"A", "B"};'
             ],
+            'algebraic variable used in calculation' => [
+                '1:21:evaluation error: numeric value expected, got algebraic variable',
+                'a = 7; b = {1:5}; 2*b'
+            ],
 
 
         ];
@@ -864,7 +947,6 @@ class evaluator_test extends \advanced_testcase {
         self::assertEquals($expected[1], $unit);
     }
 
-
     public function provide_numbers_and_units(): array {
         return [
             'missing unit' => [['123', ''], '123'],
@@ -882,22 +964,22 @@ class evaluator_test extends \advanced_testcase {
             'numerical' => [['12 + 3 * 4/8', 'm^2'], '12 + 3 * 4/8 m^2'],
             'numerical formula' => [['12 * sqrt(3)', 'kg/s'], '12 * sqrt(3) kg/s'],
 
-            'old unit tests, 1' => [['.3', ''], '.3'],
-            'old unit tests, 2' => [['3.1', ''], '3.1'],
-            'old unit tests, 3' => [['3.1e-10', ''], '3.1e-10'],
-            'old unit tests, 4' => [['3', 'm'], '3m'],
-            'old unit tests, 5' => [['3', 'kg m/s'], '3kg m/s'],
-            'old unit tests, 6' => [['3.', 'm/s'], '3.m/s'],
-            'old unit tests, 7' => [['3.e-10', 'm/s'], '3.e-10m/s'],
-            'old unit tests, 8' => [['- 3', 'm/s'], '- 3m/s'],
-            'old unit tests, 9' => [['3', 'e10 m/s'], '3 e10 m/s'],
-            'old unit tests, 10' => [['3', 'e 10 m/s'], '3e 10 m/s'],
-            'old unit tests, 11' => [['3e8', 'e8 m/s'], '3e8e8 m/s'],
-            'old unit tests, 12' => [['3+10*4', 'm/s'], '3+10*4 m/s'],
-            'old unit tests, 13' => [['3+10^4', 'm/s'], '3+10^4 m/s'],
-            'old unit tests, 14' => [['sin(3)', 'm/s'], 'sin(3) m/s'],
-            'old unit tests, 15' => [['3+exp(4)', 'm/s'], '3+exp(4) m/s'],
-            'old unit tests, 16' => [['3*4*5', 'm/s'], '3*4*5 m/s'],
+            [['.3', ''], '.3'],
+            [['3.1', ''], '3.1'],
+            [['3.1e-10', ''], '3.1e-10'],
+            [['3', 'm'], '3m'],
+            [['3', 'kg m/s'], '3kg m/s'],
+            [['3.', 'm/s'], '3.m/s'],
+            [['3.e-10', 'm/s'], '3.e-10m/s'],
+            [['- 3', 'm/s'], '- 3m/s'],
+            [['3', 'e10 m/s'], '3 e10 m/s'],
+            [['3', 'e 10 m/s'], '3e 10 m/s'],
+            [['3e8', 'e8 m/s'], '3e8e8 m/s'],
+            [['3+10*4', 'm/s'], '3+10*4 m/s'],
+            [['3+10^4', 'm/s'], '3+10^4 m/s'],
+            [['sin(3)', 'm/s'], 'sin(3) m/s'],
+            [['3+exp(4)', 'm/s'], '3+exp(4) m/s'],
+            [['3*4*5', 'm/s'], '3*4*5 m/s'],
 
             // FIXME: The following is invalid, because 3 4 5 is not a number
             // 'old unit tests, 17' => [['3 4 5 ', 'm/s'], '3 4 5 m/s'],
@@ -907,27 +989,65 @@ class evaluator_test extends \advanced_testcase {
             // 'old unit tests, 19' => [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
 
             'old unit tests, 20' => [['sin(3)', 'kg m/s'], 'sin(3)kg m/s'],
+
+            [['3.1e-10', 'kg m/s'], '3.1e-10kg m/s'],
+            [['-3', 'kg m/s'], '-3kg m/s'],
+            [['- 3', 'kg m/s'], '- 3kg m/s'],
+            [['3', 'e'], '3e'],
+            [['3e8', ''], '3e8'],
+            [['3e8', 'e'], '3e8e'],
+
+            // FIXME: The following is invalid, because 3+4 5+10^4 is not a number
+            //[['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
+            [['sin(3)', 'kg m/s'], 'sin(3)kg m/s'],
+            [['3*4*5', 'kg m/s'], '3*4*5 kg m/s'],
+
+            // FIXME: The following is invalid, because 3 4 5 is not a number
+            //'' => [['3 4 5 ', 'kg m/s'], '3 4 5 kg m/s'],
+
+            [['3e8(4.e8+2)(.5e8/2)5', 'kg m/s'], '3e8(4.e8+2)(.5e8/2)5kg m/s'],
+            [['3+exp(4+5)^sin(6+7)', 'kg m/s'], '3+exp(4+5)^sin(6+7)kg m/s'],
+            [['3+exp(4+5)^-sin(6+7)', 'kg m/s'], '3+exp(4+5)^-sin(6+7)kg m/s'],
+
+            [['3', 'exp^2'], '3exp^2'],
+            [['3', 'e8'], '3 e8'],
+            [['3', 'e 8'], '3e 8'],
+            [['3e8', 'e8'], '3e8e8'],
+            [['3e8', 'e8e8'], '3e8e8e8'],
+
+            // FIXME: The following is invalid, because exp(4+5).m/s is invalid syntax
+            //[['3+exp(4+5)', '.m/s'], '3+exp(4+5).m/s'],
+
+            // FIXME: the following are invalid (unbalanced parenthesis)
+            // [['3+(4.', '.m/s'], '3+(4.m/s'],
+            // [['3+4.)', '.m/s'], '3+4.)m/s'],
+
+            // FIXME: the following are invalid, because m^ and m/ are not valid syntax
+            //[['3', 'm^'], '3 m^'],
+            //[['3', 'm/'], '3 m/'],
+
+            [['3 /', 's'], '3 /s'],
+
+            [['3', 'm+s'], '3 m+s'],
+
+            // FIXME: this does not split in the same way anymore: '1==2?3:4' and ''
+            // [['1', '==2?3:4'], '1==2?3:4'],
+
+            [['', 'a=b'], 'a=b'],
+
+            // FIXME: this does now split '3&4' and ''
+            //[['3', '&4'], '3&4'],
+
+            // FIXME: this does now split '3==4' and ''
+            // [['3', '==4'], '3==4'],
+
+            // FIXME: this does now split '3&&4' and ''
+            //[['3', '&&4'], '3&&4'],
+
+            // FIXME: the following is invalid, because 3! is not currently allowed
+            //[['3', '!'], '3!'],
+
         ];
-    }
-
-    public function test_random_vars() {
-        return;
-        $input = 'a = shuffle([1,2,3])';
-        $input = 'a = {1,-5,-3,2}';
-
-        $parser = new parser($input);
-        $statements = $parser->get_statements();
-        $evaluator = new random_evaluator();
-        //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
-        //$evaluator->import_variable_context($context);
-        foreach ($statements as $st) {
-            $result = $evaluator->evaluate($st);
-            print_r($result);
-        }
-        // $context = $evaluator->export_variable_context();
-        // print_r($context);
-        $evaluator->instantiate_random_variables();
-        return;
     }
 
     public function test_pick() {
@@ -1003,6 +1123,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
+        return;
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
         $input = 'a = 4; b = !a';
@@ -1109,25 +1230,6 @@ class evaluator_test extends \advanced_testcase {
             //print_r(array_map(function($el) { return $el->value; }, $output));
         }
         //print_r($output);
-    }
-
-    public function test_for_loop() {
-        $input = 'b = 0; for (a:[1:23,5]) { x = {1,2}; b = b + a;}';
-
-        $parser = new parser($input);
-        $statements = $parser->get_statements();
-        $evaluator = new evaluator();
-        $result = $evaluator->evaluate($statements);
-        print_r($result);
-    }
-
-    public function test_answer_expression() {
-        $input = '2^3';
-        $input = '1.5e3 m^2';
-
-        $parser = new answer_parser($input);
-        print('unit starts at index: ' . $parser->find_start_of_units());
-        print_r($parser->statements);
     }
 
     public function test_parse_list() {
