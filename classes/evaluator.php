@@ -110,7 +110,7 @@ class evaluator {
      * @param string $text the text to be formatted
      * @return string
      */
-    public function substitute_variables_in_text(string $text): string {
+    public function substitute_variables_in_text(string $text, bool $skiplists = false): string {
         // We have three sorts of placeholders: "naked" variables like {a},
         // variables with a numerical index like {a[1]} or more complex
         // expressions like {=a+b} or {=a[b]}.
@@ -142,8 +142,13 @@ class evaluator {
                 if ($input !== $match && $parser->has_token_in_tokenlist(token::OPERATOR, '=')) {
                     continue;
                 }
-                $result = $this->evaluate($parser->get_statements());
-                $text = str_replace("{{$match}}", strval(end($result)), $text);
+                $results = $this->evaluate($parser->get_statements());
+                $result = end($results);
+                // If the users does not want to substitute lists (arrays), well ... we don't.
+                if ($skiplists && $result->type === token::LIST) {
+                    continue;
+                }
+                $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
                 // TODO: use non-capturing exception when we drop support for old PHP
                 unset($e);
@@ -537,20 +542,29 @@ class evaluator {
         for ($i = 0; $i < $count; $i++) {
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
+
+            // Flag that we will set to TRUE if a difference cannot be evaluated. This
+            // is to make sure that the difference will be PHP_FLOAT_MAX and not
+            // sqrt(PHP_FLOAT_MAX) divided by $n.
+            $cannotevaluate = false;
             for ($j = 0; $j < $n; $j++) {
                 try {
                     $difference = $this->calculate_algebraic_expression($expression);
                 } catch (Exception $e) {
                     // If evaluation failed, there is no need to evaluate any further. Instead,
-                    // we set the difference for this expression to PHP_FLOAT_MAX and leave
-                    // the inner loop. By choosing PHP_FLOAT_MAX instead of INF we make sure
+                    // we set the $cannotevaluate flag and will later set the result to
+                    // PHP_FLOAT_MAX. By choosing PHP_FLOAT_MAX rather than INF, we make sure
                     // that the result is still a float.
+                    $cannotevaluate = true;
                     $result[$i] = PHP_FLOAT_MAX;
                     break;
                 }
                 $result[$i] += $difference->value ** 2;
             }
             $result[$i] = token::wrap(sqrt($result[$i] / $n), token::NUMBER);
+            if ($cannotevaluate) {
+                $result[$i] = token::wrap(PHP_FLOAT_MAX, token::NUMBER);
+            }
         }
 
         return $result;
@@ -822,7 +836,7 @@ class evaluator {
     private function abort_if_not_scalar(token $token, bool $enforcenumeric = true): void {
         if ($token->type !== token::NUMBER) {
             if ($token->type === token::SET) {
-                $value = "algebraic variable'";
+                $value = "algebraic variable";
             } else if ($token->type === token::LIST) {
                 $value = "list";
             } else if ($enforcenumeric) {

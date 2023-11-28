@@ -293,9 +293,11 @@ class parser {
                     // before having seen the : part.
                     $anotherquestionmark = ($latype === token::OPERATOR &&  $lavalue === '?');
                     $endofstatement = ($latype === token::END_OF_STATEMENT);
-                    $endoflist = ($i + $this->position >= $this->count);
+                    // We will peek $i positions forward, so $i + $this->position MUST NOT
+                    // be larger than $this->count - 1.
+                    $endoflist = ($i + $this->position >= $this->count - 1);
                     if ($anotherquestionmark || $endofstatement || $endoflist) {
-                        $this->die('syntax error: missing : part for ternary operator', $currenttoken);
+                        $this->die("syntax error: incomplete ternary operator or misplaced '?'", $currenttoken);
                     }
                     $lookahead = $this->peek($i);
                     $latype = $lookahead->type;
