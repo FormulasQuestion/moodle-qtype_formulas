@@ -386,7 +386,7 @@ class shunting_yard {
                     // The parser for random variables removes the legacy usage of the shuffle()
                     // function by setting the name to the empty string. So if we have an empty
                     // function name, we simply do nothing.
-                    if ($token->value === '') {
+                    if ($value === '') {
                         break;
                     }
                     $opstack[] = $token;
