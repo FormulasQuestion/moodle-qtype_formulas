@@ -33,8 +33,8 @@ class lexer {
     /** @var token[] list of all tokens in the input stream */
     private $tokens = [];
 
-    /** @var boolean whether we are in the middle of a ternary operator */
-    private $pendingternary = false;
+    /** @var boolean level of nested ternary operators */
+    private $pendingternary = 0;
 
     /**
      * Constructor
@@ -112,7 +112,7 @@ class lexer {
             return $this->read_identifier();
         }
         // Unless we are in the middle of a ternary operator, we treat : as a RANGE_SEPARATOR.
-        if ($currentchar === ':' && !$this->pendingternary) {
+        if ($currentchar === ':' && $this->pendingternary < 1) {
             return $this->read_single_char_token(token::RANGE_SEPARATOR);
         }
         // Operators always start with specific characters and may be up to two characters long.
@@ -123,11 +123,12 @@ class lexer {
             // We don't mind, because bad syntax of a ternary operator will lead to a syntax error
             // anyway.
             if ($currentchar === '?') {
-                $this->pendingternary = true;
+                $this->pendingternary++;
             }
-            // After a : operator, the ternary operator is no longer pending.
+            // After a : operator, the ternary operator is no longer pending. In case of *nested*
+            // ternary operators, we go descend one level.
             if ($currentchar === ':') {
-                $this->pendingternary = false;
+                $this->pendingternary--;
             }
             return $this->read_operator();
         }

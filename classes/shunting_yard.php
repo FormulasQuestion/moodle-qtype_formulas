@@ -169,7 +169,8 @@ class shunting_yard {
     }
 
     /**
-     * Flush the operator queue until we reach the %%ternary sentinel pseudo-operator.
+     * Flush the operator queue until we reach the %%ternary-sentinel pseudo-operator.
+     * The sentinel itself is dropped, but not sent to the output queue.
      *
      * @param array $opstack operator stack, will be modified
      * @param array $output output queue, will be modified
@@ -177,8 +178,8 @@ class shunting_yard {
      */
     private static function flush_ternary_part(array &$opstack, array &$output): void {
         self::flush_while($opstack, function($token) {
-            return $token->value !== '%%ternary';
-        }, $output);
+            return $token->value !== '%%ternary-sentinel';
+        }, $output, true, true);
     }
 
     /**
@@ -411,20 +412,23 @@ class shunting_yard {
 
                     $thisprecedence = self::get_precedence($value);
                     // For the ? part of a ternary operator, we
-                    // - flush all operators on the stack with lower precedence (if any)
+                    // - flush all operators on the stack with higher precedence (if any)
                     // - put a pseudo-token on the operator stack as a sentinel
+                    // - put a pseudo-token to the output queue as a sentinel
                     // - break, in order to NOT put the ? on the operator stack.
                     if ($value === '?') {
                         self::flush_higher_precedence($opstack, $thisprecedence, $output);
-                        $opstack[] = new token(token::OPERATOR, '%%ternary');
+                        $output[] = new token(token::OPERATOR, "%%ternary-sentinel", $token->row, $token->column);
+                        $opstack[] = new token(token::OPERATOR, '%%ternary-sentinel', $token->row, $token->column);
                         break;
                     }
                     // For the : part of a ternary operator, we
-                    // - flush all operators on the stack until we reach the ?
-                    // - do NOT flush the ? but leave it on the operator stack as a sentinel
+                    // - flush all operators on the stack until we reach the ternary sentinel pseudo-token (dropping the sentinel)
+                    // - push the %%ternary command to the opstack
                     // - break, in order to NOT put the : on the operator stack.
                     if ($value === ':') {
                         self::flush_ternary_part($opstack, $output);
+                        $opstack[] = new token(token::OPERATOR, '%%ternary', $token->row, $token->column);
                         break;
                     }
                     // For left associative operators, all pending operators with higher precedence go

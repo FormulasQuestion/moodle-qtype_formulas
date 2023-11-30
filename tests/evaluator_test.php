@@ -155,7 +155,12 @@ class evaluator_test extends \advanced_testcase {
             'operations in true part' => [3, '1 ? 1 + 2 : 2'],
             'operations in false part' => [3, '1 ? 3 : 2 + 4'],
             'operations in all parts' => [7, '1+2==3 ? 1+2*3 : 4*5-6'],
-            'ternary in false part' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
+            'ternary in false part with parens' => [7, '1==2 ? 5 : (2==3 ? 6 : 7)'],
+            'ternary in true part with parens' => [4, '1==1 ? (1 == 2 ? 3 : 4) : 5'],
+            // 1 == 2 ? 5 : (2 == 3 ? 6 : 7) --> in 5.x this crashes the question for PHP >= 8
+            'ternary in false part without parens' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
+            // 1 ==1 ? (1 == 2 ? 3 : 4) : 5
+            'ternary in true part without parens' => [4, '1==1 ? 1 == 2 ? 3 : 4 : 5'],
         ];
     }
 
@@ -595,6 +600,16 @@ class evaluator_test extends \advanced_testcase {
                 ],
                 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50)[0];'
             ],
+            'ternary with variables' => [
+                [
+                    'a' => new variable('a', 1, token::NUMBER),
+                    'b' => new variable('b', 2, token::NUMBER),
+                    'c' => new variable('c', 3, token::NUMBER),
+                    'd' => new variable('d', 4, token::NUMBER),
+                    'e' => new variable('e', 3, token::NUMBER),
+                ],
+                'a=1; b=2; c=3; d=4; e=(a==b ? b : c)'
+            ],
         ];
 
     }
@@ -891,12 +906,29 @@ class evaluator_test extends \advanced_testcase {
                 '1:21:evaluation error: numeric value expected, got algebraic variable',
                 'a = 7; b = {1:5}; 2*b'
             ],
-
-
+            'invalid ternary, ? is last char before closing paren' => [
+                "syntax error: incomplete ternary operator or misplaced '?'",
+                'a = (5 ?)'
+            ],
+            'invalid ternary, ? is last char before closing brace' => [
+                "syntax error: incomplete ternary operator or misplaced '?'",
+                'a = {5 ?}'
+            ],
+            'invalid ternary, ? is last char before closing bracket' => [
+                "syntax error: incomplete ternary operator or misplaced '?'",
+                'a = [5 ?]'
+            ],
+            'invalid ternary, ? is last char before closing bracket' => [
+                'evaluation error: not enough arguments for ternary operator: 2',
+                '(5 ? 4 :)'
+            ],
+            'invalid ternary, ? is last char before closing bracket' => [
+                'evaluation error: not enough arguments for ternary operator',
+                'a = (5 ? 4 :)'
+            ],
         ];
 
     }
-
 
     /**
      * @dataProvider provide_invalid_assignments

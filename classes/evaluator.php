@@ -396,6 +396,9 @@ class evaluator {
      * @return token
      */
     private function pop_real_value(): token {
+        if (empty($this->stack)) {
+            throw new Exception('evaluation error: empty stack - did you pass enough arguments for the function or operator?');
+        }
         $token = array_pop($this->stack);
         if ($token->type === token::VARIABLE) {
             return $this->get_variable_value($token);
@@ -650,8 +653,15 @@ class evaluator {
                 } else if ($this->is_binary_operator($token)) {
                     $this->stack[] = $this->execute_binary_operator($token);
                 }
+                // The %%ternary-sentinel pseudo-token goes on the stack where it will
+                // help detect ternary expressions with too few arguments.
+                if ($value === '%%ternary-sentinel') {
+                    $this->stack[] = $token;
+                }
+                // When executing the ternary operator, we pass it the operator token
+                // in order to have best possible error reporting.
                 if ($value === '%%ternary') {
-                    $this->stack[] = $this->execute_ternary_operator();
+                    $this->stack[] = $this->execute_ternary_operator($token);
                 }
                 if ($value === '%%arrayindex') {
                     $this->stack[] = $this->fetch_array_element_or_char();
@@ -872,9 +882,27 @@ class evaluator {
         return $this->set_variable_to_value($destination, $what, $israndomvar);
     }
 
-    private function execute_ternary_operator() {
+    private function execute_ternary_operator(token $optoken) {
+        // For good error reporting, we first check, whether there are enough arguments on
+        // the stack. We subtract one, because there is a sentinel token.
+        if (count($this->stack) - 1 < 3) {
+            $this->die('evaluation error: not enough arguments for ternary operator', $optoken);
+        }
         $else = array_pop($this->stack);
         $then = array_pop($this->stack);
+        // The user might not have provided enough arguments for the ternary operator (missing 'else'
+        // part), but there might be other elements on the stack from earlier operations (or a LHS variable
+        // for an upcoming assignment). In that case, the intended 'then' token has been popped as
+        // the 'else' part and we have now read the '%%stopternary' pseudo-token.
+        if ($then->type === token::OPERATOR && $then->value === '%%ternary-sentinel') {
+            $this->die('evaluation error: not enough arguments for ternary operator', $then);
+        }
+        // If everything is OK, we should now arrive at the '%%ternary-sentinel' pseudo-token. Let's see...
+        $pseudotoken = array_pop($this->stack);
+        if ($pseudotoken->type !== token::OPERATOR && $pseudotoken->value !== '%%ternary-sentinel') {
+            $this->die('evaluation error: not enough arguments for ternary operator', $then);
+        }
+
         $condition = $this->pop_real_value();
         return ($condition->value ? $then : $else);
     }

@@ -287,16 +287,14 @@ class parser {
                 // Look ahead until we find the corresponding : part.
                 while ($latype !== token::OPERATOR && $lavalue !== ':') {
                     // We have a syntax error, if...
-                    // - we come to another ?
                     // - we come to an END_OF_STATEMENT marker
                     // - we reach the end of the token list
                     // before having seen the : part.
-                    $anotherquestionmark = ($latype === token::OPERATOR &&  $lavalue === '?');
                     $endofstatement = ($latype === token::END_OF_STATEMENT);
-                    // We will peek $i positions forward, so $i + $this->position MUST NOT
-                    // be larger than $this->count - 1.
+                    // If $i + $this->position is not smaller than $this->count - 1, the peek()
+                    // function will return the EOF token.
                     $endoflist = ($i + $this->position >= $this->count - 1);
-                    if ($anotherquestionmark || $endofstatement || $endoflist) {
+                    if ($endofstatement || $endoflist) {
                         $this->die("syntax error: incomplete ternary operator or misplaced '?'", $currenttoken);
                     }
                     $lookahead = $this->peek($i);
@@ -304,6 +302,11 @@ class parser {
                     $lavalue = $lookahead->value;
                     $i++;
                 }
+                // TODO (maybe, for earlier error reporting): ':' operator must not be followed by
+                // - another operator (except +, -, ! and ~ which might be unary, we cannot know yet)
+                // - any closing paren ), ] or }
+                // - any separator (range or argument)
+                // - an END_OF_GROUP or END_OF_STATEMENT
             }
 
             // We do not allow two subsequent numbers, two subsequent strings or a string following a number
