@@ -80,9 +80,9 @@ class behat_qtype_formulas extends behat_base {
     }
 
     /**
-     * @Given /^I confirm the quiz submission in the modal dialog$/
+     * @Given /^I confirm the quiz submission in the modal dialog for the formulas plugin$/
      */
-    public function i_confirm_the_quiz_submission_in_the_modal_dialog() {
+    public function i_confirm_the_quiz_submission_in_the_modal_dialog_for_the_formulas_plugin() {
         global $CFG;
         require_once($CFG->libdir . '/environmentlib.php');
         require($CFG->dirroot . '/version.php');
