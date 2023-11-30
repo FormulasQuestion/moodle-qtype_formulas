@@ -285,7 +285,7 @@ class parser {
                 $lavalue = $nextvalue;
                 $i = 1;
                 // Look ahead until we find the corresponding : part.
-                while ($latype !== token::OPERATOR && $lavalue !== ':') {
+                while ($latype !== token::OPERATOR || $lavalue !== ':') {
                     // We have a syntax error, if...
                     // - we come to an END_OF_STATEMENT marker
                     // - we reach the end of the token list
