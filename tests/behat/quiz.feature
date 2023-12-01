@@ -133,7 +133,7 @@ Feature: Usage in quiz
     And I click on "Cat" "radio"
     And I press "Finish attempt"
     And I press "Submit all and finish"
-    And I confirm the quiz submission in the modal dialog
+    And I confirm the quiz submission in the modal dialog for the formulas plugin
     Then I should see "Your answer is correct."
 
   Scenario: Try to answer a drowdown multiple choice formula question
@@ -166,7 +166,7 @@ Feature: Usage in quiz
     And I click on "Blue" "radio"
     And I press "Finish attempt"
     And I press "Submit all and finish"
-    And I confirm the quiz submission in the modal dialog
+    And I confirm the quiz submission in the modal dialog for the formulas plugin
     Then I should see "Your first answer is correct."
     And I should see "Your second answer is correct."
 
