@@ -30,6 +30,10 @@ use Exception;
 // TODO: add missing phpdoc
 
 class functions {
+    const NONE = 0;
+    const NON_NEGATIVE = 1;
+    const POSITIVE = 2;
+
     /**
      * List of all functions exported by this class.
      *
@@ -48,33 +52,33 @@ class functions {
         'binomialpdf' => [3, 3],
         'concat' => [2, INF],
         'diff' => [2, 3],
-        'fact' => [1, 1],
+        'fact' => [1, 1], // Test OK
         'fill' => [2, 2],
         'fmod' => [2, 2],
-        'fqversionnumber' => [0, 0],
+        'fqversionnumber' => [0, 0], // Test OK
         'gcd' => [2, 2],
         'inv' => [1, 1],
         'join' => [2, INF],
         'lcm' => [2, 2],
-        'len' => [1, 1],
+        'len' => [1, 1], // Test OK
         'ln' => [1, 1],
         'map' => [2, 3],
         'modinv' => [2, 2],
         'modpow' => [3, 3],
-        'ncr' => [2, 2],
+        'ncr' => [2, 2], // Test OK
         'normcdf' => [3, 3],
-        'npr' => [2, 2],
+        'npr' => [2, 2], // Test OK
         'pick' => [2, INF],
         'poly' => [1, 3],
         'rshuffle' => [1, 1],
         'shuffle' => [1, 1],
         'sigfig' => [2, 2],
         'sort' => [1, 2],
-        'stdnormcdf' => [1, 1],
-        'stdnormpdf' => [1, 1],
+        'stdnormcdf' => [1, 1], // Test OK
+        'stdnormpdf' => [1, 1], // Test OK
         'str' => [1, 1],
         'sublist' => [2, 2],
-        'sum' => [1, 1],
+        'sum' => [1, 1], // Test OK
     ];
 
     /**
@@ -141,16 +145,16 @@ class functions {
         // If $what is neither a valid operator nor a function, throw an error.
         if (!$usebinaryop && !$useunaryop) {
             if (!array_key_exists($what, $allfunctions) || $what === 'diff') {
-                throw new Exception(("evaluation error: '$what' is not a legal first argument for the map() function"));
+                throw new Exception("evaluation error: '$what' is not a legal first argument for the map() function");
             }
             // Fetch the number of arguments for the given function name.
             $min = $allfunctions[$what][0];
             $max = $allfunctions[$what][1];
             if ($min < 1) {
-                throw new Exception(("the function '$what' cannot be used with map(), because it accepts no arguments"));
+                throw new Exception("the function '$what' cannot be used with map(), because it accepts no arguments");
             }
             if ($min > 2) {
-                throw new Exception(("the function '$what' cannot be used with map(), because it expects more than two arguments"));
+                throw new Exception("the function '$what' cannot be used with map(), because it expects more than two arguments");
             }
             // Some functions are clearly unary.
             if ($min <= 1 && $max === 1) {
@@ -634,6 +638,10 @@ class functions {
      * @return float sum
      */
     public static function sum($array): float {
+        if (!is_array($array)) {
+            throw new Exception('sum() expects a list of numbers');
+        }
+
         $result = 0;
         foreach ($array as $token) {
             $value = $token->value;
@@ -716,20 +724,23 @@ class functions {
     }
 
     /**
-     * Calculate the factorial n! of a number.
+     * Calculate the factorial n! of a non-negative integer.
+     * Note: technically, the function accepts a float, because in some
+     * PHP versions, if one passes a float to a function that expectes an int,
+     * the float will be converted. We'd rather detect that and print an error.
      *
-     * @param int $n the number
+     * @param float $n the number
      * @return int
      */
-    public static function fact(int $n): int {
-        $n = (int) $n;
+    public static function fact(float $n): int {
+        $n = self::assure_integer($n, 'the factorial function expects its first argument to be a non-negative integer', self::NON_NEGATIVE);
         if ($n < 2) {
             return 1;
         }
         $result = 1;
         for ($i = 1; $i <= $n; $i++) {
             if ($result > PHP_INT_MAX / $i) {
-                throw new Exception("fact() cannot compute $n! on this platform, the result is bigger than PHP_MAX_INT");
+                throw new Exception("cannot compute $n! on this platform, the result is bigger than PHP_MAX_INT");
             }
             $result *= $i;
         }
@@ -747,31 +758,58 @@ class functions {
     }
 
     /**
-     * calculate standard normal cumulative distribution by approximation
-     * using Simpson's rule, accurate to ~5 decimal places
+     * Calculate standard normal cumulative distribution by approximation,
+     * accurate at least to 1e-12. The approximation uses the complementary
+     * error function and some magic numbers that can be found in Wikipedia:
+     * https://en.wikipedia.org/wiki/Error_function
      *
      * @param float $z value
      * @return float probability for a value of $z or less under standard normal distribution
      */
     public static function stdnormcdf(float $z): float {
-        if ($z < 0) {
-            return 1 - self::stdnormcdf(-$z);
+        // We use the relationship Phi(z) = (1 + erf(z/sqrt(2))) / 2 with
+        // erf() being the error function. Instead of erf(), we will approximate
+        // the complementary error function erfc() and use erf(x) = 1 - erfc(x).
+        // The approximation formula for erfc is valid for $z >= 0. For $z < 0,
+        // we can use the identity erfc(x) = 2 - erfc(-x), so we store the sign
+        // and transform $z |-> abs($z) / sqrt(2).
+        $sign = $z >= 0 ? 1 : -1;
+        $z = abs($z) / sqrt(2);
+
+        // Magic coefficients from Wikipedia.
+        $p = [
+            [0, 0, 0.56418958354775629],
+            [1, 2.71078540045147805, 5.80755613130301624],
+            [1, 3.47469513777439592, 12.07402036406381411],
+            [1, 4.00561509202259545, 9.30596659485887898],
+            [1, 5.16722705817812584, 9.12661617673673262],
+            [1, 5.95908795446633271, 9.19435612886969243],
+        ];
+        $q = [
+            [0, 1, 2.06955023132914151],
+            [1, 3.47954057099518960, 12.06166887286239555],
+            [1, 3.72068443960225092, 8.44319781003968454],
+            [1, 3.90225704029924078, 6.36161630953880464],
+            [1, 4.03296893109262491, 5.13578530585681539],
+            [1, 4.11240942957450885, 4.48640329523408675],
+        ];
+
+        // Calculate approximation of erfc()...
+        $erfc = exp(-$z ** 2);
+        for ($i = 0; $i < count($p); $i++) {
+            $erfc *= ($p[$i][0] * $z ** 2 + $p[$i][1] * $z + $p[$i][2]) / ($q[$i][0] * $z ** 2 + $q[$i][1] * $z + $q[$i][2]);
         }
-        $n = max(10, floor(10 * $z));
-        $h = $z / $n;
-        $res = self::stdnormpdf(0) + self::stdnormpdf($z);
-        for ($i = 1; $i < $n; $i++) {
-            $res += 2 * self::stdnormpdf($i * $h);
-            $res += 4 * self::stdnormpdf(($i - 0.5) * $h);
+        // If needed, transform for negative input.
+        if ($sign === -1) {
+            $erfc = 2 - $erfc;
         }
-        $res += 4 * self::stdnormpdf(($n - 0.5) * $h);
-        $res *= $h / 6;
-        return $res + 0.5;
+        // We need (1 + erf) / 2 with erf = 1 - erfc.
+        return (2 - $erfc) / 2;
     }
 
     /**
-     * calculate normal cumulative distribution by approximation
-     * using Simpson's rule, accurate to ~5 decimal places
+     * Calculate normal cumulative distribution based on stdnormcdf(). The
+     * approxmation is accurate at least to 1e-12.
      *
      * @param float $x value
      * @param float $mu mean
@@ -858,23 +896,26 @@ class functions {
      * $n trials under a binomial distribution with a probability of success
      * of $p.
      *
-     * @param int $n number of trials
+     * @param float $n number of trials
      * @param float $p probability of success for each trial
-     * @param int $x number of successful outcomes
+     * @param float $x number of successful outcomes
      *
      * @return float probability for exactly $x successful outcomes
      * @throws Exception
      */
-    public static function binomialpdf(int $n, float $p, int $x): float {
+    public static function binomialpdf(float $n, float $p, float $x): float {
         // Probability must be 0 <= p <= 1.
         if ($p < 0 || $p > 1) {
-            // FIXME: revise error message.
-            throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+            throw new Exception('binomialpdf() expects the probability to be at least 0 and not more than 1');
         }
-        // Number of successful outcomes must be at least 0 and at most number of trials.
-        if ($x < 0 || $x > $n) {
-            // FIXME: revise error message.
-            throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+        // Number of tries must be at least 0.
+        $n = self::assure_integer($n, 'binomialpdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE);
+        // Number of successful outcomes must be at least 0.
+        $x = self::assure_integer($x, 'binomialpdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE);
+        // If the number of successful outcomes is greater than the number of trials, the probability
+        // is zero.
+        if ($x > $n) {
+            return 0;
         }
         return self::ncr($n, $x) * $p ** $x * (1 - $p) ** ($n - $x);
     }
@@ -924,41 +965,49 @@ class functions {
 
     /**
      * Calculate the number of permutations when taking $r elements
-     * from a set of $n elements.
+     * from a set of $n elements. The arguments must be integers.
+     * Note: technically, the function accepts floats, because in some
+     * PHP versions, if one passes a float to a function that expectes an int,
+     * the float will be converted. We'd rather detect that and print an error.
      *
-     * @param int $n the number of elements to choose from
-     * @param int $r the number of elements to be rearranged
+     * @param float $n the number of elements to choose from
+     * @param float $r the number of elements to be chosen
      * @return int
      */
-    public static function npr(int $n, int $r): int {
-        $n = (int)$n;
-        $r = (int)$r;
-        if ($r == 0 && $n == 0) {
-            return 0;
-        }
+    public static function npr(float $n, float $r): int {
+        $n = self::assure_integer($n, 'npr() expects its first argument to be a non-negative integer', self::NON_NEGATIVE);
+        $r = self::assure_integer($r, 'npr() expects its second argument to be a non-negative integer', self::NON_NEGATIVE);
+
         return self::ncr($n, $r) * self::fact($r);
     }
 
     /**
      * Calculate the number of combination when taking $r elements
-     * from a set of $n elements.
+     * from a set of $n elements. The arguments must be integers.
+     * Note: technically, the function accepts floats, because in some
+     * PHP versions, if one passes a float to a function that expectes an int,
+     * the float will be converted. We'd rather detect that and print an error.
      *
-     * @param int $n the number of elements to choose from
-     * @param int $r the number of elements to be chosen
+     * @param float $n the number of elements to choose from
+     * @param float $r the number of elements to be chosen
      * @return int
      */
-    public static function ncr(int $n, int $r): int {
-        $n = (int)$n;
-        $r = (int)$r;
-        if ($r > $n) {
+    public static function ncr(float $n, float $r): int {
+        $n = self::assure_integer($n, 'ncr() expects its first argument to be an integer');
+        $r = self::assure_integer($r, 'ncr() expects its second argument to be an integer');
+
+        // The binomial coefficient is calculated for 0 <= r < n. For all
+        // other cases, the result is zero.
+        if ($r < 0 || $n < 0 || $n < $r) {
             return 0;
         }
+        // Take the shortest path.
         if (($n - $r) < $r) {
             return self::ncr($n, ($n - $r));
         }
         $return = 1;
         for ($i = 0; $i < $r; $i++) {
-            $return *= ($n - $i) / ($i + 1);
+            $return *= ($n - $i) / ($r - $i);
         }
         return $return;
     }
@@ -1198,5 +1247,24 @@ class functions {
             throw new Exception('unknown evaluation error');
         }
         return $output;
+    }
+
+    private static function assure_integer($n, $message, $additionalcondition = self::NONE) {
+        switch ($additionalcondition) {
+            case self::NON_NEGATIVE:
+                $additional = $n >= 0;
+                break;
+            case self::POSITIVE:
+                $additional = $n > 0;
+                break;
+            case self::NONE:
+            default:
+                $additional = true;
+        }
+
+        if ($n - intval($n) != 0 || $additional !== true) {
+            throw new Exception($message);
+        }
+        return intval($n);
     }
 }

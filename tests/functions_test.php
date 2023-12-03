@@ -23,7 +23,10 @@
  */
 
 namespace qtype_formulas;
+
 use qtype_formulas\variables;
+use qtype_formulas\parser;
+use qtype_formulas\evaluator;
 use Exception;
 
 defined('MOODLE_INTERNAL') || die();
@@ -41,94 +44,176 @@ require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 
 class functions_test extends \advanced_testcase {
 
-    /**
-     * Test 1: ncr() test.
-     */
-    public function test_ncr() {
-        // Test if function is accepted and parsed.
-        $qv = new variables;
-        $errmsg = null;
-        try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=ncr(5, 4);');
-        } catch (Exception $e) {
-            $errmsg = $e->getMessage();
-        }
-        $this->assertNull($errmsg);
+    public function provide_normcdf(): array {
+        return [
+            [0.841344746068543, 'normcdf(12, 5, 7)'],
+            [0.990184671371355, 'normcdf(135, 100, 15)'],
+            [0.246921118121914, 'normcdf(10, 23, 19)'],
+            [0.022750131948179, 'normcdf(-4, 2, 3)'],
+        ];
+    }
 
-        // Test if function works correctly.
-        $testcases = array(
-            array(ncr(0, 0), 1),
-            array(ncr(1, 5), 0),
-            array(ncr(5, 0), 1),
-            array(ncr(5, 1), 5),
-            array(ncr(5, 2), 10),
-            array(ncr(5, 3), 10),
-            array(ncr(5, 4), 5),
-            array(ncr(5, 5), 1)
-        );
-        foreach ($testcases as $case) {
-            $this->assertEquals($case[1], $case[0]);
-        }
+    public function provide_stdnormcdf(): array {
+        return [
+            [2.866515718791946e-7, 'stdnormcdf(-5)'],
+            [0.00134989803163009452665, 'stdnormcdf(-3)'],
+            [0.022750131948179207200, 'stdnormcdf(-2)'],
+            [0.158655253931457051415, 'stdnormcdf(-1)'],
+            [0.3085375387259868963623, 'stdnormcdf(-0.5)'],
+            [0.5, 'stdnormcdf(0)'],
+            [0.6914624612740131036377, 'stdnormcdf(0.5)'],
+            [0.841344746068542948585, 'stdnormcdf(1)'],
+            [0.9772498680518207927997, 'stdnormcdf(2)'],
+            [0.99865010196836990547335, 'stdnormcdf(3)'],
+            [0.9999997133484281208060883, 'stdnormcdf(5)'],
+            [0.9999999999999999999999999, 'stdnormcdf(10)'],
+            [0.9999999999999999999999999, 'stdnormcdf(20)'],
+        ];
+    }
+
+    public function provide_stdnormpdf(): array {
+        return [
+            [0.398942280401432677939946, 'stdnormpdf(0)'],
+            [0.241970724519143349797830, 'stdnormpdf(1)'],
+            [0.241970724519143349797830, 'stdnormpdf(-1)'],
+            [0.0539909665131880519505642, 'stdnormpdf(2)'],
+            [0.0539909665131880519505642, 'stdnormpdf(-2)'],
+            [0.3520653267642994777746804, 'stdnormpdf(0.5)'],
+            [0.3520653267642994777746804, 'stdnormpdf(-0.5)'],
+        ];
+    }
+
+    public function provide_ncr(): array {
+        return [
+            [1, 'ncr(0, 0)'],
+            [0, 'ncr(1, 5)'],
+            [1, 'ncr(5, 0)'],
+            [5, 'ncr(5, 1)'],
+            [10, 'ncr(5, 2)'],
+            [10, 'ncr(5, 3)'],
+            [5, 'ncr(5, 4)'],
+            [1, 'ncr(5, 5)'],
+            [0, 'ncr(5, 6)'],
+            [0, 'ncr(-1, 2)'],
+            [0, 'ncr(3, -4)'],
+            ['evaluation error: ncr() expects its first argument to be an integer', 'ncr(10.5, 3)'],
+            ['evaluation error: ncr() expects its second argument to be an integer', 'ncr(12, 3.5)'],
+        ];
+    }
+
+    public function provide_npr(): array {
+        return [
+            [1, 'npr(0, 0)'],
+            [0, 'npr(1, 5)'],
+            [1, 'npr(5, 0)'],
+            [5, 'npr(5, 1)'],
+            [20, 'npr(5, 2)'],
+            [60, 'npr(5, 3)'],
+            [120, 'npr(5, 4)'],
+            [120, 'npr(5, 5)'],
+            [0, 'npr(5, 6)'],
+            ['evaluation error: npr() expects its first argument to be a non-negative integer', 'npr(-1, 2)'],
+            ['evaluation error: npr() expects its second argument to be a non-negative integer', 'npr(3, -4)'],
+            ['evaluation error: npr() expects its first argument to be a non-negative integer', 'npr(10.5, 3)'],
+            ['evaluation error: npr() expects its second argument to be a non-negative integer', 'npr(12, 3.5)'],
+        ];
+    }
+
+    public function provide_fact(): array {
+        return [
+            [1, 'fact(0)'],
+            [1, 'fact(1)'],
+            [2, 'fact(2)'],
+            [6, 'fact(3)'],
+            [720, 'fact(6)'],
+            ['evaluation error: the factorial function expects its first argument to be a non-negative integer', 'fact(-2)'],
+            ['evaluation error: the factorial function expects its first argument to be a non-negative integer', 'fact(2.5)'],
+            ['evaluation error: cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT', 'fact(250)'],
+        ];
     }
 
     /**
-     * Test 2: npr() test.
+     * @dataProvider provide_ncr
+     * @dataProvider provide_npr
+     * @dataProvider provide_fact
+     * @dataProvider provide_stdnormpdf
+     * @dataProvider provide_stdnormcdf
+     * @dataProvider provide_normcdf
      */
-    public function test_npr() {
-        // Test if function is accepted and parsed.
-        $qv = new variables;
-        $errmsg = null;
+    public function test_combinatorics($expected, $input) {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
         try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=npr(5, 4);');
+            $result = $evaluator->evaluate($statements);
         } catch (Exception $e) {
-            $errmsg = $e->getMessage();
+            self::assertStringEndsWith($expected, $e->getMessage());
+            return;
         }
-        $this->assertNull($errmsg);
 
-        // Test if function works correctly.
-        $testcases = array(
-            array(npr(0, 0), 0),
-            array(npr(1, 5), 0),
-            array(npr(5, 0), 1),
-            array(npr(5, 1), 5),
-            array(npr(5, 2), 20),
-            array(npr(5, 3), 60),
-            array(npr(5, 4), 120),
-            array(npr(5, 5), 120)
-        );
-        foreach ($testcases as $case) {
-            $this->assertEquals($case[1], $case[0]);
-        }
+        self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
+    }
+
+
+    public function provide_len_inputs(): array {
+        return [
+            [0, 'len([])'],
+            [1, 'len([[]])'],
+            [3, 'len("foo")'],
+            [4, 'len([1, 2, 3, 4])'],
+            [4, 'len(["1", "2", "3", "4"])'],
+            [2, 'len([["1", "2"], ["3", "4"]])'],
+            ["invalid number of arguments for function 'len': 0 given", 'len()'],
+            ['len() expects a list or a string', 'len(3)'],
+        ];
     }
 
     /**
-     * Test 3: fact() test.
+     * @dataProvider provide_len_inputs
      */
-    public function test_fact() {
-        // Test if function is accepted and parsed.
-        $qv = new variables;
-        $errmsg = null;
+    public function test_len($expected, $input) {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
         try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=fact(3);');
+            $result = $evaluator->evaluate($statements);
         } catch (Exception $e) {
-            $errmsg = $e->getMessage();
+            self::assertStringEndsWith($expected, $e->getMessage());
+            return;
         }
-        $this->assertNull($errmsg);
 
-        // Test if function works correctly.
-        $testcases = array(
-            array(fact(0), 1),
-            array(fact(1), 1),
-            array(fact(3), 6),
-            array(fact(6), 720)
-        );
-        foreach ($testcases as $case) {
-            $this->assertEquals($case[1], $case[0]);
-        }
+        self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
+
+    public function provide_sum_inputs(): array {
+        return [
+            [0, 'sum([])'],
+            [10, 'sum([1, 2, 3, 4])'],
+            [10, 'sum(["1", "2", "3", "4"])'],
+            ["invalid number of arguments for function 'sum': 0 given", 'sum()'],
+            ['sum() expects a list of numbers', 'sum("a")'],
+            ['sum() expects a list of numbers', 'sum(3)'],
+            ['sum() expects a list of numbers', 'sum(["a", "b"])'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_sum_inputs
+     */
+    public function test_sum($expected, $input) {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        try {
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            self::assertStringEndsWith($expected, $e->getMessage());
+            return;
+        }
+
+        self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
+    }
+
 
     /**
      * Test 4: gcd() test.
@@ -441,66 +526,6 @@ class functions_test extends \advanced_testcase {
         );
         foreach ($testcases as $case) {
             $this->assertEquals($case[1], $case[0]);
-        }
-    }
-
-    /**
-     * Test 10: stdnormpdf() test.
-     */
-    public function test_stdnormpdf() {
-        // Test if function is accepted and parsed.
-        $qv = new variables;
-        $errmsg = null;
-        try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=stdnormpdf(1);');
-        } catch (Exception $e) {
-            $errmsg = $e->getMessage();
-        }
-        $this->assertNull($errmsg);
-
-        // Test if function works correctly.
-        $testcases = array(
-            array(stdnormpdf(0), 0.39894228),
-            array(stdnormpdf(1), 0.24197072),
-            array(stdnormpdf(2), 0.05399097),
-            array(stdnormpdf(-1), 0.24197072),
-            array(stdnormpdf(-2), 0.05399097),
-            array(stdnormpdf(0.5), 0.35206533),
-            array(stdnormpdf(-0.5), 0.35206533)
-        );
-        foreach ($testcases as $case) {
-            $this->assertEqualsWithDelta($case[1], $case[0], 1e-7);
-        }
-    }
-
-    /**
-     * Test 11: stdnormcdf() test.
-     */
-    public function test_stdnormcdf() {
-        // Test if function is accepted and parsed.
-        $qv = new variables;
-        $errmsg = null;
-        try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=stdnormcdf(0);');
-        } catch (Exception $e) {
-            $errmsg = $e->getMessage();
-        }
-        $this->assertNull($errmsg);
-
-        // Test if function works correctly.
-        $testcases = array(
-            array(stdnormcdf(0), 0.5),
-            array(stdnormcdf(1), 0.84134),
-            array(stdnormcdf(2), 0.97725),
-            array(stdnormcdf(-1), 0.15866),
-            array(stdnormcdf(-2), 0.02275),
-            array(stdnormcdf(0.5), 0.69146),
-            array(stdnormcdf(-0.5), 0.30854)
-        );
-        foreach ($testcases as $case) {
-            $this->assertEqualsWithDelta($case[1], $case[0], .00001);
         }
     }
 
@@ -1114,16 +1139,12 @@ class functions_test extends \advanced_testcase {
      * Test fqversionnumber() function
      */
     public function test_fqversionnumber() {
-        $qv = new variables();
-        $errmsg = null;
-        try {
-            $v = $qv->vstack_create();
-            $result = $qv->evaluate_assignments($v, 'a=fqversionnumber();');
-        } catch (Exception $e) {
-            $errmsg = $e->getMessage();
-        }
-        $this->assertNull($errmsg);
-        $this->assertEquals(get_config('qtype_formulas')->version, $result->all['a']->value);
+        $parser = new parser('fqversionnumber()');
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statements);
+
+        $this->assertEquals(get_config('qtype_formulas')->version, $result[0]->value);
     }
 
     public function test_fmod() {

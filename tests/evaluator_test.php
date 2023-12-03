@@ -149,7 +149,14 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_ternary_expressions(): array {
         return [
-            'basic' => [3, '1 == 5 ? 2 : 3'],
+            'basic true' => [2, '1 < 5 ? 2 : 3'],
+            'basic false' => [3, '1 == 5 ? 2 : 3'],
+            'basic true with string in condition' => [2, '"a" == "a" ? 2 : 3'],
+            'basic false with string in condition' => [3, '"a" == "b" ? 2 : 3'],
+            'basic true returning string' => ['foo', '1 <= 5 ? "foo" : "bar"'],
+            'basic false returning string' => ['bar', '1 > 5 ? "foo" : "bar"'],
+            'basic true all strings' => ['foo', '"x" != "y" ? "foo" : "bar"'],
+            'basic false all strings' => ['bar', '"x" == "y" ? "foo" : "bar"'],
             'operations in condition, 1' => [1, '1 + 2 == 3 ? 1 : 2'],
             'operations in condition, 2' => [1, '1 == 3 - 2 ? 1 : 2'],
             'operations in true part' => [3, '1 ? 1 + 2 : 2'],
@@ -161,6 +168,9 @@ class evaluator_test extends \advanced_testcase {
             'ternary in false part without parens' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
             // 1 ==1 ? (1 == 2 ? 3 : 4) : 5
             'ternary in true part without parens' => [4, '1==1 ? 1 == 2 ? 3 : 4 : 5'],
+            'ternary in both parts without parens' => [4, '1==1 ? 1 > 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
+            'ternary in both parts without parens' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
+            // TODO: test with variables
         ];
     }
 
