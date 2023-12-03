@@ -56,7 +56,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_tol[0]  | 1                 |
     And I press "id_updatebutton"
     And I wait until the page is ready
-    Then I should see "Variable '_relerr' has not been defined"
+    Then I should see "relative error (_relerr) cannot be used with answer type algebraic formula"
     And the following fields match these values:
       | correctness_simple_mode[0] | 0 |
 
