@@ -109,9 +109,9 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $globalvars = $q->get_global_variables();
-        $s = $globalvars->all['s']->value;
-        $dt = $globalvars->all['dt']->value;
+        $globalvars = $q->evaluator->variables;
+        $s = $globalvars['s']->value;
+        $dt = $globalvars['dt']->value;
 
         $this->assertEquals("This question shows different display methods of the answer and unit box.\n"
                             . "If a car travels $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
@@ -143,8 +143,8 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $globalvars = $q->get_global_variables();
-        $v = $globalvars->all['v']->value;
+        $globalvars = $q->evaluator->variables;
+        $v = $globalvars['v']->value;
 
         $this->assertEquals(array('0_' => "{$v}m/s",
                                   '1_0' => "$v",
@@ -352,11 +352,11 @@ class question_test extends \basic_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
 
         $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
-        $summary0 = $q->parts[0]->part_summarise_response($response);
+        $summary0 = $q->parts[0]->summarise_response($response);
         $this->assertEquals('5', $summary0);
-        $summary1 = $q->parts[1]->part_summarise_response($response);
+        $summary1 = $q->parts[1]->summarise_response($response);
         $this->assertEquals('6', $summary1);
-        $summary2 = $q->parts[2]->part_summarise_response($response);
+        $summary2 = $q->parts[2]->summarise_response($response);
         $this->assertEquals('7', $summary2);
         $summary = $q->summarise_response($response);
         $this->assertEquals('5, 6, 7', $summary);
@@ -367,13 +367,13 @@ class question_test extends \basic_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
 
         $response = array('0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50");
-        $summary0 = $q->parts[0]->part_summarise_response($response);
+        $summary0 = $q->parts[0]->summarise_response($response);
         $this->assertEquals('30m/s', $summary0);
-        $summary1 = $q->parts[1]->part_summarise_response($response);
+        $summary1 = $q->parts[1]->summarise_response($response);
         $this->assertEquals('20, m/s', $summary1);
-        $summary2 = $q->parts[2]->part_summarise_response($response);
+        $summary2 = $q->parts[2]->summarise_response($response);
         $this->assertEquals('40', $summary2);
-        $summary3 = $q->parts[3]->part_summarise_response($response);
+        $summary3 = $q->parts[3]->summarise_response($response);
         $this->assertEquals('50', $summary3);
         $summary = $q->summarise_response($response);
         $this->assertEquals('30m/s, 20, m/s, 40, 50', $summary);

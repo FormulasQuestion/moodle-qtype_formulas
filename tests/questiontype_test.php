@@ -81,7 +81,7 @@ class questiontype_test extends \advanced_testcase {
         $ans2 = new stdClass();
         $ans2->placeholder = '#2';
         $answers = array(0 => $ans1, 1 => $ans2);
-        $this->assertEquals(array(0 => 1, 1 => 0), $this->qtype->reorder_answers($questiontext, $answers));
+        $this->assertEquals(array(0 => $ans2, 1 => $ans1), $this->qtype->reorder_parts($questiontext, $answers));
     }
 
     public function test_reorder_answers1() {
@@ -95,7 +95,7 @@ class questiontype_test extends \advanced_testcase {
         $ans4 = new stdClass();
         $ans4->placeholder = '#fourth';
         $answers = array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
-        $this->assertEquals(array(0 => 2, 1 => 3, 2 => 0, 3 => 1), $this->qtype->reorder_answers($questiontext, $answers));
+        $this->assertEquals(array(0 => $ans3, 1 => $ans4, 2 => $ans1, 3 => $ans2), $this->qtype->reorder_parts($questiontext, $answers));
     }
 
     public function test_reorder_answers2() {
@@ -109,7 +109,7 @@ class questiontype_test extends \advanced_testcase {
         $ans4 = new stdClass();
         $ans4->placeholder = '';
         $answers = array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4);
-        $this->assertEquals(array(0 => 0, 1 => 1, 2 => 2, 3 => 3), $this->qtype->reorder_answers($questiontext, $answers));
+        $this->assertEquals(array(0 => $ans1, 1 => $ans2, 2 => $ans3, 3 => $ans4), $this->qtype->reorder_parts($questiontext, $answers));
     }
 
     public function test_check_placeholder0() {
@@ -135,7 +135,7 @@ class questiontype_test extends \advanced_testcase {
                         .' This placeholder is missing from the main question text.',
                 'placeholder[4]' => 'Duplicated placeholder in the main question text.'
                 );
-        $this->assertEquals($expected, $this->qtype->check_placeholder($questiontext, $answers));
+        $this->assertEquals($expected, $this->qtype->check_placeholders($questiontext, $answers));
     }
 
     public function test_split_questiontext0() {
@@ -189,7 +189,7 @@ class questiontype_test extends \advanced_testcase {
 
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(4, $options->numpart);
+        $this->assertEquals(4, $options->numparts);
         $this->assertCount(4, $options->answers);
 
         // Now we are going to delete the options record.
@@ -209,7 +209,7 @@ class questiontype_test extends \advanced_testcase {
         $this->assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(4, $options->numpart);
+        $this->assertEquals(4, $options->numparts);
         $this->assertCount(4, $options->answers);
 
         $this->assertEquals(get_string('correctfeedbackdefault', 'question'), $options->correctfeedback);
@@ -225,7 +225,7 @@ class questiontype_test extends \advanced_testcase {
         $this->assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(0, $options->numpart);
+        $this->assertEquals(0, $options->numparts);
         $this->assertCount(0, $options->answers);
     }
 }

@@ -144,7 +144,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public int $numparts;
 
     /**
-     * @var string[] strings (one more than $numpart) containing fragments from the question's main text
+     * @var string[] strings (one more than $numparts) containing fragments from the question's main text
      *               that surround the parts' subtexts; used by the renderer
      */
     public array $textfragments;
@@ -209,6 +209,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $globalparser = new parser($this->varsglobal, $randomparser->export_known_variables());
         $this->evaluator->evaluate($globalparser->get_statements());
 
+        // Set the question's $numparts property.
+        $this->numparts = count($this->parts);
+
         // Finally, set up the parts' evaluators that evaluate the local variables.
         $this->initialize_part_evaluators();
     }
@@ -251,6 +254,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             $parser = new parser($randominstantiated . $this->varsglobal);
             $this->evaluator->evaluate($parser->get_statements());
         }
+
+        // Set the question's $numparts property.
+        $this->numparts = count($this->parts);
 
         // Set up the parts' evaluator classes and evaluate their local variables.
         $this->initialize_part_evaluators();
@@ -728,7 +734,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function is_any_part_invalid(array $response): bool {
         // FIXME: mark part invalid if evaluation of answer fails, e.g. due to invalid tokens
         // like algebraic formula with assignment (=) or number with operators
-        // in that case, we must probably get_validation_error() accordingly
+        // in that case, we must probably change get_validation_error() accordingly
         return false;
     }
 
@@ -765,7 +771,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $fractionsum / $fractionmax;
     }
 
-    // FIXME: this has to go to the part, own implementation
+    // FIXME: remove this once grade_responses_individually() is gone
     // Check whether the format of the response is correct and evaluate the corresponding expression
     // @return difference between coordinate and model answer. null if format incorrect.
     // Note: $r will have evaluated value.
@@ -818,7 +824,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         }
     }
 
-    // FIXME: this has to go to the part, not mandatory / own implementation
+    // FIXME: this has to go to the part, not mandatory / own implementation -> remove this
     // Grade response for part, and return a list with answer correctness and unit correctness.
     public function grade_responses_individually($part, $response, &$checkunit) {
         $response = $this->normalize_response($response);
@@ -1171,8 +1177,7 @@ class qtype_formulas_part {
     /**
      * Whether or not the part contains at least one answer with a drop down or
      * radio list.
-     * TODO: implement test for this
-     * FIXME: this function seems to be unused
+     * FIXME: this function seems to be unused -> remove
      *
      * @return bool
      */
@@ -1253,7 +1258,6 @@ class qtype_formulas_part {
             // Restrict the answer's length to 128 characters. There is no real need
             // for this, but it was done in the first versions, so we'll keep it for
             // backwards compatibility.
-            // TODO: get rid of this and maybe add option to input field to restrict length
             if (strlen($result[$name]) > 128) {
                 $result[$name] = substr($result[$name], 0, 128);
             }
@@ -1383,7 +1387,7 @@ class qtype_formulas_part {
     }
 
     /**
-     * FIXME: doc
+     * TODO: doc
      *
      * @param array $answers
      * @return void
@@ -1495,8 +1499,14 @@ class qtype_formulas_part {
         // TODO: update comment
         $evaluatedresponse = $response;
         if (!$isalgebraic) {
-            $parser = new answer_parser('[' . implode(',', $response) . ']');
-            $evaluatedresponse = $this->evaluator->evaluate($parser->get_statements())[0];
+            // The answer might be invalid, so we wrap the parsing and evaluation in try-catch.
+            try {
+                $parser = new answer_parser('[' . implode(',', $response) . ']');
+                $evaluatedresponse = $this->evaluator->evaluate($parser->get_statements())[0];
+            } catch (Throwable $t) {
+                // FIXME: this could probably be improved
+                return ['answer' => 0, 'unit' => false];
+            }
 
             // Convert the array of tokens to an array of literals.
             $evaluatedresponse = array_map(function ($element) {
@@ -1547,13 +1557,13 @@ class qtype_formulas_part {
         $evaluatedgrading = max($evaluatedgrading, 0);
 
         // FIXME: not ready yet for answer type algebraic formula
-        // in that case, also check that answer is string
+        // in that case, also check that answer is string; refactor that part
         if ($this->answertype == 1000 && false) {
             throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
         }
 
         // ******** FIXME FIXME FIXME ***********
-        // FIXME: legacy code used to set $unitcorrect = 1 if all answers == 0.0
+        // FIXME: legacy code did set $unitcorrect = 1 if all answers == 0.0
 
         // if evaluation of grading crit is NaN  --> zero mark
 

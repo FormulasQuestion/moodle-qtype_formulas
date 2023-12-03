@@ -208,7 +208,7 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                         'fraction' => 1,
                     ),
                 ),
-                'numpart' => 4,
+                'numparts' => 4,
             ),
             'defaultmark' => '8.0000000',
         );

@@ -86,7 +86,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->setDefault('globalunitpenalty', $config->defaultunitpenalty);
         $mform->setType('globalunitpenalty', PARAM_FLOAT);
 
-        $conversionrules = new unit_conversion_rules;
+        $conversionrules = new unit_conversion_rules();
         $allrules = $conversionrules->allrules();
         foreach ($allrules as $id => $entry) {
             $defaultrulechoice[$id] = $entry[0];

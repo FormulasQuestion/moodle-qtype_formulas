@@ -872,14 +872,38 @@ class qtype_formulas extends question_type {
 
         // The value from the globalunitpenalty field is only used to set the penalty
         // for each part. Is has to be validated separately. The same is true for the
-        // globalruleid, but we do not validate it here, because it is a select field, so
-        // errors are less likely.
+        // globalruleid. Its value comes from a SELECT element, so there should be no errors.
         // If we are importing a question, there will be no globalunitpenalty or globalruleid,
         // because the question already has those options stored in its parts.
+        // Note: we validate this first, because the fields will be referenced during validation
+        // of the parts.
         $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
         if (!$isfromimport) {
             if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
                 $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+            }
+
+            // If the globalruleid field is missing, that means the request or the form has
+            // been modified by the user. In that case, we set the id to the invalid value -1
+            // to simplify the code for the upcoming steps.
+            if (!isset($data->globalruleid)) {
+                $data->globalruleid = -1;
+            }
+
+            // Finally, check the global setting for the basic conversion rules. We only check this
+            // once, because it is the same for all parts.
+            $conversionrules = new unit_conversion_rules();
+            $entry = $conversionrules->entry($data->globalruleid);
+            if ($entry === null || $entry[1] === null) {
+                $errors['globalruleid'] = get_string('error_ruleid', 'qtype_formulas');
+            } else {
+                $unitcheck = new answer_unit_conversion();
+                $unitcheck->assign_default_rules($data->globalruleid, $entry[1]);
+                try {
+                    $unitcheck->reparse_all_rules();
+                } catch (Exception $e) {
+                    $errors['globalruleid'] = $e->getMessage();
+                }
             }
         }
 
@@ -1028,6 +1052,7 @@ class qtype_formulas extends question_type {
                 foreach ($modelanswers as $k => &$answer) {
                     // After the first probelmatic answer, we do not need to check the rest, so we break.
                     if (!is_string($answer)) {
+                        // TODO: externalise string
                         $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
                         break;
                     }
@@ -1040,6 +1065,7 @@ class qtype_formulas extends question_type {
                         // The error message may contain line and column numbers, but they don't make
                         // sense in this context, so we'd rather remove them.
                         $message = preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage());
+                        // TODO: externalise string
                         $errors["answer[$i]"] = "error in answer #{$answerno}: $message";
                         break;
                     }
@@ -1100,10 +1126,16 @@ class qtype_formulas extends question_type {
                 }
                 $grade = $result[0]->value;
             } catch (Exception $e) {
-                // FIXME: if 'unknown variable: _relerr' and algebraic formula: change error message
-                // to something like 'relative error (_relerr) cannot be used with this answer type'
-                // FIXME: if teacher uses simplified form, error might not show up --> modify editform.js accordingly
-                $errors["correctness[$i]"] = $e->getMessage();
+                $message = $e->getMessage();
+                // If we are working with the answer type "algebraic formula" and there was an error
+                // during evaluation of the grading criterion *and* the error message contains '_relerr',
+                // we change the message, because it is save to assume that the teacher tried to use
+                // relative error which is not supported with that answer type.
+                if ($isalgebraic && strpos($message, '_relerr') !== false) {
+                    // TODO: externalise string
+                    $message = 'relative error (_relerr) cannot be used with answer type algebraic formula';
+                }
+                $errors["correctness[$i]"] = $message;
                 continue;
             }
 
@@ -1113,44 +1145,32 @@ class qtype_formulas extends question_type {
                 $errors["correctness[$i]"] = "The grading criterion should evaluate to 1 for correct answers. Found $grade instead.";
             }
 
-            // FIXME - TODO: validation of unit stuff
+            // Instantiate toolkit class for units.
+            $unitcheck = new answer_unit_conversion();
+
+            // If a unit has been provided, check whether it can be parsed.
+            if (!empty($data->postunit[$i])) {
+                try {
+                    $unitcheck->parse_targets($data->postunit[$i]);
+                } catch (Exception $e) {
+                    $errors["postunit[$i]"] = get_string('error_unit', 'qtype_formulas') . $e->getMessage();
+                }
+            }
+
+            // If provided by the user, check the additional conversion rules. We do validate those
+            // rules even if the unit has not been set, because we would not want to have invalid stuff
+            // in the database.
+            if (!empty($data->otherrule[$i])) {
+                try {
+                    $unitcheck->assign_additional_rules($data->otherrule[$i]);
+                    $unitcheck->reparse_all_rules();
+                } catch (Exception $e) {
+                    $errors["otherrule[$i]"] = get_string('error_rule', 'qtype_formulas') . $e->getMessage();
+                }
+            }
         }
 
         return (object)['errors' => $errors, 'parts' => $parts];
-
-        // ************* FIXME: clean up the rest *********
-        // Attempt to compute answers to see if they are wrong or not.
-        foreach ($validanswers as $idx => $ans) {
-            $ans->partindex = $idx;
-            $unitcheck = new answer_unit_conversion;
-
-            try {
-                $unitcheck->parse_targets($ans->postunit);
-            } catch (Exception $e) {
-                $errors["postunit[$idx]"] = get_string('error_unit', 'qtype_formulas') . $e->getMessage();
-            }
-
-            try {
-                $unitcheck->assign_additional_rules($ans->otherrule);
-                $unitcheck->reparse_all_rules();
-            } catch (Exception $e) {
-                $errors["otherrule[$idx]"] = get_string('error_rule', 'qtype_formulas') . $e->getMessage();
-            }
-
-            try {
-                $conversionrules = new unit_conversion_rules;
-                $entry = $conversionrules->entry($ans->ruleid);
-                if ($entry === null || $entry[1] === null) {
-                    throw new Exception(get_string('error_ruleid', 'qtype_formulas'));
-                }
-                $unitcheck->assign_default_rules($ans->ruleid, $entry[1]);
-                $unitcheck->reparse_all_rules();
-            } catch (Exception $e) {
-                $errors["ruleid[$idx]"] = $e->getMessage();
-            }
-
-        }
-        return $errors;
     }
 
     /**
