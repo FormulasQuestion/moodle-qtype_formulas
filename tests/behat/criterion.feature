@@ -45,6 +45,21 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_comp[0] | ==             |
       | correctness_simple_tol[0]  | 0              |
 
+  Scenario: Check visibility of error message for invalid simple grading criterion
+    When I follow "Part 1"
+    And I set the following fields to these values:
+      | name                       | test2             |
+      | answertype[0]              | Algebraic formula |
+      | answer[0]                  | "5"               |
+      | correctness_simple_type[0] | Relative error    |
+      | correctness_simple_comp[0] | <                 |
+      | correctness_simple_tol[0]  | 1                 |
+    And I press "id_updatebutton"
+    And I wait until the page is ready
+    Then I should see "Variable '_relerr' has not been defined"
+    And the following fields match these values:
+      | correctness_simple_mode[0] | 0 |
+
   Scenario: Set an expert grading criterion
     When I follow "Part 1"
     And I click on "Simplified mode" "checkbox"
