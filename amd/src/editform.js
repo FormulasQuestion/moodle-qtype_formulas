@@ -57,6 +57,7 @@ export const init = (defCorrectness) => {
 
         let checkbox = document.getElementById(`id_correctness_simple_mode_${i}`);
         checkbox.addEventListener('click', handleGradingCriterionModeSwitcher.bind(null, i));
+        checkbox.addEventListener('change', handleGradingCriterionModeSwitcher.bind(null, i));
 
         // Trigger input event in criterion textfields in order to disable the mode switcher
         // checkbox, if needed. If the criterion is simple enough, start with simple mode,
@@ -100,6 +101,29 @@ export const init = (defCorrectness) => {
     document.getElementById('id_instantiatebtn').addEventListener(
         'click', Instantiation.instantiate
     );
+
+    // We want to disable the simplified mode for all grading criterions where the validation
+    // has found an error. If the document has finished loading (readyState is 'interactive'
+    // or 'complete'), we can access all DOM elements, so we proceed. Otherwise, we attach the
+    // corresponding method to the DOMContentLoaded event.
+    if (document.readyState !== 'loading') {
+        disableSimpleModeIfError();
+    } else {
+        document.addEventListener('DOMContentLoaded', disableSimpleModeIfError.bind(null));
+    }
+};
+
+/**
+ * For all parts, check whether there has been an evaluation error of the grading
+ * criterion. If yes, we should not enter simplified mode, because the error message
+ * will not be visible.
+ */
+const disableSimpleModeIfError = () => {
+    for (let i = 0; i < numberOfParts; i++) {
+        if (document.getElementById(`id_error_correctness_${i}`).innerText.trim() !== '') {
+            document.getElementById(`id_correctness_simple_mode_${i}`).checked = false;
+        }
+    }
 };
 
 /**
