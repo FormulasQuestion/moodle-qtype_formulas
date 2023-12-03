@@ -825,7 +825,7 @@ class qtype_formulas extends question_type {
                 'tags', 'oldparent', 'context', '_qf__qtype_formulas_edit_form', 'numdataset', 'multiplier', 'import_process',
                 'inpopup', 'cmid', 'courseid', 'returnurl', 'scrollpos', 'appendqnumstring', 'usecase', 'export_process',
                 'makecopy', 'submitbutton', 'status', 'shownumcorrect', 'correctness_simple_mode', 'mdlscrollto', 'image',
-                'coursetags', 'answernotunique'];
+                'coursetags', 'answernotunique', 'updatebutton'];
         foreach ($form as $key => $value) {
             if (in_array($key, $keystoskip)) {
                 continue;
