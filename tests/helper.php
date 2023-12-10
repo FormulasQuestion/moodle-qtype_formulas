@@ -67,15 +67,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->varsglobal = '';
         $q->shownumcorrect = 0;
         $q->answernumbering = 'abc';
-        $q->qv = new qtype_formulas\variables();
         $q->penalty = 0.2; // The default.
         test_question_maker::set_standard_combined_feedback_fields($q);
         $q->numparts = 0;   // This is of course invalid but should be changed by all tests.
-        $q->parts = array();
-        $q->evaluatedanswer = array();
-        $q->fractions = array();
-        $q->anscorrs = array();
-        $q->unitcorrs = array();
+        $q->parts = [];
         return $q;
     }
 
@@ -98,15 +93,15 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->ruleid = 1;
         $p->otherrule = '';
         $p->subqtext = '';
-        $p->subqtextformat = 1;
+        $p->subqtextformat = FORMAT_HTML;
         $p->feedback = '';
         $p->feedbackformat = 1;
         $p->partcorrectfb = '';
-        $p->partcorrectfbformat = 1;
+        $p->partcorrectfbformat = FORMAT_HTML;
         $p->partpartiallycorrectfb = '';
-        $p->partpartiallycorrectfbformat = 1;
+        $p->partpartiallycorrectfbformat = FORMAT_HTML;
         $p->partincorrectfb = '';
-        $p->partincorrectfbformat = 1;
+        $p->partincorrectfbformat = FORMAT_HTML;
         $p->partindex = 0;
 
         return $p;
@@ -192,6 +187,84 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->shownumcorrect = '0';
         $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
         return $form;
+    }
+
+    public static function get_formulas_question_data_testsinglenum() {
+        $qdata = new stdClass();
+        test_question_maker::initialise_question_data($qdata);
+
+        $qdata->qtype = 'formulas';
+        $qdata->name = 'test-0';
+        $qdata->questiontext = '<p>This is a minimal question. The answer is 5.</p>';
+        $qdata->generalfeedback = '';
+        $qdata->defaultmark = 2;
+        $qdata->penalty = 0.3;
+
+        $qdata->options = new stdClass();
+        $qdata->options->varsrandom = '';
+        $qdata->options->varsglobal = '';
+        $qdata->options->answernumbering = 'abc';
+        $qdata->options->shownumcorrect = 0;
+        $qdata->options->correctfeedback =
+                test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
+        $qdata->options->correctfeedbackformat = FORMAT_HTML;
+        $qdata->options->partiallycorrectfeedback =
+                test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK;
+        $qdata->options->partiallycorrectfeedbackformat = FORMAT_HTML;
+        $qdata->options->incorrectfeedback =
+                test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
+        $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
+
+        $qdata->answers = array(
+            14 => (object) array(
+                'id' => 14,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => 0,
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => '5',
+                'answernotunique' => '0',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => '',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => '',
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => '',
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => '',
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 0,
+            )
+        );
+
+        $qdata->options->numparts = 1;
+
+        $qdata->hints = array(
+            1 => (object) array(
+                'hint' => 'Hint 1.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 0,
+                'options' => 0,
+            ),
+            2 => (object) array(
+                'hint' => 'Hint 2.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 1,
+                'options' => 1,
+            ),
+        );
+
+        return $qdata;
     }
 
     /**
@@ -635,21 +708,15 @@ class qtype_formulas_test_helper extends question_test_helper {
      * @return object
      */
     public static function get_formulas_question_data_testmethodsinparts() {
-        global $USER;
-
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 
         $qdata->qtype = 'formulas';
         $qdata->name = 'test-2';
         $qdata->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
-        $qdata->questiontextformat = FORMAT_HTML;
         $qdata->generalfeedback = '';
-        $qdata->generalfeedbackformat = FORMAT_HTML;
         $qdata->defaultmark = 8;
-        $qdata->length = 1;
         $qdata->penalty = 0.3;
-        $qdata->hidden = 0;
 
         $qdata->options = new stdClass();
         $qdata->options->varsrandom = '';

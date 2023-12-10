@@ -382,7 +382,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      *
      * @return array model answer for every answer / unit box of each part
      */
-    public function get_correct_response(): array {
+    public function get_correct_response(?qtype_formulas_part $part = null): array {
+        // If the caller has requested one specific part, just return that response.
+        if (isset($part)) {
+            return $part->get_correct_response();
+        }
+
+        // Otherwise, fetch them all.
         $responses = [];
         foreach ($this->parts as $part) {
             $responses += $part->get_correct_response();
@@ -529,9 +535,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // First, we normalize the student's answers.
         $response = $this->normalize_response($response);
 
-        // Prepare the unit checking stuff. It may be re-used across parts.
-        $checkunit = new answer_unit_conversion();
-
         $classification = [];
         // Now, we do the classification for every part.
         foreach ($this->parts as $part) {
@@ -542,9 +545,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
 
             // If there is an answer, we check its correctness.
-            // FIXME: refactor this part
-            list($anscorr, $unitcorr)
-                    = $this->grade_responses_individually($part, $response, $checkunit);
+            list('answer' => $answergrade, 'unit' => $unitcorrect) = $part->grade($response);
 
             // TODO: For questions with unit:
             // fully correct (unit + value)
@@ -564,13 +565,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             if ($part->postunit !== '') {
                 // The unit can only be correct (1.0) or wrong (0.0).
                 // The answer can be any float from 0.0 to 1.0 inclusive.
-                if ($anscorr === 1.0 && $unitcorr === 1.0) {
+                if ($answergrade >= 0.999 && $unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
                             'right', $part->summarise_response($response), 1);
-                } else if ($unitcorr === 1.0) {
+                } else if ($unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
                             'wrongvalue', $part->summarise_response($response), 0);
-                } else if ($anscorr === 1.0) {
+                } else if ($answergrade >= 0.999) {
                     $classification[$part->partindex] = new question_classified_response(
                             'wrongunit', $part->summarise_response($response), 1 - $part->unitpenalty);
                 } else {
@@ -578,13 +579,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                             'wrong', $part->summarise_response($response), 0);
                 }
             } else {
-                $fraction = $anscorr * ($unitcorr ? 1 : (1 - $part->unitpenalty));
-                if ($fraction > .999) {
+                if ($answergrade >= .999) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'right', $part->summarise_response($response), $fraction);
+                            'right', $part->summarise_response($response), $answergrade);
                 } else {
                      $classification[$part->partindex] = new question_classified_response(
-                            'wrong', $part->summarise_response($response), $fraction);
+                            'wrong', $part->summarise_response($response), $answergrade);
                 }
             }
         }
@@ -655,12 +655,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @param bool $finalsubmit true when the student clicks "submit all and finish"
      * @return array part name => qbehaviour_adaptivemultipart_part_result
      */
-    public function grade_parts_that_can_be_graded(array $response, array $lastgradedresponse, $finalsubmit) {
+    public function grade_parts_that_can_be_graded(array $response, array $lastgradedresponses, $finalsubmit) {
         $partresults = [];
 
         // Every entry from the $lastgradedresponse array contains the same fields (for the entire
         // question) and the values are all the same, so we just take the last array entry.
-        $lastresponse = end($lastgradedresponse);
+        $lastresponse = end($lastgradedresponses);
         if ($lastresponse === false) {
             $lastresponse = [];
         }
@@ -746,36 +746,51 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return float grade that should be awarded for this sequence of responses
      */
     public function compute_final_grade($responses, $totaltries): float {
-        $fractionsum = 0;
-        $fractionmax = 0;
-        $checkunit = new answer_unit_conversion();
+        $obtainedgrade = 0;
+        $maxgrade = 0;
 
         foreach ($this->parts as $part) {
-            $fractionmax += $part->answermark;
-            $lastresponse = array();
+            $maxgrade += $part->answermark;
+
+            // We start with an empty last response.
+            $lastresponse = [];
             $lastchange = 0;
+
             $partfraction = 0;
+
             foreach ($responses as $responseindex => $response) {
                 $response = $this->normalize_response($response);
+
+                // If the response has not changed, we have nothing to do.
                 if ($part->is_same_response($lastresponse, $response)) {
                     continue;
                 }
+
+                // Otherwise, save this as the last response and store the index where
+                // the response was changed for the last time.
                 $lastresponse = $response;
                 $lastchange = $responseindex;
-                list($anscorrs, $unitcorrs) = $this->grade_responses_individually($part, $response, $checkunit);
-                $partfraction = $anscorrs * ($unitcorrs ? 1 : (1 - $part->unitpenalty));
+
+                // Obtain the grade for the current response.
+                $partgrade = $part->grade($response);
+
+                $partfraction = $partgrade['answer'];
+                // If unit is wrong, make the necessary deduction.
+                if ($partgrade['unit'] === false) {
+                    $partfraction = $partfraction * (1 - $part->unitpenalty);
+                }
             }
-            $fractionsum += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
+            $obtainedgrade += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
         }
 
-        return $fractionsum / $fractionmax;
+        return $obtainedgrade / $maxgrade;
     }
 
     // FIXME: remove this once grade_responses_individually() is gone
     // Check whether the format of the response is correct and evaluate the corresponding expression
     // @return difference between coordinate and model answer. null if format incorrect.
     // Note: $r will have evaluated value.
-    public function compute_response_difference(&$vars, &$a, &$r, $cfactor, $gradingtype) {
+    public function xxx_compute_response_difference(&$vars, &$a, &$r, $cfactor, $gradingtype) {
         return 0;
         $res = (object)array('is_number' => true, 'diff' => null);
         if ($gradingtype != 10 && $gradingtype != 100 && $gradingtype != 1000) {
@@ -826,7 +841,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     // FIXME: this has to go to the part, not mandatory / own implementation -> remove this
     // Grade response for part, and return a list with answer correctness and unit correctness.
-    public function grade_responses_individually($part, $response, &$checkunit) {
+    public function xxx_grade_responses_individually($part, $response, &$checkunit) {
         $response = $this->normalize_response($response);
         // Step 1: Split the student's responses to the part into coordinates and unit.
         $coordinates = array();
@@ -1323,14 +1338,30 @@ class qtype_formulas_part {
         // If there is a combined number/unit answer, we know that there are no other
         // answers, so we just check this one.
         if ($this->has_combined_unit_field()) {
-            return empty($response["{$this->partindex}_"]);
+            // If the key does not exist, there is a problem and we consider the part as
+            // unanswered.
+            if (!array_key_exists("{$this->partindex}_", $response)) {
+                return true;
+            }
+            // If the answer is empty, but not equivalent to zero, we consider the part as
+            // unanswered.
+            $tocheck = $response["{$this->partindex}_"];
+            return empty($tocheck) && !is_numeric($tocheck);
         }
 
         // Otherwise, we check all answer boxes (including unit, if it exists) of this part.
         // If at least one is not empty, the part has been answered.
         // Note that $response will contain *all* answers for *all* parts.
         for ($i = 0; $i <= $this->numbox; $i++) {
-            if (!empty($response["{$this->partindex}_{$i}"])) {
+            // If the key does not exist, there is a problem and we consider the part as
+            // unanswered.
+            if (!array_key_exists("{$this->partindex}_{$i}", $response)) {
+                return true;
+            }
+            // If the answer field is not empty or it is equivalent to zero, we consider
+            // the part as answered and leave early.
+            $tocheck = $response["{$this->partindex}_{$i}"];
+            if (!empty($tocheck) || is_numeric($tocheck)) {
                 return false;
             }
         }
@@ -1410,6 +1441,10 @@ class qtype_formulas_part {
      * @return void
      */
     public function add_special_variables($studentanswers, $conversionfactor) {
+        if (count($studentanswers) === 0) {
+            return;
+        }
+
         $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
 
         // First, we set _a to the array of model answers. We can use the
@@ -1470,6 +1505,7 @@ class qtype_formulas_part {
         // FIXME: parser should include known variables
         $parser = new parser($command);
         $this->evaluator->evaluate($parser->get_statements(), true);
+        //$this->evaluator->clear_stack();
     }
 
     /** FIXME: not finished yet
@@ -1502,6 +1538,8 @@ class qtype_formulas_part {
             // The answer might be invalid, so we wrap the parsing and evaluation in try-catch.
             try {
                 $parser = new answer_parser('[' . implode(',', $response) . ']');
+                // Make sure the stack is empty.
+                $this->evaluator->clear_stack();
                 $evaluatedresponse = $this->evaluator->evaluate($parser->get_statements())[0];
             } catch (Throwable $t) {
                 // FIXME: this could probably be improved
@@ -1621,7 +1659,9 @@ class qtype_formulas_part {
             $res["{$this->partindex}_{$this->numbox}"] = $this->postunit;
         }
 
-        $res = $this->translate_mc_answers_for_feedback($res);
+        if ($forfeedback) {
+            $res = $this->translate_mc_answers_for_feedback($res);
+        }
 
         return $res;
     }

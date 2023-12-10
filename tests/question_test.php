@@ -25,7 +25,6 @@
 namespace qtype_formulas;
 use qbehaviour_adaptivemultipart_part_result;
 use question_attempt_step;
-use qtype_formulas_part;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -132,10 +131,10 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $this->assertEquals(array('0_0' => '5', '1_0' => '6', '2_0' => '7'), $q->get_correct_response());
-        $this->assertEquals('5', $q->correct_response_formatted($q->parts[0]));
-        $this->assertEquals('6', $q->correct_response_formatted($q->parts[1]));
-        $this->assertEquals('7', $q->correct_response_formatted($q->parts[2]));
+        $this->assertEquals(['0_0' => '5', '1_0' => '6', '2_0' => '7'], $q->get_correct_response());
+        $this->assertEquals(['0_0' => '5'], $q->get_correct_response($q->parts[0]));
+        $this->assertEquals(['1_0' => '6'], $q->get_correct_response($q->parts[1]));
+        $this->assertEquals(['2_0' => '7'], $q->get_correct_response($q->parts[2]));
     }
 
 
@@ -146,25 +145,27 @@ class question_test extends \basic_testcase {
         $globalvars = $q->evaluator->variables;
         $v = $globalvars['v']->value;
 
-        $this->assertEquals(array('0_' => "{$v}m/s",
-                                  '1_0' => "$v",
-                                  '1_1' => 'm/s',
-                                  '2_0' => "$v",
-                                  '3_0' => "$v"),
-                $q->get_correct_response());
-        $this->assertEquals("{$v} m/s", $q->correct_response_formatted($q->parts[0]));
-        $this->assertEquals("{$v}, m/s", $q->correct_response_formatted($q->parts[1]));
-        $this->assertEquals("$v", $q->correct_response_formatted($q->parts[2]));
-        $this->assertEquals("$v", $q->correct_response_formatted($q->parts[3]));
+        $this->assertEquals(
+            [
+                '0_' => "{$v} m/s",
+                '1_0' => $v,
+                '1_1' => 'm/s',
+                '2_0' => $v,
+                '3_0' => $v
+            ], $q->get_correct_response());
+        $this->assertEquals(['0_' => "{$v} m/s"], $q->get_correct_response($q->parts[0]));
+        $this->assertEquals(['1_0' => $v, '1_1' => 'm/s'], $q->get_correct_response($q->parts[1]));
+        $this->assertEquals(['2_0' => $v], $q->get_correct_response($q->parts[2]));
+        $this->assertEquals(['3_0' => $v], $q->get_correct_response($q->parts[3]));
     }
 
     public function test_get_correct_response_test3() {
         $q = $this->get_test_formulas_question('testmce');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $this->assertEquals(array('0_0' => "1"),
-                $q->get_correct_response());
-        $this->assertEquals('Cat', $q->correct_response_formatted($q->parts[0]));
+        $this->assertEquals(['0_0' => 1], $q->get_correct_response());
+        $this->assertEquals(['0_0' => 1], $q->get_correct_response($q->parts[0]));
+        $this->assertEquals(['0_0' => 'Cat'], $q->parts[0]->get_correct_response(true));
     }
 
     public function test_get_is_same_response_for_part_test2() {
@@ -200,16 +201,16 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
-        $lastgradedresponses = array(
-            '0'     => array('0_0' => '5', '1_0' => '', '2_0' => ''),
-            '1' => array('0_0' => '6', '1_0' => '6', '2_0' => '')
-        );
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
+            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => '']
+        ];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
-        $expected = array(
+        $expected = [
             '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
-        );
+        ];
         $this->assertEquals($expected, $partscores);
     }
 
@@ -219,7 +220,7 @@ class question_test extends \basic_testcase {
 
         $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
         $lastgradedresponses = array(
-            '0'     => array('0_0' => '5', '1_0' => '4', '2_0' => ''),
+            '0' => array('0_0' => '5', '1_0' => '4', '2_0' => ''),
             '1' => array('0_0' => '6', '1_0' => '6', '2_0' => ''),
             '2' => array('0_0' => '6', '1_0' => '6', '2_0' => '7')
         );

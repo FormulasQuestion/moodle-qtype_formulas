@@ -128,13 +128,13 @@ class parser_test extends \advanced_testcase {
 
     public function provide_ternary_expressions(): array {
         return [
-            'basic' => ['1,5,==,2,3,%%ternary', '1 == 5 ? 2 : 3'],
-            'operations in condition, 1' => ['1,2,+,3,==,1,2,%%ternary', '1 + 2 == 3 ? 1 : 2'],
-            'operations in condition, 2' => ['1,3,2,-,==,1,2,%%ternary', '1 == 3 - 2 ? 1 : 2'],
-            'operations in true part' => ['1,1,2,+,2,%%ternary', '1 ? 1 + 2 : 2'],
-            'operations in false part' => ['1,3,2,4,+,%%ternary', '1 ? 3 : 2 + 4'],
-            'operations in all parts' => ['1,2,+,3,==,1,2,3,*,+,4,5,*,6,-,%%ternary', '1+2==3 ? 1+2*3 : 4*5-6'],
-            'ternary in false part' => ['1,2,==,5,2,3,==,6,7,%%ternary,%%ternary', '1==2 ? 5 : 2==3 ? 6 : 7'],
+            'basic' => ['1,5,==,%%ternary-sentinel,2,3,%%ternary', '1 == 5 ? 2 : 3'],
+            'operations in condition, 1' => ['1,2,+,3,==,%%ternary-sentinel,1,2,%%ternary', '1 + 2 == 3 ? 1 : 2'],
+            'operations in condition, 2' => ['1,3,2,-,==,%%ternary-sentinel,1,2,%%ternary', '1 == 3 - 2 ? 1 : 2'],
+            'operations in true part' => ['1,%%ternary-sentinel,1,2,+,2,%%ternary', '1 ? 1 + 2 : 2'],
+            'operations in false part' => ['1,%%ternary-sentinel,3,2,4,+,%%ternary', '1 ? 3 : 2 + 4'],
+            'operations in all parts' => ['1,2,+,3,==,%%ternary-sentinel,1,2,3,*,+,4,5,*,6,-,%%ternary', '1+2==3 ? 1+2*3 : 4*5-6'],
+            'ternary in false part' => ['1,2,==,%%ternary-sentinel,5,2,3,==,%%ternary-sentinel,6,7,%%ternary,%%ternary', '1==2 ? 5 : 2==3 ? 6 : 7'],
         ];
     }
 
@@ -191,11 +191,11 @@ class parser_test extends \advanced_testcase {
             'constant' => ['a,1,=', 'a = 1'],
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
             'arithmetic expression with ternary in parens' => [
-                'a,5,b,1,==,3,4,%%ternary,2,*,+,=',
+                'a,5,b,1,==,%%ternary-sentinel,3,4,%%ternary,2,*,+,=',
                 'a = 5 + (b == 1 ? 3 : 4) * 2'
             ],
             'arithmetic expression with double ternary' => [
-                'a,b,c,==,1,b,d,==,2,0,%%ternary,%%ternary,=',
+                'a,b,c,==,%%ternary-sentinel,1,b,d,==,%%ternary-sentinel,2,0,%%ternary,%%ternary,=',
                 'a = b == c ? 1 : b == d ? 2 : 0'
             ],
             'arithmetic expression with paren and power' => ['a,3,4,**,5,**,=', 'a = (3**4)**5'],
@@ -208,6 +208,7 @@ class parser_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
+        // FIXME: remove or create real use
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
         $input = 'a = 4; b = !a';
@@ -239,6 +240,7 @@ class parser_test extends \advanced_testcase {
         $input = 'π + pi + pi() + pi(2+3)';
         $input = '"foo"[1]';
 
+        return;
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
         $parser = new parser($input);
         foreach ($parser->statements as $statement) {
@@ -250,20 +252,21 @@ class parser_test extends \advanced_testcase {
     }
 
     public function test_for_loop() {
+        // FIXME: remove this test, only test in evaluation
         $input = 'for (a:[1:23,5]) { a = 5; b = 3;}';
 
         $parser = new parser($input);
-        print_r($parser->statements);
     }
 
     public function test_answer_expression() {
+        // FIXME - TODO --> implement new test (own file)
         $input = '2^3';
 
         $parser = new answer_parser($input);
-        print_r($parser->statements);
     }
 
     public function test_parse_list() {
+        // FIXME - TODO --> implement new test
         //$input = '[1, 2, 3]';
         //$input = '[1, "a", 3]';
         //$input = '[1, ["x", "y"], 3]';
@@ -272,6 +275,6 @@ class parser_test extends \advanced_testcase {
         $input = '-123.541e-13; 4';
 
         $parser = new answer_parser($input);
-        print_r($parser->statements);
+        // print_r($parser->statements);
     }
 }

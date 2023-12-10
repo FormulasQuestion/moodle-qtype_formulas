@@ -167,7 +167,7 @@ class evaluator {
         }
     }
 
-    private function clear_stack(): void {
+    public function clear_stack(): void {
         $this->stack = [];
     }
 

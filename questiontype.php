@@ -785,10 +785,28 @@ class qtype_formulas extends question_type {
 
         $partdata = [];
         $errors = [];
+        $hasoneanswer = false;
 
         foreach (array_keys($data->answermark) as $i) {
+
+            // If the mark is not set or is zero, we consider that as no mark.
             $nomark = empty(trim($data->answermark[$i]));
-            $noanswer = empty(trim($data->answer[$i]));
+            // For answers, zero is not nothing...
+            $noanswer = empty(trim($data->answer[$i])) && !is_numeric($data->answer[$i]);
+            if ($noanswer === false) {
+                $hasoneanswer = true;
+            }
+
+            // FIXME: placement of "at least one answer is required"
+            // --> only if no valid part can be found
+            // --> if no answer and no answermark: answer
+            // --> if answer but answermark == 0: answermark
+
+            // FIXME: to review, probably keep current system
+            // We consider a part as empty if none of the following fields have been set:
+            // subqtext, answer, vars1, vars2, feedback (general feedback for part)
+            //
+            // maybe add the three other feedbacks + postunit + otherrules
 
             // Data from the editors are stored in an array with the keys text, format and itemid.
             $noparttext = empty(trim($data->subqtext[$i]['text']));
@@ -851,8 +869,14 @@ class qtype_formulas extends question_type {
 
         // If we do not have at least one valid part, output an error message. Attach
         // it to the field where the user can define the answer for the first part.
-        if (count($partdata) === 0) {
-            $errors['answer[0]'] = get_string('error_no_answer', 'qtype_formulas');
+        // Note: we do only output that error, if there is no other error for the answermark
+        // or answer field. Otherwise, we might be in a situation where the user sees
+        // "At least one answer is required." below a filled answer field, simply because
+        // e.g. all answermarks are set to 0.
+        if (count($partdata) === 0 && $hasoneanswer === false) {
+            if (empty($errors['answer[0]'])) {
+                $errors['answer[0]'] = get_string('error_no_answer', 'qtype_formulas');
+            }
         }
 
         return (object)['errors' => $errors, 'parts' => $partdata];
@@ -870,47 +894,30 @@ class qtype_formulas extends question_type {
         // Collect all error messages in an associative array of the form 'fieldname' => 'error'.
         $errors = [];
 
+        // FIXME: move the comment to the validation function
         // The value from the globalunitpenalty field is only used to set the penalty
         // for each part. Is has to be validated separately. The same is true for the
-        // globalruleid. Its value comes from a SELECT element, so there should be no errors.
+        // globalruleid. Its value comes from a <select> element, so there should be no errors.
         // If we are importing a question, there will be no globalunitpenalty or globalruleid,
         // because the question already has those options stored in its parts.
         // Note: we validate this first, because the fields will be referenced during validation
         // of the parts.
         $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
         if (!$isfromimport) {
-            if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
-                $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
-            }
-
-            // If the globalruleid field is missing, that means the request or the form has
-            // been modified by the user. In that case, we set the id to the invalid value -1
-            // to simplify the code for the upcoming steps.
-            if (!isset($data->globalruleid)) {
-                $data->globalruleid = -1;
-            }
-
-            // Finally, check the global setting for the basic conversion rules. We only check this
-            // once, because it is the same for all parts.
-            $conversionrules = new unit_conversion_rules();
-            $entry = $conversionrules->entry($data->globalruleid);
-            if ($entry === null || $entry[1] === null) {
-                $errors['globalruleid'] = get_string('error_ruleid', 'qtype_formulas');
-            } else {
-                $unitcheck = new answer_unit_conversion();
-                $unitcheck->assign_default_rules($data->globalruleid, $entry[1]);
-                try {
-                    $unitcheck->reparse_all_rules();
-                } catch (Exception $e) {
-                    $errors['globalruleid'] = $e->getMessage();
-                }
-            }
+            $errors += $this->validate_global_unit_fields($data);
         }
 
         // Check the parts. We get a stdClass with the properties 'errors' (a possibly empty array)
         // and 'parts' (an array of stdClass objects, one per part).
         $partcheckresult = $this->check_and_filter_parts($data);
         $errors += $partcheckresult->errors;
+
+        // If the basic check failed, we abort and output the error message, because the errors
+        // might cause other errors downstream.
+        if (!empty($errors)) {
+            return (object)array('errors' => $errors, 'answers' => null);
+        }
+
         $parts = $partcheckresult->parts;
 
         // Make sure that answer box placeholders (if used) are unique for each part.
@@ -927,7 +934,7 @@ class qtype_formulas extends question_type {
         // will be a string. If the data comes from the edit from, it is in the editor's
         // array structure (text, format, itemid).
         $errors += $this->check_placeholders(
-            $isfromimport ? $data->questiontext : $data->questiontext['text'],
+            is_array($data->questiontext) ? $data->questiontext['text'] : $data->questiontext,
             $parts
         );
 
@@ -939,9 +946,66 @@ class qtype_formulas extends question_type {
         $errors += $evaluationresult->errors;
         $parts = $evaluationresult->parts;
 
+        // FIXME: add default options if no parts defined
+        if (count($parts) === 0 && false) {
+            $parts[0] =
+            (object)[
+                'answermark' => get_config('qtype_formulas')->defaultanswermark,
+                'questionid' => $data->id,
+                'varsrandom' => '',
+                'varsglobal' => '',
+                'correctfeedback' => get_string('correctfeedbackdefault', 'question'),
+                'correctfeedbackformat' => FORMAT_HTML,
+                'partiallycorrectfeedback' => get_string('partiallycorrectfeedbackdefault', 'question'),
+                'partiallycorrectfeedbackformat' => FORMAT_HTML,
+                'incorrectfeedback' => get_string('incorrectfeedbackdefault', 'question'),
+                'incorrectfeedbackformat' => FORMAT_HTML,
+                'shownumcorrect' => 0,
+                'answernumbering' => 'none',
+            ];
+            print('****');
+        }
+
         return (object)array('errors' => $errors, 'answers' => $parts);
     }
 
+    /**
+     * TODO: doc
+     *
+     * @return array
+     */
+    private function validate_global_unit_fields(object $data): array {
+        $errors = [];
+
+        if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
+            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+        }
+
+        // If the globalruleid field is missing, that means the request or the form has
+        // been modified by the user. In that case, we set the id to the invalid value -1
+        // to simplify the code for the upcoming steps.
+        if (!isset($data->globalruleid)) {
+            $data->globalruleid = -1;
+        }
+
+        // Finally, check the global setting for the basic conversion rules. We only check this
+        // once, because it is the same for all parts.
+        $conversionrules = new unit_conversion_rules();
+        $entry = $conversionrules->entry($data->globalruleid);
+        if ($entry === null || $entry[1] === null) {
+            $errors['globalruleid'] = get_string('error_ruleid', 'qtype_formulas');
+        } else {
+            $unitcheck = new answer_unit_conversion();
+            $unitcheck->assign_default_rules($data->globalruleid, $entry[1]);
+            try {
+                $unitcheck->reparse_all_rules();
+            } catch (Exception $e) {
+                $errors['globalruleid'] = $e->getMessage();
+            }
+        }
+
+        return $errors;
+    }
 
     /**
      * Check definition of variables (local vars, grading vars), various expressions

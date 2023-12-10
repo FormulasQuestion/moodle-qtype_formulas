@@ -269,7 +269,7 @@ class qtype_formulas_edit_form extends question_edit_form {
                 $repeatedoptions, $answersoption);
 
         if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
+            $repeatsatstart = max(1, count($this->question->options->$answersoption));
         } else {
             $repeatsatstart = $minoptions;
         }
@@ -322,6 +322,9 @@ class qtype_formulas_edit_form extends question_edit_form {
                             'format' => $answer->$fieldformat, 'itemid' => $itemid);
                     }
                 }
+            } else {
+                // FIXME
+                //print('foooooo');
             }
 
             $question = (object)((array)$question + $defaultvalues);

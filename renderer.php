@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use qtype_formulas\answer_unit_conversion;
 
 /**
  * Base class for generating the bits of output for formulas questions.
@@ -141,10 +140,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $response = $qa->get_last_qt_data();
         $response = $question->normalize_response($response);
-        $checkunit = new answer_unit_conversion;
 
-        list( $sub->anscorr, $sub->unitcorr) = $question->grade_responses_individually($part, $response, $checkunit);
-        $sub->fraction = $sub->anscorr * ($sub->unitcorr ? 1 : (1 - $part->unitpenalty));
+        list('answer' => $answergrade, 'unit' => $unitcorrect) = $part->grade($response);
+
+        $sub->fraction = $answergrade;
+        if ($unitcorrect === false) {
+            $sub->fraction *= (1 - $part->unitpenalty);
+        }
 
         // Get the class and image for the feedback.
         if ($options->correctness) {
@@ -484,7 +486,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function part_correct_response($i, question_attempt $qa) {
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
-        $answers = $question->parts[$i]->get_correct_response();
+        $answers = $question->parts[$i]->get_correct_response(true);
         $answertext = implode(', ', $answers);
 
         if ($question->parts[$i]->answernotunique) {
