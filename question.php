@@ -409,6 +409,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return string text formatted for output by format_text
      */
     public function format_text($text, $format, $qa, $component, $filearea, $itemid, $clean = false): string {
+        // If $text is not set, we simply return an empty string.
+        if (!isset($text)) {
+            return '';
+        }
         // Doing a quick check whether there *might be* placeholders in the text. If this
         // is positive, we run it through the evaluator, even if it might not be needed.
         if (strpos($text, '{') !== false) {

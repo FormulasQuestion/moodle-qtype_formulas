@@ -68,6 +68,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->shownumcorrect = 0;
         $q->answernumbering = 'abc';
         $q->penalty = 0.2; // The default.
+        $q->generalfeedback = '';
         test_question_maker::set_standard_combined_feedback_fields($q);
         $q->numparts = 0;   // This is of course invalid but should be changed by all tests.
         $q->parts = [];
@@ -121,6 +122,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                                   1 => '');
         $q->numparts = 1;
         $q->defaultmark = 2;
+        $q->generalfeedback = '';
         $p = self::make_a_formulas_part();
         $p->id = 14;
         $p->placeholder = '';
