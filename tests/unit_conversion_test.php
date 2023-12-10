@@ -46,14 +46,14 @@ class unit_conversion_test extends \advanced_testcase {
 
         $parser = new answer_parser($expected);
         $index = $parser->find_start_of_units();
-        $expectednumber = substr($expected, 0, $index);
-        $expectedunit = substr($expected, $index);
+        $expectednumber = trim(substr($expected, 0, $index));
+        $expectedunit = trim(substr($expected, $index));
 
         foreach ($inputs as $input) {
             $parser = new answer_parser($input);
             $index = $parser->find_start_of_units();
-            $number = substr($input, 0, $index);
-            $unit = substr($input, $index);
+            $number = trim(substr($input, 0, $index));
+            $unit = trim(substr($input, $index));
 
             // Check if the unit is compatible.
             $checked = $converter->check_convertibility($unit, $expectedunit);
