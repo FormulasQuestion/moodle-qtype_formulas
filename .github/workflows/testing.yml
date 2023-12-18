@@ -72,7 +72,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           ini-values: max_input_vars=5000
-          coverage: none
+          coverage: xdebug
 
       - name: Initialise moodle-plugin-ci
         run: |
@@ -92,7 +92,11 @@ jobs:
 
       - name: PHPUnit tests
         if: ${{ always() }}
-        run: moodle-plugin-ci phpunit --fail-on-warning
+        run: |
+          moodle-plugin-ci phpunit --fail-on-warning --coverage-clover
+          moodle-plugin-ci coveralls-upload
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Behat is done separately to allow app testing as well
       #- name: Behat features
