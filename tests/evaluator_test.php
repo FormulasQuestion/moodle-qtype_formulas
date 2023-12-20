@@ -27,6 +27,9 @@ namespace qtype_formulas;
 
 use \Exception;
 
+
+// TODO: test with global vars depending on instantiated random vars
+
 class evaluator_test extends \advanced_testcase {
 
     /**
@@ -651,7 +654,7 @@ class evaluator_test extends \advanced_testcase {
                 'x = {1:3, 4:5:0.1 , 8:10:0.5 };'
             ],
             'values and ranges' => [
-                ['name' => 'a', 'count' => 42, 'min' => 0, 'max' => 10, 'shuffle' => false],
+                ['name' => 'a', 'count' => 42, 'min' => 0, 'max' => 100, 'shuffle' => false],
                 'a = {0, 1:3:0.1, 10:30, 100}'
             ],
             'shuffle with strings' => [
@@ -702,6 +705,22 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public function test_reinstantiation_of_random_variables(): void {
+        // TODO
+        $randomvars = 'a={1:10}';
+        $randomparser = new random_parser($randomvars);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+        $evaluator->instantiate_random_variables();
+
+        $globalvars = 'a=2*a';
+        $globalparser = new parser($globalvars);
+        $evaluator->evaluate($globalparser->get_statements());
+
+        $evaluator->instantiate_random_variables();
+        $evaluator->evaluate($globalparser->get_statements());
+    }
+
     /**
      * @dataProvider provide_invalid_random_vars
      */
@@ -750,7 +769,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertLessThanOrEqual(72, $result[3]->value);
     }
 
-    // TODO: maybe add a test with an algebraic variable
+    // TODO: add a test with an algebraic variable
     public function test_substitute_variables_in_text() {
         // Define, parse and evaluate some variables.
         $vars = 'a=1; b=[2,3,4];';
@@ -766,12 +785,12 @@ class evaluator_test extends \advanced_testcase {
         $text .= '{=a*100}, {=b[0]*b[1]}, {= b[1] * b[2] }, {=100+[4:8][1]}, {xyz}, {=3+}';
 
         // Test without substitution of array b.
-        $output = $evaluator->substitute_variables_in_text($text, true);
+        $output = $evaluator->substitute_variables_in_text($text);
         $expected = '{1}, 1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
         $this->assertEquals($expected, $output);
 
         // Test with substitution of array b as one would write it in PHP.
-        $output = $evaluator->substitute_variables_in_text($text);
+        $output = $evaluator->substitute_variables_in_text($text, false);
         $expected = '{1}, 1, {a }, { a}, [2, 3, 4], 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
         $this->assertEquals($expected, $output);
     }
@@ -820,6 +839,10 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_assignments(): array {
         return [
+            'assignment to invalid variable' => [
+                "you cannot assign values to the special variable '_a'",
+                '_a=3;'
+            ],
             'missing operator between numbers' => [
                 '1:5:syntax error: did you forget to put an operator?',
                 'a=3 6;'
@@ -913,7 +936,7 @@ class evaluator_test extends \advanced_testcase {
                 'x = {"A", "B"};'
             ],
             'algebraic variable used in calculation' => [
-                '1:21:evaluation error: numeric value expected, got algebraic variable',
+                "1:21:algebraic variable 'b' cannot be used in this context",
                 'a = 7; b = {1:5}; 2*b'
             ],
             'invalid ternary, ? is last char before closing paren' => [
@@ -1238,8 +1261,9 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = 5; x={1:10};';
         $input = '1+ln(3)';
         $input = 'a*sin';
+        $input = 'a=[1,2,3]; a[1]=5;';
         return;
-        //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
+                //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
         //$parser = new random_parser($input);
         $parser = new parser($input);

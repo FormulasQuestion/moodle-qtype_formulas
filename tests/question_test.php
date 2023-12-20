@@ -181,19 +181,32 @@ class question_test extends \basic_testcase {
     }
 
     public function test_grade_parts_that_can_be_graded_test1() {
-        $q = $this->get_test_formulas_question('test4');
+        // FIXME: changing this test, because it is flawed. test4 is a question with four parts
+        // and different ways of entering a result with unit (combined field, separate field, ignoring unit)
+        // and it is randomized; this should probably be 'testmethodsinparts', but the answers should
+        // respect the expected format (e.g. 0_ for combined unit field)
+        $q = $this->get_test_formulas_question('testmethodsinparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '8');
-        $lastgradedresponses = array(
-            '0'     => array('0_0' => '5', '1_0' => '', '2_0' => ''),
-            '1' => array('0_0' => '6', '1_0' => '6', '2_0' => '')
-        );
+        // old: $response = ['0_0' => '5', '1_0' => '6', '2_0' => '8'];
+        $response = ['0_' => '40 m/s', '1_0' => '30', '1_1' => 'm/s', '2_0' => '40', '3_0' => '50'];
+        $lastgradedresponses = [
+            // '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
+            // '1' => ['0_0' => '6', '1_0' => '6', '2_0' => '']
+            '0' => ['0_' => '20 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '0', '3_0' => '40'],
+            '1' => ['0_' => '30 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40'],
+        ];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
-        $expected = array(
-            '2' => new qbehaviour_adaptivemultipart_part_result('2', 0, 0.3),
-        );
+        $expected = [
+            // first part: right after wrong last response, penalty of 0.3, because it is a retry
+            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
+            // second part: wrong again, no points and a penalty of 0.3
+            '1' => new qbehaviour_adaptivemultipart_part_result('1', 0, 0.3),
+            // third part: not changed compared to last try, no entry
+            // fourth part: was right at the first try, wrong now, so 0 points and a penalty
+            '3' => new qbehaviour_adaptivemultipart_part_result('3', 0, 0.3),
+        ];
         $this->assertEquals($expected, $partscores);
     }
 
@@ -209,6 +222,10 @@ class question_test extends \basic_testcase {
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
         $expected = [
+            // FIXME: changed expected value, because new response differs from last registered
+            // response for parts 0 and 2, so both should be graded; this is a change compared to
+            // the old implementation; checking that with the authors of qbehaviour_adaptivemultipart
+            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
             '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
         ];
         $this->assertEquals($expected, $partscores);
@@ -218,15 +235,20 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
-        $lastgradedresponses = array(
-            '0' => array('0_0' => '5', '1_0' => '4', '2_0' => ''),
-            '1' => array('0_0' => '6', '1_0' => '6', '2_0' => ''),
-            '2' => array('0_0' => '6', '1_0' => '6', '2_0' => '7')
-        );
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '4', '2_0' => ''],
+            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => ''],
+            '2' => ['0_0' => '6', '1_0' => '6', '2_0' => '7']
+        ];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
-        $expected = array();
+        // FIXME: changed expected value, because new response differs from last registered
+        // response for part 0, so it should be graded; this is a change compared to
+        // the old implementation; checking that with the authors of qbehaviour_adaptivemultipart
+        $expected = [
+            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3)
+        ];
         $this->assertEquals($expected, $partscores);
     }
 
