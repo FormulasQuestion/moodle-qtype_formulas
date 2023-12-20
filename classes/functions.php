@@ -1289,6 +1289,11 @@ class functions {
 
     public static function assure_numeric($n, $message = '', $additionalcondition = self::NONE) {
         if (is_numeric($n) === false) {
+            // For compatibility with PHP 7.4: check if it is a string. If it is, remove trailing
+            // space and try again.
+            if (is_string($n) && is_numeric(trim($n))) {
+                return self::assure_numeric(trim($n), $message, $additionalcondition);
+            }
             throw new Exception($message);
         }
         if ($additionalcondition & self::NON_NEGATIVE) {
