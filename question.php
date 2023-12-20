@@ -790,34 +790,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         return $obtainedgrade / $maxgrade;
     }
 
-    // FIXME: remove this once grade_responses_individually() is gone
-    // Check whether the format of the response is correct and evaluate the corresponding expression
-    // @return difference between coordinate and model answer. null if format incorrect.
-    // Note: $r will have evaluated value.
-    public function xxx_compute_response_difference(&$vars, &$a, &$r, $cfactor, $gradingtype) {
-        return 0;
-        $res = (object)array('is_number' => true, 'diff' => null);
-        if ($gradingtype != 10 && $gradingtype != 100 && $gradingtype != 1000) {
-            $gradingtype = 0;   // Treat as number if grading type unknown.
-        }
-        $res->is_number = $gradingtype != 1000;    // 1000 is the algebraic answer type.
-
-        // Note that the same format check has been performed on the client side by the javascript "formatcheck.js".
-        try {
-            if (!$res->is_number) {  // Unit has no meaning for algebraic format, so do nothing for it.
-                $res->diff = $this->qv->compute_algebraic_formula_difference($vars, $a, $r);
-            } else {
-                $res->diff = $this->qv->compute_numerical_formula_difference($a, $r, $cfactor, $gradingtype);
-            }
-        } catch (Exception $e) { // @codingStandardsIgnoreLine
-            // Any error will return null.
-        }
-        if ($res->diff === null) {
-            return null;
-        }
-        return $res;
-    }
-
     /**
      * Set up an evaluator class for every part and have it evaluate the local variables.
      *
@@ -841,80 +813,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             // there is only one answer, we wrap the value into an array.
             $part->get_evaluated_answers();
         }
-    }
-
-    // FIXME: this has to go to the part, not mandatory / own implementation -> remove this
-    // Grade response for part, and return a list with answer correctness and unit correctness.
-    public function xxx_grade_responses_individually($part, $response, &$checkunit) {
-        $response = $this->normalize_response($response);
-        // Step 1: Split the student's responses to the part into coordinates and unit.
-        $coordinates = array();
-        $i = $part->partindex;
-        foreach (range(0, $part->numbox - 1) as $j) {
-            $coordinates[$j] = trim($response["{$i}_$j"]);
-        }
-        $postunit = trim($response["{$i}_{$part->numbox}"]);
-
-        // Step 2: Use the unit system to check whether the unit in student responses is *convertible* to the true unit.
-        $conversionrules = new unit_conversion_rules;
-        $entry = $conversionrules->entry($part->ruleid);
-        $checkunit->assign_default_rules($part->ruleid, $entry[1]);
-        $checkunit->assign_additional_rules($part->otherrule);
-        $checked = $checkunit->check_convertibility($postunit, $part->postunit);
-        $cfactor = $checked->cfactor;
-        $unitcorrect = $checked->convertible ? 1 : 0;  // Convertible is regarded as correct here.
-
-        // Step 3: Unit is always correct if all coordinates are 0.
-        // Note that numbers must be explicit zero, expression sin(0) is not acceptable.
-        $is_origin = true;
-        foreach ($coordinates as $c) {
-            if (!is_numeric($c)) {
-                $is_origin = false;
-            }
-            if ($is_origin == false) {
-                break;    // Stop earlier when one of coordinates is not zero.
-            }
-            $is_origin = $is_origin && (floatval($c) == 0);
-        }
-        if ($is_origin) {
-            $unitcorrect = 1;
-        }
-
-        // Step 4: If any coordinates is an empty string, it is considered as incorrect.
-        foreach ($coordinates as $c) {
-            if (strlen($c) == 0) {
-                return array(0, $unitcorrect);   // Graded unit is still returned.
-            }
-        }
-
-        // Step 5: Get the model answer, which is an array of numbers or strings.
-        $modelanswers = $this->get_evaluated_answers()[$part->partindex];
-        if (count($coordinates) != count($modelanswers)) {
-            throw new Exception('Database record inconsistence: number of answers in part!');
-        }
-
-        // Step 6: Check the format of the student response and transform them into variables for grading later.
-        //$vars = $this->get_local_variables($part);     // Contains both global and local variables.
-        $vars = ['idcounter' => 0, 'all' => []];
-        $gradingtype = $part->answertype;
-        $dres = $this->compute_response_difference($vars, $modelanswers, $coordinates, $cfactor, $gradingtype);
-        if ($dres === null) {
-            return array(0, $unitcorrect); // If the answer cannot be evaluated under the grading type.
-        }
-        //$this->add_special_correctness_variables($vars, $modelanswers, $coordinates, $dres->diff, $dres->is_number);
-
-        // Step 7: Evaluate the grading variables and grading criteria to determine whether the answer is correct.
-        //$vars = $this->qv->evaluate_assignments($vars, $part->vars2);
-        //$correctness = $this->qv->evaluate_general_expression($vars, $part->correctness);
-        //if ($correctness->type != 'n') {
-        //    throw new Exception(get_string('error_criterion', 'qtype_formulas'));
-        //}
-
-        // Step 8: Restrict the correctness value within 0 and 1 (inclusive). Also, all non-finite numbers are incorrect.
-        //$answercorrect = is_finite($correctness->value) ? min(max((float) $correctness->value, 0.0), 1.0) : 0.0;
-        $answercorrect = false;
-        return [1.0, true];
-        return array($answercorrect, $unitcorrect);
     }
 
     public function normalize_response(array $response): array {
