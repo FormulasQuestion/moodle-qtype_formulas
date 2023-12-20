@@ -30,6 +30,7 @@ use qtype_formulas\evaluator;
 use qtype_formulas\random_parser;
 use qtype_formulas\answer_parser;
 use qtype_formulas\parser;
+use qtype_formulas\token;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -1097,6 +1098,12 @@ class qtype_formulas extends question_type {
             // i. e. the number of answer boxes that are to be shown. Also, we make sure that
             // $modelanswers becomes an array (possibly of one value) of literals.
             if (is_array($modelanswers->value)) {
+                // The value can be an array, because the user entered an algebraic variable. That
+                // is not accepted.
+                if ($modelanswers->type === token::SET) {
+                    $errors["answer[$i]"] = 'Invalid answer format: you cannot use an algebraic variable with this answer type';
+                    continue;
+                }
                 $parts[$i]->numbox = count($modelanswers->value);
                 $modelanswers = array_map(function ($element) {
                     return $element->value;
