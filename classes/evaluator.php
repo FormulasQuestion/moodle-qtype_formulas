@@ -110,7 +110,7 @@ class evaluator {
      * @param string $text the text to be formatted
      * @return string
      */
-    public function substitute_variables_in_text(string $text, bool $skiplists = false): string {
+    public function substitute_variables_in_text(string $text, bool $skiplists = true): string {
         // We have three sorts of placeholders: "naked" variables like {a},
         // variables with a numerical index like {a[1]} or more complex
         // expressions like {=a+b} or {=a[b]}.
@@ -145,7 +145,7 @@ class evaluator {
                 $results = $this->evaluate($parser->get_statements());
                 $result = end($results);
                 // If the users does not want to substitute lists (arrays), well ... we don't.
-                if ($skiplists && $result->type === token::LIST) {
+                if ($skiplists && in_array($result->type, [token::LIST, token::SET])) {
                     continue;
                 }
                 $text = str_replace("{{$match}}", strval($result), $text);
@@ -213,8 +213,10 @@ class evaluator {
         return $result;
     }
 
-    public function instantiate_random_variables(int $seed = 1): void {
-        mt_srand($seed);
+    public function instantiate_random_variables(?int $seed = null): void {
+        if (isset($seed)) {
+            mt_srand($seed);
+        }
         foreach ($this->randomvariables as $var) {
             $value = $var->instantiate();
             $this->set_variable_to_value(token::wrap($var->name, token::VARIABLE), $value);
@@ -250,7 +252,7 @@ class evaluator {
      * Set the variable defined in $token to the value $value and correctly set
      * it's $type attribute.
      *
-     * @param token $variable
+     * @param token $vartoken
      * @param token $value
      * @param bool $israndomvar
      * @return token
@@ -276,13 +278,16 @@ class evaluator {
             // return the value of the first instantiation.
             if ($israndomvar) {
                 $useshuffle = $value->type === variable::LIST;
+                if (is_scalar($value->value)) {
+                    $this->die('invalid definition of a random variable - you must provide a list of possible values', $value);
+                }
                 $randomvar = new random_variable($basename, $value->value, $useshuffle);
                 $this->randomvariables[$basename] = $randomvar;
                 return token::wrap($randomvar->reservoir);
             }
 
             // Otherwise we return the stored value.
-            $var = new variable($basename, $value->value, $value->type);
+            $var = new variable($basename, $value->value, $value->type, microtime(true));
             $this->variables[$basename] = $var;
             return token::wrap($var->value);
         }
@@ -311,6 +316,8 @@ class evaluator {
         // inside the array itself.
         $current->value = $value->value;
         $current->type = $value->type;
+        // Update timestamp for the base variable.
+        $this->variables[$basename]->timestamp = microtime(true);
 
         // Finally, we return what has been stored.
         return $current;
@@ -341,20 +348,26 @@ class evaluator {
             $type = $result->type;
             // In algebraic mode, an algebraic variable will resolve to a random value
             // from its reservoir.
-            if ($this->algebraicmode && $type === token::SET) {
-                // We re-seed the random generator with a preset value and the CRC32 of the
-                // variable's name. The preset will be changed by the calculate_algebraic_expression()
-                // function. This makes sure that while evaluating one single expression, we will
-                // get the same value for the same variable. Adding the variable name into the seed
-                // gives the chance to not have the same value for different variables with the
-                // same reservoir, even though this is not guaranteed, especially if the reservoir is
-                // small.
-                mt_srand($this->seed + crc32($name));
+            if ($type === token::SET) {
+                if ($this->algebraicmode) {
+                    // We re-seed the random generator with a preset value and the CRC32 of the
+                    // variable's name. The preset will be changed by the calculate_algebraic_expression()
+                    // function. This makes sure that while evaluating one single expression, we will
+                    // get the same value for the same variable. Adding the variable name into the seed
+                    // gives the chance to not have the same value for different variables with the
+                    // same reservoir, even though this is not guaranteed, especially if the reservoir is
+                    // small.
+                    mt_srand($this->seed + crc32($name));
 
-                $randomindex = mt_rand(0, count($result->value) - 1);
-                $randomelement = $result->value[$randomindex];
-                $value = $randomelement->value;
-                $type = $randomelement->type;
+                    $randomindex = mt_rand(0, count($result->value) - 1);
+                    $randomelement = $result->value[$randomindex];
+                    $value = $randomelement->value;
+                    $type = $randomelement->type;
+                } else {
+                    // If we are not in algebraic mode, it does not make sense to get the value of an algebraic
+                    // variable.
+                    $this->die("algebraic variable '$name' cannot be used in this context", $variable);
+                }
             } else {
                 $value = $result->value;
             }
@@ -448,7 +461,7 @@ class evaluator {
     }
 
     /**
-     * Takes a string represantation of an algebraic formula, e.g. "a*x^2 + b" and
+     * Takes a string representation of an algebraic formula, e.g. "a*x^2 + b" and
      * replace the non-algebraic variables by their numerical value. Return the resulting
      * string.
      *
@@ -682,7 +695,7 @@ class evaluator {
         }
         // If the stack contains more than one element, there must have been a problem somewhere.
         if (count($this->stack) !== 1) {
-            throw new Exception("stack should contain exactly one element after evaluation");
+            throw new Exception('stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?');
         }
         // If the stack only contains one single variable token, return its content.
         // Otherwise, return the token.

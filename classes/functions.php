@@ -31,8 +31,11 @@ use Exception;
 
 class functions {
     const NONE = 0;
-    const NON_NEGATIVE = 1;
-    const POSITIVE = 2;
+    const INTEGER = 1;
+    const NON_NEGATIVE = 2;
+    const NON_ZERO = 4;
+    const NEGATIVE = 8;
+    const POSITIVE = 16;
 
     /**
      * List of all functions exported by this class.
@@ -48,28 +51,28 @@ class functions {
      * - functino baz() with 2 or 3 arguments: 'baz' => [2, 3]
      */
     const FUNCTIONS = [
-        'binomialcdf' => [3, 3],
-        'binomialpdf' => [3, 3],
+        'binomialcdf' => [3, 3], // Test OK
+        'binomialpdf' => [3, 3], // Test OK
         'concat' => [2, INF],
         'diff' => [2, 3],
         'fact' => [1, 1], // Test OK
         'fill' => [2, 2],
-        'fmod' => [2, 2],
+        'fmod' => [2, 2], // Test OK
         'fqversionnumber' => [0, 0], // Test OK
-        'gcd' => [2, 2],
+        'gcd' => [2, 2], // Test OK
         'inv' => [1, 1],
         'join' => [2, INF],
-        'lcm' => [2, 2],
+        'lcm' => [2, 2], // Test OK
         'len' => [1, 1], // Test OK
         'ln' => [1, 1],
         'map' => [2, 3],
-        'modinv' => [2, 2],
-        'modpow' => [3, 3],
+        'modinv' => [2, 2], // Test OK
+        'modpow' => [3, 3], // Test OK
         'ncr' => [2, 2], // Test OK
-        'normcdf' => [3, 3],
+        'normcdf' => [3, 3], // Test OK
         'npr' => [2, 2], // Test OK
-        'pick' => [2, INF],
-        'poly' => [1, 3],
+        'pick' => [2, INF], // Test OK
+        'poly' => [1, 3], // Test OK
         'rshuffle' => [1, 1],
         'shuffle' => [1, 1],
         'sigfig' => [2, 2],
@@ -367,15 +370,15 @@ class functions {
 
     /**
      * Wrapper for the poly() function which can be invoked in many different ways:
-     * - list of numbers => polynomial with variable x
-     * - number => force + sign if number > 0
-     * - string, number => combine
-     * - string, list of numbers => polynomial with variable from string
-     * - list of strings, list of numbers => linear combination
-     * - string, number, string => combine them and, if appropriate, force + sign
-     * - string, list of numbers, string => polynomial (one var) using third argument as separator (e.g. &)
-     * - list of strings, list of numbers, string => linear combination using third argument as separator
-     * - list of numbers, string => polynomial with x using third argument as separator
+     * - (1) list of numbers => polynomial with variable x
+     * - (1) number => force + sign if number > 0
+     * - (2) string, number => combine
+     * - (2) string, list of numbers => polynomial with variable from string
+     * - (2) list of strings, list of numbers => linear combination
+     * - (2) list of numbers, string => polynomial with x using second argument as separator (e.g. &)
+     * - (3) string, number, string => combine them and, if appropriate, force + sign
+     * - (3) string, list of numbers, string => polynomial (one var) using third argument as separator (e.g. &)
+     * - (3) list of strings, list of numbers, string => linear combination using third argument as separator
      *
      * This will call the poly_formatter() function accordingly.
      */
@@ -383,32 +386,53 @@ class functions {
         $numargs = count($args);
         switch ($numargs) {
             case 1:
-                $argument = $args[0];
+                $argument = token::unpack($args[0]);
                 // For backwards compatibility: if called with just a list of numbers, use x as variable.
-                if (is_array($argument)) {
+                if (self::is_numeric_array($argument)) {
                     return self::poly_formatter('x', $argument);
                 }
                 // If called with just a number, force the plus sign (if the number is positive) to be shown.
                 // Basically, there is no other reason one would call this function with just one number.
-                return self::poly_formatter('', $argument, '+');
+                if (is_numeric($argument)) {
+                    return self::poly_formatter('', $argument, '+');
+                }
+                // If the single argument is neither an array, nor a number or numeric string,
+                // we throw an error.
+                throw new Exception('when calling poly() with one argument, it must be a number or a list of numbers');
             case 2:
-                $first = $args[0];
-                $second = $args[1];
-                // If called with a string and one number, combine them.
-                if (is_string($first) && is_float($second)) {
-                    return self::poly_formatter([$first], [$second]);
+                $first = token::unpack($args[0]);
+                $second = token::unpack($args[1]);
+                // If the first argument is a string, we distinguish to cases: (a) the second is a number
+                // and (b) the second is a list of numbers.
+                if (is_string($first)) {
+                    // If we have a string and a number, we wrap them in arrays and build a linear combination.
+                    if (is_float($second)) {
+                        return self::poly_formatter([$first], [$second]);
+                    }
+                    // If it is a string and a list of numbers, we build a polynomial.
+                    if (self::is_numeric_array($second)) {
+                        return self::poly_formatter($first, $second);
+                    }
+                    throw new Exception('when calling poly() with a string, the second argument must be a number or a list of numbers');
                 }
                 // If called with a list of numbers and a string, use x as default variable for the polynomial and use the
                 // third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
-                if (is_array($first) && is_string($second)) {
+                if (self::is_numeric_array($first) && is_string($second)) {
                     return self::poly_formatter('x', $first, '', $second);
                 }
-                // All other invocations with two arguments will automatically be handled correctly.
-                return self::poly_formatter($args[0], $args[1]);
+                // If called with a list of strings, the next argument must be a list of numbers.
+                if (is_array($first)) {
+                    if (self::is_numeric_array($second)) {
+                        return self::poly_formatter($first, $second);
+                    }
+                    throw new Exception('when calling poly() with a list of strings, the second argument must be a list of numbers');
+                }
+                // Any other invocations with two arguments is invalid.
+                throw new Exception('when calling poly() with two arguments, the first must be a string or a list of strings');
             case 3:
-                $first = $args[0];
-                $second = $args[1];
-                $third = $args[2];
+                $first = token::unpack($args[0]);
+                $second = token::unpack($args[1]);
+                $third = token::unpack($args[2]);
                 // If called with a string, a number and another string, combine them while using the third argument
                 // to e. g. force a "+" on positive numbers.
                 if (is_string($first) && is_float($second) && is_string($third)) {
@@ -675,8 +699,9 @@ class functions {
     }
 
     public static function pick($index, ...$data) {
-        // If the index is a float, it will be truncated. This is needed for
-        // backward compatibility.
+        // The index must be a number (or a numeric string). We do not enforce it to be integer.
+        // If it is not, it will be truncated for backwards compatibility.
+        self::assure_numeric($index, 'pick() expects its first argument to be a number');
         $index = intval($index);
 
         $count = count($data);
@@ -733,7 +758,7 @@ class functions {
      * @return int
      */
     public static function fact(float $n): int {
-        $n = self::assure_integer($n, 'the factorial function expects its first argument to be a non-negative integer', self::NON_NEGATIVE);
+        $n = self::assure_numeric($n, 'the factorial function expects its first argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
         if ($n < 2) {
             return 1;
         }
@@ -855,6 +880,9 @@ class functions {
      * @return int the result or 0 if the inverse does not exist
      */
     public static function modinv(int $a, int $m): int {
+        self::assure_numeric($a, 'modinv() expects its first argument to be a non-zero integer', self::INTEGER | self::NON_ZERO);
+        self::assure_numeric($m, 'modinv() expects its second argument to be a positive integer', self::INTEGER | self::POSITIVE);
+
         $origm = $m;
         if (gcd($a, $m) != 1) {
             // Inverse does not exist.
@@ -883,11 +911,9 @@ class functions {
      * @return float remainder of $x modulo $m
      * @throws Exception
      */
-    public static function fmod(float $x, float $m): float {
-        if ($m === 0) {
-            // FIXME: revise error message.
-            throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
-        }
+    public static function fmod($x, $m): float {
+        self::assure_numeric($x, 'fmod() expects its first argument to be numeric');
+        self::assure_numeric($m, 'fmod() expects its second argument to be a non-zero number', self::NON_ZERO);
         return $x - $m * floor($x / $m);
     }
 
@@ -909,9 +935,9 @@ class functions {
             throw new Exception('binomialpdf() expects the probability to be at least 0 and not more than 1');
         }
         // Number of tries must be at least 0.
-        $n = self::assure_integer($n, 'binomialpdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE);
+        $n = self::assure_numeric($n, 'binomialpdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
         // Number of successful outcomes must be at least 0.
-        $x = self::assure_integer($x, 'binomialpdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE);
+        $x = self::assure_numeric($x, 'binomialpdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
         // If the number of successful outcomes is greater than the number of trials, the probability
         // is zero.
         if ($x > $n) {
@@ -975,8 +1001,8 @@ class functions {
      * @return int
      */
     public static function npr(float $n, float $r): int {
-        $n = self::assure_integer($n, 'npr() expects its first argument to be a non-negative integer', self::NON_NEGATIVE);
-        $r = self::assure_integer($r, 'npr() expects its second argument to be a non-negative integer', self::NON_NEGATIVE);
+        $n = self::assure_numeric($n, 'npr() expects its first argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $r = self::assure_numeric($r, 'npr() expects its second argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
 
         return self::ncr($n, $r) * self::fact($r);
     }
@@ -993,8 +1019,8 @@ class functions {
      * @return int
      */
     public static function ncr(float $n, float $r): int {
-        $n = self::assure_integer($n, 'ncr() expects its first argument to be an integer');
-        $r = self::assure_integer($r, 'ncr() expects its second argument to be an integer');
+        $n = self::assure_numeric($n, 'ncr() expects its first argument to be an integer', self::INTEGER);
+        $r = self::assure_numeric($r, 'ncr() expects its second argument to be an integer', self::INTEGER);
 
         // The binomial coefficient is calculated for 0 <= r < n. For all
         // other cases, the result is zero.
@@ -1014,13 +1040,19 @@ class functions {
 
     /**
      * Calculate the greatest common divisor of two integers $a and $b
-     * via the Euclidean algorithm.
+     * via the Euclidean algorithm. The arguments must be integers.
+     * Note: technically, the function accepts floats, because in some
+     * PHP versions, if one passes a float to a function that expectes an int,
+     * the float will be converted. We'd rather detect that and print an error.
      *
-     * @param int $a first number
-     * @param int $b second number
+     * @param float $a first number
+     * @param float $b second number
      * @return int
      */
-    public static function gcd($a, $b) {
+    public static function gcd(float $a, float $b): int {
+        $a = self::assure_numeric($a, 'gcd() expects its first argument to be an integer', self::INTEGER);
+        $b = self::assure_numeric($b, 'gcd() expects its second argument to be an integer', self::INTEGER);
+
         if ($a < 0) {
             $a = abs($a);
         }
@@ -1037,26 +1069,32 @@ class functions {
             return $a;
         }
         do {
-            $rest = (int) $a % $b;
+            $remainder = (int) $a % $b;
             $a = $b;
-            $b = $rest;
-        } while ($rest > 0);
+            $b = $remainder;
+        } while ($remainder > 0);
         return $a;
     }
 
     /**
      * Calculate the least (non-negative) common multiple of two integers $a and $b
-     * via the Euclidean algorithm.
+     * via the Euclidean algorithm. The arguments must be integers.
+     * Note: technically, the function accepts floats, because in some
+     * PHP versions, if one passes a float to a function that expectes an int,
+     * the float will be converted. We'd rather detect that and print an error.
      *
-     * @param int $a first number
-     * @param int $b second number
+     * @param float $a first number
+     * @param float $b second number
      * @return int
      */
-    public static function lcm($a, $b) {
+    public static function lcm(float $a, float $b): int {
+        $a = self::assure_numeric($a, 'lcm() expects its first argument to be an integer', self::INTEGER);
+        $b = self::assure_numeric($b, 'lcm() expects its second argument to be an integer', self::INTEGER);
+
         if ($a == 0 || $b == 0) {
             return 0;
         }
-        return $a * $b / self::gcd($a, $b);
+        return abs($a * $b) / self::gcd($a, $b);
     }
 
     /**
@@ -1249,22 +1287,51 @@ class functions {
         return $output;
     }
 
-    private static function assure_integer($n, $message, $additionalcondition = self::NONE) {
-        switch ($additionalcondition) {
-            case self::NON_NEGATIVE:
-                $additional = $n >= 0;
-                break;
-            case self::POSITIVE:
-                $additional = $n > 0;
-                break;
-            case self::NONE:
-            default:
-                $additional = true;
-        }
-
-        if ($n - intval($n) != 0 || $additional !== true) {
+    public static function assure_numeric($n, $message = '', $additionalcondition = self::NONE) {
+        if (is_numeric($n) === false) {
             throw new Exception($message);
         }
-        return intval($n);
+        if ($additionalcondition & self::NON_NEGATIVE) {
+            if ($n < 0) {
+                throw new Exception($message);
+            }
+        }
+        if ($additionalcondition & self::NEGATIVE) {
+            if ($n >= 0) {
+                throw new Exception($message);
+            }
+        }
+        if ($additionalcondition & self::POSITIVE) {
+            if ($n <= 0) {
+                throw new Exception($message);
+            }
+        }
+        if ($additionalcondition & self::NON_ZERO) {
+            if ($n == 0) {
+                throw new Exception($message);
+            }
+        }
+        if ($additionalcondition & self::INTEGER) {
+            if ($n - intval($n) != 0) {
+                throw new Exception($message);
+            }
+            return intval($n);
+        }
+        return floatval($n);
+    }
+
+    public static function is_numeric_array($ar, bool $acceptempty = true): bool {
+        if (!is_array($ar)) {
+            return false;
+        }
+        if (!$acceptempty && count($ar) === 0) {
+            return false;
+        }
+        foreach ($ar as $element) {
+            if (!is_numeric($element)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

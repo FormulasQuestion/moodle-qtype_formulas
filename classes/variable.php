@@ -42,10 +42,17 @@ class variable {
     /** @var mixed the variable's content */
     public $value;
 
-    public function __construct(string $name, $value = null, int $type = self::UNDEFINED) {
+    /** @var float microtime() timestamp of last update */
+    public $timestamp;
+
+    public function __construct(string $name, $value = null, int $type = self::UNDEFINED, ?float $timestamp = null) {
         $this->name = $name;
         $this->value = $value;
         $this->type = $type;
+        if (!isset($timestamp)) {
+            $timestamp = microtime(true);
+        }
+        $this->timestamp = $timestamp;
     }
 
     public function __toString() {

@@ -134,13 +134,26 @@ class token {
     }
 
     public static function unpack($token) {
+        // For convenience, we also accept elementary types instead of tokens, e.g. literals.
+        // In that case, we have nothing to do, we just return the value. Unless it is an
+        // array, because those might contain tokens.
+        if (!($token instanceof token)) {
+            if (is_array($token)) {
+                $result = [];
+                foreach ($token as $value) {
+                    $result[] = self::unpack($value);
+                }
+                return $result;
+            }
+            return $token;
+        }
         // If the token value is a literal (number or string), return it directly.
         if (in_array($token->type, [self::NUMBER, self::STRING])) {
             return $token->value;
         }
 
-        // If the token is an array, we have to unpack all elements separately and recursively.
-        if ($token->type === self::LIST) {
+        // If the token is a list or set, we have to unpack all elements separately and recursively.
+        if (in_array($token->type, [self::LIST, self::SET])) {
             $result = [];
             foreach ($token->value as $value) {
                 $result[] = self::unpack($value);
