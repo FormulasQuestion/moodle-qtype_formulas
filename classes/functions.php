@@ -591,9 +591,8 @@ class functions {
     }
 
     public static function sigfig($number, $precision): string {
-        if (!is_numeric($number)) {
-            throw new Exception('sigfig() expects its first argument to be a number');
-        }
+        self::assure_numeric($number, 'sigfig() expects its first argument to be a number');
+        self::assure_numeric($precision, 'sigfig() expects its second argument to be a positive integer', self::POSITIVE | self::INTEGER);
         $number = floatval($number);
         $precision = intval($precision);
 
@@ -884,7 +883,7 @@ class functions {
         self::assure_numeric($m, 'modinv() expects its second argument to be a positive integer', self::INTEGER | self::POSITIVE);
 
         $origm = $m;
-        if (gcd($a, $m) != 1) {
+        if (self::gcd($a, $m) != 1) {
             // Inverse does not exist.
             return 0;
         }

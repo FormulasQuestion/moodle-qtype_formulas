@@ -102,7 +102,6 @@ use qtype_formulas\unit_conversion_rules;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
-require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
 require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.php');
