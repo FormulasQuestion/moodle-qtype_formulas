@@ -56,6 +56,12 @@ class variable {
     }
 
     public function __toString() {
+        // For algebraic variables, we just return their name, because they do not
+        // have a concrete value.
+        if ($this->type === self::ALGEBRAIC) {
+            return $this->name;
+        }
+
         // Arrays are printed in their [...] form, sets are printed as {...}.
         if (gettype($this->value) === 'array') {
             $result = token::stringify_array($this->value);
@@ -63,12 +69,6 @@ class variable {
                 return '{' . substr($result, 1, -1) . '}';
             }
             return $result;
-        }
-
-        // For algebraic variables, we just return their name, because they do not
-        // have a concrete value.
-        if ($this->type === self::ALGEBRAIC) {
-            return $this->name;
         }
 
         // For everything else, we use PHP's string conversion.

@@ -115,20 +115,37 @@ class token {
         if ($value instanceof token) {
             return $value;
         }
-        // If a specific type is requested, we create a token with that type.
+        // If a NUMBER token is requested, we check whether the value is numeric. If
+        // it is, we convert it to float. Otherwise, we throw an error.
+        if ($type == self::NUMBER) {
+            if (!is_numeric(($value))) {
+                throw new Exception('cannot wrap a non-numeric value into a NUMBER token');
+            }
+            $value = floatval($value);
+        }
+        // If a STRING token is requested, we make sure the value is a string. If that is not
+        // possible, throw an error.
+        if ($type == self::STRING) {
+            try {
+                $value = strval($value);
+            } catch (Exception $e) {
+                throw new Exception('cannot wrap the given value into a STRING token');
+            }
+        }
+        // If a specific type is requested, we return a token with that type.
         if ($type !== null) {
             return new token($type, $value);
         }
-        // Otherwise, we choose the appropriate type.
+        // Otherwise, we choose the appropriate type ourselves.
         if (is_string($value)) {
             $type = self::STRING;
         } else if (is_float($value) || is_int($value)) {
             $type = self::NUMBER;
         } else if (is_array($value)) {
-            // FIXME: this probably needs some more treatment
+            // FIXME: this probably needs some more treatment, e.g. recursive wrapping
             $type = self::LIST;
         } else {
-            throw new Exception("the given value '$value' has an invalid data type an cannot be converted to a token");
+            throw new Exception("the given value '$value' has an invalid data type and cannot be converted to a token");
         }
         return new token($type, $value);
     }
