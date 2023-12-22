@@ -160,7 +160,8 @@ class instantiation extends \external_api {
             // If the variable has type SET, it is an algebraic variable. We only output its name
             // in curly braces to make that clear. For other variables, we put the value.
             if ($variable->type === token::SET) {
-                $row['globalvars'][] = ['name' => $name, 'value' => "{{$name}}"];
+                $printname = str_replace('*', '', $name);
+                $row['globalvars'][] = ['name' => $name, 'value' => "{{$printname}}"];
             } else {
                 $row['globalvars'][] = ['name' => $name, 'value' => self::stringify($variable->value)];
             }
@@ -172,7 +173,8 @@ class instantiation extends \external_api {
                 // If the variable has type SET, it is an algebraic variable. We only output its name
                 // in curly braces to make that clear. For other variables, we put the value.
                 if ($variable->type === token::SET) {
-                    $row['parts'][$i][] = ['name' => $name, 'value' => "{{$name}}"];
+                    $printname = str_replace('*', '', $name);
+                    $row['parts'][$i][] = ['name' => $name, 'value' => "{{$printname}}"];
                 } else {
                     $row['parts'][$i][] = ['name' => $name, 'value' => self::stringify($variable->value)];
                 }
@@ -234,14 +236,14 @@ class instantiation extends \external_api {
         // First, we check whether the variables can be parsed and interpreted.
         // We store the parsed variable definitions and keep the prepared evaluator
         // class for slightly better performance.
-        $noparts = count($answers);
+        $noparts = count($params['answers']);
         try {
-            $randomparser = new random_parser($randomvars);
+            $randomparser = new random_parser($params['randomvars']);
             $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
             $evaluator->instantiate_random_variables();
 
-            $globalparser = new parser($globalvars);
+            $globalparser = new parser($params['globalvars']);
             $parsedglobalvars = $globalparser->get_statements();
             $evaluator->evaluate($parsedglobalvars);
 
@@ -251,26 +253,22 @@ class instantiation extends \external_api {
             for ($i = 0; $i < $noparts; $i++) {
                 $localevaluators[$i] = clone $evaluator;
 
-                if (!empty($localvars[$i])) {
-                    $parser = new parser($localvars[$i]);
+                if (!empty($params['localvars'][$i])) {
+                    $parser = new parser($params['localvars'][$i]);
                     $parsedlocalvars[$i] = $parser->get_statements();
                     $localevaluators[$i]->evaluate($parsedlocalvars[$i]);
                 }
 
-                $parser = new parser($answers[$i]);
+                $parser = new parser($params['answers'][$i]);
                 $parsedanswers[$i] = $parser->get_statements();
-                $evaluatedanswer = $localevaluators[$i]->evaluate($parsedanswers[$i])[0];
-                // If the answer is not an algebraic formule (i.e. a string), but contains an algebraic
-                // variable, this should not be accepted.
-                /*if ($evaluatedanswer->type === token::SET) {
-                    throw new Exception('Invalid answer format: you cannot use an algebraic variable with this answer type');
-                }*/
+                $localevaluators[$i]->evaluate($parsedanswers[$i])[0];
             }
         } catch (Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
         // If requested number is -1, we try to instantiate all possible combinations, but not more than 1000.
+        $n = $params['n'];
         if ($n == -1) {
             $n = min(1000, $evaluator->get_number_of_variants());
         }
@@ -372,14 +370,14 @@ class instantiation extends \external_api {
         // Evaluation of global variables can fail, because there is an error in the random
         // variables. In order to know that, we need to have two separate try-catch constructions.
         try {
-            $randomparser = new random_parser($randomvars);
+            $randomparser = new random_parser($params['randomvars']);
             $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $globalparser = new parser($globalvars);
+            $globalparser = new parser($params['globalvars']);
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($globalparser->get_statements());
         } catch (Exception $e) {
@@ -430,21 +428,21 @@ class instantiation extends \external_api {
         // Evaluation of global variables can fail, because there is an error in the random
         // variables. In order to know that, we need to have two separate try-catch constructions.
         try {
-            $randomparser = new random_parser($randomvars);
+            $randomparser = new random_parser($params['randomvars']);
             $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $parser = new parser($globalvars);
+            $parser = new parser($params['globalvars']);
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'global', 'message' => $e->getMessage()];
         }
         try {
-            $parser = new parser($localvars);
+            $parser = new parser($params['localvars']);
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'local', 'message' => $e->getMessage()];
@@ -499,13 +497,18 @@ class instantiation extends \external_api {
      * @return array associative array with the rendered question text and array of parts' texts
      */
     public static function render_question_text($questiontext, $parttexts, $globalvars, $partvars) {
+        $params = self::validate_parameters(
+            self::render_question_text_parameters(),
+            ['questiontext' => $questiontext, 'parttexts' => $parttexts, 'globalvars' => $globalvars, 'partvars' => $partvars]
+        );
+
         $evaluator = new evaluator();
 
         // First prepare the main question text.
         try {
-            $parser = new parser($globalvars);
+            $parser = new parser($params['globalvars']);
             $evaluator->evaluate($parser->get_statements());
-            $renderedquestiontext = $evaluator->substitute_variables_in_text($questiontext);
+            $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
         } catch (Exception $e) {
             return [
                 'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
@@ -514,15 +517,18 @@ class instantiation extends \external_api {
         }
 
         $renderedparttexts = [];
-        foreach ($partvars as $i => $partvar) {
+        foreach ($params['partvars'] as $i => $partvar) {
             try {
                 $partevaluator = clone $evaluator;
                 $parser = new parser($partvar);
                 $partevaluator->evaluate($parser->get_statements());
 
-                $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($parttexts[$i]);
+                $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($params['parttexts'][$i]);
             } catch (Exception $e) {
-                $renderedparttexts[$i] = $e->getMessage();
+                return [
+                    'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                    'parts' => []
+                ];
             }
         }
 
@@ -542,6 +548,5 @@ class instantiation extends \external_api {
                 VALUE_REQUIRED
             )
         ]);
-        return new \external_value(PARAM_RAW, 'question text with placeholders replaced by their values');
     }
 }

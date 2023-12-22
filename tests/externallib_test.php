@@ -51,6 +51,10 @@ class externallib_test extends \externallib_advanced_testcase {
             ],
             [
                 ['source' => '', 'message' => ''],
+                ['randomvars' => 'a={1,2};', 'globalvars' => 'a=4']
+            ],
+            [
+                ['source' => '', 'message' => ''],
                 ['randomvars' => '', 'globalvars' => 'a=1']
             ],
             [
@@ -131,6 +135,10 @@ class externallib_test extends \externallib_advanced_testcase {
             [
                 ['source' => '', 'message' => ''],
                 ['randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b']
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a={1,2,3}']
             ],
             [
                 ['source' => 'local', 'message' => "syntax error: unexpected end of expression after '+'"],
@@ -224,6 +232,18 @@ class externallib_test extends \externallib_advanced_testcase {
                     '{=sqrt(a)}'], 'globalvars' => 'a=4', 'partvars' => ['a=1', 'a=3', '']
                 ]
             ],
+            [
+                [
+                    'question' => "No preview available. Check your definition of random variables, " .
+                        "global variables, parts' local variables and answers. Original error message: " .
+                        "1:4:division by zero is not defined",
+                    'parts' => []
+                ],
+                [
+                    'questiontext' => 'foo', 'parttexts' => ['bar {a}'], 'globalvars' => '',
+                    'partvars' => ['a=1/0']
+                ]
+            ],
         ];
     }
 
@@ -257,7 +277,7 @@ class externallib_test extends \externallib_advanced_testcase {
                     'parts' => [[['name' => '_0', 'value' => '6']]],
                 ]]],
                 [
-                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=3; b=2; c=a*b',
+                    'n' => -1, 'randomvars' => '', 'globalvars' => 'a=3; b=2; c=a*b',
                     'localvars' => [''], 'answers' => ['a*b']
                 ]
             ],
@@ -293,6 +313,17 @@ class externallib_test extends \externallib_advanced_testcase {
             ],
             [
                 ['status' => 'ok', 'data' => [[
+                    'randomvars' => [['name' => 'a', 'value' => '1']],
+                    'globalvars' => [['name' => 'a*', 'value' => '5']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => 'a={1,1}', 'globalvars' => 'a=5',
+                    'localvars' => [''], 'answers' => ['1']
+                ]
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
                     'randomvars' => [],
                     'globalvars' => [['name' => 'a', 'value' => '{a}']],
                     'parts' => [[['name' => '_0', 'value' => '1']]],
@@ -303,11 +334,43 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '[1, 2]']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=[1,2]',
+                    'localvars' => [''], 'answers' => ['1']
+                ]
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '{a}']],
+                    'parts' => [[
+                        ['name' => 'a*', 'value' => '{a}'],
+                        ['name' => '_0', 'value' => '1']
+                    ]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a={1:10}',
+                    'localvars' => ['a={1,2,3}'], 'answers' => ['1']
+                ]
+            ],
+            [
                 // TODO: old error was 'Invalid answer format: you cannot use an algebraic variable with this answer type'
                 ['status' => 'error', 'message' => "algebraic variable 'a' cannot be used in this context"],
                 [
                     'n' => 1, 'randomvars' => '', 'globalvars' => '',
                     'localvars' => ['a={1,3}'], 'answers' => ['a']
+                ]
+            ],
+            [
+                ['status' => 'error', 'message' => 'division by zero is not defined'],
+                [
+                    'n' => -1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => ['a=2'], 'answers' => ['1/(a-a)']
                 ]
             ],
             [
