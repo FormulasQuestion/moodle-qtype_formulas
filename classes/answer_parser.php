@@ -16,6 +16,8 @@
 
 namespace qtype_formulas;
 
+use \Exception;
+
 /**
  * Parser for answer expressions for qtype_formulas
  *
@@ -41,13 +43,27 @@ class answer_parser extends parser {
             $tokenlist = $lexer->get_tokens();
         }
 
-        // In the context of student answers, the caret (^) *always* means exponentiation (**) instead
-        // of XOR. In model answers entered by the teacher, the caret *only* means exponentiation
-        // for algebraic formulas, but not for the other answer types.
-        if ($caretmeanspower) {
-            foreach ($tokenlist as $token) {
+        foreach ($tokenlist as $token) {
+            // In the context of student answers, the caret (^) *always* means exponentiation (**) instead
+            // of XOR. In model answers entered by the teacher, the caret *only* means exponentiation
+            // for algebraic formulas, but not for the other answer types.
+            if ($caretmeanspower) {
                 if ($token->type === token::OPERATOR && $token->value === '^') {
                     $token->value = '**';
+                }
+            }
+            // Students are not allowed to use function names as variables, e.g. they cannot use a
+            // variable 'sin'. This is important, because teachers have that option and the regular
+            // parser will automatically consider 'sin' in the expression '3*sin x' as a variable,
+            // due to the missing parens. We want to avoid that, because it would conceal a syntax
+            // error. We make one exception: if the identifier has been labelled as a known variable,
+            // the token will be considered as a variable. This allows the teacher to use e.g. 'exp'
+            // as a unit name, if they want to.
+            if ($token->type === token::IDENTIFIER) {
+                if ($this->is_known_variable($token)) {
+                    $token->type = token::VARIABLE;
+                } else if (array_key_exists($token->value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS)) {
+                    $token->type = token::FUNCTION;
                 }
             }
         }
@@ -225,8 +241,8 @@ class answer_parser extends parser {
             }
         }
 
-        // Still here? Then it's all good.
-        return true;
+        // Still here? Then let's check the syntax.
+        return $this->is_valid_syntax();
     }
 
     /**
@@ -248,4 +264,65 @@ class answer_parser extends parser {
         // Still here? That means there is no unit, so it starts very, very far away...
         return PHP_INT_MAX;
     }
+
+    /**
+     * Iterate over all tokens and check whether the expression is *syntactically* valid.
+     * Note that this does not necessarily mean that the expression can be evaluated:
+     * - sqrt(-3) is syntactically valid, but it cannot be calculated
+     * - a/(b-b) is syntactically valid, but it cannot be evaluated
+     * - a-*b is syntactically invalid, because the operators cannot be chained that way
+     *
+     * @return bool
+     */
+    public function is_valid_syntax(): bool {
+        // The statement list must contain exactly one expression object.
+        if (count($this->statements) !== 1) {
+            return false;
+        }
+
+        $tokens = $this->statements[0]->body;
+
+        // Iterate over all tokens. Push literals (strings, number) and variables on the stack.
+        // Operators and functions will consume them, but not evaluate anything. In the end, there
+        // should be only one single element on the stack.
+        $stack = [];
+        foreach ($tokens as $token) {
+            if (in_array($token->type, [token::STRING, token::NUMBER, token::VARIABLE])) {
+                $stack[] = $token->value;
+            }
+            if ($token->type === token::OPERATOR) {
+                // Check whether the operator is unary. We also include operators that are not
+                // actually allowed in a student's answer. Unary operators would operate on
+                // the last token on the stack, but as we do not evaluate anything, we just
+                // drop them.
+                if (in_array($token->value, ['_', '!', '~'])) {
+                    continue;
+                }
+                // All other operators are binary, because the student cannot use the ternary
+                // operator in their answer. Also, they are not allowed other than round parens,
+                // so there can be no %%rangebuild or similar pseudo-operators in the queue.
+                // A binary operator would pop the two top elements, do its magic and then push
+                // the result on the stack. As we do not evaluate anything, we simply drop the top
+                // element.
+                array_pop($stack);
+            }
+            // For functions, the top element on the stack (always a number literal) will indicate
+            // the number of arguments to consume. So we pop that element plus one less than what
+            // it indicates, meaning we actually drop exactly the number of elements indicated
+            // by that element.
+            if ($token->type === token::FUNCTION) {
+                $n = end($stack);
+                if (!is_numeric($n)) {
+                    return false;
+                }
+                if (count($stack) < $n) {
+                    return false;
+                }
+                $stack = array_slice($stack, 0, -$n);
+            }
+        }
+
+        return (count($stack) === 1);
+    }
+
 }

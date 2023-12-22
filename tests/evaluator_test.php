@@ -1074,7 +1074,9 @@ class evaluator_test extends \advanced_testcase {
             [['3+exp(4+5)^sin(6+7)', 'kg m/s'], '3+exp(4+5)^sin(6+7)kg m/s'],
             [['3+exp(4+5)^-sin(6+7)', 'kg m/s'], '3+exp(4+5)^-sin(6+7)kg m/s'],
 
-            [['3', 'exp^2'], '3exp^2'],
+            // FIXME: the following is syntactically invalid. Maybe define exception
+            // via knownvariables = [...] to allow 'exp 'as "unit"?
+            // [['3', 'exp^2'], '3exp^2'],
             [['3', 'e8'], '3 e8'],
             [['3', 'e 8'], '3e 8'],
             [['3e8', 'e8'], '3e8e8'],

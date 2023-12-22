@@ -232,6 +232,12 @@ class parser {
                 }
             }
 
+            // If the token is already classified as a FUNCTION, it MUST be followed by an
+            // opening parenthesis.
+            if ($type === token::FUNCTION && $nexttype !== token::OPENING_PAREN) {
+                $this->die('syntax error: function must be followed by opening parenthesis');
+            }
+
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
             // In order to be classified as a function, it must meet the following criteria:
             // - not be a known variable (unless preceded by the PREFIX, see above)
@@ -368,7 +374,7 @@ class parser {
         return $nexttoken;
     }
 
-    private function is_known_variable(token $token): bool {
+    public function is_known_variable(token $token): bool {
         return in_array($token->value, $this->variableslist);
     }
 
