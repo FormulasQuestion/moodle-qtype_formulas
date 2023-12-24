@@ -156,8 +156,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $sub->unitfeedbackclass = $sub->feedbackclass;
                 $sub->boxfeedbackclass = $sub->feedbackclass;
             } else {  // Show individual color, all four color combinations are possible.
-                $sub->unitfeedbackclass = $this->feedback_class($sub->unitcorr);
-                $sub->boxfeedbackclass = $this->feedback_class($sub->anscorr);
+                $sub->unitfeedbackclass = $this->feedback_class($unitcorrect);
+                $sub->boxfeedbackclass = $this->feedback_class($answergrade);
             }
         } else {  // There should be no feedback if options->correctness is not set for this part.
             $sub->feedbackimage = '';
@@ -205,7 +205,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $question = $qa->get_question();
         $part = &$question->parts[$i];
 
-        $text = $part->evaluator->substitute_variables_in_text($part->subqtext);
+        // Clone the part's evaluator and remove special variables like _0 etc., because they must
+        // not be substituted here; otherwise, we would lose input boxes.
+        $evaluator = clone $part->evaluator;
+        $evaluator->remove_special_vars();
+        $text = $evaluator->substitute_variables_in_text($part->subqtext);
+
         $subqreplaced = $question->format_text($text,
                 $part->subqtextformat, $qa, 'qtype_formulas', 'answersubqtext', $part->id, false);
         $types = array(0 => 'number', 10 => 'numeric', 100 => 'numerical_formula', 1000 => 'algebraic_formula');
@@ -509,13 +514,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         if (!$qa->get_question()->is_gradable_response($response)) {
             return '';
         }
-        $a = new stdClass();
-        list($a->num, $a->outof) = $qa->get_question()->get_num_parts_right(
-                $response);
-        if (is_null($a->outof)) {
-            return '';
+        $numright = $qa->get_question()->get_num_parts_right($response);
+        if ($numright[0] === 1) {
+            return get_string('yougotoneright', 'qtype_formulas');
         } else {
-            return get_string('yougotnright', 'qtype_formulas', $a);
+            return get_string('yougotnright', 'qtype_formulas', $numright[0]);
         }
     }
 
@@ -526,10 +529,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     protected function hint(question_attempt $qa, question_hint $hint) {
         $question = $qa->get_question();
-        $globalvars = $question->get_global_variables();
-        $hint->hint = $question->qv->substitute_variables_in_text($globalvars, $hint->hint);
-        return html_writer::nonempty_tag('div',
-                $qa->get_question()->format_hint($hint, $qa), array('class' => 'hint'));
+        $hint->hint = $question->evaluator->substitute_variables_in_text($hint->hint);
+
+        return html_writer::nonempty_tag('div', $qa->get_question()->format_hint($hint, $qa), array('class' => 'hint'));
     }
 
     protected function combined_feedback(question_attempt $qa) {
