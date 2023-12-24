@@ -108,6 +108,7 @@ class evaluator {
      * expressions in the current evaluator.
      *
      * @param string $text the text to be formatted
+     * @param bool $skiplists whether lists should be skipped, otherwise they are printed as [1, 2, 3]
      * @return string
      */
     public function substitute_variables_in_text(string $text, bool $skiplists = true): string {
@@ -156,6 +157,17 @@ class evaluator {
         }
 
         return $text;
+    }
+
+    public function remove_special_vars(): void {
+        foreach ($this->variables as $name => $variable) {
+            $isreserved = in_array($name, ['_err', '_relerr', '_a', '_r', '_d', '_u']);
+            $isanswer = preg_match('/^_\d+$/', $name);
+
+            if ($isreserved || $isanswer) {
+                unset($this->variables[$name]);
+            }
+        }
     }
 
     public function reinitialize(?string $context = null) {
