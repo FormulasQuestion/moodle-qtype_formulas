@@ -311,6 +311,7 @@ class externallib_test extends \externallib_advanced_testcase {
                     'localvars' => [''], 'answers' => ['1']
                 ]
             ],
+            // For the next case, we define a "random" variable with no randomness.
             [
                 ['status' => 'ok', 'data' => [[
                     'randomvars' => [['name' => 'a', 'value' => '1']],
