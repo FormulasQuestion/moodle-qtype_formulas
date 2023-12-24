@@ -1092,29 +1092,6 @@ class qtype_formulas_part {
     }
 
     /**
-     * Whether or not the part contains at least one answer with a drop down or
-     * radio list.
-     * FIXME: this function seems to be unused -> remove
-     *
-     * @return bool
-     */
-    public function has_multichoice_coordinate(): bool {
-        // First, parse the part's text.
-        $boxes = self::scan_for_answer_boxes($this->subqtext);
-
-        // Check every answer box placeholder to see whether a variable name is
-        // stored in the 'options' field.
-        foreach ($boxes as $box) {
-            if ($box['options'] !== '') {
-                return true;
-            }
-        }
-
-        // Still here? Then there's no multichoice answer.
-        return false;
-    }
-
-    /**
      * Produce a plain text summary of a response for the part.
      * @param $response a response, as might be passed to {@link grade_response()}.
      * @return string a plain text summary of that response, that could be used in reports.
