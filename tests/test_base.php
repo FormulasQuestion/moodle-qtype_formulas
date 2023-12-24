@@ -23,7 +23,7 @@
  */
 
 namespace qtype_formulas;
-use html_writer;
+use question_pattern_expectation;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -46,34 +46,19 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
         $this->currentoutput = $this->quba->render_question($this->slot, $this->displayoptions);
     }
 
-    protected function get_tag_matcher($tag, $attributes) {
-        return array(
-            'tag' => $tag,
-            'attributes' => $attributes,
-        );
+    protected function get_contains_num_parts_correct($num) {
+        $s = get_string('yougotoneright', 'qtype_formulas');
+        if ($num !== 1) {
+            $s = get_string('yougotnright', 'qtype_formulas', $num);
+        }
+
+        return new question_pattern_expectation('/<div class="numpartscorrect">' .
+            preg_quote($s, '/') . '/');
     }
 
-    protected function check_output_contains_text_input($name, $value = null, $enabled = true) {
-        $attributes = array(
-            'type' => 'text',
-            'name' => $this->quba->get_field_prefix($this->slot) . $name,
-        );
-        if (!is_null($value)) {
-            $attributes['value'] = $value;
-        }
-        if (!$enabled) {
-            $attributes['readonly'] = 'readonly';
-        }
-        $matcher = $this->get_tag_matcher('input', $attributes);
-        $this->assertTag($matcher, $this->currentoutput,
-                'Looking for an input with attributes ' . html_writer::attributes($attributes) . ' in ' . $this->currentoutput);
-
-        if ($enabled) {
-            $matcher['attributes']['readonly'] = 'readonly';
-            $this->assertNotTag($matcher, $this->currentoutput,
-                    'input with attributes ' . html_writer::attributes($attributes) .
-                    ' should not be read-only in ' . $this->currentoutput);
-        }
+    protected function get_contains_hint_expectation($text) {
+        return new question_pattern_expectation('/<div class="hint">' .
+            preg_quote($text, '/') . '/');
     }
 
     protected function check_output_contains_part_feedback($name = null) {
@@ -94,24 +79,13 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
                 'part feedback for ' . $name . ' should not be present in ' . $this->currentoutput);
     }
 
+    // FIXME: this must be changed, because our placeholders are not the same as those of a STACK question
     protected function check_output_does_not_contain_stray_placeholders() {
         // Keeping the old way for 3.9 until it reaches end-of-life.
         if (version_compare(\PHPUnit\Runner\Version::id(), '9.0.0', '>=')) {
-            $this->assertDoesNotMatchRegularExpression('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
+            $this->assertDoesNotMatchRegularExpression('~\{|\}~', $this->currentoutput, 'Not all placehoders were replaced.');
         } else {
-            $this->assertNotRegexp('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
+            $this->assertNotRegexp('~\{|\}~', $this->currentoutput, 'Not all placehoders were replaced.');
         }
-    }
-
-    protected function check_output_contains_lang_string($identifier, $component = '', $a = null) {
-        $string = get_string($identifier, $component, $a);
-        $this->assertNotContains($string, $this->currentoutput,
-                'Expected string ' . $string . ' not found in ' . $this->currentoutput);
-    }
-
-    protected function check_output_does_not_contain_lang_string($identifier, $component = '', $a = null) {
-        $string = get_string($identifier, $component, $a);
-        $this->assertContains($string, $this->currentoutput,
-                'The string ' . $string . ' should not be present in ' . $this->currentoutput);
     }
 }
