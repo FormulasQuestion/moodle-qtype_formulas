@@ -332,6 +332,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             $response = $part->clear_from_response_if_wrong($response, $checkunit) + $response;
         }
 
+        unset($response['normalized']);
         return $response;
     }
 
@@ -1622,12 +1623,11 @@ class qtype_formulas_part {
         }
 
         // First, we have the response graded.
-        // FIXME: this must be adapted once the grading is implemented in the part.
-        list($answercorrect, $unitcorrect) = $this->grade($response);
+        list('answer' => $answercorrect, 'unit' => $unitcorrect) = $this->grade($response);
 
         // If the grade is less than 1 (full mark), we reset all fields, including a possibly existing
         // combined answer+unit field.
-        if ($answercorrect * $unitcorrect < 1) {
+        if ($answercorrect < 1 || $unitcorrect === false) {
             for ($i = 0; $i <= $this->numbox; $i++) {
                 if (array_key_exists("{$this->partindex}_{$i}", $response)) {
                     $result["{$this->partindex}_{$i}"] = '';
