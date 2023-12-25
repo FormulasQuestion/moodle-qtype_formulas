@@ -210,6 +210,108 @@ class question_test extends \basic_testcase {
         $this->assertEquals($expected, $partscores);
     }
 
+    public function test_apply_attempt_state(): void {
+        // Get a new randomized question and start a new attempt.
+        $q = $this->get_test_formulas_question('test4');
+        $seed = 1;
+        $q->start_attempt(new question_attempt_step(), $seed);
+
+        // Verify the seed is stored in the question, the evaluator is set up and the variables
+        // v, s and t do exist and that they are initialized.
+        self::assertEquals($seed, $q->seed);
+        self::assertNotNull($q->evaluator);
+        self::assertArrayHasKey('v', $q->evaluator->variables);
+        self::assertArrayHasKey('s', $q->evaluator->variables);
+        self::assertArrayHasKey('dt', $q->evaluator->variables);
+
+        // Verify the number of parts is set and the parts' evaluators are set up.
+        self::assertEquals(4, $q->numparts);
+        self::assertNotNull($q->parts[0]->evaluator);
+        self::assertNotNull($q->parts[1]->evaluator);
+        self::assertNotNull($q->parts[2]->evaluator);
+        self::assertNotNull($q->parts[3]->evaluator);
+
+        // Store the values of the two random variables.
+        $dt = $q->evaluator->export_single_variable('dt')->value;
+        $v = $q->evaluator->export_single_variable('v')->value;
+
+        // The question has the random variables "v = {20:100:10}; dt = {2:6};", so there must be
+        // 8 * 4 = 32 variants.
+        $variants = $q->get_num_variants();
+        self::assertEquals(32, $variants);
+
+        // Iterate over all variants until v and dt have changed at least once.
+        $vchanged = false;
+        $dtchanged = false;
+        for ($i = $seed + 1; $i <= $variants; $i++) {
+            $q->apply_attempt_state(new question_attempt_step(['_seed' => $i]));
+            $vchanged = $vchanged || ($q->evaluator->export_single_variable('v')->value != $v);
+            $dtchanged = $dtchanged || ($q->evaluator->export_single_variable('dt')->value != $dt);
+            if ($vchanged && $dtchanged) {
+                break;
+            }
+        }
+
+        // Apply attempt step with original seed and verify both variables do have the original value
+        // again.
+        $q->apply_attempt_state(new question_attempt_step(['_seed' => $seed]));
+        self::assertEquals($v, $q->evaluator->export_single_variable('v')->value);
+        self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
+    }
+
+    public function test_apply_legacy_attempt_state(): void {
+        // Get a new randomized question and start a new attempt.
+        $q = $this->get_test_formulas_question('test4');
+        $seed = 1;
+        $q->start_attempt(new question_attempt_step(), $seed);
+
+        // Verify the seed is stored in the question, the evaluator is set up and the variables
+        // v, s and t do exist and that they are initialized.
+        self::assertEquals($seed, $q->seed);
+        self::assertNotNull($q->evaluator);
+        self::assertArrayHasKey('v', $q->evaluator->variables);
+        self::assertArrayHasKey('s', $q->evaluator->variables);
+        self::assertArrayHasKey('dt', $q->evaluator->variables);
+
+        // Verify the number of parts is set and the parts' evaluators are set up.
+        self::assertEquals(4, $q->numparts);
+        self::assertNotNull($q->parts[0]->evaluator);
+        self::assertNotNull($q->parts[1]->evaluator);
+        self::assertNotNull($q->parts[2]->evaluator);
+        self::assertNotNull($q->parts[3]->evaluator);
+
+        // Store the values of the two random variables.
+        $dt = $q->evaluator->export_single_variable('dt')->value;
+        $v = $q->evaluator->export_single_variable('v')->value;
+
+        // Save variable data in legacy format.
+        $legacydata = $q->evaluator->export_randomvars_for_step_data();
+        self::assertEquals("v=$v;dt=$dt;", $legacydata);
+
+        // The question has the random variables "v = {20:100:10}; dt = {2:6};", so there must be
+        // 8 * 4 = 32 variants.
+        $variants = $q->get_num_variants();
+        self::assertEquals(32, $variants);
+
+        // Iterate over all variants until v and dt have changed at least once.
+        $vchanged = false;
+        $dtchanged = false;
+        for ($i = $seed + 1; $i <= $variants; $i++) {
+            $q->apply_attempt_state(new question_attempt_step(['_seed' => $i]));
+            $vchanged = $vchanged || ($q->evaluator->export_single_variable('v')->value != $v);
+            $dtchanged = $dtchanged || ($q->evaluator->export_single_variable('dt')->value != $dt);
+            if ($vchanged && $dtchanged) {
+                break;
+            }
+        }
+
+        // Apply attempt step with original seed and verify both variables do have the original value
+        // again.
+        $q->apply_attempt_state(new question_attempt_step(['_varsglobal' => $legacydata]));
+        self::assertEquals($v, $q->evaluator->export_single_variable('v')->value);
+        self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
+    }
+
     public function test_grade_parts_that_can_be_graded_test2() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);

@@ -216,7 +216,7 @@ class renderer_test extends walkthrough_test_base {
     public function test_render_mce_question() {
         // Create a single part multiple choice (radio) question.
         $q = $this->get_test_formulas_question('testmce');
-        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         $this->render();
         $this->check_output_contains_selectoptions(
@@ -228,26 +228,22 @@ class renderer_test extends walkthrough_test_base {
 
         // Submit wrong answer.
         $this->process_submission(array('0_0' => '0', '-submit' => 1));
-
-        $this->check_current_state(question_state::$todo);
+        $this->check_current_state(question_state::$gradedwrong);
         $this->check_output_contains_selectoptions(
                 $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
         );
-        $this->check_current_output(
-                $this->get_contains_num_parts_correct(0)
-        );
         $this->check_current_mark(0);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', 'Cat');
 
-        // Submit right answer.
+        // Restart question and submit right answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->process_submission(array('0_0' => '1', '-submit' => 1));
-        $this->check_current_state(question_state::$complete);
+        $this->check_current_state(question_state::$gradedright);
         $this->check_output_contains_selectoptions(
                 $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 1)
         );
-        $this->check_current_output(
-                $this->get_contains_num_parts_correct(1)
-        );
-        $this->check_current_mark(0.7);
+        $this->check_current_mark(1);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', 'Cat');
     }
 
     public function test_question_with_hint(): void {
