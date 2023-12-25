@@ -136,9 +136,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /** @var string numbering (if any) of answers */
     public string $answernumbering;
 
-    /** @var string[] evaluated answers for each part, two dimensional array */
-    public array $evaluatedanswers = [];
-
     /** @var int number of parts in this question, used e.g. by the renderer */
     public int $numparts;
 
@@ -831,26 +828,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $result['normalized'] = true;
 
         return $result;
-    }
-
-    /**
-     * Fetch evaluated answers for each part and return the overview of all parts.
-     * FIXME: remove this after refactoring is done (called from grade_responses_individually)
-     *
-     * @return array
-     */
-    public function get_evaluated_answers(): array {
-        // If we already know the evaluated answers for this part, we can simply return them.
-        if (!empty($this->evaluatedanswers)) {
-            return $this->evaluatedanswers;
-        }
-
-        // Still here? Then let's evaluate the answers.
-        foreach ($this->parts as $part) {
-            $this->evaluatedanswers[$part->partindex] = $part->get_evaluated_answers();
-        }
-
-        return $this->evaluatedanswers;
     }
 }
 

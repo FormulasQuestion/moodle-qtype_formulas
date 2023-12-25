@@ -213,6 +213,11 @@ class question_test extends \basic_testcase {
     public function test_apply_attempt_state(): void {
         // Get a new randomized question and start a new attempt.
         $q = $this->get_test_formulas_question('test4');
+
+        // The question is not initialized yet, so it should not know how many variants
+        // it can offer.
+        self::assertEquals(PHP_INT_MAX, $q->get_num_variants());
+
         $seed = 1;
         $q->start_attempt(new question_attempt_step(), $seed);
 
