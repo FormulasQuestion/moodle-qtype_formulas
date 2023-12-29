@@ -347,10 +347,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         $numcorrect = 0;
         foreach ($this->parts as $part) {
-            // FIXME: needs refactoring once part grading is implemented
             list('answer' => $answercorrect, 'unit' => $unitcorrect) = $part->grade($response);
 
-            if ($answercorrect * $unitcorrect >= .999) {
+            if ($answercorrect >= 0.999 && $unitcorrect == true) {
                 $numcorrect++;
             }
         }
@@ -725,21 +724,19 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     /**
-     * This is called by the behaviour in order to determine whether the question state should be moved
-     * to question_state::$invalid. There is virtually no scenario where a Formulas question could become
-     * invalid (in the sense that it could not be graded), so we always return false.
+     * This is called by adaptive multiplart behaviour in order to determine whether the question
+     * state should be moved to question_state::$invalid. We will always return false, considering
+     * any answer that cannot be parsed or evaluated as wrong. Also, it does not really make a
+     * difference, because invalid answers do attract the same penalty as wrong ones.
      *
      * @param array $response student's response
      * @return bool returning false
      */
     public function is_any_part_invalid(array $response): bool {
-        // FIXME: mark part invalid if evaluation of answer fails, e.g. due to invalid tokens
-        // like algebraic formula with assignment (=) or number with operators
-        // in that case, we must probably change get_validation_error() accordingly
         return false;
     }
 
-    /** FIXME: not treated yet, called when last try using interactive mode with hints is done
+    /**
      * Work out a final grade for this attempt, taking into account all the tries the student made.
      *
      * @param array $responses response for each try, each element (1 <= n <= $totaltries) is a response array
@@ -941,7 +938,6 @@ class qtype_formulas_part {
 
     /**
      * Whether or not the part has a combined input field for the number and the unit.
-     * TODO: implement test
      *
      * @return bool
      */
@@ -950,7 +946,7 @@ class qtype_formulas_part {
         // - there is a unit
         // - there is not more than one answer box
         // - the answer is not of the type algebraic formula.
-        if (!$this->has_unit() || $this->numbox > 1 || $this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+        if (!$this->has_unit() || $this->numbox > 1 || $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
             return false;
         }
 
@@ -1227,9 +1223,12 @@ class qtype_formulas_part {
     }
 
     /**
-     * TODO: Undocumented function
-     *
-     * FIXME: for algebraic answers: replace non-algebraic variables by their numerical value
+     * Return the part's evaluated answers. The teacher has probably entered them using the
+     * various (random, global and/or local) variables. This function calculates the numerical
+     * value of all answers. If the answer type is 'algebraic formula', the answers are not
+     * evaluated (this would not make sense), but the non-algebraic variables will be replaced
+     * by their respective values, e.g. "a*x^2" could become "2*x^2" if the variable a is defined
+     * to be 2.
      *
      * @return array
      */
@@ -1274,10 +1273,11 @@ class qtype_formulas_part {
     }
 
     /**
-     * TODO: doc
+     * This function takes an array of algebraic formulas and wraps them in quotes. This is
+     * needed e.g. before we feed them to the parser for further processing.
      *
-     * @param array $answers
-     * @return void
+     * @param array $formulas the formulas to be wrapped in quotes
+     * @return array array containing wrapped formulas
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
         foreach ($formulas as &$formula) {
@@ -1291,12 +1291,19 @@ class qtype_formulas_part {
     }
 
     /**
-     * TODO: Undocumented function, clean up
+     * Add several special variables to the question part's evaluator, namely
+     * _a for the model answers (array)
+     * _r for the student's response (array)
+     * _d for the differences between _a and _r (array)
+     * _0, _1 and so on for the student's individual answers
+     * _err for the absolute error
+     * _relerr for the relative error, if applicable
      *
-     * @param [type] $response (already evaluated, normal array indices)
+     * @param array $studentanswers the student's response
+     * @param float $conversionfactor unit conversion factor, if needed (1 otherwise)
      * @return void
      */
-    public function add_special_variables($studentanswers, $conversionfactor) {
+    public function add_special_variables(array $studentanswers, float $conversionfactor): void {
         if (count($studentanswers) === 0) {
             return;
         }
@@ -1358,13 +1365,11 @@ class qtype_formulas_part {
             }
         }
 
-        // FIXME: parser should include known variables
-        $parser = new parser($command);
+        $parser = new parser($command, $this->evaluator->export_variable_list());
         $this->evaluator->evaluate($parser->get_statements(), true);
-        //$this->evaluator->clear_stack();
     }
 
-    /** FIXME: not finished yet
+    /**
      * Grade the part and return its grade.
      *
      * @param array $response current response
@@ -1389,6 +1394,7 @@ class qtype_formulas_part {
         // answer type number MUST NOT contain operators etc.
         // algebraic answers must not be evaluated, but parsed in order to make sure they are valid
         // TODO: update comment
+        // FIXME: unit + algebraic formula -> only check if unit is compatible, drop conversion factor
         $evaluatedresponse = $response;
         if (!$isalgebraic) {
             // The answer might be invalid, so we wrap the parsing and evaluation in try-catch.
@@ -1398,7 +1404,9 @@ class qtype_formulas_part {
                 $this->evaluator->clear_stack();
                 $evaluatedresponse = $this->evaluator->evaluate($parser->get_statements())[0];
             } catch (Throwable $t) {
-                // FIXME: this could probably be improved
+                // If parsing or evaluation fails, we consider the answer as wrong.
+                // FIXME: the unit might be correct, but we must find a way to split it from the
+                // invalid answer
                 return ['answer' => 0, 'unit' => false];
             }
 
@@ -1421,9 +1429,11 @@ class qtype_formulas_part {
         try {
             $this->add_special_variables($evaluatedresponse, $conversionfactor);
         } catch (Exception $e) {
-            // FIXME: deal with evaluation error, e.g. if _err cannot be computed, because of
-            // invalid algebraic expression or syntax error in student input
-            // -> return as wrong answer, no need to evaluate the rest.
+            // If the special variables cannot be evaluated, the answer will be considered as
+            // wrong. Partial credit may be given for the unit. We do not carry on, because
+            // evaluation of the grading criterion (and possibly grading variables) generally
+            // depends on these special variables.
+            return ['answer' => 0, 'unit' => $unitcorrect];
         }
 
         // Fetch and evaluate grading variables.
@@ -1450,16 +1460,7 @@ class qtype_formulas_part {
         $evaluatedgrading = min($evaluatedgrading, 1);
         $evaluatedgrading = max($evaluatedgrading, 0);
 
-        // FIXME: not ready yet for answer type algebraic formula
-        // in that case, also check that answer is string; refactor that part
-        if ($this->answertype == 1000 && false) {
-            throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
-        }
-
-        // ******** FIXME FIXME FIXME ***********
-        // FIXME: legacy code did set $unitcorrect = 1 if all answers == 0.0
-
-        // if evaluation of grading crit is NaN  --> zero mark
+        // FIXME: if evaluation of grading crit is NaN  --> zero mark
 
         return ['answer' => $evaluatedgrading, 'unit' => $unitcorrect];
     }
@@ -1487,16 +1488,17 @@ class qtype_formulas_part {
     }
 
     /**
-     * Return an array containing the correct answers for this question part like they are
-     * shown e.g. in the feedback or on the review page of a question attempt.
+     * Return an array containing the correct answers for this question part. If $forfeedback
+     * is set to true, multiple choice answers are translated from their list index to their
+     * value (e.g. the text) to provide feedback to the student. Otherwise, the function returns
+     * the values as they are needed to obtain full mark at this question.
      *
-     * TODO: complete doc
+     * @param bool $forfeedback whether we request correct answers for student feedback
+     * @return array list of correct answers
      */
     public function get_correct_response(bool $forfeedback = false): array {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
-
-        // FIXME: deal with algebraic answer type (should be taken care of by get_evaluated_answers)
 
         // If we have a combined unit field, we return both the model answer plus the unit
         // in "i_". Combined fields are only possible for parts with one signle answer.
@@ -1523,7 +1525,13 @@ class qtype_formulas_part {
     }
 
     /**
-     * TODO: doc
+     * When using multichoice options in a question (e.g. radio buttons or a dropdown list),
+     * the answer will be stored as a number, e.g. 1 for the *second* option. However, when
+     * giving feedback to the student, we want to show the actual *value* of the option and not
+     * its number. This function makes sure the stored answer is translated accordingly.
+     *
+     * @param array $response the response given by the student
+     * @return array updated response
      */
     public function translate_mc_answers_for_feedback(array $response): array {
         // First, we fetch all answer boxes.

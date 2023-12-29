@@ -36,6 +36,7 @@ class qtype_formulas_test_helper extends question_test_helper {
     public function get_test_questions() {
         return array(
             'testsinglenum', // Minimal formulas question : one part, not randomised (answer = 5),
+            'testalgebraic', // Formulas question with algebraic answer,
             'testtwonums', // Minimal formulas question : one part, two numbers (2 and 3),
             'testsinglenumunit', // one part, one number with unit (answer: 5 m/s),
             'testsinglenumunitsep', // one part, one number plus separate unit (answer: 5 m/s),
@@ -82,7 +83,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->id = 0;
         $p->placeholder = '';
         $p->answermark = 1;
-        $p->answertype = 0;
+        $p->answertype = '0';
         $p->numbox = 1;
         $p->vars1 = '';
         $p->vars2 = '';
@@ -106,6 +107,39 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->partindex = 0;
 
         return $p;
+    }
+
+    /**
+     * @return qtype_formulas_question question, single part, algebraic formula
+     */
+    public static function make_formulas_question_testalgebraic() {
+        $q = self::make_a_formulas_question();
+
+        $q->name = 'test-algebraic';
+        $q->questiontext = '<p>This is a minimal question. The answer is "5*x^2".</p>';
+
+        $q->penalty = 0.3;
+        $q->textfragments = array(0 => '<p>This is a minimal question. The answer is "5*x^2".</p>',
+                                  1 => '');
+        $q->numparts = 1;
+        $q->defaultmark = 1;
+        $q->varsglobal = 'a=5;';
+        $q->generalfeedback = '';
+        $p = self::make_a_formulas_part();
+        $p->id = 1;
+        $p->placeholder = '';
+        $p->answermark = 1;
+        $p->vars1 = 'x={1:10}';
+        $p->answer = '"a*x^2"';
+        $p->answertype = strval(qtype_formulas::ANSWER_TYPE_ALGEBRAIC);
+        $p->answernotunique = '1';
+        $p->correctness = '_err < 0.01';
+        $p->subqtext = '';
+        $p->partcorrectfb = 'Your answer is correct.';
+        $p->partpartiallycorrectfb = 'Your answer is partially correct.';
+        $p->partincorrectfb = 'Your answer is incorrect.';
+        $q->parts[0] = $p;
+        return $q;
     }
 
     /**
@@ -149,7 +183,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('5');
         $form->answernotunique = array('1');
         $form->answermark = array(2);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -222,7 +256,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'id' => 14,
                 'placeholder' => '',
                 'answermark' => 2,
-                'answertype' => 0,
+                'answertype' => '0',
                 'numbox' => 1,
                 'vars1' => '',
                 'vars2' => '',
@@ -310,7 +344,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('5');
         $form->answernotunique = array('1');
         $form->answermark = array(2);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -393,7 +427,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('5');
         $form->answernotunique = array('1');
         $form->answermark = array(2);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -475,7 +509,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('[2, 3]');
         $form->answernotunique = array('1');
         $form->answermark = array(2);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1, 1);
         $form->placeholder = array('');
@@ -595,7 +629,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->numbox = array(1, 1, 1);
         $form->placeholder = array('#1', '#2', '#3');
         $form->postunit = array('', '', '');
-        $form->answertype = array(0, 0, 0);
+        $form->answertype = array('0', '0', '0');
         $form->vars1 = array('', '', '');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
         $form->vars2 = array('', '', '');
@@ -740,7 +774,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'id' => 14,
                 'placeholder' => '',
                 'answermark' => 2,
-                'answertype' => 0,
+                'answertype' => '0',
                 'numbox' => 1,
                 'vars1' => '',
                 'vars2' => '',
@@ -767,7 +801,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'id' => 15,
                 'placeholder' => '',
                 'answermark' => 2,
-                'answertype' => 0,
+                'answertype' => '0',
                 'numbox' => 1,
                 'vars1' => '',
                 'vars2' => '',
@@ -794,7 +828,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'id' => 16,
                 'placeholder' => '',
                 'answermark' => 2,
-                'answertype' => 0,
+                'answertype' => '0',
                 'numbox' => 1,
                 'vars1' => '',
                 'vars2' => '',
@@ -821,7 +855,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'id' => 17,
                 'placeholder' => '',
                 'answermark' => 2,
-                'answertype' => 0,
+                'answertype' => '0',
                 'numbox' => 1,
                 'vars1' => '',
                 'vars2' => '',
@@ -922,10 +956,10 @@ class qtype_formulas_test_helper extends question_test_helper {
             3 => '',
         );
         $form->answertype = array(
-            0 => 0,
-            1 => 0,
-            2 => 0,
-            3 => 0,
+            0 => '0',
+            1 => '0',
+            2 => '0',
+            3 => '0',
         );
         $form->vars1 = array(
             0 => '',
@@ -1057,7 +1091,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('0');
         $form->answernotunique = array('1');
         $form->answermark = array(2);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -1184,7 +1218,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->numbox = array(1, 1, 1, 1);
         $form->placeholder = array('', '', '', '');
         $form->postunit = array('m/s', 'm/s', '', '');
-        $form->answertype = array(0, 0, 0, 0);
+        $form->answertype = array('0', '0', '0', '0');
         $form->vars1 = array('', '', '', '');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01', '_relerr < 0.01');
         $form->vars2 = array('', '', '', '');
@@ -1286,7 +1320,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('1');
         $form->answernotunique = array('1');
         $form->answermark = array(1);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -1366,7 +1400,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('1');
         $form->answernotunique = array('1');
         $form->answermark = array(1);
-        $form->answertype = array(0);
+        $form->answertype = array('0');
         $form->correctness = array('_relerr < 0.01');
         $form->numbox = array(1);
         $form->placeholder = array('');
@@ -1456,7 +1490,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('1', '1');
         $form->answernotunique = array('1', '1');
         $form->answermark = array(1, 1);
-        $form->answertype = array(0, 0);
+        $form->answertype = array('0', '0');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');
         $form->numbox = array(1, 1);
         $form->placeholder = array('', '');
@@ -1552,7 +1586,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array('1', '1');
         $form->answernotunique = array('1', '1');
         $form->answermark = array(1, 1);
-        $form->answertype = array(0, 0);
+        $form->answertype = array('0', '0');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');
         $form->numbox = array(1, 1);
         $form->placeholder = array('', '');
@@ -1647,7 +1681,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answer = array(0 => '[1, 2]', 1 => '[3, 4]');
         $form->answernotunique = array('1', '1');
         $form->answermark = array(0 => 1, 1 => 1);
-        $form->answertype = array(0, 0);
+        $form->answertype = array('0', '0');
         $form->correctness = array('_relerr < 0.01', '_relerr < 0.01');
         $form->numbox = array(1, 1);
         $form->placeholder = array('', '');

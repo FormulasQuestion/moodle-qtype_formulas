@@ -101,6 +101,71 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_', '5 m/s', false);
     }
 
+    public function test_render_question_with_algebraic_answer() {
+        $q = $this->get_test_formulas_question('testalgebraic');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', true);
+
+        // Submit wrong answer.
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(0),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5*x^2');
+        $this->check_output_does_not_contain('a*x^2');
+
+        // Submit right answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '5*x^2', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5*x^2', false);
+
+        // Submit different right answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '5*x*x', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5*x*x', false);
+
+        // Test with the correct solution being stored in a string variable.
+        $q = $this->get_test_formulas_question('testalgebraic');
+        $q->varsglobal .= 'sol = "5*x^2"';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->process_submission(['0_0' => 'sol', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(0),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0', 'sol', false);
+
+        // Test with the unit: there should not be a combined unit field.
+        $q = $this->get_test_formulas_question('testalgebraic');
+        $q->parts[0]->postunit = 'm';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', true);
+        $this->check_output_contains_text_input('0_1', '', true);
+        $this->check_output_does_not_contain_text_input_with_class('0_');
+    }
+
     public function test_render_question_with_separate_unit_field() {
         $q = $this->get_test_formulas_question('testsinglenumunitsep');
         $q->parts[0]->unitpenalty = 0.5;

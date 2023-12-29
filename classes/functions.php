@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+// TODO: add die() function to streamline error output
+
 /**
  * Additional functions qtype_formulas
  *
@@ -960,13 +963,13 @@ class functions {
     public static function binomialcdf(int $n, float $p, int $x): float {
         // Probability must be 0 <= p <= 1.
         if ($p < 0 || $p > 1) {
-            // FIXME: revise error message.
-            throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+            // TODO: externalise string
+            throw new Exception('binomialcdf() expects the probability to be between 0 and 1');
         }
         // Number of successful outcomes must be at least 0 and at most number of trials.
         if ($x < 0 || $x > $n) {
-            // FIXME: revise error message.
-            throw new Exception(get_string('error_eval_numerical', 'qtype_formulas'));
+            // TODO: externalise string
+            throw new Exception('binomialcdf() expects the number of successful outcomes to be at least 0, but not larger than the number of tries');
         }
         $res = 0;
         for ($i = 0; $i <= $x; $i++) {

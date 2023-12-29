@@ -53,8 +53,8 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMBER, 'π'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '-pi'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '-π'],
-            // [false, '- 3'], FIXME: This is allowed now
-            // [false, '+ 3'], FIXME: This is allowed now
+            [qtype_formulas::ANSWER_TYPE_NUMBER, '- 3'], // TODO doc: This is allowed now
+            [qtype_formulas::ANSWER_TYPE_NUMBER, '+ 3'], // TODO doc: This is allowed now
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
@@ -75,7 +75,7 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '- 3'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)-3+exp(4)'],
-            // [true, '3e8 4.e8 .5e8'], FIXME: this is invalid (implicit multiplication with numbers)
+            [false, '3e8 4.e8 .5e8'], // TODO doc: this is invalid now (implicit multiplication with numbers)
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8(4.e8+2)(.5e8/2)5'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+4^-(9)'],
@@ -97,12 +97,12 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3+exp(u+v)^sin(x+y)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+exp(a)(u+v)^sin(1+2)(b+c)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+exp(u+v)^-sin(x+y)'],
-            // [true, 'a+b^c^d+f'], // FIXME: fails
-            // [true, 'a+b^(c^d)+f'], // FIXME: fails
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+b^c^d+f'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+b^(c^d)+f'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^d+f'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+b^c^-d'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '1+ln(a)+log10(b)'],
-            // [true, 'asin(w t)'], // FIXME: fails
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'asin(w t)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a sin(w t)+ b cos(w t)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a**b'],
@@ -114,14 +114,13 @@ class answer_parser_test extends \advanced_testcase {
             [false, '*a'],
             [false, 'a+^c+f'],
             [false, 'a+b^^+f'],
-            //[false, 'a+(b^c)^+f'], FIXME: this is correct, because + is considered as unary plus
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus
             [false, 'a+((b^c)^d+f'],
             [false, 'a+(b^c+f'],
             [false, 'a+b^c)+f'],
             [false, 'a+b^(c+f'],
             [false, 'a+b)^c+f'],
-            // FIXME: pi() is absolutely valid, even as a numerical formula
-            //[false, 'pi()'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed
             [false, 'sin 3'],
             [false, '1+sin*(3)+2'],
             [false, '1+sin^(3)+2'],

@@ -34,9 +34,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate the display of the formulation part of the question. This is the
      * area that contains the question text, and the controls for students to
-     * input their answers.
-     * FIXME: are we doing that or not? Some question types also embed bits of feedback, for
-     * example ticks and crosses, in this area.
+     * input their answers. Once the question is answered, it will contain the green tick
+     * or the red cross and the part's general / combined feedback.
      *
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
@@ -44,10 +43,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options): ?string {
         // First, fetch the instantiated question from the attempt.
-        /** @var qtype_formulas_question */
         $question = $qa->get_question();
 
-        // TODO: is this really necessary here ? If question is damaged it should have been detected before.
         if (count($question->textfragments) !== $question->numparts + 1) {
             $this->output->notification(get_string('error_question_damaged', 'qtype_formulas'), 'error');
             return null;

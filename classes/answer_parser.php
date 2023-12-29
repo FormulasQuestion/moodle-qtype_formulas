@@ -16,8 +16,6 @@
 
 namespace qtype_formulas;
 
-use \Exception;
-
 /**
  * Parser for answer expressions for qtype_formulas
  *
@@ -30,7 +28,9 @@ use \Exception;
 
 class answer_parser extends parser {
     /**
-     * FIXME Undocumented function
+     * Create a parser for student answers. This class does additional filtering (e. g. block
+     * forbidden operators) and syntax checking according to the answer type. It also translates
+     * the ^ symbol to the ** operator.
      *
      * @param string|array $tokenlist list of tokens as returned from the lexer or input string
      * @param array $knownvariables
@@ -67,10 +67,6 @@ class answer_parser extends parser {
                 }
             }
         }
-
-        // FIXME: stop at first semicolon, because answers must be single expressions?
-
-        // FIXME: Filtering?
 
         // Once this is done, we can parse the expression normally.
         parent::__construct($tokenlist, $knownvariables);
@@ -195,7 +191,7 @@ class answer_parser extends parser {
      * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
      * - everything allowed for numerical formulas
      * - all functions and operators except assignment =
-     * - variables (maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
+     * - variables (TODO: maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @param bool $disallowvariables whether we disallow the usage of variables
      * @return boolean
@@ -269,6 +265,7 @@ class answer_parser extends parser {
      * Iterate over all tokens and check whether the expression is *syntactically* valid.
      * Note that this does not necessarily mean that the expression can be evaluated:
      * - sqrt(-3) is syntactically valid, but it cannot be calculated
+     * - asin(x*y) is syntactically valid, but cannot be evaluated if abs(x*y) > 1
      * - a/(b-b) is syntactically valid, but it cannot be evaluated
      * - a-*b is syntactically invalid, because the operators cannot be chained that way
      *

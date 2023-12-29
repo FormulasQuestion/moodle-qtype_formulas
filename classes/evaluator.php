@@ -96,8 +96,10 @@ class evaluator {
     private bool $algebraicmode = false;
 
     /**
-     * FIXME Undocumented function
+     * Create an evaluator class. This class does all evaluations for expressions that have
+     * been parsed by a parser or answer_parser.
      *
+     * @param ?string $context serialized variable context from another evaluator class
      */
     public function __construct(?string $context = null) {
         $this->reinitialize($context);
@@ -143,6 +145,8 @@ class evaluator {
                 if ($input !== $match && $parser->has_token_in_tokenlist(token::OPERATOR, '=')) {
                     continue;
                 }
+                // FIXME: we will produce an error if the variable is an algebraic variable.
+                // --> type === ALGEBRAIC
                 $results = $this->evaluate($parser->get_statements());
                 $result = end($results);
                 // If the users does not want to substitute lists (arrays), well ... we don't.
@@ -152,7 +156,7 @@ class evaluator {
                 $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
                 // TODO: use non-capturing exception when we drop support for old PHP
-                unset($e);
+                ;
             }
         }
 
@@ -196,7 +200,10 @@ class evaluator {
         return $result;
     }
     /**
-     * FIXME: doc
+     * Export variable definition text for instantiated random variables. The result
+     * can then be fed to a parser and an evaluator. This is used for backwards compatibility,
+     * because legacy code used to save the random variables in the DB, rather than just
+     * the seed.
      *
      * @return string
      */
@@ -264,6 +271,8 @@ class evaluator {
      * Set the variable defined in $token to the value $value and correctly set
      * it's $type attribute.
      *
+     * FIXME: algebraic variables must not accept non-numeric values
+     *
      * @param token $vartoken
      * @param token $value
      * @param bool $israndomvar
@@ -298,7 +307,11 @@ class evaluator {
                 return token::wrap($randomvar->reservoir);
             }
 
-            // Otherwise we return the stored value.
+            // Otherwise we return the stored value. If the data is a SET, the variable is an
+            // algebraic variable.
+            if ($value->type === token::SET) {
+                $value->type = variable::ALGEBRAIC;
+            }
             $var = new variable($basename, $value->value, $value->type, microtime(true));
             $this->variables[$basename] = $var;
             return token::wrap($var->value);
@@ -336,6 +349,28 @@ class evaluator {
     }
 
     /**
+     * Check whether a given variable is an algebraic variable or not. This is needed, because
+     * in some situations they cannot be used while other variables are allowed.
+     *
+     * @param token $variable
+     * @return boolean
+     */
+    private function is_algebraic_variable(token $variable): bool {
+        // The raw name may contain indices, e.g. a[1][2]. We split at the [ and
+        // take the first chunk as the true variable name. If there are no brackets,
+        // there will be only one chunk and everything is fine.
+        $rawname = $variable->value;
+        $parts = explode('[', $rawname);
+        $name = array_shift($parts);
+
+        if (!array_key_exists($name, $this->variables)) {
+            $this->die("unknown variable: $name", $variable);
+        }
+
+        return $this->variables[$name]->type === variable::ALGEBRAIC;
+    }
+
+    /**
      * Get the value token that is stored in a variable. If the token is a literal
      * (number, string, array, set), just return the value directly.
      *
@@ -360,7 +395,7 @@ class evaluator {
             $type = $result->type;
             // In algebraic mode, an algebraic variable will resolve to a random value
             // from its reservoir.
-            if ($type === token::SET) {
+            if ($type === variable::ALGEBRAIC) {
                 if ($this->algebraicmode) {
                     // We re-seed the random generator with a preset value and the CRC32 of the
                     // variable's name. The preset will be changed by the calculate_algebraic_expression()
@@ -400,8 +435,6 @@ class evaluator {
             return new token(token::STRING, $result, $variable->row, $variable->column);
         }
         return $result;
-
-        // FIXME: if type is SET, this is either an algebraic variable or an uninstantiated random variable
     }
 
     /**
@@ -465,9 +498,20 @@ class evaluator {
         $this->algebraicmode = true;
         $oldstack = $this->stack;
         $this->clear_stack();
-        $result = $this->evaluate($parser->get_statements()[0]);
-        $this->stack = $oldstack;
-        $this->algebraicmode = false;
+        // Evaluation might fail. In that case, it is important to assure that the old stack
+        // is re-established and that algebraic mode is turned off.
+        try {
+            $result = $this->evaluate($parser->get_statements()[0]);
+        } catch (Exception $e) {
+            ;
+        } finally {
+            $this->stack = $oldstack;
+            $this->algebraicmode = false;
+            // If we have an exception, we throw it again to pass the error upstream.
+            if (isset($e)) {
+                throw $e;
+            }
+        }
 
         return $result;
     }
@@ -491,10 +535,10 @@ class evaluator {
             // an algebraic variable (i. e. the value is of type SET) or not. We will only
             // replace literals by their value.
             if ($token->type === token::VARIABLE) {
-                $value = $this->get_variable_value($token);
-                if ($value->type === token::SET) {
+                if ($this->is_algebraic_variable($token)) {
                     continue;
                 }
+                $value = $this->get_variable_value($token);
                 // Note: the value of a variable is always stored as a token.
                 $token = $value;
             }
@@ -514,7 +558,7 @@ class evaluator {
      * @return array
      */
     public function diff(array $first, array $second, ?int $n = null) {
-        // FIXME: maybe allow invocation with num/num or string/string/n for convenience.
+        // TODO: maybe allow invocation with num/num or string/string/n for convenience.
 
         // First, we check that $first and $second are lists of the same size.
         if (!is_array($first)) {
@@ -871,6 +915,7 @@ class evaluator {
     private function abort_if_not_scalar(token $token, bool $enforcenumeric = true): void {
         if ($token->type !== token::NUMBER) {
             if ($token->type === token::SET) {
+                // FIXME type ALGEBRAIC - not here
                 $value = "algebraic variable";
             } else if ($token->type === token::LIST) {
                 $value = "list";

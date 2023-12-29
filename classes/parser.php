@@ -27,19 +27,6 @@ use Exception;
  */
 
 
-/*
-
-TODO:
-
-* maybe add possibility for /* and * / delimited comments ?
-* _randomsvars_text in attempt_step_data --> prepend _version = 5; (incompat with legacy, so we know it's recent)
-      (alternative: 'version=5' or "version=5")
-*
-
-* units
-
-*/
-
 class parser {
     const EOF = null;
 
@@ -89,7 +76,7 @@ class parser {
     }
 
     private function parse_the_right_thing(token $token) {
-        // FIXME maybe add if / elseif / else clauses in the future?
+        // TODO: maybe add if / elseif / else clauses in the future?
         if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
             return $this->parse_forloop();
         } else {

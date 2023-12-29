@@ -586,16 +586,16 @@ class evaluator_test extends \advanced_testcase {
             ],
             'assignment involving for loop iterating over list of strings' => [
                 [
-                    's' => new variable('s', 'ABC', token::STRING),
-                    'i' => new variable('i', 'C', token::STRING),
+                    's' => new variable('s', 'ABC', variable::STRING),
+                    'i' => new variable('i', 'C', variable::STRING),
                 ],
                 's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }'
             ],
             'assignment involving nested for loops' => [
                 [
-                    'z' => new variable('z', 30, token::NUMBER),
-                    'i' => new variable('i', 4, token::NUMBER),
-                    'j' => new variable('j', 2, token::NUMBER),
+                    'z' => new variable('z', 30, variable::NUMERIC),
+                    'i' => new variable('i', 4, variable::NUMERIC),
+                    'j' => new variable('j', 2, variable::NUMERIC),
                 ],
                 'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;'
             ],
@@ -607,19 +607,19 @@ class evaluator_test extends \advanced_testcase {
             ],
             'assignment with algebraic vars and diff()' => [
                 [
-                    'x' => new variable('x', [1, 2, 3, 4, 5, 6, 7, 8, 9], token::SET),
-                    'y' => new variable('y', [1, 2, 3, 4, 5, 6, 7, 8, 9], token::SET),
-                    's' => new variable('s', 0, token::NUMBER),
+                    'x' => new variable('x', [1, 2, 3, 4, 5, 6, 7, 8, 9], variable::ALGEBRAIC),
+                    'y' => new variable('y', [1, 2, 3, 4, 5, 6, 7, 8, 9], variable::ALGEBRAIC),
+                    's' => new variable('s', 0, variable::NUMERIC),
                 ],
                 'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50)[0];'
             ],
             'ternary with variables' => [
                 [
-                    'a' => new variable('a', 1, token::NUMBER),
-                    'b' => new variable('b', 2, token::NUMBER),
-                    'c' => new variable('c', 3, token::NUMBER),
-                    'd' => new variable('d', 4, token::NUMBER),
-                    'e' => new variable('e', 3, token::NUMBER),
+                    'a' => new variable('a', 1, variable::NUMERIC),
+                    'b' => new variable('b', 2, variable::NUMERIC),
+                    'c' => new variable('c', 3, variable::NUMERIC),
+                    'd' => new variable('d', 4, variable::NUMERIC),
+                    'e' => new variable('e', 3, variable::NUMERIC),
                 ],
                 'a=1; b=2; c=3; d=4; e=(a==b ? b : c)'
             ],
@@ -770,9 +770,10 @@ class evaluator_test extends \advanced_testcase {
     }
 
     // TODO: add a test with an algebraic variable
+    // TODO: add test with nested array
     public function test_substitute_variables_in_text() {
         // Define, parse and evaluate some variables.
-        $vars = 'a=1; b=[2,3,4];';
+        $vars = 'a=1; b=[2,3,4]; c={1,2,3};';
         $parser = new parser($vars);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -824,10 +825,10 @@ class evaluator_test extends \advanced_testcase {
             $stored = $evaluator->variables[$key];
             self::assertEquals($variable->name, $stored->name);
             self::assertEquals($variable->type, $stored->type);
-            // If the value is a list, its elements are tokens. We will only compare the
-            // token values to the expected values. For scalar variables, we can directly
-            // compare the values.
-            if ($stored->type === token::LIST || $stored->type === token::SET) {
+            // If the value is a list or the variable is algebraic, the elements are tokens.
+            // We will only compare the token values to the expected values. For scalar variables,
+            // we can directly compare the values.
+            if ($stored->type === token::LIST || $stored->type === variable::ALGEBRAIC) {
                 foreach ($stored->value as $i => $token) {
                     self::assertEqualsWithDelta($variable->value[$i], $token->value, 1e-8);
                 }
@@ -1328,8 +1329,8 @@ class evaluator_test extends \advanced_testcase {
             [M_PI, 'π'],
             [-M_PI, '-pi'],
             [-M_PI, '-π'],
-            // [false, '- 3'], FIXME: This is allowed now
-            // [false, '+ 3'], FIXME: This is allowed now
+            [-3, '- 3'],
+            [3, '+ 3'],
             [false, '3 e10'],
             [false, '3e 10'],
             [false, '3e8e8'],
@@ -1377,12 +1378,12 @@ class evaluator_test extends \advanced_testcase {
             [1.4771212547197, '1+log10(3)'],
             [M_PI, 'pi'],
             [M_PI, 'pi()'],
-            [false, '3 4 5'], // FIXME: this used to be valid for *student* input
+            [false, '3 4 5'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
             [false, '3 e10'],
             [false, '3e 10'],
             [false, '3e8e8'],
             [false, '3e8e8e8'],
-            [false, '3e8 4.e8 .5e8'], // FIXME: this used to be valid for *student* input
+            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
         ];
 
     }
@@ -1393,7 +1394,7 @@ class evaluator_test extends \advanced_testcase {
             [true, '- 3'],
             [true, '3e 10'],
             [true, 'sin(3)-3+exp(4)'],
-            // [true, '3e8 4.e8 .5e8'], FIXME: this is invalid (implicit multiplication with numbers)
+            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
             [true, '3e8(4.e8+2)(.5e8/2)5'],
             [true, '3+exp(4+5)^sin(6+7)'],
             [true, '3+4^-(9)'],
@@ -1415,12 +1416,12 @@ class evaluator_test extends \advanced_testcase {
             [true, '3+exp(u+v)^sin(x+y)'],
             [true, 'a+exp(a)(u+v)^sin(1+2)(b+c)'],
             [true, 'a+exp(u+v)^-sin(x+y)'],
-            // [true, 'a+b^c^d+f'], // FIXME: fails
-            // [true, 'a+b^(c^d)+f'], // FIXME: fails
+            [true, 'a+b^c^d+f'],
+            [true, 'a+b^(c^d)+f'],
             [true, 'a+(b^c)^d+f'],
             [true, 'a+b^c^-d'],
             [true, '1+ln(a)+log10(b)'],
-            // [true, 'asin(w t)'], // FIXME: fails
+            [true, 'asin(w t / 100)'],
             [true, 'a sin(w t)+ b cos(w t)'],
             [true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [true, 'a**b'],
@@ -1458,7 +1459,7 @@ class evaluator_test extends \advanced_testcase {
      */
     public function test_algebraic_formulas($expected, $input): void {
         // Define a set of algebraic variables first and prepare the evaluator.
-        $algebraicvars = 'a={1:10}; b={1:10}; c={1:10}; d={1:10}; e={1:10}; f={1:10};';
+        $algebraicvars = 'a={1:10}; b={1:5}; c={1:5}; d={1:3}; e={1:10}; f={1:10};';
         $algebraicvars .= 't={1:10}; u={1:10}; v={1:10}; w={1:10}; x={1:10}; y={1:10}; z={1:10};';
         $parser = new parser($algebraicvars);
         $knownvars = $parser->export_known_variables();

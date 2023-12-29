@@ -895,12 +895,10 @@ class qtype_formulas extends question_type {
         // Collect all error messages in an associative array of the form 'fieldname' => 'error'.
         $errors = [];
 
-        // FIXME: move the comment to the validation function
-        // The value from the globalunitpenalty field is only used to set the penalty
-        // for each part. Is has to be validated separately. The same is true for the
-        // globalruleid. Its value comes from a <select> element, so there should be no errors.
-        // If we are importing a question, there will be no globalunitpenalty or globalruleid,
-        // because the question already has those options stored in its parts.
+        // The fields 'globalunitpenalty' and 'globalruleid' must be validated separately,
+        // because they are defined at the question level, even though they affect the parts.
+        // If we are importing a question, those fields will not be present, because the values
+        // are already stored with the parts.
         // Note: we validate this first, because the fields will be referenced during validation
         // of the parts.
         $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
@@ -971,9 +969,12 @@ class qtype_formulas extends question_type {
     }
 
     /**
-     * TODO: doc
+     * This function is called during the validation process to validate the special fields
+     * 'globalunitpenalty' and 'globalruleid'. Both fields are used as a single option to set
+     * the unit penalty and the unit conversion rules for all parts of a question.
      *
-     * @return array
+     * @param object $data form data to be validated
+     * @return array array containing error messages or empty array if no error
      */
     private function validate_global_unit_fields(object $data): array {
         $errors = [];
@@ -1086,8 +1087,7 @@ class qtype_formulas extends question_type {
                 // or an array of strings. Thus, evaluation of the field's content as done above cannot fail,
                 // unless that syntax constraint has not been respected by the user.
                 if ($isalgebraic) {
-                    // TODO: externalise string
-                    $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
+                    $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                 } else {
                     $errors["answer[$i]"] = $e->getMessage();
                 }
@@ -1100,6 +1100,7 @@ class qtype_formulas extends question_type {
             if (is_array($modelanswers->value)) {
                 // The value can be an array, because the user entered an algebraic variable. That
                 // is not accepted.
+                // FIXME: type === ALGEBRAIC ? not here
                 if ($modelanswers->type === token::SET) {
                     $errors["answer[$i]"] = 'Invalid answer format: you cannot use an algebraic variable with this answer type';
                     continue;
@@ -1121,10 +1122,9 @@ class qtype_formulas extends question_type {
             // add them again.
             if ($isalgebraic) {
                 foreach ($modelanswers as $k => &$answer) {
-                    // After the first probelmatic answer, we do not need to check the rest, so we break.
+                    // After the first problematic answer, we do not need to check the rest, so we break.
                     if (!is_string($answer)) {
-                        // TODO: externalise string
-                        $errors["answer[$i]"] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
+                        $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                         break;
                     }
 
@@ -1132,12 +1132,14 @@ class qtype_formulas extends question_type {
                     try {
                         $result = $partevaluator->calculate_algebraic_expression($answer);
                     } catch (Exception $e) {
-                        $answerno = $k + 1;
-                        // The error message may contain line and column numbers, but they don't make
-                        // sense in this context, so we'd rather remove them.
-                        $message = preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage());
-                        // TODO: externalise string
-                        $errors["answer[$i]"] = "error in answer #{$answerno}: $message";
+                        $a = (object)[
+                            // Answers are zero-indexed, but users normally count from 1.
+                            'answerno' => $k + 1,
+                            // The error message may contain line and column numbers, but they don't make
+                            // sense in this context, so we'd rather remove them.
+                            'message' => preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage())
+                        ];
+                        $errors["answer[$i]"] = get_string('error_in_answer', 'qtype_formulas', $a);
                         break;
                     }
 
@@ -1192,8 +1194,7 @@ class qtype_formulas extends question_type {
                 $result = $partevaluator->evaluate($partparser->get_statements());
                 $num = count($result);
                 if ($num > 1) {
-                    // TODO: externalise the string
-                    $errors["correctness[$i]"] = "The grading criterion should be one single expression. Found $num statements instead.";
+                    $errors["correctness[$i]"] = get_string('error_grading_single_expression', 'qtype_formulas', $num);
                 }
                 $grade = $result[0]->value;
             } catch (Exception $e) {
@@ -1203,8 +1204,7 @@ class qtype_formulas extends question_type {
                 // we change the message, because it is save to assume that the teacher tried to use
                 // relative error which is not supported with that answer type.
                 if ($isalgebraic && strpos($message, '_relerr') !== false) {
-                    // TODO: externalise string
-                    $message = 'relative error (_relerr) cannot be used with answer type algebraic formula';
+                    $message = get_string('error_algebraic_relerr', 'qtype_formulas');
                 }
                 $errors["correctness[$i]"] = $message;
                 continue;
@@ -1212,8 +1212,7 @@ class qtype_formulas extends question_type {
 
             // We used the model answers, so the grading criterion should always evaluate to 1 (or more).
             if ($grade < 0.999) {
-                // TODO: externalise the string
-                $errors["correctness[$i]"] = "The grading criterion should evaluate to 1 for correct answers. Found $grade instead.";
+                $errors["correctness[$i]"] = get_string('error_grading_not_1', 'qtype_formulas', $grade);
             }
 
             // Instantiate toolkit class for units.

@@ -159,7 +159,7 @@ class instantiation extends \external_api {
         foreach ($filteredglobalvars as $name => $variable) {
             // If the variable has type SET, it is an algebraic variable. We only output its name
             // in curly braces to make that clear. For other variables, we put the value.
-            if ($variable->type === token::SET) {
+            if ($variable->type === variable::ALGEBRAIC) {
                 $printname = str_replace('*', '', $name);
                 $row['globalvars'][] = ['name' => $name, 'value' => "{{$printname}}"];
             } else {
@@ -172,7 +172,7 @@ class instantiation extends \external_api {
             foreach ($filteredlocalvars as $name => $variable) {
                 // If the variable has type SET, it is an algebraic variable. We only output its name
                 // in curly braces to make that clear. For other variables, we put the value.
-                if ($variable->type === token::SET) {
+                if ($variable->type === variable::ALGEBRAIC) {
                     $printname = str_replace('*', '', $name);
                     $row['parts'][$i][] = ['name' => $name, 'value' => "{{$printname}}"];
                 } else {
