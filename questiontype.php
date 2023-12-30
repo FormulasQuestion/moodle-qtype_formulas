@@ -1100,7 +1100,6 @@ class qtype_formulas extends question_type {
             if (is_array($modelanswers->value)) {
                 // The value can be an array, because the user entered an algebraic variable. That
                 // is not accepted.
-                // FIXME: type === ALGEBRAIC ? not here
                 if ($modelanswers->type === token::SET) {
                     $errors["answer[$i]"] = 'Invalid answer format: you cannot use an algebraic variable with this answer type';
                     continue;

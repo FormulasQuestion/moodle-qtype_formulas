@@ -27,7 +27,10 @@ namespace qtype_formulas;
 
 class random_parser extends parser {
     /**
-     * FIXME Undocumented function
+     * Construct a new parser class for random variables. The main difference compared to the
+     * general parser is that the assignment '=' operator is modified in order for the evaluator
+     * to be able to distinguish random variables and normal variables. It also simplifies the
+     * creation of shuffled (randomized) arrays by making the usage shuffle() optional.
      *
      * @param [type] $tokenlist list of tokens as returned from the lexer or input string
      * @param [type] $knownvariables

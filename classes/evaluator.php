@@ -71,9 +71,8 @@ class evaluator {
         'tanh' => [1, 1],
     ];
 
-    // FIXME: temporarily, for testing debugging
-    public array $variables = [];
-    public array $randomvariables = [];
+    private array $variables = [];
+    private array $randomvariables = [];
 
     private array $constants = [
         'π' => M_PI,
@@ -106,6 +105,22 @@ class evaluator {
     }
 
     /**
+     * Undocumented function
+     *
+     * @param string|token $variable
+     * @return boolean
+     */
+    public function is_random_variable($variable): bool {
+        if ($variable instanceof token) {
+            $rawname = $variable->value;
+        } else if (is_string($variable)) {
+            $rawname = $variable;
+        }
+
+        return array_key_exists($rawname, $this->randomvariables);
+    }
+
+    /**
      * Substitute placeholders like {a} or {=a*b} in a text by evaluating the corresponding
      * expressions in the current evaluator.
      *
@@ -118,7 +133,8 @@ class evaluator {
         // variables with a numerical index like {a[1]} or more complex
         // expressions like {=a+b} or {=a[b]}.
         $varpattern = '[_A-Za-z]\w*';
-        $arraypattern = '[_A-Za-z]\w*\[\d+\]';
+        // FIXME: nested arrays?
+        $arraypattern = '[_A-Za-z]\w*(\[\d+\])+';
         $expressionpattern = '=[^}]+';
 
         $matches = [];
@@ -145,8 +161,9 @@ class evaluator {
                 if ($input !== $match && $parser->has_token_in_tokenlist(token::OPERATOR, '=')) {
                     continue;
                 }
-                // FIXME: we will produce an error if the variable is an algebraic variable.
-                // --> type === ALGEBRAIC
+                // Evaluation will fail e.g. if it is an algebraic variable or if there is an
+                // error in the expression. In those cases, the placeholder will simply not
+                // be replaced.
                 $results = $this->evaluate($parser->get_statements());
                 $result = end($results);
                 // If the users does not want to substitute lists (arrays), well ... we don't.
@@ -195,7 +212,10 @@ class evaluator {
         return array_keys($this->variables);
     }
 
-    public function export_single_variable(string $varname) {
+    public function export_single_variable(string $varname, bool $isalgebraic = false) {
+        if ($isalgebraic) {
+            return $this->variables[$varname];
+        }
         $result = $this->get_variable_value(token::wrap($varname));
         return $result;
     }
@@ -352,14 +372,18 @@ class evaluator {
      * Check whether a given variable is an algebraic variable or not. This is needed, because
      * in some situations they cannot be used while other variables are allowed.
      *
-     * @param token $variable
+     * @param string|token $variable
      * @return boolean
      */
-    private function is_algebraic_variable(token $variable): bool {
+    private function is_algebraic_variable($variable): bool {
         // The raw name may contain indices, e.g. a[1][2]. We split at the [ and
         // take the first chunk as the true variable name. If there are no brackets,
         // there will be only one chunk and everything is fine.
-        $rawname = $variable->value;
+        if ($variable instanceof token) {
+            $rawname = $variable->value;
+        } else if (is_string($variable)) {
+            $rawname = $variable;
+        }
         $parts = explode('[', $rawname);
         $name = array_shift($parts);
 

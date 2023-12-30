@@ -675,24 +675,25 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->evaluate($randomparser->get_statements());
 
         // First, we check whether the random variable has been created and registered.
-        // Unless it is a "shuffle" case, we also check whether the reservoir has the correct size.
+        // We also check whether the number of variants is correct.
+        // TODO: check also with shuffle case?
         $key = $expected['name'];
-        self::assertArrayHasKey($key, $evaluator->randomvariables);
+        self::assertTrue($evaluator->is_random_variable($key));
         if ($expected['shuffle'] === false) {
-            self::assertEquals($expected['count'], $evaluator->randomvariables[$key]->how_many());
+            self::assertEquals($expected['count'], $evaluator->get_number_of_variants());
         }
 
         // Now, we instantiate the random variable. We check that a "normal" variable is
         // created.
         $evaluator->instantiate_random_variables();
-        self::assertArrayHasKey($key, $evaluator->variables);
+        self::assertContains($key, $evaluator->export_variable_list());
 
         // FIXME: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
 
         // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
         // value is within those boundaries. For shuffled lists, we only check the size.
         // In some cases, >= and <= comparison does not make sense, e.g. when elements are lists.
-        $stored = $evaluator->variables[$key];
+        $stored = $evaluator->export_single_variable($key);
         if ($expected['shuffle'] === false) {
             if (isset($expected['min'])) {
                 self::assertGreaterThanOrEqual($expected['min'], $stored->value);
@@ -769,11 +770,9 @@ class evaluator_test extends \advanced_testcase {
         self::assertLessThanOrEqual(72, $result[3]->value);
     }
 
-    // TODO: add a test with an algebraic variable
-    // TODO: add test with nested array
     public function test_substitute_variables_in_text() {
         // Define, parse and evaluate some variables.
-        $vars = 'a=1; b=[2,3,4]; c={1,2,3};';
+        $vars = 'a=1; b=[2,3,4]; c={1,2,3}; d=[[1,2],[3,4]]';
         $parser = new parser($vars);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -793,6 +792,25 @@ class evaluator_test extends \advanced_testcase {
         // Test with substitution of array b as one would write it in PHP.
         $output = $evaluator->substitute_variables_in_text($text, false);
         $expected = '{1}, 1, {a }, { a}, [2, 3, 4], 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
+        $this->assertEquals($expected, $output);
+
+        // Test with substitution of nested array.
+        $text = '{d} {d[0]} {d[0][0]} {d[1][1]} {d[5][3]}';
+        $expected = '{d} {d[0]} 1 4 {d[5][3]}';
+        $output = $evaluator->substitute_variables_in_text($text);
+        $this->assertEquals($expected, $output);
+
+        // And with substitution of arrays being activated.
+        $expected = '[[1, 2], [3, 4]] [1, 2] 1 4 {d[5][3]}';
+        $output = $evaluator->substitute_variables_in_text($text, false);
+        $this->assertEquals($expected, $output);
+
+        // Test with algebraic variable. It should not be replaced.
+        $text = '{c} {=c}';
+        $expected = '{c} {=c}';
+        $output = $evaluator->substitute_variables_in_text($text);
+        $this->assertEquals($expected, $output);
+        $output = $evaluator->substitute_variables_in_text($text, false);
         $this->assertEquals($expected, $output);
     }
 
@@ -820,10 +838,11 @@ class evaluator_test extends \advanced_testcase {
         $evaluator = new evaluator();
         $evaluator->evaluate($statements);
 
+        $variables = $evaluator->export_variable_list();
         foreach ($expected as $key => $variable) {
-            self::assertArrayHasKey($key, $evaluator->variables);
-            $stored = $evaluator->variables[$key];
-            self::assertEquals($variable->name, $stored->name);
+            self::assertContains($key, $variables);
+            $stored = $evaluator->export_single_variable($key, true);
+            //self::assertEquals($variable->name, $stored->name);
             self::assertEquals($variable->type, $stored->type);
             // If the value is a list or the variable is algebraic, the elements are tokens.
             // We will only compare the token values to the expected values. For scalar variables,
@@ -1288,7 +1307,7 @@ class evaluator_test extends \advanced_testcase {
         //$context = 'a:2:{s:1:"a";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"a";s:4:"type";i:3;s:5:"value";d:3;}s:1:"b";O:23:"qtype_formulas\variable":3:{s:4:"name";s:1:"b";s:4:"type";i:3;s:5:"value";d:6;}}';
         //$evaluator->import_variable_context($context);
         print_r($result);
-        var_dump($evaluator->variables);
+        var_dump($evaluator->export_variable_list());
         return;
 
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);

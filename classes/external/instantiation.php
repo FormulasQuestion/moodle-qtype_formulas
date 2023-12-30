@@ -148,7 +148,7 @@ class instantiation extends \external_api {
         // The evaluator already contained the global vars, so we must filter them out before
         // continuing.
         foreach ($randomvars as $name => $variable) {
-            if (!array_key_exists($name, $evaluator->randomvariables)) {
+            if ($evaluator->is_random_variable($name) === false) {
                 unset($randomvars[$name]);
                 continue;
             }

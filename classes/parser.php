@@ -46,10 +46,13 @@ class parser {
     private $variableslist = [];
 
     /**
-     * FIXME Undocumented function
+     * Create a parser class and have it parse a given input. The input can be given as a string, in
+     * which case it will first be sent to the lexer. If that step has already been made, the constructor
+     * also accepts a list of tokens. The user can specify a list of known variables to help the
+     * parser classify identifiers as functions or variables.
      *
-     * @param [type] $tokenlist list of tokens as returned from the lexer or input string
-     * @param [type] $knownvariables
+     * @param string|array $tokenlist list of tokens as returned from the lexer or input string
+     * @param array $knownvariables
      */
     public function __construct($tokenlist, array $knownvariables = []) {
         // If the input is given as a string, run it through the lexer first.
@@ -382,12 +385,8 @@ class parser {
         return $this->variableslist;
     }
 
-    public function parse_ifelse() {
-    }
-
     /**
-     * ... FIXME ...
-     * Notes on the syntax of for loops:
+     * This function parses a for loop. Notes on the syntax of for loops:
      * - The variable will NOT be local to the loop. It will be visible in the entire scope and keep its last value.
      * - It is possible to use a variable that has already been defined. In that case, it will be overwritten.
      * - It is possible to use variables for the start and/or end of the range and also for the step size.

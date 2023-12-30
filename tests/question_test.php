@@ -108,9 +108,8 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $globalvars = $q->evaluator->variables;
-        $s = $globalvars['s']->value;
-        $dt = $globalvars['dt']->value;
+        $s = $q->evaluator->export_single_variable('s')->value;
+        $dt = $q->evaluator->export_single_variable('dt')->value;
 
         $this->assertEquals("This question shows different display methods of the answer and unit box.\n"
                             . "If a car travels $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
@@ -142,8 +141,7 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $globalvars = $q->evaluator->variables;
-        $v = $globalvars['v']->value;
+        $v = $q->evaluator->export_single_variable('v')->value;
 
         $this->assertEquals(
             [
@@ -225,9 +223,10 @@ class question_test extends \basic_testcase {
         // v, s and t do exist and that they are initialized.
         self::assertEquals($seed, $q->seed);
         self::assertNotNull($q->evaluator);
-        self::assertArrayHasKey('v', $q->evaluator->variables);
-        self::assertArrayHasKey('s', $q->evaluator->variables);
-        self::assertArrayHasKey('dt', $q->evaluator->variables);
+        $variables = $q->evaluator->export_variable_list();
+        self::assertContains('v', $variables);
+        self::assertContains('s', $variables);
+        self::assertContains('dt', $variables);
 
         // Verify the number of parts is set and the parts' evaluators are set up.
         self::assertEquals(4, $q->numparts);
@@ -274,9 +273,10 @@ class question_test extends \basic_testcase {
         // v, s and t do exist and that they are initialized.
         self::assertEquals($seed, $q->seed);
         self::assertNotNull($q->evaluator);
-        self::assertArrayHasKey('v', $q->evaluator->variables);
-        self::assertArrayHasKey('s', $q->evaluator->variables);
-        self::assertArrayHasKey('dt', $q->evaluator->variables);
+        $variables = $q->evaluator->export_variable_list();
+        self::assertContains('v', $variables);
+        self::assertContains('s', $variables);
+        self::assertContains('dt', $variables);
 
         // Verify the number of parts is set and the parts' evaluators are set up.
         self::assertEquals(4, $q->numparts);
