@@ -126,7 +126,7 @@ class lexer {
                 $this->pendingternary++;
             }
             // After a : operator, the ternary operator is no longer pending. In case of *nested*
-            // ternary operators, we go descend one level.
+            // ternary operators, we descend one level.
             if ($currentchar === ':') {
                 $this->pendingternary--;
             }
@@ -148,8 +148,8 @@ class lexer {
             ];
             return $this->read_single_char_token($types[$currentchar]);
         }
-        // If we are still here, that's not good at all. We need to read the char (it is only peeked so far)
-        // in order for the inputstream to be at the right position.
+        // If we are still here, that's not good at all. We need to read the char (it is only peeked
+        // so far) in order for the input stream to be at the right position.
         $this->inputstream->read();
         $this->inputstream->die("unexpected input: '$currentchar'");
     }
@@ -267,13 +267,13 @@ class lexer {
     }
 
     /**
-     * Read an identifier token (function name, variable name, reserved word or pre-defined constant like π)
-     * from the input stream.
+     * Read an identifier token (function name, variable name, reserved word or pre-defined constant
+     * like π) from the input stream.
      *
      * @return token the identifier token
      */
     private function read_identifier(): token {
-        // Start by reading the first char. If we are here, that means it was a number or a decimal point.
+        // Start by reading the first char. If we are here, that means it was a letter or an underscore.
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
 
@@ -313,7 +313,7 @@ class lexer {
      * @return token the operator token
      */
     private function read_operator(): token {
-        // Start by reading the first char. If we are here, that means it was a number or a decimal point.
+        // Start by reading the first char.
         $currentchar = $this->inputstream->read();
         $result = $currentchar;
 

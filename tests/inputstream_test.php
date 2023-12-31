@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * qtype_formulas unit tests for the InputStream class
+ * qtype_formulas unit tests for the inputstream class
  *
  * @package    qtype_formulas
  * @category   test
@@ -29,9 +29,9 @@ use Exception;
 class inputstream_test extends \advanced_testcase {
 
     /**
-     * Test read() and peek() function of the InputStream class.
+     * Test read() and peek() function of the inputstream class.
      */
-    public function test_read_peek() {
+    public function test_read_peek(): void {
         $input = 'abcdefg0123456';
         $reader = new input_stream($input);
 
@@ -39,85 +39,100 @@ class inputstream_test extends \advanced_testcase {
         for ($i = 0; $i < $len; $i++) {
             // We check that peek()ing does not advance the index, so read()ing will return
             // the same char again.
-            $this->assertEquals($input[$i], $reader->peek());
-            $this->assertEquals($input[$i], $reader->read());
+            self::assertEquals($input[$i], $reader->peek());
+            self::assertEquals($input[$i], $reader->read());
         }
         // The string is finished, we should get EOF.
-        $this->assertEquals($reader::EOF, $reader->peek());
-        $this->assertEquals($reader::EOF, $reader->read());
+        self::assertEquals($reader::EOF, $reader->peek());
+        self::assertEquals($reader::EOF, $reader->read());
 
         // No error should be raised if we continue reading. The stream just returns EOF.
-        $this->assertEquals($reader::EOF, $reader->read());
+        self::assertEquals($reader::EOF, $reader->read());
     }
 
     /**
-     * Test that the InputStream class indicates the correct position when die()ing.
+     * Test that the inputstream class indicates the correct position when die()ing.
      */
-    public function test_die() {
+    public function test_die(): void {
         $input = "abcde\nfghij\nklmno";
         $reader = new input_stream($input);
 
+        $e = null;
         try {
             $reader->die('foo');
 
         } catch (Exception $e) {
-            $this->assertEquals('1:0:foo', $e->getMessage());
+            self::assertEquals('1:0:foo', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         for ($i = 0; $i < 5; $i++) {
             $reader->read();
         }
         try {
             $reader->die('bar');
         } catch (Exception $e) {
-            $this->assertEquals('1:5:bar', $e->getMessage());
+            self::assertEquals('1:5:bar', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         $reader->read();
         try {
             $reader->die('error');
         } catch (Exception $e) {
-            $this->assertEquals('2:0:error', $e->getMessage());
+            self::assertEquals('2:0:error', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         $reader->read();
         try {
             $reader->die('other error');
         } catch (Exception $e) {
-            $this->assertEquals('2:1:other error', $e->getMessage());
+            self::assertEquals('2:1:other error', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         for ($i = 0; $i < 5; $i++) {
             $reader->read();
         }
         try {
             $reader->die('foo');
         } catch (Exception $e) {
-            $this->assertEquals('3:0:foo', $e->getMessage());
+            self::assertEquals('3:0:foo', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         $reader->read();
         try {
             $reader->die('x');
         } catch (Exception $e) {
-            $this->assertEquals('3:1:x', $e->getMessage());
+            self::assertEquals('3:1:x', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         for ($i = 0; $i < 4; $i++) {
             $reader->read();
         }
         try {
             $reader->die('lastchar');
         } catch (Exception $e) {
-            $this->assertEquals('3:5:lastchar', $e->getMessage());
+            self::assertEquals('3:5:lastchar', $e->getMessage());
         }
+        self::assertNotNull($e);
 
+        $e = null;
         $reader->read();
         try {
             $reader->die('shouldnotmovefarther');
         } catch (Exception $e) {
-            $this->assertEquals('3:5:shouldnotmovefarther', $e->getMessage());
+            self::assertEquals('3:5:shouldnotmovefarther', $e->getMessage());
         }
+        self::assertNotNull($e);
     }
-
 }

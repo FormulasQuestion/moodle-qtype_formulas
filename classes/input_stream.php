@@ -97,7 +97,8 @@ class input_stream {
     }
 
     /**
-     * Stop processing the input and indicate the human readable position (row/column) where the error occurred.
+     * Stop processing the input and indicate the human readable position (row/column) where
+     * the error occurred.
      *
      * @param string $message error message
      * @return void
