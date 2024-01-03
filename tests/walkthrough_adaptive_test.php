@@ -58,7 +58,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
         $this->check_current_mark(null);
-        $this->assertEquals('adaptivemultipart',
+        self::assertEquals('adaptivemultipart',
                 $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
         $this->render();
         $this->check_output_contains_text_input('0_0');
@@ -103,7 +103,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        $this->assertEquals('adaptivemultipart',
+        self::assertEquals('adaptivemultipart',
                 $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
         $this->render();
         $this->check_output_contains_text_input('0_0');
@@ -142,7 +142,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        $this->assertEquals('adaptivemultipart',
+        self::assertEquals('adaptivemultipart',
                 $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
         $this->render();
         $this->check_output_contains_text_input('0_0');
@@ -192,7 +192,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        $this->assertEquals('adaptivemultipart',
+        self::assertEquals('adaptivemultipart',
                 $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
         $this->render();
         $this->check_output_contains_text_input('0_0');

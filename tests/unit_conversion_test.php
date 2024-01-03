@@ -57,10 +57,10 @@ class unit_conversion_test extends \advanced_testcase {
 
             // Check if the unit is compatible.
             $checked = $converter->check_convertibility($unit, $expectedunit);
-            $this->assertEquals(true, $checked->convertible);
+            self::assertEquals(true, $checked->convertible);
             // Convert the number and check if the result is OK.
             $factor = $checked->cfactor;
-            $this->assertEqualsWithDelta($expectednumber, $number * $factor, 1e-8);
+            self::assertEqualsWithDelta($expectednumber, $number * $factor, 1e-8);
         }
     }
 

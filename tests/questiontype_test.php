@@ -89,11 +89,11 @@ class questiontype_test extends \advanced_testcase {
     }
 
     public function test_name() {
-        $this->assertEquals($this->qtype->name(), 'formulas');
+        self::assertEquals($this->qtype->name(), 'formulas');
     }
 
     public function test_can_analyse_responses() {
-        $this->assertTrue($this->qtype->can_analyse_responses());
+        self::assertTrue($this->qtype->can_analyse_responses());
     }
 
     public function test_reorder_parts_according_to_questiontext() {
@@ -161,7 +161,7 @@ class questiontype_test extends \advanced_testcase {
                         .' This placeholder is missing from the main question text.',
                 'placeholder[4]' => 'Duplicated placeholder in the main question text.'
                 );
-        $this->assertEquals($expected, $this->qtype->check_placeholders($questiontext, $answers));
+        self::assertEquals($expected, $this->qtype->check_placeholders($questiontext, $answers));
     }
 
     public function test_split_questiontext0() {
@@ -170,7 +170,7 @@ class questiontype_test extends \advanced_testcase {
                 1 => '--',
                 2 => '--',
                 3 => '</p>');
-        $this->assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
+        self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
     public function test_split_questiontext1() {
@@ -180,7 +180,7 @@ class questiontype_test extends \advanced_testcase {
                 2 => '',
                 3 => '',
                 4 => '');
-        $this->assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
+        self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
     public function provide_single_part_data_for_form_validation(): array {
@@ -315,7 +315,7 @@ class questiontype_test extends \advanced_testcase {
 
         //$form->mock_submit((array)$formdata);
         //qtype_formulas_edit_form::mock_submit((array)$formdata);
-        $this->assertTrue($form->is_validated());
+        self::assertTrue($form->is_validated());
 
         qtype_formulas_edit_form::mock_submit((array)$formdata);
         $test = $form->get_data();
@@ -324,7 +324,7 @@ class questiontype_test extends \advanced_testcase {
 
 
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        $this->assertTrue($form->is_validated());
+        self::assertTrue($form->is_validated());
 
 
         //$test = qtype_formulas_edit_form::mock_submit((array)$formdata);
@@ -344,7 +344,7 @@ class questiontype_test extends \advanced_testcase {
         print_r($form->get_data());
         return;
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        $this->assertTrue($form->is_validated());
+        self::assertTrue($form->is_validated());
 
         $fromform = $form->get_data();
     }
@@ -390,7 +390,7 @@ class questiontype_test extends \advanced_testcase {
         $formdata->id = 0;
         qtype_formulas_edit_form::mock_submit((array)$formdata);
         $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        $this->assertTrue($form->is_validated());
+        self::assertTrue($form->is_validated());
 
         $fromform = $form->get_data();
         $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
@@ -398,13 +398,13 @@ class questiontype_test extends \advanced_testcase {
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         // Load it.
         $this->qtype->get_question_options($question);
-        $this->assertDebuggingNotCalled();
-        $this->assertInstanceOf(stdClass::class, $question->options);
+        self::assertDebuggingNotCalled();
+        self::assertInstanceOf(stdClass::class, $question->options);
 
         $options = $question->options;
-        $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(4, $options->numparts);
-        $this->assertCount(4, $options->answers);
+        self::assertEquals($question->id, $options->questionid);
+        self::assertEquals(4, $options->numparts);
+        self::assertCount(4, $options->answers);
 
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
@@ -419,15 +419,15 @@ class questiontype_test extends \advanced_testcase {
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         $this->qtype->get_question_options($question);
 
-        $this->assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
-        $this->assertInstanceOf(stdClass::class, $question->options);
+        self::assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        self::assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
-        $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(4, $options->numparts);
-        $this->assertCount(4, $options->answers);
+        self::assertEquals($question->id, $options->questionid);
+        self::assertEquals(4, $options->numparts);
+        self::assertCount(4, $options->answers);
 
-        $this->assertEquals(get_string('correctfeedbackdefault', 'question'), $options->correctfeedback);
-        $this->assertEquals(FORMAT_HTML, $options->correctfeedbackformat);
+        self::assertEquals(get_string('correctfeedbackdefault', 'question'), $options->correctfeedback);
+        self::assertEquals(FORMAT_HTML, $options->correctfeedbackformat);
 
         // And finally we try again with no answer either.
         $DB->delete_records('qtype_formulas_answers', ['questionid' => $question->id]);
@@ -435,11 +435,11 @@ class questiontype_test extends \advanced_testcase {
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         $this->qtype->get_question_options($question);
 
-        $this->assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
-        $this->assertInstanceOf(stdClass::class, $question->options);
+        self::assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        self::assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
-        $this->assertEquals($question->id, $options->questionid);
-        $this->assertEquals(0, $options->numparts);
-        $this->assertCount(0, $options->answers);
+        self::assertEquals($question->id, $options->questionid);
+        self::assertEquals(0, $options->numparts);
+        self::assertCount(0, $options->answers);
     }
 }

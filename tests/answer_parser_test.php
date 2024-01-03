@@ -63,8 +63,12 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3*4*5'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4)'],
-            [false, '3 4 5'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
+            [false, '3; 4'],
+            [false, '[1,2]'],
+            [false, '{1,2}'],
+            [false, 'stdnormpdf(0.5)'],
+            [false, '3 4 5'],
             [false, '#'],
         ];
     }
@@ -202,7 +206,31 @@ class answer_parser_test extends \advanced_testcase {
         }
     }
 
-    /*public function test_find_start_of_units($expected, $input): void {
+    public function test_constructor_with_known_variables(): void {
+        // The function stdnormpdf() is not in the whitelist, so students are not allowed to use it.
+        // Also, used like this, it would be a syntax error anyway. But in this case, we make it
+        // available as a variable.
+        $parser = new answer_parser('3 stdnormpdf', ['stdnormpdf']);
+        self::assertTrue($parser->is_valid_algebraic_formula());
+        // Verify it works even if written as a function. Actually, this expression would mean
+        // 3*stdnormpdf*2.
+        $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
+        self::assertTrue($parser->is_valid_algebraic_formula());
 
-    }*/
+        // If stdnormpdf is not made available, this should fail, because the function is not allowed.
+        $parser = new answer_parser('3 stdnormpdf');
+        self::assertFalse($parser->is_valid_algebraic_formula());
+        // Make sure that it did not just fail because of the syntax error.
+        $parser = new answer_parser('3 stdnormpdf(2)');
+        self::assertFalse($parser->is_valid_algebraic_formula());
+
+        // See whether we can separate an imaginary unit 'exp' in a number expression.
+        $input = '3 exp';
+        $parser = new answer_parser($input, ['exp']);
+        $splitindex = $parser->find_start_of_units();
+        $number = trim(substr($input, 0, $splitindex));
+        $unit = trim(substr($input, $splitindex));
+        self::assertEquals(3, $number);
+        self::assertEquals('exp', $unit);
+    }
 }

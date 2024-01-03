@@ -95,10 +95,9 @@ class instantiation extends \external_api {
      * @return array
      */
     protected static function variable_context_to_array(array $data): array {
+        // The data comes directly from the evaluator's export_variable_context() function, so
+        // we don't have to expect an error.
         $context = unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
-        if ($context === false) {
-            return [];
-        }
 
         $result = [];
         foreach ($context as $name => $var) {
@@ -174,12 +173,6 @@ class instantiation extends \external_api {
                     $row['parts'][$i][] = ['name' => $name, 'value' => self::stringify($variable->value)];
                 }
             }
-            // The answer should be a token. If it is not, we still output something to make the user
-            // aware of the problem, but without breaking the rest.
-            if (!($answers[$i] instanceof token)) {
-                $row['parts'][$i][] = ['name' => '_0', 'value' => '!!!'];
-                continue;
-            }
             // If the value is a scalar, that means the part has only one answer and it is _0.
             if (is_scalar($answers[$i]->value)) {
                 $row['parts'][$i][] = ['name' => '_0', 'value' => $answers[$i]->value];
@@ -228,38 +221,31 @@ class instantiation extends \external_api {
             ['n' => $n, 'randomvars' => $randomvars, 'globalvars' => $globalvars, 'localvars' => $localvars, 'answers' => $answers]
         );
 
-        // First, we check whether the variables can be parsed and interpreted.
-        // We store the parsed variable definitions and keep the prepared evaluator
-        // class for slightly better performance.
+        // First, we check whether the variables can be parsed and we prepare an evaluator context
+        // containing the random variables for (probably very very) slightly better performance.
         $noparts = count($params['answers']);
         try {
             $randomparser = new random_parser($params['randomvars']);
             $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
             $randomcontext = $evaluator->export_variable_context();
-            $evaluator->instantiate_random_variables();
 
             $globalparser = new parser($params['globalvars']);
             $parsedglobalvars = $globalparser->get_statements();
-            $evaluator->evaluate($parsedglobalvars);
 
             $parsedlocalvars = [];
             $parsedanswers = [];
-            $localevaluators = [];
             for ($i = 0; $i < $noparts; $i++) {
-                $localevaluators[$i] = clone $evaluator;
-
                 if (!empty($params['localvars'][$i])) {
                     $parser = new parser($params['localvars'][$i]);
                     $parsedlocalvars[$i] = $parser->get_statements();
-                    $localevaluators[$i]->evaluate($parsedlocalvars[$i]);
                 }
 
                 $parser = new parser($params['answers'][$i]);
                 $parsedanswers[$i] = $parser->get_statements();
-                $localevaluators[$i]->evaluate($parsedanswers[$i])[0];
             }
         } catch (Exception $e) {
+            // If parsing failed, we leave now.
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
@@ -269,7 +255,7 @@ class instantiation extends \external_api {
             $n = min(1000, $evaluator->get_number_of_variants());
         }
 
-        // All clear, we can now generate instances.
+        // All clear, we can now start to generate instances.
         $data = [];
         for ($i = 0; $i < $n; $i++) {
             $result = self::fetch_one_instance($randomcontext, $parsedglobalvars, $parsedlocalvars, $parsedanswers);

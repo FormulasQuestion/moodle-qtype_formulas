@@ -60,7 +60,7 @@ class answer_parser extends parser {
             // the token will be considered as a variable. This allows the teacher to use e.g. 'exp'
             // as a unit name, if they want to.
             if ($token->type === token::IDENTIFIER) {
-                if ($this->is_known_variable($token)) {
+                if (in_array($token->value, $knownvariables)) {
                     $token->type = token::VARIABLE;
                 } else if (array_key_exists($token->value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS)) {
                     $token->type = token::FUNCTION;
@@ -174,12 +174,9 @@ class answer_parser extends parser {
             return true;
         }
 
+        // Checking whether the expression is valid as an algebraic formula, but with variables
+        // being disallowed. This also makes sure that there is one single statement.
         if (!$this->is_valid_algebraic_formula(true)) {
-            return false;
-        }
-
-        // The statement list must contain exactly one expression object.
-        if (count($this->statements) !== 1) {
             return false;
         }
 
@@ -271,12 +268,7 @@ class answer_parser extends parser {
      *
      * @return bool
      */
-    public function is_valid_syntax(): bool {
-        // The statement list must contain exactly one expression object.
-        if (count($this->statements) !== 1) {
-            return false;
-        }
-
+    private function is_valid_syntax(): bool {
         $tokens = $this->statements[0]->body;
 
         // Iterate over all tokens. Push literals (strings, number) and variables on the stack.
@@ -309,12 +301,6 @@ class answer_parser extends parser {
             // by that element.
             if ($token->type === token::FUNCTION) {
                 $n = end($stack);
-                if (!is_numeric($n)) {
-                    return false;
-                }
-                if (count($stack) < $n) {
-                    return false;
-                }
                 $stack = array_slice($stack, 0, -$n);
             }
         }

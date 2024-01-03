@@ -527,8 +527,8 @@ class functions_test extends \advanced_testcase {
             } catch (Exception $e) {
                 $errmsg = $e->getMessage();
             }
-            $this->assertNull($errmsg);
-            $this->assertEquals($case[1], $result->all);
+            self::assertNull($errmsg);
+            self::assertEquals($case[1], $result->all);
         }
         // Check invalid invocations.
         $testcases = array(
@@ -558,7 +558,7 @@ class functions_test extends \advanced_testcase {
             } catch (Exception $e) {
                 $errmsg = $e->getMessage();
             }
-            $this->assertNotNull($errmsg);
+            self::assertNotNull($errmsg);
         }
     }
 
@@ -623,9 +623,9 @@ class functions_test extends \advanced_testcase {
                 $errmsg = $e->getMessage();
             }
             if ($case[0]) {
-                $this->assertNull($errmsg);
+                self::assertNull($errmsg);
             } else {
-                $this->assertNotNull($errmsg);
+                self::assertNotNull($errmsg);
             }
         }
     }
@@ -659,9 +659,9 @@ class functions_test extends \advanced_testcase {
                 $errmsg = $e->getMessage();
             }
             if ($case[0]) {
-                $this->assertNull($errmsg);
+                self::assertNull($errmsg);
             } else {
-                $this->assertNotNull($errmsg);
+                self::assertNotNull($errmsg);
             }
         }
     }
@@ -773,9 +773,9 @@ class functions_test extends \advanced_testcase {
                 $errmsg = $e->getMessage();
             }
             if ($case[0]) {
-                $this->assertNull($errmsg);
+                self::assertNull($errmsg);
             } else {
-                $this->assertNotNull($errmsg);
+                self::assertNotNull($errmsg);
             }
         }
     }
@@ -856,9 +856,9 @@ class functions_test extends \advanced_testcase {
                 $errmsg = $e->getMessage();
             }
             if ($case[0]) {
-                $this->assertNull($errmsg);
+                self::assertNull($errmsg);
             } else {
-                $this->assertNotNull($errmsg);
+                self::assertNotNull($errmsg);
             }
         }
     }

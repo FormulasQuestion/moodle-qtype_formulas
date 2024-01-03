@@ -102,8 +102,8 @@ class externallib_test extends \externallib_advanced_testcase {
             external\instantiation::check_random_global_vars_returns(), $returnvalue
         );
 
-        $this->assertEquals($expected['source'], $returnvalue['source']);
-        $this->assertStringEndsWith($expected['message'], $returnvalue['message']);
+        self::assertEquals($expected['source'], $returnvalue['source']);
+        self::assertStringEndsWith($expected['message'], $returnvalue['message']);
     }
 
     public function provide_random_global_local_vars(): array {
@@ -186,8 +186,8 @@ class externallib_test extends \externallib_advanced_testcase {
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_local_vars_returns(), $returnvalue);
 
-        $this->assertEquals($expected['source'], $returnvalue['source']);
-        $this->assertStringEndsWith($expected['message'], $returnvalue['message']);
+        self::assertEquals($expected['source'], $returnvalue['source']);
+        self::assertStringEndsWith($expected['message'], $returnvalue['message']);
     }
 
     public function provide_question_texts(): array {
@@ -258,9 +258,9 @@ class externallib_test extends \externallib_advanced_testcase {
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::render_question_text_returns(), $returnvalue);
 
-        $this->assertEquals($expected['question'], $returnvalue['question']);
+        self::assertEquals($expected['question'], $returnvalue['question']);
         foreach ($expected['parts'] as $i => $part) {
-            $this->assertEquals($part, $returnvalue['parts'][$i]);
+            self::assertEquals($part, $returnvalue['parts'][$i]);
         }
     }
 
@@ -404,6 +404,13 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
+                ['status' => 'error', 'message' => 'division by zero is not defined'],
+                [
+                    'n' => 50, 'randomvars' => 'a={0, 1}', 'globalvars' => 'b = 1/a',
+                    'localvars' => ['b = 1/a'], 'answers' => ['1/a']
+                ]
+            ],
+            [
                 ['status' => 'ok', 'data' => [[
                     'randomvars' => [],
                     'globalvars' => [
@@ -414,10 +421,10 @@ class externallib_test extends \externallib_advanced_testcase {
                         ['name' => 'a*', 'value' => '3'],
                         ['name' => '_0', 'value' => '1'],
                         ['name' => '_1', 'value' => '3'],
-                    ],[
+                    ], [
                         ['name' => '_0', 'value' => '1'],
                         ['name' => '_1', 'value' => '2'],
-                    ],[
+                    ], [
                         ['name' => '_0', 'value' => '1'],
                     ]],
                 ]]],
@@ -458,7 +465,7 @@ class externallib_test extends \externallib_advanced_testcase {
     /**
      * @dataProvider provide_instantiation_data
      */
-    public function test_instantiate($expected, $input) {
+    public function test_instantiate($expected, $input): void {
         $this->resetAfterTest(true);
 
         $returnvalue = external\instantiation::instantiate(
@@ -466,11 +473,11 @@ class externallib_test extends \externallib_advanced_testcase {
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
 
-        $this->assertEquals($expected['status'], $returnvalue['status']);
+        self::assertEquals($expected['status'], $returnvalue['status']);
         if ($expected['status'] === 'error') {
-            $this->assertStringEndsWith($expected['message'], $returnvalue['message']);
+            self::assertStringEndsWith($expected['message'], $returnvalue['message']);
         } else {
-            $this->assertEquals($expected['data'], $returnvalue['data']);
+            self::assertEquals($expected['data'], $returnvalue['data']);
         }
     }
 }
