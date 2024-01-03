@@ -23,34 +23,54 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+ // TODO: most of these tests should only be made in the evaluator; we should only test specific
+ // parser features here, e.g. error detection, but conversion from input to token list is
+ // purely an implementation thing; the user only cares about results
+// has_token_in_tokenlist
+
 namespace qtype_formulas;
 
+use Exception;
+
 class parser_test extends \advanced_testcase {
-    /**
-     * @dataProvider provide_simple_expressions
-     */
-    public function test_simple_expressions($expected, $input): void {
-        $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
-    }
 
-    /**
-     * @dataProvider provide_expressions_with_functions
-     */
-    public function test_expressions_with_functions($expected, $input): void {
-        $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
-    }
 
-    /**
-     * @dataProvider provide_ternary_expressions
-     */
-    public function test_ternary_expression($expected, $input): void {
+    public function test_has_token_in_tokenlist(): void {
+        $input = 'sin = 5';
         $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'sin'));
+        self::assertFalse($parser->has_token_in_tokenlist(token::FUNCTION, 'sin'));
+
+        $input = 'tan = 5; y = \tan(12)';
+        $parser = new parser($input);
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'tan'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::FUNCTION, 'tan'));
+
+        $input = 'a = 5.0 - (3**4); b = [1:10:2]; c = sin(2.5*x);';
+        $parser = new parser($input);
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'a'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'b'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'c'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'x'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::FUNCTION, 'sin'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 5.0));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 5));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 4));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 3));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 2.5));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 2));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 1));
+        self::assertTrue($parser->has_token_in_tokenlist(token::NUMBER, 10));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPERATOR, '='));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPERATOR, '-'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPERATOR, '*'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPERATOR, '**'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPENING_BRACKET, '['));
+        self::assertTrue($parser->has_token_in_tokenlist(token::CLOSING_BRACKET, ']'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::OPENING_PAREN, '('));
+        self::assertTrue($parser->has_token_in_tokenlist(token::CLOSING_PAREN, ')'));
+        self::assertTrue($parser->has_token_in_tokenlist(token::END_OF_STATEMENT, ';'));
     }
 
     /**
@@ -62,133 +82,8 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
-    /**
-     * @dataProvider provide_arrays
-     */
-    public function test_arrays($expected, $input): void {
-        $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
-    }
-
-    /**
-     * @dataProvider provide_sets
-     */
-    public function test_sets($expected, $input): void {
-        $parser = new parser($input);
-        $statement = $parser->get_statements()[0];
-        self::assertEquals($expected, implode(',', $statement->body));
-    }
-
-    public function provide_sets(): array {
-        return [
-            'basic' => ['{,1,2,3,4,5,%%setbuild', '{1,2,3,4,5}'],
-            'range without step' => ['{,1,10,2,%%rangebuild,%%setbuild', '{1:10}'],
-            'range with step' => ['{,1,10,0.5,3,%%rangebuild,%%setbuild', '{1:10:0.5}'],
-            'ranges and elements' => [
-                '{,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%setbuild',
-                '{1,5:6:0.1,100,200:300,5}'
-            ],
-            'array in set' => [
-                '{,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%setbuild',
-                '{[1:10],[20:30],[40:50:2]}'
-            ],
-            'multiple ranges' => ['{,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%setbuild', '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}'],
-            'range with step, negatives' => ['{,1,_,10,_,0.5,_,3,%%rangebuild,%%setbuild', '{-1:-10:-0.5}'],
-            'range with step, composed expressions' => [
-                '{,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%setbuild',
-                '{1+sqrt(3):10+sin(5):1/5}'
-            ],
-        ];
-    }
-    public function provide_arrays(): array {
-        return [
-            'basic' => ['[,1,2,3,4,5,%%arraybuild', '[1,2,3,4,5]'],
-            'range without step' => ['[,1,10,2,%%rangebuild,%%arraybuild', '[1:10]'],
-            'range with step' => ['[,1,10,0.5,3,%%rangebuild,%%arraybuild', '[1:10:0.5]'],
-            'ranges and elements' => [
-                '[,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%arraybuild',
-                '[1,5:6:0.1,100,200:300,5]'
-            ],
-            'nested' => [
-                '[,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%arraybuild',
-                '[[1:10],[20:30],[40:50:2]]'
-            ],
-            'multiple ranges' => [
-                '[,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%arraybuild',
-                '[1:10,15:50:5,60:70:0.5,100:110,0:-10:-1]'
-            ],
-            'range with step, negatives' => ['[,1,_,10,_,0.5,_,3,%%rangebuild,%%arraybuild', '[-1:-10:-0.5]'],
-            'range with step, composed expressions' => [
-                '[,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%arraybuild',
-                '[1+sqrt(3):10+sin(5):1/5]'
-            ],
-        ];
-    }
-
-    public function provide_ternary_expressions(): array {
-        return [
-            'basic' => ['1,5,==,%%ternary-sentinel,2,3,%%ternary', '1 == 5 ? 2 : 3'],
-            'operations in condition, 1' => ['1,2,+,3,==,%%ternary-sentinel,1,2,%%ternary', '1 + 2 == 3 ? 1 : 2'],
-            'operations in condition, 2' => ['1,3,2,-,==,%%ternary-sentinel,1,2,%%ternary', '1 == 3 - 2 ? 1 : 2'],
-            'operations in true part' => ['1,%%ternary-sentinel,1,2,+,2,%%ternary', '1 ? 1 + 2 : 2'],
-            'operations in false part' => ['1,%%ternary-sentinel,3,2,4,+,%%ternary', '1 ? 3 : 2 + 4'],
-            'operations in all parts' => ['1,2,+,3,==,%%ternary-sentinel,1,2,3,*,+,4,5,*,6,-,%%ternary', '1+2==3 ? 1+2*3 : 4*5-6'],
-            'ternary in false part' => ['1,2,==,%%ternary-sentinel,5,2,3,==,%%ternary-sentinel,6,7,%%ternary,%%ternary', '1==2 ? 5 : 2==3 ? 6 : 7'],
-        ];
-    }
-
-    public function provide_expressions_with_functions(): array {
-        return [
-            'one argument' => ['5.3,1,floor', 'floor(5.3)'],
-            'two arguments' => ['10,5,2,ncr', 'ncr(10,5)'],
-            'three arguments' => ['2,100,17,3,modpow', 'modpow(2,100,17)'],
-            'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
-            'function in function' => ['2,1,sqrt,2,/,1,asin', 'asin(sqrt(2)/2)'],
-            'operation in function' => ['1,2,3,*,+,4,5,**,-,3,2,round', 'round(1+2*3-4**5,3)'],
-            'function with array' => ['[,1,2,3,%%arraybuild,1,sum', 'sum([1,2,3])'],
-        ];
-    }
-
-    public function provide_simple_expressions(): array {
-        return [
-            'modulo' => ['1,2,3,%,+', '1+2%3'],
-            'left-associativity bitwise left shift' => ['1,2,<<,3,<<', '1 << 2 << 3'],
-            'left-associativity bitwise right shift' => ['1,2,>>,3,>>', '1 >> 2 >> 3'],
-            'left-associativity bitwise left/right shift' => ['1,2,<<,3,>>', '1 << 2 >> 3'],
-            'left-associativity bitwise right/left shift' => ['1,2,>>,3,<<', '1 >> 2 << 3'],
-            'left-associativity bitwise and' => ['1,2,&,3,&', '1 & 2 & 3'],
-            'left-associativity bitwise xor' => ['1,2,^,3,^', '1 ^ 2 ^ 3'],
-            'left-associativity bitwise or' => ['1,2,|,3,|', '1 | 2 | 3'],
-            'precedence among bitwise operators: and + xor, 1' => ['1,2,&,3,^', '1 & 2 ^ 3'],
-            'precedence among bitwise operators: and + xor, 2' => ['1,2,3,&,^', '1 ^ 2 & 3'],
-            'precedence among bitwise operators: and + or, 1' => ['1,2,&,3,|', '1 & 2 | 3'],
-            'precedence among bitwise operators: and + or, 2' => ['1,2,3,&,|', '1 | 2 & 3'],
-            'precedence among bitwise operators: xor + or, 1' => ['1,2,^,3,|', '1 ^ 2 | 3'],
-            'precedence among bitwise operators: xor + or, 2' => ['1,2,3,^,|', '1 | 2 ^ 3'],
-            'precedence among bitwise operators: all mixed, 1' => ['1,2,&,3,^,4,|', '1 & 2 ^ 3 | 4'],
-            'precedence among bitwise operators: all mixed, 2' => ['1,2,^,3,4,&,|', '1 ^ 2 | 3 & 4'],
-            'precedence among bitwise operators: all mixed, 3' => ['1,2,3,&,4,^,|', '1 | 2 & 3 ^ 4'],
-            'unary bitwise negation' => ['2,~', '~2'],
-            'unary bitwise negation in a sum, 1' => ['3,2,~,+', '3+~2'],
-            'unary bitwise negation in a sum, 2' => ['3,~,2,~,+', '~3+~2'],
-            'unary minus in multiplication' => ['1,2,_,*', '1*-2'],
-            'unary minus in addition' => ['1,2,_,+', '1+-2'],
-            'unary minus in parens' => ['2,3,_,*', '2*(-3)'],
-            'multiplication before addition, 1' => ['1,2,3,*,+', '1+2*3'],
-            'multiplication before addition, 2' => ['1,2,*,3,+', '1*2+3'],
-            'implicit multiplication with parens' => ['1,2,+,3,4,+,*', '(1+2)(3+4)'],
-            'sum in parens' => ['5,2,3,+,*', '5*(2+3)'],
-            'power, with parens, 1' => ['3,4,**,5,**', '(3**4)**5'],
-            'power, with parens, 2' => ['3,4,5,**,**', '3**(4**5)'],
-            'power, right-associative' => ['3,4,5,**,**', '3**4**5'],
-            'order of basic operations' => ['1,2,*,3,4,/,-,5,6,*,+,7,8,*,-,9,10,/,+', '1*2-3/4+5*6-7*8+9/10'],
-        ];
-    }
-
     public function provide_assignments(): array {
         return [
-            'constant' => ['a,1,=', 'a = 1'],
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
             'arithmetic expression with ternary in parens' => [
                 'a,5,b,1,==,%%ternary-sentinel,3,4,%%ternary,2,*,+,=',
@@ -205,6 +100,16 @@ class parser_test extends \advanced_testcase {
             'bitwise, 2' => ['a,1,2,3,~,&,5,~,^,|,=', 'a = 1 | 2 & ~3 ^ ~5'],
             'double assignment with expression' => ['a,b,7.3,1,floor,15,2,**,+,=,=', 'a = b = floor(7.3)+15**2'],
         ];
+    }
+
+    // FIXME: rewrite with data provider and all possible combinations
+    public function test_invalid_parens() {
+        $input = 'sin(2*x]';
+        try {
+            $parser = new parser($input);
+        } catch (Exception $e) {
+            self::assertStringEndsWith("mismatched parentheses, ']' is closing '(' from row 1 and column 4", $e->getMessage());
+        }
     }
 
     public function test_basic_operations() {
@@ -251,20 +156,6 @@ class parser_test extends \advanced_testcase {
         //print_r($output);
     }
 
-    public function test_for_loop() {
-        // FIXME: remove this test, only test in evaluation
-        $input = 'for (a:[1:23,5]) { a = 5; b = 3;}';
-
-        $parser = new parser($input);
-    }
-
-    public function test_answer_expression() {
-        // FIXME - TODO --> implement new test (own file)
-        $input = '2^3';
-
-        $parser = new answer_parser($input);
-    }
-
     public function test_parse_list() {
         // FIXME - TODO --> implement new test
         //$input = '[1, 2, 3]';
@@ -276,5 +167,30 @@ class parser_test extends \advanced_testcase {
 
         $parser = new answer_parser($input);
         // print_r($parser->statements);
+    }
+
+    public function provide_impossible_things(): array {
+        return [
+            ['1:99:unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
+            ['1:99:unexpected token: foo', new token(token::IDENTIFIER, 'foo', 1, 99)],
+            ['1:99:unexpected token: invalid', new token(-1, 'invalid', 1, 99)],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_impossible_things
+     */
+    public function test_impossible_stuff($expected, $input): void {
+        $parser = new parser('a = 3');
+        $tokens = $parser->get_tokens();
+        $tokens[] = $input;
+
+        $e = null;
+        try {
+            shunting_yard::infix_to_rpn($tokens);
+        } catch (Exception $e) {
+            self::assertStringEndsWith($expected, $e->getMessage());
+        }
+        self::assertNotNull($e);
     }
 }

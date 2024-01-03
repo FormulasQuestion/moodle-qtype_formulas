@@ -27,20 +27,20 @@ namespace qtype_formulas;
 class input_stream {
     const EOF = '';
 
-    /** @var integer current position in the input */
-    private $position = -1;
+    /** @var int current position in the input */
+    private int $position = -1;
 
-    /** @var integer the row (line number) of the current character */
-    private $row = 1;
+    /** @var int the row (line number) of the current character */
+    private int $row = 1;
 
-    /** @var integer the column number of the current character */
-    private $column = 0;
+    /** @var int the column number of the current character */
+    private int $column = 0;
 
-    /** @var integer the length of the input */
-    private $length = 0;
+    /** @var int the length of the input */
+    private int $length = 0;
 
     /** @var array array containing the input's individual characters */
-    private $input = [];
+    private array $input = [];
 
     /**
      * Constructor

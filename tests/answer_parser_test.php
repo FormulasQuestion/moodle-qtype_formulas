@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 
-use \Exception;
+use Exception;
 use qtype_formulas;
 
 class answer_parser_test extends \advanced_testcase {

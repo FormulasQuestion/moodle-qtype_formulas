@@ -31,19 +31,19 @@ class parser {
     const EOF = null;
 
     /** @var array list of all (raw) tokens */
-    protected $tokenlist;
+    protected array $tokenlist;
 
-    /** @var integer number of (raw) tokens */
-    private $count;
+    /** @var int number of (raw) tokens */
+    private int $count;
 
-    /** @var integer position w.r.t. list of (raw) tokens */
-    private $position = -1;
+    /** @var int position w.r.t. list of (raw) tokens */
+    private int $position = -1;
 
     /** @var array list of all (parsed) statements */
-    public $statements = [];
+    protected array $statements = [];
 
     /** @var array list of known variables */
-    private $variableslist = [];
+    private array $variableslist = [];
 
     /**
      * Create a parser class and have it parse a given input. The input can be given as a string, in
@@ -78,6 +78,13 @@ class parser {
         }
     }
 
+    /**
+     * Invoke the parser for the thing at hand, currently either a for loop or a general
+     * expression, e.g. an assignment or an answer given by a student.
+     *
+     * @param token $token the first token
+     * @return for_loop|expression
+     */
     private function parse_the_right_thing(token $token) {
         // TODO: maybe add if / elseif / else clauses in the future?
         if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
@@ -129,9 +136,9 @@ class parser {
     }
 
     /**
-     * Undocumented function
+     * Find the matching parenthesis that closes the given opening paren.
      *
-     * @param token $opener
+     * @param token $opener opening paren (, { or [
      * @return token
      */
     private function find_closing_paren(token $opener): token {
@@ -158,9 +165,6 @@ class parser {
             $i++;
             $token = $this->peek($i);
         }
-
-        // This cannot happen, because we have already checked that parens are balanced.
-        $this->die("syntax error: could not find closing parenthesis for '$opener->value'", $opener);
     }
 
     /**
@@ -177,6 +181,13 @@ class parser {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
+    /**
+     * Check whether the token list contains at least one token with the given type and value.
+     *
+     * @param int $type the token type to look for
+     * @param mixed $value the value to look for
+     * @return bool
+     */
     public function has_token_in_tokenlist(int $type, $value): bool {
         foreach ($this->tokenlist as $token) {
             // We do not use strict comparison for the value.
@@ -187,7 +198,15 @@ class parser {
         return false;
     }
 
-    public function parse_general_expression(?int $stopat = null): expression {
+    /**
+     * Parse a general expression, i. e. an assignment or an answer expression as it could
+     * be given by a student. Can be requested to stop when finding the first token of a
+     * given type, if needed.
+     *
+     * @param int|null $stopat stop parsing when reaching a token with the given type
+     * @return expression
+     */
+    private function parse_general_expression(?int $stopat = null): expression {
         // Start by reading the first token.
         $currenttoken = $this->read_next();
         $expression = [$currenttoken];
@@ -298,16 +317,11 @@ class parser {
                     $lavalue = $lookahead->value;
                     $i++;
                 }
-                // TODO (maybe, for earlier error reporting): ':' operator must not be followed by
-                // - another operator (except +, -, ! and ~ which might be unary, we cannot know yet)
-                // - any closing paren ), ] or }
-                // - any separator (range or argument)
-                // - an END_OF_GROUP or END_OF_STATEMENT
             }
 
             // We do not allow two subsequent numbers, two subsequent strings or a string following a number
             // (and vice versa), because that's probably a typo and we do not know for sure what to do with them.
-            // For numbers, it could be an implicit multiplication, but who knows...
+            // For numbers, it could be an implicit multiplication, but also the idea of separating groups of digits.
             if (in_array($type, [token::NUMBER, token::STRING]) && in_array($nexttype, [token::NUMBER, token::STRING])) {
                 $this->die('syntax error: did you forget to put an operator?', $nexttoken);
             }
@@ -327,7 +341,8 @@ class parser {
             $colonplusparen = $type === token::RANGE_SEPARATOR && ($nexttype & token::ANY_CLOSING_PAREN);
             $twocolons = ($type === token::RANGE_SEPARATOR && $nexttype === token::RANGE_SEPARATOR);
             $commapluscolon = ($type === token::ARG_SEPARATOR && $nexttype === token::RANGE_SEPARATOR);
-            if ($parenpluscolon || $colonplusparen || $twocolons || $commapluscolon) {
+            $colonpluscomma = ($type === token::RANGE_SEPARATOR && $nexttype === token::ARG_SEPARATOR);
+            if ($parenpluscolon || $colonplusparen || $twocolons || $commapluscolon || $colonpluscomma) {
                 $this->die('syntax error: invalid use of range separator (:)', $nexttoken);
             }
 
@@ -345,10 +360,22 @@ class parser {
         return new expression(shunting_yard::infix_to_rpn($expression));
     }
 
+    /**
+     * Retrieve the parsed statements.
+     *
+     * @return array
+     */
     public function get_statements(): array {
         return $this->statements;
     }
 
+    /**
+     * Look at the next (or one of the next) token, without moving the processing index any further.
+     * Returns NULL if peeking beyond the end of the token list.
+     *
+     * @param int $skip skip a certain number of tokens
+     * @return token|null
+     */
     private function peek(int $skip = 0): ?token {
         if ($this->position < $this->count - $skip - 1) {
             return $this->tokenlist[$this->position + $skip + 1];
@@ -356,6 +383,12 @@ class parser {
         return self::EOF;
     }
 
+    /**
+     * Read the next token from the token list and move the processing index forward by one position.
+     * Returns NULL if we have reached the end of the list.
+     *
+     * @return token|null
+     */
     private function read_next(): ?token {
         $nexttoken = $this->peek();
         if ($nexttoken !== self::EOF) {
@@ -364,10 +397,22 @@ class parser {
         return $nexttoken;
     }
 
-    public function is_known_variable(token $token): bool {
+    /**
+     * Check whether a given identifier is a known variable.
+     *
+     * @param token $token token containing the identifier
+     * @return bool
+     */
+    protected function is_known_variable(token $token): bool {
         return in_array($token->value, $this->variableslist);
     }
 
+    /**
+     * Register an identifier as a known variable.
+     *
+     * @param token $token
+     * @return void
+     */
     private function register_variable(token $token): void {
         // Do not register a variable twice.
         if ($this->is_known_variable($token)) {
@@ -377,7 +422,7 @@ class parser {
     }
 
     /**
-     * Undocumented function
+     * Return the list of all known variables.
      *
      * @return array
      */
@@ -386,7 +431,11 @@ class parser {
     }
 
     /**
-     * This function parses a for loop. Notes on the syntax of for loops:
+     * This function parses a for loop.
+     * The general syntax of a for loop is for (<var>:<range/list>) { <statements> }, but the braces can be
+     * left out if there is only one statement. The range can be defined with the loop, but it can also
+     * be stored in a variable.
+     * Notes:
      * - The variable will NOT be local to the loop. It will be visible in the entire scope and keep its last value.
      * - It is possible to use a variable that has already been defined. In that case, it will be overwritten.
      * - It is possible to use variables for the start and/or end of the range and also for the step size.
@@ -397,13 +446,13 @@ class parser {
      *
      * @return for_loop
      */
-    public function parse_forloop(): for_loop {
+    private function parse_forloop(): for_loop {
         $variable = null;
         $range = [];
         $statements = [];
 
         // Consume the 'for' token.
-        $fortoken = $this->read_next();
+        $this->read_next();
 
         // Next must be an opening parenthesis.
         $currenttoken = $this->peek();
@@ -488,11 +537,6 @@ class parser {
             }
         } else {
             $statements[] = $this->parse_the_right_thing($currenttoken);
-        }
-
-        if (count($statements) === 0) {
-            // We do not disallow empty for loops for backward compatibility.
-            // $this->die('syntax error: empty for loop', $fortoken);
         }
 
         return new for_loop($variable, $range, $statements);

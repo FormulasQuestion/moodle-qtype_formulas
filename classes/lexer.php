@@ -27,14 +27,14 @@ namespace qtype_formulas;
 class lexer {
     const EOF = null;
 
-    /** @var input_stream input stream */
-    private $inputstream = null;
+    /** @var ?input_stream input stream */
+    private ?input_stream $inputstream = null;
 
     /** @var token[] list of all tokens in the input stream */
-    private $tokens = [];
+    private array $tokens = [];
 
-    /** @var boolean level of nested ternary operators */
-    private $pendingternary = 0;
+    /** @var int level of nested ternary operators */
+    private int $pendingternary = 0;
 
     /**
      * Constructor

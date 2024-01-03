@@ -117,7 +117,7 @@ class renderer_test extends walkthrough_test_base {
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', false);
-        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5*x^2');
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5 * x^2');
         $this->check_output_does_not_contain('a*x^2');
 
         // Submit right answer.

@@ -25,18 +25,35 @@
 
 namespace qtype_formulas;
 
-use \Exception;
+use Exception;
 
 
 // TODO: test with global vars depending on instantiated random vars
+// TODO: test visibility and last-value property of loop's iterator variable
+// TODO: test calculate_algebraic_expression with empty string
 
 class evaluator_test extends \advanced_testcase {
+
+    public function provide_invalid_diff(): array {
+        return [
+            ['the first argument of diff() must be a list', 'diff("", "");'],
+            ['the second argument of diff() must be a list', 'diff([1,2,3], 1);'],
+            ['diff() expects two lists of the same size', 'diff([1,2,3], [1,2]);'],
+            ['when using diff(), the first list must contain only numbers or only strings', 'diff([[1,2]], [1]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the first list', 'diff([1,"a"], [1,2]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the first list', 'diff(["a",1], ["a","b"]);'],
+            ['diff(): type mismatch for element #0 (zero-indexed) of the second list', 'diff([1,2], ["a",2]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the second list', 'diff(["a","b"], ["a",2]);'],
+            ['diff(): the third argument can only be used with lists of strings', 'diff([1,2,3], [4,5,6], 3);'],
+        ];
+    }
 
     /**
      * @dataProvider provide_expressions_with_functions
      * @dataProvider provide_simple_expressions
      * @dataProvider provide_ternary_expressions
      * @dataProvider provide_for_loops
+     * @dataProvider provide_boolean_and_logical
      */
     public function test_expressions_with_numeric_result($expected, $input): void {
         $parser = new parser($input);
@@ -46,9 +63,27 @@ class evaluator_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
+    public function provide_boolean_and_logical(): array {
+        return [
+            [1, '(0 == 0) || (1 == 1)'],
+            [1, '(1 == 1) || (0 == 1)'],
+            [1, '(0 == 1) || (1 == 1)'],
+            [0, '(0 == 1) || (1 == 2)'],
+            [1, '(0 == 0) && (1 == 1)'],
+            [0, '(1 == 1) && (0 == 1)'],
+            [0, '(0 == 1) && (1 == 1)'],
+            [0, '(0 == 1) && (1 == 2)'],
+            // Logical AND should take precedence over logical OR.
+            [0, '(1 == 1) && (0 == 1) || (1 == 2)'],
+            [1, '(0 == 0) && (1 == 0) || (1 == 1)'],
+            [1, '(0 == 1) && (1 == 1) || (2 == 2)'],
+        ];
+    }
+
     public function provide_for_loops(): array {
         return [
             'one statement' => [45, 'res = 0; for (i:[1:10]) res = res + i'],
+            'one statement with list' => [32, 'res = 0; for (i:[1, 2, 3, 5:9]) res = res + i'],
             'one statement in braces, without semicolon' => [45, 'res = 0; for (i:[1:10]) {res = res + i}'],
             'one statement in braces, with semicolon' => [45, 'res = 0; for (i:[1:10]) {res = res + i;}'],
             'two statements' => [90, 'res = 0; for (i:[1:10]) {i = i * 2; res = res + i;}'],
@@ -60,6 +95,8 @@ class evaluator_test extends \advanced_testcase {
             'one statement with variable range and step' => [22, 'a = 1; b = 5; c = 0.5; res = 0; for (i:[a:b:c]) res = res + i'],
             'one statement with expression in range' => [22, 'a = 0.5; b = 10; c = 1/4; res = 0; for (i:[a*2:b/2:c+c]) res = res + i'],
             'for loop with two statements' => [258, 'b = 0; for (a:[1:23,5]) { x = {1,2}; b = b + a;}'],
+            'for loop pre-stored range' => [45, 'r = [1:10]; b = 0; for (i:r) { b = b + i}'],
+            'for loop pre-stored list' => [17, 'r = [1, 2, 5, 9]; b = 0; for (i:r) { b = b + i}'],
         ];
     }
 
@@ -167,9 +204,7 @@ class evaluator_test extends \advanced_testcase {
             'operations in all parts' => [7, '1+2==3 ? 1+2*3 : 4*5-6'],
             'ternary in false part with parens' => [7, '1==2 ? 5 : (2==3 ? 6 : 7)'],
             'ternary in true part with parens' => [4, '1==1 ? (1 == 2 ? 3 : 4) : 5'],
-            // 1 == 2 ? 5 : (2 == 3 ? 6 : 7) --> in 5.x this crashes the question for PHP >= 8
             'ternary in false part without parens' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
-            // 1 ==1 ? (1 == 2 ? 3 : 4) : 5
             'ternary in true part without parens' => [4, '1==1 ? 1 == 2 ? 3 : 4 : 5'],
             'ternary in both parts without parens' => [4, '1==1 ? 1 > 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
             'ternary in both parts without parens' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
@@ -183,10 +218,10 @@ class evaluator_test extends \advanced_testcase {
             'one argument, custom' => [5040, 'fact(7)'],
             'two arguments' => [252, 'ncr(10,5)'],
             'three arguments' => [16, 'modpow(2,100,17)'],
-            //'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
             'function in function' => [M_PI / 4, 'asin(sqrt(2)/2)'],
             'operation in function' => [-1.02, 'round((1+2*3-4**5)/1000,2)'],
-            //'function with array' => [6, 'sum([1,2,3])'],
+            // TODO: 'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
+            // TODO: 'function with array' => [6, 'sum([1,2,3])'],
         ];
     }
 
@@ -229,11 +264,35 @@ class evaluator_test extends \advanced_testcase {
     }
 
     // TODO: reorder those tests later; some are unit tests for the functions and should go there
+    // TODO: change to variable::<TYPE>
     public function provide_valid_assignments(): array {
         return [
             'one number' => [
                 ['a' => new variable('a', 1, token::NUMBER)],
                 'a = 1;'
+            ],
+            'chain assignment' => [
+                [
+                    'a' => new variable('a', 1, token::NUMBER),
+                    'b' => new variable('b', 1, token::NUMBER)
+                ],
+                'a = b = 1;'
+            ],
+            'boolean true should be 1' => [
+                ['a' => new variable('a', 1, token::NUMBER)],
+                'a = (5 == 5);'
+            ],
+            'boolean false should be 0' => [
+                ['a' => new variable('a', 0, token::NUMBER)],
+                'a = (5 == 4);'
+            ],
+            'inverse of boolean true should be 0' => [
+                ['a' => new variable('a', 0, token::NUMBER)],
+                'a = !(5 == 5);'
+            ],
+            'inverse of boolean false should be 1' => [
+                ['a' => new variable('a', 1, token::NUMBER)],
+                'a = !(5 == 4);'
             ],
             'two numbers' => [
                 [
@@ -249,6 +308,34 @@ class evaluator_test extends \advanced_testcase {
             'one expression' => [
                 ['c' => new variable('c', 4.14, token::NUMBER)],
                 'c = cos(0)+3.14;'
+            ],
+            'char from a string' => [
+                [
+                    's' => new variable('s', 'Hello!', token::STRING),
+                    'a' => new variable('a', 'H', token::STRING)
+                ],
+                's = "Hello!"; a = s[0];'
+            ],
+            'string concatenation, direct' => [
+                [
+                    's' => new variable('s', 'Hello World!', token::STRING),
+                ],
+                's = "Hello" + " World!";'
+            ],
+            'string concatenation, from variables' => [
+                [
+                    'a' => new variable('a', 'Hello', token::STRING),
+                    'b' => new variable('b', ' World!', token::STRING),
+                    's' => new variable('s', 'Hello World!', token::STRING),
+                ],
+                'a = "Hello"; b = " World!"; s = a + b;'
+            ],
+            'string concatenation, mixed' => [
+                [
+                    'a' => new variable('a', 'Hello', token::STRING),
+                    's' => new variable('s', 'Hello World!', token::STRING),
+                ],
+                'a = "Hello"; s = a + " World!";'
             ],
             'one string with double quotes' => [
                 ['d' => new variable('d', 'Hello!', token::STRING)],
@@ -335,6 +422,54 @@ class evaluator_test extends \advanced_testcase {
                     'm' => new variable('m', [-20, -18.5, -17, -15.5, -14, -12.5, -11], token::LIST),
                 ],
                 'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'
+            ],
+            'assign from list with negative index' => [
+                [
+                    'a' => new variable('a', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], token::LIST),
+                    'b' => new variable('b', 8, token::NUMBER)
+                ],
+                'a = [0:10]; b = a[-2];'
+            ],
+            'assign to list with negative index' => [
+                [
+                    'a' => new variable('a', [0, 1, 2, 3, 4, 5, 6, 99, 8, 15], token::LIST),
+                ],
+                'a = [0:10]; a[-1] = 15; a[-3] = 99'
+            ],
+            'assign to list with index being a numeric string' => [
+                [
+                    'a' => new variable('a', [0, 1, 15, 3, 4, 5, 6, 99, 8, 9], token::LIST),
+                ],
+                'a = [0:10]; a["2"] = 15; a["-3"] = 99'
+            ],
+
+            // FIXME: add examples from string/list where index is numeric string
+            'assign from literal list with negative index' => [
+                [
+                    'a' => new variable('a', 8, token::NUMBER)
+                ],
+                'a = [0:10][-2]'
+            ],
+            'assign from string variable with negative index' => [
+                [
+                    's' => new variable('s', 'string', token::STRING),
+                    'c' => new variable('c', 'n', token::STRING)
+                ],
+                's = "string"; c = s[-2];'
+            ],
+            'assign from string variable with index being numerical string' => [
+                [
+                    's' => new variable('s', 'string', token::STRING),
+                    'c' => new variable('c', 'n', token::STRING),
+                    'd' => new variable('d', 't', token::STRING)
+                ],
+                's = "string"; c = s["-2"]; d = s["1"];'
+            ],
+            'assign from string literal with negative index' => [
+                [
+                    'c' => new variable('c', 'n', token::STRING)
+                ],
+                'c = "string"[-2];'
             ],
             'assign lists and composed expressions' => [
                 [
@@ -658,8 +793,16 @@ class evaluator_test extends \advanced_testcase {
                 'a = {0, 1:3:0.1, 10:30, 100}'
             ],
             'shuffle with strings' => [
-                ['name' => 'a', 'count' => 3, 'shuffle' => true],
+                ['name' => 'a', 'count' => 6, 'shuffle' => true],
                 'a = shuffle (["A", "B", "C"])'
+            ],
+            'big shuffle' => [
+                ['name' => 'a', 'count' => PHP_INT_MAX, 'shuffle' => true],
+                'a = shuffle ([1:100])'
+            ],
+            'two vars and many combinations' => [
+                ['name' => 'a', 'count' => PHP_INT_MAX, 'shuffle' => true],
+                'a = shuffle([1:100]); b = shuffle([1:10]);'
             ],
         ];
     }
@@ -674,14 +817,10 @@ class evaluator_test extends \advanced_testcase {
         $evaluator = new evaluator();
         $evaluator->evaluate($randomparser->get_statements());
 
-        // First, we check whether the random variable has been created and registered.
-        // We also check whether the number of variants is correct.
-        // TODO: check also with shuffle case?
+        // First, we check whether the number of variants is correct. This indirectly
+        // let's us verify that the random variable has been registered.
         $key = $expected['name'];
-        self::assertTrue($evaluator->is_random_variable($key));
-        if ($expected['shuffle'] === false) {
-            self::assertEquals($expected['count'], $evaluator->get_number_of_variants());
-        }
+        self::assertEquals($expected['count'], $evaluator->get_number_of_variants());
 
         // Now, we instantiate the random variable. We check that a "normal" variable is
         // created.
@@ -691,7 +830,7 @@ class evaluator_test extends \advanced_testcase {
         // FIXME: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
 
         // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
-        // value is within those boundaries. For shuffled lists, we only check the size.
+        // value is within those boundaries.
         // In some cases, >= and <= comparison does not make sense, e.g. when elements are lists.
         $stored = $evaluator->export_single_variable($key);
         if ($expected['shuffle'] === false) {
@@ -701,8 +840,6 @@ class evaluator_test extends \advanced_testcase {
             if (isset($expected['max'])) {
                 self::assertLessThanOrEqual($expected['max'], $stored->value);
             }
-        } else {
-            self::assertEquals($expected['count'], count($stored->value));
         }
     }
 
@@ -787,37 +924,76 @@ class evaluator_test extends \advanced_testcase {
         // Test without substitution of array b.
         $output = $evaluator->substitute_variables_in_text($text);
         $expected = '{1}, 1, {a }, { a}, {b}, 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
 
         // Test with substitution of array b as one would write it in PHP.
         $output = $evaluator->substitute_variables_in_text($text, false);
         $expected = '{1}, 1, {a }, { a}, [2, 3, 4], 2, {b[0] }, { b[0]}, {b [0]}, 100, 6, 12, 105, {xyz}, {=3+}';
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
 
         // Test with substitution of nested array.
         $text = '{d} {d[0]} {d[0][0]} {d[1][1]} {d[5][3]}';
         $expected = '{d} {d[0]} 1 4 {d[5][3]}';
         $output = $evaluator->substitute_variables_in_text($text);
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
 
         // And with substitution of arrays being activated.
         $expected = '[[1, 2], [3, 4]] [1, 2] 1 4 {d[5][3]}';
         $output = $evaluator->substitute_variables_in_text($text, false);
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
 
         // Test with algebraic variable. It should not be replaced.
         $text = '{c} {=c}';
         $expected = '{c} {=c}';
         $output = $evaluator->substitute_variables_in_text($text);
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
         $output = $evaluator->substitute_variables_in_text($text, false);
-        $this->assertEquals($expected, $output);
+        self::assertEquals($expected, $output);
+
+        // Test that expression with assignment is filtered out.
+        $text = 'foo {=(a=2)} {=2*3}';
+        $expected = 'foo {=(a=2)} 6';
+        $output = $evaluator->substitute_variables_in_text($text, false);
+        self::assertEquals($expected, $output);
     }
 
+    public function test_substitute_variables_in_algebraic_formula() {
+        // Define, parse and evaluate some variables.
+        $vars = 'a=1; b=[2,3,4]; c={1,2,3}; x={1:10}; y={1:10}; k = [[1,2],[3,4]];';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        // Test with standard variable, a one-dimensional array and an unknown variable.
+        $formula = 'a*x^2 + b[1]*y + b[2] + d';
+        $output = $evaluator->substitute_variables_in_algebraic_formula($formula);
+        $expected = '1 * x^2 + 3 * y + 4 + d';
+        self::assertEquals($expected, $output);
+
+        // Test with a two-dimensional-array.
+        $formula = 'k[0][1]*x + k[1][0]*y + k[1][1] + k[3]';
+        $output = $evaluator->substitute_variables_in_algebraic_formula($formula);
+        $expected = '2 * x + 3 * y + 4 + k[3]';
+        self::assertEquals($expected, $output);
+
+        // Test with variable indices.
+        $formula = 'k[0][a]*x + k[2a-a][a-a]*y+k[a][a] + k[a+a+a]';
+        $output = $evaluator->substitute_variables_in_algebraic_formula($formula);
+        $expected = '2 * x + 3 * y + 4 + k[1 + 1 + 1]';
+        self::assertEquals($expected, $output);
+
+        // Test with unary minus.
+        $formula = '-x + x^a';
+        $output = $evaluator->substitute_variables_in_algebraic_formula($formula);
+        $expected = '-x + x^1';
+        self::assertEquals($expected, $output);
+    }
 
     public function provide_invalid_random_vars(): array {
         return [
             ['evaluation error: range from 10 to 1 with step 1 will be empty', 'a = {10:1:1}'],
+            ['setting individual list elements is not supported for random variables', 'a[1] = {1,2,3}'],
             ['syntax error: invalid use of separator token (,)', 'a = {1:10,}'],
             ["syntax error: incomplete ternary operator or misplaced '?'", 'a = {1:10?}'],
             ['evaluation error: numeric value expected, got algebraic variable', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
@@ -857,8 +1033,73 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public function provide_invalid_for_loops(): array {
+        return [
+            ['syntax error: ( expected after for', 'for a'],
+            ['syntax error: : expected', 'for (a)'],
+            ['syntax error: : expected', 'for (a=)'],
+            ['syntax error: ) expected', 'for (a:[1:5],)'],
+        ];
+    }
+
+    public function provide_invalid_ranges(): array {
+        return [
+            ['syntax error: step size of a range cannot be zero', 'a = [1:5:0]'],
+            ['syntax error: start end end of range must not be equal', 'a = [5:5]'],
+            ['syntax error: start end end of range must not be equal', 'a = [1.0:1]'],
+            ['syntax error in range definition', 'a = [1:2:3:4]'],
+        ];
+    }
+
+    public function provide_invalid_colon(): array {
+        return [
+            ['syntax error: invalid use of range separator (:)', 'a = (:5)'],
+            ['syntax error: invalid use of range separator (:)', 'a = {5:}'],
+            ['syntax error: invalid use of range separator (:)', 'a = {:5}'],
+            ['syntax error: invalid use of range separator (:)', 'a = [5:]'],
+            ['syntax error: invalid use of range separator (:)', 'a = [:5]'],
+            ['syntax error: invalid use of range separator (:)', 'a = [5::7]'],
+            ['syntax error: invalid use of range separator (:)', 'a = [3,:7]'],
+            ['syntax error: invalid use of range separator (:)', 'a = [3:,7]'],
+            ['syntax error: ternary operator missing middle part', 'a = 5 ?: 3'],
+            ['syntax error: ranges can only be used in {} or []', 'a = 5 : 3'],
+        ];
+    }
+
     public function provide_invalid_assignments(): array {
         return [
+            'trying to change char of string' => [
+                'individual chars of a string cannot be modified',
+                's = "foo"; s[1] = "x"'
+            ],
+            'assignment with invalid function' => [
+                "unknown function: 'idontexist'",
+                'a = \idontexist(5)'
+            ],
+            'assignment to constant' => [
+                'left-hand side of assignment must be a variable',
+                'pi = 3'
+            ],
+            'assignment to constant' => [
+                'left-hand side of assignment must be a variable',
+                'π = 3'
+            ],
+            'invalid use of prefix with number' => [
+                'syntax error: invalid use of prefix character \\',
+                'a = \ 2'
+            ],
+            'invalid argument for unary operator' => [
+                "numeric value expected, got 'foo'",
+                'a = -"foo"'
+            ],
+            'invalid argument for unary operator, indirect' => [
+                "numeric value expected, got 'foo'",
+                's = "foo"; a = -s'
+            ],
+            'invalid use of prefix with paren' => [
+                'syntax error: invalid use of prefix character \\',
+                'a = \ (3 + 1)'
+            ],
             'assignment to invalid variable' => [
                 "you cannot assign values to the special variable '_a'",
                 '_a=3;'
@@ -872,7 +1113,7 @@ class evaluator_test extends \advanced_testcase {
                 'a=3«6;'
             ],
             'not subscriptable' => [
-                'Trying to access array offset on value of type float',
+                '1:8:evaluation error: indexing is only possible with arrays (lists) and strings',
                 'f=1; g=f[1];'
             ],
             'assignment of empty list' => [
@@ -979,12 +1220,50 @@ class evaluator_test extends \advanced_testcase {
                 'evaluation error: not enough arguments for ternary operator',
                 'a = (5 ? 4 :)'
             ],
+            'argument should be scalar, is list' => [
+                'evaluation error: numeric value expected, got list',
+                'a = [1, 2, 3] + 4'
+            ],
+            'argument should be scalar, is list' => [
+                'evaluation error: scalar value expected, got list',
+                'a = "a" + [1, 2, 3]'
+            ],
         ];
+    }
 
+    public function provide_invalid_indices(): array {
+        return [
+            ["expected numerical index, found 'foo'", 's = "string"; a = s["foo"];'],
+            ["expected numerical index, found 'foo'", 'a = [1, 2, 3, 4]; b = a["foo"];'],
+            ["index should be an integer, found '1.5'", 's = "string"; a = s[1.5];'],
+            ["index should be an integer, found '1.5'", 'a = [1, 2, 3, 4]; b = a[1.5];'],
+            ['index out of range: 4', 'a = [1,2,3,4][4]'],
+            ['index out of range: 4', 'a = "abcd"[4]'],
+            ['syntax error: did you forget to put an operator?', 'a = 15[2]'],
+            ['index out of range: 4', 'a = "abcd"; b = a[4];'],
+            ['index out of range: 4', 'a = [1, 2, 3, 4]; b = a[4];'],
+            ['indexing is only possible with arrays (lists) and strings', 'a = 15; b = a[2];'],
+        ];
+    }
+
+    public function provide_other_invalid_stuff(): array {
+        return [
+            ['1:7:unexpected token: ,', 'a = 15,2'],
+            ['1:9:syntax error: sets cannot be nested', 'a = {1, {2, 3}}'],
+            ['1:9:syntax error: sets cannot be used inside a list', 'a = [1, {2, 3}]'],
+            ['1:6:invalid use of unary operator: !', 'a = 1!2'],
+            ['1:6:invalid use of unary operator: ~', 'a = 1~2'],
+        ];
     }
 
     /**
      * @dataProvider provide_invalid_assignments
+     * @dataProvider provide_invalid_colon
+     * @dataProvider provide_invalid_for_loops
+     * @dataProvider provide_invalid_diff
+     * @dataProvider provide_invalid_indices
+     * @dataProvider provide_invalid_ranges
+     * @dataProvider provide_other_invalid_stuff
      */
     public function test_invalid_stuff($expected, $input): void {
         $error = '';
@@ -996,7 +1275,6 @@ class evaluator_test extends \advanced_testcase {
         } catch (Exception $e) {
             $error = $e->getMessage();
         }
-
         self::assertStringEndsWith($expected, $error);
     }
 
@@ -1009,7 +1287,7 @@ class evaluator_test extends \advanced_testcase {
         $evaluator = new evaluator();
         $result = $evaluator->evaluate($statement);
 
-        $this->assertEqualsWithDelta($expected, $result->value, 1e-8);
+        self::assertEqualsWithDelta($expected, $result->value, 1e-8);
     }
 
     public function provide_general_expressions(): array {
@@ -1209,6 +1487,49 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public function test_export_import_variable_context(): void {
+        // Prepare an evaluator with a few variables.
+        $randomparser = new random_parser('r = {1,2,3,4}');
+        $parser = new parser('a = 2; b = 3*a; c = "foo";');
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+        $evaluator->evaluate($parser->get_statements());
+
+        // Export the context and create a new evaluator based on the old one.
+        $originalcontext = $evaluator->export_variable_context();
+        $otherevaluator = new evaluator($originalcontext);
+
+        // Verify the new evaluator contains the same variables with the same values.
+        $originalvariables = $evaluator->export_variable_list();
+        $newvariables = $otherevaluator->export_variable_list();
+        foreach ($originalvariables as $varname) {
+            self::assertContains($varname, $newvariables);
+            // Exporting as "algebraic" variable, i. e. the variable as a whole and not just
+            // its content.
+            $original = $evaluator->export_single_variable($varname, true);
+            $copy = $otherevaluator->export_single_variable($varname, true);
+            self::assertEquals($copy->name, $original->name);
+            self::assertEquals($copy->type, $original->type);
+            self::assertEquals($copy->value, $original->value);
+        }
+
+        // Verify the new evaluator contains the same random variables.
+        $othercontext = $otherevaluator->export_variable_context();
+        self::assertEquals($othercontext['randomvariables'], $originalcontext['randomvariables']);
+        // Make sure the list of random variables is not empty. There might be a bug that has them
+        // both empty and we would not realize without that check.
+        self::assertNotEquals('a:0:{}', $othercontext['randomvariables']);
+
+        // Test importing a bad context.
+        $e = null;
+        try {
+            new evaluator(['randomvariables' => 'foo', 'variables' => '']);
+        } catch (Exception $e) {
+            self::assertEquals('invalid variable context given, aborting import', $e->getMessage());
+        }
+        self::assertNotNull($e);
+    }
+
     public function test_basic_operations() {
         return;
         $input = 'a = 5 = 3';
@@ -1299,7 +1620,6 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->instantiate_random_variables();
         //print_r($result);
         var_dump(end($result));
-        //die($evaluator->export_randomvars_for_step_data());
         $context = $evaluator->export_variable_context();
         print_r($context);
         return;
@@ -1328,7 +1648,7 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
 
         $parser = new parser($input);
-       // print_r($parser->statements);
+        // print_r($parser->statements);
     }
 
     public function provide_numbers(): array {
@@ -1607,6 +1927,81 @@ class evaluator_test extends \advanced_testcase {
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
+    }
+
+    public function test_impossible_stuff(): void {
+        $evaluator = new evaluator();
+
+        // Using an operator with an empty stack.
+        $statement = new expression([
+            new token(token::OPERATOR, '+'),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith('evaluation error: empty stack - did you pass enough arguments for the function or operator?', $e->getMessage());
+        }
+        self::assertNotNull($e);
+
+        // When trying to access an undefined constant, there should be an error.
+        $statement = new expression([
+            new token(token::CONSTANT, 'foo'),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith("undefined constant: 'foo'", $e->getMessage());
+        }
+        self::assertNotNull($e);
+
+        // The function evaluator::evaluate() must be called with a for_loop, an expression
+        // or a list thereof.
+        $e = null;
+        try {
+            $evaluator->evaluate(['foo', 'bar']);
+        } catch (Exception $e) {
+            self::assertStringEndsWith('bad invocation of evaluate(), expected expression or for loop', $e->getMessage());
+        }
+        self::assertNotNull($e);
+        $e = null;
+        try {
+            $evaluator->evaluate('foo');
+        } catch (Exception $e) {
+            self::assertStringEndsWith('bad invocation of evaluate(), expected an expression or a list of expressions', $e->getMessage());
+        }
+        self::assertNotNull($e);
+
+        // When executing the ternary operator, we must have enough stuff (and the right stuff) on the stack.
+        $statement = new expression([
+            new token(token::OPERATOR, '?'),
+            new token(token::OPERATOR, '%%ternary'),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith('evaluation error: not enough arguments for ternary operator', $e->getMessage());
+        }
+        self::assertNotNull($e);
+
+        $statement = new expression([
+            new token(token::NUMBER, 0),
+            new token(token::NUMBER, 0),
+            new token(token::NUMBER, 1),
+            new token(token::OPERATOR, '?'),
+            new token(token::NUMBER, 2),
+            new token(token::OPERATOR, '%%ternary'),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith('evaluation error: not enough arguments for ternary operator', $e->getMessage());
+        }
+        self::assertNotNull($e);
+
     }
 
 }

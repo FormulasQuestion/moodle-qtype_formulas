@@ -34,16 +34,16 @@ class variable {
     const ALGEBRAIC = 1024;
 
     /** @var string the identifier used to refer to this variable */
-    public $name;
+    public string $name;
 
     /** @var int the variable's data type */
-    public $type;
+    public int $type;
 
     /** @var mixed the variable's content */
     public $value;
 
     /** @var float microtime() timestamp of last update */
-    public $timestamp;
+    public float $timestamp;
 
     public function __construct(string $name, $value = null, int $type = self::UNDEFINED, ?float $timestamp = null) {
         $this->name = $name;

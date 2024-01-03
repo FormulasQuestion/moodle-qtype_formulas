@@ -17,6 +17,11 @@
 namespace qtype_formulas;
 use Throwable, Exception;
 
+// TODO: calculate_algebraic_diff etc. should probably not use known variables and thus
+// not allow using builtin functions as variables, because students do not have access to the
+// prefix operator; in any case it needs to be clearly documented
+
+
 /**
  * Evaluator for qtype_formulas
  *
@@ -71,53 +76,42 @@ class evaluator {
         'tanh' => [1, 1],
     ];
 
+    /** @var array $variables array holding all variables */
     private array $variables = [];
+
+    /** @var array $randomvariables array holding all (uninstantiated) random variables */
     private array $randomvariables = [];
 
+    /** @var array $constants array holding all predefined constants, i. e. pi */
     private array $constants = [
         'π' => M_PI,
     ];
 
+    /** @var array $stack the operand stack */
     private array $stack = [];
 
-    /*
-     * @var int seed used when picking a random value for algebraic variables
-     *
-     * This is used, because we want the same variable to be resolved to the same
+    /**
+     * PRNG seed. This is used, because we want the same variable to be resolved to the same
      * value when evaluating any given expression.
+     *
+     * @var int $seed
      */
     private int $seed = 0;
 
-    /* if true, it is possible to assign values to reserved variables */
+    /** @var bool $godmode whether we are allowed to modify reserved variables, e.g. _a or _0 */
     private bool $godmode = false;
 
-    /* if true, algebraic variables are replaced by a random value among their reservoir */
+    /** @var bool $algebraicmode whether algebraic variables are replaced by a random value from their reservoir */
     private bool $algebraicmode = false;
 
     /**
      * Create an evaluator class. This class does all evaluations for expressions that have
      * been parsed by a parser or answer_parser.
      *
-     * @param ?string $context serialized variable context from another evaluator class
+     * @param array $context serialized variable context from another evaluator class
      */
-    public function __construct(?string $context = null) {
+    public function __construct(array $context = []) {
         $this->reinitialize($context);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string|token $variable
-     * @return boolean
-     */
-    public function is_random_variable($variable): bool {
-        if ($variable instanceof token) {
-            $rawname = $variable->value;
-        } else if (is_string($variable)) {
-            $rawname = $variable;
-        }
-
-        return array_key_exists($rawname, $this->randomvariables);
     }
 
     /**
@@ -133,7 +127,6 @@ class evaluator {
         // variables with a numerical index like {a[1]} or more complex
         // expressions like {=a+b} or {=a[b]}.
         $varpattern = '[_A-Za-z]\w*';
-        // FIXME: nested arrays?
         $arraypattern = '[_A-Za-z]\w*(\[\d+\])+';
         $expressionpattern = '=[^}]+';
 
@@ -173,13 +166,18 @@ class evaluator {
                 $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
                 // TODO: use non-capturing exception when we drop support for old PHP
-                ;
+                unset($e);
             }
         }
 
         return $text;
     }
 
+    /**
+     * Remove the special variables like _a or _0, _1, ... from the evaluator.
+     *
+     * @return void
+     */
     public function remove_special_vars(): void {
         foreach ($this->variables as $name => $variable) {
             $isreserved = in_array($name, ['_err', '_relerr', '_a', '_r', '_d', '_u']);
@@ -191,54 +189,75 @@ class evaluator {
         }
     }
 
-    public function reinitialize(?string $context = null) {
+    /**
+     * Reinitialize the evaluator by clearing the stack and, if requested, setting the
+     * variables and random variables to a certain state.
+     *
+     * @param array $context associative array containing the random and normal variables
+     * @return void
+     */
+    public function reinitialize(array $context = []): void {
         $this->clear_stack();
 
         // If a context is given, we initialize our variables accordingly.
-        if (is_string($context)) {
+        if (key_exists('randomvariables', $context) && key_exists('variables', $context)) {
             $this->import_variable_context($context);
         }
     }
 
+    /**
+     * Clear the stack.
+     *
+     * @return void
+     */
     public function clear_stack(): void {
         $this->stack = [];
     }
 
-    public function export_variable_context(): string {
-        return serialize($this->variables);
+    /**
+     * Export all random variables and variables. The function returns an associative array
+     * with the keys 'randomvariables' and 'variables'. Each key will hold the serialized
+     * string of the corresponding variables.
+     *
+     * @return array
+     */
+    public function export_variable_context(): array {
+        return [
+            'randomvariables' => serialize($this->randomvariables),
+            'variables' => serialize($this->variables)
+        ];
     }
 
+    /**
+     * Export the names of all known variables. This can be used to pass to a new parser,
+     * in order to help it classify identifiers as functions or variables.
+     *
+     * @return array
+     */
     public function export_variable_list(): array {
         return array_keys($this->variables);
     }
 
-    public function export_single_variable(string $varname, bool $isalgebraic = false) {
-        if ($isalgebraic) {
+    /**
+     * Export the variable with the given name. Depending on the second parameter, the function
+     * returns a token (the variable's content) or a variable (the variable's actual definition).
+     *
+     * @param string $varname name of the variable
+     * @param boolean $exportasvariable whether to export as an instance of variable, otherwise just export the content
+     * @return token|variable
+     */
+    public function export_single_variable(string $varname, bool $exportasvariable = false) {
+        if ($exportasvariable) {
             return $this->variables[$varname];
         }
         $result = $this->get_variable_value(token::wrap($varname));
-        return $result;
-    }
-    /**
-     * Export variable definition text for instantiated random variables. The result
-     * can then be fed to a parser and an evaluator. This is used for backwards compatibility,
-     * because legacy code used to save the random variables in the DB, rather than just
-     * the seed.
-     *
-     * @return string
-     */
-    public function export_randomvars_for_step_data(): string {
-        $result = '';
-        foreach ($this->randomvariables as $var) {
-            $result .= $var->get_instantiated_definition();
-        }
         return $result;
     }
 
     /**
      * Undocumented function
      *
-     * @return integer
+     * @return int
      */
     public function get_number_of_variants(): int {
         $result = 1;
@@ -268,21 +287,32 @@ class evaluator {
      * incoming context will overwrite our data. This can be avoided by setting
      * the optional parameter to false.
      *
-     * @param string $data serialized variable context exported from another evaluator
+     * @param array $data serialized context for randomvariables and variables
      * @param boolean $overwrite whether to overwrite existing data with incoming context
      * @return void
      */
-    public function import_variable_context(string $data, bool $overwrite = true) {
-        $incoming = unserialize($data, ['allowed_classes' => [variable::class, token::class]]);
-        if ($incoming === false) {
+    public function import_variable_context(array $data, bool $overwrite = true) {
+        // If the data is invalid, unserialize() will issue an E_NOTICE. We suppress that,
+        // because we have our own error message.
+        $randomvariables = @unserialize($data['randomvariables'], ['allowed_classes' => [random_variable::class, token::class]]);
+        $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
+        if ($randomvariables === false || $variables === false) {
             throw new Exception('invalid variable context given, aborting import');
         }
-        foreach ($incoming as $name => $var) {
+        foreach ($variables as $name => $var) {
             // New variables are added.
             // Existing variables are only overwritten, if $overwrite is true.
             $notknownyet = !array_key_exists($name, $this->variables);
             if ($notknownyet || $overwrite) {
                 $this->variables[$name] = $var;
+            }
+        }
+        foreach ($randomvariables as $name => $var) {
+            // New variables are added.
+            // Existing variables are only overwritten, if $overwrite is true.
+            $notknownyet = !array_key_exists($name, $this->randomvariables);
+            if ($notknownyet || $overwrite) {
+                $this->randomvariables[$name] = $var;
             }
         }
     }
@@ -369,29 +399,50 @@ class evaluator {
     }
 
     /**
-     * Check whether a given variable is an algebraic variable or not. This is needed, because
-     * in some situations they cannot be used while other variables are allowed.
+     * Make sure the index is valid, i. e. an integer (as a number or string) and not out
+     * of range. If needed, translate a negative index (count from end) to a 0-indexed value.
      *
-     * @param string|token $variable
-     * @return boolean
+     * @param mixed $arrayorstring array or string that should be indexed
+     * @param mixed $index the index
+     * @param ?token $anchor anchor token used in case of error (may be the array or the index)
+     * @return int
      */
-    private function is_algebraic_variable($variable): bool {
-        // The raw name may contain indices, e.g. a[1][2]. We split at the [ and
-        // take the first chunk as the true variable name. If there are no brackets,
-        // there will be only one chunk and everything is fine.
-        if ($variable instanceof token) {
-            $rawname = $variable->value;
-        } else if (is_string($variable)) {
-            $rawname = $variable;
+    private function validate_array_or_string_index($arrayorstring, $index, ?token $anchor = null): int {
+        // Check if the index is a number. If it is not, try to convert it.
+        // If conversion fails, throw an error.
+        if (!is_numeric($index)) {
+            $this->die("evaluation error: expected numerical index, found '{$index}'", $anchor);
         }
-        $parts = explode('[', $rawname);
-        $name = array_shift($parts);
+        $index = floatval($index);
 
-        if (!array_key_exists($name, $this->variables)) {
-            $this->die("unknown variable: $name", $variable);
+        // If the index is not a whole number, throw an error. A whole number in float
+        // representation is fine, though.
+        if ($index - intval($index) != 0) {
+            $this->die("evaluation error: index should be an integer, found '{$index}'", $anchor);
+        }
+        $index = intval($index);
+
+        // Fetch the length of the array or string.
+        if (is_string($arrayorstring)) {
+            $len = strlen($arrayorstring);
+        } else if (is_array($arrayorstring)) {
+            $len = count($arrayorstring);
+        } else {
+            $this->die('evaluation error: indexing is only possible with arrays (lists) and strings', $anchor);
         }
 
-        return $this->variables[$name]->type === variable::ALGEBRAIC;
+        // Negative indices can be used to count "from the end". For strings, this is
+        // directly supported in PHP, but not for arrays. So for the sake of simplicity,
+        // we do our own preprocessing.
+        if ($index < 0) {
+            $index = $index + $len;
+        }
+        // Now check if the index is out of range. We use the original value from the token.
+        if ($index > $len - 1 || $index < 0) {
+            $this->die("evaluation error: index out of range: {$index}", $anchor);
+        }
+
+        return $index;
     }
 
     /**
@@ -448,7 +499,10 @@ class evaluator {
         // If we do have indices, we access them one by one. The ] at the end of each
         // part must be stripped.
         foreach ($parts as $part) {
-            $result = $result->value[substr($part, 0, -1)];
+            // Validate the index and, if necessary, convert a negative index to the corresponding
+            // positive value.
+            $index = $this->validate_array_or_string_index($result->value, substr($part, 0, -1), $variable);
+            $result = $result->value[$index];
         }
 
         // When accessing an array, the elements are already stored as tokens, so we return them
@@ -496,13 +550,9 @@ class evaluator {
      * @return token
      */
     public function calculate_algebraic_expression(string $expression): token {
-        // If the string is empty, throw an error.
-        if (strlen(trim($expression)) === 0) {
-            throw new Exception('cannot evaluate an empty formula');
-        }
-
         // Parse the expression. It will parsed by the answer parser, i. e. the ^ operator
         // will mean exponentiation rather than XOR, as per the documented behaviour.
+        // Note that this step will also throw an error, if the expression is empty.
         $parser = new answer_parser($expression, $this->export_variable_list());
         if (!$parser->is_valid_algebraic_formula()) {
             throw new Exception("'$expression' is not a valid algebraic expression");
@@ -540,9 +590,39 @@ class evaluator {
         return $result;
     }
 
+    private function find_end_of_array_access(array $tokens): int {
+        $count = count($tokens);
+
+        // If we don't have at least four tokens (variable, opening bracket, index, closing bracket)
+        // or if the first token after the variable name is not an opening bracket, we can return
+        // immediately.
+        if ($count < 4 || $tokens[1]->type !== token::OPENING_BRACKET) {
+            return 1;
+        }
+
+        for ($i = 1; $i < $count - 1; $i++) {
+            $token = $tokens[$i];
+
+            // As long as we are not at the closing bracket, we just keep advancing.
+            if ($token->type !== token::CLOSING_BRACKET) {
+                continue;
+            }
+            // We found a closing bracket. Now let's see whether the next token is
+            // an opening bracket again. If it is, we have to keep searching for the end.
+            if ($tokens[$i + 1]->type === token::OPENING_BRACKET) {
+                continue;
+            }
+            // If it is not, we can return.
+            return $i + 1;
+        }
+
+        // We have not found the closing bracket, so the end is ... at the end.
+        return $count;
+    }
+
     /**
      * Takes a string representation of an algebraic formula, e.g. "a*x^2 + b" and
-     * replace the non-algebraic variables by their numerical value. Return the resulting
+     * replaces the non-algebraic variables by their numerical value. Returns the resulting
      * string.
      *
      * @return string
@@ -552,24 +632,53 @@ class evaluator {
         // and if it is needed for later output (e.g. "the correct answer is ..."), there is
         // no need to replace ^ by **.
         $parser = new parser($formula, $this->export_variable_list());
-
         $tokens = $parser->get_tokens();
-        foreach ($tokens as &$token) {
-            // If we have a VARIABLE token, we fetch its value and check whether it is
-            // an algebraic variable (i. e. the value is of type SET) or not. We will only
-            // replace literals by their value.
-            if ($token->type === token::VARIABLE) {
-                if ($this->is_algebraic_variable($token)) {
-                    continue;
-                }
-                $value = $this->get_variable_value($token);
-                // Note: the value of a variable is always stored as a token.
-                $token = $value;
-            }
-        }
-        unset($token);
+        $count = count($tokens);
 
-        return implode('', $tokens);
+        // Will will iterate over all tokens and build an output string bit by bit.
+        $output = '';
+        for ($i = 0; $i < $count; $i++) {
+            $token = $tokens[$i];
+            // The unary minus must be translated back to '-'.
+            if ($token->type === token::OPERATOR && $token->value === '_') {
+                $output .= '-';
+                continue;
+            }
+            // For a nicer output, we add a space before and after the +, -, * and / operator.
+            if ($token->type === token::OPERATOR && in_array($token->value, ['+', '-', '*', '/'])) {
+                $output .= " {$token->value} ";
+                continue;
+            }
+            // If the token is not a VARIABLE, it can be shipped out.
+            if ($tokens[$i]->type !== token::VARIABLE) {
+                $output .= $tokens[$i]->value;
+                continue;
+            }
+
+            // If we are still here, we have a variable name, possibly followed by an opening bracket.
+            // As it is not allowed to build lists in an algebraic formula, such a bracket could only
+            // mean we are accessing an array element. We try to find out whether there is one and,
+            // if needed, how far that "subexpression" goes.
+            $numberoftokens = $this->find_end_of_array_access(array_slice($tokens, $i));
+            $subexpression = implode('', array_slice($tokens, $i, $numberoftokens));
+            $result = $this->substitute_variables_in_text("{=$subexpression}");
+
+            // If there was an error, e.g. invalid array index, there will have been no substitution.
+            // In that case, we only send the variable token to the output and keep on working, because
+            // there might be nested variables to substitute.
+            if ($result === "{=$subexpression}") {
+                $output .= $token->value;
+                continue;
+            }
+
+            // If we are still here, the subexpression has been replaced. We append it to the output
+            // and remove all tokens until the end of that subexpression from the queue.
+            $output .= $result;
+            array_splice($tokens, $i + 1, $numberoftokens - 1);
+            $count = $count - $numberoftokens + 1;
+        }
+
+        return $output;
     }
 
     /**
@@ -581,7 +690,7 @@ class evaluator {
      * @param int $n number of points where algebraic expressions will be evaluated
      * @return array
      */
-    public function diff(array $first, array $second, ?int $n = null) {
+    public function diff($first, $second, ?int $n = null) {
         // TODO: maybe allow invocation with num/num or string/string/n for convenience.
 
         // First, we check that $first and $second are lists of the same size.
@@ -671,9 +780,6 @@ class evaluator {
             return $this->evaluate_single_expression($input, $godmode);
         }
         if ($input instanceof for_loop) {
-            if ($godmode) {
-                throw new Exception('for loops cannot be evaluated in god mode');
-            }
             return $this->evaluate_for_loop($input);
         }
         throw new Exception('bad invocation of evaluate(), expected expression or for loop');
@@ -682,7 +788,7 @@ class evaluator {
     /**
      * Evaluate a single expression or an array of expressions.
      *
-     * @param expression|array $input
+     * @param expression|for_loop|array $input
      * @param bool $godmode whether to run the evaluation in god mode
      * @return token|array
      */
@@ -787,22 +893,6 @@ class evaluator {
         $index = $indextoken->value;
         $nexttoken = array_pop($this->stack);
 
-        // Check if the index is a number. If it is not, try to convert it.
-        // If conversion fails, throw an error.
-        if ($indextoken->type !== token::NUMBER) {
-            if (!is_numeric($index)) {
-                $this->die("evaluation error: expected numerical index, found '{$index}'", $indextoken);
-            }
-            $index = floatval($index);
-        }
-
-        // If the index is not a whole number, throw an error. A whole number in float
-        // representation is fine, though.
-        if (abs($index - intval($index)) > 1e-6) {
-            $this->die("evaluation error: index should be an integer, found '{$index}'", $indextoken);
-        }
-        $index = intval($index);
-
         // Make sure there is only one index.
         if ($nexttoken->type !== token::OPENING_BRACKET) {
             $this->die('evaluation error: only one index supported when accessing array elements', $indextoken);
@@ -810,35 +900,21 @@ class evaluator {
 
         // Fetch the array or string from the stack.
         $arraytoken = array_pop($this->stack);
+
         // If it is a variable, we do lazy evaluation: just append the index and wait. It might be used
-        // as a left-hand side in an assignment. If it is not, it will be resolved later.
+        // as a left-hand side in an assignment. If it is not, it will be resolved later. Also, if
+        // the index is invalid, that will lead to an error later on.
         if ($arraytoken->type === token::VARIABLE) {
             $name = $arraytoken->value . "[$index]";
             return new token(token::VARIABLE, $name, $arraytoken->row, $arraytoken->column);
         }
-        if (!in_array($arraytoken->type, [token::LIST, token::STRING])) {
-            $this->die('evaluation error: indexing is only possible with arrays (lists) and strings', $nexttoken);
-        }
+
+        // Before accessing the array or string, we validate the index and, if necessary,
+        // we translate a negative index to the corresponding positive value.
         $array = $arraytoken->value;
-
-        // Fetch the length of the array or string.
-        if ($arraytoken->type === token::STRING) {
-            $len = strlen($array);
-        } else {
-            $len = count($array);
-        }
-        // Negative indices can be used to count "from the end". For strings, this is
-        // directly supported in PHP, but not for arrays. So for the sake of simplicity,
-        // we do our own preprocessing.
-        if ($index < 0) {
-            $index = $index + $len;
-        }
-        // Now check if the index is out of range. We use the original value from the token.
-        if ($index > $len - 1 || $index < 0) {
-            $this->die("evaluation error: index out of range: {$indextoken->value}", $indextoken);
-        }
-
+        $index = $this->validate_array_or_string_index($array, $index, $nexttoken);
         $element = $array[$index];
+
         // If we are accessing a string's char, we create a new string token.
         if ($arraytoken->type === token::STRING) {
             return new token(token::STRING, $element, $arraytoken->row, $arraytoken->column + $index);
@@ -861,7 +937,7 @@ class evaluator {
         }
 
         // Step must not be zero.
-        if ($step === 0) {
+        if ($step == 0) {
             $this->die('syntax error: step size of a range cannot be zero', $steptoken);
         }
 
@@ -931,6 +1007,8 @@ class evaluator {
      * This function does the necessary check and prepares a human-friendly error message
      * if the conditions are not met.
      *
+     * TODO: we should probably use the corresponding static function from the functions class
+     *
      * @param token $token the token to check
      * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
      * @return void
@@ -987,7 +1065,7 @@ class evaluator {
         // The user might not have provided enough arguments for the ternary operator (missing 'else'
         // part), but there might be other elements on the stack from earlier operations (or a LHS variable
         // for an upcoming assignment). In that case, the intended 'then' token has been popped as
-        // the 'else' part and we have now read the '%%stopternary' pseudo-token.
+        // the 'else' part and we have now read the '%%ternary-sentinel' pseudo-token.
         if ($then->type === token::OPERATOR && $then->value === '%%ternary-sentinel') {
             $this->die('evaluation error: not enough arguments for ternary operator', $then);
         }
@@ -1005,17 +1083,12 @@ class evaluator {
         $input = $this->pop_real_value();
 
         // Check if the input is numeric. Boolean values are internally treated as 1 and 0 for
-        // backwards compatibility. The function apply_unary_operator() will do its own check,
-        // but we can have a better error message, if we do it here.
+        // backwards compatibility.
         if ($this->needs_numeric_input($token)) {
             $this->abort_if_not_scalar($input);
         }
 
-        try {
-            $result = functions::apply_unary_operator($token->value, $input->value);
-        } catch (Exception $e) {
-            $this->die($e->getMessage(), $token);
-        }
+        $result = functions::apply_unary_operator($token->value, $input->value);
         return token::wrap($result);
     }
 
@@ -1070,14 +1143,14 @@ class evaluator {
         $this->die("unknown function: '$funcname'", $function);
     }
 
-    private function resolve_constant($token) {
+    private function resolve_constant($token): token {
         if (array_key_exists($token->value, $this->constants)) {
             return new token(token::NUMBER, $this->constants[$token->value], $token->row, $token->column);
         }
         $this->die("undefined constant: '{$token->value}'", $token);
     }
 
-    public function execute_function(token $token) {
+    private function execute_function(token $token): token {
         $funcname = $token->value;
 
         // Fetch the number of params from the stack. Keep the token in case of an error.

@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace qtype_formulas;
-use Error;
 
 /**
  * Helper class implementing Dijkstra's shunting yard algorithm.
@@ -122,34 +121,22 @@ class shunting_yard {
             case '<=':
             case '!=':
                 return true;
-            // In PHP, the ternary operator is not associative (it was left-associative before 8.0.0)
-            // but many languages (e.g. JavaScript) define it to be right-associative which allows
-            // for easy chaining, i.e. condition1 ? value1 : condition2 ? value2 : value 3.
-            case '?':
-            case ':':
-                return false;
         }
     }
 
     /**
-     * Pop elements from the end of an array as long as the callback function returns true. If desired,
-     * popped elements can be appended to another array; otherwise they will be discarded. Also,
-     * the last element can be left in the input array or removed from it. If it is removed, it can be
-     * appended to the output or discarded. The function modifies the input array and resets its internal
-     * pointer.
+     * Pop elements from the end of an array as long as the callback function returns true and append
+     * them to another array. The optional parameter defines whether the "breaking" element, i. e.
+     * the first one *not* to satisfy the condition, should be popped (and discarded) or whether
+     * it should be be left in the input array.
      *
      * @param array &$input input array, will be modified and have its internal pointer reset
+     * @param array &$out output array, will be modified and have its internal pointer reset
      * @param callable $callback custom comparison function
-     * @param array &$out optional output array, will be modified and have its internal pointer reset
      * @param boolean $poplast whether the last element should be popped or not
-     * @param boolean $discardlast whether the last element should be discarded when popping it
-     * @throws Error if the last element should not be discarded, but is not to be popped
      */
-    private static function flush_while(array &$input, callable $callback, ?array &$out = null,
-            bool $poplast = false, bool $discardlast = false) {
-        if (!$poplast && $discardlast) {
-            throw new Error('Cannot move last element to output queue if it is not to be popped.');
-        }
+    private static function flush_while(array &$input, array &$out, callable $callback,
+            bool $poplast = false) {
         $head = end($input);
         while ($head !== false) {
             // Entries that do not follow the criteria will not be flushed.
@@ -161,10 +148,7 @@ class shunting_yard {
             $head = end($input);
         }
         if ($poplast) {
-            $tmp = array_pop($input);
-            if (!$discardlast && !is_null($tmp)) {
-                $out[] = $tmp;
-            }
+            array_pop($input);
         }
     }
 
@@ -177,9 +161,9 @@ class shunting_yard {
      * @return void
      */
     private static function flush_ternary_part(array &$opstack, array &$output): void {
-        self::flush_while($opstack, function($token) {
+        self::flush_while($opstack, $output, function($token) {
             return $token->value !== '%%ternary-sentinel';
-        }, $output, true, true);
+        }, true);
     }
 
     /**
@@ -191,9 +175,9 @@ class shunting_yard {
      * @return void
      */
     private static function flush_higher_precedence(array &$opstack, int $precedence, array &$output): void {
-        self::flush_while($opstack, function($operator) use ($precedence) {
+        self::flush_while($opstack, $output, function($operator) use ($precedence) {
             return $precedence <= self::get_precedence($operator->value);
-        }, $output);
+        });
     }
 
     /**
@@ -204,9 +188,9 @@ class shunting_yard {
      * @return void
      */
     private static function flush_all_operators(array &$opstack, array &$output): void {
-        self::flush_while($opstack, function($operator) {
+        self::flush_while($opstack, $output, function($operator) {
             return $operator->type === token::OPERATOR;
-        }, $output);
+        });
     }
 
     /**
@@ -219,9 +203,9 @@ class shunting_yard {
      * @return void
      */
     private static function flush_until_paren(array &$opstack, int $type, array &$output): void {
-        self::flush_while($opstack, function($operator) use ($type) {
+        self::flush_while($opstack, $output, function($operator) use ($type) {
             return $operator->type !== $type;
-        }, $output, true, true);
+        }, true);
     }
 
 
@@ -259,9 +243,9 @@ class shunting_yard {
      * @return void
      */
     private static function flush_all(array &$opstack, array &$output): void {
-        self::flush_while($opstack, function($operator) {
+        self::flush_while($opstack, $output, function() {
             return true;
-        }, $output, true);
+        });
     }
 
     /**
@@ -340,7 +324,7 @@ class shunting_yard {
                     if ($mostrecent === 'setelements') {
                         self::die('syntax error: sets cannot be nested', $token);
                     } else if ($mostrecent === 'arrayelements') {
-                        self::die('syntax error: sets cannot be used inside of lists', $token);
+                        self::die('syntax error: sets cannot be used inside a list', $token);
                     }
                     // Push the opening brace to the output queue. It will mark the start of the
                     // set during evaluation.
@@ -369,6 +353,11 @@ class shunting_yard {
                     // the user will run into an evaluation error later.
                     if (in_array($lasttype, [token::VARIABLE, token::STRING, token::CLOSING_BRACKET, token::CLOSING_PAREN])) {
                         $sentinel->value = '%%arrayindex';
+                    }
+                    // If the last token was a NUMBER, this is a syntax error, because numbers cannot be
+                    // array-indexed and an array cannot directly follow a number.
+                    if ($lasttype === token::NUMBER) {
+                        self::die('syntax error: did you forget to put an operator?', $token);
                     }
                     // Push the opening bracket to the output queue. During evaluation, this will be used
                     // in order to find the start of the list. For indexation, it is not necessary, but will
@@ -447,22 +436,14 @@ class shunting_yard {
                     self::flush_until_paren($opstack, token::OPENING_BRACKET, $output);
                     $index = count($counters['arrayelements']);
                     // Increase array element counter, unless closing bracket directly follows opening bracket.
-                    if ($index === 0) {
-                        self::die(
-                            'unknown error: there should be an array element counter in place! please file a bug report.', $token
-                        );
-                    }
                     if ($lasttype !== token::OPENING_BRACKET) {
                         ++$counters['arrayelements'][$index - 1];
                     }
                     // Pop the most recent array element counter.
-                    $numofelements = array_pop($counters['arrayelements']);
+                    array_pop($counters['arrayelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
                     $head = end($opstack);
-                    if (!in_array($head->value, ['%%arrayindex', '%%arraybuild'])) {
-                        self::die('syntax error: unknown parse error', $token);
-                    }
                     // Move the pseudo-token %%arraybuild or %%arrayindex to the output queue.
                     $output[] = array_pop($opstack);
                     // Remove last separatortype.
@@ -480,22 +461,14 @@ class shunting_yard {
                     self::flush_until_paren($opstack, token::OPENING_BRACE, $output);
                     $index = count($counters['setelements']);
                     // Increase set element counter, unless closing brace directly follows opening brace.
-                    if ($index === 0) {
-                        self::die(
-                            'unknown error: there should be a set element counter in place! please file a bug report.', $token
-                        );
-                    }
                     if ($lasttype !== token::OPENING_BRACE) {
                         ++$counters['setelements'][$index - 1];
                     }
                     // Pop the most recent set element counter and add it to the output queue.
-                    $numofelements = array_pop($counters['setelements']);
+                    array_pop($counters['setelements']);
                     // Fetch the operator stack's top element. There MUST be one, because we pushed a
                     // sentinel token before the opening bracket.
                     $head = end($opstack);
-                    if ($head->value !== '%%setbuild') {
-                        self::die('syntax error: unknown parse error', $token);
-                    }
                     // Move the pseudo-token %%setbuild to the output queue.
                     $output[] = array_pop($opstack);
                     // Remove last separatortype.
@@ -513,12 +486,6 @@ class shunting_yard {
                     if ($head->type === token::FUNCTION) {
                         // Increase argument counter, unless closing parenthesis directly follows opening parenthesis.
                         $index = count($counters['functionargs']);
-                        if ($index === 0) {
-                            self::die(
-                                'unknown error: there should be a function argument counter in place! please file a bug report.',
-                                $token
-                            );
-                        }
                         if ($lasttype !== token::OPENING_PAREN) {
                             ++$counters['functionargs'][$index - 1];
                         }
@@ -532,12 +499,6 @@ class shunting_yard {
                 // The PREFIX token has already served its purpose, we can just ignore it.
                 case token::PREFIX:
                     break;
-                // At this point, all identifiers should have been classified as functions or variables.
-                // No token should have the general IDENTIFIER type anymore.
-                case token::IDENTIFIER:
-                    self::die("syntax error: did not expect to see an unclassified identifier: $value", $token);
-                    break;
-
                 // If we see a range separator (:), we flush all pending operators and add the
                 // token to the operator stack. Note: as the range separator must not be used
                 // outside of sets or lists, flushing operators will stop -- at latest -- when
@@ -547,13 +508,10 @@ class shunting_yard {
                     $opstack[] = $token;
                     break;
                 // We should not have to deal with multiple statements, so there should be no end-of-statement
-                // marker.
-                case token::END_OF_STATEMENT:
-                    self::die('unexpected semicolon', $token);
-                    break;
+                // marker. Also, all IDENTIFIER tokens have been classified as either VARIABLE or FUNCTION. If
+                // we see any unexpected token now, we'd better throw an error.
                 default:
                     self::die("unexpected token: $value", $token);
-                    break;
             }
             $lasttoken = $token;
             // We have passed the first token, so generally there can be no unary operator.

@@ -27,19 +27,19 @@ use Exception;
 
 class random_variable extends variable {
     /** @var string the identifier used to refer to this variable */
-    public $name;
+    public string $name;
 
     /** @var array the set of possible values to choose from */
-    public $reservoir = [];
+    public array $reservoir = [];
 
     /** @var int the variable's data type */
-    public $type;
+    public int $type;
 
     /** @var mixed the variable's content */
     public $value = null;
 
     /** @var bool if the variable is a shuffled array */
-    private $shuffle;
+    private bool $shuffle;
 
     public function __construct(string $name, array $reservoir, bool $useshuffle, int $seed = 1) {
         $this->name = $name;
@@ -67,33 +67,11 @@ class random_variable extends variable {
             try {
                 $result = functions::fact(count($this->reservoir));
             } catch (Exception $e) {
+                // TODO: non-capturing catch
                 return PHP_INT_MAX;
             }
             return $result;
         }
         return count($this->reservoir);
-    }
-
-    /**
-     * Return a string that can be used to set the variable to its instantiated value.
-     * This is needed to assure proper review for questions with random variables:
-     * when the student starts a new attempt, the random values are saved in the
-     * table question_attempt_step_data. For backwards compatibility, we continue to
-     * use the existing format, i. e. <variablename> = <instantiated-value>; for every random
-     * variable.
-     *
-     * @return string
-     */
-    public function get_instantiated_definition(): string {
-        if ($this->value === null) {
-            return '';
-        }
-        $definition = $this->name . '=';
-        if (is_array($this->value)) {
-            $definition .= '[' . implode(',', $this->value) . ']';
-        } else {
-            $definition .= $this->value;
-        }
-        return $definition . ';';
     }
 }

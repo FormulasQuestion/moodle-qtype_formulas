@@ -73,13 +73,13 @@ class token {
     public $value;
 
     /** @var int token type, e.g. number or string */
-    public $type;
+    public int $type;
 
     /** @var int row in which the token starts */
-    public $row;
+    public int $row;
 
     /** @var int column in which the token starts */
-    public $column;
+    public int $column;
 
     /**
      * Constructor

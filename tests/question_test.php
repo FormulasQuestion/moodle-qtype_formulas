@@ -289,10 +289,6 @@ class question_test extends \basic_testcase {
         $dt = $q->evaluator->export_single_variable('dt')->value;
         $v = $q->evaluator->export_single_variable('v')->value;
 
-        // Save variable data in legacy format.
-        $legacydata = $q->evaluator->export_randomvars_for_step_data();
-        self::assertEquals("v=$v;dt=$dt;", $legacydata);
-
         // The question has the random variables "v = {20:100:10}; dt = {2:6};", so there must be
         // 8 * 4 = 32 variants.
         $variants = $q->get_num_variants();
@@ -312,7 +308,7 @@ class question_test extends \basic_testcase {
 
         // Apply attempt step with original seed and verify both variables do have the original value
         // again.
-        $q->apply_attempt_state(new question_attempt_step(['_varsglobal' => $legacydata]));
+        $q->apply_attempt_state(new question_attempt_step(['_varsglobal' => "v=$v;dt=$dt;"]));
         self::assertEquals($v, $q->evaluator->export_single_variable('v')->value);
         self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
     }

@@ -91,11 +91,11 @@ class instantiation extends \external_api {
      * Convert the serialized variable context of an evaluator class into an array that
      * suits our needs. In case of an error, return an empty array.
      *
-     * @param string $data serialized variable context
+     * @param array $data serialized variable context
      * @return array
      */
-    protected static function variable_context_to_array(string $data): array {
-        $context = unserialize($data, ['allowed_classes' => [variable::class, token::class]]);
+    protected static function variable_context_to_array(array $data): array {
+        $context = unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
         if ($context === false) {
             return [];
         }
@@ -110,14 +110,15 @@ class instantiation extends \external_api {
     /**
      * Instiantiate one set of variables.
      *
-     * @param evaluator evaluator class, pre-initialized with random variables
+     * @param array $context variable context containing the random variables
      * @param array $parsedglobalvars array of qtype_formulas\expression containing the parsed definition of global vars
      * @param array $parsedlocalvars array of qtype_formulas\expression containing the parsed definition of local vars
      * @param array $parsedanswers array of qtype_formulas\expression containing the parsed answers for each part
      * @return mixed associative array containing one data set or an error message, if instantiation failed
      */
-    protected static function fetch_one_instance($evaluator, $parsedglobalvars, $parsedlocalvars, $parsedanswers) {
+    protected static function fetch_one_instance($context, $parsedglobalvars, $parsedlocalvars, $parsedanswers) {
         $noparts = count($parsedanswers);
+        $evaluator = new evaluator($context);
 
         try {
             $evaluator->instantiate_random_variables(null);
@@ -145,13 +146,7 @@ class instantiation extends \external_api {
         }
 
         $row = ['randomvars' => [], 'globalvars' => [], 'parts' => []];
-        // The evaluator already contained the global vars, so we must filter them out before
-        // continuing.
         foreach ($randomvars as $name => $variable) {
-            if ($evaluator->is_random_variable($name) === false) {
-                unset($randomvars[$name]);
-                continue;
-            }
             $row['randomvars'][] = ['name' => $name, 'value' => self::stringify($variable->value)];
         }
         // Global variables might overwrite random variables. We mark those with a symbol.
@@ -201,7 +196,7 @@ class instantiation extends \external_api {
 
     /**
      * Description of the parameters for the external function 'instantiate'
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function instantiate_parameters() {
         return new \external_function_parameters([
@@ -241,6 +236,7 @@ class instantiation extends \external_api {
             $randomparser = new random_parser($params['randomvars']);
             $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
+            $randomcontext = $evaluator->export_variable_context();
             $evaluator->instantiate_random_variables();
 
             $globalparser = new parser($params['globalvars']);
@@ -276,7 +272,7 @@ class instantiation extends \external_api {
         // All clear, we can now generate instances.
         $data = [];
         for ($i = 0; $i < $n; $i++) {
-            $result = self::fetch_one_instance($evaluator, $parsedglobalvars, $parsedlocalvars, $parsedanswers);
+            $result = self::fetch_one_instance($randomcontext, $parsedglobalvars, $parsedlocalvars, $parsedanswers);
             if (gettype($result) == 'string') {
                 return ['status' => 'error', 'message' => $result];
             }
@@ -343,7 +339,7 @@ class instantiation extends \external_api {
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function check_random_global_vars_parameters() {
         return new \external_function_parameters([
@@ -400,7 +396,7 @@ class instantiation extends \external_api {
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function check_local_vars_parameters() {
         return new \external_function_parameters([
@@ -464,7 +460,7 @@ class instantiation extends \external_api {
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function render_question_text_parameters() {
         return new \external_function_parameters([
