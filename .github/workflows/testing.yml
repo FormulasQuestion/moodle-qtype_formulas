@@ -72,7 +72,9 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           ini-values: max_input_vars=5000
-          coverage: pcov
+          # For whatever reason, externallib tests fail in Moodle 3.9 with PCOV (even with
+          # clobber), so forcing xdebug for that version.
+          coverage: ${{ matrix.moodle-branch == 'MOODLE_39_STABLE' && 'xdebug' || 'pcov' }}
 
       - name: Initialise moodle-plugin-ci
         run: |
