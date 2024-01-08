@@ -54,37 +54,38 @@ class functions {
      * - functino baz() with 2 or 3 arguments: 'baz' => [2, 3]
      */
     const FUNCTIONS = [
-        'binomialcdf' => [3, 3], // Test OK
-        'binomialpdf' => [3, 3], // Test OK
+        'binomialcdf' => [3, 3],
+        'binomialpdf' => [3, 3],
         'concat' => [2, INF],
+        // The special function diff() is defined in the evaluator class.
         'diff' => [2, 3],
-        'fact' => [1, 1], // Test OK
+        'fact' => [1, 1],
         'fill' => [2, 2],
-        'fmod' => [2, 2], // Test OK
-        'fqversionnumber' => [0, 0], // Test OK
-        'gcd' => [2, 2], // Test OK
+        'fmod' => [2, 2],
+        'fqversionnumber' => [0, 0],
+        'gcd' => [2, 2],
         'inv' => [1, 1],
         'join' => [2, INF],
-        'lcm' => [2, 2], // Test OK
-        'len' => [1, 1], // Test OK
+        'lcm' => [2, 2],
+        'len' => [1, 1],
         'ln' => [1, 1],
         'map' => [2, 3],
-        'modinv' => [2, 2], // Test OK
-        'modpow' => [3, 3], // Test OK
-        'ncr' => [2, 2], // Test OK
-        'normcdf' => [3, 3], // Test OK
-        'npr' => [2, 2], // Test OK
-        'pick' => [2, INF], // Test OK
-        'poly' => [1, 3], // Test OK
+        'modinv' => [2, 2],
+        'modpow' => [3, 3],
+        'ncr' => [2, 2],
+        'normcdf' => [3, 3],
+        'npr' => [2, 2],
+        'pick' => [2, INF],
+        'poly' => [1, 3],
         'rshuffle' => [1, 1],
         'shuffle' => [1, 1],
         'sigfig' => [2, 2],
         'sort' => [1, 2],
-        'stdnormcdf' => [1, 1], // Test OK
-        'stdnormpdf' => [1, 1], // Test OK
+        'stdnormcdf' => [1, 1],
+        'stdnormpdf' => [1, 1],
         'str' => [1, 1],
         'sublist' => [2, 2],
-        'sum' => [1, 1], // Test OK
+        'sum' => [1, 1],
     ];
 
     /**
@@ -96,15 +97,6 @@ class functions {
      */
     public static function fqversionnumber(): string {
         return get_config('qtype_formulas')->version;
-    }
-
-    /**
-     * The special function diff() is defined in the evaluator class. It is listed
-     * here to avoid any confusion.
-     *
-     * @return void
-     */
-    public static function diff(): void {
     }
 
     /**
@@ -156,7 +148,7 @@ class functions {
             // Fetch the number of arguments for the given function name.
             $min = $allfunctions[$what][0];
             $max = $allfunctions[$what][1];
-            if ($min < 1) {
+            if ($max < 1) {
                 throw new Exception("the function '$what' cannot be used with map(), because it accepts no arguments");
             }
             if ($min > 2) {
@@ -186,6 +178,11 @@ class functions {
                 throw new Exception("when using map() with the unary $type '$what', only one list is accepted");
             }
             if (!is_array($first)) {
+                // The unary minus is internally represented as '_', but it should be shown as '-' in
+                // an error message.
+                if ($what === '_') {
+                    $what = '-';
+                }
                 throw new Exception("when using map() with the unary $type '$what', the argument must be a list");
             }
         }
@@ -258,15 +255,18 @@ class functions {
      * @return array inverse permutation
      */
     public static function inv($list): array {
-        // First, we check that the array contains only numbers. If necessary,
+        // First, we check that the argument is actually a list.
+        if (!is_array($list)) {
+            throw new Exception('inv() expects a list');
+        }
+        // Now, we check that the array contains only numbers. If necessary,
         // floats will be converted to integers by truncation. Note: number tokens
         // always store their value as float, so we have to apply the conversion to
         // all numbers, because we cannot know whether they really are of type float or int.
         foreach ($list as $entry) {
             $value = $entry->value;
-            if (!is_float($value)) {
-                throw new Exception("inv() expects all elements of the list to be integers, found '{$entry->value}'");
-            }
+            // Not setting INTEGER as condition, because we actually do accept floats and truncate them.
+            self::assure_numeric($value, 'inv() expects all elements of the list to be integers; floats will be truncated');
             $entry->value = intval($value);
         }
 
@@ -581,10 +581,7 @@ class functions {
         $result = [];
         foreach ($indices as $i) {
             $i = $i->value;
-            if (!is_numeric($i)) {
-                throw new Exception("sublist() expects the indices to be integers, found '$i'");
-            }
-            $i = intval($i);
+            $i = self::assure_numeric($i, "sublist() expects the indices to be integers, found '$i'", self::INTEGER);
             if ($i > count($list) - 1 || $i < 0) {
                 throw new Exception("index $i out of range in sublist()");
             }
@@ -856,7 +853,11 @@ class functions {
      * @param int $m modulus
      * @return int
      */
-    public static function modpow(int $a, int $b, int $m): int {
+    public static function modpow($a, $b, $m): int {
+        $a = self::assure_numeric($a, 'modpow() expects the base to be an integer', self::INTEGER);
+        $b = self::assure_numeric($b, 'modpow() expects the exponent to be an integer', self::INTEGER);
+        $m = self::assure_numeric($m, 'modpow() expects the modulus to be a positive integer', self::INTEGER | self::POSITIVE);
+
         $bin = decbin($b);
         $res = $a;
         if ($b == 0) {
@@ -882,8 +883,8 @@ class functions {
      * @return int the result or 0 if the inverse does not exist
      */
     public static function modinv(int $a, int $m): int {
-        self::assure_numeric($a, 'modinv() expects its first argument to be a non-zero integer', self::INTEGER | self::NON_ZERO);
-        self::assure_numeric($m, 'modinv() expects its second argument to be a positive integer', self::INTEGER | self::POSITIVE);
+        $a = self::assure_numeric($a, 'modinv() expects its first argument to be a non-zero integer', self::INTEGER | self::NON_ZERO);
+        $m = self::assure_numeric($m, 'modinv() expects its second argument to be a positive integer', self::INTEGER | self::POSITIVE);
 
         $origm = $m;
         if (self::gcd($a, $m) != 1) {
@@ -960,16 +961,19 @@ class functions {
      * @return float probability for up to $x successful outcomes
      * @throws Exception
      */
-    public static function binomialcdf(int $n, float $p, int $x): float {
+    public static function binomialcdf(float $n, float $p, float $x): float {
         // Probability must be 0 <= p <= 1.
         if ($p < 0 || $p > 1) {
             // TODO: externalise string
-            throw new Exception('binomialcdf() expects the probability to be between 0 and 1');
+            throw new Exception('binomialcdf() expects the probability to be at least 0 and not more than 1');
         }
-        // Number of successful outcomes must be at least 0 and at most number of trials.
-        if ($x < 0 || $x > $n) {
-            // TODO: externalise string
-            throw new Exception('binomialcdf() expects the number of successful outcomes to be at least 0, but not larger than the number of tries');
+        // Number of tries must be at least 0.
+        $n = self::assure_numeric($n, 'binomialcdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        // Number of successful outcomes must be at least 0.
+        $x = self::assure_numeric($x, 'binomialcdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        // The probability for *up to* $n or more successful outcomes is 1.
+        if ($x >= $n) {
+            return 1;
         }
         $res = 0;
         for ($i = 0; $i <= $x; $i++) {
@@ -1229,8 +1233,8 @@ class functions {
                 if (intval($first) != $first || intval($second) != $second) {
                     throw new Exception('bit shift operator should only be used with integers');
                 }
-                if ($first < 0) {
-                    throw new Exception("bit shift by negative number $first is not allowed");
+                if ($second < 0) {
+                    throw new Exception("bit shift by negative number $second is not allowed");
                 }
                 if ($op === '<<') {
                     $output = (int)$first << (int)$second;
@@ -1290,12 +1294,17 @@ class functions {
     }
 
     public static function assure_numeric($n, $message = '', $additionalcondition = self::NONE) {
+        // For compatibility with PHP 7.4: check if it is a string. If it is, remove trailing
+        // space before trying to convert to number.
+        if (is_string($n)) {
+            $n = trim($n);
+        }
         if (is_numeric($n) === false) {
             // For compatibility with PHP 7.4: check if it is a string. If it is, remove trailing
             // space and try again.
-            if (is_string($n) && is_numeric(trim($n))) {
+            /*if (is_string($n) && is_numeric(trim($n))) {
                 return self::assure_numeric(trim($n), $message, $additionalcondition);
-            }
+            }*/
             throw new Exception($message);
         }
         if ($additionalcondition & self::NON_NEGATIVE) {

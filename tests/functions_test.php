@@ -234,11 +234,13 @@ class functions_test extends \advanced_testcase {
             [1, 'binomialpdf(1, 0, 0)'],
             [1, 'binomialpdf(1, 1, 1)'],
             [0, 'binomialpdf(1, 1, 0)'],
+            [0, 'binomialpdf(10, 1, 20)'],
             [0.125, 'binomialpdf(3, 0.5, 0)'],
             [0.375, 'binomialpdf(3, 0.5, 1)'],
             [0.375, 'binomialpdf(3, 0.5, 2)'],
             [0.125, 'binomialpdf(3, 0.5, 3)'],
-            // FIXME: add invalid cases
+            ['binomialpdf() expects the probability to be at least 0 and not more than 1', 'binomialpdf(10, 3, 5)'],
+            ['binomialpdf() expects the probability to be at least 0 and not more than 1', 'binomialpdf(10, -2, 5)'],
         ];
     }
 
@@ -248,13 +250,31 @@ class functions_test extends \advanced_testcase {
             [1, 'binomialcdf(1, 0, 0)'],
             [1, 'binomialcdf(1, 1, 1)'],
             [0, 'binomialcdf(1, 1, 0)'],
+            [1, 'binomialcdf(10, 0.3, 10)'],
+            [1, 'binomialcdf(10, 0.3, 20)'],
             [0.125, 'binomialcdf(3, 0.5, 0)'],
             [0.5, 'binomialcdf(3, 0.5, 1)'],
             [0.875, 'binomialcdf(3, 0.5, 2)'],
             [1, 'binomialcdf(3, 0.5, 3)'],
+            ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, 3, 5)'],
+            ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, -2, 5)'],
             // FIXME: add invalid cases
         ];
     }
+
+    public function provide_inv(): array {
+        return [
+            [[0, 1, 2, 3], 'a=inv([0, 1, 2, 3]);'],
+            [[1, 2, 3, 4], 'a=inv([1, 2, 3, 4]);'],
+            ["invalid number of arguments for function 'inv': 0 given", 'a=inv();'],
+            ["invalid number of arguments for function 'inv': 2 given", 'a=inv([1, 2, 3], [4, 5, 6]);'],
+            ['inv() expects a list', 'a=inv(1);'],
+            ['when using inv(), the numbers in the list must be consecutive', 'a=inv([1, 4, 0]);'],
+            ['when using inv(), the smallest number in the list must be 0 or 1', 'a=inv([2, 3, 4]);'],
+            ['when using inv(), the list must not contain the same number multiple times', 'a=inv([0, 1, 2, 1]);'],
+        ];
+    }
+
     /**
      * @dataProvider provide_ncr
      * @dataProvider provide_npr
@@ -264,6 +284,7 @@ class functions_test extends \advanced_testcase {
      * @dataProvider provide_normcdf
      * @dataProvider provide_binomialpdf
      * @dataProvider provide_binomialcdf
+     *
      */
     public function test_combinatorics($expected, $input) {
         $parser = new parser($input);
@@ -631,42 +652,6 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
-     * Test: incovation of all documented combinatorial functions
-     */
-    public function test_invocation_combinatorial() {
-        // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to use the new evaluator
-        self::assertTrue(true);
-        return;
-
-        $testcases = array(
-            array(true, 'a=inv([0, 1, 2, 3]);'),
-            array(false, 'a=inv();'),
-            array(false, 'a=inv(1);'),
-            array(false, 'a=inv(1, 2);'),
-            array(false, 'a=inv([1, 4, 0]);'), // Not consecutive.
-            array(false, 'a=inv([1, 2, 3]);'), // Lowest is not zero.
-            array(false, 'a=inv([1, 2], 1);'),
-            array(false, 'a=inv([1, 2], [3, 4]);'),
-        );
-        $qv = new variables;
-        foreach ($testcases as $case) {
-            $errmsg = null;
-            try {
-                $v = $qv->vstack_create();
-                $qv->evaluate_assignments($v, $case[1]);
-            } catch (Exception $e) {
-                $errmsg = $e->getMessage();
-            }
-            if ($case[0]) {
-                self::assertNull($errmsg);
-            } else {
-                self::assertNotNull($errmsg);
-            }
-        }
-    }
-
-    /**
      * Test: incovation of all documented algebraic / other numerical functions
      */
     public function test_invocation_algebraic() {
@@ -778,6 +763,16 @@ class functions_test extends \advanced_testcase {
                 self::assertNotNull($errmsg);
             }
         }
+    }
+
+    public function provide_sort(): array {
+        return [
+            ['sort() expects it first argument to be a list', 'sort(5, [1,2,3])'],
+            ['sort() expects it first argument to be a list', 'sort("a", [1,2,3])'],
+            ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], 2)'],
+            ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], "a")'],
+            ['when calling sort() with two lists, they must have the same size', 'sort([1,2,3], [1,2])'],
+        ];
     }
 
     /**
@@ -990,28 +985,59 @@ class functions_test extends \advanced_testcase {
         self::assertEquals($expected, end($result)->value);
     }
 
-
     public function provide_various_function_calls(): array {
         return [
             [get_config('qtype_formulas')->version, 'fqversionnumber()'],
+            ['str() expects a scalar argument, e.g. a number', 's = str([])'],
+            ['str() expects a scalar argument, e.g. a number', 's = str([1, 2, 3])'],
+        ];
+    }
+
+    public function provide_sublist(): array {
+        return [
+            [[1, 1, 1, 2, 3, 2, 1, 3], 'sublist([1, 2, 3], [0, 0, 0, 1, 2, 1, 0, 2])'],
+            [[1, 3, 2], 'sublist([1, 2, 3], [0.0, 2.0, 1.0])'],
+            [[[1, 2], "a", 1, "a"], 'sublist([1, "a", [1, 2]], [2, 1, 0, 1])'],
+            [[], 'sublist([1, 2, 3], [])'],
+            ['sublist() expects its arguments to be lists', 'sublist([1, 2, 3], 3)'],
+            ['sublist() expects its arguments to be lists', 'sublist([1, 2, 3], "foo")'],
+            ['sublist() expects its arguments to be lists', 'sublist(1, [1, 2, 3])'],
+            ['sublist() expects its arguments to be lists', 'sublist("foo", [1, 2, 3])'],
+            ["sublist() expects the indices to be integers, found '1.5'", 'sublist([1, 2, 3], [1.5])'],
+            ["sublist() expects the indices to be integers, found 'foo'", 'sublist([1, 2, 3], ["foo"])'],
+            ['index 3 out of range in sublist()', 'sublist([1, 2, 3], [3])'],
         ];
     }
 
     public function provide_map(): array {
         return [
+            [[1, 0, 1, 0], 'map("==", [1, 2, 1, 3], [1, 1, 1, 1])'],
             [[4, 6], 'map("+", [1, 2], [3, 4])'],
             [[2, 10], 'map("-", [5, 6], [3, -4])'],
+            [[6, 7, 8], 'map("+", [1, 2, 3], 5)'],
+            ['* expects a number', 'map("*", [[1, 2], [3, 4]], "foo")'],
+            ["* expects a number, found 'foo'", 'map("*", ["foo", "bar"], "s")'],
+            [[11, 12, 13], 'map("+", 10, [1, 2, 3])'],
+            [['week 1', 'week 2', 'week 3'], 'map("+", "week ", [1, 2, 3])'],
             [[1, -2], 'map("-", [-1, 2])'],
             [['2.12', '3.57'], 'map("sigfig", [2.123, 3.568], 3)'],
+            [[6, 15], 'map("sum", [[1,2,3],[4,5,6]])'],
             [[0.977249868051821, 0.841344746068543], 'map("stdnormcdf", [2, 1])'],
             [[1, 2], 'map("abs", [-1, -2])'],
+            [[5, 10, 3], 'map("max", [5, 0, 3], [3, 10, -1])'],
+            [[5, 3], 'map("max", [[5, 0, 3], [1, 2, 3]])'],
             ["invalid number of arguments for function 'map': 1 given", 'map("+")'],
             ["invalid number of arguments for function 'map': 0 given", 'map()'],
             ["when using map() with the unary function 'abs', only one list is accepted", 'map("abs", [-1, -2], [3, 4])'],
             ["invalid number of arguments for function 'map': 1 given", 'map("abs")'],
             ["invalid number of arguments for function 'map': 1 given", 'map([1, 2, 3])'],
             ["when using map() with the binary operator '+', two arguments are expected", 'map("+", [1, 2])'],
+            ["when using map() with the binary operator '+', at least one argument must be a list", 'map("+", 3, 4)'],
+            ['when using map() with two lists, they must both have the same size', 'map("+", [1, 2, 3], [4, 5])'],
+            ["when using map() with the unary operator '-', the argument must be a list", 'map("-", 2)'],
             ["'x' is not a legal first argument for the map() function", 'map("x", [-1, -2])'],
+            ["the function 'fqversionnumber' cannot be used with map(), because it accepts no arguments", 'map("fqversionnumber", [1, 2, 3])'],
+            ["the function 'modpow' cannot be used with map(), because it expects more than two arguments", 'map("modpow", [1, 2, 3], [3, 4, 5])'],
         ];
     }
 
@@ -1059,6 +1085,7 @@ class functions_test extends \advanced_testcase {
             [12, 'modpow(12, 7, 13)'],
             [1, 'modpow(12, 8, 13)'],
             [8, 'modpow(3, 10, 17)'],
+            [1, 'modpow(12, 0, 17)'],
             // TODO: add invalid calls
         ];
     }
@@ -1079,6 +1106,9 @@ class functions_test extends \advanced_testcase {
      * @dataProvider provide_various_function_calls
      * @dataProvider provide_modular_function_calls
      * @dataProvider provide_map
+     * @dataProvider provide_sublist
+     * @dataProvider provide_inv
+     * @dataProvider provide_sort
      */
     public function test_function_calls($expected, $input): void {
         $parser = new parser($input);
@@ -1093,5 +1123,103 @@ class functions_test extends \advanced_testcase {
 
         $unpackedresult = token::unpack($result);
         self::assertEqualsWithDelta($expected, $unpackedresult, 1e-8);
+    }
+
+    public function test_shuffle(): void {
+        $parser = new parser('shuffle([1, 2, 3])');
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+
+        // First of all, the evaluation must be successful.
+        $e = null;
+        try {
+            $result = $evaluator->evaluate($statements)[0];
+        } catch (Exception $e) {
+            ;
+        }
+        self::assertNull($e);
+
+        // Second, we check that the resulting array is one of the possible permutations.
+        $all = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]];
+        $unpackedresult = token::unpack($result);
+        self::assertTrue(in_array($unpackedresult, $all));
+
+        // Third, we shuffle the array a certain number of times until the first element has changed
+        // at least once. That's enough to know that some shuffling has happened.
+        for ($i = 0; $i < 20; $i++) {
+            if ($unpackedresult[0] != 1) {
+                break;
+            }
+            $result = $evaluator->evaluate($statements)[0];
+            $unpackedresult = token::unpack($result);
+        }
+        self::assertNotEquals(1, $unpackedresult[0]);
+    }
+
+    public function test_rshuffle(): void {
+        $parser = new parser('rshuffle([[1, 2, 3],[4, 5, 6]])');
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+
+        // First of all, the evaluation must be successful.
+        $e = null;
+        try {
+            $result = $evaluator->evaluate($statements)[0];
+        } catch (Exception $e) {
+            ;
+        }
+        self::assertNull($e);
+
+        // Second, we check that the resulting array is one of the possible permutations.
+        $first = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]];
+        $second = [[4, 5, 6], [4, 6, 5], [5, 4, 6], [5, 6, 4], [6, 4, 5], [6, 5, 4]];
+        $unpackedresult = token::unpack($result);
+        if ($unpackedresult[0][0] < 4) {
+            self::assertTrue(in_array($unpackedresult[0], $first));
+            self::assertTrue(in_array($unpackedresult[1], $second));
+        } else {
+            self::assertTrue(in_array($unpackedresult[1], $first));
+            self::assertTrue(in_array($unpackedresult[0], $second));
+        }
+
+        // Third, we shuffle the array a certain number of times until the first array
+        // and the first element of both arrays has changed at least once. That's enough
+        // to know that some shuffling has happened.
+        for ($i = 0; $i < 20; $i++) {
+            $arrayschanged = ($unpackedresult[0][0] > 3);
+            if ($arrayschanged) {
+                $firstchanged = ($unpackedresult[1][0] != 1);
+                $secondchanged = ($unpackedresult[0][0] != 4);
+            } else {
+                $firstchanged = ($unpackedresult[0][0] != 1);
+                $secondchanged = ($unpackedresult[1][0] != 4);
+            }
+            if ($arrayschanged && $firstchanged && $secondchanged) {
+                break;
+            }
+            $result = $evaluator->evaluate($statements)[0];
+            $unpackedresult = token::unpack($result);
+        }
+        self::assertTrue($firstchanged);
+        self::assertTrue($secondchanged);
+        self::assertTrue($arrayschanged);
+    }
+
+    public function test_is_numeric_array(): void {
+        // If no array is given, result should be false.
+        self::assertFalse(functions::is_numeric_array('foo'));
+        self::assertFalse(functions::is_numeric_array(3));
+
+        // If empty arrays are not allowed, result should be false.
+        self::assertFalse(functions::is_numeric_array([], false));
+        // Otherwise, an empty array is fine, because it does not contain non-numeric stuff.
+        self::assertTrue(functions::is_numeric_array([]));
+
+        // Check various arrays.
+        self::assertTrue(functions::is_numeric_array([1, 2, 3]));
+        self::assertTrue(functions::is_numeric_array([1, '2', '3.0']));
+        self::assertTrue(functions::is_numeric_array([1.0, -2, -3.1]));
+        self::assertFalse(functions::is_numeric_array([1, 'foo']));
+        self::assertFalse(functions::is_numeric_array([[1, 2], [3, 4]]));
     }
 }

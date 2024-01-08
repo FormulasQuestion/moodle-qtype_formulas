@@ -58,9 +58,12 @@ class variable_test extends \advanced_testcase {
         self::assertEquals(123, $var->timestamp);
 
         // When not giving a timestamp, the current microtime() should be used.
+        $before = microtime(true);
         $var = new variable('x', 1, variable::NUMERIC);
+        $after = microtime(true);
         // Note: assertLessThanOrEqual checks whether the actual value (second parameter)
         // is less than or equal the expected value (first parameter).
-        self::assertLessThanOrEqual(microtime(true), $var->timestamp);
+        self::assertGreaterThanOrEqual($before, $var->timestamp);
+        self::assertLessThanOrEqual($after, $var->timestamp);
     }
 }

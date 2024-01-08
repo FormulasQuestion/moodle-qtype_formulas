@@ -193,7 +193,8 @@ class evaluator_test extends \advanced_testcase {
             'basic false' => [3, '1 == 5 ? 2 : 3'],
             'basic true with string in condition' => [2, '"a" == "a" ? 2 : 3'],
             'basic false with string in condition' => [3, '"a" == "b" ? 2 : 3'],
-            'basic true returning string' => ['foo', '1 <= 5 ? "foo" : "bar"'],
+            'basic true returning string, 1' => ['foo', '5 >= 1 ? "foo" : "bar"'],
+            'basic true returning string, 2' => ['foo', '1 <= 5 ? "foo" : "bar"'],
             'basic false returning string' => ['bar', '1 > 5 ? "foo" : "bar"'],
             'basic true all strings' => ['foo', '"x" != "y" ? "foo" : "bar"'],
             'basic false all strings' => ['bar', '"x" == "y" ? "foo" : "bar"'],
@@ -206,8 +207,8 @@ class evaluator_test extends \advanced_testcase {
             'ternary in true part with parens' => [4, '1==1 ? (1 == 2 ? 3 : 4) : 5'],
             'ternary in false part without parens' => [7, '1==2 ? 5 : 2==3 ? 6 : 7'],
             'ternary in true part without parens' => [4, '1==1 ? 1 == 2 ? 3 : 4 : 5'],
-            'ternary in both parts without parens' => [4, '1==1 ? 1 > 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
-            'ternary in both parts without parens' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
+            'ternary in both parts without parens, 1' => [4, '1==1 ? 1 > 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
+            'ternary in both parts without parens, 2' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
             // TODO: test with variables
         ];
     }
@@ -220,16 +221,23 @@ class evaluator_test extends \advanced_testcase {
             'three arguments' => [16, 'modpow(2,100,17)'],
             'function in function' => [M_PI / 4, 'asin(sqrt(2)/2)'],
             'operation in function' => [-1.02, 'round((1+2*3-4**5)/1000,2)'],
-            // TODO: 'several arguments' => ['-,a,b,c,4,join', 'join("-", a, b, c)'],
-            // TODO: 'function with array' => [6, 'sum([1,2,3])'],
+            'several arguments' => ['foo-bar-test', 'a="foo"; b="bar"; c="test"; join("-", a, b, c)'],
+            'function with array' => [6, 'sum([1,2,3])'],
+            'natural logarithm' => [2.708050201102210065996, 'ln(15)'],
         ];
     }
 
     public function provide_simple_expressions(): array {
         return [
-            'array access (valid)' => [5, '[1,5][1]'],
-            'array access (valid)' => [1, '[1,5][0]'],
+            'order of operations in power, 1' => [-16, '-4 ** 2'],
+            'order of operations in power, 2' => [16, '(-4) ** 2'],
+            'array access (valid), 1' => [5, '[1,5][1]'],
+            'array access (valid), 2' => [1, '[1,5][0]'],
             'modulo' => [3, '1+2%3'],
+            'bitshift left' => [32, '256 >> 3'],
+            'bitshift right' => [80, '10 << 3'],
+            'bitshift left with negative number' => [-32, '-256 >> 3'],
+            'bitshift right with negative number' => [-80, '-10 << 3'],
             'left-associativity bitwise left shift' => [32, '1 << 2 << 3'],
             'left-associativity bitwise right shift' => [0, '1 >> 2 >> 3'],
             'left-associativity bitwise left/right shift' => [0, '1 << 2 >> 3'],
@@ -383,14 +391,14 @@ class evaluator_test extends \advanced_testcase {
                 ],
                 'e = [1,2,3,4]; e[2]=111;'
             ],
-            'assign to list element with variable index' => [
+            'assign string to list element with variable index' => [
                 [
                     'a' => new variable('a', 0, token::NUMBER),
                     'e' => new variable('e', ['A', 2 , 3 , 4], token::LIST),
                 ],
-                'e=[1,2,3,4]; a=1-1; e[a]="A";'
+                'e = [1,2,3,4]; a=1-1; e[a]="A";'
             ],
-            'assign to list element with variable as index' => [
+            'assign number to list element with variable index' => [
                 [
                     'a' => new variable('a', 1, token::NUMBER),
                     'e' => new variable('e', [1, 111 , 3 , 4], token::LIST),
@@ -577,6 +585,18 @@ class evaluator_test extends \advanced_testcase {
                     's' => new variable('s', ['-3', '-2', '-1', '0', '1', '2', '3', 'A', 'B', 'a', 'b'], token::LIST),
                 ],
                 's=sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]);'
+            ],
+            'assignment with sort(), one empty list' => [
+                [
+                    's' => new variable('s', [], token::LIST),
+                ],
+                's=sort([]);'
+            ],
+            'assignment with sort(), two empty lists' => [
+                [
+                    's' => new variable('s', [], token::LIST),
+                ],
+                's=sort([], []);'
             ],
             'assignment with sublist()' => [
                 [
@@ -1033,6 +1053,23 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public function provide_invalid_bitwise_stuff(): array {
+        return [
+            ['bit shift operator should only be used with integers', '4.5 << 3'],
+            ['bit shift operator should only be used with integers', '4.5 >> 3'],
+            ['bit shift operator should only be used with integers', '8 << 1.5'],
+            ['bit shift operator should only be used with integers', '8 >> 1.5'],
+            ['bit shift by negative number -3 is not allowed', '8 >> -3'],
+            ['bit shift by negative number -3 is not allowed', '8 << -3'],
+            ['bitwise AND should only be used with integers', '8 & 1.5'],
+            ['bitwise AND should only be used with integers', '8.5 & 3'],
+            ['bitwise OR should only be used with integers', '8 | 1.5'],
+            ['bitwise OR should only be used with integers', '8.5 | 3'],
+            ['bitwise XOR should only be used with integers', '8 ^ 1.5'],
+            ['bitwise XOR should only be used with integers', '8.5 ^ 3'],
+        ];
+    }
+
     public function provide_invalid_for_loops(): array {
         return [
             ['syntax error: ( expected after for', 'for a'],
@@ -1132,11 +1169,11 @@ class evaluator_test extends \advanced_testcase {
                 '1:16:evaluation error: numeric value expected, got list',
                 'e=[1,2,3,4]; f=e*2;'
             ],
-            'multiply array with number' => [
+            'xxxx' => [
                 '', // FIXME: put this to valid assignments, it is no error anymore.
                 'e=[0:10,"k"];'
             ],
-            'multiply array with number' => [
+            'multiple indices for array' => [
                 '1:18:evaluation error: only one index supported when accessing array elements',
                 'e=[1,2,3][1][4,5,6][2];'
             ],
@@ -1147,6 +1184,14 @@ class evaluator_test extends \advanced_testcase {
             'fill with count == 10000' => [
                 '', // FIXME: this is not an error anymore
                 'c=fill(10000,"rr")'
+            ],
+            'undefined natrual logarithm' => [
+                'ln() expects its argument to be positive',
+                'x=ln(-5)'
+            ],
+            'undefined natrual logarithm' => [
+                'ln() expects its argument to be positive',
+                'x=ln(0)'
             ],
             'closing parenthesis when not opened' => [
                 "1:7:unbalanced parentheses, stray ')' found",
@@ -1228,6 +1273,18 @@ class evaluator_test extends \advanced_testcase {
                 'evaluation error: scalar value expected, got list',
                 'a = "a" + [1, 2, 3]'
             ],
+            'invalid 0^0' => [
+                'power 0^0 is not defined',
+                'a = 0 ** 0'
+            ],
+            'invalid power: 0 to negative power' => [
+                'division by zero is not defined, so base cannot be zero for negative exponents',
+                'a = 0 ** -1'
+            ],
+            'invalid power: negative base with fractional exponent' => [
+                'base cannot be negative with fractional exponent',
+                'a = (-1) ** 0.5'
+            ],
         ];
     }
 
@@ -1264,6 +1321,7 @@ class evaluator_test extends \advanced_testcase {
      * @dataProvider provide_invalid_indices
      * @dataProvider provide_invalid_ranges
      * @dataProvider provide_other_invalid_stuff
+     * @dataProvider provide_invalid_bitwise_stuff
      */
     public function test_invalid_stuff($expected, $input): void {
         $error = '';
@@ -1315,11 +1373,11 @@ class evaluator_test extends \advanced_testcase {
             'missing unit' => [['123', ''], '123'],
             'missing number' => [['', 'm/s'], 'm/s'],
             'length 1' => [['100', 'm'], '100 m'],
-            'length 1' => [['100', 'cm'], '100cm'],
-            'length 2' => [['1.05', 'mm'], '1.05 mm'],
-            'length 3' => [['-1.3', 'nm'], '-1.3 nm'],
-            'area' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2', ],
-            'area' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV', ],
+            'length 2' => [['100', 'cm'], '100cm'],
+            'length 3' => [['1.05', 'mm'], '1.05 mm'],
+            'length 4' => [['-1.3', 'nm'], '-1.3 nm'],
+            'area 1' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2', ],
+            'area 2' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV', ],
             'speed' => [['1', 'km/s'], '1 km/s'],
             'combination 1' => [['1', 'm g/us'], '1 m g/us'],
             'combination 2' => [['1', 'kPa s^-2'], '1 kPa s^-2'],
@@ -1454,39 +1512,6 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
-    public function test_sigfig() {
-        $testcases = [
-            ['sigfig(.012345, 3)', '0.0123'],
-            ['sigfig(.012345, 4)', '0.01235'],
-            ['sigfig(.012345, 6)', '0.0123450'],
-            ['sigfig(-.012345, 3)', '-0.0123'],
-            ['sigfig(-.012345, 4)', '-0.01235'],
-            ['sigfig(-.012345, 6)', '-0.0123450'],
-            ['sigfig(123.45, 2)', '120'],
-            ['sigfig(123.45, 4)', '123.5'],
-            ['sigfig(123.45, 6)', '123.450'],
-            ['sigfig(-123.45, 2)', '-120'],
-            ['sigfig(-123.45, 4)', '-123.5'],
-            ['sigfig(-123.45, 6)', '-123.450'],
-            ['sigfig(.005, 1)', '0.005'],
-            ['sigfig(.005, 2)', '0.0050'],
-            ['sigfig(.005, 3)', '0.00500'],
-            ['sigfig(-.005, 1)', '-0.005'],
-            ['sigfig(-.005, 2)', '-0.0050'],
-            ['sigfig(-.005, 3)', '-0.00500'],
-        ];
-
-        foreach ($testcases as $case) {
-            $parser = new parser($case[0]);
-            $statements = $parser->get_statements();
-            $evaluator = new evaluator();
-            $result = $evaluator->evaluate($statements);
-            //var_dump(end($result));
-            $value = end($result)->value;
-            self::assertEqualsWithDelta($case[1], $value, 1e-12);
-        }
-    }
-
     public function test_export_import_variable_context(): void {
         // Prepare an evaluator with a few variables.
         $randomparser = new random_parser('r = {1,2,3,4}');
@@ -1531,6 +1556,10 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
+        $parser = new parser('1 >= 5 ? "a" : "b"');
+        $evaluator = new evaluator();
+        $evaluator->evaluate($parser->get_statements());
+
         return;
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
@@ -1580,7 +1609,6 @@ class evaluator_test extends \advanced_testcase {
         $input = 'join("x", 8, 7, [5,9])';
         $input = 'sum([1,2,3, "4", [1]])';
         $input = 'fill("3", "a")';
-        $input = 'sort([3,12,5], [3,5,0])';
         $input = 'sublist(["A","B","C","D"],[1,3])';
         $input = 'concat([1,2,3], [4,5,6], [[1,2]], [7,8])';
         $input = 'poly("x", -5)';
@@ -1589,9 +1617,6 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a = shuffle([1,2,3])';
         $input = 'inv([2, 7, 4, 9, 8, 3, 5, 0, 6, 1])';
         $input = 'inv([0,1,2,3,4])';
-        $input = 'sort([1,-2,-3,2,"A","B"],["A","1","-1","-2","20","-5"])';
-        $input = 'sort([1,-2,-3,2,"A","B"])';
-        $input = 'sort([-20,3,1,5,2,4,-1,-4,-20,0])';
         $input = 'map("ncr", 10, [1,2,3])';
         $input = 'map("map", "-", [[1,2],[3,4]])';
         $input = 'a = 2; sin(a)';

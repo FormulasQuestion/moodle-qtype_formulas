@@ -37,6 +37,8 @@ class externallib_test extends \externallib_advanced_testcase {
     public function setUp(): void {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
+
+        $this->resetAfterTest(true);
     }
 
     public function provide_random_global_vars(): array {
@@ -92,8 +94,6 @@ class externallib_test extends \externallib_advanced_testcase {
      * @dataProvider provide_random_global_vars
      */
     public function test_check_random_global_vars($expected, $input): void {
-        $this->resetAfterTest(true);
-
         $returnvalue = external\instantiation::check_random_global_vars(
             $input['randomvars'], $input['globalvars']
         );
@@ -179,8 +179,6 @@ class externallib_test extends \externallib_advanced_testcase {
      * @dataProvider provide_random_global_local_vars
      */
     public function test_check_local_vars($expected, $input): void {
-        $this->resetAfterTest(true);
-
         $returnvalue = external\instantiation::check_local_vars(
             $input['randomvars'], $input['globalvars'], $input['localvars']
         );
@@ -251,8 +249,6 @@ class externallib_test extends \externallib_advanced_testcase {
      * @dataProvider provide_question_texts
      */
     public function test_render_question_text($expected, $input): void {
-        $this->resetAfterTest(true);
-
         $returnvalue = external\instantiation::render_question_text(
             $input['questiontext'], $input['parttexts'], $input['globalvars'], $input['partvars']
         );
@@ -466,8 +462,6 @@ class externallib_test extends \externallib_advanced_testcase {
      * @dataProvider provide_instantiation_data
      */
     public function test_instantiate($expected, $input): void {
-        $this->resetAfterTest(true);
-
         $returnvalue = external\instantiation::instantiate(
             $input['n'], $input['randomvars'], $input['globalvars'], $input['localvars'], $input['answers']
         );
