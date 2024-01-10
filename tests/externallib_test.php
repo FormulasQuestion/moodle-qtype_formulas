@@ -254,6 +254,31 @@ class externallib_test extends \externallib_advanced_testcase {
             array(
                 'n' => 1,
                 'randomvars' => '',
+                'globalvars' => 'a=1; b=2; c=(b<a)',
+                'localvars' => array(''),
+                'answers' => array('1'),
+                'return' => array(
+                    'status' => 'ok',
+                    'data' => array(
+                        array(
+                            'randomvars' => array(),
+                            'globalvars' => array(
+                                array('name' => 'a', 'value' => '1'),
+                                array('name' => 'b', 'value' => '2'),
+                                array('name' => 'c', 'value' => '0')
+                            ),
+                            'parts' => array(
+                                array(
+                                    array('name' => '_0', 'value' => '1'),
+                                )
+                            ),
+                        )
+                    )
+                )
+            ),
+            array(
+                'n' => 1,
+                'randomvars' => '',
                 'globalvars' => 'a=3; b=2; c=a*b',
                 'localvars' => array(''),
                 'answers' => array('a*b'),
