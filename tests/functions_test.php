@@ -1185,24 +1185,23 @@ class functions_test extends \advanced_testcase {
         // Third, we shuffle the array a certain number of times until the first array
         // and the first element of both arrays has changed at least once. That's enough
         // to know that some shuffling has happened.
+        $firstok = false;
+        $secondok = false;
         for ($i = 0; $i < 20; $i++) {
-            $arrayschanged = ($unpackedresult[0][0] > 3);
-            if ($arrayschanged) {
-                $firstchanged = ($unpackedresult[1][0] != 1);
-                $secondchanged = ($unpackedresult[0][0] != 4);
-            } else {
-                $firstchanged = ($unpackedresult[0][0] != 1);
-                $secondchanged = ($unpackedresult[1][0] != 4);
+            if ($unpackedresult[0][0] == 5 || $unpackedresult[0][0] == 6) {
+                $secondok = true;
             }
-            if ($arrayschanged && $firstchanged && $secondchanged) {
+            if ($unpackedresult[1][0] == 2 || $unpackedresult[1][0] == 3) {
+                $firstok = true;
+            }
+            if ($firstok && $secondok) {
                 break;
             }
             $result = $evaluator->evaluate($statements)[0];
             $unpackedresult = token::unpack($result);
         }
-        self::assertTrue($firstchanged);
-        self::assertTrue($secondchanged);
-        self::assertTrue($arrayschanged);
+        self::assertTrue($firstok);
+        self::assertTrue($secondok);
     }
 
     public function test_is_numeric_array(): void {
