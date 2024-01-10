@@ -337,10 +337,16 @@ class evaluator {
 
         // Some variables are reserved and cannot be used as left-hand side in an assignment,
         // unless the evaluator is currently in god mode.
-        $isreserved = in_array($basename, ['_err', '_relerr', '_a', '_r', '_d', '_u']);
+        // Note that _m is not a reserved name in itself, but the placeholder {_m} is accepted
+        // by the renderer to mark the position of the feedback image. Allowing that variable
+        // could lead to conflicts, so we do not allow it.
+        $isreserved = in_array($basename, ['_err', '_relerr', '_a', '_r', '_d', '_u', '_m']);
         $isanswer = preg_match('/^_\d+$/', $basename);
-        if (!$this->godmode && ($isreserved || $isanswer)) {
-            $this->die("you cannot assign values to the special variable '$basename'", $value);
+        // We will -- at least for the moment -- block all variables starting with an underscore,
+        // because we might one day need some internal variables or the like.
+        $underscore = strpos($basename, '_') === 0;
+        if ($underscore && $this->godmode === false) {
+            $this->die("invalid variable name: $basename", $value);
         }
 
         // If there are no indices, we set the variable as requested.

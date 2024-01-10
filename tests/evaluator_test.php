@@ -1138,7 +1138,7 @@ class evaluator_test extends \advanced_testcase {
                 'a = \ (3 + 1)'
             ],
             'assignment to invalid variable' => [
-                "you cannot assign values to the special variable '_a'",
+                '1:1:invalid variable name: _a',
                 '_a=3;'
             ],
             'missing operator between numbers' => [
