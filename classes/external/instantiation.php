@@ -154,13 +154,13 @@ class instantiation extends \external_api {
         return new \external_function_parameters(
             array(
                 'n' => new \external_value(PARAM_INT, 'number of data sets', VALUE_DEFAULT, 1),
-                'randomvars' => new \external_value(PARAM_TEXT, 'random variables', VALUE_REQUIRED),
-                'globalvars' => new \external_value(PARAM_TEXT, 'global variables', VALUE_REQUIRED),
+                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_REQUIRED),
+                'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_REQUIRED),
                 'localvars' => new \external_multiple_structure(
-                    new \external_value(PARAM_TEXT, 'local variables, per part', VALUE_REQUIRED)
+                    new \external_value(PARAM_RAW, 'local variables, per part', VALUE_REQUIRED)
                 ),
                 'answers' => new \external_multiple_structure(
-                    new \external_value(PARAM_TEXT, 'answers, per part', VALUE_REQUIRED)
+                    new \external_value(PARAM_RAW, 'answers, per part', VALUE_REQUIRED)
                 )
             )
         );
