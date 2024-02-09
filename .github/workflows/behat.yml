@@ -18,10 +18,6 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
-      moodleapp:
-        image: moodlehq/moodleapp:next-test
-        ports:
-          - 8100:80
 
     strategy:
       fail-fast: false
@@ -87,7 +83,7 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          MOODLE_BEHAT_DEFAULT_BROWSER: chrome
+          MOODLE_APP: true
 
       - name: Behat features
         if: ${{ always() }}

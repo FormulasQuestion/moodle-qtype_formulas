@@ -18,10 +18,6 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
-      moodleapp:
-        image: moodlehq/moodleapp:next-test
-        ports:
-          - 8100:80
 
     strategy:
       fail-fast: false
@@ -61,25 +57,22 @@ jobs:
 
       - name: Initialise moodle-plugin-ci
         run: |
-          git clone https://github.com/NoelDeMartin/moodle-plugin-ci --branch moodle-app-wip ci
-          composer install -d ./ci
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
           echo $(cd ci/bin; pwd) >> $GITHUB_PATH
           echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
-
-      - name: Install plugins
-        run: |
-          moodle-plugin-ci add-plugin moodlehq/moodle-local_moodleappbehat --branch main
-          moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
 
       - name: Install moodle-plugin-ci
         run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: mariadb
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          MOODLE_BEHAT_IONIC_WWWROOT: http://localhost:8100
-          MOODLE_BEHAT_DEFAULT_BROWSER: chrome
+          MOODLE_APP: true
+
+      - name: Install plugins
+        run: |
+          moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
 
       - name: Keep only mobile behat features
         run: |
