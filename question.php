@@ -651,21 +651,23 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * not retried, no grade or penalty should be returned.
      *
      * @param array $response current response (all fields)
-     * @param array $lastgradedresponse response from the last attempt (by part, but every part contains all fields)
+     * @param array $lastgradedresponses array containing the (full) response given when each part registered
+     *      an attempt for the last time; if there has been no try for a certain part, the corresponding key
+     *      will be missing. Note that this is not the "history record" of all tries.
      * @param bool $finalsubmit true when the student clicks "submit all and finish"
      * @return array part name => qbehaviour_adaptivemultipart_part_result
      */
     public function grade_parts_that_can_be_graded(array $response, array $lastgradedresponses, $finalsubmit) {
         $partresults = [];
 
-        // Every entry from the $lastgradedresponse array contains the same fields (for the entire
-        // question) and the values are all the same, so we just take the last array entry.
-        $lastresponse = end($lastgradedresponses);
-        if ($lastresponse === false) {
+        foreach ($this->parts as $part) {
+            // Check whether we already have an attempt for this part. If we don't, we create an
+            // empty response.
             $lastresponse = [];
+            if (array_key_exists($part->partindex, $lastgradedresponses)) {
+                $lastresponse = $lastgradedresponses[$part->partindex];
         }
 
-        foreach ($this->parts as $part) {
             // Check whether the response has been changed since the last attempt. If it has not,
             // we are done for this part.
             if ($part->is_same_response($lastresponse, $response)) {

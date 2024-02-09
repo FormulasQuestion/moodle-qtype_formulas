@@ -178,36 +178,6 @@ class question_test extends \basic_testcase {
         self::assertFalse($q->is_same_response_for_part('1', array('1_0' => 'x'), array('1_0' => 'y')));
     }
 
-    public function test_grade_parts_that_can_be_graded_test1() {
-        // FIXME: changing this test, because it is flawed. test4 is a question with four parts
-        // and different ways of entering a result with unit (combined field, separate field, ignoring unit)
-        // and it is randomized; this should probably be 'testmethodsinparts', but the answers should
-        // respect the expected format (e.g. 0_ for combined unit field)
-        $q = $this->get_test_formulas_question('testmethodsinparts');
-        $q->start_attempt(new question_attempt_step(), 1);
-
-        // old: $response = ['0_0' => '5', '1_0' => '6', '2_0' => '8'];
-        $response = ['0_' => '40 m/s', '1_0' => '30', '1_1' => 'm/s', '2_0' => '40', '3_0' => '50'];
-        $lastgradedresponses = [
-            // '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
-            // '1' => ['0_0' => '6', '1_0' => '6', '2_0' => '']
-            '0' => ['0_' => '20 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '0', '3_0' => '40'],
-            '1' => ['0_' => '30 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40'],
-        ];
-        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
-
-        $expected = [
-            // first part: right after wrong last response, penalty of 0.3, because it is a retry
-            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
-            // second part: wrong again, no points and a penalty of 0.3
-            '1' => new qbehaviour_adaptivemultipart_part_result('1', 0, 0.3),
-            // third part: not changed compared to last try, no entry
-            // fourth part: was right at the first try, wrong now, so 0 points and a penalty
-            '3' => new qbehaviour_adaptivemultipart_part_result('3', 0, 0.3),
-        ];
-        self::assertEquals($expected, $partscores);
-    }
-
     public function test_apply_attempt_state(): void {
         // Get a new randomized question and start a new attempt.
         $q = $this->get_test_formulas_question('test4');
@@ -313,48 +283,6 @@ class question_test extends \basic_testcase {
         self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
     }
 
-    public function test_grade_parts_that_can_be_graded_test2() {
-        $q = $this->get_test_formulas_question('testthreeparts');
-        $q->start_attempt(new question_attempt_step(), 1);
-
-        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
-        $lastgradedresponses = [
-            '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
-            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => '']
-        ];
-        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
-
-        $expected = [
-            // FIXME: changed expected value, because new response differs from last registered
-            // response for parts 0 and 2, so both should be graded; this is a change compared to
-            // the old implementation; checking that with the authors of qbehaviour_adaptivemultipart
-            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
-            '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
-        ];
-        self::assertEquals($expected, $partscores);
-    }
-
-    public function test_grade_parts_that_can_be_graded_test3() {
-        $q = $this->get_test_formulas_question('testthreeparts');
-        $q->start_attempt(new question_attempt_step(), 1);
-
-        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
-        $lastgradedresponses = [
-            '0' => ['0_0' => '5', '1_0' => '4', '2_0' => ''],
-            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => ''],
-            '2' => ['0_0' => '6', '1_0' => '6', '2_0' => '7']
-        ];
-        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
-
-        // FIXME: changed expected value, because new response differs from last registered
-        // response for part 0, so it should be graded; this is a change compared to
-        // the old implementation; checking that with the authors of qbehaviour_adaptivemultipart
-        $expected = [
-            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3)
-        ];
-        self::assertEquals($expected, $partscores);
-    }
-
     public function test_with_invalidated_grading_vars() {
         $q = $this->get_test_formulas_question('testtwonums');
 
@@ -398,20 +326,92 @@ class question_test extends \basic_testcase {
         self::assertEquals(0.5, $partscores[0]->rawfraction);
     }
 
+    public function test_grade_parts_that_can_be_graded_test1() {
+        // Question with three parts, answers being 5, 6 and 7.
+        $q = $this->get_test_formulas_question('testthreeparts');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '8'];
+        // The $lastgradedresponses array contains one entry for every part that has registered at
+        // least one try; if a part has never been ansered, there will be no entry for it. If there
+        // have been multiple tries, only the last graded try is kept. In particular, this array is
+        // not the *history* of all tries.
+        // With the following values, this means that the first part (part #0) has been tried at least
+        // once and on its last try, there has been no answer to the two other parts. The last time
+        // the second part (part #1) has been answered, the response was wrong for part #0, right
+        // for part #1 and empty for the last part (part #2). The last part (part #2) has never been
+        // attempted.
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
+            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => ''],
+        ];
+        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
+
+        // The current $response is '5' for the first part, which is the same as in the last try for
+        // that part. It is '6' for the second part, which is also unchanged. We have the answer '8'
+        // for the last part and as there has not been an answer for that part so far, this is a new
+        // answer. We should thus have a grading for part #2 only.
+        $expected = [
+            '2' => new qbehaviour_adaptivemultipart_part_result('2', 0, 0.3),
+        ];
+        $this->assertEquals($expected, $partscores);
+    }
+
+    public function test_grade_parts_that_can_be_graded_test2() {
+        $q = $this->get_test_formulas_question('testthreeparts');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
+            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => ''],
+        ];
+        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
+
+        // The current $response is correct for all three parts. However, at the last registered attempt,
+        // parts #0 and #1 were already correct, so this does not count as a new attempt. We should get
+        // a grading result for part #2 only.
+        $expected = [
+            '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
+        ];
+        self::assertEquals($expected, $partscores);
+    }
+
+    public function test_grade_parts_that_can_be_graded_test3() {
+        $q = $this->get_test_formulas_question('testthreeparts');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '4', '2_0' => ''],
+            '1' => ['0_0' => '6', '1_0' => '6', '2_0' => ''],
+            '2' => ['0_0' => '6', '1_0' => '6', '2_0' => '7'],
+        ];
+        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
+
+        // The current $response is correct for all three parts. However, every part has already been
+        // correctly answered at its last registered attempt, so we should get no grading at all.
+        $expected = [];
+        self::assertEquals($expected, $partscores);
+    }
+
     public function test_grade_parts_that_can_be_graded_test4() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
-        $lastgradedresponses = array(
-            '0'     => array('0_0' => '5', '1_0' => '', '2_0' => ''),
-        );
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
+        $lastgradedresponses = [
+            '0' => ['0_0' => '5', '1_0' => '', '2_0' => ''],
+        ];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
-        $expected = array(
+        // Parts #1 and #2 have never been attempted. The last registered attempt for part #0 was correct.
+        // The current $response is correct for all parts. So we expect a full-mark grading result for
+        // parts #1 and #2 only.
+        $expected = [
             '1' => new qbehaviour_adaptivemultipart_part_result('1', 1, 0.3),
             '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
-        );
+        ];
         self::assertEquals($expected, $partscores);
     }
 
@@ -419,14 +419,41 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '', '2_0' => '');
-        $lastgradedresponses = array(
-        );
+        $response = ['0_0' => '5', '1_0' => '', '2_0' => ''];
+        $lastgradedresponses = [];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
 
-        $expected = array(
+        // There have been no previously registered attempts. The new $response is correct for
+        // part #0 and empty for the other parts. Thus, we expect a full-mark grading result for
+        // part #0 only.
+        $expected = [
             '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
-        );
+        ];
+        self::assertEquals($expected, $partscores);
+    }
+
+    public function test_grade_parts_that_can_be_graded_test6() {
+        $q = $this->get_test_formulas_question('testmethodsinparts');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $response = ['0_' => '40 m/s', '1_0' => '30', '1_1' => 'm/s', '2_0' => '40', '3_0' => '50'];
+        $lastgradedresponses = [
+            '0' => ['0_' => '20 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '0', '3_0' => '40'],
+            '1' => ['0_' => '30 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40'],
+        ];
+        $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
+
+        // The latest $response is correct for parts #0 and #2; it has the wrong value but correct unit
+        // for part #1.
+        // We have no previously registered attempts for parts #2 and #3, so they should be graded.
+        // Parts #0 and #1 have been answered wrong in their last respective attempt, so they should
+        // be graded.
+        $expected = [
+            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
+            '1' => new qbehaviour_adaptivemultipart_part_result('1', 0, 0.3),
+            '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
+            '3' => new qbehaviour_adaptivemultipart_part_result('3', 0, 0.3),
+        ];
         self::assertEquals($expected, $partscores);
     }
 
