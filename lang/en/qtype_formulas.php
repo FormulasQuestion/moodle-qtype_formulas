@@ -185,13 +185,13 @@ The <tt> {_0}, {_1}, {_2} </tt> are the different input fields for values and <t
 
 All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt> {_0}, {_u} </tt> are specified consecutively, and there is only one answer field and unit, i.e. <tt> {_0}{_u} </tt>, they will be combined into a single long input answer field for both answer and unit.';
 $string['feedback'] = 'Part general feedback';
-$string['feedback_help'] = 'This part feedback will be show to all students. It can include global and locals variables that will be replaced by their values';
+$string['feedback_help'] = 'This part feedback will be show to all students. It can include global and local variables that will be replaced by their values';
 $string['incorrectfeedback'] = 'For any incorrect response';
 $string['partiallycorrectfeedback'] = 'For any partially correct response';
 $string['correctfeedback'] = 'For any correct response';
-$string['incorrectfeedback_help'] = 'This feedback will be show to students that don\'t get any mark at this part. It can include global and locals variables that will be replaced by their values';
-$string['partiallycorrectfeedback_help'] = 'This feedback will be show to students that don\'t get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
-$string['correctfeedback_help'] = 'This feedback will be show to students that get the maximum mark at this part. It can include global and locals variables that will be replaced by their values';
+$string['incorrectfeedback_help'] = 'This feedback will be show to students that don\'t get any mark at this part. It can include global and local variables that will be replaced by their values';
+$string['partiallycorrectfeedback_help'] = 'This feedback will be show to students that don\'t get the maximum mark at this part. It can include global and local variables that will be replaced by their values';
+$string['correctfeedback_help'] = 'This feedback will be show to students that get the maximum mark at this part. It can include global and local variables that will be replaced by their values';
 
 // The language string for the variables instantiation and preview.
 $string['checkvarshdr'] = 'Check variables instantiation';
@@ -220,7 +220,7 @@ $string['error_unit'] = 'Unit parsing error! ';
 $string['error_ruleid'] = 'No such rule exists in the file with the id/name.';
 $string['error_rule'] = 'Rule parsing error! ';
 $string['error_unitpenalty'] = 'The penalty must be a number between 0 and 1.';
-$string['error_validation_eval'] = 'Try evalution error! ';
+$string['error_validation_eval'] = 'Try evaluation error! ';
 $string['error_syntax'] = 'Syntax error.';
 $string['error_vars_name'] = 'The syntax of the variable name is incorrect.';
 $string['error_vars_string'] = 'Error! Either a string without closing double quote, or use of non-accepted character such as \'.';

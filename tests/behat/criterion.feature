@@ -76,7 +76,7 @@ Feature: Test setting the grading criterion in different modes
     When I set the field "Grading criterion*" to "a"
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "Try evalution error! Variable 'a' has not been defined."
+    Then I should see "Try evaluation error! Variable 'a' has not been defined."
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be disabled
