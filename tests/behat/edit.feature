@@ -63,8 +63,8 @@ Feature: Test editing a Formulas question
     And I set the following fields to these values:
       | Grading variables | test = 1/0; |
     And I press "id_submitbutton"
-    Then I should see "Try evalution error! 1: Some expressions cannot be evaluated numerically."
+    Then I should see "Try evaluation error! 1: Some expressions cannot be evaluated numerically."
     And I set the following fields to these values:
       | Grading variables | test = 2; |
     And I press "id_submitbutton"
-    Then I should not see "Try evalution error! 1: Some expressions cannot be evaluated numerically."
+    Then I should not see "Try evaluation error! 1: Some expressions cannot be evaluated numerically."
