@@ -24,7 +24,12 @@
 
 namespace qtype_formulas;
 use qbehaviour_adaptivemultipart_part_result;
+use qtype_formulas_question;
+use question_attempt;
 use question_attempt_step;
+use question_display_options;
+use question_hint_with_parts;
+use question_usage_by_activity;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -46,6 +51,248 @@ class question_test extends \basic_testcase {
      */
     protected function get_test_formulas_question($which = null) {
         return \test_question_maker::make_question('formulas', $which);
+    }
+
+    public function test_check_file_access_general() {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+        $question->id = 42;
+        $question->parts[0]->id = 1;
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        // Prepare default display options.
+        $options = new question_display_options();
+
+        // Step 1: access to files in the part's text should always be granted, as long as
+        // the $itemid ($args[0]) matches the part's ID.
+        $component = 'qtype_formulas';
+        $area = 'answersubqtext';
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 2: access to files in the question text should always be granted, as long as
+        // the $itemid ($args[0]) matches the question's ID.
+        $component = 'question';
+        $area = 'questiontext';
+        $args = [$question->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 3: access to the general feedback fields (part or question) should not be granted if
+        // the question is not finished.
+        $component = 'qtype_formulas';
+        $area = 'answerfeedback';
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 4: sending a wrong answer and thus finishing the question. Files from the area belonging
+        // to the general feedback ('answerfeedback') should be served, unless generalfeedback is hidden
+        // in the display options. However, hiding combined feedback should not change the outcome.
+        $qa->process_action(['0_0' => '4', '-submit' => 1]);
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $options->feedback = $options::HIDDEN;
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $options->generalfeedback = $options::HIDDEN;
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 5: restarting the question and sending the right answer. The general feedback should still
+        // be served.
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+        $qa->process_action(['0_0' => '5', '-submit' => 1]);
+        $options->generalfeedback = $options::VISIBLE;
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+    }
+
+    public function test_check_file_access_hints() {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+        $question->id = 42;
+        $question->parts[0]->id = 1;
+
+        // Add two hints.
+        $question->hints[] = new question_hint_with_parts(12, 'foo', FORMAT_HTML, false, false);
+        $question->hints[] = new question_hint_with_parts(13, 'bar', FORMAT_HTML, false, false);
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('interactive', 1);
+
+        // Prepare default display options.
+        $options = new question_display_options();
+
+        // Step 1: no answer has been submitted, so we should not have access to files from the
+        // 'hint' area.
+        $component = 'question';
+        $area = 'hint';
+        $args = [$question->hints[0]->id, 'foo.jpg'];
+        if (PHP_MAJOR_VERSION >= 8) {
+            $message = 'Attempt to read property "id" on null';
+        } else {
+            $message = "Trying to get property 'id' of non-object";
+        }
+        try {
+            self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        } catch (\Exception $e) {
+            self::assertStringContainsString($message, $e->getMessage());
+        }
+        $args = [$question->hints[1]->id, 'foo.jpg'];
+        try {
+            self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        } catch (\Exception $e) {
+            self::assertStringContainsString($message, $e->getMessage());
+        }
+
+        // Step 2: send a wrong answer. We should now have access to the first hint, but not the second.
+        $qa->process_action(['0_0' => '4', '-submit' => 1]);
+        $args = [$question->hints[0]->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->hints[1]->id, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 3: send another wrong answer. We should now have access to the second hint, but not the first.
+        $qa->process_action(['0_0' => '4', '-tryagain' => 1]);
+        $qa->process_action(['0_0' => '3', '-submit' => 1]);
+        $args = [$question->hints[0]->id, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->hints[1]->id, 'foo.jpg'];
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+    }
+
+    public function test_check_file_access_question_combinedfeedback() {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+        $question->id = 42;
+        $question->parts[0]->id = 1;
+
+        // Prepare default display options.
+        $options = new question_display_options();
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        // Step 1: access to combined feedback fields should not be granted, because question is
+        // not finished.
+        $component = 'question';
+        $args = [$question->id, 'foo.jpg'];
+        $area = 'correctfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partiallycorrectfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'incorrectfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 2: sending a wrong answer. Access should be granted to the file area that belongs to
+        // the incorrect feedback, but only for this question.
+        $qa->process_action(['0_0' => '4', '-submit' => 1]);
+        $area = 'correctfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partiallycorrectfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'incorrectfeedback';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 3: restarting and sending the correct answer. Access should be granted to the file area
+        // that belongs to the correct feedback, but only for this part.
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+        $qa->process_action(['0_0' => '5', '-submit' => 1]);
+        $args = [$question->id, 'foo.jpg'];
+        $area = 'partiallycorrectfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'incorrectfeedback';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'correctfeedback';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 4: access to the previously good area should no longer be granted, if we set feedback
+        // to invisible in the display options. However, hiding general feedback only should not change
+        // the access.
+        $args = [$question->id, 'foo.jpg'];
+        $options->generalfeedback = $options::HIDDEN;
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $options->feedback = $options::HIDDEN;
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+    }
+
+    public function test_check_file_access_partcombinedfeedback() {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+        $question->id = 42;
+        $question->parts[0]->id = 1;
+
+        // Prepare default display options.
+        $options = new question_display_options();
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        // Step 1: access to combined feedback fields should not be granted, because question is
+        // not finished.
+        $component = 'qtype_formulas';
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $area = 'partcorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 2: sending a wrong answer. Access should be granted to the file area that belongs to
+        // the incorrect feedback, but only for this part.
+        $qa->process_action(['0_0' => '4', '-submit' => 1]);
+        $area = 'partcorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 3: restarting and sending the correct answer. Access should be granted to the file area
+        // that belongs to the correct feedback, but only for this part.
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+        $qa->process_action(['0_0' => '5', '-submit' => 1]);
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partcorrectfb';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 4: access to the previously good area should no longer be granted, if we set feedback
+        // to invisible in the display options. However, hiding general feedback only should not change
+        // the access.
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $options->generalfeedback = $options::HIDDEN;
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $options->feedback = $options::HIDDEN;
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
     public function test_get_expected_data_test0() {

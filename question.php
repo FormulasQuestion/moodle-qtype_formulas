@@ -430,18 +430,58 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return bool whether the user can access this file
      */
     public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload): bool {
-        $ownareas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
+        // If $args is not properly specified, we won't grant access.
+        if (!isset($args[0])) {
+            return false;
+        }
+        // The first (remaining) element in the $args array is the item ID. This is either the question ID
+        // or the part ID.
+        $itemid = $args[0];
+
+        $ownfeedbackareas = ['answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
         $combinedfeedbackareas = ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
 
-        if ($component === 'qtype_formulas' && in_array($filearea, $ownareas)) {
-            // If we have a matching part ID, return true.
+        if ($component === 'qtype_formulas' && $filearea === 'answersubqtext') {
+            // Files from the part's question text should be shown if the part ID matches one of our parts.
             foreach ($this->parts as $part) {
-                if ($part->id === $args[0]) {
+                if ($part->id == $itemid) {
                     return true;
                 }
             }
-            // All parts have been checked and no part ID matched, so no access should be granted.
+            // If we did not find a matching part, we don't serve the file.
             return false;
+        } else if ($component === 'qtype_formulas' && in_array($filearea, $ownfeedbackareas)) {
+            // If the question is not finished, we don't serve files belong to any feedback field.
+            // TODO: if not finished but gradable, try to grade (as in questionbase.php for combined feedback)
+            $state = $qa->get_state();
+            if (!$state->is_finished()) {
+                return false;
+            }
+
+            // If the $itemid does not belong to our parts, we can leave.
+            $validpart = false;
+            foreach ($this->parts as $part) {
+                if ($part->id == $itemid) {
+                    $validpart = true;
+                    break;
+                }
+            }
+            if (!$validpart) {
+                return false;
+            }
+
+            // Files from the answerfeedback area belong to the part's general feedback. It is showed
+            // for all answers, if feedback is enabled in the display options.
+            if ($filearea === 'answerfeedback') {
+                return $options->generalfeedback === $options::VISIBLE;
+            }
+
+            // Fetching the feedback class, i. e. 'correct' or 'partiallycorrect' or 'incorrect'.
+            $feedbackclass = $state->get_feedback_class();
+
+            // Only show files from specific feedback area if the given answer matches the kind of
+            // feedback and if specific feedback is enabled in the display options.
+            return ($filearea === "part{$feedbackclass}fb" && $options->feedback === $options::VISIBLE);
         } else if ($component === 'question' && in_array($filearea, $combinedfeedbackareas)) {
             return $this->check_combined_feedback_file_access($qa, $options, $filearea, $args);
         } else if ($component === 'question' && $filearea === 'hint') {
