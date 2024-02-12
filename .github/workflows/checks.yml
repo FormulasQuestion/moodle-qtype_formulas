@@ -52,16 +52,11 @@ jobs:
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: mariadb
-          MOODLE_BRANCH: 'master'
+          MOODLE_BRANCH: 'main'
 
       - name: PHP Lint
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
-
-      #- name: PHP Copy/Paste Detector
-      #  continue-on-error: true
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci phpcpd
 
       #- name: Moodle Code Checker
       #  continue-on-error: true
