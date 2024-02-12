@@ -295,6 +295,67 @@ class question_test extends \basic_testcase {
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
+    public function test_check_file_access_partcombinedfeedback_adaptive() {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+        $question->id = 42;
+        $question->parts[0]->id = 1;
+
+        // Prepare default display options.
+        $options = new question_display_options();
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('adaptive', 1);
+        self::assertEquals('adaptivemultipart', $qa->get_behaviour_name());
+
+        // Step 1: access to combined feedback fields should not be granted, because question is
+        // not finished and not gradable.
+        $component = 'qtype_formulas';
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $area = 'partcorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 2: sending a wrong answer. Access should be granted to the file area that belongs to
+        // the incorrect feedback, but only for this part.
+        $qa->process_action(['0_0' => '4', '-submit' => 1]);
+        $area = 'partcorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 3: sending the correct answer. Access should be granted to the file area
+        // that belongs to the correct feedback, but only for this part.
+        $qa->process_action(['0_0' => '5', '-submit' => 1]);
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $area = 'partpartiallycorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partincorrectfb';
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $area = 'partcorrectfb';
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $args = [$question->parts[0]->id + 1, 'foo.jpg'];
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+
+        // Step 4: access to the previously good area should no longer be granted, if we set feedback
+        // to invisible in the display options. However, hiding general feedback only should not change
+        // the access.
+        $args = [$question->parts[0]->id, 'foo.jpg'];
+        $options->generalfeedback = $options::HIDDEN;
+        self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
+        $options->feedback = $options::HIDDEN;
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+    }
+
     public function test_get_expected_data_test0() {
         $q = $this->get_test_formulas_question('testsinglenum');
         self::assertEquals(array('0_0' => PARAM_RAW), $q->get_expected_data());
