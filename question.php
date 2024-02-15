@@ -791,6 +791,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * Work out a final grade for this attempt, taking into account all the tries the student made.
+     * This method is called in interactive mode when all tries are done or when the user hits
+     * 'Submit and finish'.
      *
      * @param array $responses response for each try, each element (1 <= n <= $totaltries) is a response array
      * @param int $totaltries maximum number of tries allowed
@@ -810,12 +812,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             $partfraction = 0;
 
             foreach ($responses as $responseindex => $response) {
-                $response = $this->normalize_response($response);
-
                 // If the response has not changed, we have nothing to do.
                 if ($part->is_same_response($lastresponse, $response)) {
                     continue;
                 }
+
+                $response = $this->normalize_response($response);
 
                 // Otherwise, save this as the last response and store the index where
                 // the response was changed for the last time.
@@ -829,9 +831,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                 // If unit is wrong, make the necessary deduction.
                 if ($partgrade['unit'] === false) {
                     $partfraction = $partfraction * (1 - $part->unitpenalty);
-                }
             }
             $obtainedgrade += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
+            }
         }
 
         return $obtainedgrade / $maxgrade;

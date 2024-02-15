@@ -26,6 +26,7 @@
 namespace qtype_formulas;
 use question_state;
 use test_question_maker;
+use question_hint_with_parts;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -132,6 +133,55 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', true);
         $this->check_output_does_not_contain_stray_placeholders();
+    }
+
+    public function test_test0_submit_wrong_unit_then_right() {
+        // Create and configure a question with an "odd" unit penalty in order to not
+        // get the final grade right by chance. Adding two hints to allow a total of
+        // three tries.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->unitpenalty = 0.55;
+        $q->hints[] = new question_hint_with_parts(12, 'foo', FORMAT_HTML, false, false);
+        $q->hints[] = new question_hint_with_parts(13, 'bar', FORMAT_HTML, false, false);
+
+        $this->start_attempt_at_question($q, 'interactive', 1);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        self::assertEquals('interactivecountback',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+        );
+
+        // Submit an answer with a wrong unit.
+        $this->process_submission(['0_' => '5 km/s', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_try_again_button_expectation(true),
+        );
+
+        // Submit an answer with an incompatible unit.
+        $this->process_submission(['-tryagain' => 1]);
+        $this->process_submission(['0_' => '5 kg', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_try_again_button_expectation(true),
+        );
+
+        // Submit a correct answer.
+        $this->process_submission(['-tryagain' => 1]);
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
+        // The last answer is correct, so the question should move to state "graded right".
+        $this->check_current_state(question_state::$gradedright);
+        // Check the final grade: wrong, half-right in second try, right in third try.
+        $this->check_current_mark(0 + (1 - $q->parts[0]->unitpenalty) - 0.3 + 1 - 2 * 0.3);
     }
 
     public function test_test0_submit_wrong_wrong_right() {
