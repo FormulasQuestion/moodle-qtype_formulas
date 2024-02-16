@@ -643,18 +643,22 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     /**
-     * This method is called in cases where is_gradable_response() returns false. For our qtype, this
-     * only happens when some part is unanswered, so we simply return a corresponding error message.
+     * This method is called by the renderer when the question is in "invalid" state, i. e. if it
+     * does not have a complete response (for immediate feedback or interactive mode) or if it has
+     * an invalid part (in adaptive multipart mode).
      *
      * @return string error message
      */
     public function get_validation_error(array $response): string {
-        // If the response is complete, we return an empty string. This should not happen,
-        // because the renderer should not call this method in such a case.
-        if ($this->is_complete_response($response)) {
-            return '';
+        // If is_any_part_invalid() is true, that means no part is gradable, i. e. no fields
+        // have been filled.
+        if ($this->is_any_part_invalid($response)) {
+            // TODO: externalise string
+            return 'All input fields are empty.';
         }
 
+        // If at least one part is gradable and yet the question is in "invalid" state, that means
+        // that the behaviour expected all fields to be filled.
         return get_string('pleaseputananswer', 'qtype_formulas');
     }
 
@@ -778,15 +782,24 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * This is called by adaptive multiplart behaviour in order to determine whether the question
-     * state should be moved to question_state::$invalid. We will always return false, considering
-     * any answer that cannot be parsed or evaluated as wrong. Also, it does not really make a
-     * difference, because invalid answers do attract the same penalty as wrong ones.
+     * state should be moved to question_state::$invalid; many behaviours mainly or exclusively
+     * use !is_complete_response() for that. We will return true if *no* part is gradable,
+     * because in that case it does not make sense to proceed. If at least one part has been
+     * answered (at least partially), we say that no part is invalid, because that allows the student
+     * to get feedback for the answered parts.
      *
      * @param array $response student's response
      * @return bool returning false
      */
     public function is_any_part_invalid(array $response): bool {
+        // Iterate over all parts. If at least one part is gradable, we can leave early.
+        foreach ($this->parts as $part) {
+            if ($part->is_gradable_response($response)) {
         return false;
+            }
+        }
+
+        return true;
     }
 
     /**

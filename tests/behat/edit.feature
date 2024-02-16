@@ -44,7 +44,7 @@ Feature: Test editing a Formulas question
       | behaviour | immediatefeedback |
     And I press "id_saverestart"
     And I press "Check"
-    And I should see "Please put an answer in each input field."
+    And I should see "All input fields are empty."
     And I press "Start again"
     And I set the field "Answer for part 1" to "1"
     And I set the field "Answer for part 2" to "6"

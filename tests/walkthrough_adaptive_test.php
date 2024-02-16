@@ -51,6 +51,71 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         return test_question_maker::make_question('formulas', $which);
     }
 
+    public function test_submit_empty_then_right() {
+        // Create the formulas question 'testsinglenum'.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
+        self::assertEquals(
+                'adaptivemultipart',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'incorrect');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_feedback_expectation(),
+        );
+
+        // Submit the empty form.
+        $this->process_submission(['-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$invalid);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_contains_validation_error_expectation(),
+        );
+
+        // Submit the right answer.
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(1);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', true);
+        $this->check_output_does_not_contain_stray_placeholders();
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+
+        // Finish the attempt.
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_correct_expectation(),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+    }
+
     public function test_test0_submit_right_first_time() {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
