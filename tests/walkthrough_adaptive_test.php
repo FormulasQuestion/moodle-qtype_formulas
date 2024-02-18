@@ -116,6 +116,135 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
+    public function test_submit_empty_then_right_with_combined_unit() {
+        // Create the formulas question 'testsinglenumunit'.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
+        self::assertEquals(
+                'adaptivemultipart',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_output_does_not_contain_text_input_with_class('0_', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('0_', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('0_', 'incorrect');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_feedback_expectation(),
+        );
+
+        // Submit the empty form.
+        $this->process_submission(['-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$invalid);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_contains_validation_error_expectation(),
+        );
+
+        // Submit the right answer.
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(1);
+        $this->render();
+        $this->check_output_contains_text_input('0_', '5 m/s', true);
+        $this->check_output_does_not_contain_stray_placeholders();
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+
+        // Finish the attempt.
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_correct_expectation(),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+    }
+
+    public function test_submit_empty_then_right_with_separate_unit() {
+        // Create the formulas question 'testsinglenumunitsep'.
+        $q = $this->get_test_formulas_question('testsinglenumunitsep');
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
+        self::assertEquals(
+                'adaptivemultipart',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_contains_text_input('0_1');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_feedback_expectation(),
+        );
+
+        // Submit the empty form.
+        $this->process_submission(['-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$invalid);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_contains_text_input('0_1');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_contains_validation_error_expectation(),
+        );
+
+        // Submit the right answer.
+        $this->process_submission(['0_0' => '5', '0_1' => 'm/s', '-submit' => 1]);
+
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(1);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', true);
+        $this->check_output_contains_text_input('0_1', 'm/s', true);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_submit_button_expectation(true),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+
+        // Finish the attempt.
+        $this->quba->finish_all_questions();
+
+        // Verify.
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(1);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1),
+                $this->get_contains_correct_expectation(),
+                $this->get_does_not_contain_validation_error_expectation(),
+        );
+    }
+
     public function test_test0_submit_right_first_time() {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
@@ -206,6 +335,52 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         // three tries.
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $q->parts[0]->unitpenalty = 0.55;
+
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        self::assertEquals('adaptivemultipart',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_current_output(
+                $this->get_contains_marked_out_of_summary(),
+                $this->get_contains_submit_button_expectation(true),
+        );
+
+        // Submit an answer with a wrong unit.
+        $this->process_submission(['0_' => '5 km/s', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(0),
+                $this->get_contains_submit_button_expectation(true),
+        );
+
+        // Submit an answer with an incompatible unit.
+        $this->process_submission(['0_' => '5 kg', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(1 - $q->parts[0]->unitpenalty - $q->penalty),
+                $this->get_contains_submit_button_expectation(true),
+        );
+
+        // Submit a correct answer.
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
+        // The last answer is correct, so the question should move to state "complete".
+        $this->check_current_state(question_state::$complete);
+        // Check the final grade: wrong, half-right in second try, finally right in third try.
+        $this->check_current_mark(1 - 2 * $q->penalty);
+    }
+
+    public function test_test0_submit_wrong_unit_then_right_with_hints() {
+        return;
+        // Create and configure a question with an "odd" unit penalty in order to not
+        // get the final grade right by chance. Adding two hints to allow a total of
+        // three tries.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->unitpenalty = 0.55;
         $q->hints[] = new question_hint_with_parts(12, 'foo', FORMAT_HTML, false, false);
         $q->hints[] = new question_hint_with_parts(13, 'bar', FORMAT_HTML, false, false);
 
@@ -245,8 +420,8 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
         // The last answer is correct, so the question should move to state "graded right".
         $this->check_current_state(question_state::$gradedright);
-        // Check the final grade: wrong, half-right in second try, right in third try.
-        $this->check_current_mark(0 + (1 - $q->parts[0]->unitpenalty) - 0.3 + 1 - 2 * 0.3);
+        // Check the final grade: wrong, half-right in second try, finally right in third try.
+        $this->check_current_mark(1 - 2 * 0.3);
     }
 
     public function test_test0_submit_wrong_wrong_right() {

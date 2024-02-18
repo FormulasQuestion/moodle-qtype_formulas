@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace qtype_formulas;
+
+use qtype_formulas;
 use Throwable, Exception;
 
 // TODO: calculate_algebraic_diff etc. should probably not use known variables and thus
@@ -321,8 +323,6 @@ class evaluator {
      * Set the variable defined in $token to the value $value and correctly set
      * it's $type attribute.
      *
-     * FIXME: algebraic variables must not accept non-numeric values
-     *
      * @param token $vartoken
      * @param token $value
      * @param bool $israndomvar
@@ -366,6 +366,14 @@ class evaluator {
             // Otherwise we return the stored value. If the data is a SET, the variable is an
             // algebraic variable.
             if ($value->type === token::SET) {
+                // Algebraic variables only accept a list of numbers; they must not contain
+                // strings or nested lists.
+                foreach ($value->value as $entry) {
+                    if ($entry->type != token::NUMBER) {
+                        $this->die('algebraic variables can only be initialized with a list of numbers', $value);
+                    }
+                }
+
                 $value->type = variable::ALGEBRAIC;
             }
             $var = new variable($basename, $value->value, $value->type, microtime(true));
@@ -560,7 +568,7 @@ class evaluator {
         // will mean exponentiation rather than XOR, as per the documented behaviour.
         // Note that this step will also throw an error, if the expression is empty.
         $parser = new answer_parser($expression, $this->export_variable_list());
-        if (!$parser->is_valid_algebraic_formula()) {
+        if (!$parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)) {
             throw new Exception("'$expression' is not a valid algebraic expression");
         }
 

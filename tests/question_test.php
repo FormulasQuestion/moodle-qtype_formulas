@@ -23,7 +23,10 @@
  */
 
 namespace qtype_formulas;
+
+use Exception;
 use qbehaviour_adaptivemultipart_part_result;
+use qtype_formulas_part;
 use qtype_formulas_question;
 use question_attempt;
 use question_attempt_step;
@@ -36,6 +39,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
+require_once($CFG->dirroot . '/question/type/formulas/question.php');
 
 /**
  * Unit tests for (some of) question/type/formulas/question.php.
@@ -75,6 +79,9 @@ class question_test extends \basic_testcase {
         self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
         $args = [$question->parts[0]->id + 1, 'foo.jpg'];
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+        // If no ID is given, we should not have access.
+        self::assertFalse($question->check_file_access($qa, $options, $component, $area, [], false));
+
 
         // Step 2: access to files in the question text should always be granted, as long as
         // the $itemid ($args[0]) matches the question's ID.
@@ -791,7 +798,7 @@ class question_test extends \basic_testcase {
                            1 => array('0_0' => '5', '1_0' => '7', '2_0' => '7'),
                            2 => array('0_0' => '5', '1_0' => '6', '2_0' => '7')
                           );
-        $finalgrade = $q->compute_final_grade($responses, 1);
+        $finalgrade = $q->compute_final_grade($responses, 3);
         self::assertEquals((2 + 2 * (1 - 2 * 0.3) + 2 * (1 - 0.3)) / 6, $finalgrade);
 
     }
@@ -804,8 +811,34 @@ class question_test extends \basic_testcase {
                            1 => array('0_0' => '5', '1_0' => '8', '2_0' => '6'),
                            2 => array('0_0' => '5', '1_0' => '6', '2_0' => '6')
                           );
-        $finalgrade = $q->compute_final_grade($responses, 1);
+        $finalgrade = $q->compute_final_grade($responses, 3);
         self::assertEquals((2 + 2 * (1 - 2 * 0.3)) / 6, $finalgrade);
+    }
+
+    public function test_compute_final_grade_with_unit() {
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $responses = [
+            0 => ['0_' => '5 km/s'],
+            1 => ['0_' => '5 kg'],
+            2 => ['0_' => '5 m/s'],
+        ];
+        $finalgrade = $q->compute_final_grade($responses, 3);
+        self::assertEquals(1 - 2 * 0.3, $finalgrade);
+    }
+
+    public function test_compute_final_grade_with_zero() {
+        $q = $this->get_test_formulas_question('testzero');
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        $responses = [
+            0 => ['0_0' => '1'],
+            1 => ['0_0' => ''],
+            2 => ['0_0' => '0'],
+        ];
+        $finalgrade = $q->compute_final_grade($responses, 3);
+        self::assertEquals(1 - 2 * 0.3, $finalgrade);
     }
 
     public function test_summarise_response_threeparts() {
@@ -858,5 +891,230 @@ class question_test extends \basic_testcase {
         self::assertTrue($q->is_gradable_response(array('0_0' => '0.0')));
         self::assertTrue($q->is_gradable_response(array('0_0' => '5')));
         self::assertTrue($q->is_gradable_response(array('0_0' => 5)));
+    }
+
+    public function provide_answer_box_texts(): array {
+        return [
+            [[], ''],
+            [[], '{ _0}'],
+            [[], '{_ 0}'],
+            [[], '{_0 }'],
+            [[], '{_0::}'],
+            [[], '{_0::MCE}'],
+            [[], '{_0:foo:}'],
+            [[], '{_0:foo }'],
+            [[], '{ _0:foo}'],
+            [[], '{ _u}'],
+            [[], '{_ u}'],
+            [[], '{_u }'],
+            [[], '{_a}'],
+            [[
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
+            ], '{_0}'],
+            [[
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
+            ], '{_0} {_1:}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
+            ], '{_0:foo}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false]
+            ], '{_0:MCE}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
+            ], '{_0:foo:MCE}'],
+            [[
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
+                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
+            ], '{_0}{_u}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false],
+                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
+            ], '{_0:foo} {_u}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false],
+                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
+            ], '{_0:MCE} {_u}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true],
+                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
+            ], '{_0:foo:MCE} {_u}'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_answer_box_texts
+     */
+    public function test_scan_for_answer_boxes($expected, $input) {
+        $boxes = qtype_formulas_part::scan_for_answer_boxes($input);
+        self::assertSame($expected, $boxes);
+    }
+
+    public function provide_answer_box_texts_invalid(): array {
+        return [
+            [[
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
+            ], '{_0} {_0}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
+            ], '{_0:foo} {_0}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
+            ], '{_0:foo} {_0:bar}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
+            ], '{_0:foo:MCE} {_0}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
+            ], '{_0:foo:MCE} {_0:foo}'],
+            [[
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
+                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
+            ], '{_0}{_u} {_u}'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_answer_box_texts_invalid
+     */
+    public function test_scan_for_answer_boxes_invalid($expected, $input) {
+        $e = null;
+        try {
+            qtype_formulas_part::scan_for_answer_boxes($input);
+        } catch (Exception $e) {
+            self::assertStringContainsString('answer box placeholders must be unique, found second instance of', $e->getMessage());
+        }
+        self::assertNotNull($e);
+    }
+
+    public function provide_responses_for_combined_question(): array {
+        return [
+            [['id' => null, 'fraction' => null], ''],
+            [['id' => 'right', 'fraction' => 1], '5 m/s'],
+            [['id' => 'wrongvalue', 'fraction' => 0], '15 m/s'],
+            [['id' => 'wrongunit', 'fraction' => 0.5], '5'],
+            [['id' => 'wrong', 'fraction' => 0], '99 kg'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_responses_for_combined_question
+     */
+    public function test_classify_response_combined_field($expected, $input) {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenumunit');
+        $question->parts[0]->unitpenalty = 0.5;
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        $response = ['0_' => $input, '-submit' => 1];
+        $qa->process_action($response);
+        $classification = $question->classify_response($response)[0];
+
+        // If we send an empty response, we will get a special classification with its own response summary.
+        if ($expected['id'] === null) {
+            $input = '[No response]';
+        }
+
+        self::assertEquals($expected['id'], $classification->responseclassid);
+        self::assertEquals($expected['fraction'], $classification->fraction);
+        self::assertEquals($input, $classification->response);
+    }
+
+    public function provide_responses_for_question_with_separate_unit(): array {
+        return [
+            [['id' => null, 'fraction' => null], ['', '']],
+            [['id' => 'right', 'fraction' => 1], ['5', 'm/s']],
+            [['id' => 'wrongvalue', 'fraction' => 0], ['15', 'm/s']],
+            [['id' => 'wrongunit', 'fraction' => 0.5], ['5', '']],
+            [['id' => 'wrong', 'fraction' => 0], ['99', 'kg']],
+            [['id' => 'wrong', 'fraction' => 0], ['15', '']],
+            [['id' => 'wrong', 'fraction' => 0], ['', 'kg']],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_responses_for_question_with_separate_unit
+     */
+    public function test_classify_response_separate_unit_field($expected, $input) {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenumunitsep');
+        $question->parts[0]->unitpenalty = 0.5;
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        $response = ['0_0' => $input[0], '0_1' => $input[1], '-submit' => 1];
+        $qa->process_action($response);
+        $classification = $question->classify_response($response)[0];
+
+        // If we send an empty response, we will get a special classification with its own response summary.
+        if ($expected['id'] === null) {
+            $summary = '[No response]';
+        } else {
+            $summary = "{$input[0]}, {$input[1]}";
+        }
+
+        self::assertEquals($expected['id'], $classification->responseclassid);
+        self::assertEquals($expected['fraction'], $classification->fraction);
+        self::assertEquals($summary, $classification->response);
+    }
+
+    public function provide_responses_for_threepart_question(): array {
+        return [
+            [['id' => [null, null, null], 'fraction' => [null, null, null]], ['', '', '']],
+            [['id' => ['right', 'right', 'right'], 'fraction' => [1, 1, 1]], ['5', '6', '7']],
+            [['id' => ['wrong', 'right', 'right'], 'fraction' => [0, 1, 1]], ['1', '6', '7']],
+            [['id' => ['wrong', null, 'right'], 'fraction' => [0, null, 1]], ['1', '', '7']],
+            [['id' => ['right', 'wrong', null], 'fraction' => [1, 0, null]], ['5', 'x', '']],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_responses_for_threepart_question
+     */
+    public function test_classify_response_three_parts_without_unit($expected, $input) {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testthreeparts');
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        $response = [
+            '0_0' => $input[0],
+            '1_0' => $input[1],
+            '2_0' => $input[2],
+            '-submit' => 1
+        ];
+        $qa->process_action($response);
+        $classification = $question->classify_response($response);
+
+        for ($i = 0; $i < 3; $i++) {
+            // If we send an empty response, we will get a special classification with its own response summary.
+            if ($expected['id'][$i] === null) {
+                $input[$i] = '[No response]';
+            }
+
+            self::assertEquals($expected['id'][$i], $classification[$i]->responseclassid);
+            self::assertEquals($expected['fraction'][$i], $classification[$i]->fraction);
+            self::assertEquals($input[$i], $classification[$i]->response);
+        }
+    }
+
+    // TODO
+    public function test_student_using_overwritten_function() {
+        // something like this:
+        // global vars: sin = 3, x = {-5:5}
+        // answer numerical formula \sin(20) (prefix needed)
+        // student answers sin(20) should be incorrect (because sin == 3 for student)
+        // answer algebraic formula "3x"
+        // student answers "sin(x)" should be correct
     }
 }

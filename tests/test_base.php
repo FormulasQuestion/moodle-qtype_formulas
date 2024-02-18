@@ -79,7 +79,6 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
                 'part feedback for ' . $name . ' should not be present in ' . $this->currentoutput);
     }
 
-    // FIXME: this must be changed, because our placeholders are not the same as those of a STACK question
     protected function check_output_does_not_contain_stray_placeholders() {
         // Keeping the old way for 3.9 until it reaches end-of-life.
         if (version_compare(\PHPUnit\Runner\Version::id(), '9.0.0', '>=')) {

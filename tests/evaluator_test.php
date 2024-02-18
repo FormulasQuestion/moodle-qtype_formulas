@@ -26,7 +26,7 @@
 namespace qtype_formulas;
 
 use Exception;
-
+use qtype_formulas;
 
 // TODO: test with global vars depending on instantiated random vars
 // TODO: test visibility and last-value property of loop's iterator variable
@@ -450,8 +450,6 @@ class evaluator_test extends \advanced_testcase {
                 ],
                 'a = [0:10]; a["2"] = 15; a["-3"] = 99'
             ],
-
-            // FIXME: add examples from string/list where index is numeric string
             'assign from literal list with negative index' => [
                 [
                     'a' => new variable('a', 8, token::NUMBER)
@@ -1105,6 +1103,22 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_assignments(): array {
         return [
+            'assign list of strings to algebraic variable' => [
+                'algebraic variables can only be initialized with a list of numbers',
+                'x = {"a", "b"}'
+            ],
+            'assign mixed values to algebraic variable' => [
+                'algebraic variables can only be initialized with a list of numbers',
+                'x = {1, 2, "foo"}'
+            ],
+            'assign numeric string to algebraic variable' => [
+                'algebraic variables can only be initialized with a list of numbers',
+                'x = {"1", 2}'
+            ],
+            'assign nested list to algebraic variable' => [
+                'algebraic variables can only be initialized with a list of numbers',
+                'x = {1, 2, [1, 2]}'
+            ],
             'trying to change char of string' => [
                 'individual chars of a string cannot be modified',
                 's = "foo"; s[1] = "x"'
@@ -1237,10 +1251,6 @@ class evaluator_test extends \advanced_testcase {
                 '1:3:evaluation error: diff() expects two lists of the same size',
                 's=diff([3*3+3,0],[3*4]);'
             ],
-            'algebraic variable with strings instead of numbers' => [
-                '', // FIXME: this is no error anymore; should it be?
-                'x = {"A", "B"};'
-            ],
             'algebraic variable used in calculation' => [
                 "1:21:algebraic variable 'b' cannot be used in this context",
                 'a = 7; b = {1:5}; 2*b'
@@ -1353,6 +1363,32 @@ class evaluator_test extends \advanced_testcase {
             [-0.35473297204849, 'sin(4) + exp(cos(4+5))'],
 
         ];
+    }
+
+    /**
+     * Make sure that we properly detect if a malformed expression (that somehow slipped through all
+     * syntax checks and made it to the evaluator) leaves tokens on the stack.
+     *
+     * @return void
+     */
+    public function test_expression_with_remaining_tokens(): void {
+        $e = null;
+
+        $expression = new expression([
+            new token(token::NUMBER, 1),
+            new token(token::NUMBER, 2),
+            new token(token::NUMBER, 3),
+            new token(token::OPERATOR, '+'),
+        ]);
+
+        $evaluator = new evaluator();
+
+        try {
+            $evaluator->evaluate($expression);
+        } catch (Exception $e) {
+            self::assertStringContainsString('stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?', $e->getMessage());
+        }
+        self::assertNotNull($e);
     }
 
     /**
@@ -1840,7 +1876,7 @@ class evaluator_test extends \advanced_testcase {
         }
 
         // If we expect the expression to be valid, is must pass this first test.
-        $isvalidsyntax = $parser->is_valid_algebraic_formula();
+        $isvalidsyntax = $parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC);
         if ($expected === true) {
             self::assertTrue($isvalidsyntax);
         }
@@ -1886,11 +1922,11 @@ class evaluator_test extends \advanced_testcase {
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_numerical_formula());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
             return;
         }
 
-        self::assertTrue($parser->is_valid_numerical_formula());
+        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
@@ -1915,11 +1951,11 @@ class evaluator_test extends \advanced_testcase {
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_numeric());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
             return;
         }
 
-        self::assertTrue($parser->is_valid_numeric());
+        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
@@ -1944,11 +1980,11 @@ class evaluator_test extends \advanced_testcase {
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_number());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
             return;
         }
 
-        self::assertTrue($parser->is_valid_number());
+        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);

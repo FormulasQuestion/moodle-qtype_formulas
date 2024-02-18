@@ -160,9 +160,9 @@ class answer_parser_test extends \advanced_testcase {
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false || $expected > qtype_formulas::ANSWER_TYPE_NUMBER) {
-            self::assertFalse($parser->is_valid_number());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
         } else {
-            self::assertTrue($parser->is_valid_number());
+            self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
         }
     }
 
@@ -173,9 +173,9 @@ class answer_parser_test extends \advanced_testcase {
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false || $expected > qtype_formulas::ANSWER_TYPE_NUMERIC) {
-            self::assertFalse($parser->is_valid_numeric());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
         } else {
-            self::assertTrue($parser->is_valid_numeric());
+            self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
         }
     }
 
@@ -186,9 +186,9 @@ class answer_parser_test extends \advanced_testcase {
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false || $expected > qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA) {
-            self::assertFalse($parser->is_valid_numerical_formula());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
         } else {
-            self::assertTrue($parser->is_valid_numerical_formula());
+            self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
         }
     }
 
@@ -200,9 +200,9 @@ class answer_parser_test extends \advanced_testcase {
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_algebraic_formula());
+            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         } else {
-            self::assertTrue($parser->is_valid_algebraic_formula());
+            self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         }
     }
 
@@ -211,18 +211,18 @@ class answer_parser_test extends \advanced_testcase {
         // Also, used like this, it would be a syntax error anyway. But in this case, we make it
         // available as a variable.
         $parser = new answer_parser('3 stdnormpdf', ['stdnormpdf']);
-        self::assertTrue($parser->is_valid_algebraic_formula());
+        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         // Verify it works even if written as a function. Actually, this expression would mean
         // 3*stdnormpdf*2.
         $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
-        self::assertTrue($parser->is_valid_algebraic_formula());
+        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
 
         // If stdnormpdf is not made available, this should fail, because the function is not allowed.
         $parser = new answer_parser('3 stdnormpdf');
-        self::assertFalse($parser->is_valid_algebraic_formula());
+        self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         // Make sure that it did not just fail because of the syntax error.
         $parser = new answer_parser('3 stdnormpdf(2)');
-        self::assertFalse($parser->is_valid_algebraic_formula());
+        self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
 
         // See whether we can separate an imaginary unit 'exp' in a number expression.
         $input = '3 exp';

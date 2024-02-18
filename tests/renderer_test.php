@@ -360,4 +360,101 @@ class renderer_test extends walkthrough_test_base {
         $this->render();
         $this->check_output_contains_text_input('0_0', '123', false);
     }
+
+    public function test_clear_wrong_with_combined_unit(): void {
+        // Create a multipart question with combined, separate and no unit field.
+        $q = $this->get_test_formulas_question('testmethodsinparts');
+        // Create two hints all set to clear wrong answers.
+        $q->hints = [
+                new question_hint_with_parts(0, 'Hint 1.', FORMAT_HTML, false, true),
+                new question_hint_with_parts(0, 'Hint 2.', FORMAT_HTML, false, true),
+        ];
+
+        $this->start_attempt_at_question($q, 'interactive', 4);
+
+        $this->render();
+        $this->check_output_contains_text_input('0_', '', true);
+        $this->check_output_contains_text_input('1_0', '', true);
+        $this->check_output_contains_text_input('1_1', '', true);
+        $this->check_output_contains_text_input('2_0', '', true);
+        $this->check_output_contains_text_input('3_0', '', true);
+        $this->check_current_output(
+                $this->get_no_hint_visible_expectation()
+        );
+
+        // Submit wrong answer in first and third part, right answer for the others.
+        // First part's answer is not only wrong, but invalid, i. e. it leads to an error
+        // when trying to split the number and the unit.
+        $this->process_submission(['0_' => '(', '1_0' => '40', '1_1' => 'm/s', '2_0' => '1', '3_0' => '40', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_hint_expectation('Hint 1.'),
+                $this->get_tries_remaining_expectation(2),
+                $this->get_contains_try_again_button_expectation(),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_', '(', false);
+        $this->check_output_contains_text_input('1_0', '40', false);
+        $this->check_output_contains_text_input('1_1', 'm/s', false);
+        $this->check_output_contains_text_input('2_0', '1', false);
+        $this->check_output_contains_text_input('3_0', '40', false);
+        // The first hint is set to "clear wrong answers", so there should now be hidden fields
+        // overriding the input from the text boxes.
+        $this->check_output_contains_hidden_input('0_', '');
+        $this->check_output_contains_hidden_input('2_0', '');
+
+        // Try again. The wrong fields should now be cleared, the others still filled.
+        $this->process_submission(['0_' => '', '1_0' => '40', '1_1' => 'm/s', '2_0' => '', '3_0' => '40', '-tryagain' => 1]);
+        $this->render();
+        $this->check_output_contains_text_input('0_', '', true);
+        $this->check_output_contains_text_input('1_0', '40', true);
+        $this->check_output_contains_text_input('1_1', 'm/s', true);
+        $this->check_output_contains_text_input('2_0', '', true);
+        $this->check_output_contains_text_input('3_0', '40', true);
+
+        // Submit wrong answer in first and second part, right answer for the others.
+        $this->process_submission(['0_' => '2', '1_0' => '2', '1_1' => 'kg', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+                $this->get_contains_hint_expectation('Hint 2.'),
+                $this->get_tries_remaining_expectation(1),
+                $this->get_contains_try_again_button_expectation(),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_', '2', false);
+        $this->check_output_contains_text_input('1_0', '2', false);
+        $this->check_output_contains_text_input('1_1', 'kg', false);
+        $this->check_output_contains_text_input('2_0', '40', false);
+        $this->check_output_contains_text_input('3_0', '40', false);
+        // The first hint is set to "clear wrong answers", so there should now be hidden fields
+        // overriding the input from the text boxes.
+        $this->check_output_contains_hidden_input('0_', '');
+        $this->check_output_contains_hidden_input('1_0', '');
+        $this->check_output_contains_hidden_input('1_1', '');
+
+        // Try again. The wrong fields should now be cleared, the others still filled.
+        $this->process_submission(['0_' => '', '1_0' => '', '1_1' => '', '2_0' => '40', '3_0' => '40', '-tryagain' => 1]);
+        $this->render();
+        $this->check_output_contains_text_input('0_', '', true);
+        $this->check_output_contains_text_input('1_0', '', true);
+        $this->check_output_contains_text_input('1_1', '', true);
+        $this->check_output_contains_text_input('2_0', '40', true);
+        $this->check_output_contains_text_input('3_0', '40', true);
+
+        // Submit right answer.
+        $this->process_submission(['0_' => '40 m/s', '1_0' => '40', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_output(
+                $this->get_no_hint_visible_expectation(),
+                $this->get_does_not_contain_try_again_button_expectation(),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_', '40 m/s', false);
+        $this->check_output_contains_text_input('1_0', '40', false);
+        $this->check_output_contains_text_input('1_1', 'm/s', false);
+        $this->check_output_contains_text_input('2_0', '40', false);
+        $this->check_output_contains_text_input('3_0', '40', false);
+
+        $this->check_current_mark(2.5);
+    }
 }

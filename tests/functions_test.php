@@ -258,7 +258,6 @@ class functions_test extends \advanced_testcase {
             [1, 'binomialcdf(3, 0.5, 3)'],
             ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, 3, 5)'],
             ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, -2, 5)'],
-            // FIXME: add invalid cases
         ];
     }
 

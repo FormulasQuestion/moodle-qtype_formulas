@@ -16,6 +16,8 @@
 
 namespace qtype_formulas;
 
+use qtype_formulas;
+
 /**
  * Parser for answer expressions for qtype_formulas
  *
@@ -24,7 +26,7 @@ namespace qtype_formulas;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- /* TODO: make validation functions with units */
+ /* TODO: make validation function with units */
 
 class answer_parser extends parser {
     /**
@@ -73,14 +75,38 @@ class answer_parser extends parser {
     }
 
     /**
+     * Perform the right check according to a given answer type.
+     *
+     * @param int $type the answer type, a constant from the qtype_formulas class
+     * @return bool
+     */
+    public function is_valid_for_answertype(int $type): bool {
+        if ($type === qtype_formulas::ANSWER_TYPE_NUMBER) {
+            return $this->is_valid_number();
+        }
+
+        if ($type === qtype_formulas::ANSWER_TYPE_NUMERIC) {
+            return $this->is_valid_numeric();
+        }
+
+        if ($type === qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA) {
+            return $this->is_valid_numerical_formula();
+        }
+
+        if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            return $this->is_valid_algebraic_formula();
+        }
+    }
+
+    /**
      * Check whether the given answer contains only valid tokens for the answer type NUMBER, i. e.
      * - just a number, possibly with a decimal point
      * - no operators, except unary + or - at start
      * - possibly followed by e/E (maybe followed by + or -) plus an integer
      *
-     * @return boolean
+     * @return bool
      */
-    public function is_valid_number(): bool {
+    private function is_valid_number(): bool {
         // The statement list must contain exactly one expression object.
         if (count($this->statements) !== 1) {
             return false;
@@ -120,9 +146,9 @@ class answer_parser extends parser {
      * - no functions
      * - no variables
      *
-     * @return boolean
+     * @return bool
      */
-    public function is_valid_numeric(): bool {
+    private function is_valid_numeric(): bool {
         // If it's a valid number expression, we have nothing to do.
         if ($this->is_valid_number()) {
             return true;
@@ -167,9 +193,9 @@ class answer_parser extends parser {
      * - plus functions: fact, ncr, npr
      * - no variables
      *
-     * @return boolean
+     * @return bool
      */
-    public function is_valid_numerical_formula(): bool {
+    private function is_valid_numerical_formula(): bool {
         if ($this->is_valid_number() || $this->is_valid_numeric()) {
             return true;
         }
@@ -191,9 +217,9 @@ class answer_parser extends parser {
      * - variables (TODO: maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @param bool $disallowvariables whether we disallow the usage of variables
-     * @return boolean
+     * @return bool
      */
-    public function is_valid_algebraic_formula(bool $disallowvariables = false): bool {
+    private function is_valid_algebraic_formula(bool $disallowvariables = false): bool {
         if ($this->is_valid_number() || $this->is_valid_numeric()) {
             return true;
         }

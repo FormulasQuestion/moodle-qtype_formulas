@@ -247,6 +247,10 @@ class answer_unit_conversion {
      * @return array(conversion factor, unit exponent) if it can be converted, otherwise null.
      */
     private function attempt_conversion($test_unit_name, $base_unit_array) {
+        // If the unit does not exist, we leave early.
+        if (!array_key_exists($test_unit_name, $this->mapping)) {
+            return null;
+        }
         $oclass = $this->mapping[$test_unit_name];
         if (!isset($oclass)) {
             return null;  // It does not exist in the mapping implies it is not convertible.
