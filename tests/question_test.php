@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// FIXME: use get_possible_responses in test_classify
+
+
 /**
  * Unit tests for the OU multiple response question class.
  *
@@ -32,6 +35,7 @@ use question_attempt;
 use question_attempt_step;
 use question_display_options;
 use question_hint_with_parts;
+use question_possible_response;
 use question_usage_by_activity;
 
 defined('MOODLE_INTERNAL') || die();
@@ -1010,13 +1014,22 @@ class question_test extends \basic_testcase {
         $qa = new question_attempt($question, $quba->get_id());
         $qa->start('immediatefeedback', 1);
 
+        $qdata = \test_question_maker::get_question_data('formulas', 'testsinglenumunit');
+        $possibleresponses = \question_bank::get_qtype('formulas')->get_possible_responses($qdata);
+
+
         $response = ['0_' => $input, '-submit' => 1];
         $qa->process_action($response);
         $classification = $question->classify_response($response)[0];
 
         // If we send an empty response, we will get a special classification with its own response summary.
+        // Check that the classification is in the list of possibleresponses.
         if ($expected['id'] === null) {
-            $input = '[No response]';
+            $input = get_string('noresponse', 'question');
+            // We cannot use 'null' as key for assertArrayHasKey, so we use the empty string.
+            self::assertArrayHasKey('', $possibleresponses[0]);
+        } else {
+            self::assertArrayHasKey($expected['id'], $possibleresponses[0]);
         }
 
         self::assertEquals($expected['id'], $classification->responseclassid);

@@ -88,6 +88,7 @@ class qtype_formulas extends question_type {
 
     /**
      * Fetch the ID for every part of a given question.
+     * TODO: turn this into private method
      *
      * @param int $questionid
      * @return int[]
@@ -104,6 +105,7 @@ class qtype_formulas extends question_type {
 
     /**
      * Move all the files belonging to this question (and its parts) from one context to another.
+     * TODO: oldid -> oldcontextid, newid -> newcontextid
      *
      * @param int $questionid the question being moved.
      * @param int $oldid the context it is moving from.
@@ -117,6 +119,7 @@ class qtype_formulas extends question_type {
         $fs = get_file_storage();
         $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
         foreach ($areas as $area) {
+            $fs->move_area_files_to_new_context($oldid, $newid, 'qtype_formulas', $area, $questionid);
             foreach ($partids as $partid) {
                 $fs->move_area_files_to_new_context($oldid, $newid, 'qtype_formulas', $area, $partid);
             }
@@ -125,8 +128,7 @@ class qtype_formulas extends question_type {
         $this->move_files_in_combined_feedback($questionid, $oldid, $newid);
         $this->move_files_in_hints($questionid, $oldid, $newid);
 
-        // The parent method will move files from the question text and the
-        // general feedback. Note that we do not use the latter.
+        // The parent method will move files from the question text and the general feedback.
         parent::move_files($questionid, $oldid, $newid);
     }
 
@@ -144,6 +146,7 @@ class qtype_formulas extends question_type {
         $fs = get_file_storage();
         $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
         foreach ($areas as $area) {
+            $fs->delete_area_files($contextid, 'qtype_formulas', $area, $questionid);
             foreach ($partids as $partid) {
                 $fs->delete_area_files($contextid, 'qtype_formulas', $area, $partid);
             }
@@ -152,8 +155,7 @@ class qtype_formulas extends question_type {
         $this->delete_files_in_combined_feedback($questionid, $contextid);
         $this->delete_files_in_hints($questionid, $contextid);
 
-        // The parent method will delete files from the question text and the
-        // general feedback. Note that we do not use the latter.
+        // The parent method will delete files from the question text and the general feedback.
         parent::delete_files($questionid, $contextid);
     }
 
@@ -221,7 +223,7 @@ class qtype_formulas extends question_type {
      * @param object $context the context the question is in.
      * @param string $filearea indentifies the file area questiontext,
      *      generalfeedback, answerfeedback, etc.
-     * @param int $itemid identifies the file area.
+     * @param int $itemid identifies the file area. --> FIXME: part or question ID
      *
      * @return string the text for this field, after files have been processed.
      */
@@ -299,6 +301,8 @@ class qtype_formulas extends question_type {
             // We need the current question's context. Also, we must split up the form's text editor
             // data (text and format in one array) into separate text and format properties. Moodle does
             // its magic when saving the files, so we first do that and keep the modified text.
+            // Note that we store the files with the question ID or the part ID, depending on the text
+            // area where they belong.
             $context = $formdata->context;
 
             $tmp = $part->subqtext;
@@ -595,7 +599,7 @@ class qtype_formulas extends question_type {
         // Loop over each answer block found in the XML.
         foreach ($xml['#']['answers'] as $i => $part) {
             $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
-            if ($partindex) {
+            if ($partindex !== false) {
                 $question->partindex[$i] = $partindex;
             }
             foreach (self::PART_BASIC_FIELDS as $field) {
