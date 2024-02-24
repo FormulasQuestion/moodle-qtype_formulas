@@ -539,7 +539,7 @@ class questiontype_test extends \advanced_testcase {
     }
 
     public function test_save_question_removed_one_part(): void {
-        global $USER, $DB;
+        global $USER, $DB, $CFG;
 
         // Login as admin user.
         $this->resetAfterTest(true);
@@ -578,13 +578,14 @@ class questiontype_test extends \advanced_testcase {
         ];
 
         // Save the modified question to the DB.
-        \question_bank::get_qtype('formulas')->save_question($q, $formdata);
+        $savedquestion = \question_bank::get_qtype('formulas')->save_question($q, $formdata);
 
         // Check we still have four parts in the DB and that the file has been stored.
-        $this->qtype->get_question_options($fetchedquestion);
-        self::assertCount(4, $fetchedquestion->options->answers);
+        $this->qtype->get_question_options($savedquestion);
+        self::assertCount(4, $savedquestion->options->answers);
+        $partid = $savedquestion->options->answers[3]->id;
         $fs = get_file_storage();
-        self::assertCount(2, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext'));
+        self::assertCount(2, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext', $partid));
 
         // Prepare form data and remove first part by deleting its answermark.
         $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
@@ -592,12 +593,15 @@ class questiontype_test extends \advanced_testcase {
         array_shift($formdata->answermark);
 
         // Save the modified question to the DB.
-        \question_bank::get_qtype('formulas')->save_question($q, $formdata);
+        $modifiedquestion = \question_bank::get_qtype('formulas')->save_question($q, $formdata);
 
-        // Check we now have only three parts in the DB and that the file is gone.
-        $this->qtype->get_question_options($fetchedquestion);
-        self::assertCount(3, $fetchedquestion->options->answers);
-        self::assertCount(0, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext'));
+        // Check we now have only three parts in the DB and, for Moodle 3.11 and lower, that the file is gone.
+        // For Moodle 4.0+, the file will remain in the DB, because all question versions are kept.
+        $this->qtype->get_question_options($modifiedquestion);
+        self::assertCount(3, $modifiedquestion->options->answers);
+        if ($CFG->branch < 400) {
+            self::assertCount(0, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext', $partid));
+        }
     }
 
     public function provide_import_filenames(): array {
@@ -634,7 +638,11 @@ class questiontype_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/question/format/xml/format.php');
         $qformat = new \qformat_xml();
         $qformat->setCategory($category);
-        $contexts = new \question_edit_contexts($context);
+        if (class_exists('\core_question\local\bank\question_edit_contexts')) {
+            $contexts = new \core_question\local\bank\question_edit_contexts($context);
+        } else {
+            $contexts = new \question_edit_contexts($context);
+        }
         $qformat->setContexts($contexts);
         $qformat->setCourse($course);
         $qformat->setFilename($filename);
@@ -670,14 +678,29 @@ class questiontype_test extends \advanced_testcase {
         $this->resetAfterTest(true);
         $this->setAdminUser();
 
-        // Create a course and a question. Note: the question will not be stored in the DB.
+        // Create a course and a question category.
         $course = $this->getDataGenerator()->create_course();
-        $questiondata = test_question_maker::get_question_data('formulas', $questionname);
+        $context = context_system::instance();
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $category = $questiongenerator->create_question_category(['contextid' => $context->id]);
+
+        // In Moodle 4.0+, the question MUST be stored in the DB to allow exporting it. For lower versions,
+        // we just need the data.
+        if ($CFG->branch >= 400) {
+            $questiondata = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $category->id]);
+            $this->qtype->get_question_options($questiondata);
+        } else {
+            $questiondata = test_question_maker::get_question_data('formulas', $questionname);
+        }
 
         // Prepare the XML format class.
         require_once($CFG->dirroot . '/question/format/xml/format.php');
         $qformat = new \qformat_xml();
-        $contexts = new \question_edit_contexts(context_system::instance());
+        if (class_exists('\core_question\local\bank\question_edit_contexts')) {
+            $contexts = new \core_question\local\bank\question_edit_contexts($context);
+        } else {
+            $contexts = new \question_edit_contexts($context);
+        }
         $qformat->setContexts($contexts);
         $qformat->setCourse($course);
         $qformat->setCattofile(false);
@@ -690,6 +713,11 @@ class questiontype_test extends \advanced_testcase {
         $tempfile = tmpfile();
         fwrite($tempfile, $xmloutput);
         $xmlfilepath = stream_get_meta_data($tempfile)['uri'];
+
+        // Remove the question and its parts.
+        // Note: The method will do nothing is the question is already gone, so we do not have to
+        // make separate branches for Moodle 4.0+ and for lower versions.
+        question_delete_question($questiondata->id);
 
         // Reinitialize the XML format class.
         $qformat = new \qformat_xml();
@@ -732,8 +760,13 @@ class questiontype_test extends \advanced_testcase {
         self::assertEqualsWithDelta($questiondata->timemodified, $importedquestion->timemodified, 2);
 
         // Check the question's text fields and their format.
-        $textfields = ['questiontext', 'generalfeedback', 'correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
+        $textfields = ['questiontext', 'generalfeedback'];
         foreach ($textfields as $field) {
+            self::assertEquals($questiondata->{$field}, $importedquestion->{$field});
+            self::assertEquals($questiondata->{$field . 'format'}, $importedquestion->{$field . 'format'});
+        }
+        $combinedfeedbackfields = ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
+        foreach ($combinedfeedbackfields as $field) {
             self::assertEquals($questiondata->options->{$field}, $importedquestion->options->{$field});
             self::assertEquals($questiondata->options->{$field . 'format'}, $importedquestion->options->{$field . 'format'});
         }

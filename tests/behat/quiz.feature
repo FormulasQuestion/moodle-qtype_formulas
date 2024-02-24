@@ -80,7 +80,7 @@ Feature: Usage in quiz
     # And I click on "Submit all and finish" "button" in the "Confirmation" "dialogue"
     # And I click on "Submit all and finish" "button" in the "Submit all your answers and finish?" "dialogue"
     # And I confirm the quiz submission in the modal dialog
-    Then I should see "Your answer is correct."
+    Then I should see "Correct answer, well done."
 
   Scenario: Try to answer a question with one part and two answer fields
     When I follow "Quiz 2"

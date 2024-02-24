@@ -79,7 +79,7 @@ Feature: Mobile compatibility
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
     And I press "OK" near "Once you submit" in the app
-    Then I should find "Your answer is correct." in the app
+    Then I should find "Correct answer, well done." in the app
 
   Scenario: Try to answer a question with one part and two answer fields
     When I press "Quiz 2" in the app
