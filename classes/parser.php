@@ -218,6 +218,11 @@ class parser {
             if ($nexttoken === self::EOF) {
                 // The last token must not be an OPERATOR, a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR.
                 if (in_array($type, [token::OPERATOR, token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR])) {
+                    // When coming from the random parser, the assignment operator is 'r=' instead of '=', but
+                    // the user does not know that. We must instead report the value they entered.
+                    if ($value === 'r=') {
+                        $value = '=';
+                    }
                     $this->die("syntax error: unexpected end of expression after '$value'", $currenttoken);
                 }
                 // The last identifier of a statement cannot be a FUNCTION, because it would have

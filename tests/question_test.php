@@ -956,25 +956,12 @@ class question_test extends \basic_testcase {
 
     public function provide_answer_box_texts_invalid(): array {
         return [
-            [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
-            ], '{_0} {_0}'],
-            [[
-                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
-            ], '{_0:foo} {_0}'],
-            [[
-                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
-            ], '{_0:foo} {_0:bar}'],
-            [[
-                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
-            ], '{_0:foo:MCE} {_0}'],
-            [[
-                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
-            ], '{_0:foo:MCE} {_0:foo}'],
-            [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false],
-            ], '{_0}{_u} {_u}'],
+            ['_0', '{_0} {_0}'],
+            ['_0', '{_0:foo} {_0}'],
+            ['_0', '{_0:foo} {_0:bar}'],
+            ['_0', '{_0:foo:MCE} {_0}'],
+            ['_0', '{_0:foo:MCE} {_0:foo}'],
+            ['_u', '{_0}{_u} {_u}'],
         ];
     }
 
@@ -986,7 +973,7 @@ class question_test extends \basic_testcase {
         try {
             qtype_formulas_part::scan_for_answer_boxes($input);
         } catch (Exception $e) {
-            self::assertStringContainsString('answer box placeholders must be unique, found second instance of', $e->getMessage());
+            self::assertStringContainsString(get_string('error_answerbox_duplicate', 'qtype_formulas', $expected), $e->getMessage());
         }
         self::assertNotNull($e);
     }

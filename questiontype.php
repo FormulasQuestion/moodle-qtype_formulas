@@ -223,7 +223,7 @@ class qtype_formulas extends question_type {
      * @param object $context the context the question is in.
      * @param string $filearea indentifies the file area questiontext,
      *      generalfeedback, answerfeedback, etc.
-     * @param int $itemid identifies the file area. --> FIXME: part or question ID
+     * @param int $itemid part or question ID
      *
      * @return string the text for this field, after files have been processed.
      */
@@ -255,6 +255,10 @@ class qtype_formulas extends question_type {
         // Order the parts according to how they appear in the question.
         $filtered->answers = $this->reorder_parts($formdata->questiontext, $filtered->answers);
 
+        // Get the question's context. We will need that for handling any files that might have
+        // been uploaded via the text editors.
+        $context = $formdata->context;
+
         foreach ($filtered->answers as $i => $part) {
             $part->questionid = $formdata->id;
             $part->partindex = $i;
@@ -265,9 +269,10 @@ class qtype_formulas extends question_type {
             // If there is currently no part, we create an empty one, store it in the DB
             // and retrieve its ID.
             if (empty($parttoupdate)) {
+                $config = get_config('qtype_formulas');
                 $parttoupdate = (object)[
                     'questionid' => $formdata->id,
-                    'answermark' => 1,
+                    'answermark' => $config->defaultanswermark,
                     'numbox' => 1,
                     'answer' => '',
                     'answernotunique' => 1,
@@ -298,13 +303,10 @@ class qtype_formulas extends question_type {
 
             // Now that we have the ID, we can deal with the text fields that might contain files,
             // i. e. the part's text and the feedbacks (general, correct, partially correct, incorrect).
-            // We need the current question's context. Also, we must split up the form's text editor
-            // data (text and format in one array) into separate text and format properties. Moodle does
-            // its magic when saving the files, so we first do that and keep the modified text.
-            // Note that we store the files with the question ID or the part ID, depending on the text
-            // area where they belong.
-            $context = $formdata->context;
-
+            // We must split up the form's text editor data (text and format in one array) into separate
+            // text and format properties. Moodle does its magic when saving the files, so we first do
+            // that and keep the modified text.
+            // Note that we store the files with the part ID for all text fields that belong to a part.
             $tmp = $part->subqtext;
             $part->subqtext = $this->save_file_helper($tmp, $context, 'answersubqtext', $part->id);
             $part->subqtextformat = $tmp['format'];
@@ -354,7 +356,7 @@ class qtype_formulas extends question_type {
         }
 
         // Do all the magic for the question's combined feedback fields (correct, partially correct, incorrect).
-        $options = $this->save_combined_feedback_helper($options, $formdata, $formdata->context, true);
+        $options = $this->save_combined_feedback_helper($options, $formdata, $context, true);
 
         // Get the extra fields we have for our question type. Drop the first entry, because
         // it contains the table name.
@@ -392,7 +394,7 @@ class qtype_formulas extends question_type {
                 $fs->delete_area_files($context->id, 'qtype_formulas', $area, $leftover->id);
             }
             try {
-                $DB->delete_records('qtype_formulas_answers', array('id' => $leftover->id));
+                $DB->delete_records('qtype_formulas_answers', ['id' => $leftover->id]);
             } catch (Exception $e) {
                 return (object)['error' => get_string('error_db_delete', 'qtype_formulas', 'qtype_formulas_answers')];
             }
@@ -793,36 +795,34 @@ class qtype_formulas extends question_type {
         $hasoneanswer = false;
 
         foreach (array_keys($data->answermark) as $i) {
+            // The answermark is PARAM_FLOAT, by the time we are here, it has already been filtered. If it
+            // was empty or invalid, it is now 0.
+            $nomark = empty($data->answermark[$i]);
 
-            // If the mark is not set or is zero, we consider that as no mark.
-            $nomark = empty(trim($data->answermark[$i]));
-            // For answers, zero is not nothing...
-            $noanswer = empty(trim($data->answer[$i])) && !is_numeric($data->answer[$i]);
+            // For answers, zero is not nothing... Note that the answer is PARAM_RAW_TRIMMED, so
+            // we don't have to trim it here.
+            $noanswer = empty($data->answer[$i]) && !is_numeric($data->answer[$i]);
             if ($noanswer === false) {
                 $hasoneanswer = true;
             }
 
-            // FIXME: placement of "at least one answer is required"
-            // --> only if no valid part can be found
-            // --> if no answer and no answermark: answer
-            // --> if answer but answermark == 0: answermark
-
-            // FIXME: to review, probably keep current system
-            // We consider a part as empty if none of the following fields have been set:
-            // subqtext, answer, vars1, vars2, feedback (general feedback for part)
-            //
-            // maybe add the three other feedbacks + postunit + otherrules
-
-            // Data from the editors are stored in an array with the keys text, format and itemid.
+            // For maximum backwards compatibility, we consider a part as being "empty", if
+            // has no question text (subqtext), no general feedback (combined feedback was
+            // probably not taken into account at first, because it was added later) and no
+            // local vars.
+            // Note that data from the editors is stored in an array with the keys text, format and itemid.
+            // Also note that local vars are entered in a textarea (and not an editor) and are PARAM_RAW_TRIMMED.
             $noparttext = empty(trim($data->subqtext[$i]['text']));
             $nogeneralfb = empty(trim($data->subqtext[$i]['text']));
-            $nolocalvars = empty(trim($data->vars1[$i]));
+            $nolocalvars = empty($data->vars1[$i]);
             $emptypart = $noparttext && $nogeneralfb && $nolocalvars;
 
-            if ($nomark && !$emptypart) {
+            // Having no answermark is only allowed if the part is "empty" AND if there is no answer.
+            if ($nomark && !($emptypart && $noanswer)) {
                 $errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
             }
-            if ($noanswer && !$emptypart) {
+            // Similarly, having no answer is only allowed for "empty" parts that do not have an answermark.
+            if ($noanswer && !($emptypart && $nomark)) {
                 $errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
             }
 
@@ -837,8 +837,8 @@ class qtype_formulas extends question_type {
             }
 
             // The grading criterion must not be empty. Also, if there is no grading criterion, it does
-            // not make sense to continue the validation.
-            if (empty(trim($data->correctness[$i]))) {
+            // not make sense to continue the validation. The field is PARAM_RAW_TRIMMED.
+            if (empty($data->correctness[$i])) {
                 $errors["correctness[$i]"] = get_string('error_criterion_empty', 'qtype_formulas');
                 continue;
             }
@@ -849,17 +849,13 @@ class qtype_formulas extends question_type {
             // Set the basic fields, e.g. mark, placeholder or definition of local variables.
             foreach (self::PART_BASIC_FIELDS as $field) {
                 // In the edit form, the part's 'unitpenalty' and 'ruleid' are set via the global options
-                // 'globalunitpenalty' and 'globalruleid'. When importing a question, these fields are
-                // already present in each part, so they can be copied over like all the others.
-                if ($isfromimport) {
-                    $partdata[$i]->$field = trim($data->{$field}[$i]);
+                // 'globalunitpenalty' and 'globalruleid'. When importing a question, they do not need
+                // special treatment, because they are already stored with the part. Also, all other fields
+                // are submitted by part and do not need special treatment either.
+                if (in_array($field, ['ruleid', 'unitpenalty']) && !$isfromimport) {
+                    $partdata[$i]->$field = trim($data->{'global' . $field});
                 } else {
-                    if ($field === 'unitpenalty') {
-                        $partdata[$i]->unitpenalty = trim($data->globalunitpenalty);
-                    }
-                    if ($field === 'ruleid') {
-                        $partdata[$i]->ruleid = trim($data->globalruleid);
-                    }
+                    $partdata[$i]->$field = trim($data->{$field}[$i]);
                 }
             }
 
@@ -872,15 +868,27 @@ class qtype_formulas extends question_type {
             $partdata[$i]->partincorrectfb = $data->partincorrectfb[$i];
         }
 
-        // If we do not have at least one valid part, output an error message. Attach
-        // it to the field where the user can define the answer for the first part.
-        // Note: we do only output that error, if there is no other error for the answermark
-        // or answer field. Otherwise, we might be in a situation where the user sees
-        // "At least one answer is required." below a filled answer field, simply because
-        // e.g. all answermarks are set to 0.
+        // If no part has survived the validation, we need to output an error message. There are three
+        // reasons why a part's validation can fail:
+        // (a) there is no answermark
+        // (b) there is no answer
+        // (c) there is no grading criterion
+        // If all parts are left empty, they will fail for case (a) and will not have an error message
+        // attached to the answer field (answer can be empty if part is empty). In that case, we need
+        // to output an error to the first answer field (and this one only) saying that at least one
+        // answer is needed. We do not, however, add that error if the first part failed for case (b) and
+        // thus already has an error message there.
         if (count($partdata) === 0 && $hasoneanswer === false) {
             if (empty($errors['answer[0]'])) {
                 $errors['answer[0]'] = get_string('error_no_answer', 'qtype_formulas');
+            }
+            // If the answermark was left empty or filled with rubbish, the parameter filtering
+            // will have changed the value to 0, which is not a valid value. If, in addition,
+            // the part was otherwise empty, that will not have triggered an error message so far,
+            // because it might have been on purpose (to delete the unused part). But now that
+            // there seems to be no part left, we should add an error message to the field.
+            if (empty($data->answermark[$i])) {
+                $errors['answermark[0]'] = get_string('error_mark', 'qtype_formulas');
             }
         }
 
@@ -918,18 +926,18 @@ class qtype_formulas extends question_type {
         // If the basic check failed, we abort and output the error message, because the errors
         // might cause other errors downstream.
         if (!empty($errors)) {
-            return (object)array('errors' => $errors, 'answers' => null);
+            return (object)['errors' => $errors, 'answers' => null];
         }
 
+        // From now on, we continue with the checked and filtered parts.
         $parts = $partcheckresult->parts;
 
         // Make sure that answer box placeholders (if used) are unique for each part.
-        // TODO: change to non-capturing catch when dropping support for PHP 7.4.
         foreach ($parts as $i => $part) {
             try {
                 qtype_formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
-            } catch (Exception $ingored) {
-                $errors["subqtext[$i]"] = get_string('error_answerbox_duplicate', 'qtype_formulas');
+            } catch (Exception $e) {
+                $errors["subqtext[$i]"] = $e->getMessage();
             }
         }
 
@@ -949,27 +957,7 @@ class qtype_formulas extends question_type {
         $errors += $evaluationresult->errors;
         $parts = $evaluationresult->parts;
 
-        // FIXME: add default options if no parts defined
-        if (count($parts) === 0 && false) {
-            $parts[0] =
-            (object)[
-                'answermark' => get_config('qtype_formulas')->defaultanswermark,
-                'questionid' => $data->id,
-                'varsrandom' => '',
-                'varsglobal' => '',
-                'correctfeedback' => get_string('correctfeedbackdefault', 'question'),
-                'correctfeedbackformat' => FORMAT_HTML,
-                'partiallycorrectfeedback' => get_string('partiallycorrectfeedbackdefault', 'question'),
-                'partiallycorrectfeedbackformat' => FORMAT_HTML,
-                'incorrectfeedback' => get_string('incorrectfeedbackdefault', 'question'),
-                'incorrectfeedbackformat' => FORMAT_HTML,
-                'shownumcorrect' => 0,
-                'answernumbering' => 'none',
-            ];
-            print('****');
-        }
-
-        return (object)array('errors' => $errors, 'answers' => $parts);
+        return (object)['errors' => $errors, 'answers' => $parts];
     }
 
     /**
@@ -1031,9 +1019,9 @@ class qtype_formulas extends question_type {
 
         // Check random variables. If there is an error, we do not continue, because
         // other variables or answers might depend on these definitions.
-        $randomparser = new random_parser($data->varsrandom);
-        $evaluator = new evaluator();
         try {
+            $randomparser = new random_parser($data->varsrandom);
+            $evaluator = new evaluator();
             $evaluator->evaluate($randomparser->get_statements());
             $evaluator->instantiate_random_variables();
         } catch (Exception $e) {
@@ -1048,20 +1036,19 @@ class qtype_formulas extends question_type {
             $evaluator->evaluate($globalparser->get_statements());
         } catch (Exception $e) {
             $errors['varsglobal'] = $e->getMessage();
-            return $errors;
+            return (object)['errors' => $errors, 'parts' => $parts];
         }
 
         // Check local variables, model answers and grading criterion for each part.
-        $numberofparts = count($parts);
-        for ($i = 0; $i < $numberofparts; $i++) {
+        foreach ($parts as $i => $part) {
             $partevaluator = clone $evaluator;
 
             // Validate the local variables for this part. In case of an error, skip the
             // rest of the part, because there might be dependencies.
             $partparser = null;
-            if (!empty($data->vars1[$i])) {
+            if (!empty($part->vars1)) {
                 try {
-                    $partparser = new parser($data->vars1[$i], $globalparser->export_known_variables());
+                    $partparser = new parser($part->vars1, $globalparser->export_known_variables());
                     $partevaluator->evaluate($partparser->get_statements());
                 } catch (Exception $e) {
                     $errors["vars1[$i]"] = $e->getMessage();
@@ -1077,14 +1064,14 @@ class qtype_formulas extends question_type {
             }
 
             // Check whether the part uses the algebraic answer type.
-            $isalgebraic = $data->answertype[$i] == self::ANSWER_TYPE_ALGEBRAIC;
+            $isalgebraic = $part->answertype == self::ANSWER_TYPE_ALGEBRAIC;
 
             // Try evaluating the model answers. If this fails, don't validate the rest of
             // this part, because there are dependencies.
             try {
                 // If (and only if) the answer is algebraic, the answer parser should
                 // interpret ^ as **.
-                $answerparser = new answer_parser($data->answer[$i], $knownvars, $isalgebraic);
+                $answerparser = new answer_parser($part->answer, $knownvars, $isalgebraic);
                 $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
             } catch (Exception $e) {
                 // If the answer type is algebraic, the model answer field must contain one string (with quotes)
@@ -1098,6 +1085,8 @@ class qtype_formulas extends question_type {
                 continue;
             }
 
+            // FIXME: case where type numeric and answer is variable containing a list
+
             // Now that we know the model answers, we can set the $numbox property for the part,
             // i. e. the number of answer boxes that are to be shown. Also, we make sure that
             // $modelanswers becomes an array (possibly of one value) of literals.
@@ -1105,15 +1094,16 @@ class qtype_formulas extends question_type {
                 // The value can be an array, because the user entered an algebraic variable. That
                 // is not accepted.
                 if ($modelanswers->type === token::SET) {
+                    // TODO: externalise
                     $errors["answer[$i]"] = 'Invalid answer format: you cannot use an algebraic variable with this answer type';
                     continue;
                 }
-                $parts[$i]->numbox = count($modelanswers->value);
+                $part->numbox = count($modelanswers->value);
                 $modelanswers = array_map(function ($element) {
                     return $element->value;
                 }, $modelanswers->value);
             } else {
-                $parts[$i]->numbox = 1;
+                $part->numbox = 1;
                 $modelanswers = [$modelanswers->value];
             }
 
@@ -1159,41 +1149,39 @@ class qtype_formulas extends question_type {
             }
 
             // In order to prepare the grading variables, we need to have the special vars like
-            // _a and _r or _0, _1, ... or _err and _relerr. We will simulate this part by copying
-            // the model answers and thus setting _err and _relerr to 0.
-            $command = '_a = [' . implode(',', $modelanswers) . '];';
-            $command .= '_r = [' . implode(',', $modelanswers) . '];';
-            for ($k = 0; $k < $parts[$i]->numbox; $k++) {
-                $command .= "_{$k} = {$modelanswers[$k]};";
+            // _a and _r or _0, _1, ... or _err and _relerr. We will create a dummy part and use it
+            // as our worker. The result will automatically flow back into $partevaluator, because the
+            // assignment is by reference only.
+            $dummypart = new qtype_formulas_part();
+            $dummypart->answertype = $part->answertype;
+            $dummypart->answer = $part->answer;
+            $dummypart->evaluator = $partevaluator;
+            try {
+                $dummypart->add_special_variables($dummypart->get_evaluated_answers(), 1);
+            } catch (Exception $e) {
+                // This should not happen, because we have thouroughly validated the model answers, but
+                // if there was a problem, it's probably best to output the error near the answer field.
+                $errors["answer[$i]"] = $e->getMessage();
             }
-            $command .= '_diff = [' . implode(',', array_fill(0, $parts[$i]->numbox, '0')) . '];';
-            $command .= '_err = 0;';
-            if (!$isalgebraic) {
-                $command .= '_relerr = 0;';
-            }
-            $partparser = new parser($command, $knownvars);
-            // Evaluate all that in God mode, because we set special variables.
-            $partevaluator->evaluate($partparser->get_statements(), true);
-            // Update the list of known variables.
-            $knownvars = $partparser->export_known_variables();
 
             // Validate grading variables.
-            if (!empty($data->vars2[$i])) {
+            if (!empty($part->vars2)) {
                 try {
-                    $partparser = new parser($data->vars2[$i], $knownvars);
+                    $partparser = new parser($part->vars2, $knownvars);
                     $partevaluator->evaluate($partparser->get_statements());
                 } catch (Exception $e) {
                     $errors["vars2[$i]"] = $e->getMessage();
                     continue;
                 }
+
+                // Update the list of known variables.
+                $knownvars = $partparser->export_known_variables();
             }
-            // Update the list of known variables.
-            $knownvars = $partparser->export_known_variables();
 
             // Check grading criterion.
             $grade = 0;
             try {
-                $partparser = new parser($data->correctness[$i], $knownvars);
+                $partparser = new parser($part->correctness, $knownvars);
                 $result = $partevaluator->evaluate($partparser->get_statements());
                 $num = count($result);
                 if ($num > 1) {
@@ -1222,23 +1210,23 @@ class qtype_formulas extends question_type {
             $unitcheck = new answer_unit_conversion();
 
             // If a unit has been provided, check whether it can be parsed.
-            if (!empty($data->postunit[$i])) {
+            if (!empty($part->postunit)) {
                 try {
-                    $unitcheck->parse_targets($data->postunit[$i]);
+                    $unitcheck->parse_targets($part->postunit);
                 } catch (Exception $e) {
-                    $errors["postunit[$i]"] = get_string('error_unit', 'qtype_formulas') . $e->getMessage();
+                    $errors["postunit[$i]"] = get_string('error_unit', 'qtype_formulas');
                 }
             }
 
             // If provided by the user, check the additional conversion rules. We do validate those
             // rules even if the unit has not been set, because we would not want to have invalid stuff
             // in the database.
-            if (!empty($data->otherrule[$i])) {
+            if (!empty($part->otherrule)) {
                 try {
-                    $unitcheck->assign_additional_rules($data->otherrule[$i]);
+                    $unitcheck->assign_additional_rules($part->otherrule);
                     $unitcheck->reparse_all_rules();
                 } catch (Exception $e) {
-                    $errors["otherrule[$i]"] = get_string('error_rule', 'qtype_formulas') . $e->getMessage();
+                    $errors["otherrule[$i]"] = get_string('error_rule', 'qtype_formulas');
                 }
             }
         }

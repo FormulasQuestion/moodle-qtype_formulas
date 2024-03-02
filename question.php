@@ -27,79 +27,15 @@
 // TODO: http -> https in all files (single commit)
 // TODO: maybe have special return value for invalid answers in order to display "invalid" message in adaptive/interactive mode, rather than saying the answer is wrong
 
-/*
+// TODO: sqrt() with negative numbers (currently yields NAN) or invalid arguments, e.g. string
 
-question_definition
-- get_type_name
-- make_behaviour
-- start_attempt
-- apply_attempt_state
-- get_question_summary
-- get_num_variants
-- get_variants_selection_seed
-- get_min_fraction
-- get_max_fraction
-- clear_wrong_from_response
-- get_num_parts_right
-- get_renderer
-- get_expected_data
-- get_correct_response
-- prepare_simulated_post_data
-- get_student_response_values_for_simulation
-- format_text
-- html_to_text
-- format_questiontext
-- format_generalfeedback
-- make_html_inline
-- check_file_access
-- get_question_definition_for_external_rendering
-
-question_manually_gradable
-- is_gradable_response
-- is_complete_response
-- is_same_response
-- summarise_response
-- un_summarise_response
-- classify_response
-
-question_with_responses
-- classify_response
-- is_gradable_response
-- un_summarise_response
-
-question_automatically_gradable
-- get_validation_error
-- grade_response
-- get_hint
-- get_right_answer_summary
-
-question_graded_automatically
-- get_right_answer_summary
-- check_combined_feedback_file_access
-- check_hint_file_access
-- get_hint
-- format_hint
-
-question_automatically_gradable_with_countback
-- compute_final_grade
-
-question_graded_automatically_with_countback
-- make_behaviour
-
-question_automatically_gradable_with_multiple_parts
-- grade_parts_that_can_be_graded
-- get_parts_and_weights
-- is_same_response_for_part
-- is_any_part_invalid
-
-*/
+// TODO: walkthrough tests for feedback (general, combined) on question and part level for immediate, interactive, adaptive mode
 
 use qtype_formulas\answer_parser;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\evaluator;
 use qtype_formulas\random_parser;
 use qtype_formulas\parser;
-use qtype_formulas\lexer;
 use qtype_formulas\token;
 use qtype_formulas\unit_conversion_rules;
 
@@ -320,7 +256,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     public function clear_wrong_from_response(array $response): array {
         // Note: We do not globally normalize the answers, because that would split the answer from
         // a combined unit field into two separate fields, e.g. from 0_ into 0_0 and 0_1. This
-        // will still work, because the form does not have the input fields 0_0 and 0_1, but it still
+        // will still work, because the form does not have the input fields 0_0 and 0_1, but it
         // seems strange to do that.
 
         // Call the corresponding function for each part and apply the union operator. Note that
@@ -595,7 +531,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             // If there is an answer, we check its correctness.
             list('answer' => $answergrade, 'unit' => $unitcorrect) = $part->grade($response);
 
-            // TODO: externalise strings
             if ($part->postunit !== '') {
                 // The unit can only be correct (1.0) or wrong (0.0).
                 // The answer can be any float from 0.0 to 1.0 inclusive.
@@ -1090,7 +1025,7 @@ class qtype_formulas_part {
         foreach ($matches[1] as $i => $match) {
             // Duplicates are not allowed.
             if (array_key_exists($match, $boxes)) {
-                throw new Exception("answer box placeholders must be unique, found second instance of $match");
+                throw new Exception(get_string('error_answerbox_duplicate', 'qtype_formulas', $match));
             }
             // The array $matches[0] contains the entire pattern, e.g. {_1:var:MCE} or simply {_3}. This
             // text is later needed to replace the placeholder by the input element.

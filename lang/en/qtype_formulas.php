@@ -218,7 +218,8 @@ $string['error_placeholder_format'] = 'Wrong placeholder\'s format or forbidden 
 $string['error_placeholder_missing'] = 'This placeholder is missing from the main question text.';
 $string['error_placeholder_main_duplicate'] = 'Duplicated placeholder in the main question text.';
 $string['error_placeholder_sub_duplicate'] = 'This placeholder has already been defined in some other part.';
-$string['error_answerbox_duplicate'] = 'Each answer field placeholder can only be used once in a part.';
+// $string['error_answerbox_duplicate'] = 'Each answer field placeholder can only be used once in a part.';
+$string['error_answerbox_duplicate'] = 'Answer box placeholders must be unique, found second instance of {$a}.';
 $string['error_answertype_mistmatch'] = 'Answer type mismatch: Numerical answer type requires number and algebraic answer type requires string';
 $string['error_answer_missing'] = 'No answer has been defined.';
 $string['error_criterion_empty'] = 'The grading criterion must not be empty.';
@@ -292,3 +293,6 @@ $string['error_in_answer'] = 'error in answer #{$a->answerno}: {$a->message}';
 $string['error_grading_single_expression'] = 'The grading criterion should be one single expression. Found $a statements instead.';
 $string['error_algebraic_relerr'] = 'relative error (_relerr) cannot be used with answer type algebraic formula';
 $string['error_grading_not_1'] = 'The grading criterion should evaluate to 1 for correct answers. Found $a instead.';
+
+
+$string['error_invalid_request'] = 'invalid request, field "globalruleid" is missing';

@@ -153,7 +153,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated[] = $mform->createElement('text', 'answer', get_string('answer', 'qtype_formulas'),
             array('size' => 80));
         $repeatedoptions['answer']['helpbutton'] = array('answer', 'qtype_formulas');
-        $repeatedoptions['answer']['type'] = PARAM_RAW;
+        $repeatedoptions['answer']['type'] = PARAM_RAW_TRIMMED;
         // Whether the question has multiple answers.
         $repeated[] = $mform->createElement(
             'advcheckbox',
@@ -203,7 +203,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['correctness']['hideif'] = array('correctness_simple_mode', 'checked');
         $repeatedoptions['correctness']['default'] = $config->defaultcorrectness;
         $repeatedoptions['correctness']['helpbutton'] = array('correctness', 'qtype_formulas');
-        $repeatedoptions['correctness']['type'] = PARAM_RAW;
+        $repeatedoptions['correctness']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['correctness_simple']['hideif'] = array('correctness_simple_mode', 'notchecked');
         $repeatedoptions['correctness_simple']['helpbutton'] = array('correctness', 'qtype_formulas');
         $repeatedoptions['correctness_simple_tol']['type'] = PARAM_FLOAT;
@@ -212,17 +212,20 @@ class qtype_formulas_edit_form extends question_edit_form {
         // Part's local variables.
         $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
+        $repeatedoptions['vars1']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars1']['helpbutton'] = array('vars1', 'qtype_formulas');
         $repeatedoptions['vars1']['advanced'] = true;
         // Part's grading variables.
         $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
+        $repeatedoptions['vars2']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars2']['helpbutton'] = array('vars2', 'qtype_formulas');
         $repeatedoptions['vars2']['advanced'] = true;
         // Part's other rules.
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
         $repeatedoptions['otherrule']['helpbutton'] = array('otherrule', 'qtype_formulas');
+        $repeatedoptions['otherrule']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['otherrule']['advanced'] = true;
         // Part's feedback.
         $repeated[] = $mform->createElement('editor', 'feedback', get_string('feedback', 'qtype_formulas'),
@@ -268,6 +271,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
                 $repeatedoptions, $answersoption);
 
+        // If we are editing an existing question and the user inadvertently cleared all parts,
+        // we still want to show the fields for one part in the form. If we are creating a new
+        // question, we show $minoptions part(s), the default is 3.
         if (isset($this->question->options)) {
             $repeatsatstart = max(1, count($this->question->options->$answersoption));
         } else {
@@ -322,15 +328,13 @@ class qtype_formulas_edit_form extends question_edit_form {
                             'format' => $answer->$fieldformat, 'itemid' => $itemid);
                     }
                 }
-            } else {
-                // FIXME
-                //print('foooooo');
             }
 
             $question = (object)((array)$question + $defaultvalues);
         }
         return $question;
     }
+
     /**
      * Validating the data returning from the form.
      *

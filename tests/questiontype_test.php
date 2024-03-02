@@ -40,6 +40,8 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
 
+// FIXME: check setting of numbox according to model answers
+
 
 /**
  * Unit tests for question/type/formulas/questiontype.php.
@@ -183,18 +185,42 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
-    public function provide_single_part_data_for_form_validation(): array {
-        return [
-            [[], [
-                'answermark' => [0 => 1]]
-            ],
-        ];
-    }
-
     public function provide_multipart_data_for_form_validation(): array {
         return [
-            [['answermark[0]' => 'The answer mark must take a value larger than 0.'], [
-                'answermark' => [0 => 0]]
+            [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 0]]],
+            [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => '']]],
+            [['answer[0]' => get_string('error_answer_missing', 'qtype_formulas')], ['answer' => [0 => '']]],
+            // The following should be valid, because the first part is now completely empty and will be removed.
+            [[], [
+                    'answermark' => [0 => ''],
+                    'subqtext' => [0 => ['text' => '']],
+                    'answer' => [0 => ''],
+                ]
+            ],
+            // The question has subqtexts defined for both parts, so the first part MUST have an answermark
+            // and an answer.
+            [
+                [
+                    'answermark[0]' => get_string('error_mark', 'qtype_formulas'),
+                    'answer[0]' => get_string('error_answer_missing', 'qtype_formulas'),
+                ],
+                [
+                    'answermark' => [0 => ''],
+                    'answer' => [0 => ''],
+                ]
+            ],
+            // With both parts being empty, there should be an error in the first part, because we have no
+            // answer and a note on the answermark, because the default value (0) is not going to be valid.
+            [
+                [
+                    'answermark[0]' => get_string('error_mark', 'qtype_formulas'),
+                    'answer[0]' => get_string('error_no_answer', 'qtype_formulas'),
+                ],
+                [
+                    'answermark' => [0 => '', 1 => ''],
+                    'answer' => [0 => '', 1 => ''],
+                    'subqtext' => [0 => ['text' => ''], 1 => ['text' => '']],
+                ]
             ],
         ];
     }
@@ -203,18 +229,16 @@ class questiontype_test extends \advanced_testcase {
      * @dataProvider provide_multipart_data_for_form_validation
      */
     public function test_form_validation_multipart($expected, $input) {
-        // TODO test: two parts, totally empty except for answer in one part
-
         self::resetAfterTest();
         self::setAdminUser();
 
-        $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
+        $questiondata = test_question_maker::get_question_data('formulas', 'testtwoandtwo');
 
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $generator->create_question_category([]);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
 
-        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testtwoandtwo');
         $formdata->id = 0;
         $formdata->category = "{$category->id},{$category->contextid}";
         $formdata = array_replace_recursive((array)$formdata, $input);
@@ -225,6 +249,148 @@ class questiontype_test extends \advanced_testcase {
         qtype_formulas_edit_form::mock_submit($formdata);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
         self::assertEquals(count($expected) === 0, $form->is_validated());
+    }
+
+    public function provide_single_part_data_for_form_validation(): array {
+        return [
+            [[], []],
+            [[], ['answer' => [0 => '[1, 2]']]],
+            [[], ['globalunitpenalty' => 0]],
+            [[], ['globalunitpenalty' => 1]],
+            // This should not cause a validation error, even though there is only one answer, because {_1}
+            // is then simply left as-is.
+            [[], ['subqtext' => [0 => ['text' => '{_0} and {_1}']]]],
+            [
+                ['subqtext[0]' => get_string('error_answerbox_duplicate', 'qtype_formulas', '_0')],
+                [
+                    'subqtext' => [0 => ['text' => '{_0} and {_0}']],
+                ]
+            ],
+            [
+                ['globalunitpenalty' => get_string('error_unitpenalty', 'qtype_formulas')],
+                ['globalunitpenalty' => 2]
+            ],
+            [
+                ['globalunitpenalty' => get_string('error_unitpenalty', 'qtype_formulas')],
+                ['globalunitpenalty' => -0.5]
+            ],
+            [['globalruleid' => get_string('error_ruleid', 'qtype_formulas')], ['globalruleid' => -1]],
+            [['varsrandom' => "1:2:syntax error: unexpected end of expression after '='"], ['varsrandom' => 'a=']],
+            [['varsglobal' => "1:2:syntax error: unexpected end of expression after '='"], ['varsglobal' => 'a=']],
+            // If random *and* global vars are screwed, we should only have an error for random vars.
+            [['varsrandom' => "1:2:syntax error: unexpected end of expression after '='"], ['varsrandom' => 'a=', 'varsglobal' => 'b=']],
+            [['vars1[0]' => "1:2:syntax error: unexpected end of expression after '='"], ['vars1' => [0 => 'a=']]],
+            [['vars1[0]' => '1:4:division by zero is not defined'], ['vars1' => [0 => 'a=2/0']]],
+            [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => -1]]],
+            [['answer[0]' => "1:1:syntax error: unexpected end of expression after '*'"], ['answer' => [0 => '*']]],
+            [
+                ['answer[0]' => '1:1:unknown variable: c'],
+                [
+                    'vars1' => [0 => 'a=3; b=4'],
+                    'answer' => [0 => 'c'],
+                ]
+            ],
+            [['vars2[0]' => "1:4:syntax error: unexpected end of expression after '+'"], ['vars2' => [0 => 'a=3+']]],
+            [['vars2[0]' => "1:5:evaluation error: numeric value expected, got 'f'"], ['vars2' => [0 => 'a=3*"f"']]],
+            [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 'foo']]],
+            [
+                ['answermark[0]' => get_string('error_mark', 'qtype_formulas')],
+                [
+                    'answermark' => [0 => 0],
+                    'subqtext' => [0 => ['text' => 'foo']],
+                ]
+            ],
+            [
+                ['correctness[0]' => get_string('error_criterion_empty', 'qtype_formulas')],
+                [
+                    'correctness' => [0 => ''],
+                    'subqtext' => [0 => ['text' => 'foo']],
+                ]
+            ],
+            [
+                ['answer[0]' => get_string('error_answer_missing', 'qtype_formulas')],
+                [
+                    'answer' => [0 => ''],
+                    'subqtext' => [0 => ['text' => 'foo']],
+                ]
+            ],
+            [
+                ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '3'],
+                ]
+            ],
+            [
+                ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
+                [
+                    'globalvars' => 'x=5',
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '3*x'],
+                ]
+            ],
+            [
+                ['answer[0]' => 'error in answer #1: unknown variable: x'],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '"3*x"'],
+                ]
+            ],
+            [
+                ['correctness[0]' => get_string('error_grading_not_1', 'qtype_formulas', 0.5)],
+                [
+                    'correctness' => [0 => '0.5'],
+                ]
+            ],
+            [
+                ['correctness[0]' => get_string('error_grading_single_expression', 'qtype_formulas', 2)],
+                [
+                    'correctness' => [0 => 'a=1; b=2'],
+                ]
+            ],
+            [
+                ['correctness[0]' => '1:2:division by zero is not defined'],
+                [
+                    'correctness' => [0 => '1/0'],
+                ]
+            ],
+            [
+                ['postunit[0]' => get_string('error_unit', 'qtype_formulas')],
+                [
+                    'postunit' => [0 => 'a/b*c'],
+                ]
+            ],
+            [
+                ['otherrule[0]' => get_string('error_rule', 'qtype_formulas')],
+                [
+                    'otherrule' => [0 => '5-'],
+                ]
+            ],
+            [
+                [
+                    'answermark[0]' => get_string('error_mark', 'qtype_formulas'),
+                    'answer[0]' => get_string('error_no_answer', 'qtype_formulas')
+                ],
+                [
+                    'answermark' => [0 => ''],
+                    'answer' => [0 => ''],
+                ]
+            ],
+            // The following will not generate an error for the grading criterion, because the form will
+            // switch to simplified mode and filled with the default criterion (according to the admin
+            // settings), so the field will be valid.
+            [
+                [
+                    'answermark[0]' => get_string('error_mark', 'qtype_formulas'),
+                    'answer[0]' => get_string('error_no_answer', 'qtype_formulas'),
+                ],
+                [
+                    'answermark' => [0 => ''],
+                    'correctness' => [0 => ''],
+                    'answer' => [0 => ''],
+                ]
+            ],
+        ];
     }
 
     /**
@@ -251,103 +417,6 @@ class questiontype_test extends \advanced_testcase {
         qtype_formulas_edit_form::mock_submit($formdata);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
         self::assertEquals(count($expected) === 0, $form->is_validated());
-    }
-
-    public function test_foo() {
-        // FIXME: remove this once all others are done
-        // test: two parts, totally empty except for answer in one part
-
-        self::resetAfterTest();
-        self::setAdminUser();
-
-        $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
-
-        $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        $category = $generator->create_question_category([]);
-        $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
-
-        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
-        $formdata->id = 0;
-        $formdata->category = "{$category->id},{$category->contextid}";
-        //$formdata = array_replace_recursive((array)$formdata, []);
-        $errors = $form->validation((array)$formdata, []);
-
-        self::assertEquals([], $errors);
-
-        /*$formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
-        $formdata->id = 0;
-        $formdata->category = "{$category->id},{$category->contextid}";
-        $formdata->answermark[0] = 0;
-        $errors = $form->validation((array)$formdata, []);
-
-        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
-        $formdata->id = 0;
-        $formdata->category = "{$category->id},{$category->contextid}";
-        $formdata->answermark[1] = 2;
-        $errors = $form->validation((array)$formdata, []);*/
-
-        $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
-        $formdata->id = 0;
-        $formdata->category = "{$category->id},{$category->contextid}";
-        $formdata->answermark[0] = 0;
-        $formdata->answer[0] = '1';
-        $formdata->feedback[0] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->subqtext[0] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->answermark[1] = 0;
-        $formdata->answer[1] = '';
-        $formdata->feedback[1] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->subqtext[1] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->answermark[2] = 0;
-        $formdata->answer[2] = '';
-        $formdata->feedback[2] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->subqtext[2] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->answermark[3] = 0;
-        $formdata->answer[3] = '';
-        $formdata->feedback[3] = ['text' => '', 'format' => FORMAT_HTML];
-        $formdata->subqtext[3] = ['text' => '', 'format' => FORMAT_HTML];
-        $errors = $form->validation((array)$formdata, []);
-
-
-        /*qtype_formulas_edit_form::mock_submit((array)$formdata);
-        $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
-        $fromform = $form->get_data();*/
-
-        return;
-
-        //$form->mock_submit((array)$formdata);
-        //qtype_formulas_edit_form::mock_submit((array)$formdata);
-        self::assertTrue($form->is_validated());
-
-        qtype_formulas_edit_form::mock_submit((array)$formdata);
-        $test = $form->get_data();
-
-        return;
-
-
-        $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        self::assertTrue($form->is_validated());
-
-
-        //$test = qtype_formulas_edit_form::mock_submit((array)$formdata);
-
-
-        return;
-        self::assertTrue($form->is_validated());
-        return;
-
-
-        $syscontext = context_system::instance();
-        var_dump($syscontext);
-        return;
-
-        $form = new qtype_formulas_edit_form('', new qtype_formulas_question(), $cat->id, context_system::instance());
-        $form->mock_submit($formdata);
-        print_r($form->get_data());
-        return;
-        $form = qtype_formulas_test_helper::get_question_editing_form($cat, $questiondata);
-        self::assertTrue($form->is_validated());
-
-        $fromform = $form->get_data();
     }
 
     public function test_fetch_part_ids_for_question(): void {
@@ -520,6 +589,7 @@ class questiontype_test extends \advanced_testcase {
             ['testsinglenum'],
             ['testsinglenumunit'],
             ['testmethodsinparts'],
+            ['testtwoandtwo'],
         ];
     }
 
@@ -660,16 +730,8 @@ class questiontype_test extends \advanced_testcase {
         $this->expectOutputRegex('/\+\+ Importing 1 questions from file \+\+.*' . preg_quote($expected, '/') . '/s');
     }
 
-    public function provide_question_names_for_export(): array {
-        return [
-            ['testsinglenum'],
-            ['testsinglenumunit'],
-            ['testmethodsinparts'],
-        ];
-    }
-
     /**
-     * @dataProvider provide_question_names_for_export
+     * @dataProvider provide_question_names
      */
     public function test_export_and_reimport_xml($questionname): void {
         global $CFG, $DB;
