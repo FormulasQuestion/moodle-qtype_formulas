@@ -457,14 +457,17 @@ class qtype_formulas_test_helper extends question_test_helper {
     public static function make_formulas_question_testsinglenumunitsep() {
         $q = self::make_a_formulas_question();
 
-        $q->name = 'test-0';
+        $q->name = 'test-singlenumunitsep';
         $q->questiontext = '<p>One part, one number plus unit, answer is 5 m/s</p>';
 
         $q->penalty = 0.3;
-        $q->textfragments = array(0 => '<p>One part, one number plus unit, answer is 5 m/s</p>',
-                                  1 => '');
+        $q->textfragments = [
+            0 => '<p>One part, one number plus unit, answer is 5 m/s</p>',
+            1 => ''
+        ];
         $q->numparts = 1;
         $q->defaultmark = 2;
+
         $p = self::make_a_formulas_part();
         $p->id = 14;
         $p->questionid = $q->id;
@@ -474,9 +477,9 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->answernotunique = '1';
         $p->postunit = 'm/s';
         $p->subqtext = '{_0} {_u}';
-        $p->partcorrectfb = 'Your answer is correct.';
-        $p->partpartiallycorrectfb = 'Your answer is partially correct.';
-        $p->partincorrectfb = 'Your answer is incorrect.';
+        $p->partcorrectfb = self::DEFAULT_CORRECT_FEEDBACK;
+        $p->partpartiallycorrectfb = self::DEFAULT_PARTIALLYCORRECT_FEEDBACK;
+        $p->partincorrectfb = self::DEFAULT_INCORRECT_FEEDBACK;
         $q->parts[0] = $p;
         return $q;
     }
@@ -488,37 +491,39 @@ class qtype_formulas_test_helper extends question_test_helper {
     public function get_formulas_question_form_data_testsinglenumunitsep() {
         $form = new stdClass();
 
-        $form->name = 'test-0';
+        $form->name = 'test-singlenumunit';
         $form->noanswers = 1;
-        $form->answer = array('5');
-        $form->answernotunique = array('1');
-        $form->answermark = array(2);
-        $form->answertype = array('0');
-        $form->correctness = array('_relerr < 0.01');
-        $form->numbox = array(1);
-        $form->placeholder = array('');
-        $form->vars1 = array('');
-        $form->vars2 = array('');
-        $form->postunit = array('m/s');
-        $form->otherrule = array('');
-        $form->subqtext = array(
-            array('text' => '{_0} {_u}', 'format' => FORMAT_HTML)
-        );
-        $form->feedback = array(
-            array('text' => '', 'format' => FORMAT_HTML)
-        );
-        $form->partcorrectfb = array(
-            array('text' => 'Your answer is correct.', 'format' => FORMAT_HTML)
-        );
-        $form->partpartiallycorrectfb = array(
-            array('text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML)
-        );
-        $form->partincorrectfb = array(
-            array('text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML)
-        );
-        $form->questiontext = array('text' => '<p>One part, one number plus unit, answer is 5 m/s</p>',
-                'format' => FORMAT_HTML);
-        $form->generalfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->answer = ['5'];
+        $form->answernotunique = ['1'];
+        $form->answermark = [2];
+        $form->answertype = ['0'];
+        $form->correctness = ['_relerr < 0.01'];
+        $form->numbox = [1];
+        $form->placeholder = [''];
+        $form->vars1 = [''];
+        $form->vars2 = [''];
+        $form->postunit = ['m/s'];
+        $form->otherrule = [''];
+        $form->subqtext = [
+            ['text' => '{_0} {_u}', 'format' => FORMAT_HTML]
+        ];
+        $form->feedback = [
+            ['text' => '', 'format' => FORMAT_HTML]
+        ];
+        $form->partcorrectfb = [
+            ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML]
+        ];
+        $form->partpartiallycorrectfb = [
+            ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML]
+        ];
+        $form->partincorrectfb = [
+            ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML]
+        ];
+        $form->questiontext = [
+            'text' => '<p>One part, one number plus unit, answer is 5 m/s</p>',
+            'format' => FORMAT_HTML
+        ];
+        $form->generalfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $form->defaultmark = 2;
         $form->penalty = 0.3;
         $form->varsrandom = '';
@@ -526,11 +531,71 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = 'abc';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = array('text' => '', 'format' => FORMAT_HTML);
-        $form->partiallycorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = array('text' => '', 'format' => FORMAT_HTML);
+        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
         return $form;
+    }
+
+    public static function get_formulas_question_data_testsinglenumunitsep() {
+        $qdata = new stdClass();
+        test_question_maker::initialise_question_data($qdata);
+
+        $qdata->qtype = 'formulas';
+        $qdata->name = 'test-singlenumunitsep';
+        $qdata->questiontext = '<p>One part, one number plus unit, answer is 5 m/s</p>';
+        $qdata->generalfeedback = '';
+        $qdata->defaultmark = 2;
+        $qdata->penalty = 0.3;
+
+        $qdata->options = new stdClass();
+        $qdata->contextid = context_system::instance()->id;
+        $qdata->options->varsrandom = '';
+        $qdata->options->varsglobal = '';
+        $qdata->options->answernumbering = 'abc';
+        $qdata->options->shownumcorrect = 1;
+        $qdata->options->correctfeedback = test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
+        $qdata->options->correctfeedbackformat = FORMAT_HTML;
+        $qdata->options->partiallycorrectfeedback = test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK;
+        $qdata->options->partiallycorrectfeedbackformat = FORMAT_HTML;
+        $qdata->options->incorrectfeedback = test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
+        $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
+
+        $qdata->options->answers = [
+            14 => (object)[
+                'id' => 14,
+                'questionid' => $qdata->id,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => '0',
+                'numbox' => 1,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => '5',
+                'answernotunique' => '1',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => 'm/s',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '{_0} {_u}',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => self::DEFAULT_INCORRECT_FEEDBACK,
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 0,
+            ]
+        ];
+
+        $qdata->options->numparts = 1;
+
+        return $qdata;
     }
 
     /**

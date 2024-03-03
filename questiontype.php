@@ -105,13 +105,12 @@ class qtype_formulas extends question_type {
 
     /**
      * Move all the files belonging to this question (and its parts) from one context to another.
-     * TODO: oldid -> oldcontextid, newid -> newcontextid
      *
      * @param int $questionid the question being moved.
-     * @param int $oldid the context it is moving from.
-     * @param int $newid the context it is moving to.
+     * @param int $oldcontextid the context it is moving from.
+     * @param int $newcontextid the context it is moving to.
      */
-    public function move_files($questionid, $oldid, $newid): void {
+    public function move_files($questionid, $oldcontextid, $newcontextid): void {
         // Fetch the part IDs for every part of this question.
         $partids = $this->fetch_part_ids_for_question($questionid);
 
@@ -119,17 +118,17 @@ class qtype_formulas extends question_type {
         $fs = get_file_storage();
         $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
         foreach ($areas as $area) {
-            $fs->move_area_files_to_new_context($oldid, $newid, 'qtype_formulas', $area, $questionid);
+            $fs->move_area_files_to_new_context($oldcontextid, $newcontextid, 'qtype_formulas', $area, $questionid);
             foreach ($partids as $partid) {
-                $fs->move_area_files_to_new_context($oldid, $newid, 'qtype_formulas', $area, $partid);
+                $fs->move_area_files_to_new_context($oldcontextid, $newcontextid, 'qtype_formulas', $area, $partid);
             }
         }
 
-        $this->move_files_in_combined_feedback($questionid, $oldid, $newid);
-        $this->move_files_in_hints($questionid, $oldid, $newid);
+        $this->move_files_in_combined_feedback($questionid, $oldcontextid, $newcontextid);
+        $this->move_files_in_hints($questionid, $oldcontextid, $newcontextid);
 
         // The parent method will move files from the question text and the general feedback.
-        parent::move_files($questionid, $oldid, $newid);
+        parent::move_files($questionid, $oldcontextid, $newcontextid);
     }
 
     /**
@@ -414,10 +413,6 @@ class qtype_formulas extends question_type {
         // Question's default mark is the total of all non empty parts's marks.
         $formdata->defaultmark = 0;
         foreach (array_keys($formdata->answermark) as $key) {
-            // Do nothing if the part has no mark or no answer.
-            if (trim($formdata->answermark[$key]) === '' || trim($formdata->answer[$key]) === '') {
-                continue;
-            }
             $formdata->defaultmark += $formdata->answermark[$key];
         }
 
@@ -795,13 +790,12 @@ class qtype_formulas extends question_type {
         $hasoneanswer = false;
 
         foreach (array_keys($data->answermark) as $i) {
-            // The answermark is PARAM_FLOAT, by the time we are here, it has already been filtered. If it
-            // was empty or invalid, it is now 0.
-            $nomark = empty($data->answermark[$i]);
+            // The answermark must not be empty or 0.
+            $nomark = empty(trim($data->answermark[$i]));
 
-            // For answers, zero is not nothing... Note that the answer is PARAM_RAW_TRIMMED, so
-            // we don't have to trim it here.
-            $noanswer = empty($data->answer[$i]) && !is_numeric($data->answer[$i]);
+            // For answers, zero is not nothing... Note that PHP < 8.0 does not consider '1 ' as numeric,
+            // so we trim first. PHP 8.0+ makes no difference between leading or trailing whitespace.
+            $noanswer = empty(trim($data->answer[$i])) && !is_numeric(trim($data->answer[$i]));
             if ($noanswer === false) {
                 $hasoneanswer = true;
             }
@@ -837,8 +831,8 @@ class qtype_formulas extends question_type {
             }
 
             // The grading criterion must not be empty. Also, if there is no grading criterion, it does
-            // not make sense to continue the validation. The field is PARAM_RAW_TRIMMED.
-            if (empty($data->correctness[$i])) {
+            // not make sense to continue the validation.
+            if (empty(trim($data->correctness[$i]))) {
                 $errors["correctness[$i]"] = get_string('error_criterion_empty', 'qtype_formulas');
                 continue;
             }
@@ -994,6 +988,10 @@ class qtype_formulas extends question_type {
             try {
                 $unitcheck->reparse_all_rules();
             } catch (Exception $e) {
+                // This can only happen if the user has modified (and screwed up) conversion_rules.php.
+                // TODO: When refactoring the unit stuff, user-defined rules must be written via the
+                // settings page and validated there, the user should not be forced to modify the PHP files,
+                // also because they will be overwritten on every update.
                 $errors['globalruleid'] = $e->getMessage();
             }
         }
@@ -1085,42 +1083,40 @@ class qtype_formulas extends question_type {
                 continue;
             }
 
-            // FIXME: case where type numeric and answer is variable containing a list
-
-            // Now that we know the model answers, we can set the $numbox property for the part,
-            // i. e. the number of answer boxes that are to be shown. Also, we make sure that
-            // $modelanswers becomes an array (possibly of one value) of literals.
-            if (is_array($modelanswers->value)) {
-                // The value can be an array, because the user entered an algebraic variable. That
-                // is not accepted.
-                if ($modelanswers->type === token::SET) {
-                    // TODO: externalise
-                    $errors["answer[$i]"] = 'Invalid answer format: you cannot use an algebraic variable with this answer type';
-                    continue;
-                }
-                $part->numbox = count($modelanswers->value);
-                $modelanswers = array_map(function ($element) {
-                    return $element->value;
-                }, $modelanswers->value);
+            // Check the model answer. If it is a LIST, make an array out of the individual tokens. If it is
+            // a single token, wrap it into a single-element array.
+            // Note: If we have e.g. the (global or local) variable 'a=[1,2,3]' and the answer is 'a',
+            // this will be considered as three answers 1, 2 and 3. We must maintain that interpretation
+            // for backwards compatibility.
+            if ($modelanswers->type === token::LIST) {
+                $modelanswers = $modelanswers->value;
             } else {
-                $part->numbox = 1;
-                $modelanswers = [$modelanswers->value];
+                $modelanswers = [$modelanswers];
             }
 
-            // If the answer type is algebraic and the user provided a valid numerical expression (possibly
-            // containing non-algebraic variables), evaluation did not fail, so we still find ourselves with
-            // invalid model answers. Furthermore, we must now try to do algebraic evaluation of each answer
-            // to check for bad formulas.
-            // Finally, if the user correctly specified strings, the quotes have been stripped, so we need to
-            // add them again.
-            if ($isalgebraic) {
-                foreach ($modelanswers as $k => &$answer) {
-                    // After the first problematic answer, we do not need to check the rest, so we break.
-                    if (!is_string($answer)) {
-                        $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
-                        break;
-                    }
+            // As $modelanswers is now an array, we can iterate over all answers. If the answer type is
+            // "algebraic formula", they must all be strings. Otherwise, they must all be numbers.
+            foreach ($modelanswers as $answer) {
+                if ($isalgebraic && $answer->type !== token::STRING) {
+                    $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
+                    continue;
+                }
+                if (!$isalgebraic && $answer->type !== token::NUMBER) {
+                    $errors["answer[$i]"] = get_string('error_number_for_numeric_answertypes', 'qtype_formulas');
+                    continue;
+                }
+            }
+            // Finally, we convert the array of tokens into an array of literals.
+            $modelanswers = token::unpack($modelanswers);
 
+            // Now that we know the model answers, we can set the $numbox property for the part,
+            // i. e. the number of answer boxes that are to be shown.
+            $part->numbox = count($modelanswers);
+
+            // If the answer type is algebraic, we must now try to do algebraic evaluation of each answer
+            // to check for bad formulas.
+            if ($isalgebraic) {
+                foreach ($modelanswers as $k => $answer) {
                     // Evaluating the string should give us a numeric value.
                     try {
                         $result = $partevaluator->calculate_algebraic_expression($answer);
@@ -1135,30 +1131,26 @@ class qtype_formulas extends question_type {
                         $errors["answer[$i]"] = get_string('error_in_answer', 'qtype_formulas', $a);
                         break;
                     }
+                }
+            }
 
-                    // Add quotes around the answer.
-                    $answer = '"' . $answer . '"';
-                }
-                // In case we later write to $answer, this would alter the last entry of the $modelanswers
-                // array, so we'd better remove the reference to make sure this won't happend.
-                unset($answer);
-                // If there was an error, we do not continue the validation.
-                if (!empty($errors["answer[$i]"])) {
-                    continue;
-                }
+            // If there was an error, we do not continue the validation, because the answers are going to
+            // be used for the next steps.
+            if (!empty($errors["answer[$i]"])) {
+                continue;
             }
 
             // In order to prepare the grading variables, we need to have the special vars like
             // _a and _r or _0, _1, ... or _err and _relerr. We will create a dummy part and use it
-            // as our worker. The result will automatically flow back into $partevaluator, because the
-            // assignment is by reference only.
+            // as our worker. Note that the result will automatically flow back into $partevaluator,
+            // because the assignment is by reference only.
             $dummypart = new qtype_formulas_part();
             $dummypart->answertype = $part->answertype;
             $dummypart->answer = $part->answer;
             $dummypart->evaluator = $partevaluator;
             try {
                 $dummypart->add_special_variables($dummypart->get_evaluated_answers(), 1);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 // This should not happen, because we have thouroughly validated the model answers, but
                 // if there was a problem, it's probably best to output the error near the answer field.
                 $errors["answer[$i]"] = $e->getMessage();

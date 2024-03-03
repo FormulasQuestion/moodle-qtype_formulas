@@ -978,6 +978,50 @@ class question_test extends \basic_testcase {
         self::assertNotNull($e);
     }
 
+    public function provide_responses_for_question_without_unit(): array {
+        return [
+            [['id' => null, 'fraction' => null], ''],
+            [['id' => 'right', 'fraction' => 1], '5'],
+            [['id' => 'right', 'fraction' => 1], '5.0'],
+            [['id' => 'wrong', 'fraction' => 0], '15'],
+            [['id' => 'wrong', 'fraction' => 0], 'foo'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_responses_for_question_without_unit
+     */
+    public function test_classify_response_without_unit($expected, $input) {
+        // Prepare a question.
+        $question = $this->get_test_formulas_question('testsinglenum');
+
+        // Prepare and start a question attempt.
+        $quba = new question_usage_by_activity('qtype_formulas', \context_system::instance());
+        $qa = new question_attempt($question, $quba->get_id());
+        $qa->start('immediatefeedback', 1);
+
+        $qdata = \test_question_maker::get_question_data('formulas', 'testsinglenum');
+        $possibleresponses = \question_bank::get_qtype('formulas')->get_possible_responses($qdata);
+
+        $response = ['0_0' => $input, '-submit' => 1];
+        $qa->process_action($response);
+        $classification = $question->classify_response($response)[0];
+
+        // If we send an empty response, we will get a special classification with its own response summary.
+        // Check that the classification is in the list of possibleresponses.
+        if ($expected['id'] === null) {
+            $input = get_string('noresponse', 'question');
+            // We cannot use 'null' as key for assertArrayHasKey, so we use the empty string.
+            self::assertArrayHasKey('', $possibleresponses[0]);
+        } else {
+            self::assertArrayHasKey($expected['id'], $possibleresponses[0]);
+        }
+
+        self::assertEquals($expected['id'], $classification->responseclassid);
+        self::assertEquals($expected['fraction'], $classification->fraction);
+        self::assertEquals($input, $classification->response);
+    }
+
     public function provide_responses_for_combined_question(): array {
         return [
             [['id' => null, 'fraction' => null], ''],
@@ -1003,7 +1047,6 @@ class question_test extends \basic_testcase {
 
         $qdata = \test_question_maker::get_question_data('formulas', 'testsinglenumunit');
         $possibleresponses = \question_bank::get_qtype('formulas')->get_possible_responses($qdata);
-
 
         $response = ['0_' => $input, '-submit' => 1];
         $qa->process_action($response);
@@ -1049,14 +1092,20 @@ class question_test extends \basic_testcase {
         $qa = new question_attempt($question, $quba->get_id());
         $qa->start('immediatefeedback', 1);
 
+        $qdata = \test_question_maker::get_question_data('formulas', 'testsinglenumunitsep');
+        $possibleresponses = \question_bank::get_qtype('formulas')->get_possible_responses($qdata);
+
         $response = ['0_0' => $input[0], '0_1' => $input[1], '-submit' => 1];
         $qa->process_action($response);
         $classification = $question->classify_response($response)[0];
 
         // If we send an empty response, we will get a special classification with its own response summary.
         if ($expected['id'] === null) {
-            $summary = '[No response]';
+            $summary = get_string('noresponse', 'question');
+            // We cannot use 'null' as key for assertArrayHasKey, so we use the empty string.
+            self::assertArrayHasKey('', $possibleresponses[0]);
         } else {
+            self::assertArrayHasKey($expected['id'], $possibleresponses[0]);
             $summary = "{$input[0]}, {$input[1]}";
         }
 

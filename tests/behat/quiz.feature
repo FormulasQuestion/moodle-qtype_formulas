@@ -109,7 +109,7 @@ Feature: Usage in quiz
     And I press "Finish attempt"
     And I press "Submit all and finish"
     # And I confirm the quiz submission in the modal dialog
-    Then I should see "Your answer is correct."
+    Then I should see "Correct answer, well done."
 
   Scenario: Try to answer a question with three parts and one answer field each
     When I follow "Quiz 5"

@@ -40,9 +40,6 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
 
-// FIXME: check setting of numbox according to model answers
-
-
 /**
  * Unit tests for question/type/formulas/questiontype.php.
  *
@@ -255,6 +252,7 @@ class questiontype_test extends \advanced_testcase {
         return [
             [[], []],
             [[], ['answer' => [0 => '[1, 2]']]],
+            [[], ['vars2' => [0 => 'x=_0'], 'correctness' => [0 => 'x']]],
             [[], ['globalunitpenalty' => 0]],
             [[], ['globalunitpenalty' => 1]],
             // This should not cause a validation error, even though there is only one answer, because {_1}
@@ -322,11 +320,24 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [
+                ['answer[0]' => get_string('error_number_for_numeric_answertypes', 'qtype_formulas')],
+                [
+                    'answer' => [0 => '"3"'],
+                ]
+            ],
+            [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
                 [
-                    'globalvars' => 'x=5',
+                    'varsglobal' => 'x=5',
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3*x'],
+                ]
+            ],
+            [
+                ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '3*'],
                 ]
             ],
             [
@@ -334,6 +345,30 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"3*x"'],
+                ]
+            ],
+            [
+                ['answer[0]' => "1:1:algebraic variable 'x' cannot be used in this context"],
+                [
+                    'varsglobal' => 'x={1,2,3}',
+                    'answer' => [0 => 'x'],
+                ]
+            ],
+            [
+                [],
+                [
+                    'varsglobal' => 'x={1,2,3}',
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '"x"'],
+                    'correctness' => [0 => '_err < 0.01'],
+                ]
+            ],
+            [
+                ['correctness[0]' => get_string('error_algebraic_relerr', 'qtype_formulas')],
+                [
+                    'varsglobal' => 'x={1,2,3}',
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '"x"'],
                 ]
             ],
             [
@@ -417,6 +452,35 @@ class questiontype_test extends \advanced_testcase {
         qtype_formulas_edit_form::mock_submit($formdata);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
         self::assertEquals(count($expected) === 0, $form->is_validated());
+    }
+
+    public function provide_answers_for_numbox_test(): array {
+        return [
+            [1, '5'],
+            [3, 'a'],
+            [1, 'b'],
+            [1, 'sum(a)'],
+            [1, 'sum([1,2])'],
+            [2, '[1,2]'],
+            [2, '[1,b]'],
+        ];
+    }
+
+    // FIXME: do similar test for algebraic answer type?
+
+    /**
+     * @dataProvider provide_answers_for_numbox_test
+     */
+    public function test_calculation_of_numbox_numbertype($expected, $answer) {
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testsinglenum');
+        $formdata->id = 0;
+        $formdata->varsglobal = 'a=[1,2,3]; b=1;';
+        $formdata->answer[0] = $answer;
+
+        $qtype = new qtype_formulas();
+        $validationresult = $qtype->validate($formdata);
+        self::assertEquals($expected, $validationresult->answers[0]->numbox);
+        self::assertCount(0, $validationresult->errors);
     }
 
     public function test_fetch_part_ids_for_question(): void {
@@ -588,6 +652,7 @@ class questiontype_test extends \advanced_testcase {
         return [
             ['testsinglenum'],
             ['testsinglenumunit'],
+            ['testsinglenumunitsep'],
             ['testmethodsinparts'],
             ['testtwoandtwo'],
         ];

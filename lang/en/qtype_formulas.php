@@ -288,7 +288,8 @@ $string['response_wrong_unit'] = 'Right value, wrong unit';
 
 
 
-$string['error_string_for_algebraic_formula'] = 'Invalid answer format: with the answer type "algebraic formula" you must provide one single string (wrapped in quotes) or a list of strings, each wrapped in quotes.';
+$string['error_string_for_algebraic_formula'] = 'Invalid answer format: the answer type "algebraic formula" expects one single string wrapped in quotes or a list of strings, each wrapped in quotes.';
+$string['error_number_for_numeric_answertypes'] = 'Invalid answer format: this answer type expects one number or a list of numbers.';
 $string['error_in_answer'] = 'error in answer #{$a->answerno}: {$a->message}';
 $string['error_grading_single_expression'] = 'The grading criterion should be one single expression. Found $a statements instead.';
 $string['error_algebraic_relerr'] = 'relative error (_relerr) cannot be used with answer type algebraic formula';
