@@ -142,8 +142,11 @@ class token {
         } else if (is_float($value) || is_int($value)) {
             $type = self::NUMBER;
         } else if (is_array($value)) {
-            // FIXME: this needs some more treatment, e.g. recursive wrapping
             $type = self::LIST;
+            // Values must be wrapped recursively.
+            foreach ($value as &$val) {
+                $val = self::wrap($val);
+            }
         } else {
             if (is_null($value)) {
                 $value = 'null';

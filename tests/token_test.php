@@ -85,6 +85,7 @@ class token_test extends \advanced_testcase {
         $two = new token(token::NUMBER, 2);
         $three = new token(token::NUMBER, 3);
         $foo = new token(token::STRING, 'foo');
+        $list = new token(token::LIST, [$one, $two, $three]);
 
         return [
             [$one, $one],
@@ -95,7 +96,8 @@ class token_test extends \advanced_testcase {
             [new token(token::STRING, '1'), '1'],
             [new token(token::NUMBER, 1.5), 1.5],
             [new token(token::STRING, '1'), ['value' => 1, 'type' => token::STRING]],
-            [new token(token::LIST, [$one, $two, $three]), [$one, $two, $three]],
+            [$list, [$one, $two, $three]],
+            [new token(token::LIST, [$list]), [[1, 2, 3]]],
             [$one, ['value' => '1', 'type' => token::NUMBER]],
             ['cannot wrap a non-numeric value into a NUMBER token', ['value' => 'a', 'type' => token::NUMBER]],
             ['cannot wrap the given value into a STRING token', ['value' => [1, 2], 'type' => token::STRING]],
