@@ -15,16 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Used to save and restore image correctly
+ * for loop for qtype_formulas parser
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package qtype_formulas
+ * @package    qtype_formulas
+ * @copyright  2022 Philipp Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function qtype_formulas_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG;
-    require_once($CFG->libdir . '/questionlib.php');
-    question_pluginfile($course, $context, 'qtype_formulas', $filearea, $args, $forcedownload, $options);
+namespace qtype_formulas;
+
+class for_loop {
+    /** @var token variable token for the loop's iterator variable */
+    public token $variable;
+
+    /** @var expression values the loop will iterate over */
+    public expression $range;
+
+    /** @var array statements of the loop */
+    public array $body = [];
+
+    public function __construct(token $var, expression $range, array $body) {
+        $this->variable = $var;
+        $this->range = $range;
+        $this->body = $body;
+    }
 }
