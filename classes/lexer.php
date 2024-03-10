@@ -151,7 +151,7 @@ class lexer {
         // If we are still here, that's not good at all. We need to read the char (it is only peeked
         // so far) in order for the input stream to be at the right position.
         $this->inputstream->read();
-        $this->inputstream->die("unexpected input: '$currentchar'");
+        $this->inputstream->die(get_string('error_unexpectedinput', 'qtype_formulas', $currentchar));
     }
 
     /**
@@ -261,9 +261,8 @@ class lexer {
             $result .= $currentchar;
         }
         // Still here? That means the string has not been closed.
-        $this->inputstream->die(
-            "unterminated string, started at row {$startingposition['row']}, column {$startingposition['column']}"
-        );
+        $a = (object)$startingposition;
+        $this->inputstream->die(get_string('error_unterminatedstring', 'qtype_formulas', $a));
     }
 
     /**

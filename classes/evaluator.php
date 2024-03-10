@@ -299,7 +299,7 @@ class evaluator {
         $randomvariables = @unserialize($data['randomvariables'], ['allowed_classes' => [random_variable::class, token::class]]);
         $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
         if ($randomvariables === false || $variables === false) {
-            throw new Exception('invalid variable context given, aborting import');
+            throw new Exception(get_string('error_invalidcontext', 'qtype_formulas'));
         }
         foreach ($variables as $name => $var) {
             // New variables are added.
@@ -346,7 +346,7 @@ class evaluator {
         // because we might one day need some internal variables or the like.
         $underscore = strpos($basename, '_') === 0;
         if ($underscore && $this->godmode === false) {
-            $this->die("invalid variable name: $basename", $value);
+            $this->die(get_string('error_invalidvarname', 'qtype_formulas', $basename), $value);
         }
 
         // If there are no indices, we set the variable as requested.
@@ -356,7 +356,7 @@ class evaluator {
             if ($israndomvar) {
                 $useshuffle = $value->type === variable::LIST;
                 if (is_scalar($value->value)) {
-                    $this->die('invalid definition of a random variable - you must provide a list of possible values', $value);
+                    $this->die(get_string('error_invalidrandvardef', 'qtype_formulas'), $value);
                 }
                 $randomvar = new random_variable($basename, $value->value, $useshuffle);
                 $this->randomvariables[$basename] = $randomvar;
@@ -370,7 +370,7 @@ class evaluator {
                 // strings or nested lists.
                 foreach ($value->value as $entry) {
                     if ($entry->type != token::NUMBER) {
-                        $this->die('algebraic variables can only be initialized with a list of numbers', $value);
+                        $this->die(get_string('error_algvar_numbers', 'qtype_formulas'), $value);
                     }
                 }
 
@@ -383,13 +383,13 @@ class evaluator {
 
         // If there is an index and we are setting a random variable, we throw an error.
         if ($israndomvar) {
-            $this->die('setting individual list elements is not supported for random variables', $value);
+            $this->die(get_string('error_setindividual_randvar', 'qtype_formulas'), $value);
         }
 
         // If there is an index, but the variable is a string, we throw an error. Setting
         // characters of a string in this way is not allowed.
         if ($this->variables[$basename]->type === variable::STRING) {
-            $this->die('individual chars of a string cannot be modified', $value);
+            $this->die(get_string('error_setindividual_string', 'qtype_formulas'), $value);
         }
 
         // Otherwise, we try to get the variable's value. The function will
@@ -425,14 +425,14 @@ class evaluator {
         // Check if the index is a number. If it is not, try to convert it.
         // If conversion fails, throw an error.
         if (!is_numeric($index)) {
-            $this->die("evaluation error: expected numerical index, found '{$index}'", $anchor);
+            $this->die(get_string('error_expected_intindex', 'qtype_formulas', $index), $anchor);
         }
         $index = floatval($index);
 
         // If the index is not a whole number, throw an error. A whole number in float
         // representation is fine, though.
         if ($index - intval($index) != 0) {
-            $this->die("evaluation error: index should be an integer, found '{$index}'", $anchor);
+            $this->die(get_string('error_expected_intindex', 'qtype_formulas', $index), $anchor);
         }
         $index = intval($index);
 
@@ -442,7 +442,7 @@ class evaluator {
         } else if (is_array($arrayorstring)) {
             $len = count($arrayorstring);
         } else {
-            $this->die('evaluation error: indexing is only possible with arrays (lists) and strings', $anchor);
+            $this->die(get_string('error_notindexable', 'qtype_formulas'), $anchor);
         }
 
         // Negative indices can be used to count "from the end". For strings, this is
@@ -453,7 +453,7 @@ class evaluator {
         }
         // Now check if the index is out of range. We use the original value from the token.
         if ($index > $len - 1 || $index < 0) {
-            $this->die("evaluation error: index out of range: {$index}", $anchor);
+            $this->die(get_string('error_indexoutofrange', 'qtype_formulas', $index), $anchor);
         }
 
         return $index;
@@ -474,7 +474,7 @@ class evaluator {
         $parts = explode('[', $rawname);
         $name = array_shift($parts);
         if (!array_key_exists($name, $this->variables)) {
-            $this->die("unknown variable: $name", $variable);
+            $this->die(get_string('error_unknownvarname', 'qtype_formulas', $name), $variable);
         }
         $result = $this->variables[$name];
 
@@ -502,7 +502,7 @@ class evaluator {
                 } else {
                     // If we are not in algebraic mode, it does not make sense to get the value of an algebraic
                     // variable.
-                    $this->die("algebraic variable '$name' cannot be used in this context", $variable);
+                    $this->die(get_string('error_cannotusealgebraic', 'qtype_formulas', $name), $variable);
                 }
             } else {
                 $value = $result->value;
@@ -547,7 +547,7 @@ class evaluator {
      */
     private function pop_real_value(): token {
         if (empty($this->stack)) {
-            throw new Exception('evaluation error: empty stack - did you pass enough arguments for the function or operator?');
+            throw new Exception(get_string('error_emptystack', 'qtype_formulas'));
         }
         $token = array_pop($this->stack);
         if ($token->type === token::VARIABLE) {
@@ -569,7 +569,7 @@ class evaluator {
         // Note that this step will also throw an error, if the expression is empty.
         $parser = new answer_parser($expression, $this->export_variable_list());
         if (!$parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)) {
-            throw new Exception("'$expression' is not a valid algebraic expression");
+            throw new Exception(get_string('error_invalidalgebraic', 'qtype_formulas', $expression));
         }
 
         // Setting the evaluator's seed to the current time. If the function is called several
@@ -709,14 +709,14 @@ class evaluator {
 
         // First, we check that $first and $second are lists of the same size.
         if (!is_array($first)) {
-            throw new Exception("the first argument of diff() must be a list");
+            throw new Exception(get_string('error_diff_first', 'qtype_formulas'));
         }
         if (!is_array($second)) {
-            throw new Exception("the second argument of diff() must be a list");
+            throw new Exception(get_string('error_diff_second', 'qtype_formulas'));
         }
         $count = count($first);
         if (count($second) !== $count) {
-            throw new Exception("diff() expects two lists of the same size");
+            throw new Exception(get_string('error_diff_samesize', 'qtype_formulas'));
         }
 
         // Now make sure the lists do contain one single data type (only numbers or only strings).
@@ -725,14 +725,14 @@ class evaluator {
         // type.
         $type = $first[0]->type;
         if (!in_array($type, [token::NUMBER, token::STRING])) {
-            throw new Exception("when using diff(), the first list must contain only numbers or only strings");
+            throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
         }
         for ($i = 0; $i < $count; $i++) {
             if ($first[$i]->type !== $type) {
-                throw new Exception("diff(): type mismatch for element #{$i} (zero-indexed) of the first list");
+                throw new Exception(get_string('error_diff_firstlist_mismatch', 'qtype_formulas', $i));
             }
             if ($second[$i]->type !== $type) {
-                throw new Exception("diff(): type mismatch for element #{$i} (zero-indexed) of the second list");
+                throw new Exception(get_string('error_diff_secondlist_mismatch', 'qtype_formulas', $i));
             }
         }
 
@@ -740,7 +740,7 @@ class evaluator {
         if ($type === token::NUMBER) {
             // The user should not specify a third argument when working with numbers.
             if ($n !== null) {
-                throw new Exception("diff(): the third argument can only be used with lists of strings");
+                throw new Exception(get_string('error_diff_third', 'qtype_formulas'));
             }
 
             $result = [];
@@ -796,7 +796,7 @@ class evaluator {
         if ($input instanceof for_loop) {
             return $this->evaluate_for_loop($input);
         }
-        throw new Exception('bad invocation of evaluate(), expected expression or for loop');
+        throw new Exception(get_string('error_evaluate_invocation', 'qtype_formulas', 'evaluate_the_right_thing()'));
     }
 
     /**
@@ -811,7 +811,7 @@ class evaluator {
             return $this->evaluate_the_right_thing($input, $godmode);
         }
         if (!is_array($input)) {
-            throw new Exception('bad invocation of evaluate(), expected an expression or a list of expressions');
+            throw new Exception(get_string('error_evaluate_invocation', 'qtype_formulas', 'evaluate()'));
         }
         $result = [];
         foreach ($input as $single) {
@@ -895,7 +895,7 @@ class evaluator {
         }
         // If the stack contains more than one element, there must have been a problem somewhere.
         if (count($this->stack) !== 1) {
-            throw new Exception('stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?');
+            throw new Exception(get_string('error_stacksize', 'qtype_formulas'));
         }
         // If the stack only contains one single variable token, return its content.
         // Otherwise, return the token.
@@ -909,7 +909,7 @@ class evaluator {
 
         // Make sure there is only one index.
         if ($nexttoken->type !== token::OPENING_BRACKET) {
-            $this->die('evaluation error: only one index supported when accessing array elements', $indextoken);
+            $this->die(get_string('error_onlyoneindex', 'qtype_formulas'), $indextoken);
         }
 
         // Fetch the array or string from the stack.
@@ -952,7 +952,7 @@ class evaluator {
 
         // Step must not be zero.
         if ($step == 0) {
-            $this->die('syntax error: step size of a range cannot be zero', $steptoken);
+            $this->die(get_string('error_stepzero', 'qtype_formulas'), $steptoken);
         }
 
         // Fetch start and end of the range. Conserve token for the end value, in case of an error.
@@ -966,12 +966,13 @@ class evaluator {
         $this->abort_if_not_scalar($endtoken);
 
         if ($start === $end) {
-            $this->die('syntax error: start end end of range must not be equal', $endtoken);
+            $this->die(get_string('error_samestartend', 'qtype_formulas'), $endtoken);
         }
 
         if (($end - $start) * $step < 0) {
             if ($parts === 3) {
-                $this->die("evaluation error: range from $start to $end with step $step will be empty", $steptoken);
+                $a = (object)['start' => $start, 'end' => $end, 'step' => $step];
+                $this->die(get_string('error_emptyrange', 'qtype_formulas', $a), $steptoken);
             }
             $step = -$step;
         }
@@ -1029,19 +1030,23 @@ class evaluator {
      * @throws Exception
      */
     private function abort_if_not_scalar(token $token, bool $enforcenumeric = true): void {
+        $found = '';
+        $a = (object)[];
         if ($token->type !== token::NUMBER) {
             if ($token->type === token::SET) {
-                // FIXME type ALGEBRAIC - not here
+                $found = '_algebraicvar';
                 $value = "algebraic variable";
             } else if ($token->type === token::LIST) {
+                $found = '_list';
                 $value = "list";
             } else if ($enforcenumeric) {
-                $value = "'{$token->value}'";
+                $a->found = "'{$token->value}'";
             } else if ($token->type === token::STRING) {
                 return;
             }
-            $expected = ($enforcenumeric ? 'numeric' : 'scalar');
-            $this->die("evaluation error: $expected value expected, got $value", $token);
+            $expected = ($enforcenumeric ? 'number' : 'scalar');
+
+            $this->die(get_string("error_expected_{$expected}_found{$found}", 'qtype_formulas', $a), $token);
         }
     }
 
@@ -1063,7 +1068,7 @@ class evaluator {
 
         // The destination must be a variable token.
         if ($destination->type !== token::VARIABLE) {
-            $this->die('left-hand side of assignment must be a variable', $destination);
+            $this->die(get_string('error_variablelhs', 'qtype_formulas'), $destination);
         }
         return $this->set_variable_to_value($destination, $what, $israndomvar);
     }
@@ -1072,7 +1077,7 @@ class evaluator {
         // For good error reporting, we first check, whether there are enough arguments on
         // the stack. We subtract one, because there is a sentinel token.
         if (count($this->stack) - 1 < 3) {
-            $this->die('evaluation error: not enough arguments for ternary operator', $optoken);
+            $this->die(get_string('error_ternary_notenough', 'qtype_formulas'), $optoken);
         }
         $else = array_pop($this->stack);
         $then = array_pop($this->stack);
@@ -1081,12 +1086,12 @@ class evaluator {
         // for an upcoming assignment). In that case, the intended 'then' token has been popped as
         // the 'else' part and we have now read the '%%ternary-sentinel' pseudo-token.
         if ($then->type === token::OPERATOR && $then->value === '%%ternary-sentinel') {
-            $this->die('evaluation error: not enough arguments for ternary operator', $then);
+            $this->die(get_string('error_ternary_notenough', 'qtype_formulas'), $then);
         }
         // If everything is OK, we should now arrive at the '%%ternary-sentinel' pseudo-token. Let's see...
         $pseudotoken = array_pop($this->stack);
         if ($pseudotoken->type !== token::OPERATOR && $pseudotoken->value !== '%%ternary-sentinel') {
-            $this->die('evaluation error: not enough arguments for ternary operator', $then);
+            $this->die(get_string('error_ternary_notenough', 'qtype_formulas'), $then);
         }
 
         $condition = $this->pop_real_value();
@@ -1154,14 +1159,14 @@ class evaluator {
             return $count >= $min && $count <= $max;
         }
         // Still here? That means the function is unknown.
-        $this->die("unknown function: '$funcname'", $function);
+        $this->die(get_string('error_unknownfunction', 'qtype_formulas', $funcname), $function);
     }
 
     private function resolve_constant($token): token {
         if (array_key_exists($token->value, $this->constants)) {
             return new token(token::NUMBER, $this->constants[$token->value], $token->row, $token->column);
         }
-        $this->die("undefined constant: '{$token->value}'", $token);
+        $this->die(get_string('error_undefinedconstant', 'qtype_formulas', $token->value), $token);
     }
 
     private function execute_function(token $token): token {
@@ -1174,7 +1179,8 @@ class evaluator {
         // Check if the number of params is valid for the given function. If it is not,
         // die with an error message.
         if (!$this->is_valid_num_of_params($token, $numparams)) {
-            $this->die("invalid number of arguments for function '$funcname': $numparams given", $numparamstoken);
+            $a = (object)['function' => $funcname, 'count' => $numparams];
+            $this->die(get_string('error_function_argcount', 'qtype_formulas', $a), $token);
         }
 
         // Fetch the params from the stack and reverse their order, because the stack is LIFO.
@@ -1184,24 +1190,28 @@ class evaluator {
         }
         $params = array_reverse($params);
 
-        // FIXME: return correct type according to function
-        // -> own functions should have possibility to return token; in this case, use it
-        // -> if function returns value (PHP function or simple own function), wrap it into token
         // If something goes wrong, e. g. wrong type of parameter, functions will throw a TypeError (built-in)
         // or an Exception (custom functions). We catch the exception and build a nice error message.
         try {
             // If we have our own implementation, execute that one. Otherwise, use PHP's built-in function.
             // The special function diff() is defined in the evaluator, so it needs special treatment.
+            $isown = array_key_exists($funcname, functions::FUNCTIONS);
             $prefix = '';
             if ($funcname === 'diff') {
                 $prefix = self::class . '::';
-            } else if (array_key_exists($funcname, functions::FUNCTIONS)) {
+            } else if ($isown) {
                 $prefix = functions::class . '::';
             }
             $result = call_user_func_array($prefix . $funcname, $params);
+            // Our own funtions should deal with all sorts of errors and invalid arguments. However,
+            // the PHP built-in functions will sometimes return NAN or ±INF, e.g. for sqrt(-2) or log(0).
+            // We will check for those return values and output a special error message.
+            // Note that for PHP the values NAN, INF and -INF are all numeric, but not finite.
+            if (is_numeric($result) && !is_finite($result)) {
+                throw new Exception(get_string('error_func_nan', 'qtype_formulas', $funcname));
+            }
         } catch (Throwable $e) {
-            // FIXME: maybe change message and remove "evaluation error"
-            $this->die('evaluation error: ' . $e->getMessage(), $token);
+            $this->die($e->getMessage(), $token);
         }
 
         // Some of our own functions may return a token. In those cases, we reset

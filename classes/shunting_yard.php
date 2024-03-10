@@ -229,7 +229,7 @@ class shunting_yard {
         }
         // Die with syntax error if there were more than two colons.
         if ($parts > 3) {
-            self::die('syntax error in range definition', $topmostcolon);
+            self::die(get_string('error_rangesyntax', 'qtype_formulas'), $topmostcolon);
         }
         $output[] = new token(token::NUMBER, $parts);
         $output[] = new token(token::OPERATOR, '%%rangebuild');
@@ -310,7 +310,7 @@ class shunting_yard {
                 case token::ARG_SEPARATOR:
                     $mostrecent = end($separatortype);
                     if ($mostrecent === false) {
-                        self::die('unexpected token: ,', $token);
+                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', ','), $token);
                     }
                     self::flush_all_operators($opstack, $output);
                     self::flush_range_separators($opstack, $output);
@@ -322,9 +322,9 @@ class shunting_yard {
                 case token::OPENING_BRACE:
                     $mostrecent = end($separatortype);
                     if ($mostrecent === 'setelements') {
-                        self::die('syntax error: sets cannot be nested', $token);
+                        self::die(get_string('error_setnested', 'qtype_formulas'), $token);
                     } else if ($mostrecent === 'arrayelements') {
-                        self::die('syntax error: sets cannot be used inside a list', $token);
+                        self::die(get_string('error_setinlist', 'qtype_formulas'), $token);
                     }
                     // Push the opening brace to the output queue. It will mark the start of the
                     // set during evaluation.
@@ -357,7 +357,7 @@ class shunting_yard {
                     // If the last token was a NUMBER, this is a syntax error, because numbers cannot be
                     // array-indexed and an array cannot directly follow a number.
                     if ($lasttype === token::NUMBER) {
-                        self::die('syntax error: did you forget to put an operator?', $token);
+                        self::die(get_string('error_forgotoperator', 'qtype_formulas'), $token);
                     }
                     // Push the opening bracket to the output queue. During evaluation, this will be used
                     // in order to find the start of the list. For indexation, it is not necessary, but will
@@ -396,7 +396,7 @@ class shunting_yard {
                             $value = ($token->value = '_');
                         }
                     } else if ($value === '!' || $value === '~') {
-                        self::die("invalid use of unary operator: $value", $token);
+                        self::die(get_string('error_invalidunary', 'qtype_formulas', $value), $token);
                     }
 
                     $thisprecedence = self::get_precedence($value);
@@ -511,7 +511,7 @@ class shunting_yard {
                 // marker. Also, all IDENTIFIER tokens have been classified as either VARIABLE or FUNCTION. If
                 // we see any unexpected token now, we'd better throw an error.
                 default:
-                    self::die("unexpected token: $value", $token);
+                    self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
             }
             $lasttoken = $token;
             // We have passed the first token, so generally there can be no unary operator.

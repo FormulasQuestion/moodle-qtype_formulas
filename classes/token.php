@@ -119,7 +119,7 @@ class token {
         // it is, we convert it to float. Otherwise, we throw an error.
         if ($type == self::NUMBER) {
             if (!is_numeric(($value))) {
-                throw new Exception('cannot wrap a non-numeric value into a NUMBER token');
+                throw new Exception(get_string('error_wrapnumber', 'qtype_formulas'));
             }
             $value = floatval($value);
         }
@@ -129,7 +129,7 @@ class token {
             try {
                 $value = strval($value);
             } catch (Exception $e) {
-                throw new Exception('cannot wrap the given value into a STRING token');
+                throw new Exception(get_string('error_wrapstring', 'qtype_formulas'));
             }
         }
         // If a specific type is requested, we return a token with that type.
@@ -142,10 +142,13 @@ class token {
         } else if (is_float($value) || is_int($value)) {
             $type = self::NUMBER;
         } else if (is_array($value)) {
-            // FIXME: this probably needs some more treatment, e.g. recursive wrapping
+            // FIXME: this needs some more treatment, e.g. recursive wrapping
             $type = self::LIST;
         } else {
-            throw new Exception("the given value '$value' has an invalid data type and cannot be converted to a token");
+            if (is_null($value)) {
+                $value = 'null';
+            }
+            throw new Exception(get_string('error_tokenconversion', 'qtype_formulas', $value));
         }
         return new token($type, $value);
     }

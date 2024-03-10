@@ -113,17 +113,14 @@ class parser {
                 $top = end($parenstack);
                 // If stack is empty, we have a stray closing paren.
                 if (!($top instanceof token)) {
-                    $this->die("unbalanced parentheses, stray '{$token->value}' found", $token);
+                    $this->die(get_string('error_strayparen', 'qtype_formulas', $token->value), $token);
                 }
                 // Let's check whether the opening and closing parenthesis have the same type.
                 // If they do, XORing them should leave just the 16- and the 32-bit. Otherwise,
                 // we can stop here.
                 if (($top->type ^ $type) !== 0b110000) {
-                    $this->die(
-                        "mismatched parentheses, '{$token->value}' is closing '{$top->value}' " .
-                        "from row {$top->row} and column {$top->column}",
-                        $token
-                    );
+                    $a = (object)['closer' => $token->value, 'opener' => $top->value, 'row' => $top->row, 'column' => $top->column];
+                    $this->die(get_string('error_parenmismatch', 'qtype_formulas', $a), $token);
                 }
                 array_pop($parenstack);
             }
@@ -131,7 +128,7 @@ class parser {
         // If the stack of parentheses is not empty now, we have an unmatched opening parenthesis.
         if (!empty($parenstack)) {
             $unmatched = end($parenstack);
-            $this->die("unbalanced parenthesis, '{$unmatched->value}' is never closed", $unmatched);
+            $this->die(get_string('error_parennotclosed', 'qtype_formulas', $unmatched->value), $unmatched);
         }
     }
 
@@ -223,7 +220,7 @@ class parser {
                     if ($value === 'r=') {
                         $value = '=';
                     }
-                    $this->die("syntax error: unexpected end of expression after '$value'", $currenttoken);
+                    $this->die(get_string('error_unexpectedend', 'qtype_formulas', $value), $currenttoken);
                 }
                 // The last identifier of a statement cannot be a FUNCTION, because it would have
                 // to be followed by parens. We don't register it as a known variable, because it
@@ -242,14 +239,14 @@ class parser {
                 if ($nexttype === token::IDENTIFIER) {
                     $nexttype = ($nexttoken->type = token::FUNCTION);
                 } else {
-                    $this->die('syntax error: invalid use of prefix character \\');
+                    $this->die(get_string('error_prefix', 'qtype_formulas'));
                 }
             }
 
             // If the token is already classified as a FUNCTION, it MUST be followed by an
             // opening parenthesis.
             if ($type === token::FUNCTION && $nexttype !== token::OPENING_PAREN) {
-                $this->die('syntax error: function must be followed by opening parenthesis');
+                $this->die(get_string('error_function_paren', 'qtype_formulas'));
             }
 
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
@@ -289,7 +286,7 @@ class parser {
                 // If we had to go all the way until the end of the token list, the range was not
                 // used inside a list or a set.
                 if ($lookahead === self::EOF) {
-                    $this->die('syntax error: ranges can only be used in {} or []', $currenttoken);
+                    $this->die(get_string('error_rangeusage', 'qtype_formulas'), $currenttoken);
                 }
             }
 
@@ -299,7 +296,7 @@ class parser {
             // we die with a syntax error.
             if ($type === token::OPERATOR && $value === '?') {
                 if ($nexttype === token::OPERATOR && $nextvalue === ':') {
-                    $this->die('syntax error: ternary operator missing middle part', $nexttoken);
+                    $this->die(get_string('error_ternary_missmiddle', 'qtype_formulas'), $nexttoken);
                 }
                 $latype = $nexttype;
                 $lavalue = $nextvalue;
@@ -315,7 +312,7 @@ class parser {
                     // function will return the EOF token.
                     $endoflist = ($i + $this->position >= $this->count - 1);
                     if ($endofstatement || $endoflist) {
-                        $this->die("syntax error: incomplete ternary operator or misplaced '?'", $currenttoken);
+                        $this->die(get_string('error_ternary_incomplete', 'qtype_formulas'), $currenttoken);
                     }
                     $lookahead = $this->peek($i);
                     $latype = $lookahead->type;
@@ -328,7 +325,7 @@ class parser {
             // (and vice versa), because that's probably a typo and we do not know for sure what to do with them.
             // For numbers, it could be an implicit multiplication, but also the idea of separating groups of digits.
             if (in_array($type, [token::NUMBER, token::STRING]) && in_array($nexttype, [token::NUMBER, token::STRING])) {
-                $this->die('syntax error: did you forget to put an operator?', $nexttoken);
+                $this->die(get_string('error_forgotoperator', 'qtype_formulas'), $nexttoken);
             }
 
             // We do not allow to subsequent commas, a comma following an opening parenthesis
@@ -337,7 +334,7 @@ class parser {
             $commaplusparen = $type === token::ARG_SEPARATOR && ($nexttype & token::ANY_CLOSING_PAREN);
             $twocommas = ($type === token::ARG_SEPARATOR && $nexttype === token::ARG_SEPARATOR);
             if ($parenpluscomma || $commaplusparen || $twocommas) {
-                $this->die('syntax error: invalid use of separator token (,)', $nexttoken);
+                $this->die(get_string('error_invalidargsep', 'qtype_formulas'), $nexttoken);
             }
 
             // Similarly, We do not allow to subsequent colons, a colon following an opening parenthesis,
@@ -348,7 +345,7 @@ class parser {
             $commapluscolon = ($type === token::ARG_SEPARATOR && $nexttype === token::RANGE_SEPARATOR);
             $colonpluscomma = ($type === token::RANGE_SEPARATOR && $nexttype === token::ARG_SEPARATOR);
             if ($parenpluscolon || $colonplusparen || $twocolons || $commapluscolon || $colonpluscomma) {
-                $this->die('syntax error: invalid use of range separator (:)', $nexttoken);
+                $this->die(get_string('error_invalidrangesep', 'qtype_formulas'), $nexttoken);
             }
 
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
@@ -462,7 +459,7 @@ class parser {
         // Next must be an opening parenthesis.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::OPENING_PAREN) {
-            $this->die('syntax error: ( expected after for', $currenttoken);
+            $this->die(get_string('error_for_expectparen', 'qtype_formulas'), $currenttoken);
         }
         // Consume the opening parenthesis.
         $currenttoken = $this->read_next();
@@ -470,7 +467,7 @@ class parser {
         // Next must be a variable name.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::IDENTIFIER) {
-            $this->die('syntax error: identifier expected', $currenttoken);
+            $this->die(get_string('error_for_expectidentifier', 'qtype_formulas'), $currenttoken);
         }
         $currenttoken = $this->read_next();
         $currenttoken->type = token::VARIABLE;
@@ -479,7 +476,7 @@ class parser {
         // Next must be a colon.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::RANGE_SEPARATOR) {
-            $this->die('syntax error: : expected', $currenttoken);
+            $this->die(get_string('error_for_expectcolon', 'qtype_formulas'), $currenttoken);
         }
         $currenttoken = $this->read_next();
 
@@ -490,7 +487,7 @@ class parser {
         $isbracket = ($currenttoken->type === token::OPENING_BRACKET);
         $isvariable = ($currenttoken->type === token::IDENTIFIER);
         if (empty($currenttoken) || (!$isbracket && !$isvariable)) {
-            $this->die('syntax error: [ or variable name expected', $currenttoken);
+            $this->die(get_string('error_expectbracketorvarname', 'qtype_formulas'), $currenttoken);
         }
 
         if ($isbracket) {
@@ -509,14 +506,14 @@ class parser {
         // Next must be a closing parenthesis.
         $currenttoken = $this->peek();
         if (!$currenttoken || $currenttoken->type !== token::CLOSING_PAREN) {
-            $this->die('syntax error: ) expected', $currenttoken);
+            $this->die(get_string('error_expectclosingparen', 'qtype_formulas'), $currenttoken);
         }
         $currenttoken = $this->read_next();
 
         // Next must either be an opening brace or the start of a statement.
         $currenttoken = $this->peek();
         if (!$currenttoken) {
-            $this->die('syntax error: { or statement expected', $currenttoken);
+            $this->die(get_string('error_expectbraceorstatement', 'qtype_formulas'), $currenttoken);
         }
 
         // If the token is an opening brace, we have to parse all upcoming lines until the

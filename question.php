@@ -27,8 +27,6 @@
 // TODO: http -> https in all files (single commit)
 // TODO: maybe have special return value for invalid answers in order to display "invalid" message in adaptive/interactive mode, rather than saying the answer is wrong
 
-// TODO: sqrt() with negative numbers (currently yields NAN) or invalid arguments, e.g. string
-
 // TODO: walkthrough tests for feedback (general, combined) on question and part level for immediate, interactive, adaptive mode
 
 use qtype_formulas\answer_parser;
@@ -63,11 +61,10 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /** @var ?evaluator evaluator class, this is where the evaluation stuff happens */
     public ?evaluator $evaluator = null;
 
-    /**
-     * @var string $varsrandom definition text for random variables, as entered in the edit form
-     * @var string $varsglobal definition text for the question's global variables, as entered in the edit form
-     */
+    /** @var string $varsrandom definition text for random variables, as entered in the edit form */
     public string $varsrandom;
+
+    /** @var string $varsglobal definition text for the question's global variables, as entered in the edit form */
     public string $varsglobal;
 
     /** @var qtype_formulas_part[] parts of the question */
@@ -571,8 +568,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // If is_any_part_invalid() is true, that means no part is gradable, i. e. no fields
         // have been filled.
         if ($this->is_any_part_invalid($response)) {
-            // TODO: externalise string
-            return 'All input fields are empty.';
+            return get_string('allfieldsempty', 'qtype_formulas');
         }
 
         // If at least one part is gradable and yet the question is in "invalid" state, that means

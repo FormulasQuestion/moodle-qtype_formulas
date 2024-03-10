@@ -15,8 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 
-// TODO: add die() function to streamline error output
-
 /**
  * Additional functions qtype_formulas
  *
@@ -143,16 +141,16 @@ class functions {
         // If $what is neither a valid operator nor a function, throw an error.
         if (!$usebinaryop && !$useunaryop) {
             if (!array_key_exists($what, $allfunctions) || $what === 'diff') {
-                throw new Exception("evaluation error: '$what' is not a legal first argument for the map() function");
+                self::die('error_diff_first_invalid', $what);
             }
             // Fetch the number of arguments for the given function name.
             $min = $allfunctions[$what][0];
             $max = $allfunctions[$what][1];
             if ($max < 1) {
-                throw new Exception("the function '$what' cannot be used with map(), because it accepts no arguments");
+                self::die('error_diff_function_no_args', $what);
             }
             if ($min > 2) {
-                throw new Exception("the function '$what' cannot be used with map(), because it expects more than two arguments");
+                self::die('error_diff_function_more_args', $what);
             }
             // Some functions are clearly unary.
             if ($min <= 1 && $max === 1) {
@@ -175,7 +173,7 @@ class functions {
         if ($useunaryop || $useunaryfunc) {
             $type = $useunaryop ? 'operator' : 'function';
             if ($second !== null) {
-                throw new Exception("when using map() with the unary $type '$what', only one list is accepted");
+                self::die("error_diff_unary_$type", $what);
             }
             if (!is_array($first)) {
                 // The unary minus is internally represented as '_', but it should be shown as '-' in
@@ -183,7 +181,7 @@ class functions {
                 if ($what === '_') {
                     $what = '-';
                 }
-                throw new Exception("when using map() with the unary $type '$what', the argument must be a list");
+                self::die('error_diff_unary_needslist', $what);
             }
         }
 
@@ -192,13 +190,13 @@ class functions {
         if ($usebinaryop || $usebinaryfunc) {
             $type = $usebinaryop ? 'operator' : 'function';
             if ($second === null) {
-                throw new Exception("when using map() with the binary $type '$what', two arguments are expected");
+                self::die("error_diff_binary_{$type}_two", $what);
             }
             if (is_scalar($first) && is_scalar($second)) {
-                throw new Exception("when using map() with the binary $type '$what', at least one argument must be a list");
+                self::die("error_diff_binary_{$type}_needslist", $what);
             }
             if (is_array($first) && is_array($second) && count($first) != count($second)) {
-                throw new Exception("when using map() with two lists, they must both have the same size");
+                self::die('error_diff_binary_samesize');
             }
             // We do now know that we are using a binary operator or function and that we have at least one list.
             // If the other argument is a scalar, we blow it up to an array of the same size as the other list.
@@ -238,7 +236,7 @@ class functions {
                 $result[] = token::wrap($tmp);
             }
         } catch (Exception $e) {
-            throw new Exception('evaluation error in map(): ' . $e->getMessage());
+            self::die('error_map_unknown', $e->getMessage());
         }
 
         return $result;
@@ -257,7 +255,7 @@ class functions {
     public static function inv($list): array {
         // First, we check that the argument is actually a list.
         if (!is_array($list)) {
-            throw new Exception('inv() expects a list');
+            self::die('error_inv_list');
         }
         // Now, we check that the array contains only numbers. If necessary,
         // floats will be converted to integers by truncation. Note: number tokens
@@ -273,7 +271,7 @@ class functions {
         // Now we check that the same number does not appear twice.
         $tmp = array_unique($list);
         if (count($tmp) !== count($list)) {
-            throw new Exception('when using inv(), the list must not contain the same number multiple times');
+            self::die('error_inv_nodup');
         }
         // Finally, we make sure the numbers are consecutive from 0 to n-1 or from 1 to n with
         // n being the number of elements in the list. We can use min() and max(), because the
@@ -281,10 +279,10 @@ class functions {
         $min = min($list);
         $max = max($list);
         if ($min->value > 1 || $min->value < 0) {
-            throw new Exception('when using inv(), the smallest number in the list must be 0 or 1');
+            self::die('error_inv_smallest');
         }
         if ($max->value - $min->value + 1 !== count($list)) {
-            throw new Exception('when using inv(), the numbers in the list must be consecutive');
+            self::die('error_inv_consec');
         }
 
         // Create array from minimum to maximum value and then use the given list as the sort order.
@@ -313,7 +311,7 @@ class functions {
         // Iterate over each array ...
         foreach ($arrays as $array) {
             if (!is_array($array)) {
-                throw new Exception("concat() expects its arguments to be lists, found '$array'");
+                self::die('error_func_all_lists', 'concat()');
             }
             // ... and over each element of every array.
             foreach ($array as $element) {
@@ -329,7 +327,15 @@ class functions {
      * to indicate the sort order.
      *
      * Examples:
-     * - FIXME
+     * - sort([1,10,5,3]) --> [1, 3, 5, 10]
+     * - sort([-3,-2,4,2,3,1,0,-1,-4,5]) --> [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+     * - sort(["A1","A10","A2","A100"]) --> ['A1', 'A2', 'A10', 'A100']
+     * - sort(["B","A2","A1"]) --> ['A1', 'A2', 'B']
+     * - sort(["B","C","A"],[0,2,1]) --> ['B', 'A', 'C']
+     * - sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]) --> ['-3', '-2', '-1', '0', '1', '2', '3', 'A', 'B', 'a', 'b']
+     * - sort(["B","3","1","0","A","C","c","b","2","a"]) --> ['0', '1', '2', '3', 'A', 'B', 'C', 'a', 'b', 'c']
+     * - sort(["B","A2","A1"],[2,4,1]) --> ['A1', 'B', 'A2']
+     * - sort([1,2,3], ["A10","A1","A2"]) --> [2, 3, 1]
      *
      * @param array $tosort list to be sorted
      * @param ?array $order sort order
@@ -338,7 +344,7 @@ class functions {
     public static function sort($tosort, $order = null): array {
         // The first argument must be an array.
         if (!is_array($tosort)) {
-            throw new Exception('sort() expects it first argument to be a list');
+            self::die('error_func_first_list', 'sort()');
         }
 
         // If we have one list only, we duplicate it.
@@ -348,12 +354,12 @@ class functions {
 
         // If two arguments are given, the second must be an array.
         if (!is_array($order)) {
-            throw new Exception('when calling sort() with two arguments, they must both be lists');
+            self::die('error_sort_twolists');
         }
 
         // If we have two lists, they must have the same number of elements.
         if (count($tosort) !== count($order)) {
-            throw new Exception('when calling sort() with two lists, they must have the same size');
+            self::die('error_sort_samesize');
         }
 
         // Now sort the first array, using the second as the sort order.
@@ -401,7 +407,7 @@ class functions {
                 }
                 // If the single argument is neither an array, nor a number or numeric string,
                 // we throw an error.
-                throw new Exception('when calling poly() with one argument, it must be a number or a list of numbers');
+                self::die('error_poly_one');
             case 2:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
@@ -416,7 +422,7 @@ class functions {
                     if (self::is_numeric_array($second)) {
                         return self::poly_formatter($first, $second);
                     }
-                    throw new Exception('when calling poly() with a string, the second argument must be a number or a list of numbers');
+                    self::die('error_poly_string');
                 }
                 // If called with a list of numbers and a string, use x as default variable for the polynomial and use the
                 // third argument as a separator, e. g. for a usage in LaTeX matrices or array-like constructions.
@@ -428,10 +434,10 @@ class functions {
                     if (self::is_numeric_array($second)) {
                         return self::poly_formatter($first, $second);
                     }
-                    throw new Exception('when calling poly() with a list of strings, the second argument must be a list of numbers');
+                    self::die('error_poly_stringlist');
                 }
                 // Any other invocations with two arguments is invalid.
-                throw new Exception('when calling poly() with two arguments, the first must be a string or a list of strings');
+                self::die('error_poly_two');
             case 3:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
@@ -575,15 +581,15 @@ class functions {
 
     public static function sublist($list, $indices): array {
         if (!is_array($list) || !is_array($indices)) {
-            throw new Exception('sublist() expects its arguments to be lists');
+            self::die('error_func_all_lists', 'sublist()');
         }
 
         $result = [];
         foreach ($indices as $i) {
             $i = $i->value;
-            $i = self::assure_numeric($i, "sublist() expects the indices to be integers, found '$i'", self::INTEGER);
+            $i = self::assure_numeric($i, get_string('error_sublist_indices', 'qtype_formulas', $i), self::INTEGER);
             if ($i > count($list) - 1 || $i < 0) {
-                throw new Exception("index $i out of range in sublist()");
+                self::die('error_sublist_outofrange', $i);
             }
             $result[] = $list[$i];
         }
@@ -591,7 +597,7 @@ class functions {
     }
 
     public static function sigfig($number, $precision): string {
-        self::assure_numeric($number, 'sigfig() expects its first argument to be a number');
+        self::assure_numeric($number, get_string('error_func_first_number', 'qtype_formulas', 'sigfig()'));
         self::assure_numeric($precision, 'sigfig() expects its second argument to be a positive integer', self::POSITIVE | self::INTEGER);
         $number = floatval($number);
         $precision = intval($precision);
@@ -630,7 +636,7 @@ class functions {
         if (is_string($arg)) {
             return strlen($arg);
         }
-        throw new Exception('len() expects a list or a string');
+        self::die('error_len_argument');
     }
 
     /**
@@ -649,7 +655,7 @@ class functions {
         // If $count is invalid, it will be converted to 0 which will then lead to an error.
         $count = intval($count);
         if ($count < 1) {
-            throw new Exception('fill() expects the first argument to be a positive integer');
+            self::die('error_func_first_posint', 'fill()');
         }
         return array_fill(0, $count, token::wrap($value));
     }
@@ -662,14 +668,14 @@ class functions {
      */
     public static function sum($array): float {
         if (!is_array($array)) {
-            throw new Exception('sum() expects a list of numbers');
+            self::die('error_sum_argument');
         }
 
         $result = 0;
         foreach ($array as $token) {
             $value = $token->value;
             if (!is_numeric($value)) {
-                throw new Exception('sum() expects a list of numbers');
+                self::die('error_sum_argument');
             }
             $result += floatval($value);
         }
@@ -684,7 +690,7 @@ class functions {
      */
     public static function str($value): string {
         if (!is_scalar($value)) {
-            throw new Exception('str() expects a scalar argument, e.g. a number');
+            self::die('error_str_argument');
         }
         return strval($value);
     }
@@ -700,7 +706,7 @@ class functions {
     public static function pick($index, ...$data) {
         // The index must be a number (or a numeric string). We do not enforce it to be integer.
         // If it is not, it will be truncated for backwards compatibility.
-        self::assure_numeric($index, 'pick() expects its first argument to be a number');
+        self::assure_numeric($index, get_string('error_func_first_number', 'qtype_formulas', 'pick()'));
         $index = intval($index);
 
         $count = count($data);
@@ -710,7 +716,7 @@ class functions {
         // - the various values for the pick(index, val1, val2, val3, ...) usage.
         if ($count === 1) {
             if (!is_array($data[0])) {
-                throw new Exception("when called with two arguments, pick() expects the second parameter to be a list");
+                self::die('error_pick_two');
             }
             // We set $data to the given array and update the count.
             $data = $data[0];
@@ -764,7 +770,7 @@ class functions {
         $result = 1;
         for ($i = 1; $i <= $n; $i++) {
             if ($result > PHP_INT_MAX / $i) {
-                throw new Exception("cannot compute $n! on this platform, the result is bigger than PHP_MAX_INT");
+                self::die('error_fact_toolarge', $n);
             }
             $result *= $i;
         }
@@ -915,7 +921,7 @@ class functions {
      * @throws Exception
      */
     public static function fmod($x, $m): float {
-        self::assure_numeric($x, 'fmod() expects its first argument to be numeric');
+        self::assure_numeric($x, get_string('error_func_first_number', 'qtype_formulas', 'fmod()'));
         self::assure_numeric($m, 'fmod() expects its second argument to be a non-zero number', self::NON_ZERO);
         return $x - $m * floor($x / $m);
     }
@@ -935,12 +941,12 @@ class functions {
     public static function binomialpdf(float $n, float $p, float $x): float {
         // Probability must be 0 <= p <= 1.
         if ($p < 0 || $p > 1) {
-            throw new Exception('binomialpdf() expects the probability to be at least 0 and not more than 1');
+            self::die('error_probability', 'binomialpdf()');
         }
         // Number of tries must be at least 0.
-        $n = self::assure_numeric($n, 'binomialpdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric($n, get_string('error_distribution_tries', 'qtype_formulas', 'binomialpdf()'), self::NON_NEGATIVE | self::INTEGER);
         // Number of successful outcomes must be at least 0.
-        $x = self::assure_numeric($x, 'binomialpdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $x = self::assure_numeric($x, get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialpdf'), self::NON_NEGATIVE | self::INTEGER);
         // If the number of successful outcomes is greater than the number of trials, the probability
         // is zero.
         if ($x > $n) {
@@ -964,13 +970,12 @@ class functions {
     public static function binomialcdf(float $n, float $p, float $x): float {
         // Probability must be 0 <= p <= 1.
         if ($p < 0 || $p > 1) {
-            // TODO: externalise string
-            throw new Exception('binomialcdf() expects the probability to be at least 0 and not more than 1');
+            self::die('error_probability', 'binomialcdf()');
         }
         // Number of tries must be at least 0.
-        $n = self::assure_numeric($n, 'binomialcdf() expects the number of tries to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric($n, get_string('error_distribution_tries', 'qtype_formulas', 'binomialcdf()'), self::NON_NEGATIVE | self::INTEGER);
         // Number of successful outcomes must be at least 0.
-        $x = self::assure_numeric($x, 'binomialcdf() expects the number of successful outcomes to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $x = self::assure_numeric($x, get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialcdf'), self::NON_NEGATIVE | self::INTEGER);
         // The probability for *up to* $n or more successful outcomes is 1.
         if ($x >= $n) {
             return 1;
@@ -990,7 +995,7 @@ class functions {
      */
     public static function ln(float $x): float {
         if ($x <= 0) {
-            throw new Exception('ln() expects its argument to be positive');
+            self::die('error_func_positive', 'ln()');
         }
         return log($x);
     }
@@ -1115,18 +1120,21 @@ class functions {
      * @throws Exception
      */
     private static function abort_if_not_scalar($value, string $who = '', bool $enforcenumeric = true): void {
-        $message = 'expected ';
+        $a = (object)[];
+        $variant = 'expected';
         if ($who !== '') {
-            $message = "$who expects ";
+            $a->who = $who;
+            $variant = 'expects';
         }
-        $message = $message . ($enforcenumeric ? 'a number' : 'a scalar value');
+        $expectation = ($enforcenumeric ? 'number' : 'scalar');
 
         if (!is_scalar($value)) {
-            throw new Exception($message);
+            self::die("error_{$variant}_{$expectation}", $a);
         }
         $isnumber = is_float($value) || is_int($value);
         if ($enforcenumeric && !$isnumber) {
-            throw new Exception("$message, found '$value'");
+            $a->found = $value;
+            self::die("error_{$variant}_{$expectation}_found", $a);
         }
     }
 
@@ -1186,13 +1194,13 @@ class functions {
             case '**':
                 // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
                 if ($first == 0 && $second == 0) {
-                    throw new Exception('power 0^0 is not defined');
+                    self::die('error_power_00');
                 }
                 if ($first == 0 && $second < 0) {
-                    throw new Exception('division by zero is not defined, so base cannot be zero for negative exponents');
+                    self::die('error_power_negbase_expzero');
                 }
                 if ($first < 0 && intval($second) != $second) {
-                    throw new Exception('base cannot be negative with fractional exponent');
+                    self::die('error_power_negbase_expfrac');
                 }
                 $output = $first ** $second;
                 break;
@@ -1202,7 +1210,7 @@ class functions {
             case '/':
             case '%':
                 if ($second == 0) {
-                    throw new Exception('division by zero is not defined');
+                    self::die('error_divzero');
                 }
                 if ($op === '/') {
                     $output = $first / $second;
@@ -1214,8 +1222,8 @@ class functions {
                 // If at least one operand is a string, we use concatenation instead
                 // of addition.
                 if (is_string($first) || is_string($second)) {
-                    self::abort_if_not_scalar($first, 'string concatenation', false);
-                    self::abort_if_not_scalar($second, 'string concatenation', false);
+                    self::abort_if_not_scalar($first, '+', false);
+                    self::abort_if_not_scalar($second, '+', false);
                     $output = $first . $second;
                     break;
                 }
@@ -1231,10 +1239,10 @@ class functions {
             case '<<':
             case '>>':
                 if (intval($first) != $first || intval($second) != $second) {
-                    throw new Exception('bit shift operator should only be used with integers');
+                    self::die('error_bitshift_integer');
                 }
                 if ($second < 0) {
-                    throw new Exception("bit shift by negative number $second is not allowed");
+                    self::die('error_bitshift_negative', $second);
                 }
                 if ($op === '<<') {
                     $output = (int)$first << (int)$second;
@@ -1244,19 +1252,19 @@ class functions {
                 break;
             case '&':
                 if (intval($first) != $first || intval($second) != $second) {
-                    throw new Exception('bitwise AND should only be used with integers');
+                    self::die('error_bitwand_integer');
                 }
                 $output = $first & $second;
                 break;
             case '^':
                 if (intval($first) != $first || intval($second) != $second) {
-                    throw new Exception('bitwise XOR should only be used with integers');
+                    self::die('error_bitwxor_integer');
                 }
                 $output = $first ^ $second;
                 break;
             case '|':
                 if (intval($first) != $first || intval($second) != $second) {
-                    throw new Exception('bitwise OR should only be used with integers');
+                    self::die('error_bitwor_integer');
                 }
                 $output = $first | $second;
                 break;
@@ -1288,7 +1296,7 @@ class functions {
         // One last safety check: numeric results must not be NAN or INF.
         // This should never be triggered.
         if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
-            throw new Exception('unknown evaluation error');
+            self::die('error_evaluation_unknown');
         }
         return $output;
     }
@@ -1300,11 +1308,6 @@ class functions {
             $n = trim($n);
         }
         if (is_numeric($n) === false) {
-            // For compatibility with PHP 7.4: check if it is a string. If it is, remove trailing
-            // space and try again.
-            /*if (is_string($n) && is_numeric(trim($n))) {
-                return self::assure_numeric(trim($n), $message, $additionalcondition);
-            }*/
             throw new Exception($message);
         }
         if ($additionalcondition & self::NON_NEGATIVE) {
@@ -1350,4 +1353,17 @@ class functions {
         }
         return true;
     }
+
+    /**
+     * Throw an Exception, fetching the localized string $identifier from the language file
+     * via Moodle's get_string() function.
+     *
+     * @param string $identifier identifier for the localized string
+     * @param string|object|array $a additional (third) parameter passed to get_string
+     * @throws Exception
+     */
+    private static function die(string $identifier, $a = null): never {
+        throw new Exception(get_string($identifier, 'qtype_formulas', $a));
+    }
+
 }

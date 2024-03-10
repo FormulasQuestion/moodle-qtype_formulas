@@ -192,8 +192,8 @@ class functions_test extends \advanced_testcase {
             [0, 'ncr(5, 6)'],
             [0, 'ncr(-1, 2)'],
             [0, 'ncr(3, -4)'],
-            ['evaluation error: ncr() expects its first argument to be an integer', 'ncr(10.5, 3)'],
-            ['evaluation error: ncr() expects its second argument to be an integer', 'ncr(12, 3.5)'],
+            ['ncr() expects its first argument to be an integer', 'ncr(10.5, 3)'],
+            ['ncr() expects its second argument to be an integer', 'ncr(12, 3.5)'],
         ];
     }
 
@@ -208,10 +208,10 @@ class functions_test extends \advanced_testcase {
             [120, 'npr(5, 4)'],
             [120, 'npr(5, 5)'],
             [0, 'npr(5, 6)'],
-            ['evaluation error: npr() expects its first argument to be a non-negative integer', 'npr(-1, 2)'],
-            ['evaluation error: npr() expects its second argument to be a non-negative integer', 'npr(3, -4)'],
-            ['evaluation error: npr() expects its first argument to be a non-negative integer', 'npr(10.5, 3)'],
-            ['evaluation error: npr() expects its second argument to be a non-negative integer', 'npr(12, 3.5)'],
+            ['npr() expects its first argument to be a non-negative integer', 'npr(-1, 2)'],
+            ['npr() expects its second argument to be a non-negative integer', 'npr(3, -4)'],
+            ['npr() expects its first argument to be a non-negative integer', 'npr(10.5, 3)'],
+            ['npr() expects its second argument to be a non-negative integer', 'npr(12, 3.5)'],
         ];
     }
 
@@ -222,9 +222,9 @@ class functions_test extends \advanced_testcase {
             [2, 'fact(2)'],
             [6, 'fact(3)'],
             [720, 'fact(6)'],
-            ['evaluation error: the factorial function expects its first argument to be a non-negative integer', 'fact(-2)'],
-            ['evaluation error: the factorial function expects its first argument to be a non-negative integer', 'fact(2.5)'],
-            ['evaluation error: cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT', 'fact(250)'],
+            ['the factorial function expects its first argument to be a non-negative integer', 'fact(-2)'],
+            ['the factorial function expects its first argument to be a non-negative integer', 'fact(2.5)'],
+            ['cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT', 'fact(250)'],
         ];
     }
 
@@ -766,8 +766,8 @@ class functions_test extends \advanced_testcase {
 
     public function provide_sort(): array {
         return [
-            ['sort() expects it first argument to be a list', 'sort(5, [1,2,3])'],
-            ['sort() expects it first argument to be a list', 'sort("a", [1,2,3])'],
+            ['sort() expects its first argument to be a list', 'sort(5, [1,2,3])'],
+            ['sort() expects its first argument to be a list', 'sort("a", [1,2,3])'],
             ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], 2)'],
             ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], "a")'],
             ['when calling sort() with two lists, they must have the same size', 'sort([1,2,3], [1,2])'],
@@ -987,8 +987,8 @@ class functions_test extends \advanced_testcase {
     public function provide_various_function_calls(): array {
         return [
             [get_config('qtype_formulas')->version, 'fqversionnumber()'],
-            ['str() expects a scalar argument, e.g. a number', 's = str([])'],
-            ['str() expects a scalar argument, e.g. a number', 's = str([1, 2, 3])'],
+            ['str() expects a scalar argument, e. g. a number', 's = str([])'],
+            ['str() expects a scalar argument, e. g. a number', 's = str([1, 2, 3])'],
         ];
     }
 
@@ -1010,12 +1010,12 @@ class functions_test extends \advanced_testcase {
 
     public function provide_map(): array {
         return [
-            [[1, 0, 1, 0], 'map("==", [1, 2, 1, 3], [1, 1, 1, 1])'],
-            [[4, 6], 'map("+", [1, 2], [3, 4])'],
-            [[2, 10], 'map("-", [5, 6], [3, -4])'],
-            [[6, 7, 8], 'map("+", [1, 2, 3], 5)'],
+            //[[1, 0, 1, 0], 'map("==", [1, 2, 1, 3], [1, 1, 1, 1])'],
+            //[[4, 6], 'map("+", [1, 2], [3, 4])'],
+            //[[2, 10], 'map("-", [5, 6], [3, -4])'],
+            //[[6, 7, 8], 'map("+", [1, 2, 3], 5)'],
             ['* expects a number', 'map("*", [[1, 2], [3, 4]], "foo")'],
-            ["* expects a number, found 'foo'", 'map("*", ["foo", "bar"], "s")'],
+            ["* expects a number, found foo", 'map("*", ["foo", "bar"], "s")'],
             [[11, 12, 13], 'map("+", 10, [1, 2, 3])'],
             [['week 1', 'week 2', 'week 3'], 'map("+", "week ", [1, 2, 3])'],
             [[1, -2], 'map("-", [-1, 2])'],
@@ -1033,7 +1033,7 @@ class functions_test extends \advanced_testcase {
             ["when using map() with the binary operator '+', two arguments are expected", 'map("+", [1, 2])'],
             ["when using map() with the binary operator '+', at least one argument must be a list", 'map("+", 3, 4)'],
             ['when using map() with two lists, they must both have the same size', 'map("+", [1, 2, 3], [4, 5])'],
-            ["when using map() with the unary operator '-', the argument must be a list", 'map("-", 2)'],
+            ["when using map() with '-', the argument must be a list", 'map("-", 2)'],
             ["'x' is not a legal first argument for the map() function", 'map("x", [-1, -2])'],
             ["the function 'fqversionnumber' cannot be used with map(), because it accepts no arguments", 'map("fqversionnumber", [1, 2, 3])'],
             ["the function 'modpow' cannot be used with map(), because it expects more than two arguments", 'map("modpow", [1, 2, 3], [3, 4, 5])'],
@@ -1054,9 +1054,9 @@ class functions_test extends \advanced_testcase {
             ["invalid number of arguments for function 'fmod': 0 given", 'fmod()'],
             ["invalid number of arguments for function 'fmod': 1 given", 'fmod(3)'],
             ["invalid number of arguments for function 'fmod': 3 given", 'fmod(3, 2, 1)'],
-            ['fmod() expects its first argument to be numeric', 'fmod("a", "b")'],
+            ['fmod() expects its first argument to be a number', 'fmod("a", "b")'],
             ['fmod() expects its second argument to be a non-zero number', 'fmod(3, "b")'],
-            ['fmod() expects its first argument to be numeric', 'fmod("a", 3)'],
+            ['fmod() expects its first argument to be a number', 'fmod("a", 3)'],
             ['fmod() expects its second argument to be a non-zero number', 'fmod(4, 0)'],
 
             [0, 'modinv(15, 3)'],

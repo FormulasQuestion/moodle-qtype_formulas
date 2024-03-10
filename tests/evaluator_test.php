@@ -44,7 +44,7 @@ class evaluator_test extends \advanced_testcase {
             ['diff(): type mismatch for element #1 (zero-indexed) of the first list', 'diff(["a",1], ["a","b"]);'],
             ['diff(): type mismatch for element #0 (zero-indexed) of the second list', 'diff([1,2], ["a",2]);'],
             ['diff(): type mismatch for element #1 (zero-indexed) of the second list', 'diff(["a","b"], ["a",2]);'],
-            ['diff(): the third argument can only be used with lists of strings', 'diff([1,2,3], [4,5,6], 3);'],
+            ['the third argument of diff() can only be used when working with lists of strings', 'diff([1,2,3], [4,5,6], 3);'],
         ];
     }
 
@@ -1014,7 +1014,7 @@ class evaluator_test extends \advanced_testcase {
             ['setting individual list elements is not supported for random variables', 'a[1] = {1,2,3}'],
             ['syntax error: invalid use of separator token (,)', 'a = {1:10,}'],
             ["syntax error: incomplete ternary operator or misplaced '?'", 'a = {1:10?}'],
-            ['evaluation error: numeric value expected, got algebraic variable', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
+            ['number expected, found algebraic variable', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
             ['unknown variable: a', 'a = {1:3:0.1}; b={a,12,13};'],
             // FIXME: the following are now valid
             ['', 'a = {[1,2],[3,4,5]}'],
@@ -1080,8 +1080,8 @@ class evaluator_test extends \advanced_testcase {
     public function provide_invalid_ranges(): array {
         return [
             ['syntax error: step size of a range cannot be zero', 'a = [1:5:0]'],
-            ['syntax error: start end end of range must not be equal', 'a = [5:5]'],
-            ['syntax error: start end end of range must not be equal', 'a = [1.0:1]'],
+            ['syntax error: start and end of range must not be equal', 'a = [5:5]'],
+            ['syntax error: start and end of range must not be equal', 'a = [1.0:1]'],
             ['syntax error in range definition', 'a = [1:2:3:4]'],
         ];
     }
@@ -1140,11 +1140,11 @@ class evaluator_test extends \advanced_testcase {
                 'a = \ 2'
             ],
             'invalid argument for unary operator' => [
-                "numeric value expected, got 'foo'",
+                "number expected, found 'foo'",
                 'a = -"foo"'
             ],
             'invalid argument for unary operator, indirect' => [
-                "numeric value expected, got 'foo'",
+                "number expected, found 'foo'",
                 's = "foo"; a = -s'
             ],
             'invalid use of prefix with paren' => [
@@ -1164,7 +1164,7 @@ class evaluator_test extends \advanced_testcase {
                 'a=3«6;'
             ],
             'not subscriptable' => [
-                '1:8:evaluation error: indexing is only possible with arrays (lists) and strings',
+                '1:8:evaluation error: indexing is only possible with lists and strings',
                 'f=1; g=f[1];'
             ],
             'assignment of empty list' => [
@@ -1180,7 +1180,7 @@ class evaluator_test extends \advanced_testcase {
                 'e=[1,2,3]; f=e[4,5]'
             ],
             'multiply array with number' => [
-                '1:16:evaluation error: numeric value expected, got list',
+                '1:16:number expected, found list',
                 'e=[1,2,3,4]; f=e*2;'
             ],
             'xxxx' => [
@@ -1192,7 +1192,7 @@ class evaluator_test extends \advanced_testcase {
                 'e=[1,2,3][1][4,5,6][2];'
             ],
             'fill with count == 0' => [
-                '1:3:evaluation error: fill() expects the first argument to be a positive integer',
+                '1:3:fill() expects its first argument to be a positive integer',
                 'c=fill(0,"rr")'
             ],
             'fill with count == 10000' => [
@@ -1200,11 +1200,11 @@ class evaluator_test extends \advanced_testcase {
                 'c=fill(10000,"rr")'
             ],
             'undefined natrual logarithm' => [
-                'ln() expects its argument to be positive',
+                'ln() expects its argument to be a positive number',
                 'x=ln(-5)'
             ],
             'undefined natrual logarithm' => [
-                'ln() expects its argument to be positive',
+                'ln() expects its argument to be a positive number',
                 'x=ln(0)'
             ],
             'closing parenthesis when not opened' => [
@@ -1220,7 +1220,7 @@ class evaluator_test extends \advanced_testcase {
                 'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'
             ],
             'invalid invocation of concat(), number' => [
-                "1:3:evaluation error: concat() expects its arguments to be lists, found '0'",
+                "1:3:concat() expects its arguments to be lists",
                 's=concat(0, [1,2,3], [5,6], 100);'
             ],
             'invalid invocation of concat()' => [
@@ -1248,7 +1248,7 @@ class evaluator_test extends \advanced_testcase {
                 'z = 0; for(i: [0:5]) z=z+i; b=[1,"b"];'
             ],
             'invalid invocation of diff(), mismatching lengths' => [
-                '1:3:evaluation error: diff() expects two lists of the same size',
+                '1:3:diff() expects two lists of the same size',
                 's=diff([3*3+3,0],[3*4]);'
             ],
             'algebraic variable used in calculation' => [
@@ -1280,7 +1280,7 @@ class evaluator_test extends \advanced_testcase {
                 'a = [1, 2, 3] + 4'
             ],
             'argument should be scalar, is list' => [
-                'evaluation error: scalar value expected, got list',
+                'scalar value expected, found list',
                 'a = "a" + [1, 2, 3]'
             ],
             'invalid 0^0' => [
@@ -1300,8 +1300,8 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_indices(): array {
         return [
-            ["expected numerical index, found 'foo'", 's = "string"; a = s["foo"];'],
-            ["expected numerical index, found 'foo'", 'a = [1, 2, 3, 4]; b = a["foo"];'],
+            ["index should be an integer, found 'foo'", 's = "string"; a = s["foo"];'],
+            ["index should be an integer, found 'foo'", 'a = [1, 2, 3, 4]; b = a["foo"];'],
             ["index should be an integer, found '1.5'", 's = "string"; a = s[1.5];'],
             ["index should be an integer, found '1.5'", 'a = [1, 2, 3, 4]; b = a[1.5];'],
             ['index out of range: 4', 'a = [1,2,3,4][4]'],
@@ -1309,7 +1309,7 @@ class evaluator_test extends \advanced_testcase {
             ['syntax error: did you forget to put an operator?', 'a = 15[2]'],
             ['index out of range: 4', 'a = "abcd"; b = a[4];'],
             ['index out of range: 4', 'a = [1, 2, 3, 4]; b = a[4];'],
-            ['indexing is only possible with arrays (lists) and strings', 'a = 15; b = a[2];'],
+            ['indexing is only possible with lists and strings', 'a = 15; b = a[2];'],
         ];
     }
 
@@ -1592,9 +1592,9 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
-        $parser = new parser('1 >= 5 ? "a" : "b"');
-        $evaluator = new evaluator();
-        $evaluator->evaluate($parser->get_statements());
+        //$parser = new parser('1 >= 5 ? "a" : "b"');
+        //$evaluator = new evaluator();
+        //$evaluator->evaluate($parser->get_statements());
 
         return;
         $input = 'a = 5 = 3';
@@ -1666,6 +1666,11 @@ class evaluator_test extends \advanced_testcase {
         $input = '1+ln(3)';
         $input = 'a*sin';
         $input = 'a=[1,2,3]; a[1]=5;';
+        $input = 'sqrt("foo-2")';
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $result = $evaluator->evaluate($statements);
         return;
                 //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 
@@ -2023,14 +2028,14 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate(['foo', 'bar']);
         } catch (Exception $e) {
-            self::assertStringEndsWith('bad invocation of evaluate(), expected expression or for loop', $e->getMessage());
+            self::assertStringEndsWith('bad invocation of evaluate_the_right_thing()', $e->getMessage());
         }
         self::assertNotNull($e);
         $e = null;
         try {
             $evaluator->evaluate('foo');
         } catch (Exception $e) {
-            self::assertStringEndsWith('bad invocation of evaluate(), expected an expression or a list of expressions', $e->getMessage());
+            self::assertStringEndsWith('bad invocation of evaluate()', $e->getMessage());
         }
         self::assertNotNull($e);
 

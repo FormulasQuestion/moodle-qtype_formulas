@@ -219,6 +219,15 @@ class questiontype_test extends \advanced_testcase {
                     'subqtext' => [0 => ['text' => ''], 1 => ['text' => '']],
                 ]
             ],
+            [
+                [
+                    'placeholder[1]' => get_string('error_placeholder_sub_duplicate', 'qtype_formulas'),
+                ],
+                [
+                    'questiontext' => '{#a}',
+                    'placeholder' => [0 => '#a', 1 => '#a'],
+                ]
+            ],
         ];
     }
 
@@ -252,6 +261,7 @@ class questiontype_test extends \advanced_testcase {
         return [
             [[], []],
             [[], ['answer' => [0 => '[1, 2]']]],
+            [[], ['answer' => [0 => '0']]],
             [[], ['vars2' => [0 => 'x=_0'], 'correctness' => [0 => 'x']]],
             [[], ['globalunitpenalty' => 0]],
             [[], ['globalunitpenalty' => 1]],
@@ -289,7 +299,7 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [['vars2[0]' => "1:4:syntax error: unexpected end of expression after '+'"], ['vars2' => [0 => 'a=3+']]],
-            [['vars2[0]' => "1:5:evaluation error: numeric value expected, got 'f'"], ['vars2' => [0 => 'a=3*"f"']]],
+            [['vars2[0]' => "1:5:number expected, found 'f'"], ['vars2' => [0 => 'a=3*"f"']]],
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 'foo']]],
             [
                 ['answermark[0]' => get_string('error_mark', 'qtype_formulas')],
@@ -337,6 +347,13 @@ class questiontype_test extends \advanced_testcase {
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '3'],
+                ]
+            ],
+            [
+                ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3*'],
                 ]
             ],
@@ -345,6 +362,13 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"3*x"'],
+                ]
+            ],
+            [
+                ['answer[0]' => "error in answer #1: '' is not a valid algebraic expression"],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'answer' => [0 => '""'],
                 ]
             ],
             [
@@ -423,6 +447,33 @@ class questiontype_test extends \advanced_testcase {
                     'answermark' => [0 => ''],
                     'correctness' => [0 => ''],
                     'answer' => [0 => ''],
+                ]
+            ],
+            [
+                [
+                    'placeholder[0]' => get_string('error_placeholder_too_long', 'qtype_formulas'),
+                ],
+                [
+                    'questiontext' => '{#abcdefghijklmnopqrstuvwxyzabcdefghijkklmnopqrstuvwxyz}',
+                    'placeholder' => [0 => '#abcdefghijklmnopqrstuvwxyzabcdefghijkklmnopqrstuvwxyz'],
+                ]
+            ],
+            [
+                [
+                    'placeholder[0]' => get_string('error_placeholder_format', 'qtype_formulas'),
+                ],
+                [
+                    'questiontext' => '{#ö}',
+                    'placeholder' => [0 => '#ö'],
+                ]
+            ],
+            [
+                [
+                    'placeholder[0]' => get_string('error_placeholder_main_duplicate', 'qtype_formulas'),
+                ],
+                [
+                    'questiontext' => '{#a} foo {#a}',
+                    'placeholder' => [0 => '#a'],
                 ]
             ],
         ];
@@ -656,6 +707,43 @@ class questiontype_test extends \advanced_testcase {
             ['testmethodsinparts'],
             ['testtwoandtwo'],
         ];
+    }
+
+    /**
+     * @xdataProvider provide_question_names
+     */
+    public function test_form_works_for_valid_questions($questionname = 'testsinglenum'): void {
+        // FIXME: remove or rewrite in a way that explicitly checks the important fields like varsglobal
+        // and part's fields like answer, answertype, correctness etc.
+        // see test_export_and_reimport_xml and test_get_question_options
+        // FIXME: possibility: save question to DB, edit form, change 1-2 fields, compare old/new question
+        return;
+        // Login as admin user.
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $context = context_system::instance();
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $questioncat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+
+        // Prepare question and form data.
+        $question = $questiongenerator->create_question('formulas', $questionname, ['category' => $questioncat->id]);
+        $formdata = test_question_maker::get_question_form_data('formulas', $questionname);
+        $formdata->category = "{$questioncat->id},{$questioncat->contextid}";
+
+        // Save the question to the DB.
+        $savedquestion = \question_bank::get_qtype('formulas')->save_question($question, $formdata);
+        $this->qtype->get_question_options($savedquestion);
+        $this->qtype->get_question_hints($savedquestion);
+
+        $expected = test_question_maker::get_question_data('formulas', $questionname);
+        $savedquestion->stamp = $expected->stamp;
+        $savedquestion->version = $expected->version;
+        $savedquestion->id = $expected->id;
+        $savedquestion->contextid = $expected->contextid;
+        $savedquestion->category = $expected->category;
+
+        self::assertEquals($expected, $savedquestion);
     }
 
     /**
