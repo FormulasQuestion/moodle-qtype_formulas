@@ -52,6 +52,9 @@ jobs:
           - php: '8.2'
             moodle-branch: 'main'
             database: 'mariadb'
+          - php: '8.3'
+            moodle-branch: 'main'
+            database: 'mariadb'
 
     steps:
       - name: Check out repository code
