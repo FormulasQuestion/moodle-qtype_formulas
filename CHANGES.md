@@ -1,5 +1,17 @@
 # Changelog
 
+### 5.3.3 (2024-04-20)
+- assure compatibility with Moodle 4.4 and PHP 8.3
+- bugfix: solve problem with "Save and continue" on edit form and PHP 8.2
+- bugfix: disable simple mode for grading criterion if it failed validation
+- bugfix: solve problem with < char and instantiation check
+- bugfix: correct some messages and texts
+- internal: rename behat step to avoid conflicts with other plugins during tests
+- internal: update CI
+- internal: add code coverage to CI chain
+
+Please note: this is (probably) the last version with support for Moodle < 4.1 and PHP < 8.0.
+
 ### 5.3.2 (2023-11-17)
 - bugfix: also improve robustness against risky grading variables
 - internal: additional tests
