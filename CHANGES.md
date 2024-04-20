@@ -1,6 +1,6 @@
 # Changelog
 
-### 5.3.3 (2024-04-22)
+### 5.3.3 (2024-04-20)
 - assure compatibility with Moodle 4.4 and PHP 8.3
 - bugfix: solve problem with "Save and continue" on edit form and PHP 8.2
 - bugfix: disable simple mode for grading criterion if it failed validation
