@@ -32,7 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'main']
+        moodle-branch: ['MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE', 'main']
         database: [pgsql]
         exclude:
           - moodle-branch: 'MOODLE_311_STABLE'
@@ -43,6 +43,10 @@ jobs:
             php: '7.4'
           - moodle-branch: 'MOODLE_403_STABLE'
             php: '7.4'
+          - moodle-branch: 'MOODLE_404_STABLE'
+            php: '7.4'
+          - moodle-branch: 'MOODLE_404_STABLE'
+            php: '8.0'
           - moodle-branch: 'main'
             php: '7.4'
           - moodle-branch: 'main'
@@ -58,6 +62,15 @@ jobs:
             moodle-branch: 'MOODLE_403_STABLE'
             database: pgsql
           - php: '8.2'
+            moodle-branch: 'MOODLE_404_STABLE'
+            database: pgsql
+          - php: '8.3'
+            moodle-branch: 'MOODLE_404_STABLE'
+            database: pgsql
+          - php: '8.2'
+            moodle-branch: 'main'
+            database: pgsql
+          - php: '8.3'
             moodle-branch: 'main'
             database: pgsql
 
