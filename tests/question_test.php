@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Unit tests for the OU multiple response question class.
  *
  * @package    qtype_formulas
  * @copyright 2012 Jean-Michel Védrine
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qtype_formulas;
@@ -46,7 +46,7 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * Unit tests for (some of) question/type/formulas/question.php.
  *
  * @copyright  2008 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group qtype_formulas
  */
 class question_test extends \basic_testcase {

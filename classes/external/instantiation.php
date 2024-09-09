@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * qtype_formulas external file
@@ -20,7 +20,7 @@
  * @package    qtype_formulas
  * @category   external
  * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qtype_formulas\external;
@@ -230,17 +230,20 @@ class instantiation extends \external_api {
             $evaluator->evaluate($randomparser->get_statements());
             $randomcontext = $evaluator->export_variable_context();
 
-            $globalparser = new parser($params['globalvars']);
+            // FIXME: now using known vars from random parser
+            $globalparser = new parser($params['globalvars'], $randomparser->export_known_variables());
             $parsedglobalvars = $globalparser->get_statements();
 
             $parsedlocalvars = [];
             $parsedanswers = [];
             for ($i = 0; $i < $noparts; $i++) {
                 if (!empty($params['localvars'][$i])) {
-                    $parser = new parser($params['localvars'][$i]);
+                    // FIXME: now using known vars from globalparser
+                    $parser = new parser($params['localvars'][$i], $globalparser->export_known_variables());
                     $parsedlocalvars[$i] = $parser->get_statements();
                 }
 
+                // FIXME: known vars? --> must be done by part to have part's parser
                 $parser = new parser($params['answers'][$i]);
                 $parsedanswers[$i] = $parser->get_statements();
             }
@@ -359,7 +362,8 @@ class instantiation extends \external_api {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $globalparser = new parser($params['globalvars']);
+            // FIXME: now using known vars
+            $globalparser = new parser($params['globalvars'], $evaluator->export_variable_list());
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($globalparser->get_statements());
         } catch (Exception $e) {
@@ -417,14 +421,16 @@ class instantiation extends \external_api {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $parser = new parser($params['globalvars']);
+            // FIXME: now using known vars from randomparser
+            $parser = new parser($params['globalvars'], $randomparser->export_known_variables());
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'global', 'message' => $e->getMessage()];
         }
         try {
-            $parser = new parser($params['localvars']);
+            // FIXME: now using known vars from evaluator
+            $parser = new parser($params['localvars'], $evaluator->export_variable_list());
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'local', 'message' => $e->getMessage()];
@@ -488,6 +494,7 @@ class instantiation extends \external_api {
 
         // First prepare the main question text.
         try {
+            // FIXME: not including known vars, because we start from scratch (random vars are instantiated and defined like global vars)
             $parser = new parser($params['globalvars']);
             $evaluator->evaluate($parser->get_statements());
             $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
@@ -502,7 +509,8 @@ class instantiation extends \external_api {
         foreach ($params['partvars'] as $i => $partvar) {
             try {
                 $partevaluator = clone $evaluator;
-                $parser = new parser($partvar);
+                // FIXME: now using known vars
+                $parser = new parser($partvar, $partevaluator->export_variable_list());
                 $partevaluator->evaluate($parser->get_statements());
 
                 $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($params['parttexts'][$i]);

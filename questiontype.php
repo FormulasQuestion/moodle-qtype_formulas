@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Question type class for the Formulas question type.
@@ -20,7 +20,7 @@
  * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @author Philipp Imhof
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  * @package qtype_formulas
  */
 
@@ -44,7 +44,7 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * Question type class for the Formulas question type.
  *
  * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class qtype_formulas extends question_type {
     const ANSWER_TYPE_NUMBER = 0;

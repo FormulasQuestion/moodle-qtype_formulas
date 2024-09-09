@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Question definition class for the Formulas question type.
@@ -20,14 +20,17 @@
  * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @author Philipp Imhof
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package qtype_formulas
  */
 
-// TODO: http -> https in all files (single commit)
-// TODO: maybe have special return value for invalid answers in order to display "invalid" message in adaptive/interactive mode, rather than saying the answer is wrong
 
 // TODO: walkthrough tests for feedback (general, combined) on question and part level for immediate, interactive, adaptive mode
+
+// TODO: rewrite input checker script for student answer and teacher's model answer / unit
+
+// FIXME: tests using constants (e.g. is_valid_answer)
+// FIXME: tests using variable "sin=1" defined in random/global/local; used in global/local/grading/answer
 
 use qtype_formulas\answer_parser;
 use qtype_formulas\answer_unit_conversion;
@@ -50,7 +53,7 @@ require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.ph
  * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @author Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_question extends question_graded_automatically_with_countback
         implements question_automatically_gradable_with_multiple_parts {
@@ -812,7 +815,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * in the database.
  *
  * @copyright  2012 Jean-Michel Védrine, 2023 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {
 
