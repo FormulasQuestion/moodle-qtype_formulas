@@ -87,17 +87,19 @@ jobs:
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
-      - name: Install plugins
+      - name: Install moodle-plugin-ci
         run: |
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
-
-      - name: Install moodle-plugin-ci
-        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
           MOODLE_APP: true
+          MOODLE_APP_DOCKER_IMAGE: moodlehq/moodleapp:4.3.0-test
+          MOODLE_APP_PORT: 80
+          MOODLE_APP_PROTOCOL: http
+          MOODLE_DOCKER_APP_RUNTIME: ionic5
+          MOODLE_BEHAT_IONIC_WWWROOT: http://localhost:8100
 
       - name: Behat features
-        if: ${{ always() }}
         run: moodle-plugin-ci behat --auto-rerun 1 --profile chrome
