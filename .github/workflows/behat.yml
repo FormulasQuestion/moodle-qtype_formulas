@@ -88,7 +88,7 @@ jobs:
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
       - name: Install moodle-plugin-ci without app (3.9, 3.11, 4.0)
-        if: ${{ matrix.moodle-branch == 'MOODLE_39_STABLE' || matrix.moodle-branch == 'MOODLE_311_STABLE' || matrix.moodle-branch == 'MOODLE_400_STABLE' }}
+        if: ${{ contains(fromJSON('["MOODLE_39_STABLE", "MOODLE_311_STABLE", "MOODLE_400_STABLE"]'), matrix.moodle-branch) }}
         run: |
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
@@ -97,7 +97,7 @@ jobs:
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
 
       - name: Install moodle-plugin-ci
-        if: ${{ matrix.moodle-branch != 'MOODLE_39_STABLE' && matrix.moodle-branch != 'MOODLE_311_STABLE' && matrix.moodle-branch != 'MOODLE_400_STABLE' }}
+        if: ${{ !contains(fromJSON('["MOODLE_39_STABLE", "MOODLE_311_STABLE", "MOODLE_400_STABLE"]'), matrix.moodle-branch) }}
         run: |
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
