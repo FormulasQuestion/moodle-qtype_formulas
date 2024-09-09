@@ -87,7 +87,17 @@ jobs:
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
+      - name: Install moodle-plugin-ci without app (3.9, 3.11, 4.0)
+        if: ${{ matrix.moodle-branch == 'MOODLE_39_STABLE' || matrix.moodle-branch == 'MOODLE_311_STABLE' || matrix.moodle-branch == 'MOODLE_400_STABLE' }}
+        run: |
+          moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
+          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
       - name: Install moodle-plugin-ci
+        if: ${{ matrix.moodle-branch != 'MOODLE_39_STABLE' && matrix.moodle-branch != 'MOODLE_311_STABLE' && matrix.moodle-branch != 'MOODLE_400_STABLE' }}
         run: |
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
