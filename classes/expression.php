@@ -15,16 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Used to save and restore image correctly
+ * expression or statement for qtype_formulas parser
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
- * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
- * @package qtype_formulas
+ * @package    qtype_formulas
+ * @copyright  2022 Philipp Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function qtype_formulas_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG;
-    require_once($CFG->libdir . '/questionlib.php');
-    question_pluginfile($course, $context, 'qtype_formulas', $filearea, $args, $forcedownload, $options);
+namespace qtype_formulas;
+
+class expression {
+    /** @var array the expression or statement in RPN notation */
+    public array $body = [];
+
+    public function __construct(array $body) {
+        $this->body = $body;
+    }
 }
