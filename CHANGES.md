@@ -1,5 +1,10 @@
 # Changelog
 
+### 5.3.4 (2024-10-07)
+- assure compatibility with Moodle 4.5
+
+Please note: this is the last version with support for Moodle < 4.1 and PHP < 8.0.
+
 ### 5.3.3 (2024-04-20)
 - assure compatibility with Moodle 4.4 and PHP 8.3
 - bugfix: solve problem with "Save and continue" on edit form and PHP 8.2
