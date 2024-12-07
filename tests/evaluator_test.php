@@ -1155,8 +1155,9 @@ class evaluator_test extends \advanced_testcase {
                 '1:1:invalid variable name: _a',
                 '_a=3;'
             ],
+            // FIXME: now allowed with implicit multiplication, no error
             'missing operator between numbers' => [
-                '1:5:syntax error: did you forget to put an operator?',
+                '',
                 'a=3 6;'
             ],
             'unknown char in expression' => [
@@ -1744,7 +1745,7 @@ class evaluator_test extends \advanced_testcase {
             [false, 'sin(3)'],
             [false, '3+exp(4)'],
             [false, '3*4*5'],
-            [false, '3 4 5'],
+            [60, '3 4 5'], // FIXME: now OK with implicit multiplication
             [false, 'a*b'],
             [false, '#'],
         ];
@@ -1783,12 +1784,12 @@ class evaluator_test extends \advanced_testcase {
             [1.4771212547197, '1+log10(3)'],
             [M_PI, 'pi'],
             [M_PI, 'pi()'],
-            [false, '3 4 5'], // TODO doc: is no longer valid (no implicit multiplication of numbers), unless we allow that
+            [60, '3 4 5'], // FIXME: ok with implicit multiplication
             [false, '3 e10'],
             [false, '3e 10'],
             [false, '3e8e8'],
             [false, '3e8e8e8'],
-            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers), unless we allow that
+            [6e24, '3e8 4.e8 .5e8'], // FIXME: ok with implicit multiplication
         ];
 
     }
@@ -1799,7 +1800,7 @@ class evaluator_test extends \advanced_testcase {
             [true, '- 3'],
             [true, '3e 10'],
             [true, 'sin(3)-3+exp(4)'],
-            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
+            [true, '3e8 4.e8 .5e8'], // FIXME: allowed with implicit multiplication
             [true, '3e8(4.e8+2)(.5e8/2)5'],
             [true, '3+exp(4+5)^sin(6+7)'],
             [true, '3+4^-(9)'],
