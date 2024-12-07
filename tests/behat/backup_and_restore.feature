@@ -26,6 +26,7 @@ Feature: Test duplicating a quiz containing a Formulas question
   Scenario: Backup and restore a course containing an formulas question
     When I backup "Course 1" course using this options:
       | Confirmation | Filename | test_backup.mbz |
+    # Remove the question before restoring to make sure that there is only one instance.
     And question "formulas-001" no longer exists in the database
     And I restore "test_backup.mbz" backup into a new course using this options:
       | Schema | Course name | Course 2 |
