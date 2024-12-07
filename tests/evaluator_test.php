@@ -1745,7 +1745,7 @@ class evaluator_test extends \advanced_testcase {
             [false, 'sin(3)'],
             [false, '3+exp(4)'],
             [false, '3*4*5'],
-            [60, '3 4 5'], // FIXME: now OK with implicit multiplication
+            [false, '3 4 5'],
             [false, 'a*b'],
             [false, '#'],
         ];
@@ -1754,6 +1754,7 @@ class evaluator_test extends \advanced_testcase {
     // TODO: add more cases
     public function provide_numeric_answers(): array {
         return [
+            [60, '3 4 5'], // FIXME: ok with implicit multiplication
             [3.004, '3+10*4/10^4'],
             [false, 'sin(3)'],
             [false, '3+exp(4)'],
