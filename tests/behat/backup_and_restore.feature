@@ -26,9 +26,10 @@ Feature: Test duplicating a quiz containing a Formulas question
   Scenario: Backup and restore a course containing an formulas question
     When I backup "Course 1" course using this options:
       | Confirmation | Filename | test_backup.mbz |
+    And question "formulas-001" no longer exists in the database
     And I restore "test_backup.mbz" backup into a new course using this options:
       | Schema | Course name | Course 2 |
-    And I am on the "formulas-001 for editing" "core_question > edit" page logged in as admin
+    And I am on the "formulas-001" "core_question > edit" page logged in as admin
     Then the following fields match these values:
       | Question name    | formulas-001                                                              |
       | Question text    | This question shows different display methods of the answer and unit box. |
