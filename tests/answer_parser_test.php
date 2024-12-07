@@ -79,7 +79,7 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '- 3'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)-3+exp(4)'],
-            [false, '3e8 4.e8 .5e8'], // TODO doc: this is invalid now (implicit multiplication with numbers)
+            [false, '3e8 4.e8 .5e8'], // TODO doc: this is invalid now (implicit multiplication with numbers), unless we enable that
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8(4.e8+2)(.5e8/2)5'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+4^-(9)'],

@@ -1438,7 +1438,7 @@ class evaluator_test extends \advanced_testcase {
             [['3+exp(4)', 'm/s'], '3+exp(4) m/s'],
             [['3*4*5', 'm/s'], '3*4*5 m/s'],
 
-            // FIXME: The following is invalid, because 3 4 5 is not a number
+            // FIXME: The following is invalid, because 3 4 5 is not a number; we *could* use implicit multiplication between numbers
             // 'old unit tests, 17' => [['3 4 5 ', 'm/s'], '3 4 5 m/s'],
             'old unit tests, 18' => [['', 'm/s'], 'm/s'],
 
@@ -1783,12 +1783,12 @@ class evaluator_test extends \advanced_testcase {
             [1.4771212547197, '1+log10(3)'],
             [M_PI, 'pi'],
             [M_PI, 'pi()'],
-            [false, '3 4 5'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
+            [false, '3 4 5'], // TODO doc: is no longer valid (no implicit multiplication of numbers), unless we allow that
             [false, '3 e10'],
             [false, '3e 10'],
             [false, '3e8e8'],
             [false, '3e8e8e8'],
-            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers)
+            [false, '3e8 4.e8 .5e8'], // TODO doc: is no longer valid (no implicit multiplication of numbers), unless we allow that
         ];
 
     }

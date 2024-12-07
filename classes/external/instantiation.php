@@ -230,21 +230,28 @@ class instantiation extends \external_api {
             $evaluator->evaluate($randomparser->get_statements());
             $randomcontext = $evaluator->export_variable_context();
 
-            // FIXME: now using known vars from random parser
+            // When initializing the parser, use the known vars from the random parser.
             $globalparser = new parser($params['globalvars'], $randomparser->export_known_variables());
             $parsedglobalvars = $globalparser->get_statements();
 
             $parsedlocalvars = [];
             $parsedanswers = [];
             for ($i = 0; $i < $noparts; $i++) {
+                // Get the known vars from the global parser and save them as a fallback.
+                $knownvars = $globalparser->export_known_variables();
                 if (!empty($params['localvars'][$i])) {
-                    // FIXME: now using known vars from globalparser
-                    $parser = new parser($params['localvars'][$i], $globalparser->export_known_variables());
+                    // For each part parser, use the known vars from the global parser.
+                    $parser = new parser($params['localvars'][$i], $knownvars);
                     $parsedlocalvars[$i] = $parser->get_statements();
+
+                    // If we are here, that means there are local variables. So we update the
+                    // list of known vars.
+                    $knownvars = $parser->export_known_variables();
                 }
 
-                // FIXME: known vars? --> must be done by part to have part's parser
-                $parser = new parser($params['answers'][$i]);
+                // Initialize the answer parser using the known variables, either just the global ones
+                // or global plus local vars.
+                $parser = new parser($params['answers'][$i], $knownvars);
                 $parsedanswers[$i] = $parser->get_statements();
             }
         } catch (Exception $e) {
@@ -362,7 +369,8 @@ class instantiation extends \external_api {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            // FIXME: now using known vars
+            // Initialize the parser, taking into account the vars that are known after evaluation of
+            // random variables assignments.
             $globalparser = new parser($params['globalvars'], $evaluator->export_variable_list());
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($globalparser->get_statements());
@@ -421,15 +429,17 @@ class instantiation extends \external_api {
             return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            // FIXME: now using known vars from randomparser
-            $parser = new parser($params['globalvars'], $randomparser->export_known_variables());
+            // Initialize the parser, taking into account the vars that are known after evaluation of
+            // random variables assignments.
+            $parser = new parser($params['globalvars'], $evaluator->export_variable_list());
             $evaluator->instantiate_random_variables();
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
             return ['source' => 'global', 'message' => $e->getMessage()];
         }
         try {
-            // FIXME: now using known vars from evaluator
+            // Initialize the local variable parser, taking into account all vars that have been created
+            // by random or global vars assignments.
             $parser = new parser($params['localvars'], $evaluator->export_variable_list());
             $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
@@ -494,7 +504,9 @@ class instantiation extends \external_api {
 
         // First prepare the main question text.
         try {
-            // FIXME: not including known vars, because we start from scratch (random vars are instantiated and defined like global vars)
+            // In this case, we do not start by parsing and evaluating random vars. Instead, the random vars
+            // are already instantiated and are treated like normal global vars. Therefore, we do not need
+            // to use known vars upon initialisation of the parser.
             $parser = new parser($params['globalvars']);
             $evaluator->evaluate($parser->get_statements());
             $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
@@ -509,7 +521,8 @@ class instantiation extends \external_api {
         foreach ($params['partvars'] as $i => $partvar) {
             try {
                 $partevaluator = clone $evaluator;
-                // FIXME: now using known vars
+                // Initialize the parser for each part's local variables, taking into account
+                // the (global and instantiated random) variables known so far.
                 $parser = new parser($partvar, $partevaluator->export_variable_list());
                 $partevaluator->evaluate($parser->get_statements());
 

@@ -321,10 +321,13 @@ class parser {
                 }
             }
 
-            // We do not allow two subsequent numbers, two subsequent strings or a string following a number
-            // (and vice versa), because that's probably a typo and we do not know for sure what to do with them.
-            // For numbers, it could be an implicit multiplication, but also the idea of separating groups of digits.
-            if (in_array($type, [token::NUMBER, token::STRING]) && in_array($nexttype, [token::NUMBER, token::STRING])) {
+            // We do not allow two subsequent strings or a string followed by a number, because that's probably
+            // a typo and we do not know for sure what to do with them. We make an exception for two subsequent
+            // numbers and consider that as implicit multiplication, similar to what e. g. Wolfram Alpha does.
+            if ($type === token::STRING && in_array($nexttype, [token::NUMBER, token::STRING])) {
+                $this->die(get_string('error_forgotoperator', 'qtype_formulas'), $nexttoken);
+            }
+            if ($type === token::NUMBER && $nexttype === token::STRING) {
                 $this->die(get_string('error_forgotoperator', 'qtype_formulas'), $nexttoken);
             }
 

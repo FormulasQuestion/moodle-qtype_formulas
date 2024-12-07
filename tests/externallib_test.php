@@ -458,6 +458,19 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'sin', 'value' => '1'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '2']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'sin=1',
+                    'localvars' => [], 'answers' => ['sin(2)']
+                ]
+            ],
+            [
                 ['status' => 'ok', 'data' => array_fill(0, 10, [
                     'randomvars' => [],
                     'globalvars' => [

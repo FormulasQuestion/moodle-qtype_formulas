@@ -1161,6 +1161,6 @@ class question_test extends \basic_testcase {
         // answer numerical formula \sin(20) (prefix needed)
         // student answers sin(20) should be incorrect (because sin == 3 for student)
         // answer algebraic formula "3x"
-        // student answers "sin(x)" should be correct
+        // student answers "sin(x)" should be correct, is read as sin*(x)
     }
 }

@@ -144,11 +144,11 @@ class parser_test extends \advanced_testcase {
         $input = 'a = b[1]';
         $input = 'π + pi + pi() + pi(2+3)';
         $input = '"foo"[1]';
+        $input = '3 4';
 
-        return;
         //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
         $parser = new parser($input);
-        foreach ($parser->statements as $statement) {
+        foreach ($parser->get_statements() as $statement) {
             $output = $statement;
             print_r($output);
             print_r(array_map(function($el) { return $el->value; }, $output->body));

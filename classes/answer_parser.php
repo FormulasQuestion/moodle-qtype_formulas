@@ -247,7 +247,7 @@ class answer_parser extends parser {
                     return false;
                 }
                 /* TODO: maybe we should reject unknown variables, because that avoids mistakes
-                         like a(x+y) = ax + ay instead of a*x or a x.
+                         like student writing a(x+y) = ax + ay instead of a*x or a x.
                 if (!$this->is_known_variable($token)) {
                     return false;
                 }*/
