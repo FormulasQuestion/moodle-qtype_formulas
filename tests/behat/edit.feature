@@ -20,9 +20,6 @@ Feature: Test editing a Formulas question
     And the following "questions" exist:
       | questioncategory | qtype    | name                     | template       |
       | Test questions   | formulas | formulas-001 for editing | testthreeparts |
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
 
   Scenario: Edit a Formulas question
     When I am on the "formulas-001 for editing" "core_question > edit" page logged in as teacher1
