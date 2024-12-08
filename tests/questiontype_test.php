@@ -683,20 +683,20 @@ class questiontype_test extends \advanced_testcase {
         $q = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $questioncat1->id]);
         $fs = get_file_storage();
         self::assertCount(2, $fs->get_area_files($file->get_contextid(), 'user', 'draft'));
-        self::assertCount(0, $fs->get_area_files($context1->id, 'qtype_formulas', $areaname));
+        self::assertCount(0, $fs->get_area_files($questioncat1->contextid, 'qtype_formulas', $areaname));
 
         // Store the modified question in the DB and verify the file has been moved to qtype_formulas' filearea 'answersubqtext'.
         \question_bank::get_qtype('formulas')->save_question($q, $formdata);
-        self::assertCount(2, $fs->get_area_files($context1->id, 'qtype_formulas', $areaname));
+        self::assertCount(2, $fs->get_area_files($questioncat1->contextid, 'qtype_formulas', $areaname));
 
         // Test moving the questions to another category.
         question_move_questions_to_category([$q->id], $questioncat2->id);
-        self::assertCount(0, $fs->get_area_files($context1->id, 'qtype_formulas', $areaname));
-        self::assertCount(2, $fs->get_area_files($context2->id, 'qtype_formulas', $areaname));
+        self::assertCount(0, $fs->get_area_files($questioncat1->contextid, 'qtype_formulas', $areaname));
+        self::assertCount(2, $fs->get_area_files($questioncat2->contextid, 'qtype_formulas', $areaname));
 
         // Remove the question.
         question_delete_question($q->id);
-        self::assertCount(0, $fs->get_area_files($context2->id, 'qtype_formulas', $areaname));
+        self::assertCount(0, $fs->get_area_files($questioncat2->contextid, 'qtype_formulas', $areaname));
     }
 
     public function provide_question_names(): array {
@@ -808,7 +808,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(4, $savedquestion->options->answers);
         $partid = $savedquestion->options->answers[3]->id;
         $fs = get_file_storage();
-        self::assertCount(2, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext', $partid));
+        self::assertCount(2, $fs->get_area_files($questioncat->contextid, 'qtype_formulas', 'answersubqtext', $partid));
 
         // Prepare form data and remove first part by deleting its answermark.
         $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
@@ -823,7 +823,7 @@ class questiontype_test extends \advanced_testcase {
         $this->qtype->get_question_options($modifiedquestion);
         self::assertCount(3, $modifiedquestion->options->answers);
         if ($CFG->branch < 400) {
-            self::assertCount(0, $fs->get_area_files($context->id, 'qtype_formulas', 'answersubqtext', $partid));
+            self::assertCount(0, $fs->get_area_files($questioncat->context, 'qtype_formulas', 'answersubqtext', $partid));
         }
     }
 
