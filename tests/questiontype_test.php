@@ -823,7 +823,7 @@ class questiontype_test extends \advanced_testcase {
         $this->qtype->get_question_options($modifiedquestion);
         self::assertCount(3, $modifiedquestion->options->answers);
         if ($CFG->branch < 400) {
-            self::assertCount(0, $fs->get_area_files($questioncat->context, 'qtype_formulas', 'answersubqtext', $partid));
+            self::assertCount(0, $fs->get_area_files($questioncat->contextid, 'qtype_formulas', 'answersubqtext', $partid));
         }
     }
 
