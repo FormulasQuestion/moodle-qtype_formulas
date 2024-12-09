@@ -30,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 
-use core\plugininfo\qtype;
 use Exception;
 use qtype_formulas;
 
@@ -56,34 +55,35 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMBER, '-π'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '- 3'], // TODO doc: This is allowed now
             [qtype_formulas::ANSWER_TYPE_NUMBER, '+ 3'], // TODO doc: This is allowed now
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+10*4'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+10^4'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3*4*5'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3 4 5'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
             [false, '3; 4'],
             [false, '[1,2]'],
             [false, '{1,2}'],
             [false, 'stdnormpdf(0.5)'],
-            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3 4 5'], // FIXME: is now accepted
             [false, '#'],
         ];
     }
 
     public function provide_algebraic_formulas(): array {
         return [
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
+            [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8 4.e8 .5e8'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '- 3'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)-3+exp(4)'],
-            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8 4.e8 .5e8'], // FIXME: now working again with implicit multiplication
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8(4.e8+2)(.5e8/2)5'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+4^-(9)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8(4.e8+2)(.5e8/2)5'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b*c'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a b c'],
@@ -92,7 +92,6 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a (b+c)(x/y) d'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a (b+c) (x/y) d'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a(4.e8+2)3e8(.5e8/2)d'],
-            [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+x^y'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3+x^-(y)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3+x^-y'],
@@ -111,21 +110,21 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a sin(w t)+ b cos(w t)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a**b'],
-            //[false, '3 e10'], // FIXME: this is valid: 3*e*10 (if e is known)
-            //[false, '3e8e8'], // FIXME: this is valid: 3*e*8*e*8 (if e is known)
-            //[false, '3e8e8e8'], // FIXME: this is valid: 3*e*8*e*8*e*8 (if e is known)
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a/(b-b)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed
+            //[false, '3 e10'], // FIXME: this can be valid: 3*e*10 (if e is known)
+            //[false, '3e8e8'], // FIXME: this can be valid: 3*e*8*e*8 (if e is known)
+            //[false, '3e8e8e8'], // FIXME: this can be valid: 3*e*8*e*8*e*8 (if e is known)
             [false, 'a-'],
             [false, '*a'],
             [false, 'a+^c+f'],
             [false, 'a+b^^+f'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus
             [false, 'a+((b^c)^d+f'],
             [false, 'a+(b^c+f'],
             [false, 'a+b^c)+f'],
             [false, 'a+b^(c+f'],
             [false, 'a+b)^c+f'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed
             [false, 'sin 3'],
             [false, '1+sin*(3)+2'],
             [false, '1+sin^(3)+2'],

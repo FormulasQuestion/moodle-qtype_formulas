@@ -313,6 +313,10 @@ class evaluator_test extends \advanced_testcase {
                 ['a' => new variable('a', 1, token::NUMBER)],
                 'a = 1; # This is a comment! So it will be skipped. '
             ],
+            'implicit multiplication of numbers' => [
+                ['a' => new variable('a', 18, token::NUMBER)],
+                'a=3 6;'
+            ],
             'one expression' => [
                 ['c' => new variable('c', 4.14, token::NUMBER)],
                 'c = cos(0)+3.14;'
@@ -364,6 +368,25 @@ class evaluator_test extends \advanced_testcase {
             'list with numbers and string' => [
                 ['e' => new variable('e', [1, 2, 'A'], token::LIST)],
                 'e=[1,2,"A"];'
+            ],
+            'list with range of numbers and string' => [
+                ['e' => new variable('e', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'k'], token::LIST)],
+                'e=[0:10,"k"];'
+            ],
+            'empty list' => [
+                ['e' => new variable('e', [], token::LIST)],
+                'e=[];'
+            ],
+            'large list (10000 entries) via fill' => [
+                ['c' => new variable('e', array_fill(0, 10000, 'rr'), token::LIST)],
+                'c=fill(10000,"rr")'
+            ],
+            'list filled with count from expression' => [
+                [
+                    'a' => new variable('a', [1, 2, 3, 4], token::LIST),
+                    'c' => new variable('c', array_fill(0, 5, 'rr'), token::LIST),
+                ],
+                'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'
             ],
             'composed expression with vars' => [
                 [
@@ -472,9 +495,7 @@ class evaluator_test extends \advanced_testcase {
                 's = "string"; c = s["-2"]; d = s["1"];'
             ],
             'assign from string literal with negative index' => [
-                [
-                    'c' => new variable('c', 'n', token::STRING)
-                ],
+                ['c' => new variable('c', 'n', token::STRING)],
                 'c = "string"[-2];'
             ],
             'assign lists and composed expressions' => [
@@ -484,6 +505,10 @@ class evaluator_test extends \advanced_testcase {
                     'n' => new variable('n', [9, 3, 54], token::LIST),
                 ],
                 'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];'
+            ],
+            'assign with concatenation of lists' => [
+                ['s' => new variable('s', [1, 2, 3, 'A', 'B'], token::LIST)],
+                's=concat([1,2,3], ["A","B"]);'
             ],
             'assign with exponentiation' => [
                 ['a' => new variable('a', 6561, token::NUMBER)],
@@ -845,7 +870,7 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->instantiate_random_variables();
         self::assertContains($key, $evaluator->export_variable_list());
 
-        // FIXME: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
+        // TODO: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
 
         // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
         // value is within those boundaries.
@@ -1155,11 +1180,6 @@ class evaluator_test extends \advanced_testcase {
                 '1:1:invalid variable name: _a',
                 '_a=3;'
             ],
-            // FIXME: now allowed with implicit multiplication, no error
-            'missing operator between numbers' => [
-                '',
-                'a=3 6;'
-            ],
             'unknown char in expression' => [
                 "1:4:unexpected input: '«'",
                 'a=3«6;'
@@ -1167,10 +1187,6 @@ class evaluator_test extends \advanced_testcase {
             'not subscriptable' => [
                 '1:8:evaluation error: indexing is only possible with lists and strings',
                 'f=1; g=f[1];'
-            ],
-            'assignment of empty list' => [
-                '', // FIXME: put this to valid assignments, it is no error anymore.
-                'e=[];'
             ],
             'invalid index: array' => [
                 'evaluation error: only one index supported when accessing array elements',
@@ -1184,10 +1200,6 @@ class evaluator_test extends \advanced_testcase {
                 '1:16:number expected, found list',
                 'e=[1,2,3,4]; f=e*2;'
             ],
-            'xxxx' => [
-                '', // FIXME: put this to valid assignments, it is no error anymore.
-                'e=[0:10,"k"];'
-            ],
             'multiple indices for array' => [
                 '1:18:evaluation error: only one index supported when accessing array elements',
                 'e=[1,2,3][1][4,5,6][2];'
@@ -1195,10 +1207,6 @@ class evaluator_test extends \advanced_testcase {
             'fill with count == 0' => [
                 '1:3:fill() expects its first argument to be a positive integer',
                 'c=fill(0,"rr")'
-            ],
-            'fill with count == 10000' => [
-                '', // FIXME: this is not an error anymore
-                'c=fill(10000,"rr")'
             ],
             'undefined natrual logarithm' => [
                 'ln() expects its argument to be a positive number',
@@ -1216,17 +1224,9 @@ class evaluator_test extends \advanced_testcase {
                 "1:7:unbalanced parenthesis, '(' is never closed",
                 's=fill(10,"rr";'
             ],
-            'xxx' => [
-                '', // FIXME: move to valid tests, no error anymore
-                'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'
-            ],
             'invalid invocation of concat(), number' => [
                 "1:3:concat() expects its arguments to be lists",
                 's=concat(0, [1,2,3], [5,6], 100);'
-            ],
-            'invalid invocation of concat()' => [
-                '', // FIXME: no error anymore, because lists can contain different types
-                's=concat([1,2,3], ["A","B"]);'
             ],
             'invalid for loop: no variable' => [
                 '1:12:syntax error: identifier expected',
@@ -1754,7 +1754,7 @@ class evaluator_test extends \advanced_testcase {
     // TODO: add more cases
     public function provide_numeric_answers(): array {
         return [
-            [60, '3 4 5'], // FIXME: ok with implicit multiplication
+            [60, '3 4 5'],
             [3.004, '3+10*4/10^4'],
             [false, 'sin(3)'],
             [false, '3+exp(4)'],
@@ -1785,12 +1785,12 @@ class evaluator_test extends \advanced_testcase {
             [1.4771212547197, '1+log10(3)'],
             [M_PI, 'pi'],
             [M_PI, 'pi()'],
-            [60, '3 4 5'], // FIXME: ok with implicit multiplication
+            [60, '3 4 5'],
+            [6e24, '3e8 4.e8 .5e8'],
             [false, '3 e10'],
             [false, '3e 10'],
             [false, '3e8e8'],
             [false, '3e8e8e8'],
-            [6e24, '3e8 4.e8 .5e8'], // FIXME: ok with implicit multiplication
         ];
 
     }
@@ -1801,7 +1801,7 @@ class evaluator_test extends \advanced_testcase {
             [true, '- 3'],
             [true, '3e 10'],
             [true, 'sin(3)-3+exp(4)'],
-            [true, '3e8 4.e8 .5e8'], // FIXME: allowed with implicit multiplication
+            [true, '3e8 4.e8 .5e8'],
             [true, '3e8(4.e8+2)(.5e8/2)5'],
             [true, '3+exp(4+5)^sin(6+7)'],
             [true, '3+4^-(9)'],
@@ -1832,9 +1832,9 @@ class evaluator_test extends \advanced_testcase {
             [true, 'a sin(w t)+ b cos(w t)'],
             [true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [true, 'a**b'],
-            //[false, '3 e10'], // FIXME: this is valid: 3*e*10 (if e is known)
-            //[false, '3e8e8'], // FIXME: this is valid: 3*e*8*e*8 (if e is known)
-            //[false, '3e8e8e8'], // FIXME: this is valid: 3*e*8*e*8*e*8 (if e is known)
+            //[false, '3 e10'], // FIXME: this can be valid: 3*e*10 (if e is known)
+            //[false, '3e8e8'], // FIXME: this can be valid: 3*e*8*e*8 (if e is known)
+            //[false, '3e8e8e8'], // FIXME: this can be valid: 3*e*8*e*8*e*8 (if e is known)
             [false, 'a/(b-b)'],
             [false, 'a-'],
             [false, '*a'],

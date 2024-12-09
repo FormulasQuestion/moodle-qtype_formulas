@@ -512,7 +512,7 @@ class functions_test extends \advanced_testcase {
      */
     public function test_number_conversions() {
         // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to use the new evaluator
+        // cases have yet to be ported to make use of the new evaluator
         self::assertTrue(true);
         return;
         // Check valid invocations.
@@ -587,7 +587,7 @@ class functions_test extends \advanced_testcase {
      */
     public function test_invocation_trigonometric() {
         // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to use the new evaluator
+        // cases have yet to be ported to make use of the new evaluator
         self::assertTrue(true);
         return;
 
@@ -655,7 +655,7 @@ class functions_test extends \advanced_testcase {
      */
     public function test_invocation_algebraic() {
         // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to use the new evaluator
+        // cases have yet to be ported to make use of the new evaluator
         self::assertTrue(true);
         return;
 
@@ -779,7 +779,7 @@ class functions_test extends \advanced_testcase {
      */
     public function test_invocation_string_array() {
         // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to use the new evaluator
+        // cases have yet to be ported to make use of the new evaluator
         self::assertTrue(true);
         return;
 
