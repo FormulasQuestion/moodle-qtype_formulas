@@ -15,26 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the formulas question type.
+ * for loop for qtype_formulas parser
  *
  * @package    qtype_formulas
- * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace qtype_formulas;
 
-$plugin->component = 'qtype_formulas';
-$plugin->version = 2024100701;
+class for_loop {
+    /** @var token variable token for the loop's iterator variable */
+    public token $variable;
 
-$plugin->cron      = 0;
-$plugin->requires  = 2019111803;
-$plugin->dependencies = array(
-    'qbehaviour_adaptive' => 2015111600,
-    'qbehaviour_adaptivemultipart' => 2014092500,
-    'qtype_multichoice' => 2015111600,
-);
-$plugin->supported = [39, 405];
-$plugin->release = '5.3.4.post0 for Moodle 3.9+';
+    /** @var expression values the loop will iterate over */
+    public expression $range;
 
-$plugin->maturity = MATURITY_STABLE;
+    /** @var array statements of the loop */
+    public array $body = [];
+
+    public function __construct(token $var, expression $range, array $body) {
+        $this->variable = $var;
+        $this->range = $range;
+        $this->body = $body;
+    }
+}
