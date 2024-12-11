@@ -33,6 +33,12 @@ use qtype_formulas;
 // TODO: test calculate_algebraic_expression with empty string
 
 class evaluator_test extends \advanced_testcase {
+    public static function setUpBeforeClass(): void {
+        global $CFG;
+        parent::setUpBeforeClass();
+
+        require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+    }
 
     public function provide_invalid_diff(): array {
         return [
