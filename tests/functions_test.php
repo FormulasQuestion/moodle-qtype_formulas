@@ -507,21 +507,46 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    public function provide_decbin_calls(): array {
+        return [
+            ['1', 'decbin(1)'],
+            ['0', 'decbin(0)'],
+            ['11', 'decbin(3)'],
+            ['11', 'decbin("3")'],
+            ['1010', 'decbin(10)'],
+            ['1111', 'decbin(15)'],
+            ["1:1:invalid number of arguments for function 'decbin': 0 given", 'decbin()'],
+            ["1:1:invalid number of arguments for function 'decbin': 2 given", 'decbin(1, 2)'],
+            // FIXME: the following will not throw an error in PHP 7.4; result will be 0
+            // ['1:1:decbin(): Argument #1 ($num) must be of type int, string given', 'decbin("a")'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_decbin_calls
+     */
+    public function test_number_conversion($expected, $input) {
+        // FIXME: test for return type
+        $parser = new parser($input);
+        $evaluator = new evaluator();
+        try {
+            $result = $evaluator->evaluate($parser->get_statements());
+        } catch (Exception $e) {
+            self::assertStringEndsWith($expected, $e->getMessage());
+            return;
+        }
+        self::assertEquals($expected, end($result)->value);
+    }
     /**
      * Test number conversion functions decbin(), decoct(), octdec() and bindec()
      */
-    public function test_number_conversions() {
+    public function test_number_conversions_FIXME_REMOVE_LATER() {
         // FIXME: short-circuit the test in order to remove variables.php
         // cases have yet to be ported to make use of the new evaluator
         self::assertTrue(true);
         return;
         // Check valid invocations.
         $testcases = array(
-            array('a=decbin(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
-            array('a=decbin(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
-            array('a=decbin(3);', array('a' => (object) array('type' => 'n', 'value' => 11))),
-            array('a=decbin(10);', array('a' => (object) array('type' => 'n', 'value' => 1010))),
-            array('a=decbin(15);', array('a' => (object) array('type' => 'n', 'value' => 1111))),
             array('a=decoct(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
             array('a=decoct(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
             array('a=decoct(3);', array('a' => (object) array('type' => 'n', 'value' => 3))),
@@ -552,10 +577,6 @@ class functions_test extends \advanced_testcase {
         }
         // Check invalid invocations.
         $testcases = array(
-            array('a=decbin();'),
-            array('a=decbin(1, 2);'),
-            array('a=decbin("3");'),
-            array('a=decbin("a");'),
             array('a=decoct();'),
             array('a=decoct(1, 2);'),
             array('a=decoct("3");'),

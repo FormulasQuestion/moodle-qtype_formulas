@@ -716,7 +716,7 @@ class questiontype_test extends \advanced_testcase {
         // FIXME: remove or rewrite in a way that explicitly checks the important fields like varsglobal
         // and part's fields like answer, answertype, correctness etc.
         // see test_export_and_reimport_xml and test_get_question_options
-        // FIXME: possibility: save question to DB, edit form, change 1-2 fields, compare old/new question
+        // possibility: save question to DB, edit form, change 1-2 fields, compare old/new question
         return;
         // Login as admin user.
         $this->resetAfterTest(true);

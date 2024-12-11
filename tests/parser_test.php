@@ -171,6 +171,37 @@ class parser_test extends \advanced_testcase {
         // print_r($parser->statements);
     }
 
+    /**
+     * @dataProvider provide_sets
+     */
+    public function test_sets($expected, $input): void {
+        $parser = new parser($input);
+        $statement = $parser->get_statements()[0];
+        self::assertEquals($expected, implode(',', $statement->body));
+    }
+
+    public function provide_sets(): array {
+        return [
+            'basic' => ['{,1,2,3,4,5,%%setbuild', '{1,2,3,4,5}'],
+            'range without step' => ['{,1,10,2,%%rangebuild,%%setbuild', '{1:10}'],
+            'range with step' => ['{,1,10,0.5,3,%%rangebuild,%%setbuild', '{1:10:0.5}'],
+            'ranges and elements' => [
+                '{,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%setbuild',
+                '{1,5:6:0.1,100,200:300,5}'
+            ],
+            'array in set' => [
+                '{,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%setbuild',
+                '{[1:10],[20:30],[40:50:2]}'
+            ],
+            'multiple ranges' => ['{,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%setbuild', '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}'],
+            'range with step, negatives' => ['{,1,_,10,_,0.5,_,3,%%rangebuild,%%setbuild', '{-1:-10:-0.5}'],
+            'range with step, composed expressions' => [
+                '{,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%setbuild',
+                '{1+sqrt(3):10+sin(5):1/5}'
+            ],
+        ];
+    }
+
     public function provide_impossible_things(): array {
         return [
             ['1:99:unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
