@@ -26,6 +26,7 @@
 namespace qtype_formulas;
 
 use Exception;
+use Generator;
 use qtype_formulas;
 
 // TODO: test with global vars depending on instantiated random vars
@@ -1774,7 +1775,73 @@ class evaluator_test extends \advanced_testcase {
             [false, '3e8e8'],
             [false, '3e8e8e8'],
         ];
+    }
 
+    public function provide_inputs_for_exponential_versus_e(): Generator {
+        yield [
+            'output' => [
+                '3e4' => 3e4,
+                '3e4e4' => 'unknown variable: e4',
+                '3e4e4e4' => 'unknown variable: e4e4'
+            ],
+            'vars' => '',
+        ];
+        yield [
+            'output' => [
+                '3e4' => 3e4,
+                '3e4e4' => 3e4 * 9,
+                '3e4e4e4' => 'unknown variable: e4e4'
+            ],
+            'vars' => 'e4 = 9;',
+        ];
+        yield [
+            'output' => [
+                '3e4' => 3e4,
+                '3e4e4' => 'unknown variable: e4',
+                '3e4e4e4' => 3e4 * 9,
+            ],
+            'vars' => 'e4e4 = 9;',
+        ];
+        yield [
+            'output' => [
+                '3e4' => 3e4,
+                '3e4e4' => 3e4 * 17,
+                '3e4e4e4' => 3e4 * 9,
+            ],
+            'vars' => 'e4 = 17; e4e4 = 9;',
+        ];
+    }
+
+    /**
+     * @dataProvider provide_inputs_for_exponential_versus_e
+     */
+    public function test_exponential_versus_variable_e_precedence($expected, $varcontext): void {
+        // First step: prepare evaluator with the desired variable context.
+        $parser = new parser($varcontext);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($parser->get_statements());
+
+        foreach ($expected as $input => $output) {
+            // Make sure we start with a clean copy for every variant.
+            $localevaluator = clone $evaluator;
+            $parser = new parser($input);
+            $error = null;
+            try {
+                $result = $localevaluator->evaluate($parser->get_statements())[0];
+            } catch (Exception $e) {
+                $error = $e->getMessage();
+            }
+
+            // If we expect an error message, check whether it is the right one.
+            if (is_string($output)) {
+                self::assertStringEndsWith($output, $error);
+                continue;
+            }
+
+            // Otherwise, check the result *and* make sure there was no error.
+            self::assertEquals($output, $result->value);
+            self::assertNull($error);
+        }
     }
 
     public function provide_algebraic_formulas(): array {
@@ -1814,9 +1881,12 @@ class evaluator_test extends \advanced_testcase {
             [true, 'a sin(w t)+ b cos(w t)'],
             [true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [true, 'a**b'],
-            //[false, '3 e10'], // FIXME: this can be valid: 3*e*10 (if e is known)
-            //[false, '3e8e8'], // FIXME: this can be valid: 3*e*8*e*8 (if e is known)
-            //[false, '3e8e8e8'], // FIXME: this can be valid: 3*e*8*e*8*e*8 (if e is known)
+            // Note: the following is syntactically valid, but cannot be evaluated, because e10 is not a known variable.
+            [false, '3 e10'],
+            // Note: the following is syntactically valid, but cannot be evaluated, because e8 is not a known variable.
+            [false, '3e8e8'],
+            // Note: the following is syntactically valid, but cannot be evaluated, because e8e8 is not a known variable.
+            [false, '3e8e8e8'],
             [false, 'a/(b-b)'],
             [false, 'a-'],
             [false, '*a'],

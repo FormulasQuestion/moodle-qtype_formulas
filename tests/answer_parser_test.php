@@ -113,9 +113,12 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a/(b-b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed
-            //[false, '3 e10'], // FIXME: this can be valid: 3*e*10 (if e is known)
-            //[false, '3e8e8'], // FIXME: this can be valid: 3*e*8*e*8 (if e is known)
-            //[false, '3e8e8e8'], // FIXME: this can be valid: 3*e*8*e*8*e*8 (if e is known)
+            // Note: the following is syntactically valid and is read as 3*e10; it can be evaluated if e10 is a valid variable.
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
+            // Note: the following is syntactically valid and is read as 3e8*e8; it can be evaluated if e8 is a valid variable.
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
+            // Note: the following is syntactically valid and is read as 3e8*e8e8; it can be evaluated if e8e8 is a valid variable.
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8e8'],
             [false, 'a-'],
             [false, '*a'],
             [false, 'a+^c+f'],
