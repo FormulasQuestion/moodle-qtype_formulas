@@ -1207,7 +1207,7 @@ class functions_test extends \advanced_testcase {
         // to know that some shuffling has happened.
         $firstok = false;
         $secondok = false;
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             if ($unpackedresult[0][0] == 5 || $unpackedresult[0][0] == 6) {
                 $secondok = true;
             }
