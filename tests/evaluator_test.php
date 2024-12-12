@@ -1930,12 +1930,12 @@ class evaluator_test extends \advanced_testcase {
         } catch (Exception $e) {
             // If there was an exception already during the creation of the parser,
             // it is not initialized yet. In that case, we create a new, empty parser.
-            // In such a case, is_valid_number() will fail, as expected.
+            // In such a case, is_acceptable_number() will fail, as expected.
             $parser = new answer_parser('');
         }
 
         // If we expect the expression to be valid, is must pass this first test.
-        $isvalidsyntax = $parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC);
+        $isvalidsyntax = $parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC);
         if ($expected === true) {
             self::assertTrue($isvalidsyntax);
         }
@@ -1974,18 +1974,18 @@ class evaluator_test extends \advanced_testcase {
         } catch (Exception $e) {
             // If there was an exception already during the creation of the parser,
             // it is not initialized yet. In that case, we create a new, empty parser.
-            // In such a case, is_valid_number() will fail, as expected.
+            // In such a case, is_acceptable_number() will fail, as expected.
             if (!isset($parser)) {
                 $parser = new answer_parser('');
             }
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+            self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
             return;
         }
 
-        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
@@ -2003,18 +2003,18 @@ class evaluator_test extends \advanced_testcase {
         } catch (Exception $e) {
             // If there was an exception already during the creation of the parser,
             // it is not initialized yet. In that case, we create a new, empty parser.
-            // In such a case, is_valid_number() will fail, as expected.
+            // In such a case, is_acceptable_number() will fail, as expected.
             if (!isset($parser)) {
                 $parser = new answer_parser('');
             }
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
+            self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
             return;
         }
 
-        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
+        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERIC));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);
@@ -2032,18 +2032,18 @@ class evaluator_test extends \advanced_testcase {
         } catch (Exception $e) {
             // If there was an exception already during the creation of the parser,
             // it is not initialized yet. In that case, we create a new, empty parser.
-            // In such a case, is_valid_number() will fail, as expected.
+            // In such a case, is_acceptable_number() will fail, as expected.
             if (!isset($parser)) {
                 $parser = new answer_parser('');
             }
         }
 
         if ($expected === false) {
-            self::assertFalse($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
+            self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
             return;
         }
 
-        self::assertTrue($parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
+        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMBER));
         self::assertIsArray($result);
         self::assertEquals(1, count($result));
         self::assertEqualsWithDelta($expected, $result[0]->value, 1e-8);

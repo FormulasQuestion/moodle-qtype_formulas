@@ -29,7 +29,7 @@
 
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 
-// FIXME: tests using constants (e.g. is_valid_answer)
+// FIXME: tests using constants (e.g. is_acceptable_answer)
 // FIXME: tests using variable "sin=1" defined in random/global/local; used in global/local/grading/answer
 
 use qtype_formulas\answer_parser;
@@ -1443,7 +1443,7 @@ class qtype_formulas_part {
                 // Check whether the answer is valid for the given answer type. If it is not,
                 // we just throw an exception to make use of the catch block. Note that if the
                 // student's answer was empty, it will fail in this check.
-                if (!$parser->is_valid_for_answertype($this->answertype)) {
+                if (!$parser->is_acceptable_for_answertype($this->answertype)) {
                     throw new Exception();
                 }
 

@@ -80,21 +80,21 @@ class answer_parser extends parser {
      * @param int $type the answer type, a constant from the qtype_formulas class
      * @return bool
      */
-    public function is_valid_for_answertype(int $type): bool {
+    public function is_acceptable_for_answertype(int $type): bool {
         if ($type === qtype_formulas::ANSWER_TYPE_NUMBER) {
-            return $this->is_valid_number();
+            return $this->is_acceptable_number();
         }
 
         if ($type === qtype_formulas::ANSWER_TYPE_NUMERIC) {
-            return $this->is_valid_numeric();
+            return $this->is_acceptable_numeric();
         }
 
         if ($type === qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA) {
-            return $this->is_valid_numerical_formula();
+            return $this->is_acceptable_numerical_formula();
         }
 
         if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
-            return $this->is_valid_algebraic_formula();
+            return $this->is_acceptable_algebraic_formula();
         }
     }
 
@@ -106,7 +106,7 @@ class answer_parser extends parser {
      *
      * @return bool
      */
-    private function is_valid_number(): bool {
+    private function is_acceptable_number(): bool {
         // The statement list must contain exactly one expression object.
         if (count($this->statements) !== 1) {
             return false;
@@ -148,9 +148,9 @@ class answer_parser extends parser {
      *
      * @return bool
      */
-    private function is_valid_numeric(): bool {
+    private function is_acceptable_numeric(): bool {
         // If it's a valid number expression, we have nothing to do.
-        if ($this->is_valid_number()) {
+        if ($this->is_acceptable_number()) {
             return true;
         }
 
@@ -195,14 +195,14 @@ class answer_parser extends parser {
      *
      * @return bool
      */
-    private function is_valid_numerical_formula(): bool {
-        if ($this->is_valid_number() || $this->is_valid_numeric()) {
+    private function is_acceptable_numerical_formula(): bool {
+        if ($this->is_acceptable_number() || $this->is_acceptable_numeric()) {
             return true;
         }
 
         // Checking whether the expression is valid as an algebraic formula, but with variables
         // being disallowed. This also makes sure that there is one single statement.
-        if (!$this->is_valid_algebraic_formula(true)) {
+        if (!$this->is_acceptable_algebraic_formula(true)) {
             return false;
         }
 
@@ -219,8 +219,8 @@ class answer_parser extends parser {
      * @param bool $disallowvariables whether we disallow the usage of variables
      * @return bool
      */
-    private function is_valid_algebraic_formula(bool $disallowvariables = false): bool {
-        if ($this->is_valid_number() || $this->is_valid_numeric()) {
+    private function is_acceptable_algebraic_formula(bool $disallowvariables = false): bool {
+        if ($this->is_acceptable_number() || $this->is_acceptable_numeric()) {
             return true;
         }
 

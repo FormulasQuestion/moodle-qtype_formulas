@@ -568,7 +568,7 @@ class evaluator {
         // will mean exponentiation rather than XOR, as per the documented behaviour.
         // Note that this step will also throw an error, if the expression is empty.
         $parser = new answer_parser($expression, $this->export_variable_list());
-        if (!$parser->is_valid_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)) {
+        if (!$parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)) {
             throw new Exception(get_string('error_invalidalgebraic', 'qtype_formulas', $expression));
         }
 
