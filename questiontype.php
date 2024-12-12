@@ -1070,6 +1070,12 @@ class qtype_formulas extends question_type {
                 // If (and only if) the answer is algebraic, the answer parser should
                 // interpret ^ as **.
                 $answerparser = new answer_parser($part->answer, $knownvars, $isalgebraic);
+                // If the user enters a comment sign in the model answer, it is not technically empty,
+                // but it will be parsed as an empty expression. We catch this here and make use of
+                // the catch block to pass an error message.
+                if (empty($answerparser->get_statements())) {
+                    throw new Exception(get_string('error_model_answer_no_content', 'qtype_formulas'));
+                }
                 $modelanswers = $partevaluator->evaluate($answerparser->get_statements())[0];
             } catch (Exception $e) {
                 // If the answer type is algebraic, the model answer field must contain one string (with quotes)

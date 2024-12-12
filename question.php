@@ -1302,6 +1302,11 @@ class qtype_formulas_part {
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
         foreach ($formulas as &$formula) {
+            // If the formula is aready wrapped in quotes (e. g. after an earlier call to this
+            // function), there is nothing to do.
+            if (preg_match('/^\"[^\"]+\"$/', $formula)) {
+                continue;
+            }
             $formula = '"' . $formula . '"';
         }
         // In case we later write to $formula, this would alter the last entry of the $formulas

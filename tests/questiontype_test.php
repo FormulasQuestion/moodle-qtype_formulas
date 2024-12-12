@@ -275,6 +275,10 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [
+                ['answer[0]' => get_string('error_model_answer_no_content', 'qtype_formulas')],
+                ['answer' => [0 => '#']],
+            ],
+            [
                 ['globalunitpenalty' => get_string('error_unitpenalty', 'qtype_formulas')],
                 ['globalunitpenalty' => 2]
             ],

@@ -285,6 +285,7 @@ $string['response_wrong_unit'] = 'Right value, wrong unit';
 
 
 
+$string['error_model_answer_no_content'] = 'Invalid answer: the model answer contains no evaluable symbols.';
 $string['error_string_for_algebraic_formula'] = 'Invalid answer format: the answer type "algebraic formula" expects one single string wrapped in quotes or a list of strings, each wrapped in quotes.';
 $string['error_number_for_numeric_answertypes'] = 'Invalid answer format: this answer type expects one number or a list of numbers.';
 $string['error_in_answer'] = 'error in answer #{$a->answerno}: {$a->message}';

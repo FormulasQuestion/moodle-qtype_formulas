@@ -158,19 +158,6 @@ class parser_test extends \advanced_testcase {
         //print_r($output);
     }
 
-    public function test_parse_list() {
-        // FIXME - TODO --> implement new test for lists
-        //$input = '[1, 2, 3]';
-        //$input = '[1, "a", 3]';
-        //$input = '[1, ["x", "y"], 3]';
-        //$input = '[[1,2]]';
-        $input = 'a = [1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-        $input = '-123.541e-13; 4';
-
-        $parser = new answer_parser($input);
-        // print_r($parser->statements);
-    }
-
     /**
      * @dataProvider provide_sets
      */

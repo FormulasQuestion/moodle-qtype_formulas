@@ -69,10 +69,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness[0] |       |
     And I press "id_submitbutton"
     And I wait until the page is ready
-    # FIXME: with invalid criterion and only one part, might give error "At least one answer is required."
-    # even though an answer is there
     Then I should see "The grading criterion must not be empty."
-    # Then I should see "The grading criterion must be evaluated to a single number."
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be enabled
