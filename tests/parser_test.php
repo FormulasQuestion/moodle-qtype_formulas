@@ -113,7 +113,7 @@ class parser_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
-        // FIXME: remove or create real use
+        // TODO: remove this when no longer needed for manual testing
         self::assertTrue(true);
         return;
         $input = 'a = 5 = 3';

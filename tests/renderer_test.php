@@ -32,16 +32,16 @@ use question_hint_with_parts;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once(dirname(__FILE__) . '/../../../engine/lib.php');
+require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
-require_once(dirname(__FILE__) . '/test_base.php');
+require_once($CFG->dirroot . '/question/type/formulas/tests/test_base.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 
 
 /**
  * Unit tests for the formulas question type.
  *
- * @copyright  2023 Jean-Michel Vedrine
+ * @copyright  2024 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer_test extends walkthrough_test_base {

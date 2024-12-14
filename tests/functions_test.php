@@ -517,7 +517,8 @@ class functions_test extends \advanced_testcase {
             ['1111', 'decbin(15)'],
             ["1:1:invalid number of arguments for function 'decbin': 0 given", 'decbin()'],
             ["1:1:invalid number of arguments for function 'decbin': 2 given", 'decbin(1, 2)'],
-            // FIXME: the following will not throw an error in PHP 7.4; result will be 0
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:decbin(): Argument #1 ($num) must be of type int, string given', 'decbin("a")'],
         ];
     }
@@ -526,7 +527,7 @@ class functions_test extends \advanced_testcase {
      * @dataProvider provide_decbin_calls
      */
     public function test_number_conversion($expected, $input) {
-        // FIXME: test for return type
+        // FIXME: also test for return type
         $parser = new parser($input);
         $evaluator = new evaluator();
         try {

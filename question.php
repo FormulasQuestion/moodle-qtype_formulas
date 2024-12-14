@@ -25,7 +25,6 @@
  */
 
 
-// TODO: walkthrough tests for feedback (general, combined) on question and part level for immediate, interactive, adaptive mode
 
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 

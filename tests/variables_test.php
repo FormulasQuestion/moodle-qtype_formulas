@@ -67,18 +67,4 @@ class variables_test extends \advanced_testcase {
             ),
         );
     }
-
-    /**
-     * Test 8: Split formula unit.
-     */
-    public function test_split_formula_unit() {
-        $testcases = array(
-            // FIXME: these are not valid and won't be accepted in new code
-            array('#', array('', '#')),
-            // @codingStandardsIgnoreLine
-            array('`', array('', '`')),
-            array('@', array('', '@')),
-        );
-    }
-
 }

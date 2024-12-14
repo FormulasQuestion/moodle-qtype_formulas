@@ -25,6 +25,7 @@
 namespace qtype_formulas;
 
 use Exception;
+use Generator;
 use qbehaviour_adaptivemultipart_part_result;
 use qtype_formulas_part;
 use qtype_formulas_question;
@@ -387,22 +388,40 @@ class question_test extends \basic_testcase {
                                   $q->get_expected_data());
     }
 
-    public function test_is_complete_response_test0() {
-        $q = $this->get_test_formulas_question('testsinglenum');
-
-        self::assertFalse($q->is_complete_response(array()));
-        self::assertTrue($q->is_complete_response(array('0_0' => '0')));
-        self::assertTrue($q->is_complete_response(array('0_0' => 0)));
-        self::assertTrue($q->is_complete_response(array('0_0' => 'test')));
+    public static function provide_response_for_singlenum_question(): Generator {
+        yield [false, []];
+        yield [false, ['0_0' => '']];
+        yield [true, ['0_0' => '0']];
+        yield [true, ['0_0' => 0]];
+        yield [true, ['0_0' => 10]];
+        yield [true, ['0_0' => 'test']];
     }
 
-    public function test_is_complete_response_threeparts() {
-        $q = $this->get_test_formulas_question('testthreeparts');
+    /**
+     * @dataProvider provide_response_for_singlenum_question
+     */
+    public function test_is_complete_response_test0($iscomplete, $response) {
+        $q = $this->get_test_formulas_question('testsinglenum');
+        self::assertEquals($iscomplete, $q->is_complete_response($response));
+    }
 
-        self::assertFalse($q->is_complete_response(array()));
-        self::assertFalse($q->is_complete_response(array('0_0' => '1')));
-        self::assertFalse($q->is_complete_response(array('0_0' => '1', '1_0' => '1')));
-        self::assertTrue($q->is_complete_response(array('0_0' => '1', '1_0' => '1', '2_0' => '1')));
+    public static function provide_response_for_testthreeparts_question(): Generator {
+        yield [false, []];
+        yield [false, ['0_0' => '', '1_0' => '', '2_0' => '']];
+        yield [false, ['0_0' => 1]];
+        yield [false, ['0_0' => 1, '1_0' => 2]];
+        yield [false, ['0_0' => 1, '1_0' => 2, '2_0' => '']];
+        yield [true, ['0_0' => 1, '1_0' => 2, '2_0' => 3]];
+        yield [true, ['0_0' => '1', '1_0' => '2', '2_0' => '3']];
+        yield [true, ['0_0' => 'foo', '1_0' => 'bar', '2_0' => 'test']];
+    }
+
+    /**
+     * @dataProvider provide_response_for_testthreeparts_question
+     */
+    public function test_is_complete_response_threeparts($iscomplete, $response) {
+        $q = $this->get_test_formulas_question('testthreeparts');
+        self::assertEquals($iscomplete, $q->is_complete_response($response));
     }
 
     public function test_get_question_summary_test0() {
@@ -427,19 +446,23 @@ class question_test extends \basic_testcase {
         $s = $q->evaluator->export_single_variable('s')->value;
         $dt = $q->evaluator->export_single_variable('dt')->value;
 
-        self::assertEquals("This question shows different display methods of the answer and unit box.\n"
-                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0}{_u}\n"
-                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
-                            . "If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}\n"
-                            . "If a car travels $s m in $dt s, what is the speed of the car? speed = {_0}{_u}\n",
-                                    $q->get_question_summary());
+        // Note: there is an empty line at the end, because the part texts are paragraphs.
+        $expectedsummary = <<<EOF
+        This question shows different display methods of the answer and unit box.
+        If a car travels $s m in $dt s, what is the speed of the car? {_0}{_u}
+        If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}
+        If a car travels $s m in $dt s, what is the speed of the car? {_0} {_u}
+        If a car travels $s m in $dt s, what is the speed of the car? speed = {_0}{_u}
+
+        EOF;
+
+        self::assertEquals($expectedsummary, $q->get_question_summary());
     }
 
-    public function test_get_correct_response_test0() {
+    public function test_get_correct_response_singlenum() {
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->start_attempt(new question_attempt_step(), 1);
-
-        self::assertEquals(array('0_0' => '5'), $q->get_correct_response());
+        self::assertEquals(['0_0' => '5'], $q->get_correct_response());
     }
 
     public function test_get_correct_response_threeparts() {
@@ -453,27 +476,23 @@ class question_test extends \basic_testcase {
     }
 
 
-    public function test_get_correct_response_test2() {
+    public function test_get_correct_response_test4() {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
         $v = $q->evaluator->export_single_variable('v')->value;
 
         self::assertEquals(
-            [
-                '0_' => "{$v} m/s",
-                '1_0' => $v,
-                '1_1' => 'm/s',
-                '2_0' => $v,
-                '3_0' => $v
-            ], $q->get_correct_response());
+            ['0_' => "{$v} m/s", '1_0' => $v, '1_1' => 'm/s', '2_0' => $v, '3_0' => $v],
+            $q->get_correct_response()
+        );
         self::assertEquals(['0_' => "{$v} m/s"], $q->get_correct_response($q->parts[0]));
         self::assertEquals(['1_0' => $v, '1_1' => 'm/s'], $q->get_correct_response($q->parts[1]));
         self::assertEquals(['2_0' => $v], $q->get_correct_response($q->parts[2]));
         self::assertEquals(['3_0' => $v], $q->get_correct_response($q->parts[3]));
     }
 
-    public function test_get_correct_response_test3() {
+    public function test_get_correct_response_testmce() {
         $q = $this->get_test_formulas_question('testmce');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -482,16 +501,14 @@ class question_test extends \basic_testcase {
         self::assertEquals(['0_0' => 'Cat'], $q->parts[0]->get_correct_response(true));
     }
 
-    public function test_get_is_same_response_for_part_test2() {
+    public function test_get_is_same_response_for_part_testthreeparts() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        self::assertTrue($q->is_same_response_for_part('1',
-                array('1_0' => 'x'), array('1_0' => 'x')));
-        self::assertTrue($q->is_same_response_for_part('1',
-                array('1_0' => 'x', '2_0' => 'x'),
-                array('1_0' => 'x', '2_0' => 'y')));
-        self::assertFalse($q->is_same_response_for_part('1', array('1_0' => 'x'), array('1_0' => 'y')));
+        self::assertTrue($q->is_same_response_for_part('1', ['1_0' => 'x'], ['1_0' => 'x']));
+        self::assertTrue($q->is_same_response_for_part('1', ['1_0' => 'x', '2_0' => 'x'], ['1_0' => 'x', '2_0' => 'y']));
+        self::assertFalse($q->is_same_response_for_part('1', ['1_0' => 'x'], ['1_0' => 'y']));
+        self::assertFalse($q->is_same_response_for_part('1', ['1_0' => 'x', '2_0' => 'x'], ['1_0' => 'y', '2_0' => 'x']));
     }
 
     public function test_apply_attempt_state(): void {
@@ -609,8 +626,7 @@ class question_test extends \basic_testcase {
         $q->parts[0]->numbox = 2;
         $q->start_attempt(new question_attempt_step(), 1);
 
-        // The invalid grading criterion should not lead to an exception, but get
-        // 0 marks.
+        // The invalid grading criterion should not lead to an exception, but get 0 marks.
         $response = ['0_0' => 1, '0_1' => 0];
         $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
         self::assertEquals(0, $partscores[0]->rawfraction);
@@ -630,8 +646,7 @@ class question_test extends \basic_testcase {
         $q->parts[0]->numbox = 2;
         $q->start_attempt(new question_attempt_step(), 1);
 
-        // The invalid grading criterion should not lead to an exception, but get
-        // 0 marks.
+        // The invalid grading criterion should not lead to an exception, but get 0 marks.
         $response = ['0_0' => 1, '0_1' => 0];
         $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
         self::assertEquals(0, $partscores[0]->rawfraction);
@@ -642,7 +657,7 @@ class question_test extends \basic_testcase {
         self::assertEquals(0.5, $partscores[0]->rawfraction);
     }
 
-    public function test_grade_parts_that_can_be_graded_test1() {
+    public function test_grade_parts_that_can_be_graded_1() {
         // Question with three parts, answers being 5, 6 and 7.
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -673,7 +688,7 @@ class question_test extends \basic_testcase {
         $this->assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_test2() {
+    public function test_grade_parts_that_can_be_graded_2() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -693,7 +708,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_test3() {
+    public function test_grade_parts_that_can_be_graded_3() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -711,7 +726,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_test4() {
+    public function test_grade_parts_that_can_be_graded_4() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -731,7 +746,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_test5() {
+    public function test_grade_parts_that_can_be_graded_5() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -748,7 +763,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_test6() {
+    public function test_grade_parts_that_can_be_graded_6() {
         $q = $this->get_test_formulas_question('testmethodsinparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -773,7 +788,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_get_parts_and_weights_test0() {
+    public function test_get_parts_and_weights_singlenum() {
         $q = $this->get_test_formulas_question('testsinglenum');
 
         self::assertEquals(array('0' => 1), $q->get_parts_and_weights());
@@ -785,7 +800,7 @@ class question_test extends \basic_testcase {
         self::assertEquals(array('0' => 1 / 3, '1' => 1 / 3, '2' => 1 / 3), $q->get_parts_and_weights());
     }
 
-    public function test_get_parts_and_weights_test2() {
+    public function test_get_parts_and_weights_test4() {
         $q = $this->get_test_formulas_question('test4');
 
         self::assertEquals(array('0' => .25, '1' => .25, '2' => .25, '3' => .25), $q->get_parts_and_weights());

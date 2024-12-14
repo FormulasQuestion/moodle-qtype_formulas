@@ -1312,7 +1312,18 @@ class evaluator_test extends \advanced_testcase {
                 'algebraic variables can only be initialized with a list of numbers',
                 'a = {[1:5],[20:25],[40:50:2]}'
             ],
-
+            'string after string' => [
+                'syntax error: did you forget to put an operator?',
+                'a = "foo" "bar"'
+            ],
+            'number after string' => [
+                'syntax error: did you forget to put an operator?',
+                'a = "foo" 4'
+            ],
+            'string after number' => [
+                'syntax error: did you forget to put an operator?',
+                'a = 4 "foo"'
+            ],
         ];
     }
 
