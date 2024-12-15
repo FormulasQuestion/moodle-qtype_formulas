@@ -515,92 +515,91 @@ class functions_test extends \advanced_testcase {
             ['11', 'decbin("3")'],
             ['1010', 'decbin(10)'],
             ['1111', 'decbin(15)'],
-            ["1:1:invalid number of arguments for function 'decbin': 0 given", 'decbin()'],
-            ["1:1:invalid number of arguments for function 'decbin': 2 given", 'decbin(1, 2)'],
+            ["invalid number of arguments for function 'decbin': 0 given", 'decbin()'],
+            ["invalid number of arguments for function 'decbin': 2 given", 'decbin(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:decbin(): Argument #1 ($num) must be of type int, string given', 'decbin("a")'],
         ];
     }
 
+    public function provide_bindec_calls(): array {
+        return [
+            [1, 'bindec(1)'],
+            [0, 'bindec(0)'],
+            [3, 'bindec(11)'],
+            [3, 'bindec("11")'],
+            [10, 'bindec(1010)'],
+            [10, 'bindec("1010")'],
+            [15, 'bindec(1111)'],
+            [15, 'bindec("1111")'],
+            ["invalid number of arguments for function 'bindec': 0 given", 'bindec()'],
+            ["invalid number of arguments for function 'bindec': 2 given", 'bindec(1, 2)'],
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
+            // ['1:1:bindec(): Argument #1 ($num) must be of type int, string given', 'bindec("a")'],
+        ];
+    }
+
+    public function provide_decoct_calls(): array {
+        return [
+            ['1', 'decoct(1)'],
+            ['0', 'decoct(0)'],
+            ['3', 'decoct(3)'],
+            ['3', 'decoct("3")'],
+            ['12', 'decoct(10)'],
+            ['17', 'decoct(15)'],
+            ["invalid number of arguments for function 'decoct': 0 given", 'decoct()'],
+            ["invalid number of arguments for function 'decoct': 2 given", 'decoct(1, 2)'],
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
+            // ['1:1:decoct(): Argument #1 ($num) must be of type int, string given', 'decoct("a")'],
+        ];
+
+    }
+
+    public function provide_octdec_calls(): array {
+        return [
+            [1, 'octdec(1)'],
+            [0, 'octdec(0)'],
+            [3, 'octdec(3)'],
+            [3, 'octdec("3")'],
+            [10, 'octdec(12)'],
+            [10, 'octdec("12")'],
+            [15, 'octdec(17)'],
+            [15, 'octdec("17")'],
+            ["invalid number of arguments for function 'octdec': 0 given", 'octdec()'],
+            ["invalid number of arguments for function 'octdec': 2 given", 'octdec(1, 2)'],
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
+            // ['1:1:octdec(): Argument #1 ($num) must be of type int, string given', 'octdec("a")'],
+        ];
+    }
+
     /**
      * @dataProvider provide_decbin_calls
+     * @dataProvider provide_bindec_calls
+     * @dataProvider provide_decoct_calls
+     * @dataProvider provide_octdec_calls
      */
     public function test_number_conversion($expected, $input) {
-        // FIXME: also test for return type
-        $parser = new parser($input);
+        $parser = new parser('a = ' . $input);
         $evaluator = new evaluator();
         try {
-            $result = $evaluator->evaluate($parser->get_statements());
+            $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
+            // If evaluation failed, the error message must match the expected error and we can stop.
             self::assertStringEndsWith($expected, $e->getMessage());
             return;
         }
-        self::assertEquals($expected, end($result)->value);
-    }
-    /**
-     * Test number conversion functions decbin(), decoct(), octdec() and bindec()
-     */
-    public function test_number_conversions_FIXME_REMOVE_LATER() {
-        // FIXME: short-circuit the test in order to remove variables.php
-        // cases have yet to be ported to make use of the new evaluator
-        self::assertTrue(true);
-        return;
-        // Check valid invocations.
-        $testcases = array(
-            array('a=decoct(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
-            array('a=decoct(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
-            array('a=decoct(3);', array('a' => (object) array('type' => 'n', 'value' => 3))),
-            array('a=decoct(10);', array('a' => (object) array('type' => 'n', 'value' => 12))),
-            array('a=decoct(15);', array('a' => (object) array('type' => 'n', 'value' => 17))),
-            array('a=octdec(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
-            array('a=octdec(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
-            array('a=octdec(3);', array('a' => (object) array('type' => 'n', 'value' => 3))),
-            array('a=octdec(12);', array('a' => (object) array('type' => 'n', 'value' => 10))),
-            array('a=octdec(17);', array('a' => (object) array('type' => 'n', 'value' => 15))),
-            array('a=bindec(1);', array('a' => (object) array('type' => 'n', 'value' => 1))),
-            array('a=bindec(0);', array('a' => (object) array('type' => 'n', 'value' => 0))),
-            array('a=bindec(11);', array('a' => (object) array('type' => 'n', 'value' => 3))),
-            array('a=bindec(1010);', array('a' => (object) array('type' => 'n', 'value' => 10))),
-            array('a=bindec(1111);', array('a' => (object) array('type' => 'n', 'value' => 15)))
-        );
-        foreach ($testcases as $case) {
-            $qv = new variables;
-            $errmsg = null;
-            try {
-                $v = $qv->vstack_create();
-                $result = $qv->evaluate_assignments($v, $case[0]);
-            } catch (Exception $e) {
-                $errmsg = $e->getMessage();
-            }
-            self::assertNull($errmsg);
-            self::assertEquals($case[1], $result->all);
-        }
-        // Check invalid invocations.
-        $testcases = array(
-            array('a=decoct();'),
-            array('a=decoct(1, 2);'),
-            array('a=decoct("3");'),
-            array('a=decoct("a");'),
-            array('a=octdec();'),
-            array('a=octdec(1, 2);'),
-            array('a=octdec("3");'),
-            array('a=octdec("a");'),
-            array('a=bindec();'),
-            array('a=bindec(1, 2);'),
-            array('a=bindec("3");'),
-            array('a=bindec("a");')
-        );
-        foreach ($testcases as $case) {
-            $qv = new variables;
-            $errmsg = null;
-            try {
-                $v = $qv->vstack_create();
-                $result = $qv->evaluate_assignments($v, $case[0]);
-            } catch (Exception $e) {
-                $errmsg = $e->getMessage();
-            }
-            self::assertNotNull($errmsg);
+        // Otherwise, the return value is now stored in variable 'a'. The value must match the expected
+        // value and it must be a string or a number, depending on our expectation.
+        $result = $evaluator->export_single_variable('a', true);
+        self::assertEquals($expected, $result->value);
+        if (is_string($expected)) {
+            self::assertEquals(variable::STRING, $result->type);
+        } else {
+            self::assertEquals(variable::NUMERIC, $result->type);
         }
     }
 
