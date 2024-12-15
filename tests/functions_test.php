@@ -522,6 +522,24 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    public function provide_dechex_calls(): array {
+        return [
+            ['1', 'dechex(1)'],
+            ['0', 'dechex(0)'],
+            ['3', 'dechex(3)'],
+            ['3', 'dechex("3")'],
+            ['a', 'dechex(10)'],
+            ['f', 'dechex(15)'],
+            ['19', 'dechex(25)'],
+            ['64', 'dechex(100)'],
+            ["invalid number of arguments for function 'dechex': 0 given", 'dechex()'],
+            ["invalid number of arguments for function 'dechex': 2 given", 'dechex(1, 2)'],
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
+            // ['1:1:dechex(): Argument #1 ($num) must be of type int, string given', 'dechex("a")'],
+        ];
+    }
+
     public function provide_bindec_calls(): array {
         return [
             [1, 'bindec(1)'],
@@ -575,11 +593,43 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    public function provide_hexdec_calls(): array {
+        return [
+            [1, 'hexdec("1")'],
+            [0, 'hexdec("0")'],
+            [1, 'hexdec(1)'],
+            [0, 'hexdec(0)'],
+            [10, 'hexdec("a")'],
+            [63, 'hexdec("3f")'],
+            [18, 'hexdec("12")'],
+            [18, 'hexdec(12)'],
+            ["invalid number of arguments for function 'hexdec': 0 given", 'hexdec()'],
+            ["invalid number of arguments for function 'hexdec': 2 given", 'hexdec(1, 2)'],
+            // TODO: enable the following test once we drop support for PHP 7.4
+            // the following will not throw an error in PHP 7.4; result will be 0.
+            // ['1:1:hexdec(): Argument #1 ($num) must be of type int, string given', 'hexdec("a")'],
+        ];
+    }
+
+    public function provide_base_convert_calls(): array {
+        return [
+            ['1011', 'base_convert("11", 10, 2)'],
+            ['3', 'base_convert("11", 2, 10)'],
+            ["invalid number of arguments for function 'base_convert': 0 given", 'base_convert()'],
+            ["invalid number of arguments for function 'base_convert': 1 given", 'base_convert(1)'],
+            ["invalid number of arguments for function 'base_convert': 2 given", 'base_convert(1, 2)'],
+            ["invalid number of arguments for function 'base_convert': 4 given", 'base_convert(1, 2, 3, 4)'],
+        ];
+    }
+
     /**
      * @dataProvider provide_decbin_calls
+     * @dataProvider provide_dechex_calls
      * @dataProvider provide_bindec_calls
      * @dataProvider provide_decoct_calls
      * @dataProvider provide_octdec_calls
+     * @dataProvider provide_hexdec_calls
+     * @dataProvider provide_base_convert_calls
      */
     public function test_number_conversion($expected, $input) {
         $parser = new parser('a = ' . $input);
@@ -627,7 +677,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=tan();'],
             [false, 'a=tan(1, 2);'],
             [true, 'a=acosh(1.5);'],
-            [false, 'a=acosh(0.5);'], // FIXME: false because result is NaN
+            [false, 'a=acosh(0.5);'], // Note: false because result is NaN.
             [false, 'a=acosh();'],
             [false, 'a=acosh(1, 2);'],
             [true, 'a=asinh(0.5);'],
@@ -665,6 +715,14 @@ class functions_test extends \advanced_testcase {
             [true, 'a=expm1(0.5);'],
             [false, 'a=expm1();'],
             [false, 'a=expm1(1, 2);'],
+            [true, 'a=fdiv(3, 5);'],
+            [true, 'a=fdiv(10, 7);'],
+            [false, 'a=fdiv(10);'],
+            [false, 'a=fdiv();'],
+            [false, 'a=fdiv(1, 2, 3);'],
+            [false, 'a=fdiv(10, 0);'],
+            [false, 'a=fdiv(-10, 0);'],
+            [false, 'a=fdiv(0, 0);'],
             [true, 'a=fact(3);'],
             [false, 'a=fact();'],
             [false, 'a=fact(1, 2);'],
@@ -675,6 +733,22 @@ class functions_test extends \advanced_testcase {
             [false, 'a=gcd();'],
             [false, 'a=gcd(0.5);'],
             [false, 'a=gcd(1, 2, 3);'],
+            [true, 'a=hypot(3, 5);'],
+            [true, 'a=hypot(10, 7);'],
+            [false, 'a=hypot(10);'],
+            [false, 'a=hypot();'],
+            [false, 'a=hypot(1, 2, 3);'],
+            [true, 'a=hypot(10, 0);'],
+            [true, 'a=hypot(-10, 0);'],
+            [true, 'a=hypot(0, 0);'],
+            [true, 'a=intdiv(3, 5);'],
+            [true, 'a=intdiv(10, 7);'],
+            [false, 'a=intdiv(10);'],
+            [false, 'a=intdiv();'],
+            [false, 'a=intdiv(1, 2, 3);'],
+            [false, 'a=intdiv(10, 0);'],
+            [false, 'a=intdiv(-10, 0);'],
+            [false, 'a=intdiv(0, 0);'],
             [true, 'a=is_finite(0.5);'],
             [false, 'a=is_finite();'],
             [false, 'a=is_finite(1, 2);'],
@@ -719,7 +793,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=modpow(1, 2);'],
             [false, 'a=modpow(1, 2, 3, 4);'],
             [true, 'a=pi();'],
-            [true, 'a=pi(1);'], // FIXME: now allowed, considered as pi*(1)
+            [true, 'a=pi(1);'], // Note: now allowed, considered as pi*(1)
             [true, 'a=pow(1, 2);'],
             [false, 'a=pow();'],
             [false, 'a=pow(1);'],
@@ -782,7 +856,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=sort(1, 2);'],
             [true, 'a=str(1);'],
             [false, 'a=str();'],
-            [true, 'a=str("1");'], // FIXME: this is now allowed
+            [true, 'a=str("1");'], // Note: this is now allowed
             [false, 'a=str(1, 2);'],
             [false, 'a=str([1, 2]);'],
             [true, 'a=sublist([1, 2, 3], [1, 1, 1, 1]);'],
@@ -794,7 +868,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=sublist([1, 2, 3], [5]);'], // Index is out of range.
             [false, 'a=sublist([1, 2, 3], [1, 1, 1, 1], [1, 2, 3]);'],
             [true, 'a=sum([1, 2, 3]);'],
-            [true, 'a=sum(["1", "2", "3"]);'], // FIXME: This is now allowed
+            [true, 'a=sum(["1", "2", "3"]);'], // Note: This is now allowed
             [false, 'a=sum();'],
             [false, 'a=sum(1);'],
             [false, 'a=sum(1, 2);'],
