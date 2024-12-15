@@ -1233,7 +1233,7 @@ class evaluator_test extends \advanced_testcase {
                 'x=ln(0)'
             ],
             'closing parenthesis when not opened' => [
-                "1:7:unbalanced parentheses, stray ')' found",
+                "1:7:unbalanced parenthesis, stray ')' found",
                 's=fill);'
             ],
             'opening parenthesis not closed' => [

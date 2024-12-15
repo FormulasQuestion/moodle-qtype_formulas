@@ -402,7 +402,7 @@ $string['error_function_paren'] = 'syntax error: function must be followed by op
 $string['error_prefix'] = 'syntax error: invalid use of prefix character \\';
 $string['error_unexpectedend'] = 'syntax error: unexpected end of expression after \'{$a}\'';
 $string['error_parennotclosed'] = 'unbalanced parenthesis, \'{$a}\' is never closed';
-$string['error_strayparen'] = 'unbalanced parentheses, stray \'{$a}\' found';
+$string['error_strayparen'] = 'unbalanced parenthesis, stray \'{$a}\' found';
 $string['error_parenmismatch'] = 'mismatched parentheses, \'{$a->closer}\' is closing \'{$a->opener}\' from row {$a->row} and column {$a->column}';
 
 $string['error_setnested'] = 'syntax error: sets cannot be nested';

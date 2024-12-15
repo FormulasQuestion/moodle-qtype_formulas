@@ -32,6 +32,7 @@
 namespace qtype_formulas;
 
 use Exception;
+use Generator;
 
 class parser_test extends \advanced_testcase {
 
@@ -102,14 +103,89 @@ class parser_test extends \advanced_testcase {
         ];
     }
 
-    // FIXME: rewrite with data provider and all possible combinations
-    public function test_invalid_parens() {
-        $input = 'sin(2*x]';
+    public static function provide_paren_expressions(): Generator {
+        yield [
+            "1:1:unbalanced parenthesis, '(' is never closed",
+            '(',
+        ];
+        yield [
+            "1:3:unbalanced parenthesis, '[' is never closed",
+            'a=[',
+        ];
+        yield [
+            "1:5:unbalanced parenthesis, '{' is never closed",
+            'var={',
+        ];
+        yield [
+            "1:1:unbalanced parenthesis, stray ')' found",
+            ')',
+        ];
+        yield [
+            "1:4:unbalanced parenthesis, stray ']' found",
+            'a=5]',
+        ];
+        yield [
+            "1:6:unbalanced parenthesis, stray '}' found",
+            'var=2}',
+        ];
+        yield [
+            "mismatched parentheses, ']' is closing '(' from row 1 and column 4",
+            'sin(2*x]',
+        ];
+        yield [
+            "mismatched parentheses, '}' is closing '(' from row 1 and column 4",
+            'sin(2x}',
+        ];
+        yield [
+            "mismatched parentheses, ')' is closing '[' from row 1 and column 3",
+            'a=[1,2)',
+        ];
+        yield [
+            "mismatched parentheses, '}' is closing '[' from row 1 and column 3",
+            'a=[1,2}',
+        ];
+        yield [
+            "mismatched parentheses, ')' is closing '{' from row 1 and column 3",
+            'a={1,2)',
+        ];
+        yield [
+            "mismatched parentheses, ']' is closing '{' from row 1 and column 3",
+            'a={1,2]',
+        ];
+        yield [
+            "1:1:unbalanced parenthesis, '(' is never closed",
+            '(2*(3+4)',
+        ];
+        yield [
+            "1:3:unbalanced parenthesis, '[' is never closed",
+            'a=[[1,2],[3,4]',
+        ];
+        yield [
+            "1:5:unbalanced parenthesis, '{' is never closed",
+            'var={{1,2}',
+        ];
+        yield [
+            "1:5:mismatched parentheses, ')' is closing '[' from row 1 and column 3",
+            '(a[2)]',
+        ];
+        yield [
+            "1:7:mismatched parentheses, ']' is closing '(' from row 1 and column 5",
+            '[sin(2])',
+        ];
+    }
+
+    /**
+     * @dataProvider provide_paren_expressions
+     */
+    public function test_invalid_parens($expected, $input): void {
+        $error = null;
         try {
             $parser = new parser($input);
         } catch (Exception $e) {
-            self::assertStringEndsWith("mismatched parentheses, ']' is closing '(' from row 1 and column 4", $e->getMessage());
+            $error = $e->getMessage();
         }
+        self::assertNotNull($error);
+        self::assertStringEndsWith($expected, $e->getMessage());
     }
 
     public function test_basic_operations() {
