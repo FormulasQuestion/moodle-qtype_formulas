@@ -147,6 +147,11 @@ class token {
             foreach ($value as &$val) {
                 $val = self::wrap($val);
             }
+        } else if (is_bool($value)) {
+            // Some PHP functions (e. g. is_nan and similar) will return a boolean value. For backwards
+            // compatibility, we will convert this into a number with TRUE = 1 and FALSE = 0.
+            $type = self::NUMBER;
+            $value = ($value ? 1 : 0);
         } else {
             if (is_null($value)) {
                 $value = 'null';

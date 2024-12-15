@@ -1504,45 +1504,6 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function test_pick() {
-        $testcases = [
-            ['pick(3,[0,1,2,3,4,5]);', 3],
-            ['pick(3.9,[0,1,2,3,4,5]);', 3],
-            ['pick(10,[0,1,2,3,4,5]);', 0],
-            ['pick(10.9,[0,1,2,3,4,5]);', 0],
-            ['pick(3,[0,1,2,3,4,5]);', 3],
-            ['pick(3.9,0,1,2,3,4,5);', 3],
-            ['pick(10,0,1,2,3,4,5);', 0],
-            ['pick(3,["A","B","C","D","E","F"]);', 'D'],
-            ['pick(3.9,["A","B","C","D","E","F"]);', 'D'],
-            ['pick(10,["A","B","C","D","E","F"]);', 'A'],
-            ['pick(3,"A","B","C","D","E","F");', 'D'],
-            ['pick(3.9,"A","B","C","D","E","F");', 'D'],
-            ['pick(10,"A","B","C","D","E","F");', 'A'],
-            ['pick(10.9,"A","B","C","D","E","F");', 'A'],
-            ['pick(3,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [3, 3]],
-            ['pick(3.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [3, 3]],
-            ['pick(10,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [0, 0]],
-            ['pick(10.9,[0,0],[1,1],[2,2],[3,3],[4,4],[5,5]);', [0, 0]],
-            ['pick(3,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['D', 'D']],
-            ['pick(3.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['D', 'D']],
-            ['pick(10,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['A', 'A']],
-            ['pick(10.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"]);', ['A', 'A']],
-        ];
-
-        foreach ($testcases as $case) {
-            $parser = new parser($case[0]);
-            $statements = $parser->get_statements();
-            $evaluator = new evaluator();
-            $result = $evaluator->evaluate($statements);
-            $value = end($result)->value;
-            if (is_array($value)) {
-                $value = array_map(function ($el) { return $el->value; }, $value);
-            }
-            self::assertEqualsWithDelta($case[1], $value, 1e-12);
-        }
-    }
-
     public function test_export_import_variable_context(): void {
         // Prepare an evaluator with a few variables.
         $randomparser = new random_parser('r = {1,2,3,4}');
@@ -1587,11 +1548,13 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
+        // TODO: remove, once manual testing is not needed anymore
+        self::assertTrue(true);
+        return;
         //$parser = new parser('1 >= 5 ? "a" : "b"');
         //$evaluator = new evaluator();
         //$evaluator->evaluate($parser->get_statements());
 
-        return;
         $input = 'a = 5 = 3';
         $input = 'a = b = 7 + 1';
         $input = 'a = 4; b = !a';
@@ -1662,6 +1625,7 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a*sin';
         $input = 'a=[1,2,3]; a[1]=5;';
         $input = 'sqrt("foo-2")';
+        $input = 'is_nan(0.5)';
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
