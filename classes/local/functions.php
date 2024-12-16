@@ -28,7 +28,6 @@ use Exception;
 
 // TODO: add function randint
 // TODO: add some string functions, e.g. upper/lower case, repeat char
-// TODO: add missing phpdoc
 
 class functions {
     const NONE = 0;
@@ -55,7 +54,7 @@ class functions {
         'binomialcdf' => [3, 3],
         'binomialpdf' => [3, 3],
         'concat' => [2, INF],
-        // The special function diff() is defined in the evaluator class.
+        // Note: The special function diff() is defined in the evaluator class.
         'diff' => [2, 3],
         'fact' => [1, 1],
         'fill' => [2, 2],
@@ -264,7 +263,7 @@ class functions {
         foreach ($list as $entry) {
             $value = $entry->value;
             // Not setting INTEGER as condition, because we actually do accept floats and truncate them.
-            self::assure_numeric($value, 'inv() expects all elements of the list to be integers; floats will be truncated');
+            self::assure_numeric($value, get_string('error_inv_integers', 'qtype_formulas'));
             $entry->value = intval($value);
         }
 
@@ -579,6 +578,14 @@ class functions {
         return $result;
     }
 
+    /**
+     * Given a list $list, return the elements at the positions defined by the list $indices,
+     * e. g. sublist([1, 2, 3], [0, 0, 2, 2, 1, 1]) yields [1, 1, 3, 3, 2, 2].
+     *
+     * @param mixed $list
+     * @param mixed $indices
+     * @return array
+     */
     public static function sublist($list, $indices): array {
         if (!is_array($list) || !is_array($indices)) {
             self::die('error_func_all_lists', 'sublist()');
@@ -596,9 +603,21 @@ class functions {
         return $result;
     }
 
+    /**
+     * Round a given number to an indicated number of significant figures. The function
+     * returns a string in order to allow trailing zeroes.
+     *
+     * @param mixed $number
+     * @param mixed $precision
+     * @return string
+     */
     public static function sigfig($number, $precision): string {
         self::assure_numeric($number, get_string('error_func_first_number', 'qtype_formulas', 'sigfig()'));
-        self::assure_numeric($precision, 'sigfig() expects its second argument to be a positive integer', self::POSITIVE | self::INTEGER);
+        self::assure_numeric(
+            $precision,
+            get_string('error_func_second_posint', 'qtype_formulas', 'sigfig()'),
+            self::POSITIVE | self::INTEGER
+        );
         $number = floatval($number);
         $precision = intval($precision);
 
@@ -695,6 +714,15 @@ class functions {
         return strval($value);
     }
 
+    /**
+     * Concatenate the given strings, separating them by the given separator, e. g.
+     * join('-', 'a', 'b') gives 'a-b'. The strings to be joined can also be passed as
+     * a list, e. g. join('-', ['a', 'b']).
+     *
+     * @param string $separator
+     * @param string ...$values
+     * @return string
+     */
     public static function join($separator, ...$values): string {
         $result = [];
         array_walk_recursive($values, function($val, $idx) use (&$result) {
@@ -703,6 +731,15 @@ class functions {
         return implode($separator, $result);
     }
 
+    /**
+     * Return the n-th element of a list or multiple arguments. If the index is out of range,
+     * the function will always return the *first* element in order to maintain backwards
+     * compatibility.
+     *
+     * @param mixed $index
+     * @param mixed ...$data
+     * @return void
+     */
     public static function pick($index, ...$data) {
         // The index must be a number (or a numeric string). We do not enforce it to be integer.
         // If it is not, it will be truncated for backwards compatibility.
@@ -733,11 +770,23 @@ class functions {
         return $data[$index];
     }
 
+    /**
+     * Shuffle the elements of an array.
+     *
+     * @param array $ar
+     * @return array
+     */
     public static function shuffle(array $ar): array {
         shuffle($ar);
         return $ar;
     }
 
+    /**
+     * Recursively shuffle a given array.
+     *
+     * @param array $ar
+     * @return array
+     */
     public static function rshuffle(array $ar): array {
         // First, we shuffle the array.
         shuffle($ar);
@@ -763,7 +812,11 @@ class functions {
      * @return int
      */
     public static function fact(float $n): int {
-        $n = self::assure_numeric($n, 'the factorial function expects its first argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric(
+            $n,
+            get_string('error_func_nnegint', 'qtype_formulas', 'fact()'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
         if ($n < 2) {
             return 1;
         }
@@ -860,9 +913,21 @@ class functions {
      * @return int
      */
     public static function modpow($a, $b, $m): int {
-        $a = self::assure_numeric($a, 'modpow() expects the base to be an integer', self::INTEGER);
-        $b = self::assure_numeric($b, 'modpow() expects the exponent to be an integer', self::INTEGER);
-        $m = self::assure_numeric($m, 'modpow() expects the modulus to be a positive integer', self::INTEGER | self::POSITIVE);
+        $a = self::assure_numeric(
+            $a,
+            get_string('error_func_first_int', 'qtype_formulas', 'modpow()'),
+            self::INTEGER
+        );
+        $b = self::assure_numeric(
+            $b,
+            get_string('error_func_second_int', 'qtype_formulas', 'modpow()'),
+            self::INTEGER
+        );
+        $m = self::assure_numeric(
+            $m,
+            get_string('error_func_third_posint', 'qtype_formulas', 'modpow()'),
+            self::INTEGER | self::POSITIVE
+        );
 
         $bin = decbin($b);
         $res = $a;
@@ -881,16 +946,24 @@ class functions {
     }
 
     /**
-     * calculate the multiplicative inverse of $a modulo $m using the
-     * extended euclidean algorithm
+     * Calculate the multiplicative inverse of $a modulo $m using the
+     * extended euclidean algorithm.
      *
      * @param int $a the number whose inverse is to be found
      * @param int $m the modulus
      * @return int the result or 0 if the inverse does not exist
      */
     public static function modinv(int $a, int $m): int {
-        $a = self::assure_numeric($a, 'modinv() expects its first argument to be a non-zero integer', self::INTEGER | self::NON_ZERO);
-        $m = self::assure_numeric($m, 'modinv() expects its second argument to be a positive integer', self::INTEGER | self::POSITIVE);
+        $a = self::assure_numeric(
+            $a,
+            get_string('error_func_first_nzeroint', 'qtype_formulas', 'modinv()'),
+            self::INTEGER | self::NON_ZERO
+        );
+        $m = self::assure_numeric(
+            $m,
+            get_string('error_func_second_posint', 'qtype_formulas', 'modinv()'),
+            self::INTEGER | self::POSITIVE
+        );
 
         $origm = $m;
         if (self::gcd($a, $m) != 1) {
@@ -922,7 +995,7 @@ class functions {
      */
     public static function fmod($x, $m): float {
         self::assure_numeric($x, get_string('error_func_first_number', 'qtype_formulas', 'fmod()'));
-        self::assure_numeric($m, 'fmod() expects its second argument to be a non-zero number', self::NON_ZERO);
+        self::assure_numeric($m, get_string('error_func_second_nzeronum', 'qtype_formulas', 'fmod()'), self::NON_ZERO);
         return $x - $m * floor($x / $m);
     }
 
@@ -944,9 +1017,17 @@ class functions {
             self::die('error_probability', 'binomialpdf()');
         }
         // Number of tries must be at least 0.
-        $n = self::assure_numeric($n, get_string('error_distribution_tries', 'qtype_formulas', 'binomialpdf()'), self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric(
+            $n,
+            get_string('error_distribution_tries', 'qtype_formulas', 'binomialpdf()'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
         // Number of successful outcomes must be at least 0.
-        $x = self::assure_numeric($x, get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialpdf'), self::NON_NEGATIVE | self::INTEGER);
+        $x = self::assure_numeric(
+            $x,
+            get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialpdf'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
         // If the number of successful outcomes is greater than the number of trials, the probability
         // is zero.
         if ($x > $n) {
@@ -973,9 +1054,17 @@ class functions {
             self::die('error_probability', 'binomialcdf()');
         }
         // Number of tries must be at least 0.
-        $n = self::assure_numeric($n, get_string('error_distribution_tries', 'qtype_formulas', 'binomialcdf()'), self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric(
+            $n,
+            get_string('error_distribution_tries', 'qtype_formulas', 'binomialcdf()'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
         // Number of successful outcomes must be at least 0.
-        $x = self::assure_numeric($x, get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialcdf'), self::NON_NEGATIVE | self::INTEGER);
+        $x = self::assure_numeric(
+            $x,
+            get_string('error_distribution_outcomes', 'qtype_formulas', 'binomialcdf'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
         // The probability for *up to* $n or more successful outcomes is 1.
         if ($x >= $n) {
             return 1;
@@ -1012,8 +1101,16 @@ class functions {
      * @return int
      */
     public static function npr(float $n, float $r): int {
-        $n = self::assure_numeric($n, 'npr() expects its first argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
-        $r = self::assure_numeric($r, 'npr() expects its second argument to be a non-negative integer', self::NON_NEGATIVE | self::INTEGER);
+        $n = self::assure_numeric(
+            $n,
+            get_string('error_func_first_nnegint', 'qtype_formulas', 'npr()'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
+        $r = self::assure_numeric(
+            $r,
+            get_string('error_func_second_nnegint', 'qtype_formulas', 'npr()'),
+            self::NON_NEGATIVE | self::INTEGER
+        );
 
         return self::ncr($n, $r) * self::fact($r);
     }
@@ -1030,8 +1127,8 @@ class functions {
      * @return int
      */
     public static function ncr(float $n, float $r): int {
-        $n = self::assure_numeric($n, 'ncr() expects its first argument to be an integer', self::INTEGER);
-        $r = self::assure_numeric($r, 'ncr() expects its second argument to be an integer', self::INTEGER);
+        $n = self::assure_numeric($n, get_string('error_func_first_int', 'qtype_formulas', 'ncr()'), self::INTEGER);
+        $r = self::assure_numeric($r, get_string('error_func_second_int', 'qtype_formulas', 'ncr()'), self::INTEGER);
 
         // The binomial coefficient is calculated for 0 <= r < n. For all
         // other cases, the result is zero.
@@ -1061,8 +1158,8 @@ class functions {
      * @return int
      */
     public static function gcd(float $a, float $b): int {
-        $a = self::assure_numeric($a, 'gcd() expects its first argument to be an integer', self::INTEGER);
-        $b = self::assure_numeric($b, 'gcd() expects its second argument to be an integer', self::INTEGER);
+        $a = self::assure_numeric($a, get_string('error_func_first_int', 'qtype_formulas', 'gcd()'), self::INTEGER);
+        $b = self::assure_numeric($b, get_string('error_func_second_int', 'qtype_formulas', 'gcd()'), self::INTEGER);
 
         if ($a < 0) {
             $a = abs($a);
@@ -1099,8 +1196,8 @@ class functions {
      * @return int
      */
     public static function lcm(float $a, float $b): int {
-        $a = self::assure_numeric($a, 'lcm() expects its first argument to be an integer', self::INTEGER);
-        $b = self::assure_numeric($b, 'lcm() expects its second argument to be an integer', self::INTEGER);
+        $a = self::assure_numeric($a, get_string('error_func_first_int', 'qtype_formulas', 'lcm()'), self::INTEGER);
+        $b = self::assure_numeric($b, get_string('error_func_second_int', 'qtype_formulas', 'lcm()'), self::INTEGER);
 
         if ($a == 0 || $b == 0) {
             return 0;
@@ -1115,7 +1212,7 @@ class functions {
      *
      * @param mixed $value the value to check
      * @param string $who the operator or function we perform the check for
-     * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
+     * @param bool $enforcenumeric whether the value must be numeric in addition to being scalar
      * @return void
      * @throws Exception
      */
@@ -1194,7 +1291,7 @@ class functions {
             case '**':
                 // Only check for equality, because 0.0 == 0 but not 0.0 === 0.
                 if ($first == 0 && $second == 0) {
-                    self::die('error_power_00');
+                    self::die('error_power_zerozero');
                 }
                 if ($first == 0 && $second < 0) {
                     self::die('error_power_negbase_expzero');
@@ -1301,7 +1398,19 @@ class functions {
         return $output;
     }
 
-    public static function assure_numeric($n, $message = '', $additionalcondition = self::NONE) {
+    /**
+     * Check whether a given value is numeric and, if desired, meets other criteria like
+     * being non-negative or integer etc. If the conditions are not met, the function will
+     * throw an Exception. If the value is valid, the function will return a float or int,
+     * depending on the given conditions.
+     *
+     * @param mixed $n
+     * @param string $message
+     * @param int $additionalcondition
+     * @throws Exception
+     * @return int|float
+     */
+    public static function assure_numeric($n, string $message = '', int $additionalcondition = self::NONE) {
         // For compatibility with PHP 7.4: check if it is a string. If it is, remove trailing
         // space before trying to convert to number.
         if (is_string($n)) {
@@ -1339,6 +1448,13 @@ class functions {
         return floatval($n);
     }
 
+    /**
+     * Check whether a given array contains only numbers.
+     *
+     * @param mixed $ar
+     * @param bool $acceptempty
+     * @return bool
+     */
     public static function is_numeric_array($ar, bool $acceptempty = true): bool {
         if (!is_array($ar)) {
             return false;
