@@ -371,7 +371,6 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
-                // TODO: old error was 'Invalid answer format: you cannot use an algebraic variable with this answer type'
                 ['status' => 'error', 'message' => "algebraic variable 'a' cannot be used in this context"],
                 [
                     'n' => 1, 'randomvars' => '', 'globalvars' => '',
@@ -386,7 +385,6 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
-                // TODO: old error was 'Invalid answer format: you cannot use an algebraic variable with this answer type'
                 ['status' => 'error', 'message' => "algebraic variable 'a' cannot be used in this context"],
                 [
                     'n' => 1, 'randomvars' => '', 'globalvars' => '',

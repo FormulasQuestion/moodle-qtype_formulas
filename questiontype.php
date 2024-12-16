@@ -1201,7 +1201,7 @@ class qtype_formulas extends question_type {
 
             // We used the model answers, so the grading criterion should always evaluate to 1 (or more).
             if ($grade < 0.999) {
-                $errors["correctness[$i]"] = get_string('error_grading_not_1', 'qtype_formulas', $grade);
+                $errors["correctness[$i]"] = get_string('error_grading_not_one', 'qtype_formulas', $grade);
             }
 
             // Instantiate toolkit class for units.

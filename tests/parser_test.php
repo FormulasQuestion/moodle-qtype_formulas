@@ -24,10 +24,11 @@
  */
 
 
- // TODO: most of these tests should only be made in the evaluator; we should only test specific
- // parser features here, e.g. error detection, but conversion from input to token list is
- // purely an implementation thing; the user only cares about results
-// has_token_in_tokenlist
+// TODO: most of these tests should only be made in the evaluator; we should only test specific
+// parser features here, e.g. error detection, but conversion from input to token list is
+// purely an implementation thing; the user only cares about results
+
+// TODO/FIXME: maybe add explicit test for has_token_in_tokenlist() ?
 
 namespace qtype_formulas;
 
@@ -189,52 +190,6 @@ class parser_test extends \advanced_testcase {
         }
         self::assertNotNull($error);
         self::assertStringEndsWith($expected, $e->getMessage());
-    }
-
-    public function test_basic_operations() {
-        // TODO: remove this when no longer needed for manual testing
-        self::assertTrue(true);
-        return;
-        $input = 'a = 5 = 3';
-        $input = 'a = b = 7 + 1';
-        $input = 'a = 4; b = !a';
-        $input = 'a = !a b 2';
-        $input = 'a = arctan(1,2,3) + sin(2,3) + cos(1) + pi()';
-        $input = 'a = arctan(sin(2,cos(pi())),4)';
-        $input = 'a = "foo" 5';
-        $input = 'a = 5 5';
-        $input = 'a = 5 == 3 ? 1 + 2 : 2*(0 + 3)';
-        $input = 'a = sin(2)';
-        $input = 'a = a[1][2]; b = [1, 2, [3, "four", 5], 6, [7]]';
-        $input = 'a = \sin(2)';
-        $input = 'a = 1?a:';
-        $input = '[1, ["x", "y"], [3, 4], 5, [[1,2]],6]';
-        $input = 'a = sin(sin(4),cos(5))';
-        $input = 'a = {1,-5,-3,2}';
-        $input = 'a = [1:-5:-1]';
-        $input = 'a = {1:-5:-1,9}';
-        $input = 'a = 5:4';
-        $input = 'a = {5:10:2,20,30:40:.5}';
-        $input = 'a = [5:10:2,20,30:40:.5]';
-        $input = '{3:5:0.5,10:15:0.5,1:3:4}';
-        $input = '{[1,2], [3,4]}';
-        $input = '5~3';
-        $input = '{{1,2}}';
-        $input = '[{1,2}]';
-        $input = 'a = (b = 3) * 4; c = 5 * a(1 + b) * b(4 + a) + e;';
-        $input = 'a = b[1]';
-        $input = 'π + pi + pi() + pi(2+3)';
-        $input = '"foo"[1]';
-        $input = '3 4';
-
-        //$parser = new parser($lexer->get_token_list(), true, ['b', 'c', 'd']);
-        $parser = new parser($input);
-        foreach ($parser->get_statements() as $statement) {
-            $output = $statement;
-            print_r($output);
-            print_r(array_map(function($el) { return $el->value; }, $output->body));
-        }
-        //print_r($output);
     }
 
     /**

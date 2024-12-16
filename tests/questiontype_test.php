@@ -400,7 +400,7 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [
-                ['correctness[0]' => get_string('error_grading_not_1', 'qtype_formulas', 0.5)],
+                ['correctness[0]' => get_string('error_grading_not_one', 'qtype_formulas', 0.5)],
                 [
                     'correctness' => [0 => '0.5'],
                 ]

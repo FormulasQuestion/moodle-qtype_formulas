@@ -705,8 +705,6 @@ class evaluator {
      * @return array
      */
     public function diff($first, $second, ?int $n = null) {
-        // TODO: maybe allow invocation with num/num or string/string/n for convenience.
-
         // First, we check that $first and $second are lists of the same size.
         if (!is_array($first)) {
             throw new Exception(get_string('error_diff_first', 'qtype_formulas'));
@@ -1022,8 +1020,6 @@ class evaluator {
      * This function does the necessary check and prepares a human-friendly error message
      * if the conditions are not met.
      *
-     * TODO: we should probably use the corresponding static function from the functions class
-     *
      * @param token $token the token to check
      * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
      * @return void
@@ -1180,7 +1176,7 @@ class evaluator {
         // die with an error message.
         if (!$this->is_valid_num_of_params($token, $numparams)) {
             $a = (object)['function' => $funcname, 'count' => $numparams];
-            $this->die(get_string('error_function_argcount', 'qtype_formulas', $a), $token);
+            $this->die(get_string('error_func_argcount', 'qtype_formulas', $a), $token);
         }
 
         // Fetch the params from the stack and reverse their order, because the stack is LIFO.

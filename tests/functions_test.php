@@ -38,6 +38,8 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
+// FIXME: add unit test for join() function
+
 /**
  * Unit tests for various functions
  *
@@ -225,8 +227,8 @@ class functions_test extends \advanced_testcase {
             [2, 'fact(2)'],
             [6, 'fact(3)'],
             [720, 'fact(6)'],
-            ['the factorial function expects its first argument to be a non-negative integer', 'fact(-2)'],
-            ['the factorial function expects its first argument to be a non-negative integer', 'fact(2.5)'],
+            ['fact() expects its argument to be a non-negative integer', 'fact(-2)'],
+            ['fact() expects its argument to be a non-negative integer', 'fact(2.5)'],
             ['cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT', 'fact(250)'],
         ];
     }
@@ -609,9 +611,6 @@ class functions_test extends \advanced_testcase {
             [18, 'hexdec(12)'],
             ["invalid number of arguments for function 'hexdec': 0 given", 'hexdec()'],
             ["invalid number of arguments for function 'hexdec': 2 given", 'hexdec(1, 2)'],
-            // TODO: enable the following test once we drop support for PHP 7.4
-            // the following will not throw an error in PHP 7.4; result will be 0.
-            // ['1:1:hexdec(): Argument #1 ($num) must be of type int, string given', 'hexdec("a")'],
         ];
     }
 
@@ -1138,7 +1137,6 @@ class functions_test extends \advanced_testcase {
             [1, 'modpow(12, 8, 13)'],
             [8, 'modpow(3, 10, 17)'],
             [1, 'modpow(12, 0, 17)'],
-            // TODO: add invalid calls
         ];
     }
 

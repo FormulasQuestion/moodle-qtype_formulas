@@ -287,10 +287,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $stexts = null;
             if (strlen($boxes[$placeholder]['options']) != 0) { // Then it's a multichoice answer..
                 try {
-                    // TODO: clean up etc.
                     $stexts = $part->evaluator->export_single_variable($boxes[$placeholder]['options']);
-                } catch (Exception $e) { // @codingStandardsIgnoreLine
-                    // The $stexts variable will be null if evaluation fails.
+                } catch (Exception $e) {
+                    // TODO: use non-capturing catch
+                    unset($e);
                 }
             }
             // Coordinate as multichoice options.

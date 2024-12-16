@@ -86,7 +86,6 @@ class parser {
      * @return for_loop|expression
      */
     private function parse_the_right_thing(token $token) {
-        // TODO: maybe add if / elseif / else clauses in the future?
         if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
             return $this->parse_forloop();
         } else {
@@ -246,7 +245,7 @@ class parser {
             // If the token is already classified as a FUNCTION, it MUST be followed by an
             // opening parenthesis.
             if ($type === token::FUNCTION && $nexttype !== token::OPENING_PAREN) {
-                $this->die(get_string('error_function_paren', 'qtype_formulas'));
+                $this->die(get_string('error_func_paren', 'qtype_formulas'));
             }
 
             // If the current token is an IDENTIFIER, we will classify it as a VARIABLE or a FUNCTION.
