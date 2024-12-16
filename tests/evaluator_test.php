@@ -28,6 +28,13 @@ namespace qtype_formulas;
 use Exception;
 use Generator;
 use qtype_formulas;
+use qtype_formulas\local\answer_parser;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\expression;
+use qtype_formulas\local\variable;
+use qtype_formulas\local\token;
 
 // TODO: test with global vars depending on instantiated random vars
 // TODO: test visibility and last-value property of loop's iterator variable

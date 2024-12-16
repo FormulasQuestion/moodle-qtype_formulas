@@ -397,89 +397,92 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_output(
             $this->get_contains_marked_out_of_summary(),
             $this->get_contains_submit_button_expectation(true),
-            $this->get_does_not_contain_feedback_expectation());
+            $this->get_does_not_contain_feedback_expectation()
+        );
 
-            // Submit an incorrect answer.
-            $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        // Submit an incorrect answer.
+        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
 
-            // Verify.
-            $this->check_current_state(question_state::$todo);
-            $this->check_current_mark(0);
-            $this->check_current_output(
-                $this->get_contains_mark_summary(0),
-                $this->get_contains_submit_button_expectation(true),
-                $this->get_does_not_contain_validation_error_expectation());
+        // Verify.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_validation_error_expectation()
+        );
 
-                // Submit a correct answer.
-                $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        // Submit a correct answer.
+        $this->process_submission(array('0_0' => '5', '-submit' => 1));
 
-                // Verify.
-                $this->check_current_state(question_state::$complete);
-                $this->check_current_mark(0.7);
-                $this->render();
-                $this->check_output_contains_text_input('0_0', '5', true);
-                $this->check_output_does_not_contain_stray_placeholders();
-            }
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(0.7);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', true);
+        $this->check_output_does_not_contain_stray_placeholders();
+    }
 
-            public function test_test0_submit_wrong_unit_then_right() {
-                // Create and configure a question with an "odd" unit penalty in order to not
-                // get the final grade right by chance. Adding two hints to allow a total of
-                // three tries.
-                $q = $this->get_test_formulas_question('testsinglenumunit');
-                $q->parts[0]->unitpenalty = 0.55;
+    public function test_test0_submit_wrong_unit_then_right() {
+        // Create and configure a question with an "odd" unit penalty in order to not
+        // get the final grade right by chance. Adding two hints to allow a total of
+        // three tries.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->unitpenalty = 0.55;
 
-                $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->start_attempt_at_question($q, 'adaptive', 1);
 
-                // Check the initial state.
-                $this->check_current_state(question_state::$todo);
-                self::assertEquals('adaptivemultipart',
-                $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
-            );
-            $this->render();
-            $this->check_output_contains_text_input('0_');
-            $this->check_current_output(
-                $this->get_contains_marked_out_of_summary(),
-                $this->get_contains_submit_button_expectation(true),
-            );
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        self::assertEquals(
+            'adaptivemultipart',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_current_output(
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_contains_submit_button_expectation(true),
+        );
 
-            // Submit an answer with a wrong unit.
-            $this->process_submission(['0_' => '5 km/s', '-submit' => 1]);
-            $this->check_current_state(question_state::$todo);
-            $this->check_current_output(
-                $this->get_contains_mark_summary(0),
-                $this->get_contains_submit_button_expectation(true),
-            );
+        // Submit an answer with a wrong unit.
+        $this->process_submission(['0_' => '5 km/s', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+        );
 
-            // Submit an answer with an incompatible unit.
-            $this->process_submission(['0_' => '5 kg', '-submit' => 1]);
-            $this->check_current_state(question_state::$todo);
-            $this->check_current_output(
-                $this->get_contains_mark_summary(1 - $q->parts[0]->unitpenalty - $q->penalty),
-                $this->get_contains_submit_button_expectation(true),
-            );
+        // Submit an answer with an incompatible unit.
+        $this->process_submission(['0_' => '5 kg', '-submit' => 1]);
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(1 - $q->parts[0]->unitpenalty - $q->penalty),
+            $this->get_contains_submit_button_expectation(true),
+        );
 
-            // Submit a correct answer.
-            $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
-            // The last answer is correct, so the question should move to state "complete".
-            $this->check_current_state(question_state::$complete);
-            // Check the final grade: wrong, half-right in second try, finally right in third try.
-            $this->check_current_mark(1 - 2 * $q->penalty);
-        }
+        // Submit a correct answer.
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
+        // The last answer is correct, so the question should move to state "complete".
+        $this->check_current_state(question_state::$complete);
+        // Check the final grade: wrong, half-right in second try, finally right in third try.
+        $this->check_current_mark(1 - 2 * $q->penalty);
+    }
 
-        public function test_test0_submit_wrong_unit_then_right_with_hints() {
-            return;
-            // Create and configure a question with an "odd" unit penalty in order to not
-            // get the final grade right by chance. Adding two hints to allow a total of
-            // three tries.
-            $q = $this->get_test_formulas_question('testsinglenumunit');
-            $q->parts[0]->unitpenalty = 0.55;
-            $q->hints[] = new question_hint_with_parts(12, 'foo', FORMAT_HTML, false, false);
-            $q->hints[] = new question_hint_with_parts(13, 'bar', FORMAT_HTML, false, false);
+    public function test_test0_submit_wrong_unit_then_right_with_hints() {
+        return;
+        // Create and configure a question with an "odd" unit penalty in order to not
+        // get the final grade right by chance. Adding two hints to allow a total of
+        // three tries.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->unitpenalty = 0.55;
+        $q->hints[] = new question_hint_with_parts(12, 'foo', FORMAT_HTML, false, false);
+        $q->hints[] = new question_hint_with_parts(13, 'bar', FORMAT_HTML, false, false);
 
-            $this->start_attempt_at_question($q, 'interactive', 1);
+        $this->start_attempt_at_question($q, 'interactive', 1);
 
-            // Check the initial state.
-            $this->check_current_state(question_state::$todo);
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
             self::assertEquals('interactivecountback',
             $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
         );
@@ -531,88 +534,94 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_output(
             $this->get_contains_marked_out_of_summary(),
             $this->get_contains_submit_button_expectation(true),
-            $this->get_does_not_contain_feedback_expectation());
+            $this->get_does_not_contain_feedback_expectation()
+        );
 
-            // Submit an incorrect answer.
-            $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        // Submit an incorrect answer.
+        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
 
-            // Verify.
-            $this->check_current_state(question_state::$todo);
-            $this->check_current_mark(0);
-            $this->check_current_output(
-                $this->get_contains_mark_summary(0),
-                $this->get_contains_submit_button_expectation(true),
-                $this->get_does_not_contain_validation_error_expectation());
+        // Verify.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_validation_error_expectation()
+        );
 
-                // Submit another incorrect answer.
-                $this->process_submission(array('0_0' => 'still dont know', '-submit' => 1));
+        // Submit another incorrect answer.
+        $this->process_submission(array('0_0' => 'still dont know', '-submit' => 1));
 
-                // Verify.
-                $this->check_current_state(question_state::$todo);
-                $this->check_current_mark(0);
-                $this->check_current_output(
-                    $this->get_contains_mark_summary(0),
-                    $this->get_contains_submit_button_expectation(true),
-                    $this->get_does_not_contain_validation_error_expectation());
+        // Verify.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_validation_error_expectation()
+        );
 
-                    // Submit a correct answer.
-                    $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        // Submit a correct answer.
+        $this->process_submission(array('0_0' => '5', '-submit' => 1));
 
-                    // Verify.
-                    $this->check_current_state(question_state::$complete);
-                    $this->check_current_mark(0.4);
-                    $this->render();
-                    $this->check_output_contains_text_input('0_0', '5', true);
-                    $this->check_output_does_not_contain_stray_placeholders();
-                }
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(0.4);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', true);
+        $this->check_output_does_not_contain_stray_placeholders();
+    }
 
-                public function test_test0_submit_wrong_same_wrong_right() {
-                    // Here we test that the student is not penalized twice for the same error.
-                    // Create the formulas question 'test0'.
-                    $q = $this->get_test_formulas_question('testsinglenum');
-                    $this->start_attempt_at_question($q, 'adaptive', 1);
+    public function test_test0_submit_wrong_same_wrong_right() {
+        // Here we test that the student is not penalized twice for the same error.
+        // Create the formulas question 'test0'.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $this->start_attempt_at_question($q, 'adaptive', 1);
 
-                    // Check the initial state.
-                    $this->check_current_state(question_state::$todo);
-                    self::assertEquals('adaptivemultipart',
-                    $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
-                    $this->render();
-                    $this->check_output_contains_text_input('0_0');
-                    $this->check_current_output(
-                        $this->get_contains_marked_out_of_summary(),
-                        $this->get_contains_submit_button_expectation(true),
-                        $this->get_does_not_contain_feedback_expectation());
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        self::assertEquals('adaptivemultipart',
+        $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_current_output(
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_feedback_expectation()
+        );
 
-                        // Submit an incorrect answer.
-                        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        // Submit an incorrect answer.
+        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
 
-                        // Verify.
-                        $this->check_current_state(question_state::$todo);
-                        $this->check_current_mark(0);
-                        $this->check_current_output(
-                            $this->get_contains_mark_summary(0),
-                            $this->get_contains_submit_button_expectation(true),
-                            $this->get_does_not_contain_validation_error_expectation());
+        // Verify.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_validation_error_expectation()
+        );
 
-                            // Submit again the same incorrect answer.
-                            $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        // Submit again the same incorrect answer.
+        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
 
-                            // Verify.
-                            $this->check_current_state(question_state::$todo);
-                            $this->check_current_mark(0);
-                            $this->check_current_output(
-                                $this->get_contains_mark_summary(0),
-                                $this->get_contains_submit_button_expectation(true),
-                                $this->get_does_not_contain_validation_error_expectation());
+        // Verify.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_submit_button_expectation(true),
+            $this->get_does_not_contain_validation_error_expectation()
+        );
 
-                                // Submit a correct answer.
-                                $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        // Submit a correct answer.
+        $this->process_submission(array('0_0' => '5', '-submit' => 1));
 
-                                // Verify.
-                                $this->check_current_state(question_state::$complete);
-                                $this->check_current_mark(0.7);
-                                $this->render();
-                                $this->check_output_contains_text_input('0_0', '5', true);
-                                $this->check_output_does_not_contain_stray_placeholders();
-                            }
-                        }
+        // Verify.
+        $this->check_current_state(question_state::$complete);
+        $this->check_current_mark(0.7);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', true);
+        $this->check_output_does_not_contain_stray_placeholders();
+    }
+}

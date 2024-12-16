@@ -33,6 +33,9 @@ namespace qtype_formulas;
 
 use Exception;
 use Generator;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\token;
+use qtype_formulas\local\shunting_yard;
 
 class parser_test extends \advanced_testcase {
 

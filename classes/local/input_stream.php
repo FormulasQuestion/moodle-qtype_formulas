@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace qtype_formulas;
+namespace qtype_formulas\local;
 
 /**
  * Helper class to go through the input, used by the tokenizer.

@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qtype_formulas;
+namespace qtype_formulas\local;
 
 class expression {
     /** @var array the expression or statement in RPN notation */

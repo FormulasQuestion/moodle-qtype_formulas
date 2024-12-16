@@ -26,11 +26,11 @@
 
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\unit_conversion_rules;
-use qtype_formulas\evaluator;
-use qtype_formulas\random_parser;
-use qtype_formulas\answer_parser;
-use qtype_formulas\parser;
-use qtype_formulas\token;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\answer_parser;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\token;
 
 defined('MOODLE_INTERNAL') || die();
 

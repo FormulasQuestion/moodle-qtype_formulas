@@ -33,7 +33,6 @@ use question_attempt;
 use question_attempt_step;
 use question_display_options;
 use question_hint_with_parts;
-use question_possible_response;
 use question_usage_by_activity;
 
 defined('MOODLE_INTERNAL') || die();

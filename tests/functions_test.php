@@ -25,8 +25,12 @@
 
 namespace qtype_formulas;
 
-use qtype_formulas\parser;
-use qtype_formulas\evaluator;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\variable;
+use qtype_formulas\local\token;
+use qtype_formulas\local\functions;
+
 use Exception;
 
 defined('MOODLE_INTERNAL') || die();

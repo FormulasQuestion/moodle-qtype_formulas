@@ -24,6 +24,8 @@
 
 namespace qtype_formulas;
 
+use qtype_formulas\local\answer_parser;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;

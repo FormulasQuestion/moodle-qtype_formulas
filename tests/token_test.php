@@ -25,6 +25,8 @@
 
 namespace qtype_formulas;
 
+use qtype_formulas\local\token;
+
 class token_test extends \advanced_testcase {
     /**
      * @dataProvider provide_tokens

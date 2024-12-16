@@ -26,11 +26,11 @@
 namespace qtype_formulas\external;
 
 use Exception;
-use qtype_formulas\evaluator;
-use qtype_formulas\variable;
-use qtype_formulas\token;
-use qtype_formulas\random_parser;
-use qtype_formulas\parser;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\variable;
+use qtype_formulas\local\token;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\parser;
 
 defined('MOODLE_INTERNAL') || die();
 

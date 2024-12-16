@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace qtype_formulas;
+namespace qtype_formulas\local;
 
 use Exception;
 

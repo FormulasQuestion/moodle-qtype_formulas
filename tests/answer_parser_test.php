@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 
 use Exception;
 use qtype_formulas;
+use qtype_formulas\local\answer_parser;
 
 class answer_parser_test extends \advanced_testcase {
 
