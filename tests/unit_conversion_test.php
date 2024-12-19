@@ -23,14 +23,13 @@
  */
 
 namespace qtype_formulas;
-use qtype_formulas\variables;
-use Exception;
+
+use qtype_formulas\local\answer_parser;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
-require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
 require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 
@@ -41,23 +40,29 @@ class unit_conversion_test extends \advanced_testcase {
      * @dataProvider provide_numbers_and_units
      */
     public function test_common_si_units($expected, $inputs): void {
-        $qv = new variables;
         $rules = new unit_conversion_rules();
         $converter = new answer_unit_conversion();
         // The ruleset "common SI units" is number 1.
         $entry = $rules->entry(1);
         $converter->assign_default_rules(1, $entry[1]);
 
-        list($modelnumber, $modelunit) = $qv->split_formula_unit($expected);
+        $parser = new answer_parser($expected);
+        $index = $parser->find_start_of_units();
+        $expectednumber = trim(substr($expected, 0, $index));
+        $expectedunit = trim(substr($expected, $index));
+
         foreach ($inputs as $input) {
-            list($answernumber, $answerunit) = $qv->split_formula_unit($input);
+            $parser = new answer_parser($input);
+            $index = $parser->find_start_of_units();
+            $number = trim(substr($input, 0, $index));
+            $unit = trim(substr($input, $index));
 
             // Check if the unit is compatible.
-            $checked = $converter->check_convertibility($answerunit, $modelunit);
-            $this->assertEquals(true, $checked->convertible);
+            $checked = $converter->check_convertibility($unit, $expectedunit);
+            self::assertEquals(true, $checked->convertible);
             // Convert the number and check if the result is OK.
             $factor = $checked->cfactor;
-            $this->assertEqualsWithDelta(floatval($modelnumber), floatval($answernumber) * $factor, 1e-8);
+            self::assertEqualsWithDelta($expectednumber, $number * $factor, 1e-8);
         }
     }
 
