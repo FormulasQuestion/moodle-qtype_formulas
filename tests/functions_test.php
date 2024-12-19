@@ -38,8 +38,6 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
-// FIXME: add unit test for join() function
-
 /**
  * Unit tests for various functions
  *
@@ -1140,8 +1138,26 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    public function provide_join_calls(): array {
+        return [
+            ["ab", 'join("", "a", "b")'],
+            ["a-b", 'join("-", "a", "b")'],
+            ["b", 'join("", "", "b")'],
+            ["a", 'join("", "a", "")'],
+            ["-b", 'join("-", "", "b")'],
+            ["a-", 'join("-", "a", "")'],
+            ["ab", 'join("", ["a", "b"])'],
+            ["a-b", 'join("-", ["a", "b"])'],
+            ["b", 'join("", ["", "b"])'],
+            ["a", 'join("", ["a", ""])'],
+            ["-b", 'join("-", ["", "b"])'],
+            ["a-", 'join("-", ["a", ""])'],
+        ];
+    }
+
     /**
      * @dataProvider provide_sigfig_expressions
+     * @dataProvider provide_join_calls
      */
     public function test_functions_returning_string($expected, $input): void {
         $parser = new parser($input);

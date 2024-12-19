@@ -539,10 +539,13 @@ class questiontype_test extends \advanced_testcase {
     }
 
     public function test_fetch_part_ids_for_question(): void {
-        // TODO: remove this once method is private; it is indirectly tested
-        // with the tests to move/delete files
         $this->resetAfterTest();
         $this->setAdminUser();
+
+        // Prepare reflection and make protected method accessible.
+        $reflectedqtype = new \ReflectionClass($this->qtype);
+        $fetchermethod = $reflectedqtype->getMethod('fetch_part_ids_for_question');
+        $fetchermethod->setAccessible(true);
 
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $generator->create_question_category([]);
@@ -552,14 +555,14 @@ class questiontype_test extends \advanced_testcase {
         $formdata->category = "{$category->id},{$category->contextid}";
         $formdata->id = 0;
         $saved = $this->qtype->save_question($questiondata, $formdata);
-        self::assertCount(1, $this->qtype->fetch_part_ids_for_question($saved->id));
+        self::assertCount(1, $fetchermethod->invokeArgs($this->qtype, [$saved->id]));
 
         $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
         $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
         $formdata->category = "{$category->id},{$category->contextid}";
         $formdata->id = 0;
         $saved = $this->qtype->save_question($questiondata, $formdata);
-        self::assertCount(4, $this->qtype->fetch_part_ids_for_question($saved->id));
+        self::assertCount(4, $fetchermethod->invokeArgs($this->qtype, [$saved->id]));
     }
 
     /**

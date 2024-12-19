@@ -88,12 +88,11 @@ class qtype_formulas extends question_type {
 
     /**
      * Fetch the ID for every part of a given question.
-     * TODO: turn this into private method
      *
      * @param int $questionid
      * @return int[]
      */
-    public function fetch_part_ids_for_question(int $questionid): array {
+    protected function fetch_part_ids_for_question(int $questionid): array {
         global $DB;
 
         // Fetch the parts from the DB. The result will be an associative array with

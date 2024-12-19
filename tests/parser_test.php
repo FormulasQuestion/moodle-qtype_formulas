@@ -28,8 +28,6 @@
 // parser features here, e.g. error detection, but conversion from input to token list is
 // purely an implementation thing; the user only cares about results
 
-// TODO/FIXME: maybe add explicit test for has_token_in_tokenlist() ?
-
 namespace qtype_formulas;
 
 use Exception;

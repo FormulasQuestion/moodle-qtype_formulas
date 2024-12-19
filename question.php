@@ -825,82 +825,82 @@ class qtype_formulas_part {
     public array $evaluatedanswers = [];
 
     /** @var int the part's id */
-    public $id;
+    public int $id;
 
     /** @var int the parents question's id */
-    public $questionid;
+    public int $questionid;
 
     /** @var int the part's position among all parts of the question */
-    public $partindex;
+    public int $partindex;
 
     /** @var string the part's placeholder, e.g. #1 */
-    public $placeholder;
+    public string $placeholder;
 
     /** @var float the maximum grade for this part */
-    public $answermark;
+    public float $answermark;
 
     /** @var int answer type (number, numerical, numerical formula, algebraic) */
-    public $answertype;
+    public int $answertype;
 
     /** @var int number of answer boxes (not including a possible unit box) for this part */
-    public $numbox;
+    public int $numbox;
 
     /** @var string definition of local variables */
-    public $vars1;
+    public string $vars1;
 
     /** @var string definition of grading variables */
-    public $vars2;
+    public string $vars2;
 
     /** @var string definition of the model answer(s) */
-    public $answer;
+    public string $answer;
 
     /** @var int whether there are multiple possible answers */
-    public $answernotunique;
+    public int $answernotunique;
 
     /** @var string definition of the grading criterion */
-    public $correctness;
+    public string $correctness;
 
     /** @var float deduction for a wrong unit */
-    public $unitpenalty;
+    public float $unitpenalty;
 
     /** @var string unit */
-    public $postunit;
+    public string $postunit;
 
     /** @var int the set of basic unit conversion rules to be used */
-    public $ruleid;
+    public int $ruleid;
 
     /** @var string additional conversion rules for other accepted base units */
-    public $otherrule;
+    public string $otherrule;
 
     /** @var string the part's text */
-    public $subqtext;
+    public string $subqtext;
 
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
-    public $subqtextformat;
+    public int $subqtextformat;
 
     /** @var string general feedback for the part */
-    public $feedback;
+    public string $feedback;
 
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
-    public $feedbackformat;
+    public int $feedbackformat;
 
     /** @var string part's feedback for any correct response */
-    public $partcorrectfb;
+    public string $partcorrectfb;
 
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
-    public $partcorrectfbformat;
+    public int $partcorrectfbformat;
 
     /** @var string part's feedback for any partially correct response */
-    public $partpartiallycorrectfb;
+    public string $partpartiallycorrectfb;
 
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
-    public $partpartiallycorrectfbformat;
+    public int $partpartiallycorrectfbformat;
 
     /** @var string part's feedback for any incorrect response */
-    public $partincorrectfb;
+    public string $partincorrectfb;
 
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
-    public $partincorrectfbformat;
+    public int $partincorrectfbformat;
 
     /**
      * Constructor.

@@ -725,7 +725,9 @@ class functions {
      */
     public static function join($separator, ...$values): string {
         $result = [];
-        array_walk_recursive($values, function($val, $idx) use (&$result) {
+        // Using array_walk_recursive() makes it easy to accept a list of strings as the second
+        // argument instead of giving all strings individually.
+        array_walk_recursive($values, function($val) use (&$result) {
             $result[] = $val;
         });
         return implode($separator, $result);
