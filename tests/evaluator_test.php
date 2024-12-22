@@ -1099,6 +1099,64 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public static function provide_nested_list_assignments(): array {
+        return [
+            'nested list' => [
+                [
+                    'e' => new variable('e', [[1, 2], [3, 4]], variable::LIST),
+                ],
+                'e=[[1,2],[3,4]];'
+            ],
+            'change list element to nested list' => [
+                [
+                    'e' => new variable('e', [[8, 9], 2, 3], variable::LIST),
+                ],
+                'e=[1,2,3]; e[0] = [8,9];'
+            ],
+            'nest list into list from variable' => [
+                [
+                    'a' => new variable('a', [9,10], variable::LIST),
+                    'e' => new variable('e', [[9, 10], 2, 3], variable::LIST),
+                ],
+                'a=[9,10]; e=[1,2,3]; e[0]=a;'
+            ],
+            'change list element in a nested list' => [
+                [
+                    'e' => new variable('e', [[1, 5], 2, 3], variable::LIST),
+                ],
+                'e=[[1,2],2,3]; e[0][1] = 5;'
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_nested_list_assignments
+     */
+    public function test_assignment_of_nested_lists($expected, $input): void {
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        $variables = $evaluator->export_variable_list();
+        foreach ($expected as $key => $variable) {
+            self::assertContains($key, $variables);
+            $stored = $evaluator->export_single_variable($key, true);
+            //self::assertEquals($variable->name, $stored->name);
+            self::assertEquals($variable->type, $stored->type);
+            // If the value is a list or the variable is algebraic, the elements are tokens.
+            // We will only compare the token values to the expected values. For scalar variables,
+            // we can directly compare the values.
+            if ($stored->type === token::LIST) {
+                foreach ($stored->value as $i => $token) {
+                    self::assertEquals($variable->value[$i], token::unpack($token));
+                }
+            } else {
+                self::assertEquals($variable->value, $stored->value);
+            }
+        }
+    }
+
     public function provide_invalid_bitwise_stuff(): array {
         return [
             ['bit shift operator should only be used with integers', '4.5 << 3'],

@@ -24,10 +24,6 @@
  */
 
 
-// TODO: most of these tests should only be made in the evaluator; we should only test specific
-// parser features here, e.g. error detection, but conversion from input to token list is
-// purely an implementation thing; the user only cares about results
-
 namespace qtype_formulas;
 
 use Exception;
@@ -180,14 +176,13 @@ class parser_test extends \advanced_testcase {
      * @dataProvider provide_paren_expressions
      */
     public function test_invalid_parens($expected, $input): void {
-        $error = null;
+        $e = null;
         try {
             $parser = new parser($input);
         } catch (Exception $e) {
-            $error = $e->getMessage();
+            self::assertStringEndsWith($expected, $e->getMessage());
         }
-        self::assertNotNull($error);
-        self::assertStringEndsWith($expected, $e->getMessage());
+        self::assertNotNull($e);
     }
 
     /**

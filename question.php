@@ -28,8 +28,8 @@
 
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 
-// TODO: tests using constants (e.g. is_acceptable_answer)
-// TODO: tests using variable "sin=1" defined in random/global/local; used in global/local/grading/answer
+// FIXME-TODO: tests using constants (e.g. is_acceptable_answer)
+// FIXME-TODO: tests using variable "sin=1" defined in random/global/local; used in global/local/grading/answer
 
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
