@@ -54,7 +54,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_tol[0]  | 1                 |
     And I press "id_updatebutton"
     And I wait until the page is ready
-    Then I should see "relative error (_relerr) cannot be used with answer type algebraic formula"
+    Then I should see "Relative error (_relerr) cannot be used with answer type algebraic formula."
     And the following fields match these values:
       | correctness_simple_mode[0] | 0 |
 
@@ -76,7 +76,7 @@ Feature: Test setting the grading criterion in different modes
     When I set the field "Grading criterion*" to "a"
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "unknown variable: a"
+    Then I should see "Unknown variable: a"
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be disabled

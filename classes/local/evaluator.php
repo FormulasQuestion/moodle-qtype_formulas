@@ -19,11 +19,6 @@ namespace qtype_formulas\local;
 use qtype_formulas;
 use Throwable, Exception;
 
-// TODO: calculate_algebraic_diff etc. should probably not use known variables and thus
-// not allow using builtin functions as variables, because students do not have access to the
-// prefix operator; in any case it needs to be clearly documented
-
-
 /**
  * Evaluator for qtype_formulas
  *

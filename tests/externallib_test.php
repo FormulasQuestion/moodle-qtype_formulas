@@ -72,19 +72,19 @@ class externallib_test extends \externallib_advanced_testcase {
                 ['randomvars' => 'a={1,2}', 'globalvars' => 'b=a']
             ],
             [
-                ['source' => 'random', 'message' => 'invalid definition of a random variable - you must provide a list of possible values'],
+                ['source' => 'random', 'message' => 'Invalid definition of a random variable - you must provide a list of possible values.'],
                 ['randomvars' => 'a=1', 'globalvars' => '']
             ],
             [
-                ['source' => 'global', 'message' => 'unknown variable: a'],
+                ['source' => 'global', 'message' => 'Unknown variable: a'],
                 ['randomvars' => '', 'globalvars' => 'b=a']
             ],
             [
-                ['source' => 'global', 'message' => "syntax error: unexpected end of expression after '='"],
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '='."],
                 ['randomvars' => '', 'globalvars' => 'a=']
             ],
             [
-                ['source' => 'global', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => '', 'globalvars' => 'a=+']
             ],
         ];
@@ -125,7 +125,7 @@ class externallib_test extends \externallib_advanced_testcase {
                 ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1,2}']
             ],
             [
-                ['source' => 'local', 'message' => 'unknown variable: b'],
+                ['source' => 'local', 'message' => 'Unknown variable: b'],
                 ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b']
             ],
             [
@@ -141,35 +141,35 @@ class externallib_test extends \externallib_advanced_testcase {
                 ['randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a={1,2,3}']
             ],
             [
-                ['source' => 'local', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'local', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+']
             ],
             [
-                ['source' => 'global', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2']
             ],
             [
-                ['source' => 'global', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2']
             ],
             [
-                ['source' => 'random', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=2']
             ],
             [
-                ['source' => 'random', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=+++']
             ],
             [
-                ['source' => 'random', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => 'a=+', 'globalvars' => '', 'localvars' => 'c=+++']
             ],
             [
-                ['source' => 'random', 'message' => "syntax error: unexpected end of expression after '+'"],
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
                 ['randomvars' => 'a=+', 'globalvars' => 'b=++', 'localvars' => 'c=+++']
             ],
             [
-                ['source' => 'local', 'message' => "syntax error: unexpected end of expression after '='"],
+                ['source' => 'local', 'message' => "Syntax error: unexpected end of expression after '='."],
                 ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=']
             ],
         ];
@@ -198,7 +198,7 @@ class externallib_test extends \externallib_advanced_testcase {
                 [
                     'question' => "No preview available. Check your definition of random variables, " .
                         "global variables, parts' local variables and answers. Original error message: " .
-                        "1:3:syntax error: unexpected end of expression after '*'",
+                        "1:3:Syntax error: unexpected end of expression after '*'.",
                     'parts' => []
                 ],
                 ['questiontext' => '', 'parttexts' => [], 'globalvars' => 'a=*', 'partvars' => []]
@@ -234,7 +234,7 @@ class externallib_test extends \externallib_advanced_testcase {
                 [
                     'question' => "No preview available. Check your definition of random variables, " .
                         "global variables, parts' local variables and answers. Original error message: " .
-                        "1:4:division by zero is not defined",
+                        "1:4:Division by zero is not defined.",
                     'parts' => []
                 ],
                 [
@@ -371,21 +371,21 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
-                ['status' => 'error', 'message' => "algebraic variable 'a' cannot be used in this context"],
+                ['status' => 'error', 'message' => "Algebraic variable 'a' cannot be used in this context."],
                 [
                     'n' => 1, 'randomvars' => '', 'globalvars' => '',
                     'localvars' => ['a={1,3}'], 'answers' => ['a']
                 ]
             ],
             [
-                ['status' => 'error', 'message' => 'division by zero is not defined'],
+                ['status' => 'error', 'message' => 'Division by zero is not defined.'],
                 [
                     'n' => -1, 'randomvars' => '', 'globalvars' => '',
                     'localvars' => ['a=2'], 'answers' => ['1/(a-a)']
                 ]
             ],
             [
-                ['status' => 'error', 'message' => "algebraic variable 'a' cannot be used in this context"],
+                ['status' => 'error', 'message' => "Algebraic variable 'a' cannot be used in this context."],
                 [
                     'n' => 1, 'randomvars' => '', 'globalvars' => '',
                     'localvars' => ['a={1:5}'], 'answers' => ['a']
@@ -406,14 +406,14 @@ class externallib_test extends \externallib_advanced_testcase {
                 ]
             ],
             [
-                ['status' => 'error', 'message' => "syntax error: unexpected end of expression after '*'"],
+                ['status' => 'error', 'message' => "Syntax error: unexpected end of expression after '*'."],
                 [
                     'n' => 1, 'randomvars' => 'a=*', 'globalvars' => '',
                     'localvars' => [], 'answers' => []
                 ]
             ],
             [
-                ['status' => 'error', 'message' => 'division by zero is not defined'],
+                ['status' => 'error', 'message' => 'Division by zero is not defined.'],
                 [
                     'n' => 50, 'randomvars' => 'a={0, 1}', 'globalvars' => 'b = 1/a',
                     'localvars' => ['b = 1/a'], 'answers' => ['1/a']

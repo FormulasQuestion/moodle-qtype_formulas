@@ -101,9 +101,9 @@ class token_test extends \advanced_testcase {
             [$list, [$one, $two, $three]],
             [new token(token::LIST, [$list]), [[1, 2, 3]]],
             [$one, ['value' => '1', 'type' => token::NUMBER]],
-            ['cannot wrap a non-numeric value into a NUMBER token', ['value' => 'a', 'type' => token::NUMBER]],
-            ['cannot wrap the given value into a STRING token', ['value' => [1, 2], 'type' => token::STRING]],
-            ["the given value 'null' has an invalid data type and cannot be converted to a token", null],
+            ['Cannot wrap a non-numeric value into a NUMBER token.', ['value' => 'a', 'type' => token::NUMBER]],
+            ['Cannot wrap the given value into a STRING token.', ['value' => [1, 2], 'type' => token::STRING]],
+            ["The given value 'null' has an invalid data type and cannot be converted to a token.", null],
         ];
     }
 }

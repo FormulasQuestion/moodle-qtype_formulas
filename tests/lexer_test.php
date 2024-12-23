@@ -623,8 +623,8 @@ EOF;
 
     public function provide_invalid_strings(): array {
         return [
-            ['1:4:unterminated string, started at row 1, column 1', '"foo'],
-            ['1:4:unterminated string, started at row 1, column 1', "'foo"],
+            ['1:4:Unterminated string, started at row 1, column 1.', '"foo'],
+            ['1:4:Unterminated string, started at row 1, column 1.', "'foo"],
         ];
     }
 
@@ -670,7 +670,7 @@ EOF;
         try {
             $lexer = new lexer($input);
         } catch (Exception $e) {
-            self::assertEquals("1:5:unexpected input: '.'", $e->getMessage());
+            self::assertEquals("1:5:Unexpected input: '.'", $e->getMessage());
         }
         self::assertNotNull($e);
     }

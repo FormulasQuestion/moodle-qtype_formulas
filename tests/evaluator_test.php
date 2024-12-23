@@ -50,15 +50,15 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_diff(): array {
         return [
-            ['the first argument of diff() must be a list', 'diff("", "");'],
-            ['the second argument of diff() must be a list', 'diff([1,2,3], 1);'],
-            ['diff() expects two lists of the same size', 'diff([1,2,3], [1,2]);'],
-            ['when using diff(), the first list must contain only numbers or only strings', 'diff([[1,2]], [1]);'],
-            ['diff(): type mismatch for element #1 (zero-indexed) of the first list', 'diff([1,"a"], [1,2]);'],
-            ['diff(): type mismatch for element #1 (zero-indexed) of the first list', 'diff(["a",1], ["a","b"]);'],
-            ['diff(): type mismatch for element #0 (zero-indexed) of the second list', 'diff([1,2], ["a",2]);'],
-            ['diff(): type mismatch for element #1 (zero-indexed) of the second list', 'diff(["a","b"], ["a",2]);'],
-            ['the third argument of diff() can only be used when working with lists of strings', 'diff([1,2,3], [4,5,6], 3);'],
+            ['The first argument of diff() must be a list.', 'diff("", "");'],
+            ['The second argument of diff() must be a list.', 'diff([1,2,3], 1);'],
+            ['diff() expects two lists of the same size.', 'diff([1,2,3], [1,2]);'],
+            ['When using diff(), the first list must contain only numbers or only strings.', 'diff([[1,2]], [1]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff([1,"a"], [1,2]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff(["a",1], ["a","b"]);'],
+            ['diff(): type mismatch for element #0 (zero-indexed) of the second list.', 'diff([1,2], ["a",2]);'],
+            ['diff(): type mismatch for element #1 (zero-indexed) of the second list.', 'diff(["a","b"], ["a",2]);'],
+            ['The third argument of diff() can only be used when working with lists of strings.', 'diff([1,2,3], [4,5,6], 3);'],
         ];
     }
 
@@ -1061,12 +1061,12 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_random_vars(): array {
         return [
-            ['evaluation error: range from 10 to 1 with step 1 will be empty', 'a = {10:1:1}'],
-            ['setting individual list elements is not supported for random variables', 'a[1] = {1,2,3}'],
-            ['syntax error: invalid use of separator token (,)', 'a = {1:10,}'],
-            ["syntax error: incomplete ternary operator or misplaced '?'", 'a = {1:10?}'],
-            ['number expected, found algebraic variable', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
-            ['unknown variable: a', 'a = {1:3:0.1}; b={a,12,13};'],
+            ['Evaluation error: range from 10 to 1 with step 1 will be empty.', 'a = {10:1:1}'],
+            ['Setting individual list elements is not supported for random variables.', 'a[1] = {1,2,3}'],
+            ['Syntax error: invalid use of separator token \',\'.', 'a = {1:10,}'],
+            ["Syntax error: incomplete ternary operator or misplaced '?'.", 'a = {1:10?}'],
+            ['Number expected, found algebraic variable.', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
+            ['Unknown variable: a', 'a = {1:3:0.1}; b={a,12,13};'],
         ];
     }
 
@@ -1159,234 +1159,234 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_bitwise_stuff(): array {
         return [
-            ['bit shift operator should only be used with integers', '4.5 << 3'],
-            ['bit shift operator should only be used with integers', '4.5 >> 3'],
-            ['bit shift operator should only be used with integers', '8 << 1.5'],
-            ['bit shift operator should only be used with integers', '8 >> 1.5'],
-            ['bit shift by negative number -3 is not allowed', '8 >> -3'],
-            ['bit shift by negative number -3 is not allowed', '8 << -3'],
-            ['bitwise AND should only be used with integers', '8 & 1.5'],
-            ['bitwise AND should only be used with integers', '8.5 & 3'],
-            ['bitwise OR should only be used with integers', '8 | 1.5'],
-            ['bitwise OR should only be used with integers', '8.5 | 3'],
-            ['bitwise XOR should only be used with integers', '8 ^ 1.5'],
-            ['bitwise XOR should only be used with integers', '8.5 ^ 3'],
+            ['Bit shift operator should only be used with integers.', '4.5 << 3'],
+            ['Bit shift operator should only be used with integers.', '4.5 >> 3'],
+            ['Bit shift operator should only be used with integers.', '8 << 1.5'],
+            ['Bit shift operator should only be used with integers.', '8 >> 1.5'],
+            ['Bit shift by negative number -3 is not allowed.', '8 >> -3'],
+            ['Bit shift by negative number -3 is not allowed.', '8 << -3'],
+            ['Bitwise AND should only be used with integers.', '8 & 1.5'],
+            ['Bitwise AND should only be used with integers.', '8.5 & 3'],
+            ['Bitwise OR should only be used with integers.', '8 | 1.5'],
+            ['Bitwise OR should only be used with integers.', '8.5 | 3'],
+            ['Bitwise XOR should only be used with integers.', '8 ^ 1.5'],
+            ['Bitwise XOR should only be used with integers.', '8.5 ^ 3'],
         ];
     }
 
     public function provide_invalid_for_loops(): array {
         return [
-            ['syntax error: ( expected after for', 'for a'],
-            ['syntax error: : expected', 'for (a)'],
-            ['syntax error: : expected', 'for (a=)'],
-            ['syntax error: ) expected', 'for (a:[1:5],)'],
+            ['Syntax error: ( expected after for.', 'for a'],
+            ['Syntax error: : expected.', 'for (a)'],
+            ['Syntax error: : expected.', 'for (a=)'],
+            ['Syntax error: ) expected.', 'for (a:[1:5],)'],
         ];
     }
 
     public function provide_invalid_ranges(): array {
         return [
-            ['syntax error: step size of a range cannot be zero', 'a = [1:5:0]'],
-            ['syntax error: start and end of range must not be equal', 'a = [5:5]'],
-            ['syntax error: start and end of range must not be equal', 'a = [1.0:1]'],
-            ['syntax error in range definition', 'a = [1:2:3:4]'],
+            ['Syntax error: step size of a range cannot be zero.', 'a = [1:5:0]'],
+            ['Syntax error: start and end of range must not be equal.', 'a = [5:5]'],
+            ['Syntax error: start and end of range must not be equal.', 'a = [1.0:1]'],
+            ['Syntax error in range definition.', 'a = [1:2:3:4]'],
         ];
     }
 
     public function provide_invalid_colon(): array {
         return [
-            ['syntax error: invalid use of range separator (:)', 'a = (:5)'],
-            ['syntax error: invalid use of range separator (:)', 'a = {5:}'],
-            ['syntax error: invalid use of range separator (:)', 'a = {:5}'],
-            ['syntax error: invalid use of range separator (:)', 'a = [5:]'],
-            ['syntax error: invalid use of range separator (:)', 'a = [:5]'],
-            ['syntax error: invalid use of range separator (:)', 'a = [5::7]'],
-            ['syntax error: invalid use of range separator (:)', 'a = [3,:7]'],
-            ['syntax error: invalid use of range separator (:)', 'a = [3:,7]'],
-            ['syntax error: ternary operator missing middle part', 'a = 5 ?: 3'],
-            ['syntax error: ranges can only be used in {} or []', 'a = 5 : 3'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = (:5)'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = {5:}'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = {:5}'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = [5:]'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = [:5]'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = [5::7]'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = [3,:7]'],
+            ['Syntax error: invalid use of range separator \':\'.', 'a = [3:,7]'],
+            ['Syntax error: ternary operator missing middle part.', 'a = 5 ?: 3'],
+            ['Syntax error: ranges can only be used in {} or [].', 'a = 5 : 3'],
         ];
     }
 
     public function provide_invalid_assignments(): array {
         return [
             'assign list of strings to algebraic variable' => [
-                'algebraic variables can only be initialized with a list of numbers',
+                'Algebraic variables can only be initialized with a list of numbers.',
                 'x = {"a", "b"}'
             ],
             'assign mixed values to algebraic variable' => [
-                'algebraic variables can only be initialized with a list of numbers',
+                'Algebraic variables can only be initialized with a list of numbers.',
                 'x = {1, 2, "foo"}'
             ],
             'assign numeric string to algebraic variable' => [
-                'algebraic variables can only be initialized with a list of numbers',
+                'Algebraic variables can only be initialized with a list of numbers.',
                 'x = {"1", 2}'
             ],
             'assign nested list to algebraic variable' => [
-                'algebraic variables can only be initialized with a list of numbers',
+                'Algebraic variables can only be initialized with a list of numbers.',
                 'x = {1, 2, [1, 2]}'
             ],
             'trying to change char of string' => [
-                'individual chars of a string cannot be modified',
+                'Individual chars of a string cannot be modified.',
                 's = "foo"; s[1] = "x"'
             ],
             'assignment with invalid function' => [
-                "unknown function: 'idontexist'",
+                "Unknown function: 'idontexist'",
                 'a = \idontexist(5)'
             ],
             'assignment to constant' => [
-                'left-hand side of assignment must be a variable',
+                'Left-hand side of assignment must be a variable.',
                 'pi = 3'
             ],
             'assignment to constant' => [
-                'left-hand side of assignment must be a variable',
+                'Left-hand side of assignment must be a variable.',
                 'π = 3'
             ],
             'invalid use of prefix with number' => [
-                'syntax error: invalid use of prefix character \\',
+                'Syntax error: invalid use of prefix character \.',
                 'a = \ 2'
             ],
             'invalid argument for unary operator' => [
-                "number expected, found 'foo'",
+                "Number expected, found 'foo'.",
                 'a = -"foo"'
             ],
             'invalid argument for unary operator, indirect' => [
-                "number expected, found 'foo'",
+                "Number expected, found 'foo'.",
                 's = "foo"; a = -s'
             ],
             'invalid use of prefix with paren' => [
-                'syntax error: invalid use of prefix character \\',
+                'Syntax error: invalid use of prefix character \.',
                 'a = \ (3 + 1)'
             ],
             'assignment to invalid variable' => [
-                '1:1:invalid variable name: _a',
+                '1:1:Invalid variable name: _a.',
                 '_a=3;'
             ],
             'unknown char in expression' => [
-                "1:4:unexpected input: '«'",
+                "1:4:Unexpected input: '«'",
                 'a=3«6;'
             ],
             'not subscriptable' => [
-                '1:8:evaluation error: indexing is only possible with lists and strings',
+                '1:8:Evaluation error: indexing is only possible with lists and strings.',
                 'f=1; g=f[1];'
             ],
             'invalid index: array' => [
-                'evaluation error: only one index supported when accessing array elements',
+                'Evaluation error: only one index supported when accessing array elements.',
                 'e=[1,2,3][4,5];'
             ],
             'invalid index: array (indirect)' => [
-                'evaluation error: only one index supported when accessing array elements',
+                'Evaluation error: only one index supported when accessing array elements.',
                 'e=[1,2,3]; f=e[4,5]'
             ],
             'multiply array with number' => [
-                '1:16:number expected, found list',
+                '1:16:Number expected, found list.',
                 'e=[1,2,3,4]; f=e*2;'
             ],
             'multiple indices for array' => [
-                '1:18:evaluation error: only one index supported when accessing array elements',
+                '1:18:Evaluation error: only one index supported when accessing array elements.',
                 'e=[1,2,3][1][4,5,6][2];'
             ],
             'fill with count == 0' => [
-                '1:3:fill() expects its first argument to be a positive integer',
+                '1:3:fill() expects its first argument to be a positive integer.',
                 'c=fill(0,"rr")'
             ],
             'undefined natrual logarithm' => [
-                'ln() expects its argument to be a positive number',
+                'ln() expects its argument to be a positive number.',
                 'x=ln(-5)'
             ],
             'undefined natrual logarithm' => [
-                'ln() expects its argument to be a positive number',
+                'ln() expects its argument to be a positive number.',
                 'x=ln(0)'
             ],
             'closing parenthesis when not opened' => [
-                "1:7:unbalanced parenthesis, stray ')' found",
+                "1:7:Unbalanced parenthesis, stray ')' found.",
                 's=fill);'
             ],
             'opening parenthesis not closed' => [
-                "1:7:unbalanced parenthesis, '(' is never closed",
+                "1:7:Unbalanced parenthesis, '(' is never closed.",
                 's=fill(10,"rr";'
             ],
             'invalid invocation of concat(), number' => [
-                "1:3:concat() expects its arguments to be lists",
+                "1:3:concat() expects its arguments to be lists.",
                 's=concat(0, [1,2,3], [5,6], 100);'
             ],
             'invalid for loop: no variable' => [
-                '1:12:syntax error: identifier expected',
+                '1:12:Syntax error: identifier expected.',
                 'z = 0; for(: [0:5]) z=z+i;'
             ],
             'invalid for loop: no list' => [
-                '1:14:syntax error: [ or variable name expected',
+                '1:14:Syntax error: [ or variable name expected.',
                 'z = 0; for(i:) z=z+i;'
             ],
             'invalid for loop: no statement or brace' => [
-                'syntax error: { or statement expected',
+                'Syntax error: { or statement expected.',
                 'z = 0; for(i: [0:5]) '
             ],
             'invalid for loop: missing colon in nested loop' => [
-                '1:28:syntax error: : expected',
+                '1:28:Syntax error: : expected.',
                 'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;'
             ],
             'invalid invocation of diff(), mismatching lengths' => [
-                '1:3:diff() expects two lists of the same size',
+                '1:3:diff() expects two lists of the same size.',
                 's=diff([3*3+3,0],[3*4]);'
             ],
             'algebraic variable used in calculation' => [
-                "1:21:algebraic variable 'b' cannot be used in this context",
+                "1:21:Algebraic variable 'b' cannot be used in this context.",
                 'a = 7; b = {1:5}; 2*b'
             ],
             'invalid ternary, ? is last char before closing paren' => [
-                "syntax error: incomplete ternary operator or misplaced '?'",
+                "Syntax error: incomplete ternary operator or misplaced '?'.",
                 'a = (5 ?)'
             ],
             'invalid ternary, ? is last char before closing brace' => [
-                "syntax error: incomplete ternary operator or misplaced '?'",
+                "Syntax error: incomplete ternary operator or misplaced '?'.",
                 'a = {5 ?}'
             ],
             'invalid ternary, ? is last char before closing bracket' => [
-                "syntax error: incomplete ternary operator or misplaced '?'",
+                "Syntax error: incomplete ternary operator or misplaced '?'.",
                 'a = [5 ?]'
             ],
             'invalid ternary, ? is last char before closing bracket' => [
-                'evaluation error: not enough arguments for ternary operator: 2',
+                'Evaluation error: not enough arguments for ternary operator: 2.',
                 '(5 ? 4 :)'
             ],
             'invalid ternary, ? is last char before closing bracket' => [
-                'evaluation error: not enough arguments for ternary operator',
+                'Evaluation error: not enough arguments for ternary operator.',
                 'a = (5 ? 4 :)'
             ],
             'argument should be scalar, is list' => [
-                'evaluation error: numeric value expected, got list',
+                'Evaluation error: numeric value expected, got list.',
                 'a = [1, 2, 3] + 4'
             ],
             'argument should be scalar, is list' => [
-                'scalar value expected, found list',
+                'Scalar value expected, found list.',
                 'a = "a" + [1, 2, 3]'
             ],
             'invalid 0^0' => [
-                'power 0^0 is not defined',
+                'Power 0^0 is not defined.',
                 'a = 0 ** 0'
             ],
             'invalid power: 0 to negative power' => [
-                'division by zero is not defined, so base cannot be zero for negative exponents',
+                'Division by zero is not defined, so base cannot be zero for negative exponents.',
                 'a = 0 ** -1'
             ],
             'invalid power: negative base with fractional exponent' => [
-                'base cannot be negative with fractional exponent',
+                'Base cannot be negative with fractional exponent.',
                 'a = (-1) ** 0.5'
             ],
             'array in algebraic variable' => [
-                'algebraic variables can only be initialized with a list of numbers',
+                'Algebraic variables can only be initialized with a list of numbers.',
                 'a = {[1:5],[20:25],[40:50:2]}'
             ],
             'string after string' => [
-                'syntax error: did you forget to put an operator?',
+                'Syntax error: did you forget to put an operator?',
                 'a = "foo" "bar"'
             ],
             'number after string' => [
-                'syntax error: did you forget to put an operator?',
+                'Syntax error: did you forget to put an operator?',
                 'a = "foo" 4'
             ],
             'string after number' => [
-                'syntax error: did you forget to put an operator?',
+                'Syntax error: did you forget to put an operator?',
                 'a = 4 "foo"'
             ],
         ];
@@ -1394,26 +1394,26 @@ class evaluator_test extends \advanced_testcase {
 
     public function provide_invalid_indices(): array {
         return [
-            ["index should be an integer, found 'foo'", 's = "string"; a = s["foo"];'],
-            ["index should be an integer, found 'foo'", 'a = [1, 2, 3, 4]; b = a["foo"];'],
-            ["index should be an integer, found '1.5'", 's = "string"; a = s[1.5];'],
-            ["index should be an integer, found '1.5'", 'a = [1, 2, 3, 4]; b = a[1.5];'],
-            ['index out of range: 4', 'a = [1,2,3,4][4]'],
-            ['index out of range: 4', 'a = "abcd"[4]'],
-            ['syntax error: did you forget to put an operator?', 'a = 15[2]'],
-            ['index out of range: 4', 'a = "abcd"; b = a[4];'],
-            ['index out of range: 4', 'a = [1, 2, 3, 4]; b = a[4];'],
-            ['indexing is only possible with lists and strings', 'a = 15; b = a[2];'],
+            ["index should be an integer, found 'foo'.", 's = "string"; a = s["foo"];'],
+            ["index should be an integer, found 'foo'.", 'a = [1, 2, 3, 4]; b = a["foo"];'],
+            ["index should be an integer, found '1.5'.", 's = "string"; a = s[1.5];'],
+            ["index should be an integer, found '1.5'.", 'a = [1, 2, 3, 4]; b = a[1.5];'],
+            ['index 4 out of range.', 'a = [1,2,3,4][4]'],
+            ['index 4 out of range.', 'a = "abcd"[4]'],
+            ['Syntax error: did you forget to put an operator?', 'a = 15[2]'],
+            ['index 4 out of range.', 'a = "abcd"; b = a[4];'],
+            ['index 4 out of range.', 'a = [1, 2, 3, 4]; b = a[4];'],
+            ['indexing is only possible with lists and strings.', 'a = 15; b = a[2];'],
         ];
     }
 
     public function provide_other_invalid_stuff(): array {
         return [
-            ['1:7:unexpected token: ,', 'a = 15,2'],
-            ['1:9:syntax error: sets cannot be nested', 'a = {1, {2, 3}}'],
-            ['1:9:syntax error: sets cannot be used inside a list', 'a = [1, {2, 3}]'],
-            ['1:6:invalid use of unary operator: !', 'a = 1!2'],
-            ['1:6:invalid use of unary operator: ~', 'a = 1~2'],
+            ['1:7:Unexpected token: ,', 'a = 15,2'],
+            ['1:9:Syntax error: sets cannot be nested.', 'a = {1, {2, 3}}'],
+            ['1:9:Syntax error: sets cannot be used inside a list.', 'a = [1, {2, 3}]'],
+            ['1:6:Invalid use of unary operator: !.', 'a = 1!2'],
+            ['1:6:Invalid use of unary operator: ~.', 'a = 1~2'],
         ];
     }
 
@@ -1480,7 +1480,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($expression);
         } catch (Exception $e) {
-            self::assertStringContainsString('stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?', $e->getMessage());
+            self::assertStringContainsString('Stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?', $e->getMessage());
         }
         self::assertNotNull($e);
     }
@@ -1607,7 +1607,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             new evaluator(['randomvariables' => 'foo', 'variables' => '']);
         } catch (Exception $e) {
-            self::assertEquals('invalid variable context given, aborting import', $e->getMessage());
+            self::assertEquals('Invalid variable context given, aborting import.', $e->getMessage());
         }
         self::assertNotNull($e);
     }
@@ -1821,8 +1821,8 @@ class evaluator_test extends \advanced_testcase {
         yield [
             'output' => [
                 '3e4' => 3e4,
-                '3e4e4' => 'unknown variable: e4',
-                '3e4e4e4' => 'unknown variable: e4e4'
+                '3e4e4' => 'Unknown variable: e4',
+                '3e4e4e4' => 'Unknown variable: e4e4'
             ],
             'vars' => '',
         ];
@@ -1830,14 +1830,14 @@ class evaluator_test extends \advanced_testcase {
             'output' => [
                 '3e4' => 3e4,
                 '3e4e4' => 3e4 * 9,
-                '3e4e4e4' => 'unknown variable: e4e4'
+                '3e4e4e4' => 'Unknown variable: e4e4'
             ],
             'vars' => 'e4 = 9;',
         ];
         yield [
             'output' => [
                 '3e4' => 3e4,
-                '3e4e4' => 'unknown variable: e4',
+                '3e4e4' => 'Unknown variable: e4',
                 '3e4e4e4' => 3e4 * 9,
             ],
             'vars' => 'e4e4 = 9;',
@@ -2100,7 +2100,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($statement);
         } catch (Exception $e) {
-            self::assertStringEndsWith('evaluation error: empty stack - did you pass enough arguments for the function or operator?', $e->getMessage());
+            self::assertStringEndsWith('Evaluation error: empty stack - did you pass enough arguments for the function or operator?', $e->getMessage());
         }
         self::assertNotNull($e);
 
@@ -2112,7 +2112,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($statement);
         } catch (Exception $e) {
-            self::assertStringEndsWith("undefined constant: 'foo'", $e->getMessage());
+            self::assertStringEndsWith("Undefined constant: 'foo'", $e->getMessage());
         }
         self::assertNotNull($e);
 
@@ -2122,14 +2122,14 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate(['foo', 'bar']);
         } catch (Exception $e) {
-            self::assertStringEndsWith('bad invocation of evaluate_the_right_thing()', $e->getMessage());
+            self::assertStringEndsWith('Bad invocation of evaluate_the_right_thing().', $e->getMessage());
         }
         self::assertNotNull($e);
         $e = null;
         try {
             $evaluator->evaluate('foo');
         } catch (Exception $e) {
-            self::assertStringEndsWith('bad invocation of evaluate()', $e->getMessage());
+            self::assertStringEndsWith('Bad invocation of evaluate().', $e->getMessage());
         }
         self::assertNotNull($e);
 
@@ -2142,7 +2142,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($statement);
         } catch (Exception $e) {
-            self::assertStringEndsWith('evaluation error: not enough arguments for ternary operator', $e->getMessage());
+            self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
 
@@ -2158,7 +2158,7 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($statement);
         } catch (Exception $e) {
-            self::assertStringEndsWith('evaluation error: not enough arguments for ternary operator', $e->getMessage());
+            self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
 

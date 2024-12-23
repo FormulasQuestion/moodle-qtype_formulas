@@ -60,8 +60,8 @@ Feature: Test editing a Formulas question
     And I set the following fields to these values:
       | Grading variables | test = 1/0; |
     And I press "id_submitbutton"
-    Then I should see "division by zero is not defined"
+    Then I should see "Division by zero is not defined."
     And I set the following fields to these values:
       | Grading variables | test = 2; |
     And I press "id_submitbutton"
-    Then I should not see "division by zero is not defined"
+    Then I should not see "Division by zero is not defined."

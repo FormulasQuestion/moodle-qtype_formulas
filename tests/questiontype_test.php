@@ -301,23 +301,23 @@ class questiontype_test extends \advanced_testcase {
                 ['globalunitpenalty' => -0.5]
             ],
             [['globalruleid' => get_string('error_ruleid', 'qtype_formulas')], ['globalruleid' => -1]],
-            [['varsrandom' => "1:2:syntax error: unexpected end of expression after '='"], ['varsrandom' => 'a=']],
-            [['varsglobal' => "1:2:syntax error: unexpected end of expression after '='"], ['varsglobal' => 'a=']],
+            [['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsrandom' => 'a=']],
+            [['varsglobal' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsglobal' => 'a=']],
             // If random *and* global vars are screwed, we should only have an error for random vars.
-            [['varsrandom' => "1:2:syntax error: unexpected end of expression after '='"], ['varsrandom' => 'a=', 'varsglobal' => 'b=']],
-            [['vars1[0]' => "1:2:syntax error: unexpected end of expression after '='"], ['vars1' => [0 => 'a=']]],
-            [['vars1[0]' => '1:4:division by zero is not defined'], ['vars1' => [0 => 'a=2/0']]],
+            [['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsrandom' => 'a=', 'varsglobal' => 'b=']],
+            [['vars1[0]' => "1:2:Syntax error: unexpected end of expression after '='."], ['vars1' => [0 => 'a=']]],
+            [['vars1[0]' => '1:4:Division by zero is not defined.'], ['vars1' => [0 => 'a=2/0']]],
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => -1]]],
-            [['answer[0]' => "1:1:syntax error: unexpected end of expression after '*'"], ['answer' => [0 => '*']]],
+            [['answer[0]' => "1:1:Syntax error: unexpected end of expression after '*'."], ['answer' => [0 => '*']]],
             [
-                ['answer[0]' => '1:1:unknown variable: c'],
+                ['answer[0]' => '1:1:Unknown variable: c'],
                 [
                     'vars1' => [0 => 'a=3; b=4'],
                     'answer' => [0 => 'c'],
                 ]
             ],
-            [['vars2[0]' => "1:4:syntax error: unexpected end of expression after '+'"], ['vars2' => [0 => 'a=3+']]],
-            [['vars2[0]' => "1:5:number expected, found 'f'"], ['vars2' => [0 => 'a=3*"f"']]],
+            [['vars2[0]' => "1:4:Syntax error: unexpected end of expression after '+'."], ['vars2' => [0 => 'a=3+']]],
+            [['vars2[0]' => "1:5:Number expected, found 'f'."], ['vars2' => [0 => 'a=3*"f"']]],
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 'foo']]],
             [
                 ['answermark[0]' => get_string('error_mark', 'qtype_formulas')],
@@ -376,21 +376,21 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [
-                ['answer[0]' => 'error in answer #1: unknown variable: x'],
+                ['answer[0]' => 'Error in answer #1: Unknown variable: x'],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"3*x"'],
                 ]
             ],
             [
-                ['answer[0]' => "error in answer #1: '' is not a valid algebraic expression"],
+                ['answer[0]' => "Error in answer #1: '' is not a valid algebraic expression."],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '""'],
                 ]
             ],
             [
-                ['answer[0]' => "1:1:algebraic variable 'x' cannot be used in this context"],
+                ['answer[0]' => "1:1:Algebraic variable 'x' cannot be used in this context."],
                 [
                     'varsglobal' => 'x={1,2,3}',
                     'answer' => [0 => 'x'],
@@ -426,7 +426,7 @@ class questiontype_test extends \advanced_testcase {
                 ]
             ],
             [
-                ['correctness[0]' => '1:2:division by zero is not defined'],
+                ['correctness[0]' => '1:2:Division by zero is not defined.'],
                 [
                     'correctness' => [0 => '1/0'],
                 ]

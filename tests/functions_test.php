@@ -195,8 +195,8 @@ class functions_test extends \advanced_testcase {
             [0, 'ncr(5, 6)'],
             [0, 'ncr(-1, 2)'],
             [0, 'ncr(3, -4)'],
-            ['ncr() expects its first argument to be an integer', 'ncr(10.5, 3)'],
-            ['ncr() expects its second argument to be an integer', 'ncr(12, 3.5)'],
+            ['ncr() expects its first argument to be an integer.', 'ncr(10.5, 3)'],
+            ['ncr() expects its second argument to be an integer.', 'ncr(12, 3.5)'],
         ];
     }
 
@@ -211,10 +211,10 @@ class functions_test extends \advanced_testcase {
             [120, 'npr(5, 4)'],
             [120, 'npr(5, 5)'],
             [0, 'npr(5, 6)'],
-            ['npr() expects its first argument to be a non-negative integer', 'npr(-1, 2)'],
-            ['npr() expects its second argument to be a non-negative integer', 'npr(3, -4)'],
-            ['npr() expects its first argument to be a non-negative integer', 'npr(10.5, 3)'],
-            ['npr() expects its second argument to be a non-negative integer', 'npr(12, 3.5)'],
+            ['npr() expects its first argument to be a non-negative integer.', 'npr(-1, 2)'],
+            ['npr() expects its second argument to be a non-negative integer.', 'npr(3, -4)'],
+            ['npr() expects its first argument to be a non-negative integer.', 'npr(10.5, 3)'],
+            ['npr() expects its second argument to be a non-negative integer.', 'npr(12, 3.5)'],
         ];
     }
 
@@ -225,9 +225,9 @@ class functions_test extends \advanced_testcase {
             [2, 'fact(2)'],
             [6, 'fact(3)'],
             [720, 'fact(6)'],
-            ['fact() expects its argument to be a non-negative integer', 'fact(-2)'],
-            ['fact() expects its argument to be a non-negative integer', 'fact(2.5)'],
-            ['cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT', 'fact(250)'],
+            ['fact() expects its argument to be a non-negative integer.', 'fact(-2)'],
+            ['fact() expects its argument to be a non-negative integer.', 'fact(2.5)'],
+            ['Cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT.', 'fact(250)'],
         ];
     }
 
@@ -242,8 +242,8 @@ class functions_test extends \advanced_testcase {
             [0.375, 'binomialpdf(3, 0.5, 1)'],
             [0.375, 'binomialpdf(3, 0.5, 2)'],
             [0.125, 'binomialpdf(3, 0.5, 3)'],
-            ['binomialpdf() expects the probability to be at least 0 and not more than 1', 'binomialpdf(10, 3, 5)'],
-            ['binomialpdf() expects the probability to be at least 0 and not more than 1', 'binomialpdf(10, -2, 5)'],
+            ['binomialpdf() expects the probability to be at least 0 and not more than 1.', 'binomialpdf(10, 3, 5)'],
+            ['binomialpdf() expects the probability to be at least 0 and not more than 1.', 'binomialpdf(10, -2, 5)'],
         ];
     }
 
@@ -259,8 +259,8 @@ class functions_test extends \advanced_testcase {
             [0.5, 'binomialcdf(3, 0.5, 1)'],
             [0.875, 'binomialcdf(3, 0.5, 2)'],
             [1, 'binomialcdf(3, 0.5, 3)'],
-            ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, 3, 5)'],
-            ['binomialcdf() expects the probability to be at least 0 and not more than 1', 'binomialcdf(10, -2, 5)'],
+            ['binomialcdf() expects the probability to be at least 0 and not more than 1.', 'binomialcdf(10, 3, 5)'],
+            ['binomialcdf() expects the probability to be at least 0 and not more than 1.', 'binomialcdf(10, -2, 5)'],
         ];
     }
 
@@ -268,12 +268,12 @@ class functions_test extends \advanced_testcase {
         return [
             [[0, 1, 2, 3], 'a=inv([0, 1, 2, 3]);'],
             [[1, 2, 3, 4], 'a=inv([1, 2, 3, 4]);'],
-            ["invalid number of arguments for function 'inv': 0 given", 'a=inv();'],
-            ["invalid number of arguments for function 'inv': 2 given", 'a=inv([1, 2, 3], [4, 5, 6]);'],
-            ['inv() expects a list', 'a=inv(1);'],
-            ['when using inv(), the numbers in the list must be consecutive', 'a=inv([1, 4, 0]);'],
-            ['when using inv(), the smallest number in the list must be 0 or 1', 'a=inv([2, 3, 4]);'],
-            ['when using inv(), the list must not contain the same number multiple times', 'a=inv([0, 1, 2, 1]);'],
+            ["Invalid number of arguments for function 'inv': 0 given.", 'a=inv();'],
+            ["Invalid number of arguments for function 'inv': 2 given.", 'a=inv([1, 2, 3], [4, 5, 6]);'],
+            ['inv() expects a list.', 'a=inv(1);'],
+            ['When using inv(), the numbers in the list must be consecutive.', 'a=inv([1, 4, 0]);'],
+            ['When using inv(), the smallest number in the list must be 0 or 1.', 'a=inv([2, 3, 4]);'],
+            ['When using inv(), the list must not contain the same number multiple times.', 'a=inv([0, 1, 2, 1]);'],
         ];
     }
 
@@ -310,8 +310,8 @@ class functions_test extends \advanced_testcase {
             [4, 'len([1, 2, 3, 4])'],
             [4, 'len(["1", "2", "3", "4"])'],
             [2, 'len([["1", "2"], ["3", "4"]])'],
-            ["invalid number of arguments for function 'len': 0 given", 'len()'],
-            ['len() expects a list or a string', 'len(3)'],
+            ["Invalid number of arguments for function 'len': 0 given.", 'len()'],
+            ['len() expects a list or a string.', 'len(3)'],
         ];
     }
 
@@ -337,10 +337,10 @@ class functions_test extends \advanced_testcase {
             [0, 'sum([])'],
             [10, 'sum([1, 2, 3, 4])'],
             [10, 'sum(["1", "2", "3", "4"])'],
-            ["invalid number of arguments for function 'sum': 0 given", 'sum()'],
-            ['sum() expects a list of numbers', 'sum("a")'],
-            ['sum() expects a list of numbers', 'sum(3)'],
-            ['sum() expects a list of numbers', 'sum(["a", "b"])'],
+            ["Invalid number of arguments for function 'sum': 0 given.", 'sum()'],
+            ['sum() expects a list of numbers.', 'sum("a")'],
+            ['sum() expects a list of numbers.', 'sum(3)'],
+            ['sum() expects a list of numbers.', 'sum(["a", "b"])'],
         ];
     }
 
@@ -377,8 +377,8 @@ class functions_test extends \advanced_testcase {
             [3, 'gcd(-9, 12)'],
             [3, 'gcd(9, -12)'],
             [2, 'gcd(-10, -12)'],
-            ['gcd() expects its first argument to be an integer', 'gcd(1.5, 3)'],
-            ['gcd() expects its second argument to be an integer', 'gcd(9, 4.5)'],
+            ['gcd() expects its first argument to be an integer.', 'gcd(1.5, 3)'],
+            ['gcd() expects its second argument to be an integer.', 'gcd(9, 4.5)'],
         ];
     }
 
@@ -398,8 +398,8 @@ class functions_test extends \advanced_testcase {
             [36, 'lcm(-9, 12)'],
             [36, 'lcm(9, -12)'],
             [60, 'lcm(-10, -12)'],
-            ['lcm() expects its first argument to be an integer', 'lcm(1.5, 3)'],
-            ['lcm() expects its second argument to be an integer', 'lcm(9, 4.5)'],
+            ['lcm() expects its first argument to be an integer.', 'lcm(1.5, 3)'],
+            ['lcm() expects its second argument to be an integer.', 'lcm(9, 4.5)'],
         ];
     }
 
@@ -448,8 +448,8 @@ class functions_test extends \advanced_testcase {
             [['D', 'D'], 'pick(3.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"])'],
             [['A', 'A'], 'pick(10,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"])'],
             [['A', 'A'], 'pick(10.9,["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F","F"])'],
-            ['pick() expects its first argument to be a number', 'pick("r",[2,3,5,7,11])'],
-            ['when called with two arguments, pick() expects the second parameter to be a list', 'pick(2,3)'],
+            ['pick() expects its first argument to be a number.', 'pick("r",[2,3,5,7,11])'],
+            ['When called with two arguments, pick() expects the second parameter to be a list.', 'pick(2,3)'],
             // The next line was not allowed in older versions.
             [['a', 'b'], 'pick(2,[2,3],[4,5],["a","b"])'],
         ];
@@ -518,8 +518,8 @@ class functions_test extends \advanced_testcase {
             ['11', 'decbin("3")'],
             ['1010', 'decbin(10)'],
             ['1111', 'decbin(15)'],
-            ["invalid number of arguments for function 'decbin': 0 given", 'decbin()'],
-            ["invalid number of arguments for function 'decbin': 2 given", 'decbin(1, 2)'],
+            ["Invalid number of arguments for function 'decbin': 0 given.", 'decbin()'],
+            ["Invalid number of arguments for function 'decbin': 2 given.", 'decbin(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:decbin(): Argument #1 ($num) must be of type int, string given', 'decbin("a")'],
@@ -536,8 +536,8 @@ class functions_test extends \advanced_testcase {
             ['f', 'dechex(15)'],
             ['19', 'dechex(25)'],
             ['64', 'dechex(100)'],
-            ["invalid number of arguments for function 'dechex': 0 given", 'dechex()'],
-            ["invalid number of arguments for function 'dechex': 2 given", 'dechex(1, 2)'],
+            ["Invalid number of arguments for function 'dechex': 0 given.", 'dechex()'],
+            ["Invalid number of arguments for function 'dechex': 2 given.", 'dechex(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:dechex(): Argument #1 ($num) must be of type int, string given', 'dechex("a")'],
@@ -554,8 +554,8 @@ class functions_test extends \advanced_testcase {
             [10, 'bindec("1010")'],
             [15, 'bindec(1111)'],
             [15, 'bindec("1111")'],
-            ["invalid number of arguments for function 'bindec': 0 given", 'bindec()'],
-            ["invalid number of arguments for function 'bindec': 2 given", 'bindec(1, 2)'],
+            ["Invalid number of arguments for function 'bindec': 0 given.", 'bindec()'],
+            ["Invalid number of arguments for function 'bindec': 2 given.", 'bindec(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:bindec(): Argument #1 ($num) must be of type int, string given', 'bindec("a")'],
@@ -570,8 +570,8 @@ class functions_test extends \advanced_testcase {
             ['3', 'decoct("3")'],
             ['12', 'decoct(10)'],
             ['17', 'decoct(15)'],
-            ["invalid number of arguments for function 'decoct': 0 given", 'decoct()'],
-            ["invalid number of arguments for function 'decoct': 2 given", 'decoct(1, 2)'],
+            ["Invalid number of arguments for function 'decoct': 0 given.", 'decoct()'],
+            ["Invalid number of arguments for function 'decoct': 2 given.", 'decoct(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:decoct(): Argument #1 ($num) must be of type int, string given', 'decoct("a")'],
@@ -589,8 +589,8 @@ class functions_test extends \advanced_testcase {
             [10, 'octdec("12")'],
             [15, 'octdec(17)'],
             [15, 'octdec("17")'],
-            ["invalid number of arguments for function 'octdec': 0 given", 'octdec()'],
-            ["invalid number of arguments for function 'octdec': 2 given", 'octdec(1, 2)'],
+            ["Invalid number of arguments for function 'octdec': 0 given.", 'octdec()'],
+            ["Invalid number of arguments for function 'octdec': 2 given.", 'octdec(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
             // ['1:1:octdec(): Argument #1 ($num) must be of type int, string given', 'octdec("a")'],
@@ -607,8 +607,8 @@ class functions_test extends \advanced_testcase {
             [63, 'hexdec("3f")'],
             [18, 'hexdec("12")'],
             [18, 'hexdec(12)'],
-            ["invalid number of arguments for function 'hexdec': 0 given", 'hexdec()'],
-            ["invalid number of arguments for function 'hexdec': 2 given", 'hexdec(1, 2)'],
+            ["Invalid number of arguments for function 'hexdec': 0 given.", 'hexdec()'],
+            ["Invalid number of arguments for function 'hexdec': 2 given.", 'hexdec(1, 2)'],
         ];
     }
 
@@ -616,10 +616,10 @@ class functions_test extends \advanced_testcase {
         return [
             ['1011', 'base_convert("11", 10, 2)'],
             ['3', 'base_convert("11", 2, 10)'],
-            ["invalid number of arguments for function 'base_convert': 0 given", 'base_convert()'],
-            ["invalid number of arguments for function 'base_convert': 1 given", 'base_convert(1)'],
-            ["invalid number of arguments for function 'base_convert': 2 given", 'base_convert(1, 2)'],
-            ["invalid number of arguments for function 'base_convert': 4 given", 'base_convert(1, 2, 3, 4)'],
+            ["Invalid number of arguments for function 'base_convert': 0 given.", 'base_convert()'],
+            ["Invalid number of arguments for function 'base_convert': 1 given.", 'base_convert(1)'],
+            ["Invalid number of arguments for function 'base_convert': 2 given.", 'base_convert(1, 2)'],
+            ["Invalid number of arguments for function 'base_convert': 4 given.", 'base_convert(1, 2, 3, 4)'],
         ];
     }
 
@@ -899,11 +899,11 @@ class functions_test extends \advanced_testcase {
 
     public function provide_sort(): array {
         return [
-            ['sort() expects its first argument to be a list', 'sort(5, [1,2,3])'],
-            ['sort() expects its first argument to be a list', 'sort("a", [1,2,3])'],
-            ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], 2)'],
-            ['when calling sort() with two arguments, they must both be lists', 'sort([1,2,3], "a")'],
-            ['when calling sort() with two lists, they must have the same size', 'sort([1,2,3], [1,2])'],
+            ['sort() expects its first argument to be a list.', 'sort(5, [1,2,3])'],
+            ['sort() expects its first argument to be a list.', 'sort("a", [1,2,3])'],
+            ['When calling sort() with two arguments, they must both be lists.', 'sort([1,2,3], 2)'],
+            ['When calling sort() with two arguments, they must both be lists.', 'sort([1,2,3], "a")'],
+            ['When calling sort() with two lists, they must have the same size.', 'sort([1,2,3], [1,2])'],
         ];
     }
 
@@ -926,12 +926,12 @@ class functions_test extends \advanced_testcase {
             ['+3x^5', 'poly("x^5", 3, "+")'],
             ['0', 'poly("x", 0)'],
             // Invalid invocation with two arguments and the first not a string...
-            ['when calling poly() with two arguments, the first must be a string or a list of strings', 'poly(1, [1, 2, 3])'],
+            ['When calling poly() with two arguments, the first must be a string or a list of strings.', 'poly(1, [1, 2, 3])'],
             // Usage of other variables as coefficients...
             ['5x+2', 'a=5; b=2; p=poly([a,b]);'],
             ['+10', 'a=5; b=2; p=poly(a*b);'],
             // Invalid usage with algebraic variable as coefficient...
-            ["algebraic variable 'a' cannot be used in this context", 'a={1,2,3}; p=poly("x", a);'],
+            ["Algebraic variable 'a' cannot be used in this context.", 'a={1,2,3}; p=poly("x", a);'],
             // Usage of other functions in the list of coefficients...
             ['x^{2}+3x+1', 'poly("x", [1, sqrt(3**2), 1])'],
             // With a variable and a list of numbers, with or without a separator...
@@ -1009,11 +1009,11 @@ class functions_test extends \advanced_testcase {
             // Artificially making the lengh odd; no practical use...
             ['x&& -2y&& +3z', 'poly(["x", "y", "z"], [1, -2, 3], "&& ")'],
             // Invalid invocations...
-            ["invalid number of arguments for function 'poly': 0 given", 'poly()'],
-            ['when calling poly() with one argument, it must be a number or a list of numbers', 'poly("x")'],
-            ['when calling poly() with one argument, it must be a number or a list of numbers', 'poly(["x", "y"])'],
-            ['when calling poly() with a list of strings, the second argument must be a list of numbers', 'poly(["x", "y"], 1)'],
-            ['when calling poly() with a string, the second argument must be a number or a list of numbers', 'poly("x", "y")'],
+            ["Invalid number of arguments for function 'poly': 0 given.", 'poly()'],
+            ['When calling poly() with one argument, it must be a number or a list of numbers.', 'poly("x")'],
+            ['When calling poly() with one argument, it must be a number or a list of numbers.', 'poly(["x", "y"])'],
+            ['When calling poly() with a list of strings, the second argument must be a list of numbers.', 'poly(["x", "y"], 1)'],
+            ['When calling poly() with a string, the second argument must be a number or a list of numbers.', 'poly("x", "y")'],
         ];
     }
 
@@ -1037,8 +1037,8 @@ class functions_test extends \advanced_testcase {
     public function provide_various_function_calls(): array {
         return [
             [get_config('qtype_formulas')->version, 'fqversionnumber()'],
-            ['str() expects a scalar argument, e. g. a number', 's = str([])'],
-            ['str() expects a scalar argument, e. g. a number', 's = str([1, 2, 3])'],
+            ['str() expects a scalar argument, e. g. a number.', 's = str([])'],
+            ['str() expects a scalar argument, e. g. a number.', 's = str([1, 2, 3])'],
         ];
     }
 
@@ -1048,13 +1048,13 @@ class functions_test extends \advanced_testcase {
             [[1, 3, 2], 'sublist([1, 2, 3], [0.0, 2.0, 1.0])'],
             [[[1, 2], "a", 1, "a"], 'sublist([1, "a", [1, 2]], [2, 1, 0, 1])'],
             [[], 'sublist([1, 2, 3], [])'],
-            ['sublist() expects its arguments to be lists', 'sublist([1, 2, 3], 3)'],
-            ['sublist() expects its arguments to be lists', 'sublist([1, 2, 3], "foo")'],
-            ['sublist() expects its arguments to be lists', 'sublist(1, [1, 2, 3])'],
-            ['sublist() expects its arguments to be lists', 'sublist("foo", [1, 2, 3])'],
-            ["sublist() expects the indices to be integers, found '1.5'", 'sublist([1, 2, 3], [1.5])'],
-            ["sublist() expects the indices to be integers, found 'foo'", 'sublist([1, 2, 3], ["foo"])'],
-            ['index 3 out of range in sublist()', 'sublist([1, 2, 3], [3])'],
+            ['sublist() expects its arguments to be lists.', 'sublist([1, 2, 3], 3)'],
+            ['sublist() expects its arguments to be lists.', 'sublist([1, 2, 3], "foo")'],
+            ['sublist() expects its arguments to be lists.', 'sublist(1, [1, 2, 3])'],
+            ['sublist() expects its arguments to be lists.', 'sublist("foo", [1, 2, 3])'],
+            ["sublist() expects the indices to be integers, found '1.5'.", 'sublist([1, 2, 3], [1.5])'],
+            ["sublist() expects the indices to be integers, found 'foo'.", 'sublist([1, 2, 3], ["foo"])'],
+            ['Index 3 out of range in sublist().', 'sublist([1, 2, 3], [3])'],
         ];
     }
 
@@ -1064,8 +1064,8 @@ class functions_test extends \advanced_testcase {
             [[4, 6], 'map("+", [1, 2], [3, 4])'],
             [[2, 10], 'map("-", [5, 6], [3, -4])'],
             [[6, 7, 8], 'map("+", [1, 2, 3], 5)'],
-            ['* expects a number', 'map("*", [[1, 2], [3, 4]], "foo")'],
-            ["* expects a number, found foo", 'map("*", ["foo", "bar"], "s")'],
+            ['* expects a number.', 'map("*", [[1, 2], [3, 4]], "foo")'],
+            ["* expects a number, found foo.", 'map("*", ["foo", "bar"], "s")'],
             [[11, 12, 13], 'map("+", 10, [1, 2, 3])'],
             [['week 1', 'week 2', 'week 3'], 'map("+", "week ", [1, 2, 3])'],
             [[1, -2], 'map("-", [-1, 2])'],
@@ -1075,18 +1075,18 @@ class functions_test extends \advanced_testcase {
             [[1, 2], 'map("abs", [-1, -2])'],
             [[5, 10, 3], 'map("max", [5, 0, 3], [3, 10, -1])'],
             [[5, 3], 'map("max", [[5, 0, 3], [1, 2, 3]])'],
-            ["invalid number of arguments for function 'map': 1 given", 'map("+")'],
-            ["invalid number of arguments for function 'map': 0 given", 'map()'],
-            ["when using map() with the unary function 'abs', only one list is accepted", 'map("abs", [-1, -2], [3, 4])'],
-            ["invalid number of arguments for function 'map': 1 given", 'map("abs")'],
-            ["invalid number of arguments for function 'map': 1 given", 'map([1, 2, 3])'],
-            ["when using map() with the binary operator '+', two arguments are expected", 'map("+", [1, 2])'],
-            ["when using map() with the binary operator '+', at least one argument must be a list", 'map("+", 3, 4)'],
-            ['when using map() with two lists, they must both have the same size', 'map("+", [1, 2, 3], [4, 5])'],
-            ["when using map() with '-', the argument must be a list", 'map("-", 2)'],
-            ["'x' is not a legal first argument for the map() function", 'map("x", [-1, -2])'],
-            ["the function 'fqversionnumber' cannot be used with map(), because it accepts no arguments", 'map("fqversionnumber", [1, 2, 3])'],
-            ["the function 'modpow' cannot be used with map(), because it expects more than two arguments", 'map("modpow", [1, 2, 3], [3, 4, 5])'],
+            ["Invalid number of arguments for function 'map': 1 given.", 'map("+")'],
+            ["Invalid number of arguments for function 'map': 0 given.", 'map()'],
+            ["When using map() with the unary function 'abs', only one list is accepted.", 'map("abs", [-1, -2], [3, 4])'],
+            ["Invalid number of arguments for function 'map': 1 given.", 'map("abs")'],
+            ["Invalid number of arguments for function 'map': 1 given.", 'map([1, 2, 3])'],
+            ["When using map() with the binary operator '+', two arguments are expected.", 'map("+", [1, 2])'],
+            ["When using map() with the binary operator '+', at least one argument must be a list.", 'map("+", 3, 4)'],
+            ['When using map() with two lists, they must both have the same size.', 'map("+", [1, 2, 3], [4, 5])'],
+            ["When using map() with '-', the argument must be a list.", 'map("-", 2)'],
+            ["'x' is not a legal first argument for the map() function.", 'map("x", [-1, -2])'],
+            ["The function 'fqversionnumber' cannot be used with map(), because it accepts no arguments.", 'map("fqversionnumber", [1, 2, 3])'],
+            ["The function 'modpow' cannot be used with map(), because it expects more than two arguments.", 'map("modpow", [1, 2, 3], [3, 4, 5])'],
         ];
     }
 
@@ -1101,13 +1101,13 @@ class functions_test extends \advanced_testcase {
             [0.5, 'fmod(5.7, 1.3)'],
             [0, 'fmod(0, 7.9)'],
             [0, 'fmod(2, 0.4)'],
-            ["invalid number of arguments for function 'fmod': 0 given", 'fmod()'],
-            ["invalid number of arguments for function 'fmod': 1 given", 'fmod(3)'],
-            ["invalid number of arguments for function 'fmod': 3 given", 'fmod(3, 2, 1)'],
-            ['fmod() expects its first argument to be a number', 'fmod("a", "b")'],
-            ['fmod() expects its second argument to be a non-zero number', 'fmod(3, "b")'],
-            ['fmod() expects its first argument to be a number', 'fmod("a", 3)'],
-            ['fmod() expects its second argument to be a non-zero number', 'fmod(4, 0)'],
+            ["Invalid number of arguments for function 'fmod': 0 given.", 'fmod()'],
+            ["Invalid number of arguments for function 'fmod': 1 given.", 'fmod(3)'],
+            ["Invalid number of arguments for function 'fmod': 3 given.", 'fmod(3, 2, 1)'],
+            ['fmod() expects its first argument to be a number.', 'fmod("a", "b")'],
+            ['fmod() expects its second argument to be a non-zero number.', 'fmod(3, "b")'],
+            ['fmod() expects its first argument to be a number.', 'fmod("a", 3)'],
+            ['fmod() expects its second argument to be a non-zero number.', 'fmod(4, 0)'],
 
             [0, 'modinv(15, 3)'],
             [0, 'modinv(5, 1)'],
@@ -1118,9 +1118,9 @@ class functions_test extends \advanced_testcase {
             [3, 'modinv(5, 7)'],
             [6, 'modinv(6, 7)'],
             [3, 'modinv(-3, 5)'],
-            ['modinv() expects its second argument to be a positive integer', 'modinv(8, -3)'],
-            ['modinv() expects its second argument to be a positive integer', 'modinv(8, 0)'],
-            ['modinv() expects its first argument to be a non-zero integer', 'modinv(0, 13)'],
+            ['modinv() expects its second argument to be a positive integer.', 'modinv(8, -3)'],
+            ['modinv() expects its second argument to be a positive integer.', 'modinv(8, 0)'],
+            ['modinv() expects its first argument to be a non-zero integer.', 'modinv(0, 13)'],
 
             [7, 'modpow(15, 300, 19)'],
             [1, 'modpow(15, 18, 19)'],

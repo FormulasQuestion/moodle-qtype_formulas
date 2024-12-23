@@ -103,71 +103,71 @@ class parser_test extends \advanced_testcase {
 
     public static function provide_paren_expressions(): Generator {
         yield [
-            "1:1:unbalanced parenthesis, '(' is never closed",
+            "1:1:Unbalanced parenthesis, '(' is never closed.",
             '(',
         ];
         yield [
-            "1:3:unbalanced parenthesis, '[' is never closed",
+            "1:3:Unbalanced parenthesis, '[' is never closed.",
             'a=[',
         ];
         yield [
-            "1:5:unbalanced parenthesis, '{' is never closed",
+            "1:5:Unbalanced parenthesis, '{' is never closed.",
             'var={',
         ];
         yield [
-            "1:1:unbalanced parenthesis, stray ')' found",
+            "1:1:Unbalanced parenthesis, stray ')' found.",
             ')',
         ];
         yield [
-            "1:4:unbalanced parenthesis, stray ']' found",
+            "1:4:Unbalanced parenthesis, stray ']' found.",
             'a=5]',
         ];
         yield [
-            "1:6:unbalanced parenthesis, stray '}' found",
+            "1:6:Unbalanced parenthesis, stray '}' found.",
             'var=2}',
         ];
         yield [
-            "mismatched parentheses, ']' is closing '(' from row 1 and column 4",
+            "Mismatched parentheses, ']' is closing '(' from row 1 and column 4.",
             'sin(2*x]',
         ];
         yield [
-            "mismatched parentheses, '}' is closing '(' from row 1 and column 4",
+            "Mismatched parentheses, '}' is closing '(' from row 1 and column 4.",
             'sin(2x}',
         ];
         yield [
-            "mismatched parentheses, ')' is closing '[' from row 1 and column 3",
+            "Mismatched parentheses, ')' is closing '[' from row 1 and column 3.",
             'a=[1,2)',
         ];
         yield [
-            "mismatched parentheses, '}' is closing '[' from row 1 and column 3",
+            "Mismatched parentheses, '}' is closing '[' from row 1 and column 3.",
             'a=[1,2}',
         ];
         yield [
-            "mismatched parentheses, ')' is closing '{' from row 1 and column 3",
+            "Mismatched parentheses, ')' is closing '{' from row 1 and column 3.",
             'a={1,2)',
         ];
         yield [
-            "mismatched parentheses, ']' is closing '{' from row 1 and column 3",
+            "Mismatched parentheses, ']' is closing '{' from row 1 and column 3.",
             'a={1,2]',
         ];
         yield [
-            "1:1:unbalanced parenthesis, '(' is never closed",
+            "1:1:Unbalanced parenthesis, '(' is never closed.",
             '(2*(3+4)',
         ];
         yield [
-            "1:3:unbalanced parenthesis, '[' is never closed",
+            "1:3:Unbalanced parenthesis, '[' is never closed.",
             'a=[[1,2],[3,4]',
         ];
         yield [
-            "1:5:unbalanced parenthesis, '{' is never closed",
+            "1:5:Unbalanced parenthesis, '{' is never closed.",
             'var={{1,2}',
         ];
         yield [
-            "1:5:mismatched parentheses, ')' is closing '[' from row 1 and column 3",
+            "1:5:Mismatched parentheses, ')' is closing '[' from row 1 and column 3.",
             '(a[2)]',
         ];
         yield [
-            "1:7:mismatched parentheses, ']' is closing '(' from row 1 and column 5",
+            "1:7:Mismatched parentheses, ']' is closing '(' from row 1 and column 5.",
             '[sin(2])',
         ];
     }
@@ -218,9 +218,9 @@ class parser_test extends \advanced_testcase {
 
     public function provide_impossible_things(): array {
         return [
-            ['1:99:unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
-            ['1:99:unexpected token: foo', new token(token::IDENTIFIER, 'foo', 1, 99)],
-            ['1:99:unexpected token: invalid', new token(-1, 'invalid', 1, 99)],
+            ['1:99:Unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
+            ['1:99:Unexpected token: foo', new token(token::IDENTIFIER, 'foo', 1, 99)],
+            ['1:99:Unexpected token: invalid', new token(-1, 'invalid', 1, 99)],
         ];
     }
 
