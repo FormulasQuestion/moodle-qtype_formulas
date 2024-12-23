@@ -260,10 +260,13 @@ class questiontype_test extends \advanced_testcase {
     public function provide_single_part_data_for_form_validation(): array {
         return [
             [[], []],
-            // Prefix must be allowed in model answer.
-            [[], ['answer' => [0 => '\sin(20)']]],
+            // Prefix is allowed in model answer for number, numeric, numerical formula.
+            [[], ['answertype' => [0 => qtype_formulas::ANSWER_TYPE_NUMBER], 'answer' => [0 => '\sin(20)']]],
+            [[], ['answertype' => [0 => qtype_formulas::ANSWER_TYPE_NUMERIC], 'answer' => [0 => '\sin(20)']]],
+            [[], ['answertype' => [0 => qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA], 'answer' => [0 => '\sin(20)']]],
+            // Prefix is not allowed in model answer for algebraic formula.
             [
-                [],
+                ['answer[0]' => get_string('error_model_answer_prefix', 'qtype_formulas')],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'correctness' => [0 => '_err < 0.01'],

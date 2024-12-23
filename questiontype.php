@@ -1156,12 +1156,14 @@ class qtype_formulas extends question_type {
             $dummypart->evaluator = $partevaluator;
             try {
                 // As we are using the model answers, we must set the third parameter to TRUE, because
-                // there might be a PREFIX operator.
+                // there might be a PREFIX operator. This is important for answer type algebraic formula.
                 $dummypart->add_special_variables($dummypart->get_evaluated_answers(), 1, true);
             } catch (Throwable $e) {
-                // This should not happen, because we have thouroughly validated the model answers, but
-                // if there was a problem, it's probably best to output the error near the answer field.
+                // If the last step failed (e. g. because the model answer to an algebraic formula question
+                // contained a PREFIX operator), we attach the message to the answer field and stop
+                // further validation steps.
                 $errors["answer[$i]"] = $e->getMessage();
+                continue;
             }
 
             // Validate grading variables.

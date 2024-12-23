@@ -181,6 +181,7 @@ $string['error_len_argument'] = 'len() expects a list or a string';
 $string['error_map_unknown'] = 'evaluation error in map(): {$a}';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
 $string['error_model_answer_no_content'] = 'Invalid answer: the model answer contains no evaluable symbols.';
+$string['error_model_answer_prefix'] = 'Invalid answer: Please do not use the prefix operator \ in model answers with this answer type.';
 $string['error_no_answer'] = 'At least one answer is required.';
 $string['error_notindexable'] = 'evaluation error: indexing is only possible with lists and strings';
 $string['error_number_for_numeric_answertypes'] = 'Invalid answer format: this answer type expects one number or a list of numbers.';

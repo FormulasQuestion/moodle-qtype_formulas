@@ -1369,7 +1369,13 @@ class qtype_formulas_part {
         if ($isalgebraic) {
             // Students are not allowed to use the PREFIX operator. If they do, we drop out
             // here. Throwing an exception will make sure the grading function awards zero points.
-            if (!$formodelanswer && self::contains_prefix_operator($studentanswers)) {
+            // Also, we disallow usage of the PREFIX in an algebraic formula's model answer, because
+            // that would lead to bad feedback (showing the student a "correct" answer that they cannot
+            // type in). In this case, we use a different error message.
+            if (self::contains_prefix_operator($studentanswers)) {
+                if ($formodelanswer) {
+                    throw new Exception(get_string('error_model_answer_prefix', 'qtype_formulas'));
+                }
                 throw new Exception(get_string('error_prefix', 'qtype_formulas'));
             }
             $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);

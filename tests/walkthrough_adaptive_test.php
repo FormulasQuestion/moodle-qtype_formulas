@@ -681,6 +681,8 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $q->varsglobal = 'sin = 3; x = {-5:5}';
         $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
         $q->parts[0]->correctness = '_err < 0.01';
+        // Using the PREFIX operator in the model answer is not possible via the edit form,
+        // but for the unit test, the usual checks are bypassed.
         $q->parts[0]->answer = '"\sin(x)"';
 
         // The student's answer must now be wrong, because the teacher used the sine function,
@@ -695,6 +697,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => 'tan(x)*cos(x)', '-submit' => 1]);
         $this->check_current_mark(1);
 
+        // The student is not allowed to use the PREFIX operator, so their answer must be wrong now.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->process_submission(['0_0' => '\sin(x)', '-submit' => 1]);
         $this->check_current_mark(0);
