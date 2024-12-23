@@ -170,7 +170,7 @@ class parser {
      * @return void
      * @throws Exception
      */
-    private function die(string $message, ?token $offendingtoken = null): never {
+    protected function die(string $message, ?token $offendingtoken = null): never {
         if (is_null($offendingtoken)) {
             $offendingtoken = $this->tokenlist[$this->position];
         }
@@ -184,8 +184,13 @@ class parser {
      * @param mixed $value the value to look for
      * @return bool
      */
-    public function has_token_in_tokenlist(int $type, $value): bool {
+    public function has_token_in_tokenlist(int $type, $value = null): bool {
         foreach ($this->tokenlist as $token) {
+            // If the value does not matter, we also set the token's value to null.
+            if ($value === null) {
+                $token->value = null;
+            }
+
             // We do not use strict comparison for the value.
             if ($token->type === $type && $token->value == $value) {
                 return true;
@@ -233,9 +238,11 @@ class parser {
             $nextvalue = $nexttoken->value;
 
             // If the current token is a PREFIX and the next one is an IDENTIFIER, we will consider
-            // that one as a FUNCTION. Otherwise, this is a syntax error.
+            // that one as a FUNCTION. If the next token has already been classified as a function,
+            // there is nothing to do; this can happen if we are coming from an answer_parser subclass.
+            // Otherwise, this is a syntax error.
             if ($type === token::PREFIX) {
-                if ($nexttype === token::IDENTIFIER) {
+                if ($nexttype === token::IDENTIFIER || $nexttype === token::FUNCTION) {
                     $nexttype = ($nexttoken->type = token::FUNCTION);
                 } else {
                     $this->die(get_string('error_prefix', 'qtype_formulas'));

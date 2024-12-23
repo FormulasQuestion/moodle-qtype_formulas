@@ -1167,14 +1167,4 @@ class question_test extends \basic_testcase {
             self::assertEquals($input[$i], $classification[$i]->response);
         }
     }
-
-    // TODO
-    public function test_student_using_overwritten_function() {
-        // something like this:
-        // global vars: sin = 3, x = {-5:5}
-        // answer numerical formula \sin(20) (prefix needed)
-        // student answers sin(20) should be incorrect (because sin == 3 for student)
-        // answer algebraic formula "3x"
-        // student answers "sin(x)" should be correct, is read as sin*(x)
-    }
 }

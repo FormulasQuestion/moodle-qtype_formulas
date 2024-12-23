@@ -29,11 +29,12 @@
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 
 // FIXME-TODO: tests using constants (e.g. is_acceptable_answer)
-// FIXME-TODO: tests using variable "sin=1" defined in random/global/local; used in global/local/grading/answer
+// FIXME: renderer should have a test to verify that local/grading vars can be used in part feedback
 
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\evaluator;
+use qtype_formulas\local\lexer;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\parser;
 use qtype_formulas\local\token;
@@ -1264,7 +1265,7 @@ class qtype_formulas_part {
         // Check whether the part uses the algebraic answer type.
         $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
 
-        $parser = new parser($this->answer);
+        $parser = new parser($this->answer, $this->evaluator->export_variable_list());
         $result = $this->evaluator->evaluate($parser->get_statements())[0];
 
         // The $result will now be a token with its value being either a literal (string, number)
@@ -1306,6 +1307,7 @@ class qtype_formulas_part {
             if (preg_match('/^\"[^\"]+\"$/', $formula)) {
                 continue;
             }
+
             $formula = '"' . $formula . '"';
         }
         // In case we later write to $formula, this would alter the last entry of the $formulas
@@ -1313,6 +1315,26 @@ class qtype_formulas_part {
         unset($formula);
 
         return $formulas;
+    }
+
+    /**
+     * Check whether algebraic formulas contain a PREFIX operator.
+     *
+     * @param array $formulas the formulas to check
+     * @return bool
+     */
+    private static function contains_prefix_operator(array $formulas): bool {
+        foreach ($formulas as $formula) {
+            $lexer = new lexer($formula);
+
+            foreach ($lexer->get_tokens() as $token) {
+                if ($token->type === token::PREFIX) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1326,9 +1348,10 @@ class qtype_formulas_part {
      *
      * @param array $studentanswers the student's response
      * @param float $conversionfactor unit conversion factor, if needed (1 otherwise)
+     * @param bool $formodelanswer whether we are doing this to test model answers, i. e. PREFIX operator is allowed
      * @return void
      */
-    public function add_special_variables(array $studentanswers, float $conversionfactor): void {
+    public function add_special_variables(array $studentanswers, float $conversionfactor, bool $formodelanswer = false): void {
         $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
 
         // First, we set _a to the array of model answers. We can use the
@@ -1344,6 +1367,11 @@ class qtype_formulas_part {
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
         // individual answers.
         if ($isalgebraic) {
+            // Students are not allowed to use the PREFIX operator. If they do, we drop out
+            // here. Throwing an exception will make sure the grading function awards zero points.
+            if (!$formodelanswer && self::contains_prefix_operator($studentanswers)) {
+                throw new Exception(get_string('error_prefix', 'qtype_formulas'));
+            }
             $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);
         }
         $ssqstudentanswer = 0;
@@ -1428,7 +1456,7 @@ class qtype_formulas_part {
         // formulas, we must wrap the answers in quotes before we move on. Also, we reset the conversion
         // factor, because it is not needed for algebraic answers.
         if ($isalgebraic) {
-            $response = self::wrap_algebraic_formulas_in_quotes($response);
+                $response = self::wrap_algebraic_formulas_in_quotes($response);
             $conversionfactor = 1;
         }
 
@@ -1437,7 +1465,10 @@ class qtype_formulas_part {
         $evaluatedresponse = [];
         foreach ($response as $answer) {
             try {
-                $parser = new answer_parser($answer);
+                // Using the known variables upon initialisation allows the teacher to "block"
+                // certain built-in functions for the student by overwriting them, e. g. by
+                // defining "sin = 1" in the global variables.
+                $parser = new answer_parser($answer, $this->evaluator->export_variable_list());
 
                 // Check whether the answer is valid for the given answer type. If it is not,
                 // we just throw an exception to make use of the catch block. Note that if the
@@ -1527,8 +1558,9 @@ class qtype_formulas_part {
     /**
      * Return an array containing the correct answers for this question part. If $forfeedback
      * is set to true, multiple choice answers are translated from their list index to their
-     * value (e.g. the text) to provide feedback to the student. Otherwise, the function returns
-     * the values as they are needed to obtain full mark at this question.
+     * value (e.g. the text) to provide feedback to the student. Also, quotes are stripped
+     * from algebraic formulas. Otherwise, the function returns the values as they are needed
+     * to obtain full mark at this question.
      *
      * @param bool $forfeedback whether we request correct answers for student feedback
      * @return array list of correct answers
@@ -1541,6 +1573,11 @@ class qtype_formulas_part {
         // in "i_". Combined fields are only possible for parts with one signle answer.
         if ($this->has_combined_unit_field()) {
             return ["{$this->partindex}_" => trim($answers[0] . ' ' . $this->postunit)];
+        }
+
+        // Strip quotes around algebraic formulas, if the answers are used for feedback.
+        if ($forfeedback && $this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            $answers = str_replace('"', '', $answers);
         }
 
         // Otherwise, we build an array with all answers, according to our naming scheme.

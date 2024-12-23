@@ -260,6 +260,17 @@ class questiontype_test extends \advanced_testcase {
     public function provide_single_part_data_for_form_validation(): array {
         return [
             [[], []],
+            // Prefix must be allowed in model answer.
+            [[], ['answer' => [0 => '\sin(20)']]],
+            [
+                [],
+                [
+                    'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+                    'correctness' => [0 => '_err < 0.01'],
+                    'answer' => [0 => '"\sin(20)"'],
+                ]
+            ],
+            [[], ['answer' => [0 => '\sin(20)']]],
             [[], ['answer' => [0 => '[1, 2]']]],
             [[], ['answer' => [0 => '0']]],
             [[], ['vars2' => [0 => 'x=_0'], 'correctness' => [0 => 'x']]],

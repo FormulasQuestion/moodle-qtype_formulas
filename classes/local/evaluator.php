@@ -566,8 +566,10 @@ class evaluator {
     public function calculate_algebraic_expression(string $expression): token {
         // Parse the expression. It will parsed by the answer parser, i. e. the ^ operator
         // will mean exponentiation rather than XOR, as per the documented behaviour.
+        // As the expression might contain a PREFIX operator (from a model answer), we
+        // set the fourth parameter of the constructor to TRUE.
         // Note that this step will also throw an error, if the expression is empty.
-        $parser = new answer_parser($expression, $this->export_variable_list());
+        $parser = new answer_parser($expression, $this->export_variable_list(), true, true);
         if (!$parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)) {
             throw new Exception(get_string('error_invalidalgebraic', 'qtype_formulas', $expression));
         }
@@ -773,6 +775,7 @@ class evaluator {
                     // PHP_FLOAT_MAX. By choosing PHP_FLOAT_MAX rather than INF, we make sure
                     // that the result is still a float.
                     $cannotevaluate = true;
+                    // Note: index is $i, because every $j step adds to the $i-th difference.
                     $result[$i] = PHP_FLOAT_MAX;
                     break;
                 }

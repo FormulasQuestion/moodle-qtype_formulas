@@ -25,6 +25,8 @@
 
 namespace qtype_formulas;
 
+// FIXME: add test for PREFIX in number, numerical, numerical formula answers -> should not be accepted (should be accepted algebraic formula)
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;

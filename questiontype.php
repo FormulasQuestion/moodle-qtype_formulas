@@ -1039,13 +1039,14 @@ class qtype_formulas extends question_type {
         // Check local variables, model answers and grading criterion for each part.
         foreach ($parts as $i => $part) {
             $partevaluator = clone $evaluator;
+            $knownvars = $partevaluator->export_variable_list();
 
             // Validate the local variables for this part. In case of an error, skip the
             // rest of the part, because there might be dependencies.
             $partparser = null;
             if (!empty($part->vars1)) {
                 try {
-                    $partparser = new parser($part->vars1, $globalparser->export_known_variables());
+                    $partparser = new parser($part->vars1, $knownvars);
                     $partevaluator->evaluate($partparser->get_statements());
                 } catch (Exception $e) {
                     $errors["vars1[$i]"] = $e->getMessage();
@@ -1053,7 +1054,6 @@ class qtype_formulas extends question_type {
                 }
             }
 
-            $knownvars = [];
             // If there were no local variables, the partparser has not been initialized yet.
             // Otherwise, we export its known variables.
             if ($partparser !== null) {
@@ -1067,8 +1067,9 @@ class qtype_formulas extends question_type {
             // this part, because there are dependencies.
             try {
                 // If (and only if) the answer is algebraic, the answer parser should
-                // interpret ^ as **.
-                $answerparser = new answer_parser($part->answer, $knownvars, $isalgebraic);
+                // interpret ^ as **. The last argument tells the answer parser that we are
+                // checking model answers, i. e. the prefix operator is allowed.
+                $answerparser = new answer_parser($part->answer, $knownvars, $isalgebraic, true);
                 // If the user enters a comment sign in the model answer, it is not technically empty,
                 // but it will be parsed as an empty expression. We catch this here and make use of
                 // the catch block to pass an error message.
@@ -1154,7 +1155,9 @@ class qtype_formulas extends question_type {
             $dummypart->answer = $part->answer;
             $dummypart->evaluator = $partevaluator;
             try {
-                $dummypart->add_special_variables($dummypart->get_evaluated_answers(), 1);
+                // As we are using the model answers, we must set the third parameter to TRUE, because
+                // there might be a PREFIX operator.
+                $dummypart->add_special_variables($dummypart->get_evaluated_answers(), 1, true);
             } catch (Throwable $e) {
                 // This should not happen, because we have thouroughly validated the model answers, but
                 // if there was a problem, it's probably best to output the error near the answer field.
