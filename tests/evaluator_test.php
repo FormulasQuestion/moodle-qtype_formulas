@@ -1414,6 +1414,7 @@ class evaluator_test extends \advanced_testcase {
             ['1:9:Syntax error: sets cannot be used inside a list.', 'a = [1, {2, 3}]'],
             ['1:6:Invalid use of unary operator: !.', 'a = 1!2'],
             ['1:6:Invalid use of unary operator: ~.', 'a = 1~2'],
+            ['1:8:Unknown error while applying operator **, result was (positive or negative) infinity or not a number (NAN).', 'a = 99 ** 999'],
         ];
     }
 
@@ -1691,10 +1692,13 @@ class evaluator_test extends \advanced_testcase {
         $input = 'a=[1,2,3]; a[1]=5;';
         $input = 'sqrt("foo-2")';
         $input = 'is_nan(0.5)';
+        $input = '99**999';
+        $input = '1/sin(0)';
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
         $result = $evaluator->evaluate($statements);
+        var_dump($result);
         return;
                 //$input = "a = [1,2,3];\nb = 1 \n     + 3\n# comment\n     + a";
 

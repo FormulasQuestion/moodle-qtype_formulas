@@ -1395,7 +1395,7 @@ class functions {
         // One last safety check: numeric results must not be NAN or INF.
         // This should never be triggered.
         if (is_numeric($output) && (is_nan($output) || is_infinite($output))) {
-            self::die('error_evaluation_unknown');
+            self::die('error_evaluation_unknown_nan_inf', $op);
         }
         return $output;
     }
