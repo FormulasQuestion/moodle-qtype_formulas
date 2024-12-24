@@ -65,7 +65,8 @@ class functions_test extends \advanced_testcase {
             array(ncr(5, 2), 10),
             array(ncr(5, 3), 10),
             array(ncr(5, 4), 5),
-            array(ncr(5, 5), 1)
+            array(ncr(5, 5), 1),
+            array(ncr(23, 3), 1771)
         );
         foreach ($testcases as $case) {
             $this->assertEquals($case[1], $case[0]);
