@@ -1141,11 +1141,13 @@ class functions {
         if (($n - $r) < $r) {
             return self::ncr($n, ($n - $r));
         }
-        $return = 1;
-        for ($i = 0; $i < $r; $i++) {
-            $return *= ($n - $i) / ($r - $i);
+        $numerator = 1;
+        $denominator = 1;
+        for ($i = 1; $i <= $r; $i++) {
+            $numerator *= ($n - $i + 1);
+            $denominator *= $i;
         }
-        return $return;
+        return intdiv($numerator, $denominator);
     }
 
     /**

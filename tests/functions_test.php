@@ -195,6 +195,7 @@ class functions_test extends \advanced_testcase {
             [0, 'ncr(5, 6)'],
             [0, 'ncr(-1, 2)'],
             [0, 'ncr(3, -4)'],
+            [1771, 'ncr(23, 3)'],
             ['ncr() expects its first argument to be an integer.', 'ncr(10.5, 3)'],
             ['ncr() expects its second argument to be an integer.', 'ncr(12, 3.5)'],
         ];
