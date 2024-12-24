@@ -33,7 +33,7 @@ Feature: Test setting the grading criterion in different modes
       | name                       | test2          |
       | correctness_simple_type[0] | Absolute error |
       | correctness_simple_comp[0] | ==             |
-      | correctness_simple_tol[0]  | 0.02           |
+      | correctness_simple_tol[0]  | 0              |
     And I press "id_submitbutton"
     And I wait until the page is ready
     And I am on the "test2" "core_question > edit" page logged in as teacher1
@@ -41,7 +41,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_mode[0] | 1              |
       | correctness_simple_type[0] | Absolute error |
       | correctness_simple_comp[0] | ==             |
-      | correctness_simple_tol[0]  | 0.02           |
+      | correctness_simple_tol[0]  | 0              |
 
   Scenario: Check visibility of error message for invalid simple grading criterion
     When I follow "Part 1"
@@ -54,7 +54,7 @@ Feature: Test setting the grading criterion in different modes
       | correctness_simple_tol[0]  | 1                 |
     And I press "id_updatebutton"
     And I wait until the page is ready
-    Then I should see "Variable '_relerr' has not been defined"
+    Then I should see "Relative error (_relerr) cannot be used with answer type algebraic formula."
     And the following fields match these values:
       | correctness_simple_mode[0] | 0 |
 
@@ -69,14 +69,14 @@ Feature: Test setting the grading criterion in different modes
       | correctness[0] |       |
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "The grading criterion must be evaluated to a single number."
+    Then I should see "The grading criterion must not be empty."
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be enabled
     When I set the field "Grading criterion*" to "a"
     And I press "id_submitbutton"
     And I wait until the page is ready
-    Then I should see "Try evaluation error! Variable 'a' has not been defined."
+    Then I should see "Unknown variable: a"
     And the following fields match these values:
       | correctness_simple_mode[0] |  |
     And the "Simplified mode" "checkbox" should be disabled

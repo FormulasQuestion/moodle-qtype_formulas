@@ -27,7 +27,8 @@ use qtype_formulas\unit_conversion_rules;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/question/type/edit_question_form.php');
+require_once($CFG->dirroot . '/question/type/edit_question_form.php');
+require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
 
 /**
  * coodinate question type editing form definition.
@@ -66,7 +67,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->addHelpButton('varsglobal', 'varsglobal', 'qtype_formulas');
         $mform->insertElementBefore($mform->createElement('header', 'mainq', get_string('mainq', 'qtype_formulas'),
             ''), 'questiontext');
-        $numberingoptions = question_bank::get_qtype('multichoice')->get_numbering_styles();
+        $numberingoptions = qtype_multichoice::get_numbering_styles();
         $mform->addElement('select', 'answernumbering',
                 get_string('answernumbering', 'qtype_multichoice'), $numberingoptions);
         $mform->setDefault('answernumbering', get_config('qtype_multichoice', 'answernumbering'));
@@ -85,7 +86,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->setDefault('globalunitpenalty', $config->defaultunitpenalty);
         $mform->setType('globalunitpenalty', PARAM_FLOAT);
 
-        $conversionrules = new unit_conversion_rules;
+        $conversionrules = new unit_conversion_rules();
         $allrules = $conversionrules->allrules();
         foreach ($allrules as $id => $entry) {
             $defaultrulechoice[$id] = $entry[0];
@@ -152,7 +153,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated[] = $mform->createElement('text', 'answer', get_string('answer', 'qtype_formulas'),
             array('size' => 80));
         $repeatedoptions['answer']['helpbutton'] = array('answer', 'qtype_formulas');
-        $repeatedoptions['answer']['type'] = PARAM_RAW;
+        $repeatedoptions['answer']['type'] = PARAM_RAW_TRIMMED;
         // Whether the question has multiple answers.
         $repeated[] = $mform->createElement(
             'advcheckbox',
@@ -202,7 +203,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['correctness']['hideif'] = array('correctness_simple_mode', 'checked');
         $repeatedoptions['correctness']['default'] = $config->defaultcorrectness;
         $repeatedoptions['correctness']['helpbutton'] = array('correctness', 'qtype_formulas');
-        $repeatedoptions['correctness']['type'] = PARAM_RAW;
+        $repeatedoptions['correctness']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['correctness_simple']['hideif'] = array('correctness_simple_mode', 'notchecked');
         $repeatedoptions['correctness_simple']['helpbutton'] = array('correctness', 'qtype_formulas');
         $repeatedoptions['correctness_simple_tol']['type'] = PARAM_FLOAT;
@@ -211,17 +212,20 @@ class qtype_formulas_edit_form extends question_edit_form {
         // Part's local variables.
         $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
+        $repeatedoptions['vars1']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars1']['helpbutton'] = array('vars1', 'qtype_formulas');
         $repeatedoptions['vars1']['advanced'] = true;
         // Part's grading variables.
         $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
+        $repeatedoptions['vars2']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars2']['helpbutton'] = array('vars2', 'qtype_formulas');
         $repeatedoptions['vars2']['advanced'] = true;
         // Part's other rules.
         $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
             array('cols' => 80, 'rows' => 1));
         $repeatedoptions['otherrule']['helpbutton'] = array('otherrule', 'qtype_formulas');
+        $repeatedoptions['otherrule']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['otherrule']['advanced'] = true;
         // Part's feedback.
         $repeated[] = $mform->createElement('editor', 'feedback', get_string('feedback', 'qtype_formulas'),
@@ -267,8 +271,11 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
                 $repeatedoptions, $answersoption);
 
+        // If we are editing an existing question and the user inadvertently cleared all parts,
+        // we still want to show the fields for one part in the form. If we are creating a new
+        // question, we show $minoptions part(s), the default is 3.
         if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
+            $repeatsatstart = max(1, count($this->question->options->$answersoption));
         } else {
             $repeatsatstart = $minoptions;
         }
@@ -289,7 +296,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         if (isset($question->options)) {
             $defaultvalues = array();
             if (count($question->options->answers)) {
-                $tags = question_bank::get_qtype($question->qtype)->part_tags();
+                $tags = qtype_formulas::PART_BASIC_FIELDS;
                 foreach ($question->options->answers as $key => $answer) {
 
                     foreach ($tags as $tag) {
@@ -327,6 +334,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         }
         return $question;
     }
+
     /**
      * Validating the data returning from the form.
      *
@@ -336,7 +344,8 @@ class qtype_formulas_edit_form extends question_edit_form {
         $errors = parent::validation($fromform, $files);
         // Use the validation defined in the question type, check by instantiating one variable set.
         $data = (object)$fromform;
-        $instantiationresult = question_bank::get_qtype($this->qtype())->validate($data);
+        $qtype = new qtype_formulas();
+        $instantiationresult = $qtype->validate($data);
         if (isset($instantiationresult->errors)) {
             $errors = array_merge($errors, $instantiationresult->errors);
         }

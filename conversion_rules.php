@@ -58,6 +58,9 @@ H: k m u n p;
     }
 
     public function entry($n) {
+        if (!isset($this->basicunitconversionrule[$n])) {
+            return null;
+        }
         return $this->basicunitconversionrule[$n];
     }
 

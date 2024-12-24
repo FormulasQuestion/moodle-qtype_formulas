@@ -15,26 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the formulas question type.
+ * expression or statement for qtype_formulas parser
  *
  * @package    qtype_formulas
- * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace qtype_formulas\local;
 
-$plugin->component = 'qtype_formulas';
-$plugin->version = 2024100701;
+class expression {
+    /** @var array the expression or statement in RPN notation */
+    public array $body = [];
 
-$plugin->cron      = 0;
-$plugin->requires  = 2019111803;
-$plugin->dependencies = array(
-    'qbehaviour_adaptive' => 2015111600,
-    'qbehaviour_adaptivemultipart' => 2014092500,
-    'qtype_multichoice' => 2015111600,
-);
-$plugin->supported = [39, 405];
-$plugin->release = '5.3.4.post0 for Moodle 3.9+';
-
-$plugin->maturity = MATURITY_STABLE;
+    public function __construct(array $body) {
+        $this->body = $body;
+    }
+}

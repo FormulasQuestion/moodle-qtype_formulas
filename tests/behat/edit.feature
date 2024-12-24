@@ -1,4 +1,4 @@
-@qtype @qtype_formulas
+@qtype @qtype_formulas @javascript
 Feature: Test editing a Formulas question
     As a teacher
     In order to be able to update my Formulas question
@@ -41,7 +41,7 @@ Feature: Test editing a Formulas question
       | behaviour | immediatefeedback |
     And I press "id_saverestart"
     And I press "Check"
-    And I should see "Please put an answer in each input field."
+    And I should see "All input fields are empty."
     And I press "Start again"
     And I set the field "Answer for part 1" to "1"
     And I set the field "Answer for part 2" to "6"
@@ -60,8 +60,8 @@ Feature: Test editing a Formulas question
     And I set the following fields to these values:
       | Grading variables | test = 1/0; |
     And I press "id_submitbutton"
-    Then I should see "Try evaluation error! 1: Some expressions cannot be evaluated numerically."
+    Then I should see "Division by zero is not defined."
     And I set the following fields to these values:
       | Grading variables | test = 2; |
     And I press "id_submitbutton"
-    Then I should not see "Try evaluation error! 1: Some expressions cannot be evaluated numerically."
+    Then I should not see "Division by zero is not defined."
