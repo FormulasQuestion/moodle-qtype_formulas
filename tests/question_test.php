@@ -175,7 +175,7 @@ class question_test extends \basic_testcase {
             } else {
                 $checkresult = $question->check_file_access($qa, $options, $component, $area, $args, false);
             }
-            self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+            self::assertFalse($checkresult);
         } catch (\Exception $e) {
             self::assertStringContainsString($message, $e->getMessage());
         }
