@@ -1844,7 +1844,7 @@ class evaluator_test extends \advanced_testcase {
 
     public static function provide_inputs_for_exponential_versus_e(): Generator {
         yield [
-            'output' => [
+            'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 'Unknown variable: e4',
                 '3e4e4e4' => 'Unknown variable: e4e4'
@@ -1852,7 +1852,7 @@ class evaluator_test extends \advanced_testcase {
             'vars' => '',
         ];
         yield [
-            'output' => [
+            'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 3e4 * 9,
                 '3e4e4e4' => 'Unknown variable: e4e4'
@@ -1860,7 +1860,7 @@ class evaluator_test extends \advanced_testcase {
             'vars' => 'e4 = 9;',
         ];
         yield [
-            'output' => [
+            'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 'Unknown variable: e4',
                 '3e4e4e4' => 3e4 * 9,
@@ -1868,7 +1868,7 @@ class evaluator_test extends \advanced_testcase {
             'vars' => 'e4e4 = 9;',
         ];
         yield [
-            'output' => [
+            'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 3e4 * 17,
                 '3e4e4e4' => 3e4 * 9,
@@ -1880,9 +1880,9 @@ class evaluator_test extends \advanced_testcase {
     /**
      * @dataProvider provide_inputs_for_exponential_versus_e
      */
-    public function test_exponential_versus_variable_e_precedence($expected, $varcontext): void {
+    public function test_exponential_versus_variable_e_precedence($expected, $vars): void {
         // First step: prepare evaluator with the desired variable context.
-        $parser = new parser($varcontext);
+        $parser = new parser($vars);
         $evaluator = new evaluator();
         $evaluator->evaluate($parser->get_statements());
 

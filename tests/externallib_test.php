@@ -185,7 +185,12 @@ class externallib_test extends \externallib_advanced_testcase {
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_local_vars_returns(), $returnvalue);
 
         self::assertEquals($expected['source'], $returnvalue['source']);
-        self::assertStringEndsWith($expected['message'], $returnvalue['message']);
+        // As from PHP Unit 11.5, assertStringEndsWith() cannot be used to check for empty suffix anymore.
+        if ($expected['message'] === '') {
+            self::assertEmpty($returnvalue['message']);
+        } else {
+            self::assertStringEndsWith($expected['message'], $returnvalue['message']);
+        }
     }
 
     public static function provide_question_texts(): array {

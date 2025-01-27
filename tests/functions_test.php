@@ -47,7 +47,7 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 class functions_test extends \advanced_testcase {
 
-    public function provide_cases_for_assure_numeric(): array {
+    public static function provide_cases_for_assure_numeric(): array {
         $message = 'error message';
 
         return [
@@ -898,7 +898,7 @@ class functions_test extends \advanced_testcase {
         self::assertEquals($expected, $error === null);
     }
 
-    public function provide_sort(): array {
+    public static function provide_sort(): array {
         return [
             ['sort() expects its first argument to be a list.', 'sort(5, [1,2,3])'],
             ['sort() expects its first argument to be a list.', 'sort("a", [1,2,3])'],
@@ -908,7 +908,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_poly_inputs(): array {
+    public static function provide_poly_inputs(): array {
         return [
             // With just a number...
             ['+5', 'poly(5)'],
@@ -1035,7 +1035,7 @@ class functions_test extends \advanced_testcase {
         self::assertEquals($expected, end($result)->value);
     }
 
-    public function provide_various_function_calls(): array {
+    public static function provide_various_function_calls(): array {
         return [
             [get_config('qtype_formulas')->version, 'fqversionnumber()'],
             ['str() expects a scalar argument, e. g. a number.', 's = str([])'],
@@ -1043,7 +1043,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_sublist(): array {
+    public static function provide_sublist(): array {
         return [
             [[1, 1, 1, 2, 3, 2, 1, 3], 'sublist([1, 2, 3], [0, 0, 0, 1, 2, 1, 0, 2])'],
             [[1, 3, 2], 'sublist([1, 2, 3], [0.0, 2.0, 1.0])'],
@@ -1059,7 +1059,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_map(): array {
+    public static function provide_map(): array {
         return [
             [[1, 0, 1, 0], 'map("==", [1, 2, 1, 3], [1, 1, 1, 1])'],
             [[4, 6], 'map("+", [1, 2], [3, 4])'],
@@ -1091,7 +1091,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_modular_function_calls(): array {
+    public static function provide_modular_function_calls(): array {
         return [
             [15, 'fmod(35,20)'],
             [5, 'fmod(-35, 20)'],
@@ -1139,7 +1139,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_join_calls(): array {
+    public static function provide_join_calls(): array {
         return [
             ["ab", 'join("", "a", "b")'],
             ["a-b", 'join("-", "a", "b")'],
