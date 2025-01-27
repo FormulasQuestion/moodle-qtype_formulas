@@ -41,7 +41,7 @@ class externallib_test extends \externallib_advanced_testcase {
         $this->resetAfterTest(true);
     }
 
-    public function provide_random_global_vars(): array {
+    public static function provide_random_global_vars(): array {
         return [
             [
                 ['source' => '', 'message' => ''],
@@ -106,7 +106,7 @@ class externallib_test extends \externallib_advanced_testcase {
         self::assertStringEndsWith($expected['message'], $returnvalue['message']);
     }
 
-    public function provide_random_global_local_vars(): array {
+    public static function provide_random_global_local_vars(): array {
         return [
             [
                 ['source' => '', 'message' => ''],
@@ -188,7 +188,7 @@ class externallib_test extends \externallib_advanced_testcase {
         self::assertStringEndsWith($expected['message'], $returnvalue['message']);
     }
 
-    public function provide_question_texts(): array {
+    public static function provide_question_texts(): array {
         return [
             [
                 ['question' => '', 'parts' => []],
@@ -260,7 +260,7 @@ class externallib_test extends \externallib_advanced_testcase {
         }
     }
 
-    public function provide_instantiation_data(): array {
+    public static function provide_instantiation_data(): array {
         return [
             [
                 ['status' => 'ok', 'data' => [[

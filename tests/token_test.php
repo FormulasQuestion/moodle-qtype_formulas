@@ -37,7 +37,7 @@ class token_test extends \advanced_testcase {
         self::assertEquals($expected, $s);
     }
 
-    public function provide_tokens(): array {
+    public static function provide_tokens(): array {
         $one = new token(token::NUMBER, 1);
         $two = new token(token::NUMBER, 2);
         $three = new token(token::NUMBER, 3);
@@ -82,7 +82,7 @@ class token_test extends \advanced_testcase {
         self::assertEquals($expected, token::wrap($value, $type));
     }
 
-    public function provide_tokens_to_wrap(): array {
+    public static function provide_tokens_to_wrap(): array {
         $one = new token(token::NUMBER, 1);
         $two = new token(token::NUMBER, 2);
         $three = new token(token::NUMBER, 3);

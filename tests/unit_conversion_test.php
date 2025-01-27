@@ -66,7 +66,7 @@ class unit_conversion_test extends \advanced_testcase {
         }
     }
 
-    public function provide_numbers_and_units(): array {
+    public static function provide_numbers_and_units(): array {
         return [
             'length 1' => ['100 m', ['0.1 km', '10000 cm', '1000 dm', '100000 mm']],
             'length 2' => ['1 mm', ['1000 um', '1000000 nm', '0.001 m', '0.1 cm']],

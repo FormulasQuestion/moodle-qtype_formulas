@@ -460,7 +460,7 @@ EOF;
         }
     }
 
-    public function provide_identifiers(): array {
+    public static function provide_identifiers(): array {
         return [
             ['abc_', 'abc_'],
             ['a1', 'a1'],
@@ -472,7 +472,7 @@ EOF;
         ];
     }
 
-    public function provide_parens(): array {
+    public static function provide_parens(): array {
         return [
             ['(', '('],
             ['[', '['],
@@ -487,7 +487,7 @@ EOF;
         ];
     }
 
-    public function provide_operators(): array {
+    public static function provide_operators(): array {
         return [
             ['+', '+'],
             ['+', '+*'],
@@ -541,7 +541,7 @@ EOF;
         ];
     }
 
-    public function provide_valid_strings(): array {
+    public static function provide_valid_strings(): array {
         return [
             ['foo', "'foo'"],
             ['foo', '"foo"'],
@@ -572,7 +572,7 @@ EOF;
         ];
     }
 
-    public function provide_numbers(): array {
+    public static function provide_numbers(): array {
         return [
             [123, "\n123"],
             [123, "\n\n123"],
@@ -621,7 +621,7 @@ EOF;
         self::assertEquals($expected, $tokens[0]->value);
     }
 
-    public function provide_invalid_strings(): array {
+    public static function provide_invalid_strings(): array {
         return [
             ['1:4:Unterminated string, started at row 1, column 1.', '"foo'],
             ['1:4:Unterminated string, started at row 1, column 1.', "'foo"],

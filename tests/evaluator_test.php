@@ -48,7 +48,7 @@ class evaluator_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
     }
 
-    public function provide_invalid_diff(): array {
+    public static function provide_invalid_diff(): array {
         return [
             ['The first argument of diff() must be a list.', 'diff("", "");'],
             ['The second argument of diff() must be a list.', 'diff([1,2,3], 1);'],
@@ -93,7 +93,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertEquals(9, $result->value);
     }
 
-    public function provide_boolean_and_logical(): array {
+    public static function provide_boolean_and_logical(): array {
         return [
             [1, '(0 == 0) || (1 == 1)'],
             [1, '(1 == 1) || (0 == 1)'],
@@ -110,7 +110,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_for_loops(): array {
+    public static function provide_for_loops(): array {
         return [
             'one statement' => [45, 'res = 0; for (i:[1:10]) res = res + i'],
             'one statement with list' => [32, 'res = 0; for (i:[1, 2, 3, 5:9]) res = res + i'],
@@ -153,7 +153,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, $content, 1e-12);
     }
 
-    public function provide_sets(): array {
+    public static function provide_sets(): array {
         return [
             'basic' => [
                 ['a' => new variable('a', [1, 2, 3, 4, 5], variable::ALGEBRAIC)],
@@ -186,7 +186,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_arrays(): array {
+    public static function provide_arrays(): array {
         return [
             'basic' => [[1, 2, 3, 4, 5], '[1,2,3,4,5]'],
             'range without step' => [[1, 2, 3, 4, 5, 6, 7, 8, 9], '[1:10]'],
@@ -218,7 +218,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_ternary_expressions(): array {
+    public static function provide_ternary_expressions(): array {
         return [
             'basic true' => [2, '1 < 5 ? 2 : 3'],
             'basic false' => [3, '1 == 5 ? 2 : 3'],
@@ -245,7 +245,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_expressions_with_functions(): array {
+    public static function provide_expressions_with_functions(): array {
         return [
             'one argument, built-in' => [5, 'floor(5.3)'],
             'one argument, custom' => [5040, 'fact(7)'],
@@ -259,7 +259,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_simple_expressions(): array {
+    public static function provide_simple_expressions(): array {
         return [
             'order of operations in power, 1' => [-16, '-4 ** 2'],
             'order of operations in power, 2' => [16, '(-4) ** 2'],
@@ -304,7 +304,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     // TODO: reorder those tests later; some are unit tests for the functions and should go there
-    public function provide_valid_assignments(): array {
+    public static function provide_valid_assignments(): array {
         return [
             'one number' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
@@ -836,7 +836,7 @@ class evaluator_test extends \advanced_testcase {
 
     }
 
-    public function provide_random_variables(): array {
+    public static function provide_random_variables(): array {
         return [
             'three numbers' => [
                 ['name' => 'x', 'count' => 3, 'min' => 1, 'max' => 3, 'shuffle' => false],
@@ -1076,7 +1076,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertEquals($expected, $output);
     }
 
-    public function provide_invalid_random_vars(): array {
+    public static function provide_invalid_random_vars(): array {
         return [
             ['Evaluation error: range from 10 to 1 with step 1 will be empty.', 'a = {10:1:1}'],
             ['Setting individual list elements is not supported for random variables.', 'a[1] = {1,2,3}'],
@@ -1174,7 +1174,7 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
-    public function provide_invalid_bitwise_stuff(): array {
+    public static function provide_invalid_bitwise_stuff(): array {
         return [
             ['Bit shift operator should only be used with integers.', '4.5 << 3'],
             ['Bit shift operator should only be used with integers.', '4.5 >> 3'],
@@ -1191,7 +1191,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_invalid_for_loops(): array {
+    public static function provide_invalid_for_loops(): array {
         return [
             ['Syntax error: ( expected after for.', 'for a'],
             ['Syntax error: : expected.', 'for (a)'],
@@ -1200,7 +1200,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_invalid_ranges(): array {
+    public static function provide_invalid_ranges(): array {
         return [
             ['Syntax error: step size of a range cannot be zero.', 'a = [1:5:0]'],
             ['Syntax error: start and end of range must not be equal.', 'a = [5:5]'],
@@ -1209,7 +1209,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_invalid_colon(): array {
+    public static function provide_invalid_colon(): array {
         return [
             ['Syntax error: invalid use of range separator \':\'.', 'a = (:5)'],
             ['Syntax error: invalid use of range separator \':\'.', 'a = {5:}'],
@@ -1224,7 +1224,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_invalid_assignments(): array {
+    public static function provide_invalid_assignments(): array {
         return [
             'assign list of strings to algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
@@ -1409,7 +1409,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_invalid_indices(): array {
+    public static function provide_invalid_indices(): array {
         return [
             ["index should be an integer, found 'foo'.", 's = "string"; a = s["foo"];'],
             ["index should be an integer, found 'foo'.", 'a = [1, 2, 3, 4]; b = a["foo"];'],
@@ -1424,7 +1424,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_other_invalid_stuff(): array {
+    public static function provide_other_invalid_stuff(): array {
         return [
             ['1:7:Unexpected token: ,', 'a = 15,2'],
             ['1:9:Syntax error: sets cannot be nested.', 'a = {1, {2, 3}}'],
@@ -1470,7 +1470,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, $result->value, 1e-8);
     }
 
-    public function provide_general_expressions(): array {
+    public static function provide_general_expressions(): array {
         return [
             [-0.35473297204849, 'sin(4) + exp(cos(4+5))'],
 
@@ -1516,7 +1516,7 @@ class evaluator_test extends \advanced_testcase {
         self::assertEquals($expected[1], $unit);
     }
 
-    public function provide_numbers_and_units(): array {
+    public static function provide_numbers_and_units(): array {
         return [
             'missing unit' => [['123', ''], '123'],
             'missing number' => [['', 'm/s'], 'm/s'],
@@ -1762,7 +1762,7 @@ class evaluator_test extends \advanced_testcase {
         // print_r($parser->statements);
     }
 
-    public function provide_numbers(): array {
+    public static function provide_numbers(): array {
         return [
             [3, '3'],
             [3, '3.'],
@@ -1796,7 +1796,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     // FIXME-TODO: add more cases
-    public function provide_numeric_answers(): array {
+    public static function provide_numeric_answers(): array {
         return [
             [60, '3 4 5'],
             [3.004, '3+10*4/10^4'],
@@ -1807,7 +1807,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_numerical_formulas(): array {
+    public static function provide_numerical_formulas(): array {
         return [
             [3.1e-10, '3.1e-10'],
             [-3, '- 3'],
@@ -1842,7 +1842,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_inputs_for_exponential_versus_e(): Generator {
+    public static function provide_inputs_for_exponential_versus_e(): Generator {
         yield [
             'output' => [
                 '3e4' => 3e4,
@@ -1909,7 +1909,7 @@ class evaluator_test extends \advanced_testcase {
         }
     }
 
-    public function provide_algebraic_formulas(): array {
+    public static function provide_algebraic_formulas(): array {
         return [
             [true, 'sin(a)-a+exp(b)'],
             [true, '- 3'],

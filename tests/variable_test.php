@@ -37,7 +37,7 @@ class variable_test extends \advanced_testcase {
         self::assertEquals($expected, $s);
     }
 
-    public function provide_variables(): array {
+    public static function provide_variables(): array {
         return [
             ['1', new variable('x', 1, variable::NUMERIC)],
             ['1', new variable('x', 1.0, variable::NUMERIC)],

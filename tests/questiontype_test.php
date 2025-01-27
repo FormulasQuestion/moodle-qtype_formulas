@@ -182,7 +182,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
-    public function provide_multipart_data_for_form_validation(): array {
+    public static function provide_multipart_data_for_form_validation(): array {
         return [
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 0]]],
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => '']]],
@@ -257,7 +257,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals(count($expected) === 0, $form->is_validated());
     }
 
-    public function provide_single_part_data_for_form_validation(): array {
+    public static function provide_single_part_data_for_form_validation(): array {
         return [
             [[], []],
             // Prefix is allowed in model answer for number, numeric, numerical formula.
@@ -523,7 +523,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals(count($expected) === 0, $form->is_validated());
     }
 
-    public function provide_answers_for_numbox_test(): array {
+    public static function provide_answers_for_numbox_test(): array {
         return [
             [1, '5'],
             [3, 'a'],
@@ -651,7 +651,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(0, $options->answers);
     }
 
-    public function provide_fileareas_for_deletion_and_moving(): array {
+    public static function provide_fileareas_for_deletion_and_moving(): array {
         return [
             ['subqtext', 'answersubqtext'],
             ['feedback', 'answerfeedback'],
@@ -720,7 +720,7 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(0, $fs->get_area_files($questioncat2->contextid, 'qtype_formulas', $areaname));
     }
 
-    public function provide_question_names(): array {
+    public static function provide_question_names(): array {
         return [
             ['testsinglenum'],
             ['testsinglenumunit'],
@@ -848,7 +848,7 @@ class questiontype_test extends \advanced_testcase {
         }
     }
 
-    public function provide_import_filenames(): array {
+    public static function provide_import_filenames(): array {
         global $CFG;
 
         return [

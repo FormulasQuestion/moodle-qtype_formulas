@@ -81,7 +81,7 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
-    public function provide_assignments(): array {
+    public static function provide_assignments(): array {
         return [
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
             'arithmetic expression with ternary in parens' => [
@@ -194,7 +194,7 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
-    public function provide_sets(): array {
+    public static function provide_sets(): array {
         return [
             'basic' => ['{,1,2,3,4,5,%%setbuild', '{1,2,3,4,5}'],
             'range without step' => ['{,1,10,2,%%rangebuild,%%setbuild', '{1:10}'],
@@ -216,7 +216,7 @@ class parser_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_impossible_things(): array {
+    public static function provide_impossible_things(): array {
         return [
             ['1:99:Unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
             ['1:99:Unexpected token: foo', new token(token::IDENTIFIER, 'foo', 1, 99)],

@@ -143,7 +143,7 @@ class functions_test extends \advanced_testcase {
         self::assertEquals(gettype($expected), gettype($result));
     }
 
-    public function provide_normcdf(): array {
+    public static function provide_normcdf(): array {
         return [
             [0.841344746068543, 'normcdf(12, 5, 7)'],
             [0.990184671371355, 'normcdf(135, 100, 15)'],
@@ -152,7 +152,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_stdnormcdf(): array {
+    public static function provide_stdnormcdf(): array {
         return [
             [2.866515718791946e-7, 'stdnormcdf(-5)'],
             [0.00134989803163009452665, 'stdnormcdf(-3)'],
@@ -170,7 +170,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_stdnormpdf(): array {
+    public static function provide_stdnormpdf(): array {
         return [
             [0.398942280401432677939946, 'stdnormpdf(0)'],
             [0.241970724519143349797830, 'stdnormpdf(1)'],
@@ -182,7 +182,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_ncr(): array {
+    public static function provide_ncr(): array {
         return [
             [1, 'ncr(0, 0)'],
             [0, 'ncr(1, 5)'],
@@ -201,7 +201,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_npr(): array {
+    public static function provide_npr(): array {
         return [
             [1, 'npr(0, 0)'],
             [0, 'npr(1, 5)'],
@@ -219,7 +219,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_fact(): array {
+    public static function provide_fact(): array {
         return [
             [1, 'fact(0)'],
             [1, 'fact(1)'],
@@ -232,7 +232,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_binomialpdf(): array {
+    public static function provide_binomialpdf(): array {
         return [
             [0, 'binomialpdf(1, 0, 1)'],
             [1, 'binomialpdf(1, 0, 0)'],
@@ -248,7 +248,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_binomialcdf(): array {
+    public static function provide_binomialcdf(): array {
         return [
             [1, 'binomialcdf(1, 0, 1)'],
             [1, 'binomialcdf(1, 0, 0)'],
@@ -265,7 +265,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_inv(): array {
+    public static function provide_inv(): array {
         return [
             [[0, 1, 2, 3], 'a=inv([0, 1, 2, 3]);'],
             [[1, 2, 3, 4], 'a=inv([1, 2, 3, 4]);'],
@@ -303,7 +303,7 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
-    public function provide_len_inputs(): array {
+    public static function provide_len_inputs(): array {
         return [
             [0, 'len([])'],
             [1, 'len([[]])'],
@@ -333,7 +333,7 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
-    public function provide_sum_inputs(): array {
+    public static function provide_sum_inputs(): array {
         return [
             [0, 'sum([])'],
             [10, 'sum([1, 2, 3, 4])'],
@@ -362,7 +362,7 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
-    public function provide_gcd_inputs(): array {
+    public static function provide_gcd_inputs(): array {
         return [
             [0, 'gcd(0, 0)'],
             [13, 'gcd(13, 13)'],
@@ -383,7 +383,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_lcm_inputs(): array {
+    public static function provide_lcm_inputs(): array {
         return [
             [0, 'lcm(0, 0)'],
             [13, 'lcm(13, 13)'],
@@ -423,7 +423,7 @@ class functions_test extends \advanced_testcase {
     }
 
 
-    public function provide_pick_inputs(): array {
+    public static function provide_pick_inputs(): array {
         return [
             [3, 'pick(3,[0,1,2,3,4,5])'],
             [3, 'pick(3.9,[0,1,2,3,4,5])'],
@@ -479,7 +479,7 @@ class functions_test extends \advanced_testcase {
         }
     }
 
-    public function provide_sigfig_expressions(): array {
+    public static function provide_sigfig_expressions(): array {
         return [
             ['0.01', 'sigfig(.012345, 1)'],
             ['0.02', 'sigfig(.019, 1)'],
@@ -511,7 +511,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_decbin_calls(): array {
+    public static function provide_decbin_calls(): array {
         return [
             ['1', 'decbin(1)'],
             ['0', 'decbin(0)'],
@@ -527,7 +527,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_dechex_calls(): array {
+    public static function provide_dechex_calls(): array {
         return [
             ['1', 'dechex(1)'],
             ['0', 'dechex(0)'],
@@ -545,7 +545,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_bindec_calls(): array {
+    public static function provide_bindec_calls(): array {
         return [
             [1, 'bindec(1)'],
             [0, 'bindec(0)'],
@@ -563,7 +563,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_decoct_calls(): array {
+    public static function provide_decoct_calls(): array {
         return [
             ['1', 'decoct(1)'],
             ['0', 'decoct(0)'],
@@ -580,7 +580,7 @@ class functions_test extends \advanced_testcase {
 
     }
 
-    public function provide_octdec_calls(): array {
+    public static function provide_octdec_calls(): array {
         return [
             [1, 'octdec(1)'],
             [0, 'octdec(0)'],
@@ -598,7 +598,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_hexdec_calls(): array {
+    public static function provide_hexdec_calls(): array {
         return [
             [1, 'hexdec("1")'],
             [0, 'hexdec("0")'],
@@ -613,7 +613,7 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_base_convert_calls(): array {
+    public static function provide_base_convert_calls(): array {
         return [
             ['1011', 'base_convert("11", 10, 2)'],
             ['3', 'base_convert("11", 2, 10)'],

@@ -908,7 +908,7 @@ class question_test extends \basic_testcase {
         self::assertTrue($q->is_gradable_response(array('0_0' => 5)));
     }
 
-    public function provide_answer_box_texts(): array {
+    public static function provide_answer_box_texts(): array {
         return [
             [[], ''],
             [[], '{ _0}'],
@@ -965,7 +965,7 @@ class question_test extends \basic_testcase {
         self::assertSame($expected, $boxes);
     }
 
-    public function provide_answer_box_texts_invalid(): array {
+    public static function provide_answer_box_texts_invalid(): array {
         return [
             ['_0', '{_0} {_0}'],
             ['_0', '{_0:foo} {_0}'],
@@ -989,7 +989,7 @@ class question_test extends \basic_testcase {
         self::assertNotNull($e);
     }
 
-    public function provide_responses_for_question_without_unit(): array {
+    public static function provide_responses_for_question_without_unit(): array {
         return [
             [['id' => null, 'fraction' => null], ''],
             [['id' => 'right', 'fraction' => 1], '5'],
@@ -1033,7 +1033,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($input, $classification->response);
     }
 
-    public function provide_responses_for_combined_question(): array {
+    public static function provide_responses_for_combined_question(): array {
         return [
             [['id' => null, 'fraction' => null], ''],
             [['id' => 'right', 'fraction' => 1], '5 m/s'],
@@ -1078,7 +1078,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($input, $classification->response);
     }
 
-    public function provide_responses_for_question_with_separate_unit(): array {
+    public static function provide_responses_for_question_with_separate_unit(): array {
         return [
             [['id' => null, 'fraction' => null], ['', '']],
             [['id' => 'right', 'fraction' => 1], ['5', 'm/s']],
@@ -1125,7 +1125,7 @@ class question_test extends \basic_testcase {
         self::assertEquals($summary, $classification->response);
     }
 
-    public function provide_responses_for_threepart_question(): array {
+    public static function provide_responses_for_threepart_question(): array {
         return [
             [['id' => [null, null, null], 'fraction' => [null, null, null]], ['', '', '']],
             [['id' => ['right', 'right', 'right'], 'fraction' => [1, 1, 1]], ['5', '6', '7']],

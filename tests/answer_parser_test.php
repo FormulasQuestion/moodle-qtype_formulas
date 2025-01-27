@@ -36,7 +36,7 @@ use qtype_formulas\local\answer_parser;
 
 class answer_parser_test extends \advanced_testcase {
 
-    public function provide_numbers(): array {
+    public static function provide_numbers(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, '3'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '3.'],
@@ -76,7 +76,7 @@ class answer_parser_test extends \advanced_testcase {
         ];
     }
 
-    public function provide_algebraic_formulas(): array {
+    public static function provide_algebraic_formulas(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8 4.e8 .5e8'],
