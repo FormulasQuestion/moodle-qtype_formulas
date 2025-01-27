@@ -127,6 +127,10 @@ class token {
         // possible, throw an error.
         if ($type == self::STRING) {
             try {
+                // We do not allow implicit conversion of array to string.
+                if (gettype($value) === 'array') {
+                    throw new Exception(get_string('error_wrapstring', 'qtype_formulas'));
+                }
                 $value = strval($value);
             } catch (Exception $e) {
                 throw new Exception(get_string('error_wrapstring', 'qtype_formulas'));
