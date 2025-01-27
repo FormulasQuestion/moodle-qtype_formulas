@@ -146,18 +146,35 @@ class question_test extends \basic_testcase {
         $component = 'question';
         $area = 'hint';
         $args = [$question->hints[0]->id, 'foo.jpg'];
+        // The function check_hint_file_access() in core tries to access the hint's id property, without
+        // checking whether that hint is NULL. This will trigger a PHP warning that we capture.
         if (PHP_MAJOR_VERSION >= 8) {
             $message = 'Attempt to read property "id" on null';
         } else {
             $message = "Trying to get property 'id' of non-object";
         }
+        $phpunitversion = \PHPUnit\Runner\Version::id();
         try {
-            self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
+            // In PHPUnit 11.5, the warning will not automatically trigger a PHPUnit exception, but it will
+            // be logged. So we suppress the warning for that version.
+            if (substr($phpunitversion, 0, 4) == '11.5') {
+                $checkresult = @$question->check_file_access($qa, $options, $component, $area, $args, false);
+            } else {
+                $checkresult = $question->check_file_access($qa, $options, $component, $area, $args, false);
+            }
+            self::assertFalse($checkresult);
         } catch (\Exception $e) {
             self::assertStringContainsString($message, $e->getMessage());
         }
         $args = [$question->hints[1]->id, 'foo.jpg'];
         try {
+            // In PHPUnit 11.5, the warning will not automatically trigger a PHPUnit exception, but it will
+            // be logged. So we suppress the warning for that version.
+            if (substr($phpunitversion, 0, 4) == '11.5') {
+                $checkresult = @$question->check_file_access($qa, $options, $component, $area, $args, false);
+            } else {
+                $checkresult = $question->check_file_access($qa, $options, $component, $area, $args, false);
+            }
             self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
         } catch (\Exception $e) {
             self::assertStringContainsString($message, $e->getMessage());
