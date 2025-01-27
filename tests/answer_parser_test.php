@@ -25,8 +25,6 @@
 
 namespace qtype_formulas;
 
-// FIXME: add test for PREFIX in number, numerical, numerical formula answers -> should not be accepted (should be accepted algebraic formula)
-
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -68,6 +66,8 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
+            [false, '\sin(3)'],
+            [false, '\ 3'],
             [false, '3; 4'],
             [false, '[1,2]'],
             [false, '{1,2}'],
@@ -142,6 +142,8 @@ class answer_parser_test extends \advanced_testcase {
             [false, '3&&4'],
             [false, '3!'],
             [false, '@'],
+            [false, '\ 4'],
+            [false, '\sin(pi)'],
         ];
     }
 

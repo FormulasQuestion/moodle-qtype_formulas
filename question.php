@@ -26,9 +26,9 @@
 
 
 
+
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 
-// FIXME-TODO: tests using constants (e.g. is_acceptable_answer)
 // FIXME: renderer should have a test to verify that local/grading vars can be used in part feedback
 
 use qtype_formulas\answer_unit_conversion;
@@ -1237,7 +1237,6 @@ class qtype_formulas_part {
                 return false;
             }
         }
-
 
         // Still here? Then no fields were filled.
         return true;

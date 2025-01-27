@@ -27,6 +27,7 @@ namespace qtype_formulas;
 
 use Exception;
 use Generator;
+use Throwable;
 use qtype_formulas;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\random_parser;
@@ -36,9 +37,8 @@ use qtype_formulas\local\expression;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
-// TODO: test with global vars depending on instantiated random vars
-// TODO: test visibility and last-value property of loop's iterator variable
-// TODO: test calculate_algebraic_expression with empty string
+// FIXME-TODO: test with global vars depending on instantiated random vars
+// FIXME-TODO: test calculate_algebraic_expression with empty string
 
 class evaluator_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {
@@ -75,6 +75,22 @@ class evaluator_test extends \advanced_testcase {
         $evaluator = new evaluator();
         $result = $evaluator->evaluate($statements);
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
+    }
+
+    public function test_scope_of_for_loop_iterator(): void {
+        $input = 'for (a:[1:10]) { x=1;} res=a;';
+        $parser = new parser($input);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $e = null;
+        try {
+            $evaluator->evaluate($statements);
+            $result = $evaluator->export_single_variable('res');
+        } catch (Throwable $e) {
+            $result = null;
+        }
+        self::assertNull($e);
+        self::assertEquals(9, $result->value);
     }
 
     public function provide_boolean_and_logical(): array {
@@ -224,7 +240,8 @@ class evaluator_test extends \advanced_testcase {
             'ternary in true part without parens' => [4, '1==1 ? 1 == 2 ? 3 : 4 : 5'],
             'ternary in both parts without parens, 1' => [4, '1==1 ? 1 > 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
             'ternary in both parts without parens, 2' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
-            // TODO: test with variables
+            'ternary with vars' => [1, 'a=1; b=2; a < b ? a : b'],
+            'ternary with arrays' => [2, 'a=[1,2,3]; b=2; a[0] > a[b] ? a[1] : a[0] * a[1]'],
         ];
     }
 
@@ -876,7 +893,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    // TODO: test for "randomness"
+    // FIXME-TODO: test for "randomness"
 
     /**
      * @dataProvider provide_random_variables
@@ -896,7 +913,7 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->instantiate_random_variables();
         self::assertContains($key, $evaluator->export_variable_list());
 
-        // TODO: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
+        // FIXME-TODO: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
 
         // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
         // value is within those boundaries.
@@ -913,7 +930,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_reinstantiation_of_random_variables(): void {
-        // TODO
+        // FIXME-TODO
         $randomvars = 'a={1:10}';
         $randomparser = new random_parser($randomvars);
         $evaluator = new evaluator();
@@ -1614,7 +1631,7 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_basic_operations() {
-        // TODO: remove, once manual testing is not needed anymore
+        // FIXME-TODO: remove, once manual testing is not needed anymore
         self::assertTrue(true);
         return;
         //$parser = new parser('1 >= 5 ? "a" : "b"');
@@ -1778,11 +1795,13 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    // TODO: add more cases
+    // FIXME-TODO: add more cases
     public function provide_numeric_answers(): array {
         return [
             [60, '3 4 5'],
             [3.004, '3+10*4/10^4'],
+            [false, '\\'],
+            [false, '\sin(3)'],
             [false, 'sin(3)'],
             [false, '3+exp(4)'],
         ];
@@ -1818,6 +1837,8 @@ class evaluator_test extends \advanced_testcase {
             [false, '3e 10'],
             [false, '3e8e8'],
             [false, '3e8e8e8'],
+            [false, '\ 3'],
+            [false, '\sin(3)'],
         ];
     }
 
