@@ -586,8 +586,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
         $showfeedback = $options->feedback && $state->get_feedback_class() != '';
         if ($showfeedback) {
+            // Clone the part's evaluator and substitute local / grading vars first.
+            $evaluator = clone $part->evaluator;
+            $feedbacktext = $evaluator->substitute_variables_in_text($part->feedback);
+
             $feedbacktext = $question->format_text(
-              $part->feedback,
+              $feedbacktext,
               FORMAT_HTML,
               $qa,
               'qtype_formulas',
@@ -631,6 +635,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $field = 'part' . $feedbackclass . 'fb';
             $format = 'part' . $feedbackclass . 'fbformat';
             if ($part->$field) {
+                // Clone the part's evaluator and substitute local / grading vars first.
+                $evaluator = clone $part->evaluator;
+                $part->$field = $evaluator->substitute_variables_in_text($part->$field);
                 $feedback = $question->format_text($part->$field, $part->$format,
                         $qa, 'qtype_formulas', $field, $part->id, false);
             }

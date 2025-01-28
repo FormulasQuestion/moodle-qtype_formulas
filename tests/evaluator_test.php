@@ -1670,6 +1670,7 @@ class evaluator_test extends \advanced_testcase {
     public function test_basic_operations() {
         // FIXME-TODO: remove, once manual testing is not needed anymore
         self::assertTrue(true);
+        return;
         //$parser = new parser('1 >= 5 ? "a" : "b"');
         //$evaluator = new evaluator();
         //$evaluator->evaluate($parser->get_statements());

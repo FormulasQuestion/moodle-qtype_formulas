@@ -29,8 +29,6 @@
 
 // TODO: rewrite input checker script for student answer and teacher's model answer / unit
 
-// FIXME: renderer should have a test to verify that local/grading vars can be used in part feedback
-
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\evaluator;

@@ -52,6 +52,38 @@ class renderer_test extends walkthrough_test_base {
         return test_question_maker::make_question('formulas', $which);
     }
 
+    public function test_usage_of_local_and_grading_vars_in_feedback(): void {
+        // Create a basic question, setting global, local and grading vars, as well as
+        // a custom feedback.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->varsglobal = 'x = 1; y = 9;';
+        $q->parts[0]->vars1 = 'y = 2;';
+        $q->parts[0]->vars2 = 'z = _0';
+        $q->parts[0]->feedback = 'general {x} -- {y} -- {z}';
+        $q->parts[0]->partincorrectfb = 'incorrect {z} -- {y} -- {x}';
+        $q->parts[0]->partcorrectfb = 'correct {z} -- {y} -- {x}';
+        $q->parts[0]->partpartiallycorrectfb = 'partially correct {z} -- {y} -- {x}';
+        $q->parts[0]->unitpenalty = 0.5;
+
+        // Start attempt and submit wrong answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(array('0_' => '99', '-submit' => 1));
+        $this->check_output_contains('general 1 -- 2 -- 99');
+        $this->check_output_contains('incorrect 99 -- 2 -- 1');
+
+        // Start attempt and submit correct answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(array('0_' => '5 m/s', '-submit' => 1));
+        $this->check_output_contains('general 1 -- 2 -- 5');
+        $this->check_output_contains('correct 5 -- 2 -- 1');
+
+        // Start attempt and submit partially correct answer.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(array('0_' => '5 m', '-submit' => 1));
+        $this->check_output_contains('general 1 -- 2 -- 5');
+        $this->check_output_contains('partially correct 5 -- 2 -- 1');
+    }
+
     public function test_answer_not_unique() {
         // Create a basic question. By default, the answer is not unique.
         $q = $this->get_test_formulas_question('testsinglenum');
