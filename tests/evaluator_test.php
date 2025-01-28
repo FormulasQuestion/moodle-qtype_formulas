@@ -38,7 +38,6 @@ use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
 // FIXME-TODO: test with global vars depending on instantiated random vars
-// FIXME-TODO: test calculate_algebraic_expression with empty string
 
 class evaluator_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {
@@ -1458,6 +1457,44 @@ class evaluator_test extends \advanced_testcase {
         self::assertStringEndsWith($expected, $error);
     }
 
+    public static function provide_algebraic_expressions(): array {
+        // Note: The test function will have the algebraic variable x, set to the value 4.
+        return [
+            ["'' is not a valid algebraic expression.", ''],
+            ["'y=2' is not a valid algebraic expression.", 'y=2'],
+            ["'4==x' is not a valid algebraic expression.", '4==x'],
+            [0, '0'],
+            [2, 'sqrt(4)'],
+            [4, 'x'],
+            [16, 'x^2'],
+            [12, '3x'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_algebraic_expressions
+     */
+    public function test_calculate_algebraic_expression($expected, $input): void {
+        $error = '';
+        $result = null;
+        try {
+            $parser = new parser('x={4};');
+            $statements = $parser->get_statements();
+            $evaluator = new evaluator();
+            $evaluator->evaluate($statements);
+            $result = $evaluator->calculate_algebraic_expression($input);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+
+        if (is_string($expected)) {
+            self::assertStringEndsWith($expected, $error);
+        } else {
+            self::assertEmpty($error);
+            self::assertEquals($expected, $result->value);
+        }
+    }
+
     /**
      * @dataProvider provide_general_expressions
      */
@@ -1633,7 +1670,6 @@ class evaluator_test extends \advanced_testcase {
     public function test_basic_operations() {
         // FIXME-TODO: remove, once manual testing is not needed anymore
         self::assertTrue(true);
-        return;
         //$parser = new parser('1 >= 5 ? "a" : "b"');
         //$evaluator = new evaluator();
         //$evaluator->evaluate($parser->get_statements());
@@ -1711,6 +1747,7 @@ class evaluator_test extends \advanced_testcase {
         $input = 'is_nan(0.5)';
         $input = '99**999';
         $input = '1/sin(0)';
+        $input = 'diff([""], ["0"])';
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
