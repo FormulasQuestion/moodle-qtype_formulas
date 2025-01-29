@@ -37,8 +37,6 @@ use qtype_formulas\local\expression;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
-// FIXME-TODO: test with global vars depending on instantiated random vars
-
 class evaluator_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {
         global $CFG;
@@ -892,8 +890,6 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    // FIXME-TODO: test for "randomness"
-
     /**
      * @dataProvider provide_random_variables
      */
@@ -929,19 +925,47 @@ class evaluator_test extends \advanced_testcase {
     }
 
     public function test_reinstantiation_of_random_variables(): void {
-        // FIXME-TODO
-        $randomvars = 'a={1:10}';
+        // Setup and instantiate a random variable.
+        $randomvars = 'a={1,2,4}';
         $randomparser = new random_parser($randomvars);
         $evaluator = new evaluator();
         $evaluator->evaluate($randomparser->get_statements());
         $evaluator->instantiate_random_variables();
 
+        // Overwrite the random variable with a dependent global variable.
         $globalvars = 'a=2*a';
         $globalparser = new parser($globalvars);
         $evaluator->evaluate($globalparser->get_statements());
 
-        $evaluator->instantiate_random_variables();
-        $evaluator->evaluate($globalparser->get_statements());
+        // Variable a must be between 2, 4 or 8, as float.
+        $a = $evaluator->export_single_variable('a')->value;
+        self::assertContains($a, [2.0, 4.0, 8.0]);
+
+        // Now re-instantiate the random variable until all values have been taken at least once,
+        // but stop after 200 iterations.
+        $two = false;
+        $four = false;
+        $eight = false;
+        for ($i = 0; $i < 200; $i++) {
+            if ($a == 2) {
+                $two = true;
+            }
+            if ($a == 4) {
+                $four = true;
+            }
+            if ($a == 8) {
+                $eight = true;
+            }
+            if ($two && $four && $eight) {
+                break;
+            }
+            $evaluator->instantiate_random_variables();
+            $evaluator->evaluate($globalparser->get_statements());
+            $a = $evaluator->export_single_variable('a')->value;
+        }
+        self::assertTrue($two);
+        self::assertTrue($four);
+        self::assertTrue($eight);
     }
 
     /**
