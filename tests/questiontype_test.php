@@ -535,8 +535,6 @@ class questiontype_test extends \advanced_testcase {
         ];
     }
 
-    // FIXME-TODO: do similar test for algebraic answer type?
-
     /**
      * @dataProvider provide_answers_for_numbox_test
      */
@@ -544,6 +542,31 @@ class questiontype_test extends \advanced_testcase {
         $formdata = test_question_maker::get_question_form_data('formulas', 'testsinglenum');
         $formdata->id = 0;
         $formdata->varsglobal = 'a=[1,2,3]; b=1;';
+        $formdata->answer[0] = $answer;
+
+        $qtype = new qtype_formulas();
+        $validationresult = $qtype->validate($formdata);
+        self::assertEquals($expected, $validationresult->answers[0]->numbox);
+        self::assertCount(0, $validationresult->errors);
+    }
+
+    public static function provide_algebraic_answers_for_numbox_test(): array {
+        return [
+            [1, '"5"'],
+            [1, '"b"'],
+            [1, '"b*x"'],
+            [1, '"x"'],
+            [3, '["x", "2x", "b x"]'],
+            [3, 'a'],
+        ];
+    }
+    /**
+     * @dataProvider provide_algebraic_answers_for_numbox_test
+     */
+    public function test_calculation_of_numbox_algebraictype($expected, $answer) {
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testalgebraic');
+        $formdata->id = 0;
+        $formdata->varsglobal = 'a=["1","2","3"]; b=1;';
         $formdata->answer[0] = $answer;
 
         $qtype = new qtype_formulas();

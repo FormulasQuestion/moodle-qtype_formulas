@@ -143,6 +143,50 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
+     * Gets the question form data for the algebraic formulas question
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_testalgebraic() {
+        $form = new stdClass();
+
+        $form->name = 'test-algebraic';
+        $form->noanswers = 1;
+        $form->answer = ['"a*x^2"'];
+        $form->answernotunique = ['1'];
+        $form->answermark = [1];
+        $form->answertype = [strval(qtype_formulas::ANSWER_TYPE_ALGEBRAIC)];
+        $form->correctness = ['_err < 0.01'];
+        $form->numbox = [1];
+        $form->placeholder = [''];
+        $form->vars1 = ['x={1:10}'];
+        $form->vars2 = [''];
+        $form->postunit = [''];
+        $form->otherrule = [''];
+        $form->subqtext = [['text' => '', 'format' => FORMAT_HTML]];
+        $form->feedback = [['text' => '', 'format' => FORMAT_HTML]];
+        $form->partcorrectfb = [['text' => 'Your answer is correct.', 'format' => FORMAT_HTML]];
+        $form->partpartiallycorrectfb = [['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML]];
+        $form->partincorrectfb = [['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML]];
+        $form->questiontext = [
+            'text' => '<p>This is a minimal question. The answer is "5*x^2".</p>',
+            'format' => FORMAT_HTML,
+        ];
+        $form->generalfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->defaultmark = 2;
+        $form->penalty = 0.2;
+        $form->varsrandom = '';
+        $form->varsglobal = '';
+        $form->answernumbering = 'abc';
+        $form->globalunitpenalty = 1;
+        $form->globalruleid = 1;
+        $form->correctfeedback = ['text' => test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->shownumcorrect = '1';
+        return $form;
+    }
+
+    /**
      * @return qtype_formulas_question question, single part, one number as answer, no unit
      */
     public static function make_formulas_question_testsinglenum() {
