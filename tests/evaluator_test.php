@@ -908,8 +908,6 @@ class evaluator_test extends \advanced_testcase {
         $evaluator->instantiate_random_variables();
         self::assertContains($key, $evaluator->export_variable_list());
 
-        // FIXME-TODO: if not shuffle: check element is in reservoir; if shuffle: sort both lists and compare
-
         // If it is not a "shuffle" case and we have boundaries, we check that the instantiated
         // value is within those boundaries.
         // In some cases, >= and <= comparison does not make sense, e.g. when elements are lists.

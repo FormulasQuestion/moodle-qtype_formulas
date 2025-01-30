@@ -753,15 +753,7 @@ class questiontype_test extends \advanced_testcase {
         ];
     }
 
-    /**
-     * @xdataProvider provide_question_names
-     */
-    public function test_form_works_for_valid_questions($questionname = 'testsinglenum'): void {
-        // FIXME: remove or rewrite in a way that explicitly checks the important fields like varsglobal
-        // and part's fields like answer, answertype, correctness etc.
-        // see test_export_and_reimport_xml and test_get_question_options
-        // possibility: save question to DB, edit form, change 1-2 fields, compare old/new question
-        return;
+    public function test_save_question(): void {
         // Login as admin user.
         $this->resetAfterTest(true);
         $this->setAdminUser();
@@ -771,23 +763,46 @@ class questiontype_test extends \advanced_testcase {
         $questioncat = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
         // Prepare question and form data.
-        $question = $questiongenerator->create_question('formulas', $questionname, ['category' => $questioncat->id]);
-        $formdata = test_question_maker::get_question_form_data('formulas', $questionname);
+        $question = (object)[
+            'qtype' => 'formulas',
+            'id' => 0,
+            'questiontext' => '',
+            'questiontextformat' => FORMAT_HTML
+        ];
+        $formdata = test_question_maker::get_question_form_data('formulas', 'testsinglenum');
         $formdata->category = "{$questioncat->id},{$questioncat->contextid}";
 
-        // Save the question to the DB.
+        // Setting the options and fields that are specific to our question.
+        $formdata->varsrandom = 'foo = {1,2,3}';
+        $formdata->varsglobal = 'bar = foo * 2';
+        $formdata->globalunitpenalty = '0.9';
+        $formdata->globalruleid = 99;
+        $formdata->subqtext = [['text' => 'testing text for part', 'format' => FORMAT_HTML]];
+        $formdata->answertype = [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA];
+        $formdata->vars1 = ['local = 1 + foo + bar'];
+        $formdata->vars2 = ['grading = _0 + foo'];
+        $formdata->answer = ['123'];
+        $formdata->answernotunique = ['0'];
+        $formdata->correctness = ['_err == 0 && 1 == 1'];
+
+        // Save the question to the DB and retrieve it, together with its options and part data.
         $savedquestion = \question_bank::get_qtype('formulas')->save_question($question, $formdata);
         $this->qtype->get_question_options($savedquestion);
-        $this->qtype->get_question_hints($savedquestion);
+        $savedpart = reset($savedquestion->options->answers);
 
-        $expected = test_question_maker::get_question_data('formulas', $questionname);
-        $savedquestion->stamp = $expected->stamp;
-        $savedquestion->version = $expected->version;
-        $savedquestion->id = $expected->id;
-        $savedquestion->contextid = $expected->contextid;
-        $savedquestion->category = $expected->category;
-
-        self::assertEquals($expected, $savedquestion);
+        // Make sure our data has been stored as requested. Note that the globalunitpenalty and globalruleid
+        // should now be stored with the part (as unitpenalty and ruleid) and not with the question.
+        self::assertEquals('foo = {1,2,3}', $savedquestion->options->varsrandom);
+        self::assertEquals('bar = foo * 2', $savedquestion->options->varsglobal);
+        self::assertEquals('99', $savedpart->ruleid);
+        self::assertEquals('0.9', $savedpart->unitpenalty);
+        self::assertEquals('testing text for part', $savedpart->subqtext);
+        self::assertEquals('local = 1 + foo + bar', $savedpart->vars1);
+        self::assertEquals('grading = _0 + foo', $savedpart->vars2);
+        self::assertEquals('_err == 0 && 1 == 1', $savedpart->correctness);
+        self::assertEquals('123', $savedpart->answer);
+        self::assertEquals(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, $savedpart->answertype);
+        self::assertEquals('0', $savedpart->answernotunique);
     }
 
     /**
