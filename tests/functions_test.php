@@ -43,6 +43,7 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  *
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \qtype_formulas\local\functions
  */
 
 class functions_test extends \advanced_testcase {
@@ -795,7 +796,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=modpow(1, 2);'],
             [false, 'a=modpow(1, 2, 3, 4);'],
             [true, 'a=pi();'],
-            [true, 'a=pi(1);'], // Note: now allowed, considered as pi*(1)
+            [true, 'a=pi(1);'], // Note: now allowed, considered as pi*(1).
             [true, 'a=pow(1, 2);'],
             [false, 'a=pow();'],
             [false, 'a=pow(1);'],
@@ -858,7 +859,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=sort(1, 2);'],
             [true, 'a=str(1);'],
             [false, 'a=str();'],
-            [true, 'a=str("1");'], // Note: this is now allowed
+            [true, 'a=str("1");'], // Note: this is now allowed.
             [false, 'a=str(1, 2);'],
             [false, 'a=str([1, 2]);'],
             [true, 'a=sublist([1, 2, 3], [1, 1, 1, 1]);'],
@@ -870,7 +871,7 @@ class functions_test extends \advanced_testcase {
             [false, 'a=sublist([1, 2, 3], [5]);'], // Index is out of range.
             [false, 'a=sublist([1, 2, 3], [1, 1, 1, 1], [1, 2, 3]);'],
             [true, 'a=sum([1, 2, 3]);'],
-            [true, 'a=sum(["1", "2", "3"]);'], // Note: This is now allowed
+            [true, 'a=sum(["1", "2", "3"]);'], // Note: This is now allowed.
             [false, 'a=sum();'],
             [false, 'a=sum(1);'],
             [false, 'a=sum(1, 2);'],
@@ -1086,8 +1087,14 @@ class functions_test extends \advanced_testcase {
             ['When using map() with two lists, they must both have the same size.', 'map("+", [1, 2, 3], [4, 5])'],
             ["When using map() with '-', the argument must be a list.", 'map("-", 2)'],
             ["'x' is not a legal first argument for the map() function.", 'map("x", [-1, -2])'],
-            ["The function 'fqversionnumber' cannot be used with map(), because it accepts no arguments.", 'map("fqversionnumber", [1, 2, 3])'],
-            ["The function 'modpow' cannot be used with map(), because it expects more than two arguments.", 'map("modpow", [1, 2, 3], [3, 4, 5])'],
+            [
+                "The function 'fqversionnumber' cannot be used with map(), because it accepts no arguments.",
+                'map("fqversionnumber", [1, 2, 3])',
+            ],
+            [
+                "The function 'modpow' cannot be used with map(), because it expects more than two arguments.",
+                'map("modpow", [1, 2, 3], [3, 4, 5])',
+            ],
         ];
     }
 

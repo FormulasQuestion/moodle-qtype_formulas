@@ -20,6 +20,7 @@ use Exception;
 /**
  * @copyright Copyright (c) 2010-2011, Hon Wai, Lau. All rights reserved.
  * @author Hon Wai, Lau <lau65536@gmail.com>
+ * @package qtype_formulas
  * @license New and Simplified BSD licenses, http://www.opensource.org/licenses/bsd-license.php
  */
 

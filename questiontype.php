@@ -542,6 +542,7 @@ class qtype_formulas extends question_type {
     public function get_possible_responses($questiondata) {
         $responses = [];
 
+        /** @var qtype_formulas_question $question */
         $question = $this->make_question($questiondata);
 
         foreach ($question->parts as $part) {

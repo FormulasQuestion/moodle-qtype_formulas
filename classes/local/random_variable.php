@@ -67,7 +67,7 @@ class random_variable extends variable {
             try {
                 $result = functions::fact(count($this->reservoir));
             } catch (Exception $e) {
-                // TODO: non-capturing catch
+                // TODO: non-capturing catch.
                 return PHP_INT_MAX;
             }
             return $result;

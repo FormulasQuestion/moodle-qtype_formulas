@@ -27,7 +27,7 @@
 
 
 
-// TODO: rewrite input checker script for student answer and teacher's model answer / unit
+// TODO: rewrite input checker script for student answer and teacher's model answer / unit.
 
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
@@ -1030,7 +1030,7 @@ class qtype_formulas_part {
             // boxes or the drop down list.
             // Finally, the array $matches[4] will contain ':MCE' in case this has been specified. Otherwise,
             // there will be an empty string.
-            // TODO: add option 'size' (for characters) or 'width' (for pixel width)
+            // TODO: add option 'size' (for characters) or 'width' (for pixel width).
             $boxes[$match] = [
                 'placeholder' => $matches[0][$i],
                 'options' => $matches[3][$i],
@@ -1102,7 +1102,7 @@ class qtype_formulas_part {
                 $parser = new answer_parser($combined);
                 $splitindex = $parser->find_start_of_units();
             } catch (Throwable $t) {
-                // TODO: convert to non-capturing catch
+                // TODO: convert to non-capturing catch.
                 $splitindex = PHP_INT_MAX;
             }
 
@@ -1525,7 +1525,7 @@ class qtype_formulas_part {
             $evaluatedgrading = $this->evaluator->evaluate($correctnessparser->get_statements())[0];
             $evaluatedgrading = $evaluatedgrading->value;
         } catch (Exception $e) {
-            // TODO: convert to non-capturing catch
+            // TODO: convert to non-capturing catch.
             $evaluatedgrading = 0;
         }
 

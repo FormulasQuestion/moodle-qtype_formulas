@@ -28,6 +28,9 @@ use Exception;
 use qtype_formulas\local\token;
 use qtype_formulas\local\lexer;
 
+/**
+ * @covers \qtype_formulas\local\lexer
+ */
 class lexer_test extends \advanced_testcase {
 
     public function test_get_token_list_1(): void {

@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 /**
  * @runTestsInSeparateProcesses
+ * @covers \qtype_formulas\external\instantiation
  */
 class externallib_test extends \externallib_advanced_testcase {
     public function setUp(): void {
@@ -72,7 +73,10 @@ class externallib_test extends \externallib_advanced_testcase {
                 ['randomvars' => 'a={1,2}', 'globalvars' => 'b=a']
             ],
             [
-                ['source' => 'random', 'message' => 'Invalid definition of a random variable - you must provide a list of possible values.'],
+                [
+                    'source' => 'random',
+                    'message' => 'Invalid definition of a random variable - you must provide a list of possible values.',
+                ],
                 ['randomvars' => 'a=1', 'globalvars' => '']
             ],
             [

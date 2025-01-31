@@ -16,12 +16,12 @@
 
 
 /**
-* Unit tests for the formulas question type.
-*
-* @package    qtype_formulas
-* @copyright  2012 Jean-Michel Védrine
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Unit tests for the formulas question type.
+ *
+ * @package    qtype_formulas
+ * @copyright  2012 Jean-Michel Védrine
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 namespace qtype_formulas;
 use question_state;
@@ -41,15 +41,15 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 
 
 /**
-* Unit tests for the formulas question type.
-*
-* @copyright  2012 Jean-Michel Vedrine
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Unit tests for the formulas question type.
+ *
+ * @copyright  2012 Jean-Michel Vedrine
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class walkthrough_adaptive_test extends walkthrough_test_base {
     /**
-    * @return qtype_formulas_question the requested question object.
-    */
+     * @return qtype_formulas_question the requested question object.
+     */
     protected function get_test_formulas_question($which = null) {
         return test_question_maker::make_question('formulas', $which);
     }
@@ -347,8 +347,8 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
     }
 
     /**
-    * @dataProvider provide_responses_for_feedback_test
-    */
+     * @dataProvider provide_responses_for_feedback_test
+     */
     public function test_part_feedback($expectedfeedback, $input) {
         // Prepare feedback strings.
         $generalfeedback = 'Part general feedback';

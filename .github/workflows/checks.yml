@@ -58,15 +58,15 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci phplint
 
-      #- name: Moodle Code Checker
-      #  continue-on-error: true
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci codechecker --max-warnings 0
+      - name: Moodle Code Checker
+        continue-on-error: true
+        if: ${{ always() }}
+        run: moodle-plugin-ci codechecker --max-warnings 0
 
-      #- name: Moodle PHPDoc Checker
-      #  continue-on-error: true
-      #  if: ${{ always() }}
-      #  run: moodle-plugin-ci phpdoc
+      - name: Moodle PHPDoc Checker
+        continue-on-error: true
+        if: ${{ always() }}
+        run: moodle-plugin-ci phpdoc
 
       - name: Validating
         if: ${{ always() }}

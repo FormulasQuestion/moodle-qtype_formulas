@@ -43,6 +43,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options): ?string {
         // First, fetch the instantiated question from the attempt.
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         if (count($question->textfragments) !== $question->numparts + 1) {
@@ -106,7 +107,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $sub
         );
         // Place for the right/wrong feeback image or appended at part's end.
-        // TODO: this is not documented anywhere
+        // TODO: this is not documented anywhere.
         if (strpos($output, '{_m}') !== false) {
             $output = str_replace('{_m}', $sub->feedbackimage, $output);
         } else {
@@ -199,6 +200,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
     // Return the part's text with variables replaced by their values.
     public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $sub) {
+        /** @var qype_formulas_question $question */
         $question = $qa->get_question();
         $part = &$question->parts[$i];
 
@@ -233,7 +235,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $inputattributes = array(
                 'type' => 'text',
                 'name' => $inputname,
-                'title' => get_string($gtype.($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
+                'title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
                 'value' => $currentanswer,
                 'id' => $inputname,
                 'class' => 'formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
@@ -289,7 +291,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 try {
                     $stexts = $part->evaluator->export_single_variable($boxes[$placeholder]['options']);
                 } catch (Exception $e) {
-                    // TODO: use non-capturing catch
+                    // TODO: use non-capturing catch.
                     unset($e);
                 }
             }
@@ -525,6 +527,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment.
      */
     protected function hint(question_attempt $qa, question_hint $hint) {
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $hint->hint = $question->evaluator->substitute_variables_in_text($hint->hint);
 
@@ -548,7 +551,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $field = $state->get_feedback_class() . 'feedback';
         $format = $state->get_feedback_class() . 'feedbackformat';
         if ($question->$field) {
-            //$globalvars = $question->get_global_variables();
             $feedback .= $question->format_text($question->$field, $question->$format,
                     $qa, 'question', $field, $question->id, false);
         }

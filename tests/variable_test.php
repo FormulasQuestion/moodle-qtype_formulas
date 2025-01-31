@@ -27,6 +27,9 @@ namespace qtype_formulas;
 
 use qtype_formulas\local\variable;
 
+/**
+ * @covers \qtype_formulas\local\variable
+ */
 class variable_test extends \advanced_testcase {
     /**
      * @dataProvider provide_variables

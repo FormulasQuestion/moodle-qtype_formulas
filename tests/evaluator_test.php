@@ -37,6 +37,9 @@ use qtype_formulas\local\expression;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
+/**
+ * @covers \qtype_formulas\local\evaluator
+ */
 class evaluator_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {
         global $CFG;
@@ -120,7 +123,10 @@ class evaluator_test extends \advanced_testcase {
             'nested with braces' => [810, 'res = 0; for (a:[1:10]) { for (b:[1:10]) { res = res + a + b } }'],
             'one statement with variable range' => [10, 'a = 1; b = 5; res = 0; for (i:[a:b]) res = res + i'],
             'one statement with variable range and step' => [22, 'a = 1; b = 5; c = 0.5; res = 0; for (i:[a:b:c]) res = res + i'],
-            'one statement with expression in range' => [22, 'a = 0.5; b = 10; c = 1/4; res = 0; for (i:[a*2:b/2:c+c]) res = res + i'],
+            'one statement with expression in range' => [
+                22,
+                'a = 0.5; b = 10; c = 1/4; res = 0; for (i:[a*2:b/2:c+c]) res = res + i',
+            ],
             'for loop with two statements' => [258, 'b = 0; for (a:[1:23,5]) { x = {1,2}; b = b + a;}'],
             'for loop pre-stored range' => [45, 'r = [1:10]; b = 0; for (i:r) { b = b + i}'],
             'for loop pre-stored list' => [17, 'r = [1, 2, 5, 9]; b = 0; for (i:r) { b = b + i}'],
@@ -140,7 +146,9 @@ class evaluator_test extends \advanced_testcase {
         $content = array_map(
             function ($el) {
                 if (is_array($el->value)) {
-                    return array_map(function ($nested) { return $nested->value; }, $el->value);
+                    return array_map(function ($nested) {
+                        return $nested->value;
+                    }, $el->value);
                 } else {
                     return $el->value;
                 }
@@ -300,7 +308,7 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    // TODO: reorder those tests later; some are unit tests for the functions and should go there
+    // TODO: reorder those tests later; some are unit tests for the functions and should go there.
     public static function provide_valid_assignments(): array {
         return [
             'one number' => [
@@ -1122,7 +1130,6 @@ class evaluator_test extends \advanced_testcase {
         foreach ($expected as $key => $variable) {
             self::assertContains($key, $variables);
             $stored = $evaluator->export_single_variable($key, true);
-            //self::assertEquals($variable->name, $stored->name);
             self::assertEquals($variable->type, $stored->type);
             // If the value is a list or the variable is algebraic, the elements are tokens.
             // We will only compare the token values to the expected values. For scalar variables,
@@ -1153,7 +1160,7 @@ class evaluator_test extends \advanced_testcase {
             ],
             'nest list into list from variable' => [
                 [
-                    'a' => new variable('a', [9,10], variable::LIST),
+                    'a' => new variable('a', [9, 10], variable::LIST),
                     'e' => new variable('e', [[9, 10], 2, 3], variable::LIST),
                 ],
                 'a=[9,10]; e=[1,2,3]; e[0]=a;'
@@ -1180,7 +1187,6 @@ class evaluator_test extends \advanced_testcase {
         foreach ($expected as $key => $variable) {
             self::assertContains($key, $variables);
             $stored = $evaluator->export_single_variable($key, true);
-            //self::assertEquals($variable->name, $stored->name);
             self::assertEquals($variable->type, $stored->type);
             // If the value is a list or the variable is algebraic, the elements are tokens.
             // We will only compare the token values to the expected values. For scalar variables,
@@ -1452,7 +1458,10 @@ class evaluator_test extends \advanced_testcase {
             ['1:9:Syntax error: sets cannot be used inside a list.', 'a = [1, {2, 3}]'],
             ['1:6:Invalid use of unary operator: !.', 'a = 1!2'],
             ['1:6:Invalid use of unary operator: ~.', 'a = 1~2'],
-            ['1:8:Unknown error while applying operator **, result was (positive or negative) infinity or not a number (NAN).', 'a = 99 ** 999'],
+            [
+                '1:8:Unknown error while applying operator **, result was (positive or negative) infinity or not a number (NAN).',
+                'a = 99 ** 999',
+            ],
         ];
     }
 
@@ -1557,7 +1566,10 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($expression);
         } catch (Exception $e) {
-            self::assertStringContainsString('Stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?', $e->getMessage());
+            self::assertStringContainsString(
+                'Stack should contain exactly one element after evaluation - did you forget a semicolon somewhere?',
+                $e->getMessage()
+            );
         }
         self::assertNotNull($e);
     }
@@ -1573,6 +1585,19 @@ class evaluator_test extends \advanced_testcase {
 
         self::assertEquals($expected[0], trim($number));
         self::assertEquals($expected[1], $unit);
+    }
+
+    public function test_strange_unit_split(): void {
+        $input = '3exp^2';
+
+        // Define 'exp' as a known variable.
+        $parser = new answer_parser($input, ['exp']);
+        $index = $parser->find_start_of_units();
+        $number = substr($input, 0, $index);
+        $unit = substr($input, $index);
+
+        self::assertEquals('3', trim($number));
+        self::assertEquals('exp^2', $unit);
     }
 
     public static function provide_numbers_and_units(): array {
@@ -1639,10 +1664,6 @@ class evaluator_test extends \advanced_testcase {
             [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
             [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
             [['3 4 5', 'kg m/s'], '3 4 5 kg m/s'],
-
-            // FIXME: the following is syntactically invalid. Maybe define exception
-            // via knownvariables = [...] to allow 'exp 'as "unit"?
-            // [['3', 'exp^2'], '3exp^2'],
         ];
     }
 
@@ -1722,11 +1743,18 @@ class evaluator_test extends \advanced_testcase {
         ];
     }
 
-    // FIXME-TODO: add more cases
     public static function provide_numeric_answers(): array {
         return [
+            [7, '3+4'],
+            [-1, '3-4'],
+            [23, '3+4*5'],
+            [35, '(3+4)*5'],
+            [.75, '3/4'],
+            [sqrt(2), '2**(1/2)'],
             [60, '3 4 5'],
             [3.004, '3+10*4/10^4'],
+            [false, '3x'],
+            [false, '3*x'],
             [false, '\\'],
             [false, '\sin(3)'],
             [false, 'sin(3)'],
@@ -2052,7 +2080,10 @@ class evaluator_test extends \advanced_testcase {
         try {
             $evaluator->evaluate($statement);
         } catch (Exception $e) {
-            self::assertStringEndsWith('Evaluation error: empty stack - did you pass enough arguments for the function or operator?', $e->getMessage());
+            self::assertStringEndsWith(
+                'Evaluation error: empty stack - did you pass enough arguments for the function or operator?',
+                $e->getMessage()
+            );
         }
         self::assertNotNull($e);
 

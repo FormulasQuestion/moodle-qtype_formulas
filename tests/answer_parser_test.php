@@ -34,6 +34,9 @@ use Exception;
 use qtype_formulas;
 use qtype_formulas\local\answer_parser;
 
+/**
+ * @covers \qtype_formulas\local\answer_parser
+ */
 class answer_parser_test extends \advanced_testcase {
 
     public static function provide_numbers(): array {
@@ -54,12 +57,18 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMBER, 'π'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '-pi'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '-π'],
-            [qtype_formulas::ANSWER_TYPE_NUMBER, '- 3'], // TODO doc: This is allowed now
-            [qtype_formulas::ANSWER_TYPE_NUMBER, '+ 3'], // TODO doc: This is allowed now
+            [qtype_formulas::ANSWER_TYPE_NUMBER, '- 3'], // TODO doc: This is allowed now.
+            [qtype_formulas::ANSWER_TYPE_NUMBER, '+ 3'], // TODO doc: This is allowed now.
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+10*4'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+10^4'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3*4*5'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3 4 5'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+4'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3-4'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+4*5'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '(3+4)*5'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3/4'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '2**(1/2)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
@@ -114,8 +123,8 @@ class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a**b'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a/(b-b)'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus.
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed.
             // Note: the following is syntactically valid and is read as 3*e10; it can be evaluated if e10 is a valid variable.
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
             // Note: the following is syntactically valid and is read as 3e8*e8; it can be evaluated if e8 is a valid variable.

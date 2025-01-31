@@ -27,6 +27,9 @@ namespace qtype_formulas;
 use Exception;
 use qtype_formulas\local\input_stream;
 
+/**
+ * @covers \qtype_formulas\local\input_stream
+ */
 class inputstream_test extends \advanced_testcase {
 
     /**

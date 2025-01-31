@@ -45,7 +45,8 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  *
  * @copyright  2013 Jean-Michel Vedrine
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @group qtype_formulas
+ * @group      qtype_formulas
+ * @covers     \qtype_formulas
  */
 class questiontype_test extends \advanced_testcase {
 
@@ -240,6 +241,7 @@ class questiontype_test extends \advanced_testcase {
 
         $questiondata = test_question_maker::get_question_data('formulas', 'testtwoandtwo');
 
+        /** @var \core_question_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $generator->create_question_category([]);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
@@ -304,7 +306,10 @@ class questiontype_test extends \advanced_testcase {
             [['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsrandom' => 'a=']],
             [['varsglobal' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsglobal' => 'a=']],
             // If random *and* global vars are screwed, we should only have an error for random vars.
-            [['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsrandom' => 'a=', 'varsglobal' => 'b=']],
+            [
+                ['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."],
+                ['varsrandom' => 'a=', 'varsglobal' => 'b='],
+            ],
             [['vars1[0]' => "1:2:Syntax error: unexpected end of expression after '='."], ['vars1' => [0 => 'a=']]],
             [['vars1[0]' => '1:4:Division by zero is not defined.'], ['vars1' => [0 => 'a=2/0']]],
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => -1]]],
@@ -506,6 +511,7 @@ class questiontype_test extends \advanced_testcase {
 
         $questiondata = test_question_maker::get_question_data('formulas', 'testsinglenum');
 
+        /** @var \core_question_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $generator->create_question_category([]);
         $form = qtype_formulas_test_helper::get_question_editing_form($category, $questiondata);
@@ -584,6 +590,7 @@ class questiontype_test extends \advanced_testcase {
         $fetchermethod = $reflectedqtype->getMethod('fetch_part_ids_for_question');
         $fetchermethod->setAccessible(true);
 
+        /** @var \core_question_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $generator->create_question_category([]);
 
@@ -614,6 +621,7 @@ class questiontype_test extends \advanced_testcase {
         // Create a complete, in DB question to use.
         $questiondata = test_question_maker::get_question_data('formulas', 'testmethodsinparts');
         $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
+        /** @var \core_question_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $generator->create_question_category(array());
 
@@ -701,6 +709,7 @@ class questiontype_test extends \advanced_testcase {
         // Create a context and a question category in each course.
         $context1 = \context_coursecat::instance($coursecat1->id);
         $context2 = \context_coursecat::instance($coursecat2->id);
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $questioncat1 = $questiongenerator->create_question_category(['contextid' => $context1->id]);
         $questioncat2 = $questiongenerator->create_question_category(['contextid' => $context2->id]);
@@ -759,6 +768,7 @@ class questiontype_test extends \advanced_testcase {
         $this->setAdminUser();
 
         $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $questioncat = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
@@ -828,6 +838,7 @@ class questiontype_test extends \advanced_testcase {
         $this->setAdminUser();
 
         $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $questioncat = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
@@ -913,6 +924,7 @@ class questiontype_test extends \advanced_testcase {
         // Create a course and a question category.
         $course = $this->getDataGenerator()->create_course();
         $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
@@ -955,6 +967,7 @@ class questiontype_test extends \advanced_testcase {
         // Create a course and a question category.
         $course = $this->getDataGenerator()->create_course();
         $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
@@ -996,6 +1009,7 @@ class questiontype_test extends \advanced_testcase {
         // Reinitialize the XML format class.
         $qformat = new \qformat_xml();
         $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $category = $questiongenerator->create_question_category(['contextid' => $context->id]);
         $qformat->setCategory($category);

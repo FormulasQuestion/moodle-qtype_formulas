@@ -47,7 +47,9 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  *
  * @copyright  2008 The Open University
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @group qtype_formulas
+ * @group      qtype_formulas
+ * @covers     \qtype_formulas_question
+ * @covers     \qtype_formulas_part
  */
 class question_test extends \basic_testcase {
 
@@ -82,7 +84,6 @@ class question_test extends \basic_testcase {
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
         // If no ID is given, we should not have access.
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, [], false));
-
 
         // Step 2: access to files in the question text should always be granted, as long as
         // the $itemid ($args[0]) matches the question's ID.
@@ -1001,7 +1002,10 @@ class question_test extends \basic_testcase {
         try {
             qtype_formulas_part::scan_for_answer_boxes($input);
         } catch (Exception $e) {
-            self::assertStringContainsString(get_string('error_answerbox_duplicate', 'qtype_formulas', $expected), $e->getMessage());
+            self::assertStringContainsString(
+                get_string('error_answerbox_duplicate', 'qtype_formulas', $expected),
+                $e->getMessage()
+            );
         }
         self::assertNotNull($e);
     }

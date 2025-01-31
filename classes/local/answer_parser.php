@@ -26,8 +26,6 @@ use qtype_formulas;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- /* FIXME-TODO: make validation function with units --> add unit tests, should be working, because unit/number are split before check */
-
 class answer_parser extends parser {
     /**
      * Create a parser for student answers. This class does additional filtering (e. g. block
@@ -39,7 +37,8 @@ class answer_parser extends parser {
      * @param bool $caretmeanspower whether ^ should be interpreted as exponentiation operator
      * @param bool $formodelanswer whether we are parsing a teacher's model answer (thus allowing \ prefix)
      */
-    public function __construct($tokenlist, array $knownvariables = [], bool $caretmeanspower = true, bool $formodelanswer = false) {
+    public function __construct($tokenlist, array $knownvariables = [], bool $caretmeanspower = true,
+            bool $formodelanswer = false) {
         // If the input is given as a string, run it through the lexer first.
         if (is_string($tokenlist)) {
             $lexer = new lexer($tokenlist);

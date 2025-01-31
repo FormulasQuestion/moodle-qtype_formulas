@@ -26,8 +26,8 @@
 namespace qtype_formulas\local;
 use Exception;
 
-// TODO: add function randint
-// TODO: add some string functions, e.g. upper/lower case, repeat char
+// TODO: add function randint.
+// TODO: add some string functions, e.g. upper/lower case, repeat char.
 
 class functions {
     const NONE = 0;
@@ -285,7 +285,7 @@ class functions {
         }
 
         // Create array from minimum to maximum value and then use the given list as the sort order.
-        // Note: number tokens should have their value stored as floats
+        // Note: number tokens should have their value stored as floats.
         $result = [];
         for ($i = $min->value; $i <= $max->value; $i++) {
             $result[] = new token(token::NUMBER, floatval($i));

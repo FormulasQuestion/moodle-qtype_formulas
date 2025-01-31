@@ -162,7 +162,7 @@ class evaluator {
                 }
                 $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
-                // TODO: use non-capturing exception when we drop support for old PHP
+                // TODO: use non-capturing exception when we drop support for old PHP.
                 unset($e);
             }
         }
