@@ -1013,6 +1013,7 @@ class question_test extends \basic_testcase {
             [['id' => 'right', 'fraction' => 1], '5.0'],
             [['id' => 'wrong', 'fraction' => 0], '15'],
             [['id' => 'wrong', 'fraction' => 0], 'foo'],
+            [['id' => 'wrong', 'fraction' => 0], str_pad('1', 130, '0')],
         ];
     }
 
@@ -1047,6 +1048,10 @@ class question_test extends \basic_testcase {
 
         self::assertEquals($expected['id'], $classification->responseclassid);
         self::assertEquals($expected['fraction'], $classification->fraction);
+        // Response will be trimmed to max. 128 chars during normalization.
+        if (strlen($input) > 128) {
+            $input = substr($input, 0, 128);
+        }
         self::assertEquals($input, $classification->response);
     }
 
@@ -1182,6 +1187,32 @@ class question_test extends \basic_testcase {
             self::assertEquals($expected['id'][$i], $classification[$i]->responseclassid);
             self::assertEquals($expected['fraction'][$i], $classification[$i]->fraction);
             self::assertEquals($input[$i], $classification[$i]->response);
+        }
+    }
+
+    public static function provide_formulas_for_wrapping(): array {
+        return [
+            [['""'], ['']],
+            [['"a"'], ['a']],
+            [['"a"'], ['"a"']],
+            [['"1"', '"2"'], ['1', '2']],
+            [['""', '""'], ['', '']],
+            [['""', '""'], ['""', '""']],
+            [['"1"', '"x"'], ['"1"', '"x"']],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_formulas_for_wrapping
+     */
+    public function test_wrap_algebraic_formulas_in_quotes($expected, $input): void {
+        $func = new \ReflectionMethod(qtype_formulas_part::class, 'wrap_algebraic_formulas_in_quotes');
+        $func->setAccessible(true);
+
+        $wrapped = $func->invoke(null, $input);
+
+        foreach ($expected as $i => $exp) {
+            self::assertEquals($exp, $wrapped[$i]);
         }
     }
 }
