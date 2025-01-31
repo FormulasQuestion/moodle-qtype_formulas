@@ -51,7 +51,7 @@ class behat_qtype_formulas extends behat_base {
             new behat_component_named_selector(
                 'Validation Unit Tests Error Indicator',
                 ["//span[@id='validation-unittests-failed']"]
-            )
+            ),
         ];
     }
 
@@ -61,7 +61,7 @@ class behat_qtype_formulas extends behat_base {
      */
     public function i_click_on_row_number_of_the_formulas_question_instantiation_table($rownumber) {
         $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]";
-        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+        $this->execute("behat_general::i_click_on", [$this->escape($xpath), "xpath_element"]);
     }
 
     /**
@@ -92,6 +92,6 @@ class behat_qtype_formulas extends behat_base {
         } else if (version_compare($currentversion, '3.9', ">=")) {
             $xpath = "//div[contains(@class, 'confirmation-dialogue')]/*/input[contains(@class, 'btn-primary')]";
         }
-        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+        $this->execute("behat_general::i_click_on", [$this->escape($xpath), "xpath_element"]);
     }
 }

@@ -88,11 +88,11 @@ class parser_test extends \advanced_testcase {
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
             'arithmetic expression with ternary in parens' => [
                 'a,5,b,1,==,%%ternary-sentinel,3,4,%%ternary,2,*,+,=',
-                'a = 5 + (b == 1 ? 3 : 4) * 2'
+                'a = 5 + (b == 1 ? 3 : 4) * 2',
             ],
             'arithmetic expression with double ternary' => [
                 'a,b,c,==,%%ternary-sentinel,1,b,d,==,%%ternary-sentinel,2,0,%%ternary,%%ternary,=',
-                'a = b == c ? 1 : b == d ? 2 : 0'
+                'a = b == c ? 1 : b == d ? 2 : 0',
             ],
             'arithmetic expression with paren and power' => ['a,3,4,**,5,**,=', 'a = (3**4)**5'],
             'double assignment' => ['a,b,7,=,=', 'a = b = 7'],
@@ -203,20 +203,20 @@ class parser_test extends \advanced_testcase {
             'range with step' => ['{,1,10,0.5,3,%%rangebuild,%%setbuild', '{1:10:0.5}'],
             'ranges and elements' => [
                 '{,1,5,6,0.1,3,%%rangebuild,100,200,300,2,%%rangebuild,5,%%setbuild',
-                '{1,5:6:0.1,100,200:300,5}'
+                '{1,5:6:0.1,100,200:300,5}',
             ],
             'array in set' => [
                 '{,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%setbuild',
-                '{[1:10],[20:30],[40:50:2]}'
+                '{[1:10],[20:30],[40:50:2]}',
             ],
             'multiple ranges' => [
                 '{,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%setbuild',
-                '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}'
+                '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}',
             ],
             'range with step, negatives' => ['{,1,_,10,_,0.5,_,3,%%rangebuild,%%setbuild', '{-1:-10:-0.5}'],
             'range with step, composed expressions' => [
                 '{,1,3,1,sqrt,+,10,5,1,sin,+,1,5,/,3,%%rangebuild,%%setbuild',
-                '{1+sqrt(3):10+sin(5):1/5}'
+                '{1+sqrt(3):10+sin(5):1/5}',
             ],
         ];
     }

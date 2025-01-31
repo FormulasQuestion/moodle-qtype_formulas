@@ -66,7 +66,7 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
         if ($name) {
             $class .= ' formulaspartfeedback-' . $name;
         }
-        $this->assertTag(array('tag' => 'div', 'attributes' => array('class' => $class)), $this->currentoutput,
+        $this->assertTag(['tag' => 'div', 'attributes' => ['class' => $class]], $this->currentoutput,
                 'part feedback for ' . $name . ' not found in ' . $this->currentoutput);
     }
 
@@ -75,7 +75,7 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
         if ($name) {
             $class .= ' formulaspartfeedback-' . $name;
         }
-        $this->assertNotTag(array('tag' => 'div', 'attributes' => array('class' => $class)), $this->currentoutput,
+        $this->assertNotTag(['tag' => 'div', 'attributes' => ['class' => $class]], $this->currentoutput,
                 'part feedback for ' . $name . ' should not be present in ' . $this->currentoutput);
     }
 

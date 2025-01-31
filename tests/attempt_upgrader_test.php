@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/question/engine/upgrade/tests/helper.php');
  */
 class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
     public function test_formulas_deferredfeedback_qsession2() {
-        $quiz = (object) array(
+        $quiz = (object) [
             'id' => '1',
             'course' => '2',
             'name' => 'essai quiz deffered',
@@ -70,8 +70,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
             'showuserpicture' => '0',
             'showblocks' => '0',
             'preferredbehaviour' => 'deferredfeedback',
-        );
-        $attempt = (object) array(
+        ];
+        $attempt = (object) [
             'id' => '2',
             'uniqueid' => '2',
             'quiz' => '1',
@@ -84,8 +84,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
             'layout' => '4,0',
             'preview' => '0',
             'needsupgradetonewqe' => 1,
-        );
-        $question = (object) array(
+        ];
+        $question = (object) [
             'id' => '4',
             'category' => '3',
             'parent' => '0',
@@ -108,14 +108,14 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
             'createdby' => '2',
             'modifiedby' => '2',
             'maxmark' => '8.0000000',
-            'options' => (object) array(
+            'options' => (object) [
                 'varsrandom' => 'v = {20:100:10};
  dt = {2:6};',
                 'varsglobal' => 's = v*dt;',
                 'peranswersubmit' => '1',
                 'showperanswermark' => '1',
-                'answers' => array(
-                    0 => (object) array(
+                'answers' => [
+                    0 => (object) [
                         'id' => '6',
                         'questionid' => '4',
                         'placeholder' => '',
@@ -137,8 +137,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                         'feedbackformat' => '0',
                         'partindex' => 0,
                         'fraction' => 1,
-                    ),
-                    1 => (object) array(
+                    ],
+                    1 => (object) [
                         'id' => '7',
                         'questionid' => '4',
                         'placeholder' => '',
@@ -160,8 +160,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                         'feedbackformat' => '0',
                         'partindex' => 1,
                         'fraction' => 1,
-                    ),
-                    2 => (object) array(
+                    ],
+                    2 => (object) [
                         'id' => '8',
                         'questionid' => '4',
                         'placeholder' => '',
@@ -183,8 +183,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                         'feedbackformat' => '0',
                         'partindex' => 2,
                         'fraction' => 1,
-                    ),
-                    3 => (object) array(
+                    ],
+                    3 => (object) [
                         'id' => '9',
                         'questionid' => '4',
                         'placeholder' => '',
@@ -206,13 +206,13 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                         'feedbackformat' => '0',
                         'partindex' => 3,
                         'fraction' => 1,
-                    ),
-                ),
+                    ],
+                ],
                 'numparts' => 4,
-            ),
+            ],
             'defaultmark' => '8.0000000',
-        );
-        $qsession = (object) array(
+        ];
+        $qsession = (object) [
             'id' => '2',
             'attemptid' => '2',
             'questionid' => '4',
@@ -222,9 +222,9 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
             'manualcomment' => '',
             'manualcommentformat' => '1',
             'flagged' => '0',
-        );
-        $qstates = array(
-            2 => (object) array(
+        ];
+        $qstates = [
+            2 => (object) [
                 'id' => '2',
                 'attempt' => '2',
                 'question' => '4',
@@ -239,8 +239,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                 'grade' => '0.0000000',
                 'raw_grade' => '0.0000000',
                 'penalty' => '0.0000000',
-            ),
-            3 => (object) array(
+            ],
+            3 => (object) [
                 'id' => '3',
                 'attempt' => '2',
                 'question' => '4',
@@ -265,8 +265,8 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                 'grade' => '0.0000000',
                 'raw_grade' => '4.0000000',
                 'penalty' => '0.0000000',
-            ),
-            4 => (object) array(
+            ],
+            4 => (object) [
                 'id' => '4',
                 'attempt' => '2',
                 'question' => '4',
@@ -291,12 +291,12 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
                 'grade' => '4.0000000',
                 'raw_grade' => '4.0000000',
                 'penalty' => '0.0000000',
-            ),
-        );
+            ],
+        ];
 
         $qa = $this->updater->convert_question_attempt($quiz, $attempt, $question, $qsession, $qstates);
 
-        $expectedqa = (object) array(
+        $expectedqa = (object) [
             'behaviour' => 'deferredfeedback',
             'questionid' => '4',
             'variant' => 1,
@@ -314,44 +314,44 @@ class attempt_upgrader_test extends \question_attempt_upgrader_test_base {
             'rightanswer' => '',
             'responsesummary' => '30m/s,40,m/s,30,40',
             'timemodified' => 1357402884,
-            'steps' => array(
-                0 => (object) array(
+            'steps' => [
+                0 => (object) [
                     'sequencenumber' => 0,
                     'state' => 'todo',
                     'fraction' => null,
                     'timecreated' => 1357402852,
                     'userid' => 3,
-                    'data' => array('_randomsvars_text' => 'v=30;dt=3;',
-                            '_varsglobal' => 's = v*dt;'),
-                ),
-                1 => (object) array(
+                    'data' => ['_randomsvars_text' => 'v=30;dt=3;',
+                            '_varsglobal' => 's = v*dt;'],
+                ],
+                1 => (object) [
                     'sequencenumber' => 1,
                     'state' => 'complete',
                     'fraction' => null,
                     'timecreated' => 1357402884,
                     'userid' => 3,
-                    'data' => array(
+                    'data' => [
                 '0_' => '30m/s',
                 '1_0' => '40',
                 '1_1' => 'm/s',
                 '2_0' => '30',
-                '3_0' => '40'),
-                ),
-                2 => (object) array(
+                '3_0' => '40'],
+                ],
+                2 => (object) [
                     'sequencenumber' => 2,
                     'state' => 'gradedpartial',
                     'fraction' => 0.5,
                     'timecreated' => 1357402884,
                     'userid' => 3,
-                    'data' => array('-finish' => '1',
+                    'data' => ['-finish' => '1',
                     '0_' => '30m/s',
                 '1_0' => '40',
                 '1_1' => 'm/s',
                 '2_0' => '30',
-                '3_0' => '40'),
-                ),
-            ),
-        );
+                '3_0' => '40'],
+                ],
+            ],
+        ];
 
         $this->compare_qas($expectedqa, $qa);
     }

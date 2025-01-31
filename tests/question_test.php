@@ -384,24 +384,24 @@ class question_test extends \basic_testcase {
 
     public function test_get_expected_data_test0() {
         $q = $this->get_test_formulas_question('testsinglenum');
-        self::assertEquals(array('0_0' => PARAM_RAW), $q->get_expected_data());
+        self::assertEquals(['0_0' => PARAM_RAW], $q->get_expected_data());
     }
 
     public function test_get_expected_data_testthreeparts() {
         $q = $this->get_test_formulas_question('testthreeparts');
-        self::assertEquals(array('0_0' => PARAM_RAW,
+        self::assertEquals(['0_0' => PARAM_RAW,
                                   '1_0' => PARAM_RAW,
-                                  '2_0' => PARAM_RAW),
+                                  '2_0' => PARAM_RAW],
                                   $q->get_expected_data());
     }
 
     public function test_get_expected_data_test2() {
         $q = $this->get_test_formulas_question('test4');
-        self::assertEquals(array('0_' => PARAM_RAW,
+        self::assertEquals(['0_' => PARAM_RAW,
                                   '1_0' => PARAM_RAW,
                                   '1_1' => PARAM_RAW,
                                   '2_0' => PARAM_RAW,
-                                  '3_0' => PARAM_RAW),
+                                  '3_0' => PARAM_RAW],
                                   $q->get_expected_data());
     }
 
@@ -808,29 +808,29 @@ class question_test extends \basic_testcase {
     public function test_get_parts_and_weights_singlenum() {
         $q = $this->get_test_formulas_question('testsinglenum');
 
-        self::assertEquals(array('0' => 1), $q->get_parts_and_weights());
+        self::assertEquals(['0' => 1], $q->get_parts_and_weights());
     }
 
     public function test_get_parts_and_weights_threeparts() {
         $q = $this->get_test_formulas_question('testthreeparts');
 
-        self::assertEquals(array('0' => 1 / 3, '1' => 1 / 3, '2' => 1 / 3), $q->get_parts_and_weights());
+        self::assertEquals(['0' => 1 / 3, '1' => 1 / 3, '2' => 1 / 3], $q->get_parts_and_weights());
     }
 
     public function test_get_parts_and_weights_test4() {
         $q = $this->get_test_formulas_question('test4');
 
-        self::assertEquals(array('0' => .25, '1' => .25, '2' => .25, '3' => .25), $q->get_parts_and_weights());
+        self::assertEquals(['0' => .25, '1' => .25, '2' => .25, '3' => .25], $q->get_parts_and_weights());
     }
 
     public function test_compute_final_grade_threeparts_1() {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' => '6'),
-                           1 => array('0_0' => '5', '1_0' => '7', '2_0' => '7'),
-                           2 => array('0_0' => '5', '1_0' => '6', '2_0' => '7')
-                          );
+        $responses = [0 => ['0_0' => '5', '1_0' => '7', '2_0' => '6'],
+                           1 => ['0_0' => '5', '1_0' => '7', '2_0' => '7'],
+                           2 => ['0_0' => '5', '1_0' => '6', '2_0' => '7'],
+                          ];
         $finalgrade = $q->compute_final_grade($responses, 3);
         self::assertEquals((2 + 2 * (1 - 2 * 0.3) + 2 * (1 - 0.3)) / 6, $finalgrade);
 
@@ -840,10 +840,10 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $responses = array(0 => array('0_0' => '5', '1_0' => '7', '2_0' => '6'),
-                           1 => array('0_0' => '5', '1_0' => '8', '2_0' => '6'),
-                           2 => array('0_0' => '5', '1_0' => '6', '2_0' => '6')
-                          );
+        $responses = [0 => ['0_0' => '5', '1_0' => '7', '2_0' => '6'],
+                           1 => ['0_0' => '5', '1_0' => '8', '2_0' => '6'],
+                           2 => ['0_0' => '5', '1_0' => '6', '2_0' => '6'],
+                          ];
         $finalgrade = $q->compute_final_grade($responses, 3);
         self::assertEquals((2 + 2 * (1 - 2 * 0.3)) / 6, $finalgrade);
     }
@@ -878,7 +878,7 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_0' => '5', '1_0' => '6', '2_0' => '7');
+        $response = ['0_0' => '5', '1_0' => '6', '2_0' => '7'];
         $summary0 = $q->parts[0]->summarise_response($response);
         self::assertEquals('5', $summary0);
         $summary1 = $q->parts[1]->summarise_response($response);
@@ -893,7 +893,7 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
-        $response = array('0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50");
+        $response = ['0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50"];
         $summary0 = $q->parts[0]->summarise_response($response);
         self::assertEquals('30m/s', $summary0);
         $summary1 = $q->parts[1]->summarise_response($response);
@@ -909,21 +909,21 @@ class question_test extends \basic_testcase {
     public function test_is_complete_response_test3() {
         $q = $this->get_test_formulas_question('testzero');
 
-        self::assertFalse($q->is_complete_response(array()));
-        self::assertTrue($q->is_complete_response(array('0_0' => '0')));
-        self::assertTrue($q->is_complete_response(array('0_0' => 0)));
-        self::assertTrue($q->is_complete_response(array('0_0' => 'test')));
+        self::assertFalse($q->is_complete_response([]));
+        self::assertTrue($q->is_complete_response(['0_0' => '0']));
+        self::assertTrue($q->is_complete_response(['0_0' => 0]));
+        self::assertTrue($q->is_complete_response(['0_0' => 'test']));
     }
 
     public function test_is_gradable_response_test3() {
         $q = $this->get_test_formulas_question('testzero');
 
-        self::assertFalse($q->is_gradable_response(array()));
-        self::assertTrue($q->is_gradable_response(array('0_0' => '0')));
-        self::assertTrue($q->is_gradable_response(array('0_0' => 0)));
-        self::assertTrue($q->is_gradable_response(array('0_0' => '0.0')));
-        self::assertTrue($q->is_gradable_response(array('0_0' => '5')));
-        self::assertTrue($q->is_gradable_response(array('0_0' => 5)));
+        self::assertFalse($q->is_gradable_response([]));
+        self::assertTrue($q->is_gradable_response(['0_0' => '0']));
+        self::assertTrue($q->is_gradable_response(['0_0' => 0]));
+        self::assertTrue($q->is_gradable_response(['0_0' => '0.0']));
+        self::assertTrue($q->is_gradable_response(['0_0' => '5']));
+        self::assertTrue($q->is_gradable_response(['0_0' => 5]));
     }
 
     public static function provide_answer_box_texts(): array {
@@ -942,19 +942,19 @@ class question_test extends \basic_testcase {
             [[], '{_u }'],
             [[], '{_a}'],
             [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
             ], '{_0}'],
             [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false]
+                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
             ], '{_0} {_1:}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false]
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false],
             ], '{_0:foo}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false]
+                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false],
             ], '{_0:MCE}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true]
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true],
             ], '{_0:foo:MCE}'],
             [[
                 '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false],
@@ -1177,7 +1177,7 @@ class question_test extends \basic_testcase {
             '0_0' => $input[0],
             '1_0' => $input[1],
             '2_0' => $input[2],
-            '-submit' => 1
+            '-submit' => 1,
         ];
         $qa->process_action($response);
         $classification = $question->classify_response($response);

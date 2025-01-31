@@ -343,7 +343,7 @@ class qtype_formulas extends question_type {
                 'correctfeedback' => '',
                 'partiallycorrectfeedback' => '',
                 'incorrectfeedback' => '',
-                'answernumbering' => 'none'
+                'answernumbering' => 'none',
             ];
 
             try {
@@ -1133,7 +1133,7 @@ class qtype_formulas extends question_type {
                             'answerno' => $k + 1,
                             // The error message may contain line and column numbers, but they don't make
                             // sense in this context, so we'd rather remove them.
-                            'message' => preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage())
+                            'message' => preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage()),
                         ];
                         $errors["answer[$i]"] = get_string('error_in_answer', 'qtype_formulas', $a);
                         break;

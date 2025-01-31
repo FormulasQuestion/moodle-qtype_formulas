@@ -162,31 +162,31 @@ class evaluator_test extends \advanced_testcase {
         return [
             'basic' => [
                 ['a' => new variable('a', [1, 2, 3, 4, 5], variable::ALGEBRAIC)],
-                'a = {1,2,3,4,5}'
+                'a = {1,2,3,4,5}',
             ],
             'range without step' => [
                 ['a' => new variable('a', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], variable::ALGEBRAIC)],
-                'a = {1:10}'
+                'a = {1:10}',
             ],
             'range with step' => [
                 ['a' => new variable('a', [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5], variable::ALGEBRAIC)],
-                'a = {1:5:0.5}'
+                'a = {1:5:0.5}',
             ],
             'range with step, negatives' => [
                 ['a' => new variable('a', [-1, -3, -5, -7, -9], variable::ALGEBRAIC)],
-                'a = {-1:-10:-2}'
+                'a = {-1:-10:-2}',
             ],
             'ranges and elements' => [
                 ['a' => new variable('a', [1, 5, 5.2, 5.4, 5.6, 5.8, 100, 200, 250], variable::ALGEBRAIC)],
-                'a = {1,5:6:0.2,100,200:300:50}'
+                'a = {1,5:6:0.2,100,200:300:50}',
             ],
             'multiple ranges' => [
                 ['a' => new variable('a', [1, 3, 5, 7, 9, 15, 20, 25, 30, 35, 0, -1, -2, -3, -4], variable::ALGEBRAIC)],
-                'a = {1:10:2,15:40:5,0:-5:-1}'
+                'a = {1:10:2,15:40:5,0:-5:-1}',
             ],
             'range with step, composed expressions' => [
                 ['a' => new variable('a', [1 + sqrt(3), 1.2 + sqrt(3), 1.4 + sqrt(3), 1.6 + sqrt(3)], variable::ALGEBRAIC)],
-                'a = {1+sqrt(3):4.5-cos(0):1/5}'
+                'a = {1+sqrt(3):4.5-cos(0):1/5}',
             ],
         ];
     }
@@ -199,26 +199,26 @@ class evaluator_test extends \advanced_testcase {
             'range with step' => [[1, 3, 5, 7, 9], '[1:10:2]'],
             'ranges and elements' => [
                 [1, 5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 100, 200, 225, 250, 275],
-                '[1,5:5.95:0.1,100,200:300:25]'
+                '[1,5:5.95:0.1,100,200:300:25]',
             ],
             'nested' => [
                 [[1, 2, 3, 4, 5], [20, 24, 28], [40, 42, 44, 46, 48]],
-                '[[1:6],[20:30:4],[40:50:2]]'
+                '[[1:6],[20:30:4],[40:50:2]]',
             ],
             'multiple ranges' => [
                 [1, 2, 3, 4, 15, 30, 45, 60, 60.5, 61, 61.5, 62, 62.5, 0, -1, -2, -3, -4],
-                '[1:5,15:50:15,60:63:0.5,0:-5:-1]'
+                '[1:5,15:50:15,60:63:0.5,0:-5:-1]',
             ],
             'range with step, negatives' => [
                 [-1, -1.5, -2, -2.5, -3, -3.5, -4, -4.5],
                 '[-1:-5:-0.5]'],
             'elements are expressions' => [
                 [3, 4.7449230967779314, 0.2],
-                '[1+sqrt(4),5*sin(5/4),1/5]'
+                '[1+sqrt(4),5*sin(5/4),1/5]',
             ],
             'range with step, composed expressions' => [
                 [3, 3.2, 3.4, 3.6, 3.8, 4, 4.2, 4.4, 4.6],
-                '[1+sqrt(4):5*sin(5/4):1/5]'
+                '[1+sqrt(4):5*sin(5/4):1/5]',
             ],
         ];
     }
@@ -313,62 +313,62 @@ class evaluator_test extends \advanced_testcase {
         return [
             'one number' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
-                'a = 1;'
+                'a = 1;',
             ],
             'chain assignment' => [
                 [
                     'a' => new variable('a', 1, variable::NUMERIC),
-                    'b' => new variable('b', 1, variable::NUMERIC)
+                    'b' => new variable('b', 1, variable::NUMERIC),
                 ],
-                'a = b = 1;'
+                'a = b = 1;',
             ],
             'boolean true should be 1' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
-                'a = (5 == 5);'
+                'a = (5 == 5);',
             ],
             'boolean false should be 0' => [
                 ['a' => new variable('a', 0, variable::NUMERIC)],
-                'a = (5 == 4);'
+                'a = (5 == 4);',
             ],
             'inverse of boolean true should be 0' => [
                 ['a' => new variable('a', 0, variable::NUMERIC)],
-                'a = !(5 == 5);'
+                'a = !(5 == 5);',
             ],
             'inverse of boolean false should be 1' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
-                'a = !(5 == 4);'
+                'a = !(5 == 4);',
             ],
             'two numbers' => [
                 [
                     'a' => new variable('a', 1, variable::NUMERIC),
-                    'b' => new variable('b', 4, variable::NUMERIC)
+                    'b' => new variable('b', 4, variable::NUMERIC),
                 ],
-                'a = 1; b = 4;'
+                'a = 1; b = 4;',
             ],
             'number with comment' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
-                'a = 1; # This is a comment! So it will be skipped. '
+                'a = 1; # This is a comment! So it will be skipped. ',
             ],
             'implicit multiplication of numbers' => [
                 ['a' => new variable('a', 18, variable::NUMERIC)],
-                'a=3 6;'
+                'a=3 6;',
             ],
             'one expression' => [
                 ['c' => new variable('c', 4.14, variable::NUMERIC)],
-                'c = cos(0)+3.14;'
+                'c = cos(0)+3.14;',
             ],
             'char from a string' => [
                 [
                     's' => new variable('s', 'Hello!', variable::STRING),
-                    'a' => new variable('a', 'H', variable::STRING)
+                    'a' => new variable('a', 'H', variable::STRING),
                 ],
-                's = "Hello!"; a = s[0];'
+                's = "Hello!"; a = s[0];',
             ],
             'string concatenation, direct' => [
                 [
                     's' => new variable('s', 'Hello World!', variable::STRING),
                 ],
-                's = "Hello" + " World!";'
+                's = "Hello" + " World!";',
             ],
             'string concatenation, from variables' => [
                 [
@@ -376,53 +376,53 @@ class evaluator_test extends \advanced_testcase {
                     'b' => new variable('b', ' World!', variable::STRING),
                     's' => new variable('s', 'Hello World!', variable::STRING),
                 ],
-                'a = "Hello"; b = " World!"; s = a + b;'
+                'a = "Hello"; b = " World!"; s = a + b;',
             ],
             'string concatenation, mixed' => [
                 [
                     'a' => new variable('a', 'Hello', variable::STRING),
                     's' => new variable('s', 'Hello World!', variable::STRING),
                 ],
-                'a = "Hello"; s = a + " World!";'
+                'a = "Hello"; s = a + " World!";',
             ],
             'one string with double quotes' => [
                 ['d' => new variable('d', 'Hello!', variable::STRING)],
-                'd = "Hello!";'
+                'd = "Hello!";',
             ],
             'one string with single quotes' => [
                 ['d' => new variable('d', 'Hello!', variable::STRING)],
-                "d = 'Hello!';"
+                "d = 'Hello!';",
             ],
             'list of numbers' => [
                 ['e' => new variable('e', [1, 2, 3, 4], variable::LIST)],
-                'e =[1,2,3,4];'
+                'e =[1,2,3,4];',
             ],
             'list of strings' => [
                 ['f' => new variable('f', ['A', 'B', 'C'], variable::LIST)],
-                'f =["A", "B", "C"];'
+                'f =["A", "B", "C"];',
             ],
             'list with numbers and string' => [
                 ['e' => new variable('e', [1, 2, 'A'], variable::LIST)],
-                'e=[1,2,"A"];'
+                'e=[1,2,"A"];',
             ],
             'list with range of numbers and string' => [
                 ['e' => new variable('e', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'k'], variable::LIST)],
-                'e=[0:10,"k"];'
+                'e=[0:10,"k"];',
             ],
             'empty list' => [
                 ['e' => new variable('e', [], variable::LIST)],
-                'e=[];'
+                'e=[];',
             ],
             'large list (10000 entries) via fill' => [
                 ['c' => new variable('e', array_fill(0, 10000, 'rr'), variable::LIST)],
-                'c=fill(10000,"rr")'
+                'c=fill(10000,"rr")',
             ],
             'list filled with count from expression' => [
                 [
                     'a' => new variable('a', [1, 2, 3, 4], variable::LIST),
                     'c' => new variable('c', array_fill(0, 5, 'rr'), variable::LIST),
                 ],
-                'a=[1,2,3,4]; c=fill(len(a)+1,"rr")'
+                'a=[1,2,3,4]; c=fill(len(a)+1,"rr")',
             ],
             'composed expression with vars' => [
                 [
@@ -431,56 +431,56 @@ class evaluator_test extends \advanced_testcase {
                     'c' => new variable('c', 4, variable::NUMERIC),
                     'g' => new variable('g', [1, 47 , 2 , 2.718281828459, 16], variable::LIST),
                 ],
-                'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];'
+                'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];',
             ],
             'list with expressions + list element reference' => [
                 [
                     'h' => new variable('h', [1, 5 , -0.7568024953079282, 5], variable::LIST),
                     'j' => new variable('j', 5, variable::NUMERIC),
                 ],
-                'h = [1,2+3,sin(4),5]; j=h[1];'
+                'h = [1,2+3,sin(4),5]; j=h[1];',
             ],
             'assign list element' => [
                 ['e' => new variable('e', 2, variable::NUMERIC)],
-                'e = [1,2,3,4][1];'
+                'e = [1,2,3,4][1];',
             ],
             'assign to list element' => [
                 [
                     'e' => new variable('e', [1, 2 , 111 , 4], variable::LIST),
                 ],
-                'e = [1,2,3,4]; e[2]=111;'
+                'e = [1,2,3,4]; e[2]=111;',
             ],
             'assign string to list element with variable index' => [
                 [
                     'a' => new variable('a', 0, variable::NUMERIC),
                     'e' => new variable('e', ['A', 2 , 3 , 4], variable::LIST),
                 ],
-                'e = [1,2,3,4]; a=1-1; e[a]="A";'
+                'e = [1,2,3,4]; a=1-1; e[a]="A";',
             ],
             'assign number to list element with variable index' => [
                 [
                     'a' => new variable('a', 1, variable::NUMERIC),
                     'e' => new variable('e', [1, 111 , 3 , 4], variable::LIST),
                 ],
-                'e = [1,2,3,4]; a=1; e[a]=111;'
+                'e = [1,2,3,4]; a=1; e[a]=111;',
             ],
             'assign to list element with calculated variable as index' => [
                 [
                     'a' => new variable('a', 0, variable::NUMERIC),
                     'e' => new variable('e', [111, 2 , 3 , 4], variable::LIST),
                 ],
-                'e = [1,2,3,4]; a=1-1; e[a]=111;'
+                'e = [1,2,3,4]; a=1-1; e[a]=111;',
             ],
             'assign only element from list of length 1' => [
                 ['g' => new variable('g', 3, variable::NUMERIC)],
-                'g = [3][0];'
+                'g = [3][0];',
             ],
             'assign from array where element is itself element from a list' => [
                 [
                     'a' => new variable('a', [7, 8, 9], variable::LIST),
                     'g' => new variable('g', 8, variable::NUMERIC),
                 ],
-                'a = [7,8,9]; g = [a[1]][0];'
+                'a = [7,8,9]; g = [a[1]][0];',
             ],
             'assign with ranges' => [
                 [
@@ -488,51 +488,51 @@ class evaluator_test extends \advanced_testcase {
                     'k' => new variable('k', [4, 5, 6, 7], variable::LIST),
                     'm' => new variable('m', [-20, -18.5, -17, -15.5, -14, -12.5, -11], variable::LIST),
                 ],
-                'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];'
+                'h = [0:10]; k=[4:8:1]; m=[-20:-10:1.5];',
             ],
             'assign from list with negative index' => [
                 [
                     'a' => new variable('a', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], variable::LIST),
-                    'b' => new variable('b', 8, variable::NUMERIC)
+                    'b' => new variable('b', 8, variable::NUMERIC),
                 ],
-                'a = [0:10]; b = a[-2];'
+                'a = [0:10]; b = a[-2];',
             ],
             'assign to list with negative index' => [
                 [
                     'a' => new variable('a', [0, 1, 2, 3, 4, 5, 6, 99, 8, 15], variable::LIST),
                 ],
-                'a = [0:10]; a[-1] = 15; a[-3] = 99'
+                'a = [0:10]; a[-1] = 15; a[-3] = 99',
             ],
             'assign to list with index being a numeric string' => [
                 [
                     'a' => new variable('a', [0, 1, 15, 3, 4, 5, 6, 99, 8, 9], variable::LIST),
                 ],
-                'a = [0:10]; a["2"] = 15; a["-3"] = 99'
+                'a = [0:10]; a["2"] = 15; a["-3"] = 99',
             ],
             'assign from literal list with negative index' => [
                 [
-                    'a' => new variable('a', 8, variable::NUMERIC)
+                    'a' => new variable('a', 8, variable::NUMERIC),
                 ],
-                'a = [0:10][-2]'
+                'a = [0:10][-2]',
             ],
             'assign from string variable with negative index' => [
                 [
                     's' => new variable('s', 'string', variable::STRING),
-                    'c' => new variable('c', 'n', variable::STRING)
+                    'c' => new variable('c', 'n', variable::STRING),
                 ],
-                's = "string"; c = s[-2];'
+                's = "string"; c = s[-2];',
             ],
             'assign from string variable with index being numerical string' => [
                 [
                     's' => new variable('s', 'string', variable::STRING),
                     'c' => new variable('c', 'n', variable::STRING),
-                    'd' => new variable('d', 't', variable::STRING)
+                    'd' => new variable('d', 't', variable::STRING),
                 ],
-                's = "string"; c = s["-2"]; d = s["1"];'
+                's = "string"; c = s["-2"]; d = s["1"];',
             ],
             'assign from string literal with negative index' => [
                 ['c' => new variable('c', 'n', variable::STRING)],
-                'c = "string"[-2];'
+                'c = "string"[-2];',
             ],
             'assign lists and composed expressions' => [
                 [
@@ -540,15 +540,15 @@ class evaluator_test extends \advanced_testcase {
                     's' => new variable('s', [2, 0, 1], variable::LIST),
                     'n' => new variable('n', [9, 3, 54], variable::LIST),
                 ],
-                'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];'
+                'a = [1,2,3]; s=[2,0,1]; n=[3*a[s[0]], 3*a[s[1]], 3*a[s[2]]*9];',
             ],
             'assign with concatenation of lists' => [
                 ['s' => new variable('s', [1, 2, 3, 'A', 'B'], variable::LIST)],
-                's=concat([1,2,3], ["A","B"]);'
+                's=concat([1,2,3], ["A","B"]);',
             ],
             'assign with exponentiation' => [
                 ['a' => new variable('a', 6561, variable::NUMERIC)],
-                'a=3**8;'
+                'a=3**8;',
             ],
             'assign with fill()' => [
                 [
@@ -557,7 +557,7 @@ class evaluator_test extends \advanced_testcase {
                     'B' => new variable('B', ['Hello', 'Hello', 'Hello'], variable::LIST),
                     'C' => new variable('C', [4, 4, 4, 4], variable::LIST),
                 ],
-                'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);'
+                'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);',
             ],
             'assign with indirect fill()' => [
                 [
@@ -565,121 +565,121 @@ class evaluator_test extends \advanced_testcase {
                     'b' => new variable('b', 4, variable::NUMERIC),
                     'c' => new variable('c', ['rr', 'rr', 'rr', 'rr'], variable::LIST),
                 ],
-                'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")'
+                'a=[1,2,3,4]; b=len(a); c=fill(len(a),"rr")',
             ],
             'assignment with sort() (numbers)' => [
                 [
                     's' => new variable('s', [2, 3, 5, 7, 11], variable::LIST),
                 ],
-                's=sort([7,5,3,11,2]);'
+                's=sort([7,5,3,11,2]);',
             ],
             'assignment with sort() (strings)' => [
                 [
                     's' => new variable('s', ['A1', 'A2', 'A10', 'A100'], variable::LIST),
                 ],
-                's=sort(["A1","A10","A2","A100"]);'
+                's=sort(["A1","A10","A2","A100"]);',
             ],
             'assignment with sort() (two args)' => [
                 [
                     's' => new variable('s', [2, 3, 1], variable::LIST),
                 ],
-                's=sort([1,2,3], ["A10","A1","A2"]);'
+                's=sort([1,2,3], ["A10","A1","A2"]);',
             ],
             'assignment with sort() (numbers again)' => [
                 [
                     's' => new variable('s', [1, 3, 5, 10], variable::LIST),
                 ],
-                's=sort([1,10,5,3]);'
+                's=sort([1,10,5,3]);',
             ],
             'assignment with sort() (numeric strings and letters)' => [
                 [
                     's' => new variable('s', ['1', '2', '3', '4', 'A', 'B', 'C', 'a', 'b', 'c'], variable::LIST),
                 ],
-                's=sort(["4","3","A","a","B","2","1","b","c","C"]);'
+                's=sort(["4","3","A","a","B","2","1","b","c","C"]);',
             ],
             'assignment with sort() (letters)' => [
                 [
                     's' => new variable('s', ['A', 'B', 'B', 'C'], variable::LIST),
                 ],
-                's=sort(["B","C","A","B"]);'
+                's=sort(["B","C","A","B"]);',
             ],
             'assignment with sort() (numeric strings and letters again)' => [
                 [
                     's' => new variable('s', ['0', '1', '2', '3', 'A', 'B', 'C', 'a', 'b', 'c'], variable::LIST),
                 ],
-                's=sort(["B","3","1","0","A","C","c","b","2","a"]);'
+                's=sort(["B","3","1","0","A","C","c","b","2","a"]);',
             ],
             'assignment with sort() (strings)' => [
                 [
                     's' => new variable('s', ['A1', 'A2', 'B'], variable::LIST),
                 ],
-                's=sort(["B","A2","A1"]);'
+                's=sort(["B","A2","A1"]);',
             ],
             'assignment with sort() (strings, two params)' => [
                 [
                     's' => new variable('s', ['B', 'A', 'C'], variable::LIST),
                 ],
-                's=sort(["B","C","A"],[0,2,1]);'
+                's=sort(["B","C","A"],[0,2,1]);',
             ],
             'assignment with sort() (strings, two params again)' => [
                 [
                     's' => new variable('s', ['A1', 'B', 'A2'], variable::LIST),
                 ],
-                's=sort(["B","A2","A1"],[2,4,1]);'
+                's=sort(["B","A2","A1"],[2,4,1]);',
             ],
             'assignment with sort() (both arguments are strings)' => [
                 [
                     's' => new variable('s', ['C', 'A', 'B'], variable::LIST),
                 ],
-                's=sort(["A","B","C"],["A2","A10","A1"]);'
+                's=sort(["A","B","C"],["A2","A10","A1"]);',
             ],
             'assignment with sort() (positive and negative numbers)' => [
                 [
                     's' => new variable('s', [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5], variable::LIST),
                 ],
-                's=sort([-3,-2,4,2,3,1,0,-1,-4,5]);'
+                's=sort([-3,-2,4,2,3,1,0,-1,-4,5]);',
             ],
             'assignment with sort() (positive and negative numbers as strings)' => [
                 [
                     's' => new variable('s', ['-3', '-2', '-1', '0', '1', '2', '3', 'A', 'B', 'a', 'b'], variable::LIST),
                 ],
-                's=sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]);'
+                's=sort(["-3","-2","B","2","3","1","0","-1","b","a","A"]);',
             ],
             'assignment with sort(), one empty list' => [
                 [
                     's' => new variable('s', [], variable::LIST),
                 ],
-                's=sort([]);'
+                's=sort([]);',
             ],
             'assignment with sort(), two empty lists' => [
                 [
                     's' => new variable('s', [], variable::LIST),
                 ],
-                's=sort([], []);'
+                's=sort([], []);',
             ],
             'assignment with sublist()' => [
                 [
                     's' => new variable('s', ['B', 'D'], variable::LIST),
                 ],
-                's=sublist(["A","B","C","D"],[1,3]);'
+                's=sublist(["A","B","C","D"],[1,3]);',
             ],
             'assignment with sublist(), same element twice' => [
                 [
                     's' => new variable('s', ['A', 'A', 'C', 'D'], variable::LIST),
                 ],
-                's=sublist(["A","B","C","D"],[0,0,2,3]);'
+                's=sublist(["A","B","C","D"],[0,0,2,3]);',
             ],
             'assignment with inv()' => [
                 [
                     's' => new variable('s', [1, 3, 0, 2], variable::LIST),
                 ],
-                's=inv([2,0,3,1]);'
+                's=inv([2,0,3,1]);',
             ],
             'assignment with inv(inv())' => [
                 [
                     's' => new variable('s', [2, 0, 3, 1], variable::LIST),
                 ],
-                's=inv(inv([2,0,3,1]));'
+                's=inv(inv([2,0,3,1]));',
             ],
             'assignment with sublist() and inv()' => [
                 [
@@ -687,21 +687,21 @@ class evaluator_test extends \advanced_testcase {
                     'B' => new variable('B', [2, 0, 3, 1], variable::LIST),
                     's' => new variable('s', ['A', 'B', 'C', 'D'], variable::LIST),
                 ],
-                'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));'
+                'A=["A","B","C","D"]; B=[2,0,3,1]; s=sublist(sublist(A,B),inv(B));',
             ],
             'assignment with map() and "exp"' => [
                 [
                     'a' => new variable('a', [1, 2, 3], variable::LIST),
                     'A' => new variable('A', [2.718281828459, 7.3890560989307, 20.085536923188], variable::LIST),
                 ],
-                'a=[1,2,3]; A=map("exp",a);'
+                'a=[1,2,3]; A=map("exp",a);',
             ],
             'assignment with map() and "+" with constant' => [
                 [
                     'a' => new variable('a', [1, 2, 3], variable::LIST),
                     'A' => new variable('A', [3.3, 4.3, 5.3], variable::LIST),
                 ],
-                'a=[1,2,3]; A=map("+",a,2.3);'
+                'a=[1,2,3]; A=map("+",a,2.3);',
             ],
             'assignment with map() and "+" with two arrays' => [
                 [
@@ -709,7 +709,7 @@ class evaluator_test extends \advanced_testcase {
                     'b' => new variable('b', [4, 5, 6], variable::LIST),
                     'A' => new variable('A', [5, 7, 9], variable::LIST),
                 ],
-                'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);'
+                'a=[1,2,3]; b=[4,5,6]; A=map("+",a,b);',
             ],
             'assignment with map() and "pow" with two arrays' => [
                 [
@@ -717,50 +717,50 @@ class evaluator_test extends \advanced_testcase {
                     'b' => new variable('b', [4, 5, 6], variable::LIST),
                     'A' => new variable('A', [1, 32, 729], variable::LIST),
                 ],
-                'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);'
+                'a=[1,2,3]; b=[4,5,6]; A=map("pow",a,b);',
             ],
             'assignment with sum()' => [
                 [
                     'r' => new variable('r', 15, variable::NUMERIC),
                 ],
-                'r=sum([4,5,6]);'
+                'r=sum([4,5,6]);',
             ],
             'assignment with sum(), fill() and operations' => [
                 [
                     'r' => new variable('r', -4, variable::NUMERIC),
                 ],
-                'r=3+sum(fill(10,-1))+3;'
+                'r=3+sum(fill(10,-1))+3;',
             ],
             'assignment with concat() and lists of numbers' => [
                 [
                     's' => new variable('s', [1, 2, 3, 4, 5, 6, 7, 8], variable::LIST),
                 ],
-                's=concat([1,2,3], [4,5,6], [7,8]);'
+                's=concat([1,2,3], [4,5,6], [7,8]);',
             ],
             'assignment with concat() and lists of strings' => [
                 [
                     's' => new variable('s', ['A', 'B', 'X', 'Y', 'Z', 'Hello'], variable::LIST),
                 ],
-                's=concat(["A","B"],["X","Y","Z"],["Hello"]);'
+                's=concat(["A","B"],["X","Y","Z"],["Hello"]);',
             ],
             'assignment with join() and list of numbers' => [
                 [
                     's' => new variable('s', '1~2~3', variable::STRING),
                 ],
-                's=join("~", [1,2,3]);'
+                's=join("~", [1,2,3]);',
             ],
             'assignment with str()' => [
                 [
                     's' => new variable('s', '45', variable::STRING),
                 ],
-                's=str(45);'
+                's=str(45);',
             ],
             'assignment with nested join() and list' => [
                 [
                     'a' => new variable('a', [4, 5], variable::LIST),
                     's' => new variable('s', 'A,B,1,5,3,4+5+?,9', variable::STRING),
                 ],
-                'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);'
+                'a=[4,5]; s = join(",","A","B", [ 1 , a  [1]], 3, [join("+",a,"?"),"9"]);',
             ],
             'assignment with references and sum() containing a range' => [
                 [
@@ -769,19 +769,19 @@ class evaluator_test extends \advanced_testcase {
                     'Y' => new variable('Y', 'Hello!', variable::STRING),
                     'X' => new variable('X', 31, variable::NUMERIC),
                 ],
-                'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;'
+                'A = 1; Z = A + 3; Y = "Hello!"; X = sum([4:12:2]) + 3;',
             ],
             'implicit assignment via empty for loop index' => [
                 [
                     'i' => new variable('i', 3, variable::NUMERIC),
                 ],
-                'for(i:[1,2,3]){ };'
+                'for(i:[1,2,3]){ };',
             ],
             'implicit assignment via for loop index, other input format' => [
                 [
                     'i' => new variable('i', 3, variable::NUMERIC),
                 ],
-                'for ( i : [1,2,3] ) {};'
+                'for ( i : [1,2,3] ) {};',
             ],
             'assignment involving for loop with single statement and list from variable' => [
                 [
@@ -789,21 +789,21 @@ class evaluator_test extends \advanced_testcase {
                     'i' => new variable('i', 3, variable::NUMERIC),
                     'A' => new variable('A', [1, 2, 3], variable::LIST),
                 ],
-                'z = 0; A=[1,2,3]; for(i:A) z=z+i;'
+                'z = 0; A=[1,2,3]; for(i:A) z=z+i;',
             ],
             'assignment involving for loop with single statement in braces' => [
                 [
                     'z' => new variable('z', 10, variable::NUMERIC),
                     'i' => new variable('i', 4, variable::NUMERIC),
                 ],
-                'z = 0; for(i: [0:5]){z = z + i;}'
+                'z = 0; for(i: [0:5]){z = z + i;}',
             ],
             'assignment involving for loop iterating over list of strings' => [
                 [
                     's' => new variable('s', 'ABC', variable::STRING),
                     'i' => new variable('i', 'C', variable::STRING),
                 ],
-                's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }'
+                's = ""; for(i: ["A","B","C"]) { s=join("",s,[i]); }',
             ],
             'assignment involving nested for loops' => [
                 [
@@ -811,13 +811,13 @@ class evaluator_test extends \advanced_testcase {
                     'i' => new variable('i', 4, variable::NUMERIC),
                     'j' => new variable('j', 2, variable::NUMERIC),
                 ],
-                'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;'
+                'z = 0; for(i: [0:5]) for(j: [0:3]) z=z+i;',
             ],
             'assignment involving nested for loops' => [
                 [
                     's' => new variable('s', [0], variable::LIST),
                 ],
-                's=diff([3*3+3],[3*4]);'
+                's=diff([3*3+3],[3*4]);',
             ],
             'assignment with algebraic vars and diff()' => [
                 [
@@ -825,7 +825,7 @@ class evaluator_test extends \advanced_testcase {
                     'y' => new variable('y', [1, 2, 3, 4, 5, 6, 7, 8, 9], variable::ALGEBRAIC),
                     's' => new variable('s', 0, variable::NUMERIC),
                 ],
-                'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50)[0];'
+                'x={1:10}; y={1:10}; s=diff(["x*x+y*y"],["x^2+y^2"],50)[0];',
             ],
             'ternary with variables' => [
                 [
@@ -835,7 +835,7 @@ class evaluator_test extends \advanced_testcase {
                     'd' => new variable('d', 4, variable::NUMERIC),
                     'e' => new variable('e', 3, variable::NUMERIC),
                 ],
-                'a=1; b=2; c=3; d=4; e=(a==b ? b : c)'
+                'a=1; b=2; c=3; d=4; e=(a==b ? b : c)',
             ],
         ];
 
@@ -845,55 +845,55 @@ class evaluator_test extends \advanced_testcase {
         return [
             'three numbers' => [
                 ['name' => 'x', 'count' => 3, 'min' => 1, 'max' => 3, 'shuffle' => false],
-                'x = {1,2,3};'
+                'x = {1,2,3};',
             ],
             'three letters' => [
                 ['name' => 'a', 'count' => 3, 'min' => 'A', 'max' => 'C', 'shuffle' => false],
-                'a = {"A","B","C"}'
+                'a = {"A","B","C"}',
             ],
             'two lists with numbers' => [
                 ['name' => 'a', 'count' => 2, 'min' => null, 'max' => null, 'shuffle' => false],
-                'a = {[1,2], [3,4]}'
+                'a = {[1,2], [3,4]}',
             ],
             'two lists with letters' => [
                 ['name' => 'a', 'count' => 2, 'min' => null, 'max' => null, 'shuffle' => false],
-                'a = {["A","B"],["C","D"]}'
+                'a = {["A","B"],["C","D"]}',
             ],
             'three values, more whitespace' => [
                 ['name' => 'x', 'count' => 3, 'min' => 1, 'max' => 3, 'shuffle' => false],
-                'x = { 1 , 2 , 3 };'
+                'x = { 1 , 2 , 3 };',
             ],
             'three ranges' => [
                 ['name' => 'x', 'count' => 16, 'min' => 1, 'max' => 9.5, 'shuffle' => false],
-                'x = {1:3, 4:5:0.1 , 8:10:0.5 };'
+                'x = {1:3, 4:5:0.1 , 8:10:0.5 };',
             ],
             'values and ranges' => [
                 ['name' => 'a', 'count' => 42, 'min' => 0, 'max' => 100, 'shuffle' => false],
-                'a = {0, 1:3:0.1, 10:30, 100}'
+                'a = {0, 1:3:0.1, 10:30, 100}',
             ],
             'shuffle with strings' => [
                 ['name' => 'a', 'count' => 6, 'shuffle' => true],
-                'a = shuffle (["A", "B", "C"])'
+                'a = shuffle (["A", "B", "C"])',
             ],
             'big shuffle' => [
                 ['name' => 'a', 'count' => PHP_INT_MAX, 'shuffle' => true],
-                'a = shuffle ([1:100])'
+                'a = shuffle ([1:100])',
             ],
             'two vars and many combinations' => [
                 ['name' => 'a', 'count' => PHP_INT_MAX, 'shuffle' => true],
-                'a = shuffle([1:100]); b = shuffle([1:10]);'
+                'a = shuffle([1:100]); b = shuffle([1:10]);',
             ],
             'two numeric lists of different length' => [
                 ['name' => 'a', 'count' => 2, 'shuffle' => false],
-                'a = {[1,2],[3,4,5]}'
+                'a = {[1,2],[3,4,5]}',
             ],
             'list of numbers and strings, same length' => [
                 ['name' => 'a', 'count' => 2, 'shuffle' => false],
-                'a = {[1,2],["A","B"]}'
+                'a = {[1,2],["A","B"]}',
             ],
             'list of numbers and strings, different length' => [
                 ['name' => 'a', 'count' => 2, 'shuffle' => false],
-                'a = {[1,2],["A","B","C"]}'
+                'a = {[1,2],["A","B","C"]}',
             ],
         ];
     }
@@ -1150,26 +1150,26 @@ class evaluator_test extends \advanced_testcase {
                 [
                     'e' => new variable('e', [[1, 2], [3, 4]], variable::LIST),
                 ],
-                'e=[[1,2],[3,4]];'
+                'e=[[1,2],[3,4]];',
             ],
             'change list element to nested list' => [
                 [
                     'e' => new variable('e', [[8, 9], 2, 3], variable::LIST),
                 ],
-                'e=[1,2,3]; e[0] = [8,9];'
+                'e=[1,2,3]; e[0] = [8,9];',
             ],
             'nest list into list from variable' => [
                 [
                     'a' => new variable('a', [9, 10], variable::LIST),
                     'e' => new variable('e', [[9, 10], 2, 3], variable::LIST),
                 ],
-                'a=[9,10]; e=[1,2,3]; e[0]=a;'
+                'a=[9,10]; e=[1,2,3]; e[0]=a;',
             ],
             'change list element in a nested list' => [
                 [
                     'e' => new variable('e', [[1, 5], 2, 3], variable::LIST),
                 ],
-                'e=[[1,2],2,3]; e[0][1] = 5;'
+                'e=[[1,2],2,3]; e[0][1] = 5;',
             ],
         ];
     }
@@ -1255,183 +1255,183 @@ class evaluator_test extends \advanced_testcase {
         return [
             'assign list of strings to algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
-                'x = {"a", "b"}'
+                'x = {"a", "b"}',
             ],
             'assign mixed values to algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
-                'x = {1, 2, "foo"}'
+                'x = {1, 2, "foo"}',
             ],
             'assign numeric string to algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
-                'x = {"1", 2}'
+                'x = {"1", 2}',
             ],
             'assign nested list to algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
-                'x = {1, 2, [1, 2]}'
+                'x = {1, 2, [1, 2]}',
             ],
             'trying to change char of string' => [
                 'Individual chars of a string cannot be modified.',
-                's = "foo"; s[1] = "x"'
+                's = "foo"; s[1] = "x"',
             ],
             'assignment with invalid function' => [
                 "Unknown function: 'idontexist'",
-                'a = \idontexist(5)'
+                'a = \idontexist(5)',
             ],
             'assignment to constant' => [
                 'Left-hand side of assignment must be a variable.',
-                'pi = 3'
+                'pi = 3',
             ],
             'assignment to constant' => [
                 'Left-hand side of assignment must be a variable.',
-                'π = 3'
+                'π = 3',
             ],
             'invalid use of prefix with number' => [
                 'Syntax error: invalid use of prefix character \.',
-                'a = \ 2'
+                'a = \ 2',
             ],
             'invalid argument for unary operator' => [
                 "Number expected, found 'foo'.",
-                'a = -"foo"'
+                'a = -"foo"',
             ],
             'invalid argument for unary operator, indirect' => [
                 "Number expected, found 'foo'.",
-                's = "foo"; a = -s'
+                's = "foo"; a = -s',
             ],
             'invalid use of prefix with paren' => [
                 'Syntax error: invalid use of prefix character \.',
-                'a = \ (3 + 1)'
+                'a = \ (3 + 1)',
             ],
             'assignment to invalid variable' => [
                 '1:1:Invalid variable name: _a.',
-                '_a=3;'
+                '_a=3;',
             ],
             'unknown char in expression' => [
                 "1:4:Unexpected input: '«'",
-                'a=3«6;'
+                'a=3«6;',
             ],
             'not subscriptable' => [
                 '1:8:Evaluation error: indexing is only possible with lists and strings.',
-                'f=1; g=f[1];'
+                'f=1; g=f[1];',
             ],
             'invalid index: array' => [
                 'Evaluation error: only one index supported when accessing array elements.',
-                'e=[1,2,3][4,5];'
+                'e=[1,2,3][4,5];',
             ],
             'invalid index: array (indirect)' => [
                 'Evaluation error: only one index supported when accessing array elements.',
-                'e=[1,2,3]; f=e[4,5]'
+                'e=[1,2,3]; f=e[4,5]',
             ],
             'multiply array with number' => [
                 '1:16:Number expected, found list.',
-                'e=[1,2,3,4]; f=e*2;'
+                'e=[1,2,3,4]; f=e*2;',
             ],
             'multiple indices for array' => [
                 '1:18:Evaluation error: only one index supported when accessing array elements.',
-                'e=[1,2,3][1][4,5,6][2];'
+                'e=[1,2,3][1][4,5,6][2];',
             ],
             'fill with count == 0' => [
                 '1:3:fill() expects its first argument to be a positive integer.',
-                'c=fill(0,"rr")'
+                'c=fill(0,"rr")',
             ],
             'undefined natrual logarithm' => [
                 'ln() expects its argument to be a positive number.',
-                'x=ln(-5)'
+                'x=ln(-5)',
             ],
             'undefined natrual logarithm' => [
                 'ln() expects its argument to be a positive number.',
-                'x=ln(0)'
+                'x=ln(0)',
             ],
             'closing parenthesis when not opened' => [
                 "1:7:Unbalanced parenthesis, stray ')' found.",
-                's=fill);'
+                's=fill);',
             ],
             'opening parenthesis not closed' => [
                 "1:7:Unbalanced parenthesis, '(' is never closed.",
-                's=fill(10,"rr";'
+                's=fill(10,"rr";',
             ],
             'invalid invocation of concat(), number' => [
                 "1:3:concat() expects its arguments to be lists.",
-                's=concat(0, [1,2,3], [5,6], 100);'
+                's=concat(0, [1,2,3], [5,6], 100);',
             ],
             'invalid for loop: no variable' => [
                 '1:12:Syntax error: identifier expected.',
-                'z = 0; for(: [0:5]) z=z+i;'
+                'z = 0; for(: [0:5]) z=z+i;',
             ],
             'invalid for loop: no list' => [
                 '1:14:Syntax error: [ or variable name expected.',
-                'z = 0; for(i:) z=z+i;'
+                'z = 0; for(i:) z=z+i;',
             ],
             'invalid for loop: no statement or brace' => [
                 'Syntax error: { or statement expected.',
-                'z = 0; for(i: [0:5]) '
+                'z = 0; for(i: [0:5]) ',
             ],
             'invalid for loop: missing colon in nested loop' => [
                 '1:28:Syntax error: : expected.',
-                'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;'
+                'z = 0; for(i: [0:5]) for(j [0:3]) z=z+i;',
             ],
             'invalid invocation of diff(), mismatching lengths' => [
                 '1:3:diff() expects two lists of the same size.',
-                's=diff([3*3+3,0],[3*4]);'
+                's=diff([3*3+3,0],[3*4]);',
             ],
             'algebraic variable used in calculation' => [
                 "1:21:Algebraic variable 'b' cannot be used in this context.",
-                'a = 7; b = {1:5}; 2*b'
+                'a = 7; b = {1:5}; 2*b',
             ],
             'invalid ternary, ? is last char before closing paren' => [
                 "Syntax error: incomplete ternary operator or misplaced '?'.",
-                'a = (5 ?)'
+                'a = (5 ?)',
             ],
             'invalid ternary, ? is last char before closing brace' => [
                 "Syntax error: incomplete ternary operator or misplaced '?'.",
-                'a = {5 ?}'
+                'a = {5 ?}',
             ],
             'invalid ternary, ? is last char before closing bracket' => [
                 "Syntax error: incomplete ternary operator or misplaced '?'.",
-                'a = [5 ?]'
+                'a = [5 ?]',
             ],
             'invalid ternary, ? is last char before closing bracket' => [
                 'Evaluation error: not enough arguments for ternary operator: 2.',
-                '(5 ? 4 :)'
+                '(5 ? 4 :)',
             ],
             'invalid ternary, ? is last char before closing bracket' => [
                 'Evaluation error: not enough arguments for ternary operator.',
-                'a = (5 ? 4 :)'
+                'a = (5 ? 4 :)',
             ],
             'argument should be scalar, is list' => [
                 'Evaluation error: numeric value expected, got list.',
-                'a = [1, 2, 3] + 4'
+                'a = [1, 2, 3] + 4',
             ],
             'argument should be scalar, is list' => [
                 'Scalar value expected, found list.',
-                'a = "a" + [1, 2, 3]'
+                'a = "a" + [1, 2, 3]',
             ],
             'invalid 0^0' => [
                 'Power 0^0 is not defined.',
-                'a = 0 ** 0'
+                'a = 0 ** 0',
             ],
             'invalid power: 0 to negative power' => [
                 'Division by zero is not defined, so base cannot be zero for negative exponents.',
-                'a = 0 ** -1'
+                'a = 0 ** -1',
             ],
             'invalid power: negative base with fractional exponent' => [
                 'Base cannot be negative with fractional exponent.',
-                'a = (-1) ** 0.5'
+                'a = (-1) ** 0.5',
             ],
             'array in algebraic variable' => [
                 'Algebraic variables can only be initialized with a list of numbers.',
-                'a = {[1:5],[20:25],[40:50:2]}'
+                'a = {[1:5],[20:25],[40:50:2]}',
             ],
             'string after string' => [
                 'Syntax error: did you forget to put an operator?',
-                'a = "foo" "bar"'
+                'a = "foo" "bar"',
             ],
             'number after string' => [
                 'Syntax error: did you forget to put an operator?',
-                'a = "foo" 4'
+                'a = "foo" 4',
             ],
             'string after number' => [
                 'Syntax error: did you forget to put an operator?',
-                'a = 4 "foo"'
+                'a = 4 "foo"',
             ],
         ];
     }
@@ -1608,8 +1608,8 @@ class evaluator_test extends \advanced_testcase {
             'length 2' => [['100', 'cm'], '100cm'],
             'length 3' => [['1.05', 'mm'], '1.05 mm'],
             'length 4' => [['-1.3', 'nm'], '-1.3 nm'],
-            'area 1' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2', ],
-            'area 2' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV', ],
+            'area 1' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2'],
+            'area 2' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV'],
             'speed' => [['1', 'km/s'], '1 km/s'],
             'combination 1' => [['1', 'm g/us'], '1 m g/us'],
             'combination 2' => [['1', 'kPa s^-2'], '1 kPa s^-2'],
@@ -1802,7 +1802,7 @@ class evaluator_test extends \advanced_testcase {
             'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 'Unknown variable: e4',
-                '3e4e4e4' => 'Unknown variable: e4e4'
+                '3e4e4e4' => 'Unknown variable: e4e4',
             ],
             'vars' => '',
         ];
@@ -1810,7 +1810,7 @@ class evaluator_test extends \advanced_testcase {
             'expected' => [
                 '3e4' => 3e4,
                 '3e4e4' => 3e4 * 9,
-                '3e4e4e4' => 'Unknown variable: e4e4'
+                '3e4e4e4' => 'Unknown variable: e4e4',
             ],
             'vars' => 'e4 = 9;',
         ];

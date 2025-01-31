@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-
 /**
  * Unit tests for the formulas question type renderer.
  *
@@ -68,19 +67,19 @@ class renderer_test extends walkthrough_test_base {
 
         // Start attempt and submit wrong answer.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
-        $this->process_submission(array('0_' => '99', '-submit' => 1));
+        $this->process_submission(['0_' => '99', '-submit' => 1]);
         $this->check_output_contains('general 1 -- 2 -- 99');
         $this->check_output_contains('incorrect 99 -- 2 -- 1');
 
         // Start attempt and submit correct answer.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
-        $this->process_submission(array('0_' => '5 m/s', '-submit' => 1));
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
         $this->check_output_contains('general 1 -- 2 -- 5');
         $this->check_output_contains('correct 5 -- 2 -- 1');
 
         // Start attempt and submit partially correct answer.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
-        $this->process_submission(array('0_' => '5 m', '-submit' => 1));
+        $this->process_submission(['0_' => '5 m', '-submit' => 1]);
         $this->check_output_contains('general 1 -- 2 -- 5');
         $this->check_output_contains('partially correct 5 -- 2 -- 1');
     }
@@ -91,7 +90,7 @@ class renderer_test extends walkthrough_test_base {
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         // Submit wrong answer and check for 'One possible correct answer is: 5'.
-        $this->process_submission(array('0_0' => '0', '-submit' => 1));
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
         $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5');
 
         // Set to unique answer and restart.
@@ -99,7 +98,7 @@ class renderer_test extends walkthrough_test_base {
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         // Submit wrong answer and check for 'The correct answer is: 5'.
-        $this->process_submission(array('0_0' => '0', '-submit' => 1));
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
         $this->check_output_contains_lang_string('uniquecorrectansweris', 'qtype_formulas', '5');
     }
 
@@ -292,7 +291,7 @@ class renderer_test extends walkthrough_test_base {
         );
 
         // Submit wrong answer.
-        $this->process_submission(array('0_0' => '0', '-submit' => 1));
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
 
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
@@ -302,7 +301,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_current_mark(0);
 
         // Submit right answer.
-        $this->process_submission(array('0_0' => '1', '-submit' => 1));
+        $this->process_submission(['0_0' => '1', '-submit' => 1]);
         $this->check_current_state(question_state::$complete);
         $this->check_current_output(
                 $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, true),
@@ -325,7 +324,7 @@ class renderer_test extends walkthrough_test_base {
         );
 
         // Submit wrong answer.
-        $this->process_submission(array('0_0' => '0', '-submit' => 1));
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedwrong);
         $this->check_output_contains_selectoptions(
                 $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
@@ -335,7 +334,7 @@ class renderer_test extends walkthrough_test_base {
 
         // Restart question and submit right answer.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
-        $this->process_submission(array('0_0' => '1', '-submit' => 1));
+        $this->process_submission(['0_0' => '1', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedright);
         $this->check_output_contains_selectoptions(
                 $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 1)

@@ -60,11 +60,11 @@ class questiontype_test extends \advanced_testcase {
         return test_question_maker::make_question('formulas', $which);
     }
 
-    protected function setUp():void {
+    protected function setUp(): void {
         $this->qtype = new qtype_formulas();
     }
 
-    protected function tearDown():void {
+    protected function tearDown(): void {
         $this->qtype = null;
     }
 
@@ -76,15 +76,15 @@ class questiontype_test extends \advanced_testcase {
         file_prepare_draft_area($draftitemid, $usercontext->id, null, null, null);
 
         $fs = get_file_storage();
-        $fileinfo = array(
+        $fileinfo = [
             'contextid' => $usercontext->id,
             'component' => 'user',
             'filearea' => 'draft',
             'itemid' => $draftitemid,
             'userid' => $user->id,
             'filepath' => '/',
-            'filename' => 'icon.gif'
-        );
+            'filename' => 'icon.gif',
+        ];
         $file = $fs->create_file_from_pathname($fileinfo, $CFG->dirroot . '/question/type/formulas/tests/fixtures/icon.gif');
 
         return $file;
@@ -150,8 +150,8 @@ class questiontype_test extends \advanced_testcase {
         $ans3->placeholder = '#3';
         $ans4 = new stdClass();
         $ans4->placeholder = '#4';
-        $answers = array(0 => $ans0, 1 => $ans1, 2 => $ans2, 3 => $ans3, 4 => $ans4);
-        $expected = array(
+        $answers = [0 => $ans0, 1 => $ans1, 2 => $ans2, 3 => $ans3, 4 => $ans4];
+        $expected = [
                 'placeholder[0]' => 'The placeholder\'s length is limited to 40 characters.'
                         .' This placeholder is missing from the main question text.',
                 'placeholder[1]' => 'Wrong placeholder\'s format or forbidden characters.'
@@ -159,27 +159,27 @@ class questiontype_test extends \advanced_testcase {
                 'placeholder[2]' => 'This placeholder is missing from the main question text.',
                 'placeholder[3]' => 'This placeholder has already been defined in some other part.'
                         .' This placeholder is missing from the main question text.',
-                'placeholder[4]' => 'Duplicated placeholder in the main question text.'
-                );
+                'placeholder[4]' => 'Duplicated placeholder in the main question text.',
+                ];
         self::assertEquals($expected, $this->qtype->check_placeholders($questiontext, $answers));
     }
 
     public function test_split_questiontext0(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
-        $expected = array(0 => '<p>Multiple parts : --',
+        $expected = [0 => '<p>Multiple parts : --',
                 1 => '--',
                 2 => '--',
-                3 => '</p>');
+                3 => '</p>'];
         self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
     public function test_split_questiontext1(): void {
         $q = $this->get_test_formulas_question('test4');
-        $expected = array(0 => '<p>This question shows different display methods of the answer and unit box.</p>',
+        $expected = [0 => '<p>This question shows different display methods of the answer and unit box.</p>',
                 1 => '',
                 2 => '',
                 3 => '',
-                4 => '');
+                4 => ''];
         self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
@@ -193,7 +193,7 @@ class questiontype_test extends \advanced_testcase {
                     'answermark' => [0 => ''],
                     'subqtext' => [0 => ['text' => '']],
                     'answer' => [0 => ''],
-                ]
+                ],
             ],
             // The question has subqtexts defined for both parts, so the first part MUST have an answermark
             // and an answer.
@@ -205,7 +205,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'answermark' => [0 => ''],
                     'answer' => [0 => ''],
-                ]
+                ],
             ],
             // With both parts being empty, there should be an error in the first part, because we have no
             // answer and a note on the answermark, because the default value (0) is not going to be valid.
@@ -218,7 +218,7 @@ class questiontype_test extends \advanced_testcase {
                     'answermark' => [0 => '', 1 => ''],
                     'answer' => [0 => '', 1 => ''],
                     'subqtext' => [0 => ['text' => ''], 1 => ['text' => '']],
-                ]
+                ],
             ],
             [
                 [
@@ -227,7 +227,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'questiontext' => '{#a}',
                     'placeholder' => [0 => '#a', 1 => '#a'],
-                ]
+                ],
             ],
         ];
     }
@@ -273,7 +273,7 @@ class questiontype_test extends \advanced_testcase {
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'correctness' => [0 => '_err < 0.01'],
                     'answer' => [0 => '"\sin(20)"'],
-                ]
+                ],
             ],
             [[], ['answer' => [0 => '\sin(20)']]],
             [[], ['answer' => [0 => '[1, 2]']]],
@@ -288,7 +288,7 @@ class questiontype_test extends \advanced_testcase {
                 ['subqtext[0]' => get_string('error_answerbox_duplicate', 'qtype_formulas', '_0')],
                 [
                     'subqtext' => [0 => ['text' => '{_0} and {_0}']],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_model_answer_no_content', 'qtype_formulas')],
@@ -296,11 +296,11 @@ class questiontype_test extends \advanced_testcase {
             ],
             [
                 ['globalunitpenalty' => get_string('error_unitpenalty', 'qtype_formulas')],
-                ['globalunitpenalty' => 2]
+                ['globalunitpenalty' => 2],
             ],
             [
                 ['globalunitpenalty' => get_string('error_unitpenalty', 'qtype_formulas')],
-                ['globalunitpenalty' => -0.5]
+                ['globalunitpenalty' => -0.5],
             ],
             [['globalruleid' => get_string('error_ruleid', 'qtype_formulas')], ['globalruleid' => -1]],
             [['varsrandom' => "1:2:Syntax error: unexpected end of expression after '='."], ['varsrandom' => 'a=']],
@@ -319,7 +319,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'vars1' => [0 => 'a=3; b=4'],
                     'answer' => [0 => 'c'],
-                ]
+                ],
             ],
             [['vars2[0]' => "1:4:Syntax error: unexpected end of expression after '+'."], ['vars2' => [0 => 'a=3+']]],
             [['vars2[0]' => "1:5:Number expected, found 'f'."], ['vars2' => [0 => 'a=3*"f"']]],
@@ -329,34 +329,34 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'answermark' => [0 => 0],
                     'subqtext' => [0 => ['text' => 'foo']],
-                ]
+                ],
             ],
             [
                 ['correctness[0]' => get_string('error_criterion_empty', 'qtype_formulas')],
                 [
                     'correctness' => [0 => ''],
                     'subqtext' => [0 => ['text' => 'foo']],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_answer_missing', 'qtype_formulas')],
                 [
                     'answer' => [0 => ''],
                     'subqtext' => [0 => ['text' => 'foo']],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_number_for_numeric_answertypes', 'qtype_formulas')],
                 [
                     'answer' => [0 => '"3"'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
@@ -364,42 +364,42 @@ class questiontype_test extends \advanced_testcase {
                     'varsglobal' => 'x=5',
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3*x'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '3*'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => 'Error in answer #1: Unknown variable: x'],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"3*x"'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => "Error in answer #1: '' is not a valid algebraic expression."],
                 [
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '""'],
-                ]
+                ],
             ],
             [
                 ['answer[0]' => "1:1:Algebraic variable 'x' cannot be used in this context."],
                 [
                     'varsglobal' => 'x={1,2,3}',
                     'answer' => [0 => 'x'],
-                ]
+                ],
             ],
             [
                 [],
@@ -408,7 +408,7 @@ class questiontype_test extends \advanced_testcase {
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"x"'],
                     'correctness' => [0 => '_err < 0.01'],
-                ]
+                ],
             ],
             [
                 ['correctness[0]' => get_string('error_algebraic_relerr', 'qtype_formulas')],
@@ -416,47 +416,47 @@ class questiontype_test extends \advanced_testcase {
                     'varsglobal' => 'x={1,2,3}',
                     'answertype' => [0 => qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
                     'answer' => [0 => '"x"'],
-                ]
+                ],
             ],
             [
                 ['correctness[0]' => get_string('error_grading_not_one', 'qtype_formulas', 0.5)],
                 [
                     'correctness' => [0 => '0.5'],
-                ]
+                ],
             ],
             [
                 ['correctness[0]' => get_string('error_grading_single_expression', 'qtype_formulas', 2)],
                 [
                     'correctness' => [0 => 'a=1; b=2'],
-                ]
+                ],
             ],
             [
                 ['correctness[0]' => '1:2:Division by zero is not defined.'],
                 [
                     'correctness' => [0 => '1/0'],
-                ]
+                ],
             ],
             [
                 ['postunit[0]' => get_string('error_unit', 'qtype_formulas')],
                 [
                     'postunit' => [0 => 'a/b*c'],
-                ]
+                ],
             ],
             [
                 ['otherrule[0]' => get_string('error_rule', 'qtype_formulas')],
                 [
                     'otherrule' => [0 => '5-'],
-                ]
+                ],
             ],
             [
                 [
                     'answermark[0]' => get_string('error_mark', 'qtype_formulas'),
-                    'answer[0]' => get_string('error_no_answer', 'qtype_formulas')
+                    'answer[0]' => get_string('error_no_answer', 'qtype_formulas'),
                 ],
                 [
                     'answermark' => [0 => ''],
                     'answer' => [0 => ''],
-                ]
+                ],
             ],
             // The following will not generate an error for the grading criterion, because the form will
             // switch to simplified mode and filled with the default criterion (according to the admin
@@ -470,7 +470,7 @@ class questiontype_test extends \advanced_testcase {
                     'answermark' => [0 => ''],
                     'correctness' => [0 => ''],
                     'answer' => [0 => ''],
-                ]
+                ],
             ],
             [
                 [
@@ -479,7 +479,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'questiontext' => '{#abcdefghijklmnopqrstuvwxyzabcdefghijkklmnopqrstuvwxyz}',
                     'placeholder' => [0 => '#abcdefghijklmnopqrstuvwxyzabcdefghijkklmnopqrstuvwxyz'],
-                ]
+                ],
             ],
             [
                 [
@@ -488,7 +488,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'questiontext' => '{#ö}',
                     'placeholder' => [0 => '#ö'],
-                ]
+                ],
             ],
             [
                 [
@@ -497,7 +497,7 @@ class questiontype_test extends \advanced_testcase {
                 [
                     'questiontext' => '{#a} foo {#a}',
                     'placeholder' => [0 => '#a'],
-                ]
+                ],
             ],
         ];
     }
@@ -623,7 +623,7 @@ class questiontype_test extends \advanced_testcase {
         $formdata = test_question_maker::get_question_form_data('formulas', 'testmethodsinparts');
         /** @var \core_question_generator $generator */
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        $cat = $generator->create_question_category(array());
+        $cat = $generator->create_question_category([]);
 
         $formdata->category = "{$cat->id},{$cat->contextid}";
         $formdata->id = 0;
@@ -731,7 +731,7 @@ class questiontype_test extends \advanced_testcase {
         $formdata->{$fieldname}[0] = [
             'text' => '<img src="' . $url . '">',
             'itemid' => $file->get_itemid(),
-            'format' => FORMAT_HTML
+            'format' => FORMAT_HTML,
         ];
         $q = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $questioncat1->id]);
         $fs = get_file_storage();
@@ -777,7 +777,7 @@ class questiontype_test extends \advanced_testcase {
             'qtype' => 'formulas',
             'id' => 0,
             'questiontext' => '',
-            'questiontextformat' => FORMAT_HTML
+            'questiontextformat' => FORMAT_HTML,
         ];
         $formdata = test_question_maker::get_question_form_data('formulas', 'testsinglenum');
         $formdata->category = "{$questioncat->id},{$questioncat->contextid}";
@@ -867,7 +867,7 @@ class questiontype_test extends \advanced_testcase {
         $formdata->subqtext[3] = [
             'text' => '<img src="' . $url . '">',
             'itemid' => $file->get_itemid(),
-            'format' => FORMAT_HTML
+            'format' => FORMAT_HTML,
         ];
 
         // Save the modified question to the DB.
@@ -903,11 +903,11 @@ class questiontype_test extends \advanced_testcase {
         return [
             [
                 'The question is now set to have a unique answer.',
-                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.3.0.xml'
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.3.0.xml',
             ],
             [
                 'For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria',
-                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.2.0.xml'
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.2.0.xml',
             ],
         ];
     }

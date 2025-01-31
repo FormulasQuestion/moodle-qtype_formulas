@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Unit tests for the formulas question type.
  *
@@ -270,7 +269,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit the right answer.
-        $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$complete);
@@ -402,7 +401,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit an incorrect answer.
-        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        $this->process_submission(['0_0' => 'dont know', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$todo);
@@ -414,7 +413,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit a correct answer.
-        $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$complete);
@@ -539,7 +538,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit an incorrect answer.
-        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        $this->process_submission(['0_0' => 'dont know', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$todo);
@@ -551,7 +550,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit another incorrect answer.
-        $this->process_submission(array('0_0' => 'still dont know', '-submit' => 1));
+        $this->process_submission(['0_0' => 'still dont know', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$todo);
@@ -563,7 +562,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit a correct answer.
-        $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$complete);
@@ -592,7 +591,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit an incorrect answer.
-        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        $this->process_submission(['0_0' => 'dont know', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$todo);
@@ -604,7 +603,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit again the same incorrect answer.
-        $this->process_submission(array('0_0' => 'dont know', '-submit' => 1));
+        $this->process_submission(['0_0' => 'dont know', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$todo);
@@ -616,7 +615,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
 
         // Submit a correct answer.
-        $this->process_submission(array('0_0' => '5', '-submit' => 1));
+        $this->process_submission(['0_0' => '5', '-submit' => 1]);
 
         // Verify.
         $this->check_current_state(question_state::$complete);

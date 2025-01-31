@@ -30,7 +30,7 @@ use qtype_formulas\local\variable;
 /**
  * @covers \qtype_formulas\local\variable
  */
-class variable_test extends \advanced_testcase {
+final class variable_test extends \advanced_testcase {
     /**
      * @dataProvider provide_variables
      */

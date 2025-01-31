@@ -1034,7 +1034,7 @@ class qtype_formulas_part {
             $boxes[$match] = [
                 'placeholder' => $matches[0][$i],
                 'options' => $matches[3][$i],
-                'dropdown' => ($matches[4][$i] === ':MCE')
+                'dropdown' => ($matches[4][$i] === ':MCE'),
             ];
         }
         return $boxes;
