@@ -79,7 +79,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains('partially correct 5 -- 2 -- 1');
     }
 
-    public function test_answer_not_unique() {
+    public function test_answer_not_unique(): void {
         // Create a basic question. By default, the answer is not unique.
         $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
@@ -97,7 +97,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_lang_string('uniquecorrectansweris', 'qtype_formulas', '5');
     }
 
-    public function test_render_question_with_combined_unit_field() {
+    public function test_render_question_with_combined_unit_field(): void {
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $q->parts[0]->unitpenalty = 0.5;
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
@@ -128,7 +128,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_', '5 m/s', false);
     }
 
-    public function test_render_question_with_algebraic_answer() {
+    public function test_render_question_with_algebraic_answer(): void {
         $q = $this->get_test_formulas_question('testalgebraic');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
@@ -193,7 +193,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_text_input_with_class('0_');
     }
 
-    public function test_render_question_with_separate_unit_field() {
+    public function test_render_question_with_separate_unit_field(): void {
         $q = $this->get_test_formulas_question('testsinglenumunitsep');
         $q->parts[0]->unitpenalty = 0.5;
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
@@ -239,7 +239,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_1', 'm/s', false);
     }
 
-    public function test_render_question_with_multiple_parts() {
+    public function test_render_question_with_multiple_parts(): void {
         $q = $this->get_test_formulas_question('testmethodsinparts');
         $this->start_attempt_at_question($q, 'immediatefeedback', 8);
 
@@ -276,7 +276,7 @@ final class renderer_test extends walkthrough_test_base {
         );
     }
 
-    public function test_render_mc_question() {
+    public function test_render_mc_question(): void {
         // Create a single part multiple choice (radio) question.
         $q = $this->get_test_formulas_question('testmc');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -307,7 +307,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_mark(0.7);
     }
 
-    public function test_render_mce_question() {
+    public function test_render_mce_question(): void {
         // Create a single part multiple choice (radio) question.
         $q = $this->get_test_formulas_question('testmce');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);

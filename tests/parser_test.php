@@ -223,10 +223,12 @@ final class parser_test extends \advanced_testcase {
                 '{1,5:6:0.1,100,200:300,5}',
             ],
             'array in set' => [
+                // phpcs:ignore moodle.Files.LineLength.TooLong
                 '{,[,1,10,2,%%rangebuild,%%arraybuild,[,20,30,2,%%rangebuild,%%arraybuild,[,40,50,2,3,%%rangebuild,%%arraybuild,%%setbuild',
                 '{[1:10],[20:30],[40:50:2]}',
             ],
             'multiple ranges' => [
+                // phpcs:ignore moodle.Files.LineLength.TooLong
                 '{,1,10,2,%%rangebuild,15,50,5,3,%%rangebuild,60,70,0.5,3,%%rangebuild,100,110,2,%%rangebuild,0,10,_,1,_,3,%%rangebuild,%%setbuild',
                 '{1:10,15:50:5,60:70:0.5,100:110,0:-10:-1}',
             ],

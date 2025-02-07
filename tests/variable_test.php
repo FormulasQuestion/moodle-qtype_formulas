@@ -32,9 +32,12 @@ final class variable_test extends \advanced_testcase {
     /**
      * Test conversion of variable object into string.
      *
+     * @param string $expected expected output
+     * @param variable $input variable token
+     *
      * @dataProvider provide_variables
      */
-    public function test_string_representation($expected, $input): void {
+    public function test_string_representation(string $expected, variable $input): void {
         $s = '' . $input;
 
         self::assertEquals($expected, $s);

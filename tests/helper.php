@@ -15,40 +15,57 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Test helper code for the formulas question type.
+ * Test helper class for the formulas question type.
  *
  * @package    qtype_formulas
  * @copyright  2012 Jean-Michel Védrine
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/**
- * Test helper class for the formulas question type.
- *
- * @copyright  2012 Jean-Michel Védrine
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class qtype_formulas_test_helper extends question_test_helper {
-    const DEFAULT_CORRECT_FEEDBACK          = '<p>Correct answer, well done.</p>';
-    const DEFAULT_PARTIALLYCORRECT_FEEDBACK = '<p>Your answer is partially correct.</p>';
-    const DEFAULT_INCORRECT_FEEDBACK        = '<p>Incorrect answer.</p>';
+    /** @var string */
+    const DEFAULT_CORRECT_FEEDBACK = '<p>Correct answer, well done.</p>';
 
-    public function get_test_questions() {
+    /** @var string */
+    const DEFAULT_PARTIALLYCORRECT_FEEDBACK = '<p>Your answer is partially correct.</p>';
+
+    /** @var string */
+    const DEFAULT_INCORRECT_FEEDBACK = '<p>Incorrect answer.</p>';
+
+    /**
+     * Return a list of possible test questions.
+     *
+     * @return array
+     */
+    public function get_test_questions(): array {
         return [
-            'testsinglenum', // Minimal formulas question : one part, not randomised (answer = 5),
-            'testalgebraic', // Formulas question with algebraic answer,
-            'testtwonums', // Minimal formulas question : one part, two numbers (2 and 3),
-            'testsinglenumunit', // one part, one number with unit (answer: 5 m/s),
-            'testsinglenumunitsep', // one part, one number plus separate unit (answer: 5 m/s),
-            'testzero', // one part, not randomized, answer = 0 (to test problem with 0 as answer),
-            'testmce', // One part not randomized drowdown multichoice answer.
-            'testmc', // One part not randomized radiobutton multichoice answer.
-            'testthreeparts', // 3 parts, not randomised. (answers = 5, 6, 7),
-            'testmethodsinparts', // 4 parts, separated and combined unit field, not ramdomized,
-            'testmcetwoparts', // 2 parts, each one with an MCE (dropdown) question
-            'testmctwoparts', // 2 parts, each one with an MC (radio) question
-            'testtwoandtwo', // 2 parts, each one with 2 numbers
-            'test4', // 4 parts, separated and combined unit field, ramdomized.
+            // Minimal formulas question: one part, not randomised, answer = 5.
+            'testsinglenum',
+             // Formulas question with algebraic answer.
+            'testalgebraic',
+             // Minimal formulas question: one part, two numbers, answer = 2 and 3.
+            'testtwonums',
+            // Formulas question with one part, one number with unit (combined), answer = 5 m/s.
+            'testsinglenumunit',
+            // Formulas question with one part, one number with unit (separate), answer = 5 m/s.
+            'testsinglenumunitsep',
+            // Formulas question with one part, not randomized, answer = 0, used to test for problems with 0 as answer.
+            'testzero',
+            // Formulas question with one part, not randomized, drowdown multichoice answer.
+            'testmce',
+            // Formulas question with one part, not randomized, radio button multichoice answer.
+            'testmc',
+            // Formulas question with 3 parts, not randomised, answers = 5, 6, 7.
+            'testthreeparts',
+            // Formulas question with 4 parts, not randomised, separate and combined unit fields.
+            'testmethodsinparts',
+            // Formulas question with 2 parts, each with a drowdown multichoice answer.
+            'testmcetwoparts',
+            // Formulas question with 2 parts, each with a radio button multichoice answer.
+            'testmctwoparts',
+            // Formulas question with 2 parts, each one with 2 numbers.
+            'testtwoandtwo',
+            // Formulas question with 4 parts, randomised, separate and combined unit fields.
+            'test4',
         ];
     }
 
@@ -76,7 +93,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $q;
     }
 
-    protected static function make_a_formulas_part() {
+    /**
+     * Create a qtype_formulas_part object for testing.
+     *
+     * @return qtype_formulas_part
+     */
+    protected static function make_a_formulas_part(): qtype_formulas_part {
         question_bank::load_question_definition_classes('formulas');
 
         $p = new qtype_formulas_part();
@@ -110,7 +132,9 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question question, single part, algebraic formula
+     * Create a single-part test question with answer type algebraic formula.
+     *
+     * @return qtype_formulas_question
      */
     public static function make_formulas_question_testalgebraic() {
         $q = self::make_a_formulas_question();
@@ -180,14 +204,19 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
         $form->correctfeedback = ['text' => test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK, 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
         $form->incorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
         $form->shownumcorrect = '1';
         return $form;
     }
 
     /**
-     * @return qtype_formulas_question question, single part, one number as answer, no unit
+     * Create a single-part test question with answer type number.
+     *
+     * @return qtype_formulas_question
      */
     public static function make_formulas_question_testsinglenum() {
         $q = self::make_a_formulas_question();
@@ -220,9 +249,10 @@ class qtype_formulas_test_helper extends question_test_helper {
 
     /**
      * Gets the question form data for the singlenum formulas question
+     *
      * @return stdClass
      */
-    public function get_formulas_question_form_data_testsinglenum() {
+    public function get_formulas_question_form_data_testsinglenum(): stdClass {
         $form = new stdClass();
 
         $form->name = 'test-singlenum';
@@ -264,13 +294,21 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
         $form->correctfeedback = ['text' => test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK, 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
         $form->incorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
         $form->shownumcorrect = '1';
         return $form;
     }
 
-    public static function get_formulas_question_data_testsinglenum() {
+    /**
+     * Return question data for a single-part question with answer type number.
+     *
+     * @return stdClass
+     */
+    public static function get_formulas_question_data_testsinglenum(): stdClass {
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 
@@ -353,9 +391,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question one part, one number with unit
+     * Return Formulas question with one part, one number with unit (combined), answer = 5 m/s.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testsinglenumunit() {
+    public static function make_formulas_question_testsinglenumunit(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-singlenumunit';
@@ -432,7 +472,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $form;
     }
 
-    public static function get_formulas_question_data_testsinglenumunit() {
+    /**
+     * Get question data for the testsinglenumunit question.
+     *
+     * @return stdClass
+     */
+    public static function get_formulas_question_data_testsinglenumunit(): stdClass {
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 
@@ -496,9 +541,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question one part, one number plus unit
+     * Return Formulas question with one part, one number with unit (separate), answer = 5 m/s.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testsinglenumunitsep() {
+    public static function make_formulas_question_testsinglenumunitsep(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-singlenumunitsep';
@@ -582,7 +629,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $form;
     }
 
-    public static function get_formulas_question_data_testsinglenumunitsep() {
+    /**
+     * Return question data for the testsinglenumunitsep question.
+     *
+     * @return stdClass
+     */
+    public static function get_formulas_question_data_testsinglenumunitsep(): stdClass {
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 
@@ -643,9 +695,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question question, single part, one number as answer, no unit
+     * Return Formulas question: one part, two numbers, answer = 2 and 3.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testtwonums() {
+    public static function make_formulas_question_testtwonums(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-1';
@@ -727,10 +781,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
+     * Return Formulas question with 3 parts, not randomised, answers = 5, 6, 7.
+     *
      * @return qtype_formulas_question with 3 parts.
-     * this version is non randomized to ease testing
      */
-    public static function make_formulas_question_testthreeparts() {
+    public static function make_formulas_question_testthreeparts(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-1';
@@ -851,10 +906,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question the question from the test1.xml file.
-     * Non randomized version for Behat tests.
+     * Return Formulas question with 4 parts, not randomised, separate and combined unit fields.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testmethodsinparts() {
+    public static function make_formulas_question_testmethodsinparts(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-methodsinparts';
@@ -1223,7 +1279,10 @@ class qtype_formulas_test_helper extends question_test_helper {
             3 => ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->correctfeedback = ['text' => test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK, 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
         $form->incorrectfeedback = ['text' => test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML];
         $form->shownumcorrect = '1';
         $form->numhints = 2;
@@ -1237,9 +1296,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question the question with 0 as answer.
+     * Return Formulas question with one part, not randomized, answer = 0, used to test for problems with 0 as answer.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testzero() {
+    public static function make_formulas_question_testzero(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-3';
@@ -1313,10 +1374,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question the question from the test1.xml file.
-     * Randomized version.
+     * Return Formulas question with 4 parts, randomised, separate and combined unit fields.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_test4() {
+    public static function make_formulas_question_test4(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-4';
@@ -1461,9 +1523,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with a (radio button) multichoice answer.
+     * Return Formulas question with one part, not randomized, radio button multichoice answer.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testmc() {
+    public static function make_formulas_question_testmc(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-5';
@@ -1539,9 +1603,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with a dropdown multichoice answer.
+     * Return Formulas question with one part, not randomized, drowdown multichoice answer.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testmce() {
+    public static function make_formulas_question_testmce(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-5';
@@ -1617,9 +1683,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with two dropdown multichoice answers in separate parts.
+     * Return Formulas question with 2 parts, each with a drowdown multichoice answer.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testmcetwoparts() {
+    public static function make_formulas_question_testmcetwoparts(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'testmcetwoparts';
@@ -1711,9 +1779,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with two radio button multichoice answers in separate parts.
+     * Formulas question with 2 parts, each with a radio button multichoice answer.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testmctwoparts() {
+    public static function make_formulas_question_testmctwoparts(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'testmcetwoparts';
@@ -1805,9 +1875,11 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * @return qtype_formulas_question with two parts and two numbers in each of them.
+     * Return Formulas question with 2 parts, each one with 2 numbers.
+     *
+     * @return qtype_formulas_question
      */
-    public static function make_formulas_question_testtwoandtwo() {
+    public static function make_formulas_question_testtwoandtwo(): qtype_formulas_question {
         $q = self::make_a_formulas_question();
 
         $q->name = 'testtwoandtwo';
@@ -1914,7 +1986,12 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $form;
     }
 
-    public static function get_formulas_question_data_testtwoandtwo() {
+    /**
+     * Return question data for the testtwoandtwo Formulas question.
+     *
+     * @return stdClass
+     */
+    public static function get_formulas_question_data_testtwoandtwo(): stdClass {
         $qdata = new stdClass();
         test_question_maker::initialise_question_data($qdata);
 

@@ -67,6 +67,7 @@ class behat_qtype_formulas extends behat_base {
     /**
      * Check values inside the instantiation table.
      *
+     * phpcs:ignore moodle.Files.LineLength.TooLong
      * @Given /^I should see "(?P<text>[^"]*)" in the "(?P<field>[^"]*)" field of row number "(?P<rownumber>\d+)" of the Formulas Question instantiation table$/
      *
      * @param string $what the text to look for

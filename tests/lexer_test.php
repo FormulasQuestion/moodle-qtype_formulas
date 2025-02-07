@@ -680,7 +680,7 @@ EOF;
      * Test whether the read() function of the tokenizer class correctly parses special
      * cases involving numbers.
      */
-    public function test_read_numbers_edge_cases() {
+    public function test_read_numbers_edge_cases(): void {
         // Tokens: 5.127 (number) 0.3 (number) -> valid.
         $input = '5.127.3';
         $lexer = new lexer($input);

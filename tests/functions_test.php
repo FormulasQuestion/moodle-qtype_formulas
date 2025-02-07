@@ -344,7 +344,7 @@ final class functions_test extends \advanced_testcase {
      * @dataProvider provide_binomialcdf
      *
      */
-    public function test_combinatorics($expected, $input) {
+    public function test_combinatorics($expected, $input): void {
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -381,7 +381,7 @@ final class functions_test extends \advanced_testcase {
      *
      * @dataProvider provide_len_inputs
      */
-    public function test_len($expected, $input) {
+    public function test_len($expected, $input): void {
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -417,7 +417,7 @@ final class functions_test extends \advanced_testcase {
      *
      * @dataProvider provide_sum_inputs
      */
-    public function test_sum($expected, $input) {
+    public function test_sum($expected, $input): void {
         $parser = new parser($input);
         $statements = $parser->get_statements();
         $evaluator = new evaluator();
@@ -762,7 +762,7 @@ final class functions_test extends \advanced_testcase {
      * @dataProvider provide_hexdec_calls
      * @dataProvider provide_base_convert_calls
      */
-    public function test_number_conversion($expected, $input) {
+    public function test_number_conversion($expected, $input): void {
         $parser = new parser('a = ' . $input);
         $evaluator = new evaluator();
         try {
@@ -1029,7 +1029,7 @@ final class functions_test extends \advanced_testcase {
      * @dataProvider provide_algebraic_numerical_function_invocations
      * @dataProvider provide_string_array_function_invocations
      */
-    public function test_function_invocations($expected, $input) {
+    public function test_function_invocations($expected, $input): void {
         $parser = new parser($input);
         $evaluator = new evaluator();
         $error = null;

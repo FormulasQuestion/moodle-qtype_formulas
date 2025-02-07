@@ -1055,7 +1055,7 @@ final class evaluator_test extends \advanced_testcase {
         self::assertStringEndsWith($expected, $error);
     }
 
-    public function test_algebraic_diff() {
+    public function test_algebraic_diff(): void {
         // Initialize the evaluator with global algebraic vars.
         $vars = 'x={-10:11:1}; y={-10:-5, 6:11};';
         $parser = new parser($vars);
@@ -1087,7 +1087,7 @@ final class evaluator_test extends \advanced_testcase {
         self::assertLessThanOrEqual(72, $result[3]->value);
     }
 
-    public function test_substitute_variables_in_text() {
+    public function test_substitute_variables_in_text(): void {
         // Define, parse and evaluate some variables.
         $vars = 'a=1; b=[2,3,4]; c={1,2,3}; d=[[1,2],[3,4]]';
         $parser = new parser($vars);
@@ -1137,7 +1137,7 @@ final class evaluator_test extends \advanced_testcase {
         self::assertEquals($expected, $output);
     }
 
-    public function test_substitute_variables_in_algebraic_formula() {
+    public function test_substitute_variables_in_algebraic_formula(): void {
         // Define, parse and evaluate some variables.
         $vars = 'a=1; b=[2,3,4]; c={1,2,3}; x={1:10}; y={1:10}; k = [[1,2],[3,4]];';
         $parser = new parser($vars);
@@ -1502,7 +1502,7 @@ final class evaluator_test extends \advanced_testcase {
                 'a = (5 ? 4 :)',
             ],
             'argument should be scalar, is list' => [
-                'Evaluation error: numeric value expected, found list.',
+                'Number expected, found list.',
                 'a = [1, 2, 3] + 4',
             ],
             'argument should be scalar, is list, 2' => [

@@ -58,7 +58,7 @@ final class question_test extends \basic_testcase {
         return \test_question_maker::make_question('formulas', $which);
     }
 
-    public function test_check_file_access_general() {
+    public function test_check_file_access_general(): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
         $question->id = 42;
@@ -122,7 +122,7 @@ final class question_test extends \basic_testcase {
         self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
-    public function test_check_file_access_hints() {
+    public function test_check_file_access_hints(): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
         $question->id = 42;
@@ -195,7 +195,7 @@ final class question_test extends \basic_testcase {
         self::assertTrue($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
-    public function test_check_file_access_question_combinedfeedback() {
+    public function test_check_file_access_question_combinedfeedback(): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
         $question->id = 42;
@@ -257,7 +257,7 @@ final class question_test extends \basic_testcase {
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
-    public function test_check_file_access_partcombinedfeedback() {
+    public function test_check_file_access_partcombinedfeedback(): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
         $question->id = 42;
@@ -319,7 +319,7 @@ final class question_test extends \basic_testcase {
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
-    public function test_check_file_access_partcombinedfeedback_adaptive() {
+    public function test_check_file_access_partcombinedfeedback_adaptive(): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
         $question->id = 42;
@@ -380,12 +380,12 @@ final class question_test extends \basic_testcase {
         self::assertFalse($question->check_file_access($qa, $options, $component, $area, $args, false));
     }
 
-    public function test_get_expected_data_test0() {
+    public function test_get_expected_data_test0(): void {
         $q = $this->get_test_formulas_question('testsinglenum');
         self::assertEquals(['0_0' => PARAM_RAW], $q->get_expected_data());
     }
 
-    public function test_get_expected_data_testthreeparts() {
+    public function test_get_expected_data_testthreeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         self::assertEquals(['0_0' => PARAM_RAW,
                                   '1_0' => PARAM_RAW,
@@ -393,7 +393,7 @@ final class question_test extends \basic_testcase {
                                   $q->get_expected_data());
     }
 
-    public function test_get_expected_data_test2() {
+    public function test_get_expected_data_test2(): void {
         $q = $this->get_test_formulas_question('test4');
         self::assertEquals(['0_' => PARAM_RAW,
                                   '1_0' => PARAM_RAW,
@@ -423,7 +423,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_response_for_singlenum_question
      */
-    public function test_is_complete_response_test0($iscomplete, $response) {
+    public function test_is_complete_response_test0($iscomplete, $response): void {
         $q = $this->get_test_formulas_question('testsinglenum');
         self::assertEquals($iscomplete, $q->is_complete_response($response));
     }
@@ -449,12 +449,12 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_response_for_testthreeparts_question
      */
-    public function test_is_complete_response_threeparts($iscomplete, $response) {
+    public function test_is_complete_response_threeparts($iscomplete, $response): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         self::assertEquals($iscomplete, $q->is_complete_response($response));
     }
 
-    public function test_get_question_summary_test0() {
+    public function test_get_question_summary_test0(): void {
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals(
@@ -462,14 +462,14 @@ final class question_test extends \basic_testcase {
                 $q->get_question_summary());
     }
 
-    public function test_get_question_summary_threeparts() {
+    public function test_get_question_summary_threeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n",
                 $q->get_question_summary());
     }
 
-    public function test_get_question_summary_test2() {
+    public function test_get_question_summary_test2(): void {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -489,13 +489,13 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expectedsummary, $q->get_question_summary());
     }
 
-    public function test_get_correct_response_singlenum() {
+    public function test_get_correct_response_singlenum(): void {
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals(['0_0' => '5'], $q->get_correct_response());
     }
 
-    public function test_get_correct_response_threeparts() {
+    public function test_get_correct_response_threeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -506,7 +506,7 @@ final class question_test extends \basic_testcase {
     }
 
 
-    public function test_get_correct_response_test4() {
+    public function test_get_correct_response_test4(): void {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -524,7 +524,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(['3_0' => $v], $q->get_correct_response($q->parts[3]));
     }
 
-    public function test_get_correct_response_testmce() {
+    public function test_get_correct_response_testmce(): void {
         $q = $this->get_test_formulas_question('testmce');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -533,7 +533,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(['0_0' => 'Cat'], $q->parts[0]->get_correct_response(true));
     }
 
-    public function test_get_is_same_response_for_part_testthreeparts() {
+    public function test_get_is_same_response_for_part_testthreeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -648,7 +648,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
     }
 
-    public function test_with_invalidated_grading_vars() {
+    public function test_with_invalidated_grading_vars(): void {
         $q = $this->get_test_formulas_question('testtwonums');
 
         // Set the grading vars to _0/_1 which will be invalid if the student
@@ -669,7 +669,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(0.5, $partscores[0]->rawfraction);
     }
 
-    public function test_with_invalidated_grading_criterion() {
+    public function test_with_invalidated_grading_criterion(): void {
         $q = $this->get_test_formulas_question('testtwonums');
 
         // Set the grading criterion to _0/_1 which will be invalid if the student
@@ -689,7 +689,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(0.5, $partscores[0]->rawfraction);
     }
 
-    public function test_grade_parts_that_can_be_graded_1() {
+    public function test_grade_parts_that_can_be_graded_1(): void {
         // Question with three parts, answers being 5, 6 and 7.
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
@@ -720,7 +720,7 @@ final class question_test extends \basic_testcase {
         $this->assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_2() {
+    public function test_grade_parts_that_can_be_graded_2(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -740,7 +740,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_3() {
+    public function test_grade_parts_that_can_be_graded_3(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -758,7 +758,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_4() {
+    public function test_grade_parts_that_can_be_graded_4(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -778,7 +778,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_5() {
+    public function test_grade_parts_that_can_be_graded_5(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -795,7 +795,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_grade_parts_that_can_be_graded_6() {
+    public function test_grade_parts_that_can_be_graded_6(): void {
         $q = $this->get_test_formulas_question('testmethodsinparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -823,25 +823,25 @@ final class question_test extends \basic_testcase {
         self::assertEquals($expected, $partscores);
     }
 
-    public function test_get_parts_and_weights_singlenum() {
+    public function test_get_parts_and_weights_singlenum(): void {
         $q = $this->get_test_formulas_question('testsinglenum');
 
         self::assertEquals(['0' => 1], $q->get_parts_and_weights());
     }
 
-    public function test_get_parts_and_weights_threeparts() {
+    public function test_get_parts_and_weights_threeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
 
         self::assertEquals(['0' => 1 / 3, '1' => 1 / 3, '2' => 1 / 3], $q->get_parts_and_weights());
     }
 
-    public function test_get_parts_and_weights_test4() {
+    public function test_get_parts_and_weights_test4(): void {
         $q = $this->get_test_formulas_question('test4');
 
         self::assertEquals(['0' => .25, '1' => .25, '2' => .25, '3' => .25], $q->get_parts_and_weights());
     }
 
-    public function test_compute_final_grade_threeparts_1() {
+    public function test_compute_final_grade_threeparts_1(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -854,7 +854,7 @@ final class question_test extends \basic_testcase {
 
     }
 
-    public function test_compute_final_grade_threeparts_2() {
+    public function test_compute_final_grade_threeparts_2(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -866,7 +866,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals((2 + 2 * (1 - 2 * 0.3)) / 6, $finalgrade);
     }
 
-    public function test_compute_final_grade_with_unit() {
+    public function test_compute_final_grade_with_unit(): void {
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -879,7 +879,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(1 - 2 * 0.3, $finalgrade);
     }
 
-    public function test_compute_final_grade_with_zero() {
+    public function test_compute_final_grade_with_zero(): void {
         $q = $this->get_test_formulas_question('testzero');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -892,7 +892,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals(1 - 2 * 0.3, $finalgrade);
     }
 
-    public function test_summarise_response_threeparts() {
+    public function test_summarise_response_threeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -907,7 +907,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals('5, 6, 7', $summary);
     }
 
-    public function test_summarise_response_test1() {
+    public function test_summarise_response_test1(): void {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
@@ -925,7 +925,7 @@ final class question_test extends \basic_testcase {
         self::assertEquals('30m/s, 20, m/s, 40, 50', $summary);
     }
 
-    public function test_is_complete_response_test3() {
+    public function test_is_complete_response_test3(): void {
         $q = $this->get_test_formulas_question('testzero');
 
         self::assertFalse($q->is_complete_response([]));
@@ -934,7 +934,7 @@ final class question_test extends \basic_testcase {
         self::assertTrue($q->is_complete_response(['0_0' => 'test']));
     }
 
-    public function test_is_gradable_response_test3() {
+    public function test_is_gradable_response_test3(): void {
         $q = $this->get_test_formulas_question('testzero');
 
         self::assertFalse($q->is_gradable_response([]));
@@ -1004,7 +1004,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_answer_box_texts
      */
-    public function test_scan_for_answer_boxes($expected, $input) {
+    public function test_scan_for_answer_boxes($expected, $input): void {
         $boxes = qtype_formulas_part::scan_for_answer_boxes($input);
         self::assertSame($expected, $boxes);
     }
@@ -1030,7 +1030,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_answer_box_texts_invalid
      */
-    public function test_scan_for_answer_boxes_invalid($expected, $input) {
+    public function test_scan_for_answer_boxes_invalid($expected, $input): void {
         $e = null;
         try {
             qtype_formulas_part::scan_for_answer_boxes($input);
@@ -1064,7 +1064,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_responses_for_question_without_unit
      */
-    public function test_classify_response_without_unit($expected, $input) {
+    public function test_classify_response_without_unit($expected, $input): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenum');
 
@@ -1119,7 +1119,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_responses_for_combined_question
      */
-    public function test_classify_response_combined_field($expected, $input) {
+    public function test_classify_response_combined_field($expected, $input): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenumunit');
         $question->parts[0]->unitpenalty = 0.5;
@@ -1173,7 +1173,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_responses_for_question_with_separate_unit
      */
-    public function test_classify_response_separate_unit_field($expected, $input) {
+    public function test_classify_response_separate_unit_field($expected, $input): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testsinglenumunitsep');
         $question->parts[0]->unitpenalty = 0.5;
@@ -1225,7 +1225,7 @@ final class question_test extends \basic_testcase {
      *
      * @dataProvider provide_responses_for_threepart_question
      */
-    public function test_classify_response_three_parts_without_unit($expected, $input) {
+    public function test_classify_response_three_parts_without_unit($expected, $input): void {
         // Prepare a question.
         $question = $this->get_test_formulas_question('testthreeparts');
 

@@ -250,7 +250,7 @@ final class questiontype_test extends \advanced_testcase {
      *
      * @dataProvider provide_multipart_data_for_form_validation
      */
-    public function test_form_validation_multipart($expected, $input) {
+    public function test_form_validation_multipart($expected, $input): void {
         self::resetAfterTest();
         self::setAdminUser();
 
@@ -527,7 +527,7 @@ final class questiontype_test extends \advanced_testcase {
      *
      * @dataProvider provide_single_part_data_for_form_validation
      */
-    public function test_form_validation_single_part($expected, $input) {
+    public function test_form_validation_single_part($expected, $input): void {
         self::resetAfterTest();
         self::setAdminUser();
 
@@ -573,7 +573,7 @@ final class questiontype_test extends \advanced_testcase {
      *
      * @dataProvider provide_answers_for_numbox_test
      */
-    public function test_calculation_of_numbox_numbertype($expected, $answer) {
+    public function test_calculation_of_numbox_numbertype($expected, $answer): void {
         $formdata = test_question_maker::get_question_form_data('formulas', 'testsinglenum');
         $formdata->id = 0;
         $formdata->varsglobal = 'a=[1,2,3]; b=1;';
@@ -606,7 +606,7 @@ final class questiontype_test extends \advanced_testcase {
      *
      * @dataProvider provide_algebraic_answers_for_numbox_test
      */
-    public function test_calculation_of_numbox_algebraictype($expected, $answer) {
+    public function test_calculation_of_numbox_algebraictype($expected, $answer): void {
         $formdata = test_question_maker::get_question_form_data('formulas', 'testalgebraic');
         $formdata->id = 0;
         $formdata->varsglobal = 'a=["1","2","3"]; b=1;';

@@ -44,7 +44,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @covers \qtype_formulas_part
  * @covers \qtype_formulas_question
  */
-class walkthrough_adaptive_test extends walkthrough_test_base {
+final class walkthrough_adaptive_test extends walkthrough_test_base {
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
      *
@@ -54,7 +54,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         return test_question_maker::make_question('formulas', $which);
     }
 
-    public function test_submit_empty_then_right() {
+    public function test_submit_empty_then_right(): void {
         // Create the formulas question 'testsinglenum'.
         $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -119,7 +119,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
-    public function test_submit_empty_then_right_with_combined_unit() {
+    public function test_submit_empty_then_right_with_combined_unit(): void {
         // Create the formulas question 'testsinglenumunit'.
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -184,7 +184,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
-    public function test_submit_empty_then_right_with_separate_unit() {
+    public function test_submit_empty_then_right_with_separate_unit(): void {
         // Create the formulas question 'testsinglenumunitsep'.
         $q = $this->get_test_formulas_question('testsinglenumunitsep');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -248,7 +248,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
-    public function test_test0_submit_right_first_time() {
+    public function test_test0_submit_right_first_time(): void {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -356,7 +356,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
      *
      * @dataProvider provide_responses_for_feedback_test
      */
-    public function test_part_feedback($expectedfeedback, $input) {
+    public function test_part_feedback($expectedfeedback, $input): void {
         // Prepare feedback strings.
         $generalfeedback = 'Part general feedback';
         $feedbacks = [
@@ -391,7 +391,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         }
     }
 
-    public function test_test0_submit_wrong_submit_right() {
+    public function test_test0_submit_wrong_submit_right(): void {
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'adaptive', 1);
@@ -431,7 +431,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
-    public function test_test0_submit_wrong_unit_then_right() {
+    public function test_test0_submit_wrong_unit_then_right(): void {
         // Create and configure a question with an "odd" unit penalty in order to not
         // get the final grade right by chance. Adding two hints to allow a total of
         // three tries.
@@ -477,7 +477,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_mark(1 - 2 * $q->penalty);
     }
 
-    public function test_test0_submit_wrong_unit_then_right_with_hints() {
+    public function test_test0_submit_wrong_unit_then_right_with_hints(): void {
         return;
         // Create and configure a question with an "odd" unit penalty in order to not
         // get the final grade right by chance. Adding two hints to allow a total of
@@ -527,7 +527,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_mark(1 - 2 * 0.3);
     }
 
-    public function test_test0_submit_wrong_wrong_right() {
+    public function test_test0_submit_wrong_wrong_right(): void {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
@@ -580,7 +580,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
-    public function test_test0_submit_wrong_same_wrong_right() {
+    public function test_test0_submit_wrong_same_wrong_right(): void {
         // Here we test that the student is not penalized twice for the same error.
         // Create the formulas question 'test0'.
         $q = $this->get_test_formulas_question('testsinglenum');
@@ -633,7 +633,7 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
-    public function test_student_using_overwritten_function() {
+    public function test_student_using_overwritten_function(): void {
         // Create a question and tweak it a bit, by overwriting the sin() function in the global vars.
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->varsglobal = 'sin = 3';

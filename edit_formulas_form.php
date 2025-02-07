@@ -116,7 +116,12 @@ class qtype_formulas_edit_form extends question_edit_form {
     /**
      * Add the answer field for a particular part labelled by placeholder.
      *
-     * @param MoodleQuickForm $mform the form being built.
+     * @param MoodleQuickForm $mform the form being built
+     * @param string $label label to use for each option
+     * @param $gradeoptions the possible grades for each answer.
+     * @param array $repeatedoptions reference to array of repeated options to fill
+     * @param array $answersoption reference to return the name of $question->options field holding an array of answers
+     * @return array of form fields.
      */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
             &$repeatedoptions, &$answersoption) {

@@ -314,6 +314,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Return the model answers as entered by the teacher. These answers should normally be sufficient
      * to get the maximum grade.
      *
+     * @param qtype_formulas_part|null model answer for every answer / unit box of each part
      * @return array model answer for every answer / unit box of each part
      */
     public function get_correct_response(?qtype_formulas_part $part = null): array {
@@ -497,7 +498,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * Produce a plain text summary of a response to be used e. g. in reports.
      *
-     * @param $response student's response, as might be passed to {@link grade_response()}
+     * @param array $response student's response, as might be passed to {@link grade_response()}
      * @return string plain text summary
      */
     public function summarise_response(array $response) {
@@ -513,7 +514,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * Categorise the student's response according to the categories defined by get_possible_responses.
      *
-     * @param $response response, as might be passed to {@link grade_response()}
+     * @param array $response response, as might be passed to {@link grade_response()}
      * @return array subpartid => {@link question_classified_response} objects;  empty array if no analysis is possible
      */
     public function classify_response(array $response) {
@@ -566,6 +567,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * does not have a complete response (for immediate feedback or interactive mode) or if it has
      * an invalid part (in adaptive multipart mode).
      *
+     * @param array $response student's response
      * @return string error message
      */
     public function get_validation_error(array $response): string {
@@ -1020,7 +1022,7 @@ class qtype_formulas_part {
      * there is no actual question object.
      * TODO: allow {_n|50px} or {_n|10} to control size of the input field
      *
-     * @param $text string to be parsed
+     * @param string $text string to be parsed
      * @return array
      */
     public static function scan_for_answer_boxes(string $text): array {
@@ -1053,7 +1055,8 @@ class qtype_formulas_part {
 
     /**
      * Produce a plain text summary of a response for the part.
-     * @param $response a response, as might be passed to {@link grade_response()}.
+     *
+     * @param array $response a response, as might be passed to {@link grade_response()}.
      * @return string a plain text summary of that response, that could be used in reports.
      */
     public function summarise_response(array $response) {
@@ -1664,7 +1667,6 @@ class qtype_formulas_part {
      * will be used to reset answers from wrong parts.
      *
      * @param array $response student's response
-     * @param answer_unit_conversion $checkunit the unit checking toolkit in order to avoid reinitialisation for each part
      * @return array either an empty array (if part is correct) or an array with all answers being the empty string
      */
     public function clear_from_response_if_wrong(array $response): array {
