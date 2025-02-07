@@ -32,13 +32,9 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE', 'MOODLE_405_STABLE', 'main']
+        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE', 'MOODLE_405_STABLE', 'main']
         database: [pgsql]
         exclude:
-          - moodle-branch: 'MOODLE_311_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_400_STABLE'
-            php: '8.1'
           - moodle-branch: 'MOODLE_402_STABLE'
             php: '7.4'
           - moodle-branch: 'MOODLE_403_STABLE'
@@ -58,9 +54,6 @@ jobs:
           - moodle-branch: 'main'
             php: '8.1'
         include:
-          - php: '7.4'
-            moodle-branch: 'MOODLE_39_STABLE'
-            database: 'pgsql'
           - php: '8.2'
             moodle-branch: 'MOODLE_402_STABLE'
             database: pgsql
@@ -97,9 +90,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           ini-values: max_input_vars=5000
-          # For whatever reason, externallib tests fail in Moodle 3.9 with PCOV (even with
-          # clobber), so forcing xdebug for that version.
-          coverage: ${{ matrix.moodle-branch == 'MOODLE_39_STABLE' && 'xdebug' || 'pcov' }}
+          coverage: 'pcov'
 
       - name: Initialise moodle-plugin-ci
         run: |
