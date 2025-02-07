@@ -1494,7 +1494,7 @@ final class evaluator_test extends \advanced_testcase {
                 'a = [5 ?]',
             ],
             'invalid ternary, ? is last char before closing bracket, 2' => [
-                'Evaluation error: not enough arguments for ternary operator: 2.',
+                'Evaluation error: not enough arguments for ternary operator.',
                 '(5 ? 4 :)',
             ],
             'invalid ternary, ? is last char before closing bracket, 3' => [
@@ -1502,7 +1502,7 @@ final class evaluator_test extends \advanced_testcase {
                 'a = (5 ? 4 :)',
             ],
             'argument should be scalar, is list' => [
-                'Evaluation error: numeric value expected, got list.',
+                'Evaluation error: numeric value expected, found list.',
                 'a = [1, 2, 3] + 4',
             ],
             'argument should be scalar, is list, 2' => [
