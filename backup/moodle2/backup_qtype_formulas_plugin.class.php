@@ -15,14 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    qtype_formulas
- * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-/**
  * Provides the information to backup formulas questions
  *
+ * @package    qtype_formulas
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,20 +41,20 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
 
         // Now create the qtype own structures.
 
-        $formulas = new backup_nested_element('formulas', array('id'), array(
+        $formulas = new backup_nested_element('formulas', ['id'], [
             'varsrandom', 'varsglobal',
             'correctfeedback', 'correctfeedbackformat',
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
             'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect',
-            'answernumbering'));
+            'answernumbering']);
 
         $formulasanswers = new backup_nested_element('formulas_answers');
-        $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(
+        $formulasanswer = new backup_nested_element('formulas_answer', ['id'], [
             'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2', 'correctness',
             'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat',
             'partcorrectfb', 'partcorrectfbformat',
             'partpartiallycorrectfb', 'partpartiallycorrectfbformat',
-            'partincorrectfb', 'partincorrectfbformat'));
+            'partincorrectfb', 'partincorrectfbformat']);
 
         // Don't need to annotate ids nor files.
         // Now the own qtype tree.
@@ -75,9 +70,9 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
                 FROM {qtype_formulas_answers}
                 WHERE questionid = :questionid
                 ORDER BY partindex',
-                array('questionid' => backup::VAR_PARENTID));
+                ['questionid' => backup::VAR_PARENTID]);
 
-        $formulas->set_source_table('qtype_formulas_options', array('questionid' => backup::VAR_PARENTID));
+        $formulas->set_source_table('qtype_formulas_options', ['questionid' => backup::VAR_PARENTID]);
 
         // Don't need to annotate ids nor files.
 
@@ -91,7 +86,7 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
      * files to be processed both in backup and restore.
      */
     public static function get_qtype_fileareas() {
-        return array(
+        return [
             'answersubqtext' => 'qtype_formulas_answers',
             'answerfeedback' => 'qtype_formulas_answers',
             'correctfeedback' => 'question_created',
@@ -99,6 +94,6 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
             'incorrectfeedback' => 'question_created',
             'partcorrectfb' => 'qtype_formulas_answers',
             'partpartiallycorrectfb' => 'qtype_formulas_answers',
-            'partincorrectfb' => 'qtype_formulas_answers');
+            'partincorrectfb' => 'qtype_formulas_answers'];
     }
 }

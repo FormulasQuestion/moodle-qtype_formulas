@@ -43,11 +43,16 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  *
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \qtype_formulas\local\functions
+ *
+ * @covers \qtype_formulas\local\functions
  */
+final class functions_test extends \advanced_testcase {
 
-class functions_test extends \advanced_testcase {
-
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_cases_for_assure_numeric(): array {
         $message = 'error message';
 
@@ -129,6 +134,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::assure_numeric().
+     *
      * @dataProvider provide_cases_for_assure_numeric
      */
     public function test_assure_numeric($expected, $input): void {
@@ -144,6 +151,11 @@ class functions_test extends \advanced_testcase {
         self::assertEquals(gettype($expected), gettype($result));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_normcdf(): array {
         return [
             [0.841344746068543, 'normcdf(12, 5, 7)'],
@@ -153,6 +165,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_stdnormcdf(): array {
         return [
             [2.866515718791946e-7, 'stdnormcdf(-5)'],
@@ -171,6 +188,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_stdnormpdf(): array {
         return [
             [0.398942280401432677939946, 'stdnormpdf(0)'],
@@ -183,6 +205,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_ncr(): array {
         return [
             [1, 'ncr(0, 0)'],
@@ -202,6 +229,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_npr(): array {
         return [
             [1, 'npr(0, 0)'],
@@ -220,6 +252,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_fact(): array {
         return [
             [1, 'fact(0)'],
@@ -233,6 +270,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_binomialpdf(): array {
         return [
             [0, 'binomialpdf(1, 0, 1)'],
@@ -249,6 +291,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_binomialcdf(): array {
         return [
             [1, 'binomialcdf(1, 0, 1)'],
@@ -266,6 +313,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_inv(): array {
         return [
             [[0, 1, 2, 3], 'a=inv([0, 1, 2, 3]);'],
@@ -280,6 +332,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test various combinatoric functions, e. g. ncr().
+     *
      * @dataProvider provide_ncr
      * @dataProvider provide_npr
      * @dataProvider provide_fact
@@ -304,6 +358,11 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_len_inputs(): array {
         return [
             [0, 'len([])'],
@@ -318,6 +377,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::len().
+     *
      * @dataProvider provide_len_inputs
      */
     public function test_len($expected, $input) {
@@ -334,6 +395,11 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_sum_inputs(): array {
         return [
             [0, 'sum([])'],
@@ -347,6 +413,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::sum().
+     *
      * @dataProvider provide_sum_inputs
      */
     public function test_sum($expected, $input) {
@@ -363,6 +431,11 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_gcd_inputs(): array {
         return [
             [0, 'gcd(0, 0)'],
@@ -384,6 +457,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_lcm_inputs(): array {
         return [
             [0, 'lcm(0, 0)'],
@@ -406,6 +484,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::gcd() and functions::lcm().
+     *
      * @dataProvider provide_gcd_inputs
      * @dataProvider provide_lcm_inputs
      */
@@ -423,7 +503,11 @@ class functions_test extends \advanced_testcase {
         self::assertEqualsWithDelta($expected, end($result)->value, 1e-12);
     }
 
-
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_pick_inputs(): array {
         return [
             [3, 'pick(3,[0,1,2,3,4,5])'],
@@ -458,6 +542,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::pick().
+     *
      * @dataProvider provide_pick_inputs
      */
     public function test_pick($expected, $input): void {
@@ -480,6 +566,11 @@ class functions_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_sigfig_expressions(): array {
         return [
             ['0.01', 'sigfig(.012345, 1)'],
@@ -512,6 +603,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_decbin_calls(): array {
         return [
             ['1', 'decbin(1)'],
@@ -528,6 +624,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_dechex_calls(): array {
         return [
             ['1', 'dechex(1)'],
@@ -546,6 +647,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_bindec_calls(): array {
         return [
             [1, 'bindec(1)'],
@@ -564,6 +670,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_decoct_calls(): array {
         return [
             ['1', 'decoct(1)'],
@@ -581,6 +692,11 @@ class functions_test extends \advanced_testcase {
 
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_octdec_calls(): array {
         return [
             [1, 'octdec(1)'],
@@ -599,6 +715,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_hexdec_calls(): array {
         return [
             [1, 'hexdec("1")'],
@@ -614,6 +735,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_base_convert_calls(): array {
         return [
             ['1011', 'base_convert("11", 10, 2)'],
@@ -626,6 +752,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test various functions for number conversion, e. g. functions::decbin() or functions::hexdec().
+     *
      * @dataProvider provide_decbin_calls
      * @dataProvider provide_dechex_calls
      * @dataProvider provide_bindec_calls
@@ -655,6 +783,11 @@ class functions_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_trigonometric_function_invocations(): array {
         return [
             [true, 'a=acos(0.5);'],
@@ -701,6 +834,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_algebraic_numerical_function_invocations(): array {
         return [
             [true, 'a=abs(-3);'],
@@ -819,6 +957,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_string_array_function_invocations(): array {
         return [
             [true, 'a=concat([1, 2], [2, 4]);'],
@@ -880,6 +1023,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test invocation of known functions.
+     *
      * @dataProvider provide_trigonometric_function_invocations
      * @dataProvider provide_algebraic_numerical_function_invocations
      * @dataProvider provide_string_array_function_invocations
@@ -899,6 +1044,11 @@ class functions_test extends \advanced_testcase {
         self::assertEquals($expected, $error === null);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_sort(): array {
         return [
             ['sort() expects its first argument to be a list.', 'sort(5, [1,2,3])'],
@@ -909,6 +1059,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_poly_inputs(): array {
         return [
             // With just a number...
@@ -1020,6 +1175,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test functions::poly().
+     *
      * @dataProvider provide_poly_inputs
      */
     public function test_poly($expected, $input): void {
@@ -1036,6 +1193,11 @@ class functions_test extends \advanced_testcase {
         self::assertEquals($expected, end($result)->value);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_various_function_calls(): array {
         return [
             [get_config('qtype_formulas')->version, 'fqversionnumber()'],
@@ -1044,6 +1206,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_sublist(): array {
         return [
             [[1, 1, 1, 2, 3, 2, 1, 3], 'sublist([1, 2, 3], [0, 0, 0, 1, 2, 1, 0, 2])'],
@@ -1060,6 +1227,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_map(): array {
         return [
             [[1, 0, 1, 0], 'map("==", [1, 2, 1, 3], [1, 1, 1, 1])'],
@@ -1098,6 +1270,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_modular_function_calls(): array {
         return [
             [15, 'fmod(35,20)'],
@@ -1146,6 +1323,11 @@ class functions_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_join_calls(): array {
         return [
             ["ab", 'join("", "a", "b")'],
@@ -1164,6 +1346,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test various functions that return a string, e. g. functions::sigfig() or functions::join().
+     *
      * @dataProvider provide_sigfig_expressions
      * @dataProvider provide_join_calls
      */
@@ -1177,6 +1361,8 @@ class functions_test extends \advanced_testcase {
     }
 
     /**
+     * Test various functions, e. g. functions::map() or functions::sort().
+     *
      * @dataProvider provide_various_function_calls
      * @dataProvider provide_modular_function_calls
      * @dataProvider provide_map

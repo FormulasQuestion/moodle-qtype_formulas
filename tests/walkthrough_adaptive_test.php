@@ -14,15 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for the formulas question type.
- *
- * @package    qtype_formulas
- * @copyright  2012 Jean-Michel Védrine
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
+
 use question_state;
 use test_question_maker;
 use question_hint_with_parts;
@@ -42,12 +35,20 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 /**
  * Unit tests for the formulas question type.
  *
+ * @package    qtype_formulas
  * @copyright  2012 Jean-Michel Vedrine
+ * @copyright  2024 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @covers \qtype_formulas
+ * @covers \qtype_formulas_part
+ * @covers \qtype_formulas_question
  */
 class walkthrough_adaptive_test extends walkthrough_test_base {
     /**
-     * @return qtype_formulas_question the requested question object.
+     * Create a question object of a certain type, as defined in the helper.php file.
+     *
+     * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
         return test_question_maker::make_question('formulas', $which);
@@ -296,6 +297,11 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
+    /**
+     * Data provider.
+     *
+     * @return Generator
+     */
     public static function provide_responses_for_feedback_test(): Generator {
         yield [
             qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK,
@@ -346,6 +352,8 @@ class walkthrough_adaptive_test extends walkthrough_test_base {
     }
 
     /**
+     * Test general and combined feedback for part.
+     *
      * @dataProvider provide_responses_for_feedback_test
      */
     public function test_part_feedback($expectedfeedback, $input) {

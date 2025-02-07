@@ -32,7 +32,7 @@ $functions = [
             'type' => 'read',
             'ajax' => true,
             'capabilities' => '',
-            'services' => []
+            'services' => [],
     ],
     'qtype_formulas_check_random_global_vars' => [
         'classname' => 'qtype_formulas\external\instantiation',
@@ -41,7 +41,7 @@ $functions = [
         'type' => 'read',
         'ajax' => true,
         'capabilities' => '',
-        'services' => []
+        'services' => [],
     ],
     'qtype_formulas_check_local_vars' => [
         'classname' => 'qtype_formulas\external\instantiation',
@@ -50,7 +50,7 @@ $functions = [
         'type' => 'read',
         'ajax' => true,
         'capabilities' => '',
-        'services' => []
+        'services' => [],
     ],
     'qtype_formulas_render_question_text' => [
         'classname' => 'qtype_formulas\external\instantiation',
@@ -59,6 +59,6 @@ $functions = [
         'type' => 'read',
         'ajax' => true,
         'capabilities' => '',
-        'services' => []
-    ]
+        'services' => [],
+    ],
 ];

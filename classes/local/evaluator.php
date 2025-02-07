@@ -26,9 +26,8 @@ use Throwable, Exception;
  * @copyright  2022 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class evaluator {
-    /* function name => [min params, max params] */
+    /** @var array list function name => [min params, max params] */
     const PHPFUNCTIONS = [
         'abs' => [1, 1],
         'acos' => [1, 1],
@@ -221,7 +220,7 @@ class evaluator {
     public function export_variable_context(): array {
         return [
             'randomvariables' => serialize($this->randomvariables),
-            'variables' => serialize($this->variables)
+            'variables' => serialize($this->variables),
         ];
     }
 
@@ -252,7 +251,7 @@ class evaluator {
     }
 
     /**
-     * Undocumented function
+     * Calculate the number of possible variants according to the defined random variables.
      *
      * @return int
      */
@@ -268,6 +267,13 @@ class evaluator {
         return $result;
     }
 
+    /**
+     * Instantiate random variables, i. e. assigning a fixed value to them and make them available
+     * as regular global variables.
+     *
+     * @param integer|null $seed
+     * @return void
+     */
     public function instantiate_random_variables(?int $seed = null): void {
         if (isset($seed)) {
             mt_srand($seed);
@@ -530,7 +536,7 @@ class evaluator {
      * @param string $message error message
      * @throws Exception
      */
-    private function die(string $message, token $offendingtoken): never {
+    private function die(string $message, token $offendingtoken) {
         throw new Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 
@@ -601,6 +607,13 @@ class evaluator {
         return $result;
     }
 
+    /**
+     * For a given list of tokens, find the index of the closing bracket that marks the end of
+     * the index definition, i. e. the part that says what element of the array should be accessed.
+     *
+     * @param array $tokens
+     * @return int
+     */
     private function find_end_of_array_access(array $tokens): int {
         $count = count($tokens);
 
@@ -785,6 +798,13 @@ class evaluator {
         return $result;
     }
 
+    /**
+     * Evaluate the given thing, e. g. an expression or a for loop.
+     *
+     * @param expression|for_loop $input
+     * @param bool $godmode whether one should be allowed to modify reserved variables like e.g. _a or _0
+     * @return token|void
+     */
     private function evaluate_the_right_thing($input, bool $godmode = false) {
         if ($input instanceof expression) {
             return $this->evaluate_single_expression($input, $godmode);
@@ -816,6 +836,12 @@ class evaluator {
         return $result;
     }
 
+    /**
+     * Evaluate a for loop.
+     *
+     * @param for_loop $loop
+     * @return void
+     */
     private function evaluate_for_loop(for_loop $loop) {
         $rangetoken = $this->evaluate_single_expression($loop->range);
         $range = $rangetoken->value;
@@ -828,7 +854,14 @@ class evaluator {
         return end($result);
     }
 
-    private function evaluate_single_expression(expression $expression, bool $godmode = false) {
+    /**
+     * Evaluate an expression, e. g. an assignment, a function call or a calculation.
+     *
+     * @param expression $expression
+     * @param bool $godmode
+     * @return token
+     */
+    private function evaluate_single_expression(expression $expression, bool $godmode = false): token {
         foreach ($expression->body as $token) {
             $type = $token->type;
             $value = $token->value;
@@ -898,6 +931,12 @@ class evaluator {
         return $this->pop_real_value();
     }
 
+    /**
+     * Fetch an element from a list or a char from a string. The index and the list or string will
+     * be taken from the stack.
+     *
+     * @return token the desired list element or char
+     */
     private function fetch_array_element_or_char(): token {
         $indextoken = $this->pop_real_value();
         $index = $indextoken->value;
@@ -933,7 +972,13 @@ class evaluator {
         return $element;
     }
 
-    private function build_range() {
+    /**
+     * Build a list of (NUMBER) tokens based on a range definition. The lower and upper limit
+     * and, if present, the step will be taken from the stack.
+     *
+     * @return array
+     */
+    private function build_range(): array {
         // Pop the number of parts. We generated it ourselves, so we know it will be 2 or 3.
         $parts = array_pop($this->stack)->value;
 
@@ -982,7 +1027,13 @@ class evaluator {
         return $result;
     }
 
-    private function build_set_or_array(string $type) {
+    /**
+     * Create a SET or LIST token based on elements on the stack.
+     *
+     * @param string $type whether to build a SET or a LIST
+     * @return token
+     */
+    private function build_set_or_array(string $type): token {
         if ($type === '%%setbuild') {
             $delimitertype = token::OPENING_BRACE;
             $outputtype = token::SET;
@@ -1004,10 +1055,22 @@ class evaluator {
         return new token($outputtype, array_reverse($elements));
     }
 
+    /**
+     * Whether a given OPERATOR token is an unary operator.
+     *
+     * @param token $token
+     * @return bool
+     */
     private function is_unary_operator(token $token): bool {
         return in_array($token->value, ['_', '!', '~']);
     }
 
+    /**
+     * Whether a given OPERATOR token expects its argument(s) to be numbers.
+     *
+     * @param token $token
+     * @return bool
+     */
     private function needs_numeric_input(token $token): bool {
         $operators = ['_', '~', '**', '*', '/', '%', '-', '<<', '>>', '&', '^', '|', '&&', '||'];
         return in_array($token->value, $operators);
@@ -1044,6 +1107,12 @@ class evaluator {
         }
     }
 
+    /**
+     * Whether a given OPERATOR token is a binary operator.
+     *
+     * @param token $token
+     * @return bool
+     */
     private function is_binary_operator(token $token): bool {
         $binaryoperators = ['=', '**', '*', '/', '%', '+', '-', '<<', '>>', '&', '^',
             '|', '&&', '||', '<', '>', '==', '>=', '<=', '!='];
@@ -1051,6 +1120,12 @@ class evaluator {
         return in_array($token->value, $binaryoperators);
     }
 
+    /**
+     * Assign a value to a variable. The value and the variable name are taken from the stack.
+     *
+     * @param boolean $israndomvar
+     * @return token the assigned value
+     */
     private function execute_assignment($israndomvar = false): token {
         $what = $this->pop_real_value();
         $destination = array_pop($this->stack);
@@ -1067,6 +1142,12 @@ class evaluator {
         return $this->set_variable_to_value($destination, $what, $israndomvar);
     }
 
+    /**
+     * Evaluate a ternary expression, taking the arguments from the stack.
+     *
+     * @param token $optoken token that led to this function being called, for better error reporting
+     * @return token evaluation result
+     */
     private function execute_ternary_operator(token $optoken) {
         // For good error reporting, we first check, whether there are enough arguments on
         // the stack. We subtract one, because there is a sentinel token.
@@ -1092,6 +1173,12 @@ class evaluator {
         return ($condition->value ? $then : $else);
     }
 
+    /**
+     * Apply an unary operator to the token that is currently on top of the stack.
+     *
+     * @param token $token operator token
+     * @return token result
+     */
     private function execute_unary_operator($token) {
         $input = $this->pop_real_value();
 
@@ -1105,6 +1192,12 @@ class evaluator {
         return token::wrap($result);
     }
 
+    /**
+     * Apply a binary operator to the two elements currently on top of the stack.
+     *
+     * @param token $optoken operator token
+     * @return token result
+     */
     private function execute_binary_operator($optoken) {
         // The stack is LIFO, so we pop the second operand first.
         $secondtoken = $this->pop_real_value();
@@ -1140,6 +1233,13 @@ class evaluator {
         return token::wrap($result);
     }
 
+    /**
+     * Check whether the number of parameters is valid for a given function.
+     *
+     * @param token $function FUNCTION token containing the function name
+     * @param int $count number of arguments
+     * @return bool
+     */
     private function is_valid_num_of_params(token $function, int $count): bool {
         $funcname = $function->value;
         $min = INF;
@@ -1156,6 +1256,12 @@ class evaluator {
         $this->die(get_string('error_unknownfunction', 'qtype_formulas', $funcname), $function);
     }
 
+    /**
+     * Lookup the value of a constant and return its value.
+     *
+     * @param token $token CONSTANT token containing the constant's name
+     * @return token value of the requested constant
+     */
     private function resolve_constant($token): token {
         if (array_key_exists($token->value, $this->constants)) {
             return new token(token::NUMBER, $this->constants[$token->value], $token->row, $token->column);
@@ -1163,6 +1269,12 @@ class evaluator {
         $this->die(get_string('error_undefinedconstant', 'qtype_formulas', $token->value), $token);
     }
 
+    /**
+     * Execute a given function, taking the needed argument(s) from the stack.
+     *
+     * @param token $token FUNCTION token containing the function's name.
+     * @return token result
+     */
     private function execute_function(token $token): token {
         $funcname = $token->value;
 

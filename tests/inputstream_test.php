@@ -14,23 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * qtype_formulas unit tests for the inputstream class
- *
- * @package    qtype_formulas
- * @category   test
- * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
+
 use Exception;
 use qtype_formulas\local\input_stream;
 
 /**
+ * Unit tests for the input_stream class.
+ *
+ * @package    qtype_formulas
+ * @copyright  2022 Philipp Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @covers \qtype_formulas\local\input_stream
  */
-class inputstream_test extends \advanced_testcase {
+final class inputstream_test extends \advanced_testcase {
 
     /**
      * Test read() and peek() function of the inputstream class.

@@ -14,26 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for the OU multiple response question class.
- *
- * @package    qtype_formulas
- * @copyright 2012 Jean-Michel Védrine
- * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 use Exception;
 use Generator;
 use qbehaviour_adaptivemultipart_part_result;
-use qtype_formulas_part;
-use qtype_formulas_question;
 use question_attempt;
 use question_attempt_step;
 use question_display_options;
 use question_hint_with_parts;
 use question_usage_by_activity;
+use qtype_formulas_part;
+use qtype_formulas_question;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -43,18 +35,24 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 require_once($CFG->dirroot . '/question/type/formulas/question.php');
 
 /**
- * Unit tests for (some of) question/type/formulas/question.php.
+ * Unit tests for qtype_formulas_question and qtype_formulas_part classes.
  *
  * @copyright  2008 The Open University
+ * @copyright  2012 Jean-Michel Védrine
+ * @copyright  2024 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    qtype_formulas
  * @group      qtype_formulas
+ *
  * @covers     \qtype_formulas_question
  * @covers     \qtype_formulas_part
  */
-class question_test extends \basic_testcase {
+final class question_test extends \basic_testcase {
 
     /**
-     * @return qtype_formulas_question the requested question object.
+     * Create a question object of a certain type, as defined in the helper.php file.
+     *
+     * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
         return \test_question_maker::make_question('formulas', $which);
@@ -399,12 +397,18 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         self::assertEquals(['0_' => PARAM_RAW,
                                   '1_0' => PARAM_RAW,
+                                  // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
                                   '1_1' => PARAM_RAW,
                                   '2_0' => PARAM_RAW,
                                   '3_0' => PARAM_RAW],
                                   $q->get_expected_data());
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_response_for_singlenum_question(): Generator {
         yield [false, []];
         yield [false, ['0_0' => '']];
@@ -415,6 +419,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::is_complete_response() with a single-part question.
+     *
      * @dataProvider provide_response_for_singlenum_question
      */
     public function test_is_complete_response_test0($iscomplete, $response) {
@@ -422,6 +428,11 @@ class question_test extends \basic_testcase {
         self::assertEquals($iscomplete, $q->is_complete_response($response));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_response_for_testthreeparts_question(): Generator {
         yield [false, []];
         yield [false, ['0_0' => '', '1_0' => '', '2_0' => '']];
@@ -434,6 +445,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::is_complete_response() with a multi-part question.
+     *
      * @dataProvider provide_response_for_testthreeparts_question
      */
     public function test_is_complete_response_threeparts($iscomplete, $response) {
@@ -500,10 +513,12 @@ class question_test extends \basic_testcase {
         $v = $q->evaluator->export_single_variable('v')->value;
 
         self::assertEquals(
+            // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
             ['0_' => "{$v} m/s", '1_0' => $v, '1_1' => 'm/s', '2_0' => $v, '3_0' => $v],
             $q->get_correct_response()
         );
         self::assertEquals(['0_' => "{$v} m/s"], $q->get_correct_response($q->parts[0]));
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         self::assertEquals(['1_0' => $v, '1_1' => 'm/s'], $q->get_correct_response($q->parts[1]));
         self::assertEquals(['2_0' => $v], $q->get_correct_response($q->parts[2]));
         self::assertEquals(['3_0' => $v], $q->get_correct_response($q->parts[3]));
@@ -784,9 +799,12 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('testmethodsinparts');
         $q->start_attempt(new question_attempt_step(), 1);
 
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $response = ['0_' => '40 m/s', '1_0' => '30', '1_1' => 'm/s', '2_0' => '40', '3_0' => '50'];
         $lastgradedresponses = [
+            // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
             '0' => ['0_' => '20 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '0', '3_0' => '40'],
+            // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
             '1' => ['0_' => '30 m/s', '1_0' => '0', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40'],
         ];
         $partscores = $q->grade_parts_that_can_be_graded($response, $lastgradedresponses, false);
@@ -893,6 +911,7 @@ class question_test extends \basic_testcase {
         $q = $this->get_test_formulas_question('test4');
         $q->start_attempt(new question_attempt_step(), 1);
 
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $response = ['0_' => "30m/s", '1_0' => "20", '1_1' => 'm/s', '2_0' => "40", '3_0' => "50"];
         $summary0 = $q->parts[0]->summarise_response($response);
         self::assertEquals('30m/s', $summary0);
@@ -926,6 +945,11 @@ class question_test extends \basic_testcase {
         self::assertTrue($q->is_gradable_response(['0_0' => 5]));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_answer_box_texts(): array {
         return [
             [[], ''],
@@ -976,6 +1000,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_part::scan_for_answer_boxes().
+     *
      * @dataProvider provide_answer_box_texts
      */
     public function test_scan_for_answer_boxes($expected, $input) {
@@ -983,6 +1009,11 @@ class question_test extends \basic_testcase {
         self::assertSame($expected, $boxes);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_answer_box_texts_invalid(): array {
         return [
             ['_0', '{_0} {_0}'],
@@ -995,6 +1026,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_part::scan_for_answer_boxes() with invalid input.
+     *
      * @dataProvider provide_answer_box_texts_invalid
      */
     public function test_scan_for_answer_boxes_invalid($expected, $input) {
@@ -1010,6 +1043,11 @@ class question_test extends \basic_testcase {
         self::assertNotNull($e);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_responses_for_question_without_unit(): array {
         return [
             [['id' => null, 'fraction' => null], ''],
@@ -1022,6 +1060,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::classify_response() for questions without unit.
+     *
      * @dataProvider provide_responses_for_question_without_unit
      */
     public function test_classify_response_without_unit($expected, $input) {
@@ -1059,6 +1099,11 @@ class question_test extends \basic_testcase {
         self::assertEquals($input, $classification->response);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_responses_for_combined_question(): array {
         return [
             [['id' => null, 'fraction' => null], ''],
@@ -1070,6 +1115,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::classify_response() for questions with a combined unit field.
+     *
      * @dataProvider provide_responses_for_combined_question
      */
     public function test_classify_response_combined_field($expected, $input) {
@@ -1104,6 +1151,11 @@ class question_test extends \basic_testcase {
         self::assertEquals($input, $classification->response);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_responses_for_question_with_separate_unit(): array {
         return [
             [['id' => null, 'fraction' => null], ['', '']],
@@ -1117,6 +1169,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::classify_response() for questions with a separate unit field.
+     *
      * @dataProvider provide_responses_for_question_with_separate_unit
      */
     public function test_classify_response_separate_unit_field($expected, $input) {
@@ -1151,6 +1205,11 @@ class question_test extends \basic_testcase {
         self::assertEquals($summary, $classification->response);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_responses_for_threepart_question(): array {
         return [
             [['id' => [null, null, null], 'fraction' => [null, null, null]], ['', '', '']],
@@ -1162,6 +1221,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_question::classify_response() for questions with a multi-part question.
+     *
      * @dataProvider provide_responses_for_threepart_question
      */
     public function test_classify_response_three_parts_without_unit($expected, $input) {
@@ -1194,6 +1255,11 @@ class question_test extends \basic_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_formulas_for_wrapping(): array {
         return [
             [['""'], ['']],
@@ -1207,6 +1273,8 @@ class question_test extends \basic_testcase {
     }
 
     /**
+     * Test for qtype_formulas_part::wrap_algebraic_formulas_in_quotes().
+     *
      * @dataProvider provide_formulas_for_wrapping
      */
     public function test_wrap_algebraic_formulas_in_quotes($expected, $input): void {

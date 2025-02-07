@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Defines the editing form for the formulas question type.
  *
- * @copyright &copy; 2010-2011 Hon Wai, Lau
+ * @copyright 2010-2011 Hon Wai, Lau
  * @author Hon Wai, Lau <lau65536@gmail.com>
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package qtype_formulas
  */
 
@@ -285,10 +285,23 @@ class qtype_formulas_edit_form extends question_edit_form {
                 $this->get_more_choices_string(), false);
     }
 
+    /**
+     * Language string to use for 'Add {no} more blanks'. Override from parent for
+     * appropriate text.
+     *
+     * @return void
+     */
     protected function get_more_choices_string() {
         return get_string('addmorepartsblanks', 'qtype_formulas');
     }
 
+    /**
+     * Perform any preprocessing needed on the data passed to {@link set_data()}
+     * before it is used to initialise the form.
+     *
+     * @param object $question the data being passed to the form
+     * @return object the modified data
+     */
     protected function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_combined_feedback($question, true);
@@ -352,6 +365,11 @@ class qtype_formulas_edit_form extends question_edit_form {
         return $errors;
     }
 
+    /**
+     * Overriding abstract parent method to return the question type name.
+     *
+     * @return string
+     */
     public function qtype() {
         return 'formulas';
     }

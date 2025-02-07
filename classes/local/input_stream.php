@@ -23,8 +23,8 @@ namespace qtype_formulas\local;
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class input_stream {
+    /** @var string */
     const EOF = '';
 
     /** @var int current position in the input */
@@ -104,7 +104,7 @@ class input_stream {
      * @return void
      * @throws Exception
      */
-    public function die(string $message): never {
+    public function die(string $message): void {
         throw new \Exception($this->row . ':' . $this->column . ':' . $message);
     }
 

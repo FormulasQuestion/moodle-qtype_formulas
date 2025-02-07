@@ -23,8 +23,8 @@ namespace qtype_formulas\local;
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class lexer {
+    /** @var null */
     const EOF = null;
 
     /** @var ?input_stream input stream */
@@ -144,7 +144,7 @@ class lexer {
                 ',' => token::ARG_SEPARATOR,
                 '\\' => token::PREFIX,
                 ';' => token::END_OF_STATEMENT,
-                'π' => token::CONSTANT
+                'π' => token::CONSTANT,
             ];
             return $this->read_single_char_token($types[$currentchar]);
         }

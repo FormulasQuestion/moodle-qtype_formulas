@@ -25,7 +25,6 @@ use qtype_formulas;
  * @copyright  2022 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class answer_parser extends parser {
     /**
      * Create a parser for student answers. This class does additional filtering (e. g. block
@@ -247,7 +246,7 @@ class answer_parser extends parser {
         // Iterate over all tokens. If we find a FUNCTION token, we check whether it is in the white list.
         $functionwhitelist = [
             'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-            'sqrt', 'exp', 'log', 'log10', 'ln', 'abs', 'ceil', 'floor', 'fact', 'ncr', 'npr'
+            'sqrt', 'exp', 'log', 'log10', 'ln', 'abs', 'ceil', 'floor', 'fact', 'ncr', 'npr',
         ];
         $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
         foreach ($answertokens as $token) {

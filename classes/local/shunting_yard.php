@@ -23,7 +23,6 @@ namespace qtype_formulas\local;
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class shunting_yard {
     /**
      * Return numeric precedence value for an operator
@@ -208,7 +207,13 @@ class shunting_yard {
         }, true);
     }
 
-
+    /**
+     * Flush remaining range separator tokens (i. e. commas) from the operator stack to the output queue.
+     *
+     * @param array $opstack operator stack, will be modified
+     * @param array $output output queue, will be modified
+     * @return void
+     */
     private static function flush_range_separators(array &$opstack, array &$output): void {
         // If the opstack's top element is not a RANGE_SEPARATOR, there is nothing to
         // do for us.
@@ -280,7 +285,7 @@ class shunting_yard {
                 token::OPENING_BRACE,
                 token::ARG_SEPARATOR,
                 token::RANGE_SEPARATOR,
-                token::OPERATOR
+                token::OPERATOR,
             ];
             if (in_array($lasttype, $allowunaryafter)) {
                 $unarypossible = true;
@@ -531,7 +536,7 @@ class shunting_yard {
      * @return void
      * @throws Exception
      */
-    private static function die(string $message, token $offendingtoken): never {
+    private static function die(string $message, token $offendingtoken): void {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
 

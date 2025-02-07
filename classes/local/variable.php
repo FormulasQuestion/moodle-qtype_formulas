@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas\local;
+
 /**
  * Parser for qtype_formulas
  *
@@ -21,16 +23,26 @@
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace qtype_formulas\local;
-
 class variable {
+    /** @var int used to designate a variable of unknown type*/
     const UNDEFINED = 0;
+
+    /** @var int used to designate a variable storing a number */
     const NUMERIC = token::NUMBER;
+
+    /** @var int used to designate a variable storing a string literal */
     const STRING = token::STRING;
+
+    /** @var int used to designate a variable storing a list */
     const LIST = token::LIST;
+
+    /** @var int used to designate a variable storing a set */
     const SET = token::SET;
+
+    /** @var int used to designate a variable storing a matrix (not yet implemented) */
     const MATRIX = 32;
+
+    /** @var int used to designate an algebraic variable */
     const ALGEBRAIC = 1024;
 
     /** @var string the identifier used to refer to this variable */
@@ -45,6 +57,14 @@ class variable {
     /** @var float microtime() timestamp of last update */
     public float $timestamp;
 
+    /**
+     * Constructor. If no timestamp is given, the current time (to microseconds) will be used.
+     *
+     * @param string $name identifier used to refer to this variable
+     * @param mixed $value the variable's content
+     * @param int $type int the variable's data type, use pre-defined constants
+     * @param float|null $timestamp timestamp of last update
+     */
     public function __construct(string $name, $value = null, int $type = self::UNDEFINED, ?float $timestamp = null) {
         $this->name = $name;
         $this->value = $value;
@@ -55,6 +75,11 @@ class variable {
         $this->timestamp = $timestamp;
     }
 
+    /**
+     * Convert variable to string.
+     *
+     * @return string
+     */
     public function __toString() {
         // For algebraic variables, we just return their name, because they do not
         // have a concrete value.

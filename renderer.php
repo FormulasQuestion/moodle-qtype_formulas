@@ -85,14 +85,29 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $result;
     }
 
+    /**
+     * Return HTML that needs to be included in the page's <head> when this
+     * question is used.
+     *
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @return string HTML fragment
+     */
     public function head_code(question_attempt $qa) {
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
+        return '';
     }
 
-    // Return the part text, controls, grading details and feedbacks.
-    public function part_formulation_and_controls(question_attempt $qa, question_display_options $options, $part) {
+    /**
+     * Return the part text, controls, grading details and feedbacks.
+     *
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param question_display_options $options
+     * @param qtype_formulas_part $part
+     * @return void
+     */
+    public function part_formulation_and_controls(question_attempt $qa, question_display_options $options,
+            qtype_formulas_part $part) {
 
-        $question = $qa->get_question();
         $partoptions = clone $options;
         // If using adaptivemultipart behaviour, adjust feedback display options for this part.
         if ($qa->get_behaviour_name() === 'adaptivemultipart') {
@@ -130,7 +145,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return html_writer::tag('div', $output , ['class' => 'formulaspart']);
     }
 
-    // Return class and image for the part feedback.
+    /**
+     * Return class and image for the part feedback.
+     *
+     * @param question_attempt $qa
+     * @param question_display_options $options
+     * @param qtype_formulas_part $part
+     * @return object
+     */
     public function get_part_image_and_class($qa, $options, $part) {
         $question = $qa->get_question();
 
@@ -167,13 +189,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * @param int $num The number, starting at 0.
-     * @param string $style The style to render the number in. One of the
-     * options returned by {@link qtype_multichoice:;get_numbering_styles()}.
-     * @return string the number $num in the requested style.
+     * Format given number according to numbering style, e. g. abc or 123.
+     *
+     * @param int $num number
+     * @param string $style style to render the number in, acccording to {@link qtype_multichoice::get_numbering_styles()}
+     * @return string number $num in the requested style
      */
     protected function number_in_style($num, $style) {
-        switch($style) {
+        switch ($style) {
             case 'abc':
                 $number = chr(ord('a') + $num);
                 break;
@@ -198,7 +221,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $number . '. ';
     }
 
-    // Return the part's text with variables replaced by their values.
+    /**
+     * Return the part's text with variables replaced by their values.
+     *
+     * @param question_attempt $qa
+     * @param question_display_options $options
+     * @param int $i part index
+     * @param object $sub class and image for the part feedback
+     * @return string
+     */
     public function get_part_formulation(question_attempt $qa, question_display_options $options, $i, $sub) {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -443,49 +474,59 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * @param string $class class attribute value.
-     * @return string HTML to go before each choice.
+     * Generate HTML code to be included before each choice in multiple choice questions.
+     *
+     * @param string $class class attribute value
+     * @return string
      */
     protected function choice_wrapper_start($class) {
         return html_writer::start_tag('div', ['class' => $class]);
     }
 
     /**
-     * @return string HTML to go after each choice.
+     * Generate HTML code to be included after each choice in multiple choice questions.
+     *
+     * @return string
      */
     protected function choice_wrapper_end() {
         return html_writer::end_tag('div');
     }
 
     /**
-     * @return string HTML to go before all the choices.
+     * Generate HTML code to be included before all choices in multiple choice questions.
+     *
+     * @return string
      */
     protected function all_choices_wrapper_start() {
         return html_writer::start_tag('div', ['class' => 'multichoice_answer']);
     }
 
     /**
-     * @return string HTML to go after all the choices.
+     * Generate HTML code to be included after all choices in multiple choice questions.
+     *
+     * @return string
      */
     protected function all_choices_wrapper_end() {
         return html_writer::end_tag('div');
     }
+
     /**
-     * Correct response is provided by each question part.
+     * Correct response for the question. This is not needed for the Formulas question, because
+     * answers are relative to parts.
      *
-     * @param question_attempt $qa the question attempt to display.
-     * @return string HTML fragment.
+     * @param question_attempt $qa the question attempt to display
+     * @return string empty string
      */
     public function correct_response(question_attempt $qa) {
         return '';
     }
 
     /**
-     * Generate an automatic description of the correct response for this part.
+     * Generate an automatic description of the correct response for a given part.
      *
-     * @param int $i the part index.
-     * @param question_attempt $qa the question attempt to display.
-     * @return string HTML fragment.
+     * @param int $i part index
+     * @param question_attempt $qa question attempt to display
+     * @return string HTML fragment
      */
     public function part_correct_response($i, question_attempt $qa) {
         /** @var qtype_formulas_question $question */
@@ -534,6 +575,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return html_writer::nonempty_tag('div', $qa->get_question()->format_hint($hint, $qa), ['class' => 'hint']);
     }
 
+    /**
+     * Generate HTML fragment for the question's combined feedback.
+     *
+     * @param question_attempt $qa question attempt being displayed
+     * @return string
+     */
     protected function combined_feedback(question_attempt $qa) {
         $question = $qa->get_question();
 
@@ -558,16 +605,25 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $feedback;
     }
 
+    /**
+     * Generate the specific feedback. This is feedback that varies according to
+     * the response the student gave.
+     *
+     * @param question_attempt $qa question attempt being displayed
+     * @return string
+     */
     public function specific_feedback(question_attempt $qa) {
         return $this->combined_feedback($qa);
     }
 
     /**
-     * @param int $i the part index.
-     * @param question_attempt $qa the question attempt to display.
-     * @param question_definition $question the question being displayed.
-     * @param question_display_options $options controls what should and should not be displayed.
-     * @return string nicely formatted feedback, for display.
+     * Gereate the part's general feedback. This is feedback is shown to all students.
+     *
+     * @param int $i part index
+     * @param question_attempt $qa question attempt being displayed
+     * @param question_definition $question question being displayed
+     * @param question_display_options $options controls what should and should not be displayed
+     * @return string HTML fragment
      */
     protected function part_general_feedback(question_attempt $qa, question_display_options $options, $part) {
         if ($part->feedback == '') {
@@ -609,11 +665,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * @param int $i the part index.
-     * @param question_attempt $qa the question attempt to display.
-     * @param question_definition $question the question being displayed.
-     * @param question_display_options $options controls what should and should not be displayed.
-     * @return string nicely formatted feedback, for display.
+     * Generate HTML fragment for the part's combined feedback.
+     *
+     * @param int $i part index
+     * @param question_attempt $qa question attempt being displayed
+     * @param question_definition $question question being displayed
+     * @param question_display_options $options controls what should and should not be displayed
+     * @return string HTML fragment
      */
     protected function part_combined_feedback(question_attempt $qa, question_display_options $options, $part, $fraction) {
         $feedback = '';

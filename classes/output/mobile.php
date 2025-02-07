@@ -24,8 +24,6 @@
 
 namespace qtype_formulas\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Mobile output class for gapfill question type
  *
@@ -45,10 +43,10 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => file_get_contents($CFG->dirroot."/question/type/formulas/mobile/mobile.html")
-                    ]
+                    'html' => file_get_contents($CFG->dirroot."/question/type/formulas/mobile/mobile.html"),
+                ],
             ],
-            'javascript' => file_get_contents($CFG->dirroot . '/question/type/formulas/mobile/mobile.js')
+            'javascript' => file_get_contents($CFG->dirroot . '/question/type/formulas/mobile/mobile.js'),
         ];
     }
 }

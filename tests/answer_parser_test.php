@@ -35,10 +35,20 @@ use qtype_formulas;
 use qtype_formulas\local\answer_parser;
 
 /**
+ * Unit tests for the answer_parser class.
+ *
+ * @copyright  2024 Philipp Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @covers \qtype_formulas\local\answer_parser
  */
-class answer_parser_test extends \advanced_testcase {
+final class answer_parser_test extends \advanced_testcase {
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_numbers(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, '3'],
@@ -85,6 +95,11 @@ class answer_parser_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_algebraic_formulas(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi'],
@@ -156,6 +171,12 @@ class answer_parser_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Prepare an answer parser to be used in the tests.
+     *
+     * @param string $input given input
+     * @return answer_parser
+     */
     private static function prepare_answer_parser($input): answer_parser {
         try {
             $parser = new answer_parser($input);
@@ -171,6 +192,8 @@ class answer_parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test for answer_parser::is_acceptable_number().
+     *
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_number($expected, $input): void {
@@ -184,6 +207,8 @@ class answer_parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test for answer_parser::is_acceptable_numberic().
+     *
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_numeric($expected, $input): void {
@@ -197,6 +222,8 @@ class answer_parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test for answer_parser::is_acceptable_numberical_formula().
+     *
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_numerical_formula($expected, $input): void {
@@ -210,6 +237,8 @@ class answer_parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test for answer_parser::is_acceptable_algebraic_formula().
+     *
      * @dataProvider provide_numbers
      * @dataProvider provide_algebraic_formulas
      */

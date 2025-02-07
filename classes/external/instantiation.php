@@ -27,10 +27,10 @@ namespace qtype_formulas\external;
 
 use Exception;
 use qtype_formulas\local\evaluator;
-use qtype_formulas\local\variable;
-use qtype_formulas\local\token;
-use qtype_formulas\local\random_parser;
 use qtype_formulas\local\parser;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\token;
+use qtype_formulas\local\variable;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -201,7 +201,7 @@ class instantiation extends \external_api {
             ),
             'answers' => new \external_multiple_structure(
                 new \external_value(PARAM_RAW, 'answers, per part', VALUE_REQUIRED)
-            )
+            ),
         ]);
     }
 
@@ -292,7 +292,7 @@ class instantiation extends \external_api {
                         new \external_single_structure(
                             [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
+                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
                             ],
                             'description of each random variable',
                             VALUE_REQUIRED
@@ -304,7 +304,7 @@ class instantiation extends \external_api {
                         new \external_single_structure(
                             [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
+                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
                             ],
                             'description of each global variable',
                             VALUE_REQUIRED
@@ -317,7 +317,7 @@ class instantiation extends \external_api {
                             new \external_single_structure(
                                 [
                                     'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                    'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
+                                    'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
                                 ]
                             ),
                             'list of variables for the corresponding part',
@@ -340,7 +340,7 @@ class instantiation extends \external_api {
     public static function check_random_global_vars_parameters() {
         return new \external_function_parameters([
             'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
-            'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, '')
+            'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -388,7 +388,7 @@ class instantiation extends \external_api {
     public static function check_random_global_vars_returns() {
         return new \external_single_structure([
             'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
-            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message'),
         ]);
     }
 
@@ -400,7 +400,7 @@ class instantiation extends \external_api {
         return new \external_function_parameters([
             'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
             'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
-            'localvars' => new \external_value(PARAM_RAW, 'local variables', VALUE_DEFAULT, '')
+            'localvars' => new \external_value(PARAM_RAW, 'local variables', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -456,7 +456,7 @@ class instantiation extends \external_api {
     public static function check_local_vars_returns() {
         return new \external_single_structure([
             'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
-            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message'),
         ]);
     }
 
@@ -478,7 +478,7 @@ class instantiation extends \external_api {
             ),
             'partvars' => new \external_multiple_structure(
                 new \external_value(PARAM_RAW, 'definition for part\'s local variables', VALUE_DEFAULT, '')
-            )
+            ),
         ]);
     }
 
@@ -513,7 +513,7 @@ class instantiation extends \external_api {
         } catch (Exception $e) {
             return [
                 'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
-                'parts' => []
+                'parts' => [],
             ];
         }
 
@@ -530,7 +530,7 @@ class instantiation extends \external_api {
             } catch (Exception $e) {
                 return [
                     'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
-                    'parts' => []
+                    'parts' => [],
                 ];
             }
         }
@@ -549,7 +549,7 @@ class instantiation extends \external_api {
                 new \external_value(PARAM_RAW, 'rendered part text', VALUE_REQUIRED),
                 'array of rendered part texts',
                 VALUE_REQUIRED
-            )
+            ),
         ]);
     }
 }

@@ -23,8 +23,6 @@ namespace qtype_formulas\local;
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-
 class random_parser extends parser {
     /**
      * Construct a new parser class for random variables. The main difference compared to the

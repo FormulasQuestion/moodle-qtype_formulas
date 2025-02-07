@@ -40,12 +40,24 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
+    /** @var string|null $currentoutput */
     protected $currentoutput = null;
 
+    /**
+     * Render the question and fetch the generated HTML.
+     *
+     * @return void
+     */
     protected function render() {
         $this->currentoutput = $this->quba->render_question($this->slot, $this->displayoptions);
     }
 
+    /**
+     * Test whether the feedback concerning the number of correct parts is right.
+     *
+     * @param int $num
+     * @return void
+     */
     protected function get_contains_num_parts_correct($num) {
         $s = get_string('yougotoneright', 'qtype_formulas');
         if ($num !== 1) {
@@ -56,29 +68,23 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
             preg_quote($s, '/') . '/');
     }
 
+    /**
+     * Create assertion to check that a hint with a given text is shown.
+     *
+     * @param string $text
+     * @return void
+     */
     protected function get_contains_hint_expectation($text) {
         return new question_pattern_expectation('/<div class="hint">' .
             preg_quote($text, '/') . '/');
     }
 
-    protected function check_output_contains_part_feedback($name = null) {
-        $class = 'formulaspartfeedback';
-        if ($name) {
-            $class .= ' formulaspartfeedback-' . $name;
-        }
-        $this->assertTag(['tag' => 'div', 'attributes' => ['class' => $class]], $this->currentoutput,
-                'part feedback for ' . $name . ' not found in ' . $this->currentoutput);
-    }
-
-    protected function check_output_does_not_contain_part_feedback($name = null) {
-        $class = 'formulaspartfeedback';
-        if ($name) {
-            $class .= ' formulaspartfeedback-' . $name;
-        }
-        $this->assertNotTag(['tag' => 'div', 'attributes' => ['class' => $class]], $this->currentoutput,
-                'part feedback for ' . $name . ' should not be present in ' . $this->currentoutput);
-    }
-
+    /**
+     * Check whether there are placeholders for answer boxes, expressions and/or variables left in the HTML output,
+     * e. g. {_0} or {x} or {=2*a}.
+     *
+     * @return void
+     */
     protected function check_output_does_not_contain_stray_placeholders() {
         // Keeping the old way for 3.9 until it reaches end-of-life.
         if (version_compare(\PHPUnit\Runner\Version::id(), '9.0.0', '>=')) {

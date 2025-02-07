@@ -25,48 +25,102 @@ use Exception;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class token {
-    // Literals (string or number) will have their 1-bit set.
+
+    /** @var int all literals (string or number) will have their 1-bit set */
     const ANY_LITERAL = 1;
+
+    /** @var int used to designate a token storing a number */
     const NUMBER = 3;
+
+    /** @var int used to designate a token storing a string literal */
     const STRING = 5;
 
-    /* Parentheses are organised in groups, allowing for bitwise comparison.
-       We set the 8-bit for any parenthesis plus the 16-bit for opening and the 32-bit for closing parens.
-       examples: CLOSING_PAREN & ANY_PAREN = ANY_PAREN
-                 CLOSING_PAREN & ANY_CLOSING_PAREN = ANY_CLOSING_PAREN
-                 CLOSING_PAREN & OPEN_OR_CLOSE_PAREN = OPEN_OR_CLOSE_PAREN
-                 CLOSING_PAREN & CLOSING_BRACKET = ANY_PAREN | ANY_CLOSING_PAREN
-                 OPENING_* ^ CLOSING_COUNTER_PART = ANY_CLOSING_PAREN | ANY_OPENING_PAREN
-    */
+    /**
+     * Parentheses are organised in groups, allowing for bitwise comparison.
+     * examples: CLOSING_PAREN & ANY_PAREN = ANY_PAREN
+     *           CLOSING_PAREN & ANY_CLOSING_PAREN = ANY_CLOSING_PAREN
+     *           CLOSING_PAREN & OPEN_OR_CLOSE_PAREN = OPEN_OR_CLOSE_PAREN
+     *           CLOSING_PAREN & CLOSING_BRACKET = ANY_PAREN | ANY_CLOSING_PAREN
+     *           OPENING_* ^ CLOSING_COUNTER_PART = ANY_CLOSING_PAREN | ANY_OPENING_PAREN
+     *
+     *
+     * @var int all parentheses have their 8-bit set
+     **/
     const ANY_PAREN = 8;
+
+    /** @var int all opening parentheses have their 16-bit set */
     const ANY_OPENING_PAREN = 16;
+
+    /** @var int all closing parentheses have their 32-bit set */
     const ANY_CLOSING_PAREN = 32;
+
+    /** @var int round opening or closing parens have their 64-bit set */
     const OPEN_OR_CLOSE_PAREN = 64;
+
+    /** @var int opening or closing brackets have their 128-bit set */
     const OPEN_OR_CLOSE_BRACKET = 128;
+
+    /** @var int opening or closing braces have their 256-bit set */
     const OPEN_OR_CLOSE_BRACE = 256;
+
+    /** @var int an opening paren must be 8 (any paren) + 16 (opening) + 64 (round paren) = 88 */
     const OPENING_PAREN = 88;
+
+    /** @var int a closing paren must be 8 (any paren) + 32 (closing) + 64 (round paren) = 104 */
     const CLOSING_PAREN = 104;
+
+    /** @var int an opening bracket must be 8 (any paren) + 16 (opening) + 128 (bracket) = 152 */
     const OPENING_BRACKET = 152;
+
+    /** @var int a closing bracket must be 8 (any paren) + 32 (closing) + 128 (bracket) = 168 */
     const CLOSING_BRACKET = 168;
+
+    /** @var int an opening brace must be 8 (any paren) + 16 (opening) + 256 (brace) = 280 */
     const OPENING_BRACE = 280;
+
+    /** @var int a closing brace must be 8 (any paren) + 32 (closing) + 256 (brace) = 296 */
     const CLOSING_BRACE = 296;
 
-    // Identifiers will have their 512-bit set.
+    /** @var int identifiers will have their 512-bit set */
     const IDENTIFIER = 512;
+
+    /** @var int function tokens are 512 (identifier) + 1024 = 1536 */
     const FUNCTION = 1536;
+
+    /** @var int variable tokens are 512 (identifier) + 2048 = 2560 */
     const VARIABLE = 2560;
 
-    // Other types.
+    /** @var int used to designate a token storing the prefix operator */
     const PREFIX = 4096;
+
+    /** @var int used to designate a token storing a constant */
     const CONSTANT = 8192;
+
+    /** @var int used to designate a token storing an operator */
     const OPERATOR = 16384;
+
+    /** @var int used to designate a token storing an argument separator (comma) */
     const ARG_SEPARATOR = 32768;
+
+    /** @var int used to designate a token storing a range separator (colon) */
     const RANGE_SEPARATOR = 65536;
+
+    /** @var int used to designate a token storing an end-of-statement marker (semicolon) */
     const END_OF_STATEMENT = 131072;
+
+    /** @var int used to designate a token storing a reserved word (e. g. for) */
     const RESERVED_WORD = 262144;
+
+    /** @var int used to designate a token storing a list */
     const LIST = 524288;
+
+    /** @var int used to designate a token storing a set */
     const SET = 1048576;
+
+    /** @var int used to designate a token storing a start-of-group marker (opening brace) */
     const START_GROUP = 2097152;
+
+    /** @var int used to designate a token storing an end-of-group marker (closing brace) */
     const END_GROUP = 4194304;
 
     /** @var mixed the token's content, will be the name for identifiers */
@@ -82,7 +136,7 @@ class token {
     public int $column;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param int $type the type of the token
      * @param mixed $value the value (e.g. name of identifier, string content, number value, operator)
@@ -96,6 +150,11 @@ class token {
         $this->column = $column;
     }
 
+    /**
+     * Convert token to a string.
+     *
+     * @return string
+     */
     public function __toString() {
         // Arrays are printed in their [...] form, sets are printed as {...}.
         if (gettype($this->value) === 'array') {
@@ -110,7 +169,15 @@ class token {
         return strval($this->value);
     }
 
-    public static function wrap($value, $type = null) {
+    /**
+     * Wrap a given value (e. g. a number) into a token. If no specific type is requested, the
+     * token type will be derived from the value.
+     *
+     * @param mixed $value value to be wrapped
+     * @param int $type if desired, type of the resulting token (use pre-defined constants)
+     * @return token
+     */
+    public static function wrap($value, $type = null): token {
         // If the value is already a token, we do nothing.
         if ($value instanceof token) {
             return $value;
@@ -165,6 +232,12 @@ class token {
         return new token($type, $value);
     }
 
+    /**
+     * Extract the value from a token.
+     *
+     * @param token $token
+     * @return mixed
+     */
     public static function unpack($token) {
         // For convenience, we also accept elementary types instead of tokens, e.g. literals.
         // In that case, we have nothing to do, we just return the value. Unless it is an

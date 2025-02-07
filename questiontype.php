@@ -20,7 +20,7 @@
  * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
  * @author Hon Wai, Lau <lau65536@gmail.com>
  * @author Philipp Imhof
- * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package qtype_formulas
  */
 
@@ -47,9 +47,17 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class qtype_formulas extends question_type {
+
+    /** @var int */
     const ANSWER_TYPE_NUMBER = 0;
+
+    /** @var int */
     const ANSWER_TYPE_NUMERIC = 10;
+
+    /** @var int */
     const ANSWER_TYPE_NUMERICAL_FORMULA = 100;
+
+    /** @var int */
     const ANSWER_TYPE_ALGEBRAIC = 1000;
 
     /**

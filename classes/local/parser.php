@@ -25,9 +25,8 @@ use Exception;
  * @copyright  2022 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-
 class parser {
+    /** @var null */
     const EOF = null;
 
     /** @var array list of all (raw) tokens */
@@ -170,7 +169,7 @@ class parser {
      * @return void
      * @throws Exception
      */
-    protected function die(string $message, ?token $offendingtoken = null): never {
+    protected function die(string $message, ?token $offendingtoken = null): void {
         if (is_null($offendingtoken)) {
             $offendingtoken = $this->tokenlist[$this->position];
         }

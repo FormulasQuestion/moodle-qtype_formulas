@@ -48,13 +48,15 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @group      qtype_formulas
  * @covers     \qtype_formulas
  */
-class questiontype_test extends \advanced_testcase {
+final class questiontype_test extends \advanced_testcase {
 
     /** @var formulas instance of the question type class to test. */
     protected $qtype;
 
     /**
-     * @return qtype_formulas_question the requested question object.
+     * Create a question object of a certain type, as defined in the helper.php file.
+     *
+     * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
         return test_question_maker::make_question('formulas', $which);
@@ -68,6 +70,12 @@ class questiontype_test extends \advanced_testcase {
         $this->qtype = null;
     }
 
+    /**
+     * Helper function to create a new draft file.
+     *
+     * @param stdClass $user user object, e. g. global $USER
+     * @return \stored_file
+     */
     public static function create_draft_file_for_user($user): \stored_file {
         global $CFG;
 
@@ -183,6 +191,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals($expected, $this->qtype->split_questiontext($q->questiontext, $q->parts));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_multipart_data_for_form_validation(): array {
         return [
             [['answermark[0]' => get_string('error_mark', 'qtype_formulas')], ['answermark' => [0 => 0]]],
@@ -233,6 +246,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test validation of question's edit form for multi-part questions.
+     *
      * @dataProvider provide_multipart_data_for_form_validation
      */
     public function test_form_validation_multipart($expected, $input) {
@@ -259,6 +274,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals(count($expected) === 0, $form->is_validated());
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_single_part_data_for_form_validation(): array {
         return [
             [[], []],
@@ -503,6 +523,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test validation of question's edit form for single-part questions.
+     *
      * @dataProvider provide_single_part_data_for_form_validation
      */
     public function test_form_validation_single_part($expected, $input) {
@@ -529,6 +551,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertEquals(count($expected) === 0, $form->is_validated());
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_answers_for_numbox_test(): array {
         return [
             [1, '5'],
@@ -542,6 +569,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test calculation of the number of answer boxes based on the teacher's model answers.
+     *
      * @dataProvider provide_answers_for_numbox_test
      */
     public function test_calculation_of_numbox_numbertype($expected, $answer) {
@@ -556,6 +585,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(0, $validationresult->errors);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_algebraic_answers_for_numbox_test(): array {
         return [
             [1, '"5"'],
@@ -567,6 +601,9 @@ class questiontype_test extends \advanced_testcase {
         ];
     }
     /**
+     * Test calculation of the number of answer boxes based on the teacher's model answers
+     * when the answer type is "algebraic formula".
+     *
      * @dataProvider provide_algebraic_answers_for_numbox_test
      */
     public function test_calculation_of_numbox_algebraictype($expected, $answer) {
@@ -682,6 +719,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(0, $options->answers);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_fileareas_for_deletion_and_moving(): array {
         return [
             ['subqtext', 'answersubqtext'],
@@ -693,6 +735,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test that files are properly moved if a question is moved from one category to another.
+     *
      * @dataProvider provide_fileareas_for_deletion_and_moving
      */
     public function test_move_question_with_file_in_part($fieldname, $areaname): void {
@@ -752,6 +796,11 @@ class questiontype_test extends \advanced_testcase {
         self::assertCount(0, $fs->get_area_files($questioncat2->contextid, 'qtype_formulas', $areaname));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_question_names(): array {
         return [
             ['testsinglenum'],
@@ -816,6 +865,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test initialisation of a question instance.
+     *
      * @dataProvider provide_question_names
      */
     public function test_initialise_question_instance($questionname): void {
@@ -897,6 +948,11 @@ class questiontype_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_import_filenames(): array {
         global $CFG;
 
@@ -912,6 +968,8 @@ class questiontype_test extends \advanced_testcase {
         ];
     }
     /**
+     * Test importing a question from a prior XML export.
+     *
      * @dataProvider provide_import_filenames
      */
     public function test_import_from_xml($expected, $filename): void {
@@ -955,6 +1013,8 @@ class questiontype_test extends \advanced_testcase {
     }
 
     /**
+     * Test exporting a question to XML and reimporting it.
+     *
      * @dataProvider provide_question_names
      */
     public function test_export_and_reimport_xml($questionname): void {

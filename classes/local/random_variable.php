@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas\local;
+use Exception;
+
 /**
  * Parser for qtype_formulas
  *
@@ -21,10 +24,6 @@
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace qtype_formulas\local;
-use Exception;
-
 class random_variable extends variable {
     /** @var string the identifier used to refer to this variable */
     public string $name;
@@ -41,12 +40,25 @@ class random_variable extends variable {
     /** @var bool if the variable is a shuffled array */
     private bool $shuffle;
 
+    /**
+     * Constructor.
+     *
+     * @param string $name identifier used to refer to this variable
+     * @param array $reservoir set of possible values to choose from
+     * @param bool $useshuffle whether the variable is a shuffled array
+     * @param int $seed the seed for the PRNG
+     */
     public function __construct(string $name, array $reservoir, bool $useshuffle, int $seed = 1) {
         $this->name = $name;
         $this->shuffle = $useshuffle;
         $this->reservoir = $reservoir;
     }
 
+    /**
+     * Instantiate the random variable, e. g. assigning one of the possible values to it.
+     *
+     * @return token assigned value
+     */
     public function instantiate(): token {
         // We have two types of random variables. One is a list that will be shuffled.
         // The other is a set where we pick one random element.
@@ -62,6 +74,11 @@ class random_variable extends variable {
         return token::wrap($this->value, $this->type);
     }
 
+    /**
+     * Calculate the number of possible values for this random variable.
+     *
+     * @return int
+     */
     public function how_many(): int {
         if ($this->shuffle) {
             try {

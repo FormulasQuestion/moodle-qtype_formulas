@@ -14,19 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for the formulas question type renderer.
- *
- * @package    qtype_formulas
- * @copyright  2023 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
+use question_hint_with_parts;
 use question_state;
 use test_question_maker;
-use question_hint_with_parts;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,17 +28,20 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/test_base.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 
-
 /**
  * Unit tests for the formulas question type.
  *
+ * @package    qtype_formulas
  * @copyright  2024 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @covers     \qtype_formulas_renderer
  */
-class renderer_test extends walkthrough_test_base {
+final class renderer_test extends walkthrough_test_base {
     /**
-     * @return qtype_formulas_question the requested question object.
+     * Create a question object of a certain type, as defined in the helper.php file.
+     *
+     * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
         return test_question_maker::make_question('formulas', $which);
@@ -258,6 +253,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_text_input_with_class('3_1');
 
         // Submit partial answer.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '40 m/s', '1_0' => '40', '1_1' => 'm/s', '-submit' => 1]);
         $this->check_current_state(question_state::$invalid);
         $this->check_current_mark(null);
@@ -270,6 +266,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('1_1', 'm/s', true);
 
         // Submit partially correct answer.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '40 m/s', '1_0' => '40', '1_1' => 'm/s', '2_0' => '20', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedpartial);
         $this->check_current_mark(6);
@@ -417,6 +414,7 @@ class renderer_test extends walkthrough_test_base {
         // Submit wrong answer in first and third part, right answer for the others.
         // First part's answer is not only wrong, but invalid, i. e. it leads to an error
         // when trying to split the number and the unit.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '(', '1_0' => '40', '1_1' => 'm/s', '2_0' => '1', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
@@ -436,6 +434,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_hidden_input('2_0', '');
 
         // Try again. The wrong fields should now be cleared, the others still filled.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '', '1_0' => '40', '1_1' => 'm/s', '2_0' => '', '3_0' => '40', '-tryagain' => 1]);
         $this->render();
         $this->check_output_contains_text_input('0_', '', true);
@@ -445,6 +444,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('3_0', '40', true);
 
         // Submit wrong answer in first and second part, right answer for the others.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '2', '1_0' => '2', '1_1' => 'kg', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
@@ -465,6 +465,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_hidden_input('1_1', '');
 
         // Try again. The wrong fields should now be cleared, the others still filled.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '', '1_0' => '', '1_1' => '', '2_0' => '40', '3_0' => '40', '-tryagain' => 1]);
         $this->render();
         $this->check_output_contains_text_input('0_', '', true);
@@ -474,6 +475,7 @@ class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('3_0', '40', true);
 
         // Submit right answer.
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
         $this->process_submission(['0_' => '40 m/s', '1_0' => '40', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_output(

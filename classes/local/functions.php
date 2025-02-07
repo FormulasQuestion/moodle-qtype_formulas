@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace qtype_formulas\local;
+use Exception;
+
+// TODO: add function randint.
+// TODO: add some string functions, e.g. upper/lower case, repeat char.
 
 /**
  * Additional functions qtype_formulas
@@ -22,19 +27,23 @@
  * @copyright  2022 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace qtype_formulas\local;
-use Exception;
-
-// TODO: add function randint.
-// TODO: add some string functions, e.g. upper/lower case, repeat char.
-
 class functions {
+    /** @var int */
     const NONE = 0;
+
+    /** @var int */
     const INTEGER = 1;
+
+    /** @var int */
     const NON_NEGATIVE = 2;
+
+    /** @var int */
     const NON_ZERO = 4;
+
+    /** @var int */
     const NEGATIVE = 8;
+
+    /** @var int */
     const POSITIVE = 16;
 
     /**
@@ -48,7 +57,9 @@ class functions {
      * Examples:
      * - function foo() with no arguments: 'foo' => [0, 0]
      * - function bar() with at least 1 argument: 'bar' => [1, INF]
-     * - functino baz() with 2 or 3 arguments: 'baz' => [2, 3]
+     * - function baz() with 2 or 3 arguments: 'baz' => [2, 3]
+     *
+     * @var array
      */
     const FUNCTIONS = [
         'binomialcdf' => [3, 3],
@@ -495,7 +506,7 @@ class functions {
             // is not a real coefficient, but a constant term that has to be printed.
             $constantone = true;
             $tmp = $variables;
-            $variables = array();
+            $variables = [];
             for ($i = 0; $i < $numberofterms; $i++) {
                 if ($i == $numberofterms - 2) {
                     $variables[$i] = $tmp;
@@ -1482,7 +1493,7 @@ class functions {
      * @param string|object|array $a additional (third) parameter passed to get_string
      * @throws Exception
      */
-    private static function die(string $identifier, $a = null): never {
+    private static function die(string $identifier, $a = null): void {
         throw new Exception(get_string($identifier, 'qtype_formulas', $a));
     }
 

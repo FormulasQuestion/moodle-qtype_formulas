@@ -29,11 +29,11 @@ $plugin->version = 2024100701;
 
 $plugin->cron      = 0;
 $plugin->requires  = 2019111803;
-$plugin->dependencies = array(
+$plugin->dependencies = [
     'qbehaviour_adaptive' => 2015111600,
     'qbehaviour_adaptivemultipart' => 2014092500,
     'qtype_multichoice' => 2015111600,
-);
+];
 $plugin->supported = [39, 405];
 $plugin->release = '5.3.4.post0 for Moodle 3.9+';
 

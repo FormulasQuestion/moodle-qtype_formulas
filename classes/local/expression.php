@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas\local;
+
 /**
  * expression or statement for qtype_formulas parser
  *
@@ -21,13 +23,15 @@
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace qtype_formulas\local;
-
 class expression {
     /** @var array the expression or statement in RPN notation */
     public array $body = [];
 
+    /**
+     * Constructor.
+     *
+     * @param array $body list of tokens forming the expression or statement, in RPN notation
+     */
     public function __construct(array $body) {
         $this->body = $body;
     }

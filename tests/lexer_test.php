@@ -14,24 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas;
+
+use Exception;
+use qtype_formulas\local\lexer;
+use qtype_formulas\local\token;
+
 /**
- * qtype_formulas lexer tests
+ * Tests for the lexer class.
  *
  * @package    qtype_formulas
- * @category   test
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace qtype_formulas;
-use Exception;
-use qtype_formulas\local\token;
-use qtype_formulas\local\lexer;
-
-/**
+ *
  * @covers \qtype_formulas\local\lexer
  */
-class lexer_test extends \advanced_testcase {
+final class lexer_test extends \advanced_testcase {
 
     public function test_get_token_list_1(): void {
         $input = <<<EOF
@@ -463,6 +461,11 @@ EOF;
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_identifiers(): array {
         return [
             ['abc_', 'abc_'],
@@ -475,6 +478,11 @@ EOF;
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_parens(): array {
         return [
             ['(', '('],
@@ -490,6 +498,11 @@ EOF;
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_operators(): array {
         return [
             ['+', '+'],
@@ -544,6 +557,11 @@ EOF;
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_valid_strings(): array {
         return [
             ['foo', "'foo'"],
@@ -575,6 +593,11 @@ EOF;
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_numbers(): array {
         return [
             [123, "\n123"],
@@ -612,6 +635,8 @@ EOF;
     }
 
     /**
+     * Test lexing of various inputs.
+     *
      * @dataProvider provide_identifiers
      * @dataProvider provide_parens
      * @dataProvider provide_operators
@@ -624,6 +649,11 @@ EOF;
         self::assertEquals($expected, $tokens[0]->value);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_invalid_strings(): array {
         return [
             ['1:4:Unterminated string, started at row 1, column 1.', '"foo'],
@@ -632,6 +662,8 @@ EOF;
     }
 
     /**
+     * Test interpretation of badly formatted strings.
+     *
      * @dataProvider provide_invalid_strings
      */
     public function test_read_invalid_string($expected, $input): void {

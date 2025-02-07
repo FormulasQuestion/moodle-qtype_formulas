@@ -14,28 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * qtype_formulas parser tests
- *
- * @package    qtype_formulas
- * @category   test
- * @copyright  2022 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-
 namespace qtype_formulas;
 
 use Exception;
 use Generator;
 use qtype_formulas\local\parser;
-use qtype_formulas\local\token;
 use qtype_formulas\local\shunting_yard;
+use qtype_formulas\local\token;
 
 /**
+ * Unit tests for the parser class.
+ *
+ * @package    qtype_formulas
+ * @copyright  2022 Philipp Imhof
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @covers \qtype_formulas\local\parser
  */
-class parser_test extends \advanced_testcase {
+final class parser_test extends \advanced_testcase {
 
     public function test_has_token_in_tokenlist(): void {
         $input = 'sin = 5';
@@ -75,6 +71,8 @@ class parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test various assignments.
+     *
      * @dataProvider provide_assignments
      */
     public function test_assignments($expected, $input): void {
@@ -83,6 +81,11 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_assignments(): array {
         return [
             'arithmetic expression' => ['a,1,2,3,*,+,=', 'a = 1+2*3'],
@@ -103,6 +106,11 @@ class parser_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_paren_expressions(): Generator {
         yield [
             "1:1:Unbalanced parenthesis, '(' is never closed.",
@@ -175,6 +183,8 @@ class parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test various expressions involving parentheses.
+     *
      * @dataProvider provide_paren_expressions
      */
     public function test_invalid_parens($expected, $input): void {
@@ -188,6 +198,8 @@ class parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test various expressions involving sets.
+     *
      * @dataProvider provide_sets
      */
     public function test_sets($expected, $input): void {
@@ -196,6 +208,11 @@ class parser_test extends \advanced_testcase {
         self::assertEquals($expected, implode(',', $statement->body));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_sets(): array {
         return [
             'basic' => ['{,1,2,3,4,5,%%setbuild', '{1,2,3,4,5}'],
@@ -221,6 +238,11 @@ class parser_test extends \advanced_testcase {
         ];
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_impossible_things(): array {
         return [
             ['1:99:Unexpected token: ;', new token(token::END_OF_STATEMENT, ';', 1, 99)],
@@ -230,6 +252,8 @@ class parser_test extends \advanced_testcase {
     }
 
     /**
+     * Test dealing with things that cannot normally be seen.
+     *
      * @dataProvider provide_impossible_things
      */
     public function test_impossible_stuff($expected, $input): void {

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas\local;
+
 /**
  * for loop for qtype_formulas parser
  *
@@ -21,9 +23,6 @@
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace qtype_formulas\local;
-
 class for_loop {
     /** @var token variable token for the loop's iterator variable */
     public token $variable;
@@ -34,6 +33,13 @@ class for_loop {
     /** @var array statements of the loop */
     public array $body = [];
 
+    /**
+     * Constructor
+     *
+     * @param token $var variable token for the loop's iterator variable
+     * @param expression $range expression values the loop will iterate over
+     * @param array $body list of statements forming the loop's body
+     */
     public function __construct(token $var, expression $range, array $body) {
         $this->variable = $var;
         $this->range = $range;

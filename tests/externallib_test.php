@@ -31,10 +31,15 @@ global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 /**
+ * Unit test for the instantiation web service.
+ *
+ * @copyright  2024 Philipp Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @runTestsInSeparateProcesses
  * @covers \qtype_formulas\external\instantiation
  */
-class externallib_test extends \externallib_advanced_testcase {
+final class externallib_test extends \externallib_advanced_testcase {
     public function setUp(): void {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
@@ -42,6 +47,11 @@ class externallib_test extends \externallib_advanced_testcase {
         $this->resetAfterTest(true);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_random_global_vars(): array {
         return [
             [
@@ -95,6 +105,8 @@ class externallib_test extends \externallib_advanced_testcase {
     }
 
     /**
+     * Test for instantiation::check_random_global_vars().
+     *
      * @dataProvider provide_random_global_vars
      */
     public function test_check_random_global_vars($expected, $input): void {
@@ -115,6 +127,11 @@ class externallib_test extends \externallib_advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_random_global_local_vars(): array {
         return [
             [
@@ -185,6 +202,8 @@ class externallib_test extends \externallib_advanced_testcase {
     }
 
     /**
+     * Test for instantiation::check_local_vars().
+     *
      * @dataProvider provide_random_global_local_vars
      */
     public function test_check_local_vars($expected, $input): void {
@@ -202,6 +221,11 @@ class externallib_test extends \externallib_advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_question_texts(): array {
         return [
             [
@@ -231,7 +255,12 @@ class externallib_test extends \externallib_advanced_testcase {
             ],
             [
                 ['question' => 'Foo Bar {a}', 'parts' => ['local 10']],
-                ['questiontext' => 'Foo Bar {a}', 'parttexts' => ['local {a}'], 'globalvars' => 'a={1,2,3}', 'partvars' => ['a=10']],
+                [
+                    'questiontext' => 'Foo Bar {a}',
+                    'parttexts' => ['local {a}'],
+                    'globalvars' => 'a={1,2,3}',
+                    'partvars' => ['a=10'],
+                ],
             ],
             [
                 ['question' => '', 'parts' => ['Foo Bar 1']],
@@ -260,6 +289,8 @@ class externallib_test extends \externallib_advanced_testcase {
     }
 
     /**
+     * Test for instantiation::render_question_text().
+     *
      * @dataProvider provide_question_texts
      */
     public function test_render_question_text($expected, $input): void {
@@ -274,6 +305,11 @@ class externallib_test extends \externallib_advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_instantiation_data(): array {
         return [
             [
@@ -499,6 +535,8 @@ class externallib_test extends \externallib_advanced_testcase {
     }
 
     /**
+     * Test for instantiation::instantiate().
+     *
      * @dataProvider provide_instantiation_data
      */
     public function test_instantiate($expected, $input): void {

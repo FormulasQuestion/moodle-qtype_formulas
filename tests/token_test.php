@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas;
+
+use qtype_formulas\local\token;
+
 /**
  * qtype_formulas token class tests
  *
@@ -21,17 +25,13 @@
  * @category   test
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace qtype_formulas;
-
-use qtype_formulas\local\token;
-
-/**
+ *
  * @covers \qtype_formulas\local\token
  */
-class token_test extends \advanced_testcase {
+final class token_test extends \advanced_testcase {
     /**
+     * Test conversion of token to string.
+     *
      * @dataProvider provide_tokens
      */
     public function test_string_representation($expected, $input): void {
@@ -40,6 +40,11 @@ class token_test extends \advanced_testcase {
         self::assertEquals($expected, $s);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_tokens(): array {
         $one = new token(token::NUMBER, 1);
         $two = new token(token::NUMBER, 2);
@@ -64,6 +69,8 @@ class token_test extends \advanced_testcase {
     }
 
     /**
+     * Test wrapping of values into tokens.
+     *
      * @dataProvider provide_tokens_to_wrap
      */
     public function test_wrap($expected, $input): void {
@@ -85,6 +92,11 @@ class token_test extends \advanced_testcase {
         self::assertEquals($expected, token::wrap($value, $type));
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_tokens_to_wrap(): array {
         $one = new token(token::NUMBER, 1);
         $two = new token(token::NUMBER, 2);

@@ -83,19 +83,22 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public array $textfragments;
 
-    /**
-     * @var string $correctfeedback combined feedback for correct answer
-     * @var int $correctfeedbackformat format of combined feedback for correct answer
-     * @var string $partiallycorrectfeedback combined feedback for partially correct answer
-     * @var int $partiallycorrectfeedbackformat format of combined feedback for partially correct answer
-     * @var string $incorrectfeedback combined feedback for in correct answer
-     * @var int $incorrectfeedbackformat format of combined feedback for incorrect answer
-     */
+    /** @var string $correctfeedback combined feedback for correct answer */
     public string $correctfeedback;
+
+    /** @var int $correctfeedbackformat format of combined feedback for correct answer */
     public int $correctfeedbackformat;
+
+    /** @var string $partiallycorrectfeedback combined feedback for partially correct answer */
     public string $partiallycorrectfeedback;
+
+    /** @var int $partiallycorrectfeedbackformat format of combined feedback for partially correct answer */
     public int $partiallycorrectfeedbackformat;
+
+    /** @var string $incorrectfeedback combined feedback for in correct answer */
     public string $incorrectfeedback;
+
+    /** @var int $incorrectfeedbackformat format of combined feedback for incorrect answer */
     public int $incorrectfeedbackformat;
 
     /**
@@ -792,6 +795,14 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         }
     }
 
+    /**
+     * Normalize student response for each part, i. e. split number and unit for combined answer
+     * fields, trim answers and set missing answers to empty string to make sure all expected
+     * response fields are set.
+     *
+     * @param array $response the student's response
+     * @return array normalized response
+     */
     public function normalize_response(array $response): array {
         $result = [];
 
@@ -1079,10 +1090,12 @@ class qtype_formulas_part {
     }
 
     /**
-     * Undocumented function
+     * Normalize student response for current part, i. e. split number and unit for combined answer
+     * fields, trim answers and set missing answers to empty string to make sure all expected
+     * response fields are set.
      *
-     * @param array $response
-     * @return array
+     * @param array $response student's full response
+     * @return array normalized response for this part only
      */
     public function normalize_response(array $response): array {
         $result = [];

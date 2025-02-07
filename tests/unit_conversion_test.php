@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for unit conversion in the Formulas question plugin.
- *
- * @package    qtype_formulas
- * @copyright  2023 Philipp E. Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 use qtype_formulas\local\answer_parser;
@@ -33,10 +25,20 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
 require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 
-
-class unit_conversion_test extends \advanced_testcase {
+/**
+ * Unit tests for unit conversion in the Formulas question plugin.
+ *
+ * @package    qtype_formulas
+ * @copyright  2023 Philipp E. Imhof
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @covers \qtype_formulas\answer_unit_conversion
+ */
+final class unit_conversion_test extends \advanced_testcase {
 
     /**
+     * Test conversion between "common SI units".
+     *
      * @dataProvider provide_numbers_and_units
      */
     public function test_common_si_units($expected, $inputs): void {
@@ -66,6 +68,11 @@ class unit_conversion_test extends \advanced_testcase {
         }
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_numbers_and_units(): array {
         return [
             'length 1' => ['100 m', ['0.1 km', '10000 cm', '1000 dm', '100000 mm']],
