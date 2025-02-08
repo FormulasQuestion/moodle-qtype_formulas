@@ -137,4 +137,32 @@ final class inputstream_test extends \advanced_testcase {
         }
         self::assertNotNull($e);
     }
+
+    public function test_get_position(): void {
+        $input = "ab\nfg";
+        $reader = new input_stream($input);
+
+        // At the start, we should be on row 1 and column 0, because we have not read any char on
+        // that row yet.
+        self::assertEquals(['row' => 1, 'column' => 0], $reader->get_position());
+
+        // Peeking should not move the position.
+        $reader->peek();
+        self::assertEquals(['row' => 1, 'column' => 0], $reader->get_position());
+
+        // Reading one character should bring us to 1/1.
+        $reader->read();
+        self::assertEquals(['row' => 1, 'column' => 1], $reader->get_position());
+
+        // Reading two more characters should finally move us to the start of row 2.
+        $reader->read();
+        self::assertEquals(['row' => 1, 'column' => 2], $reader->get_position());
+        $reader->read();
+        self::assertEquals(['row' => 2, 'column' => 0], $reader->get_position());
+
+        $reader->read();
+        self::assertEquals(['row' => 2, 'column' => 1], $reader->get_position());
+        $reader->read();
+        self::assertEquals(['row' => 2, 'column' => 2], $reader->get_position());
+    }
 }

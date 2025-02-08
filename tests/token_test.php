@@ -111,6 +111,8 @@ final class token_test extends \advanced_testcase {
             [$foo, $foo],
             [$foo, 'foo'],
             [new token(token::STRING, '1'), '1'],
+            [new token(token::NUMBER, 1), true],
+            [new token(token::NUMBER, 0), false],
             [new token(token::NUMBER, 1.5), 1.5],
             [new token(token::STRING, '1'), ['value' => 1, 'type' => token::STRING]],
             [$list, [$one, $two, $three]],
@@ -119,6 +121,79 @@ final class token_test extends \advanced_testcase {
             ['Cannot wrap a non-numeric value into a NUMBER token.', ['value' => 'a', 'type' => token::NUMBER]],
             ['Cannot wrap the given value into a STRING token.', ['value' => [1, 2], 'type' => token::STRING]],
             ["The given value 'null' has an invalid data type and cannot be converted to a token.", null],
+        ];
+    }
+
+    /**
+     * Test unpacking of tokens (or literals).
+     *
+     * @param mixed $expected expected return value
+     * @param mixed $input token or literal
+     * @return void
+     *
+     * @dataProvider provide_tokens_and_values_to_unpack
+     */
+    public function test_unpack($expected, $input): void {
+        $unpacked = token::unpack($input);
+
+        self::assertSame($expected, $unpacked);
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_tokens_and_values_to_unpack(): array {
+        return [
+            // Scalar values that are not tokens will be returned as they are.
+            [1, 1],
+            [1.0, 1.0],
+            [true, true],
+            [false, false],
+            ['foo', 'foo'],
+            ['1', '1'],
+            [[1, 2.0, true, false, 'foo', '3', '4.0'], [1, 2.0, true, false, 'foo', '3', '4.0']],
+            // STRING and NUMBER tokens should have just their value returned.
+            [1, new token(token::NUMBER, 1)],
+            [1.0, new token(token::NUMBER, 1.0)],
+            ['foo', new token(token::STRING, 'foo')],
+            ['1.0', new token(token::STRING, '1.0')],
+            ['1', new token(token::STRING, '1')],
+            [
+                [1, 2.0, 'foo', '3', '4.0'],
+                new token(token::LIST, [
+                    new token(token::NUMBER, 1),
+                    new token(token::NUMBER, 2.0),
+                    new token(token::STRING, 'foo'),
+                    new token(token::STRING, '3'),
+                    new token(token::STRING, '4.0'),
+                ]),
+            ],
+            [
+                [[1, 2.0], ['foo', '3'], '4.0'],
+                new token(token::LIST, [
+                    new token(token::LIST, [
+                        new token(token::NUMBER, 1),
+                        new token(token::NUMBER, 2.0),
+                    ]),
+                    new token(token::LIST, [
+                        new token(token::STRING, 'foo'),
+                        new token(token::STRING, '3'),
+                    ]),
+                    new token(token::STRING, '4.0'),
+                ]),
+            ],
+            [
+                [1, 2.0, 'foo', '3', '4.0'],
+                new token(token::SET, [
+                    new token(token::NUMBER, 1),
+                    new token(token::NUMBER, 2.0),
+                    new token(token::STRING, 'foo'),
+                    new token(token::STRING, '3'),
+                    new token(token::STRING, '4.0'),
+                ]),
+            ],
         ];
     }
 }

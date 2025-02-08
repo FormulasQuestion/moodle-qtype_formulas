@@ -45,7 +45,6 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  *
  * @copyright  2013 Jean-Michel Vedrine
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @group      qtype_formulas
  * @covers     \qtype_formulas
  */
 final class questiontype_test extends \advanced_testcase {

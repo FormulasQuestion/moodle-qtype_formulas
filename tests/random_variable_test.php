@@ -23,6 +23,7 @@ use qtype_formulas\local\token;
  * Unit tests for the random_variable class.
  *
  * @package    qtype_formulas
+ * @category   test
  * @copyright  2025 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *

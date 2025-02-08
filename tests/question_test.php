@@ -42,7 +42,6 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @copyright  2024 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package    qtype_formulas
- * @group      qtype_formulas
  *
  * @covers     \qtype_formulas_question
  * @covers     \qtype_formulas_part

@@ -709,4 +709,38 @@ EOF;
         }
         self::assertNotNull($e);
     }
+
+    public function test_lexing_for_loop(): void {
+        $input = <<<EOF
+        for (a:[1:b]) { x = x + a; }
+EOF;
+
+        // We are not testing the positions anymore.
+        $output = [
+            new token(token::RESERVED_WORD, 'for'),
+            new token(token::OPENING_PAREN, '('),
+            new token(token::IDENTIFIER, 'a'),
+            new token(token::RANGE_SEPARATOR, ':'),
+            new token(token::OPENING_BRACKET, '['),
+            new token(token::NUMBER, '1'),
+            new token(token::RANGE_SEPARATOR, ':'),
+            new token(token::IDENTIFIER, 'b'),
+            new token(token::CLOSING_BRACKET, ']'),
+            new token(token::CLOSING_PAREN, ')'),
+            new token(token::OPENING_BRACE, '{'),
+            new token(token::IDENTIFIER, 'x'),
+            new token(token::OPERATOR, '='),
+            new token(token::IDENTIFIER, 'x'),
+            new token(token::OPERATOR, '+'),
+            new token(token::IDENTIFIER, 'a'),
+            new token(token::END_OF_STATEMENT, ';'),
+            new token(token::CLOSING_BRACE, '}'),
+        ];
+
+        $tokens = (new lexer($input))->get_tokens();
+        foreach ($tokens as $i => $token) {
+            self::assertEquals($output[$i]->type, $token->type);
+            self::assertEquals($output[$i]->value, $token->value);
+        }
+    }
 }

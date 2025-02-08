@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * qtype_formulas external functions unit tests
- *
- * @package    qtype_formulas
- * @category   external
- * @copyright  2022 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,6 +25,8 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * Unit test for the instantiation web service.
  *
  * @copyright  2024 Philipp Imhof
+ * @package    qtype_formulas
+ * @category   test
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @runTestsInSeparateProcesses

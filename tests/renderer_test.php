@@ -36,6 +36,9 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers     \qtype_formulas_renderer
+ * @covers     \qtype_formulas_question
+ * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas
  */
 final class renderer_test extends walkthrough_test_base {
     /**

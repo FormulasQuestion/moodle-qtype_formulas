@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for the Formulas question plugin's evaluator class,
- * focused on the invocation and implementation of functions.
- *
- * @package    qtype_formulas
- * @copyright  2022 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 use qtype_formulas\local\parser;
@@ -39,8 +30,10 @@ global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 /**
- * Unit tests for various functions
+ * Unit tests for various functions.
  *
+ * @package    qtype_formulas
+ * @category   test
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *

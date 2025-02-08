@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * qtype_formulas evaluation tests
- *
- * @package    qtype_formulas
- * @category   test
- * @copyright  2022 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 use Exception;
@@ -40,12 +31,23 @@ use qtype_formulas\local\token;
 // TODO: reorder those tests later; some are unit tests for the functions and should go there.
 
 /**
- * Unit tests for the evaluator class.
+ * Unit tests for the evaluator class. Most tests simultaneously test other classes, e. g. parser,
+ * random_parser, functions, because it makes sense to test them in combination with the evaluation,
+ * even if that means they are not strictly unit tests anymore.
  *
+ * @package    qtype_formulas
+ * @category   test
  * @copyright  2024 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\evaluator
+ * @covers \qtype_formulas\local\parser
+ * @covers \qtype_formulas\local\shunting_yard
+ * @covers \qtype_formulas\local\answer_parser
+ * @covers \qtype_formulas\local\random_parser
+ * @covers \qtype_formulas\local\functions
+ * @covers \qtype_formulas\local\expression
+ * @covers \qtype_formulas\local\for_loop
  */
 final class evaluator_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {

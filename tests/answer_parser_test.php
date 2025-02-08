@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * qtype_formulas answer_parser class tests
- *
- * @package    qtype_formulas
- * @category   test
- * @copyright  2023 Philipp Imhof
- * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qtype_formulas;
 
 defined('MOODLE_INTERNAL') || die();
@@ -37,6 +28,8 @@ use qtype_formulas\local\answer_parser;
 /**
  * Unit tests for the answer_parser class.
  *
+ * @package    qtype_formulas
+ * @category   test
  * @copyright  2024 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
