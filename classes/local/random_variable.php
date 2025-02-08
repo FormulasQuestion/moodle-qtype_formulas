@@ -91,4 +91,51 @@ class random_variable extends variable {
         }
         return count($this->reservoir);
     }
+
+    /**
+     * Return a string that can be used to set the variable to its instantiated value.
+     * This is how Formulas question prior to version 6.x used to store their state.
+     * We implement this for maximum backwards compatibility, i. e. in order to allow
+     * switching back to a 5.x version. We continue to use the old format, i. e.
+     * <variablename> = <instantiated-value>; for every random variable.
+     *
+     * @return string
+     */
+    public function get_instantiated_definition(): string {
+        if ($this->value === null) {
+            return '';
+        }
+        $definition = $this->name . '=';
+
+        // If the value is a string, we wrap it in quotes. Also, we remove all existing quotes inside
+        // the string, because in Formulas question < 6.0, it was not possible to have escaped quotes
+        // in a string.
+        if (is_string($this->value)) {
+            return $definition . '"' . preg_replace('/(\\\\)?["\']/', '', $this->value) . '";';
+        }
+
+        // If the value is a number, we return it as it is. We do this after the string, because numeric
+        // strings should be returned as strings, not numbers.
+        if (is_numeric($this->value)) {
+            return $definition . $this->value . ';';
+        }
+
+        // If we are still here, the value is an array. We iterate over all entries and, if necessary,
+        // wrap them in quotes. Note that these individual values are all tokens.
+        $values = [];
+        foreach ($this->value as $valuetoken) {
+            if (is_string($valuetoken->value)) {
+                $values[] = '"' . preg_replace('/(\\\\)?["\']/', '', $valuetoken->value) . '"';
+                continue;
+            }
+            if (is_numeric($valuetoken->value)) {
+                $values[] = $valuetoken->value;
+                continue;
+            }
+            // If we are still here, the element is itself an array (a list). Nested lists are not
+            // allowed in legacy versions of Formulas question, so we simply drop the value.
+        }
+
+        return $definition . '[' . implode(',', $values) . '];';
+    }
 }

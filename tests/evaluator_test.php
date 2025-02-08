@@ -2290,7 +2290,54 @@ final class evaluator_test extends \advanced_testcase {
             self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
-
     }
 
+    /**
+     * Test evaluator::export_randomvars_for_step_data().
+     *
+     * @param string $expected regex pattern for expected output
+     * @param string $input definition of random variable(s)
+     *
+     * @dataProvider provide_variable_definitions
+     */
+    public function test_export_randomvars_for_step_data(string $expected, string $input): void {
+        // Prepare and instantiate the random variables.
+        $randomparser = new random_parser($input);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+        $evaluator->instantiate_random_variables();
+
+        // Check if the export matches the expected definition.
+        self::assertMatchesRegularExpression($expected, $evaluator->export_randomvars_for_step_data());
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_variable_definitions(): array {
+        return [
+            ['//', ''],
+            ['/a=[123];/', 'a={1,2,3}'],
+            ['/a=[123];b="[AB]";/', 'a={1,2,3}; b={"A","B"}'],
+            ['/a="[ABC]";/', 'a={"A","B","C"}'],
+            ['/a="(AB|CD)";/', 'a={\'A"B\',\'C"D\'}'],
+            ['/a="(AB|CD)";/', 'a={"A\'B","C\'D"}'],
+            ['/a="(AB|CD)";/', 'a={"A\"B","C\"D"}'],
+            ['/a=[1-9];/', 'a={1:10}'],
+            ['/a=(\[1,2\]|\[3,4\]);/', 'a={[1,2],[3,4]}'],
+            ['/a=(\["A","B"\]|\["C","D"\]);/', 'a={["A","B"],["C","D"]}'],
+            ['/a=(\["A","B"\]|\["C","D"\]);/', 'a={["\"A","\'B"],["\"C","\'D"]}'],
+            ['/a=(\["A","B"\]|\["C","D"\]);/', "a={['A','B'],['C','D']}"],
+            ['/a=(\["A","B"\]|\["C","D"\]);/', "a={['\"A','\'B'],['\"C','\'D']}"],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', 'a=shuffle(["A","B"])'],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', 'a=shuffle(["\"A","\"B"])'],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', 'a=shuffle(["\'A","\'B"])'],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', "a=shuffle(['A','B'])"],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', "a=shuffle(['\"A','\"B'])"],
+            ['/a=(\["A","B"\]|\["B","A"\]);/', "a=shuffle(['\'A','\'B'])"],
+            ['/a=(\[1,2,3\]|\[1,3,2\]|\[2,1,3\]|\[2,3,1\]|\[3,1,2\]|\[3,2,1\]);/', 'a=shuffle([1,2,3])'],
+        ];
+    }
 }

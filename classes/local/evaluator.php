@@ -225,6 +225,22 @@ class evaluator {
     }
 
     /**
+     * Build a string that can be used to redefine the instantiated random variables with
+     * the same values, but as global values. This is how Formulas question prior to version 6.x
+     * used to store their state. We implement this for maximum backwards compatibility, i. e.
+     * in order to allow switching back to a 5.x version.
+     *
+     * @return string
+     */
+    public function export_randomvars_for_step_data(): string {
+        $result = '';
+        foreach ($this->randomvariables as $var) {
+            $result .= $var->get_instantiated_definition();
+        }
+        return $result;
+    }
+
+    /**
      * Export the names of all known variables. This can be used to pass to a new parser,
      * in order to help it classify identifiers as functions or variables.
      *

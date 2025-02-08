@@ -146,6 +146,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         $globalparser = new parser($this->varsglobal, $randomparser->export_known_variables());
         $this->evaluator->evaluate($globalparser->get_statements());
 
+        // For improved backwards-compatibility (allowing downgrade back to 5.x), we also store
+        // the legacy qt vars '_randomvars_text' and '_varsglobal' in the DB.
+        $legacynote = "# Legacy entry for backwards compatibility only\r\n";
+        $step->set_qt_var('_randomvars_text', $legacynote . $this->evaluator->export_randomvars_for_step_data());
+        $step->set_qt_var('_varsglobal', $legacynote . $this->varsglobal);
+
         // Set the question's $numparts property.
         $this->numparts = count($this->parts);
 
