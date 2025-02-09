@@ -186,12 +186,13 @@ class parser {
     public function has_token_in_tokenlist(int $type, $value = null): bool {
         foreach ($this->tokenlist as $token) {
             // If the value does not matter, we also set the token's value to null.
+            $tokenvalue = $token->value;
             if ($value === null) {
-                $token->value = null;
+                $tokenvalue = null;
             }
 
             // We do not use strict comparison for the value.
-            if ($token->type === $type && $token->value == $value) {
+            if ($token->type === $type && $tokenvalue == $value) {
                 return true;
             }
         }

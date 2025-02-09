@@ -94,6 +94,7 @@ final class random_variable_test extends \advanced_testcase {
     public static function provide_random_variables_for_how_many(): array {
         return [
             [3, new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], false)],
+            [50, new random_variable('a', array_fill(0, 50, token::wrap(1)), false)],
             [3, new random_variable('a', [token::wrap('A'), token::wrap('B'), token::wrap('C')], false)],
             [2, new random_variable('a', [token::wrap([1, 2]), token::wrap([3, 4])], false)],
             [
@@ -103,6 +104,10 @@ final class random_variable_test extends \advanced_testcase {
             [
                 6,
                 new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], true),
+            ],
+            [
+                3628800,
+                new random_variable('a', array_fill(0, 10, token::wrap(1)), true),
             ],
             [
                 PHP_INT_MAX,

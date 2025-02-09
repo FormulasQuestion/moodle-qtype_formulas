@@ -28,12 +28,6 @@ use qtype_formulas\local\expression;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
-// FIXME: test for remove_special_vars()
-// FIXME: test instantiate_random_variables() with seed
-// FIXME: test set variable to value: random variable with scalar instead of list
-// FIXME: test execute_function with invalid num of params (maybe indirect via function, add @coverage there)
-// FIXME: test execute_function when function returns a token
-
 // TODO: reorder those tests later; some are unit tests for the functions and should go there.
 
 /**
@@ -61,6 +55,56 @@ final class evaluator_test extends \advanced_testcase {
         parent::setUpBeforeClass();
 
         require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+    }
+
+    public function test_instantiate_random_variables(): void {
+        $command = 'a = {1:100}; b = shuffle([1,2,3,4,5,6]);';
+        $randomparser = new random_parser($command);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+
+        // Instantiate random variables with a given seed and store their values for comparison.
+        $seed = intval(microtime(true));
+        $evaluator->instantiate_random_variables($seed);
+        $export = $evaluator->export_randomvars_for_step_data();
+
+        // Re-instantiate. The PRNG has not been re-seeded, so the values should be different now.
+        $evaluator->instantiate_random_variables();
+        self::assertNotEquals($export, $evaluator->export_randomvars_for_step_data());
+
+        // Re-instantiate with the same seed, so we should get the same values as for the first step.
+        $evaluator->instantiate_random_variables($seed);
+        self::assertEquals($export, $evaluator->export_randomvars_for_step_data());
+    }
+
+    public function test_remove_special_vars(): void {
+        $command = '_a = 1; _r = 2; _d = 3; _err = 1.5; _relerr = 2.5; _u = "cm";';
+        $command .= '_0 = 10; _1 = 20; _999 = 100;';
+        $additionalvar = 'foo = 123;';
+
+        $parser = new parser($command . $additionalvar);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($parser->get_statements(), true);
+
+        self::assertEquals(
+            ['_a', '_r', '_d', '_err', '_relerr', '_u', '_0', '_1', '_999', 'foo'],
+            $evaluator->export_variable_list()
+        );
+
+        $evaluator->remove_special_vars();
+        self::assertEquals(['foo'], $evaluator->export_variable_list());
+
+        $parser = new parser($command);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($parser->get_statements(), true);
+
+        self::assertEquals(
+            ['_a', '_r', '_d', '_err', '_relerr', '_u', '_0', '_1', '_999'],
+            $evaluator->export_variable_list()
+        );
+
+        $evaluator->remove_special_vars();
+        self::assertEquals([], $evaluator->export_variable_list());
     }
 
     /**
@@ -1185,6 +1229,8 @@ final class evaluator_test extends \advanced_testcase {
      */
     public static function provide_invalid_random_vars(): array {
         return [
+            ['Invalid definition of a random variable - you must provide a list of possible values.', 'a = 1'],
+            ["Syntax error: unexpected end of expression after '='.", 'a = '],
             ['Evaluation error: range from 10 to 1 with step 1 will be empty.', 'a = {10:1:1}'],
             ['Setting individual list elements is not supported for random variables.', 'a[1] = {1,2,3}'],
             ['Syntax error: invalid use of separator token \',\'.', 'a = {1:10,}'],
