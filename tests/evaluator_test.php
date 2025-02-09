@@ -28,6 +28,12 @@ use qtype_formulas\local\expression;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 
+// FIXME: test for remove_special_vars()
+// FIXME: test instantiate_random_variables() with seed
+// FIXME: test set variable to value: random variable with scalar instead of list
+// FIXME: test execute_function with invalid num of params (maybe indirect via function, add @coverage there)
+// FIXME: test execute_function when function returns a token
+
 // TODO: reorder those tests later; some are unit tests for the functions and should go there.
 
 /**
@@ -1569,6 +1575,7 @@ final class evaluator_test extends \advanced_testcase {
      */
     public static function provide_other_invalid_stuff(): array {
         return [
+            ['1:7:Division by zero is not defined.', 'a = 5 % 0'],
             ['1:7:Unexpected token: ,', 'a = 15,2'],
             ['1:9:Syntax error: sets cannot be nested.', 'a = {1, {2, 3}}'],
             ['1:9:Syntax error: sets cannot be used inside a list.', 'a = [1, {2, 3}]'],

@@ -19,6 +19,7 @@
  *
  * @package    qtype_formulas
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
+ * @copyright  2024 Philipp E. Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

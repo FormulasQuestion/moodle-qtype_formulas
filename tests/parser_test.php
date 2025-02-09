@@ -22,6 +22,8 @@ use qtype_formulas\local\parser;
 use qtype_formulas\local\shunting_yard;
 use qtype_formulas\local\token;
 
+// FIXME: test parse_general_expression with r= assignment (via random_parser, update @coverage there)
+
 /**
  * Unit tests for the parser class.
  *
@@ -31,6 +33,7 @@ use qtype_formulas\local\token;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\parser
+ * @covers \qtype_formulas\local\shunting_yard
  */
 final class parser_test extends \advanced_testcase {
 
@@ -39,6 +42,10 @@ final class parser_test extends \advanced_testcase {
         $parser = new parser($input);
         self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, 'sin'));
         self::assertFalse($parser->has_token_in_tokenlist(token::FUNCTION, 'sin'));
+        // Checking without specifying the value, just looking for the type.
+        self::assertTrue($parser->has_token_in_tokenlist(token::VARIABLE, null));
+        self::assertFalse($parser->has_token_in_tokenlist(token::FUNCTION, null));
+        self::assertFalse($parser->has_token_in_tokenlist(token::OPENING_PAREN, null));
 
         $input = 'tan = 5; y = \tan(12)';
         $parser = new parser($input);

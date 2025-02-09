@@ -37,7 +37,7 @@ final class random_variable_test extends \advanced_testcase {
      * @param string $expected regex pattern for expected output
      * @param random_variable $input random variable
      *
-     * @dataProvider provide_random_variables
+     * @dataProvider provide_random_variables_for_instantiation
      */
     public function test_get_instantiated_definition(string $expected, random_variable $input): void {
         $input->instantiate();
@@ -51,7 +51,7 @@ final class random_variable_test extends \advanced_testcase {
      *
      * @return array
      */
-    public static function provide_random_variables(): array {
+    public static function provide_random_variables_for_instantiation(): array {
         return [
             ['/^a=[123];$/', new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], false)],
             ['/^a="[ABC]";$/', new random_variable('a', [token::wrap('A'), token::wrap('B'), token::wrap('C')], false)],
@@ -63,6 +63,50 @@ final class random_variable_test extends \advanced_testcase {
             [
                 '/^a=(\[1,2,3\]|\[1,3,2\]|\[2,1,3\]|\[2,3,1\]|\[3,1,2\]|\[3,2,1\]);$/',
                 new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], true),
+            ],
+        ];
+    }
+
+    public function test_get_instantiated_definition_if_not_instantiated(): void {
+        $var = new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], false);
+        self::assertEmpty($var->get_instantiated_definition());
+    }
+
+    /**
+     * Test random_variable::get_instantiated_definition().
+     *
+     * @param int $expected expected number of variants
+     * @param random_variable $input random variable
+     *
+     * @dataProvider provide_random_variables_for_how_many
+     */
+    public function test_how_many(int $expected, random_variable $input): void {
+        self::assertEquals(
+            $expected, $input->how_many()
+        );
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_random_variables_for_how_many(): array {
+        return [
+            [3, new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], false)],
+            [3, new random_variable('a', [token::wrap('A'), token::wrap('B'), token::wrap('C')], false)],
+            [2, new random_variable('a', [token::wrap([1, 2]), token::wrap([3, 4])], false)],
+            [
+                2,
+                new random_variable('a', [token::wrap(['A', 'B']), token::wrap(['C', 'D'])], false),
+            ],
+            [
+                6,
+                new random_variable('a', [token::wrap(1), token::wrap(2), token::wrap(3)], true),
+            ],
+            [
+                PHP_INT_MAX,
+                new random_variable('a', array_fill(0, 200, token::wrap(1)), true),
             ],
         ];
     }

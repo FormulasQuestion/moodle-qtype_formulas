@@ -38,6 +38,7 @@ final class externallib_test extends \externallib_advanced_testcase {
         require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
 
         $this->resetAfterTest(true);
+        parent::setUp();
     }
 
     /**

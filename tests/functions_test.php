@@ -30,7 +30,9 @@ global $CFG;
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 /**
- * Unit tests for various functions.
+ * Unit tests for various functions. As we run all functions through the general evaluator
+ * and we expect it to react on certain syntax errors, some tests cover that class as well.
+ * This makes sense, even if it means that the tests are not strictly unit tests anymore.
  *
  * @package    qtype_formulas
  * @category   test
@@ -38,6 +40,7 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\functions
+ * @covers \qtype_formulas\local\evaluator
  */
 final class functions_test extends \advanced_testcase {
 

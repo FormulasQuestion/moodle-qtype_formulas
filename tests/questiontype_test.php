@@ -45,7 +45,9 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  *
  * @copyright  2013 Jean-Michel Vedrine
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @covers     \qtype_formulas
+ * @covers     \qtype_formulas_edit_form
  */
 final class questiontype_test extends \advanced_testcase {
 
@@ -63,10 +65,14 @@ final class questiontype_test extends \advanced_testcase {
 
     protected function setUp(): void {
         $this->qtype = new qtype_formulas();
+
+        parent::setUp();
     }
 
     protected function tearDown(): void {
         $this->qtype = null;
+
+        parent::tearDown();
     }
 
     /**

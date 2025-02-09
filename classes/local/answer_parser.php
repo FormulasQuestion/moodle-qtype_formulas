@@ -70,6 +70,7 @@ class answer_parser extends parser {
                 }
             }
 
+            // Students are not allowed to use the PREFIX operator.
             if (!$formodelanswer && $token->type === token::PREFIX) {
                 $this->die(get_string('error_prefix', 'qtype_formulas'), $token);
             }
@@ -170,11 +171,6 @@ class answer_parser extends parser {
 
         // Iterate over all tokens.
         foreach ($answertokens as $token) {
-            // The PREFIX operator must not be used in numeric answers.
-            if ($token->type === token::PREFIX) {
-                return false;
-            }
-
             // If we find a FUNCTION or VARIABLE token, we can stop, because those are not
             // allowed in the numeric answer type.
             if ($token->type === token::FUNCTION || $token->type === token::VARIABLE) {
@@ -253,10 +249,6 @@ class answer_parser extends parser {
             // Cut short, if it is a NUMBER token.
             if ($token->type === token::NUMBER) {
                 continue;
-            }
-            // The PREFIX operator must not be used in numerical formulas.
-            if ($fornumericalformula && $token->type === token::PREFIX) {
-                return false;
             }
             if ($token->type === token::VARIABLE) {
                 if ($fornumericalformula) {

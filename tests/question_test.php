@@ -45,6 +45,7 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  *
  * @covers     \qtype_formulas_question
  * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas
  */
 final class question_test extends \basic_testcase {
 
