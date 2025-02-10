@@ -1,5 +1,39 @@
 # Changelog
 
+### 6.0.0 (2025-xx-xx)
+
+- complete rewrite of the parsing / evaluation engine
+- new feature: access to grading variables and student answers in part feedback
+- new feature: allow == comparison of strings
+- new feature: allow use of strings in ternary expressions; no more obligation to use pick() for this
+- new feature: allow string concatenation with + operator; no more obligation to use join() for this
+- new feature: allow use of variables for the range delimiters and step size in for loop
+- new feature: mixed lists are now possible, i. e. lists including numbers and strings
+- new feature: lists may now be nested
+- new feature: allow use of ranges and elements side-by-side in a list, e. g. [1:10, 12]
+- new feature: access individual chars of a string, as one can do with list elements
+- new feature: allow negative indices to access chars or list elements "from the end"
+- new feature: possibility to use escaped quotes inside string
+- new feature: allow to use single quote as string delimiter
+- new feature: strings can include line breaks and hence span multiple lines
+- new feature: allow usage of pi or π instead of pi() in expressions; pi() is still valid
+- improvement: precise error reporting, indicating (as much as possible) where the problem happened
+- bugfix: no more loss of images when moving question between categories
+- bugfix: no more inconsistency errors when reviewing old attempts
+- internal: added extensive automated tests to bring code coverage > 90%
+- internal: no more use of eval() in the code
+- internal: fixed all codesniffer errors and most warnings, except for legacy code
+
+### 5.3.5 (2025-02-10)
+
+- improvement: avoid possible precision problem with ncr()
+- internal: drop support for upcoming Moodle 5.0
+
+This is the final regular version for the 5.x branch. It is compatible with Moodle 3.9 to
+Moodle 4.5. No updates are planned. Further development is done in the main branch, starting
+with version 6.0.0. While it might still work with Moodle 5.0, no tests have been done to make
+sure it does.
+
 ### 5.3.4.post0 (2024-10-07)
 - internal: explicitly list Moodle 4.5 as supported in version.php
 
