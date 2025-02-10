@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
+
 /**
  * Behat qtype_formulas related steps definitions.
  *
@@ -22,11 +24,6 @@
  * @copyright  2022 Philipp Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
-
-require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
-
 class behat_qtype_formulas extends behat_base {
 
     /**
@@ -51,26 +48,33 @@ class behat_qtype_formulas extends behat_base {
             new behat_component_named_selector(
                 'Validation Unit Tests Error Indicator',
                 ["//span[@id='validation-unittests-failed']"]
-            )
+            ),
         ];
     }
 
     /**
+     * Click a row in the instantiation table to select the given set of values.
+     *
      * @When /^I click on row number "(?P<rownumber>\d+)" of the Formulas Question instantiation table$/
-     * @param integer $rownumber which row
+     *
+     * @param int $rownumber which row
      */
-    public function i_click_on_row_number_of_the_formulas_question_instantiation_table($rownumber) {
+    public function i_click_on_row_number_of_the_formulas_question_instantiation_table(int $rownumber): void {
         $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]";
-        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+        $this->execute("behat_general::i_click_on", [$this->escape($xpath), "xpath_element"]);
     }
 
     /**
+     * Check values inside the instantiation table.
+     *
+     * phpcs:ignore moodle.Files.LineLength.TooLong
      * @Given /^I should see "(?P<text>[^"]*)" in the "(?P<field>[^"]*)" field of row number "(?P<rownumber>\d+)" of the Formulas Question instantiation table$/
+     *
      * @param string $what the text to look for
      * @param string $field the field name
-     * @param integer $rownumber which row
+     * @param int $rownumber which row
      */
-    public function i_should_see_in_the_field_of_row_of_the_formulas_question_instatiation_table($text, $field, $rownumber) {
+    public function i_should_see_in_the_field_of_row_of_the_formulas_question_instatiation_table(string $text, string $field, int $rownumber): void {
         $field = behat_context_helper::escape($field);
 
         $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]"
@@ -80,6 +84,8 @@ class behat_qtype_formulas extends behat_base {
     }
 
     /**
+     * Confirm the quiz should be submitted.
+     *
      * @Given /^I confirm the quiz submission in the modal dialog for the formulas plugin$/
      */
     public function i_confirm_the_quiz_submission_in_the_modal_dialog_for_the_formulas_plugin() {
@@ -92,6 +98,6 @@ class behat_qtype_formulas extends behat_base {
         } else if (version_compare($currentversion, '3.9', ">=")) {
             $xpath = "//div[contains(@class, 'confirmation-dialogue')]/*/input[contains(@class, 'btn-primary')]";
         }
-        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+        $this->execute("behat_general::i_click_on", [$this->escape($xpath), "xpath_element"]);
     }
 }

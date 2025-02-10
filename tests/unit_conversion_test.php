@@ -14,54 +14,66 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qtype_formulas;
+
+use qtype_formulas\local\answer_parser;
+
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
+require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
+require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
+
 /**
  * Unit tests for unit conversion in the Formulas question plugin.
  *
  * @package    qtype_formulas
  * @copyright  2023 Philipp E. Imhof
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @covers \qtype_formulas\answer_unit_conversion
  */
-
-namespace qtype_formulas;
-use qtype_formulas\variables;
-use Exception;
-
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
-require_once($CFG->dirroot . '/question/type/formulas/variables.php');
-require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
-require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
-
-
-class unit_conversion_test extends \advanced_testcase {
+final class unit_conversion_test extends \advanced_testcase {
 
     /**
+     * Test conversion between "common SI units".
+     *
      * @dataProvider provide_numbers_and_units
      */
     public function test_common_si_units($expected, $inputs): void {
-        $qv = new variables;
         $rules = new unit_conversion_rules();
         $converter = new answer_unit_conversion();
         // The ruleset "common SI units" is number 1.
         $entry = $rules->entry(1);
         $converter->assign_default_rules(1, $entry[1]);
 
-        list($modelnumber, $modelunit) = $qv->split_formula_unit($expected);
+        $parser = new answer_parser($expected);
+        $index = $parser->find_start_of_units();
+        $expectednumber = trim(substr($expected, 0, $index));
+        $expectedunit = trim(substr($expected, $index));
+
         foreach ($inputs as $input) {
-            list($answernumber, $answerunit) = $qv->split_formula_unit($input);
+            $parser = new answer_parser($input);
+            $index = $parser->find_start_of_units();
+            $number = trim(substr($input, 0, $index));
+            $unit = trim(substr($input, $index));
 
             // Check if the unit is compatible.
-            $checked = $converter->check_convertibility($answerunit, $modelunit);
-            $this->assertEquals(true, $checked->convertible);
+            $checked = $converter->check_convertibility($unit, $expectedunit);
+            self::assertEquals(true, $checked->convertible);
             // Convert the number and check if the result is OK.
             $factor = $checked->cfactor;
-            $this->assertEqualsWithDelta(floatval($modelnumber), floatval($answernumber) * $factor, 1e-8);
+            self::assertEqualsWithDelta($expectednumber, $number * $factor, 1e-8);
         }
     }
 
-    public function provide_numbers_and_units(): array {
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_numbers_and_units(): array {
         return [
             'length 1' => ['100 m', ['0.1 km', '10000 cm', '1000 dm', '100000 mm']],
             'length 2' => ['1 mm', ['1000 um', '1000000 nm', '0.001 m', '0.1 cm']],

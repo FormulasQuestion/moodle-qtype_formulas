@@ -23,17 +23,9 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0', '8.1']
-        moodle-branch: ['MOODLE_39_STABLE', 'MOODLE_311_STABLE', 'MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE', 'MOODLE_405_STABLE', 'main']
+        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE', 'MOODLE_405_STABLE', 'main']
         database: [mariadb]
         exclude:
-          - moodle-branch: 'MOODLE_39_STABLE'
-            php: '8.0'
-          - moodle-branch: 'MOODLE_39_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_311_STABLE'
-            php: '8.1'
-          - moodle-branch: 'MOODLE_400_STABLE'
-            php: '8.1'
           - moodle-branch: 'MOODLE_402_STABLE'
             php: '7.4'
           - moodle-branch: 'MOODLE_403_STABLE'
@@ -99,17 +91,7 @@ jobs:
           sudo locale-gen en_AU.UTF-8
           echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
-      - name: Install moodle-plugin-ci without app (3.9, 3.11, 4.0)
-        if: ${{ contains(fromJSON('["MOODLE_39_STABLE", "MOODLE_311_STABLE", "MOODLE_400_STABLE"]'), matrix.moodle-branch) }}
-        run: |
-          moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
-          moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
-        env:
-          DB: ${{ matrix.database }}
-          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-
       - name: Install moodle-plugin-ci
-        if: ${{ !contains(fromJSON('["MOODLE_39_STABLE", "MOODLE_311_STABLE", "MOODLE_400_STABLE"]'), matrix.moodle-branch) }}
         run: |
           moodle-plugin-ci add-plugin maths/moodle-qbehaviour_adaptivemultipart
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1

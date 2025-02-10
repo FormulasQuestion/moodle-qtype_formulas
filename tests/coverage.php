@@ -33,7 +33,7 @@ return new class extends phpunit_coverage_info {
     /** @var array list of folders to exclude from coverage generation. */
     protected $excludelistfolders = [
         'tests',
-        'lang'
+        'lang',
     ];
 
     /** @var array list of files to exclude from coverage generation. */
