@@ -35,6 +35,6 @@ $plugin->dependencies = array(
     'qtype_multichoice' => 2015111600,
 );
 $plugin->supported = [39, 405];
-$plugin->release = '5.3.4.post0 for Moodle 3.9+';
+$plugin->release = '5.3.5 for Moodle 3.9 - 4.5';
 
 $plugin->maturity = MATURITY_STABLE;
