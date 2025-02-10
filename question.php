@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,916 +12,818 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Moodle formulas question definition class.
+ * Question definition class for the Formulas question type.
  *
- * @package    qtype_formulas
- * @copyright  2010-2011 Hon Wai, Lau
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
+ * @author Hon Wai, Lau <lau65536@gmail.com>
+ * @author Philipp Imhof
+ * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package qtype_formulas
  */
 
+
+
+
+// TODO: rewrite input checker script for student answer and teacher's model answer / unit.
+
 use qtype_formulas\answer_unit_conversion;
+use qtype_formulas\local\answer_parser;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\lexer;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\token;
 use qtype_formulas\unit_conversion_rules;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
-require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
 require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.php');
 
 /**
- * Base class for formulas questions.
+ * Base class for the Formulas question type.
  *
- * @copyright  2010-2011 Hon Wai, Lau
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2010-2011 Hon Wai, Lau; 2023 Philipp Imhof
+ * @author Hon Wai, Lau <lau65536@gmail.com>
+ * @author Philipp Imhof
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_question extends question_graded_automatically_with_countback
         implements question_automatically_gradable_with_multiple_parts {
 
-    // Definition of properties used in legacy code or tests, for compatibility with PHP 8.2.
-    // This will be cleaner with the new parser code.
-    public $correctfeedback;
-    public $correctfeedbackformat;
-    public $partiallycorrectfeedback;
-    public $partiallycorrectfeedbackformat;
-    public $incorrectfeedback;
-    public $incorrectfeedbackformat;
-    public $answernumbering;
-    public $globalvars;
-    public $noanswers;
-    public $answermark;
-    public $numbox;
-    public $placeholder;
-    public $subqtext;
-    public $answertype;
-    public $answer;
-    public $postunit;
-    public $correctness;
-    public $vars1;
-    public $vars2;
-    public $otherrule;
-    public $feedback;
-    public $partcorrectfb;
-    public $partpartiallycorrectfb;
-    public $partincorrectfb;
-    public $globalunitpenalty;
-    public $globalruleid;
-    public $numhints;
-    public $hint;
-    public $hintclearwrong;
-    public $hintshownumcorrect;
-    public $ruleid;
-    public $options;
-    public $unitpenalty;
-    public $shuffleanswers;
+    /** @var int seed used to initialize the RNG; needed to restore an attempt state */
+    public int $seed;
 
+    /** @var ?evaluator evaluator class, this is where the evaluation stuff happens */
+    public ?evaluator $evaluator = null;
+
+    /** @var string $varsrandom definition text for random variables, as entered in the edit form */
+    public string $varsrandom;
+
+    /** @var string $varsglobal definition text for the question's global variables, as entered in the edit form */
+    public string $varsglobal;
+
+    /** @var qtype_formulas_part[] parts of the question */
+    public $parts = [];
+
+    /** @var string numbering (if any) of answers */
+    public string $answernumbering;
+
+    /** @var int number of parts in this question, used e.g. by the renderer */
+    public int $numparts;
 
     /**
-     * @var int: number of formulas_parts for the question.
+     * @var string[] strings (one more than $numparts) containing fragments from the question's main text
+     *               that surround the parts' subtexts; used by the renderer
      */
-    public $numpart;
-    /**
-     * @var array of qtype_formulas_part, the $numpart parts of the question.
-     */
-    public $parts = array();
-    /**
-     * @var array of strings, one longer than $numpart, which is achieved by
-     * indexing from 0. The bits of question text that go between the parts.
-     */
-    public $textfragments;
-    /** These array may be used some day to store results ? */
-    public $evaluatedanswer = array();
-    public $fractions = array();
-    public $raw_grades = array();
-    public $anscorrs = array();
-    public $unitcorrs = array();
+    public array $textfragments;
 
-    public $localvars = array();
-    public $varsrandom;
-    /** global variables serialized as string (as saved in database) */
-    public $varsglobal;
-    /** qtype_formulas_variables */
-    public $qv;
-    /** instancied random variables  */
-    public $randomsvars;
-    /** instancied random variables serialized as string (as saved in database) */
-    public $randomsvarstext;
+    /** @var string $correctfeedback combined feedback for correct answer */
+    public string $correctfeedback;
 
+    /** @var int $correctfeedbackformat format of combined feedback for correct answer */
+    public int $correctfeedbackformat;
+
+    /** @var string $partiallycorrectfeedback combined feedback for partially correct answer */
+    public string $partiallycorrectfeedback;
+
+    /** @var int $partiallycorrectfeedbackformat format of combined feedback for partially correct answer */
+    public int $partiallycorrectfeedbackformat;
+
+    /** @var string $incorrectfeedback combined feedback for in correct answer */
+    public string $incorrectfeedback;
+
+    /** @var int $incorrectfeedbackformat format of combined feedback for incorrect answer */
+    public int $incorrectfeedbackformat;
+
+    /**
+     * Create the appropriate behaviour for an attempt at this question.
+     *
+     * @param question_attempt $qa
+     * @param string $preferredbehaviour
+     * @return question_behaviour
+     */
     public function make_behaviour(question_attempt $qa, $preferredbehaviour) {
-        if ($preferredbehaviour == 'adaptive' || $preferredbehaviour == 'adaptivenopenalty') {
+        // If the requested behaviour is 'adaptive' or 'adaptiveopenpenalty', we have to change it
+        // to 'adaptivemultipart'.
+        if (in_array($preferredbehaviour, ['adaptive', 'adaptiveopenpenalty'])) {
             return question_engine::make_behaviour('adaptivemultipart', $qa, $preferredbehaviour);
         }
+
+        // Otherwise, pass it on to the parent class.
         return parent::make_behaviour($qa, $preferredbehaviour);
     }
+
     /**
-     * What data may be included in the form submission when a student enter a response.
-     * The number before the _ is the part index (starting at 0),
-     * and the number after the _ is the coordinate index (starting at 0).
-     * For instance "2_3" is anwer for fourth coordinate of third part.
-     * When there is a separated unit response for part index i, it is called "i_n"
-     * where n is the number of coordinates for part i.
-     * Sor for instance if part 2 has 3 coordinates and a separate unit response,
-     * we will have responses names 2_0, 2_1, 2_2, 2_3 (last one is for unit)
-     * When there is a combined answer&unit field for part index i, it is simply called "i_"
-     * So for instance if part index 2 has a combined answer&unit response, its name will be "2_"
-     * and will be equivalent to separate anser and unit response "2_0" and "2_1".
+     * Start a new attempt at this question. This method initializes and instantiates the
+     * random variables. Also, we will store the seed of the RNG in order to allow restoring
+     * the question later on. Finally, we initialize the evaluators for every part, because
+     * they need the global and random variables from the main question.
+     *
+     * @param question_attempt_step $step the step of the {@link question_attempt} being started
+     * @param int $variant the variant requested, integer between 1 and {@link get_num_variants()} inclusive
      */
-    public function get_expected_data() {
-        $expected = array();
-        foreach ($this->parts as $part) {
-            $expected += $part->part_get_expected_data();
-        }
-        return $expected;
+    public function start_attempt(question_attempt_step $step, $variant): void {
+        // Take $variant as the seed, store it in the database (question_attempt_step_data)
+        // and seed the PRNG with that value.
+        $this->seed = $variant;
+        $step->set_qt_var('_seed', $this->seed);
+
+        // Create an empty evaluator, feed it with the random variables and instantiate
+        // them.
+        $this->evaluator = new evaluator();
+        $randomparser = new random_parser($this->varsrandom);
+        $this->evaluator->evaluate($randomparser->get_statements());
+        $this->evaluator->instantiate_random_variables($this->seed);
+
+        // Parse the definition of global variables and evaluate them, taking into account
+        // the random variables.
+        $globalparser = new parser($this->varsglobal, $randomparser->export_known_variables());
+        $this->evaluator->evaluate($globalparser->get_statements());
+
+        // For improved backwards-compatibility (allowing downgrade back to 5.x), we also store
+        // the legacy qt vars '_randomsvars_text' (not a typo) and '_varsglobal' in the DB.
+        $legacynote = "# Legacy entry for backwards compatibility only\r\n";
+        $step->set_qt_var('_randomsvars_text', $legacynote . $this->evaluator->export_randomvars_for_step_data());
+        $step->set_qt_var('_varsglobal', $legacynote . $this->varsglobal);
+
+        // Set the question's $numparts property.
+        $this->numparts = count($this->parts);
+
+        // Finally, set up the parts' evaluators that evaluate the local variables.
+        $this->initialize_part_evaluators();
     }
 
     /**
-     * Start a new attempt at this question, storing any information that will
-     * be needed later in the step.
+     * When reloading an in-progress {@link question_attempt} from the database, restore the question's
+     * state, i. e. make sure the random variables are instantiated with the same values again. For more
+     * recent versions, we do this by restoring the seed. For legacy questions, the instantiated values
+     * are stored in the database.
      *
-     * This is where the question can do any initialisation required on a
-     * per-attempt basis. For example, this is where the multiple choice
-     * question type randomly shuffles the choices (if that option is set).
-     *
-     * Any information about how the question has been set up for this attempt
-     * should be stored in the $step, by calling $step->set_qt_var(...).
-     *
-     * @param question_attempt_step The first step of the {@link question_attempt}
-     *      being started. Can be used to store state.
-     * @param int $variant which variant of this question to start. Will be between
-     *      1 and {@link get_num_variants()} inclusive.
+     * @param question_attempt_step $step the step of the {@link question_attempt} being loaded
      */
-    public function start_attempt(question_attempt_step $step, $variant) {
-        try {
-            $vstack = $this->qv->parse_random_variables($this->varsrandom);
-            $this->randomsvars = $this->qv->instantiate_random_variables($vstack);
-            $this->randomsvarstext = $this->qv->vstack_get_serialization($this->randomsvars);
-            $step->set_qt_var('_randomsvars_text', $this->randomsvarstext);
-            $step->set_qt_var('_varsglobal', $this->varsglobal);
+    public function apply_attempt_state(question_attempt_step $step): void {
+        // Create an empty evaluator.
+        $this->evaluator = new evaluator();
 
-            return true;    // Success.
-        } catch (Exception $e) {
-            return false;   // Fail.
+        // For backwards compatibility, we must check whether the attempt stems from
+        // a legacy version or not. Recent versions only store the seed that is used
+        // to initialize the RNG.
+        if ($step->has_qt_var('_seed')) {
+            // Fetch the seed, set up the random variables and instantiate them with
+            // the stored seed.
+            $this->seed = $step->get_qt_var('_seed');
+            $parser = new random_parser($this->varsrandom);
+            $this->evaluator->evaluate($parser->get_statements());
+            $this->evaluator->instantiate_random_variables($this->seed);
+
+            // Parse the definition of global variables and evaluate them, taking into account
+            // the random variables.
+            $globalparser = new parser($this->varsglobal, $parser->export_known_variables());
+            $this->evaluator->evaluate($globalparser->get_statements());
+        } else {
+            // Fetch the stored definition of the previously instantiated random variables
+            // and send them to the evaluator. They will be evaluated as *global* variables,
+            // because there is no randomness anymore. The data was created by the old
+            // variables:vstack_get_serialization() function, so we know that every statement
+            // ends with a semicolon and we can simply concatenate random and global vars definition.
+            $randominstantiated = $step->get_qt_var('_randomsvars_text');
+            $this->varsglobal = $step->get_qt_var('_varsglobal');
+            $parser = new parser($randominstantiated . $this->varsglobal);
+            $this->evaluator->evaluate($parser->get_statements());
         }
 
-    }
+        // Set the question's $numparts property.
+        $this->numparts = count($this->parts);
 
-    /**
-     * When an in-progress {@link question_attempt} is re-loaded from the
-     * database, this method is called so that the question can re-initialise
-     * its internal state as needed by this attempt.
-     *
-     * For example, the multiple choice question type needs to set the order
-     * of the choices to the order that was set up when start_attempt was called
-     * originally. All the information required to do this should be in the
-     * $step object, which is the first step of the question_attempt being loaded.
-     *
-     * @param question_attempt_step The first step of the {@link question_attempt}
-     *      being loaded.
-     */
-    public function apply_attempt_state(question_attempt_step $step) {
-        $this->randomsvarstext = $step->get_qt_var('_randomsvars_text');
-        $this->varsglobal = $step->get_qt_var('_varsglobal');
-        $this->randomsvars = $this->qv->evaluate_assignments($this->qv->vstack_create(), $this->randomsvarstext);
+        // Set up the parts' evaluator classes and evaluate their local variables.
+        $this->initialize_part_evaluators();
 
         parent::apply_attempt_state($step);
     }
 
     /**
-     * Replace variables with their values
-     * and apply format_text() to some text.
+     * Generate a brief plain-text summary of this question to be used e.g. in reports. The summary
+     * will contain the question text and all parts' texts (at the right place) with all their variables
+     * substituted.
      *
-     * @param $vars
-     * @param string $text some content that needs to be output.
-     * @param int $format the FORMAT_... constant.
-     * @param question_attempt $qa the question attempt.
-     * @param string $component used for rewriting file area URLs.
-     * @param string $filearea used for rewriting file area URLs.
-     * @param bool $clean Whether the HTML needs to be cleaned. Generally,
-     *      parts of the question do not need to be cleaned, and student input does.
-     * @return string the text formatted for output by format_text.
+     * @return string a plain text summary of this question.
      */
-    public function formulas_format_text($vars, $text, $format, $qa, $component, $filearea, $itemid,
-            $clean = false) {
-        return $this->format_text($this->qv->substitute_variables_in_text($vars, $text),
-                 $format, $qa, $component, $filearea, $itemid, $clean);
-    }
+    public function get_question_summary(): string {
+        // First, we take the main question text and substitute all the placeholders.
+        $questiontext = $this->evaluator->substitute_variables_in_text($this->questiontext);
+        $summary = $this->html_to_text($questiontext, $this->questiontextformat);
 
-    /**
-     * This has to be a formulas-specific method
-     * so that global variables are replaced by their values.
-     */
-    public function format_generalfeedback($qa) {
-        $globalvars = $this->get_global_variables();
-        return $this->formulas_format_text($globalvars, $this->generalfeedback, $this->generalfeedbackformat,
-                $qa, 'question', 'generalfeedback', $this->id, false);
-    }
-
-    /**
-     * Generate a brief, plain-text, summary of this question. This is used by
-     * various reports. This should show the particular variant of the question
-     * as presented to students. For example, the calculated quetsion type would
-     * fill in the particular numbers that were presented to the student.
-     * This method will return null if such a summary is not possible, or
-     * inappropriate.
-     * @return string|null a plain text summary of this question.
-     */
-    public function get_question_summary() {
-        $globalvars = $this->get_global_variables();
-        $qtext = $this->qv->substitute_variables_in_text($globalvars, $this->questiontext);
-        $summary = $this->html_to_text($qtext, $this->questiontextformat);
+        // For every part, we clone the current evaluator, so each part gets the same base of
+        // instantiated random and global variables. Then we use the evaluator to prepare the part's
+        // text.
         foreach ($this->parts as $part) {
-            $localvars = $this->get_local_variables($part);
-            $subtext = $this->qv->substitute_variables_in_text($localvars, $part->subqtext);
-            $answerbit = $this->html_to_text($subtext, $part->subqtextformat);
-            if ($part->placeholder != '') {
-                $summary = str_replace('{' . $part->placeholder . '}', $answerbit, $summary);
+            $subqtext = $part->evaluator->substitute_variables_in_text($part->subqtext);
+            $chunk = $this->html_to_text($subqtext, $part->subqtextformat);
+            // If the part has a placeholder, we insert the part's text at the position of the
+            // placeholder. Otherwise, we simply append it.
+            if ($part->placeholder !== '') {
+                $summary = str_replace("{{$part->placeholder}}", $chunk, $summary);
             } else {
-                $summary .= $answerbit;
+                $summary .= $chunk;
             }
         }
         return $summary;
     }
 
     /**
-     * Given a response, rest the parts that are wrong.
-     * @param array $response a response
-     * @return array a cleaned up response with the wrong bits reset.
+     * Return the number of variants that exist for this question. This depends on the definition of
+     * random variables, so we have to pass through the question's evaluator class. If there is no
+     * evaluator, we return PHP_INT_MAX.
+     *
+     * @return int number of variants or PHP_INT_MAX
      */
-    public function clear_wrong_from_response(array $response) {
-        $this->rationalize_responses($response);
-        $checkunit = new answer_unit_conversion;
-        foreach ($this->parts as $part) {
-            list( $answercorrect, $unitcorrect) = $this->grade_responses_individually($part, $response, $checkunit);
-            if ($answercorrect * $unitcorrect < 1.0) {
-                foreach (range(0, $part->numbox) as $j) {
-                    if (array_key_exists($part->partindex . "_$j", $response)) {
-                        $response[$part->partindex . "_$j"] = '';
-                    }
-                }
-                if (array_key_exists($part->partindex . "_", $response)) {
-                    $response[$part->partindex . "_"] = '';
-                }
-            }
+    public function get_num_variants(): int {
+        // If the question data has not been analyzed yet, we let Moodle
+        // define the seed freely.
+        if ($this->evaluator === null) {
+            return PHP_INT_MAX;
         }
+        return $this->evaluator->get_number_of_variants();
+    }
+
+    /**
+     * This function is called, if the question is attempted in interactive mode with multiple tries *and*
+     * if it is setup to clear incorrect responses for the next try. In this case, we clear *all* answer boxes
+     * (including a possibly existing unit field) for any part that is not fully correct.
+     *
+     * @param array $response student's response
+     * @return array same array, but with *all* answers of wrong parts being empty
+     */
+    public function clear_wrong_from_response(array $response): array {
+        // Note: We do not globally normalize the answers, because that would split the answer from
+        // a combined unit field into two separate fields, e.g. from 0_ into 0_0 and 0_1. This
+        // will still work, because the form does not have the input fields 0_0 and 0_1, but it
+        // seems strange to do that.
+
+        // Call the corresponding function for each part and apply the union operator. Note that
+        // the first argument takes precedence if a key exists in both arrays, so this will
+        // replace all answers from $response that have been set in clear_from_response_if_wrong() and
+        // keep all the others.
+        foreach ($this->parts as $part) {
+            $response = $part->clear_from_response_if_wrong($response) + $response;
+        }
+
         return $response;
     }
 
-     /**
-      * Return the number of parts of the question
-      */
-    public function get_number_of_parts() {
-        return $this->numpart;
-    }
-
     /**
-     * Return the number of subparts of this response that are right.
-     * @param array $response a response
-     * @return array with two elements, the number of correct subparts, and
-     * the total number of subparts.
+     * Return the number of parts that have been correctly answered. The renderer will call this function
+     * when the question is attempted in interactive mode with multiple tries *and* it is setup to show
+     * the number of correct responses.
+     *
+     * @param array $response student's response
+     * @return array array with [0] = number of correct parts and [1] = total number of parts
      */
-    public function get_num_parts_right(array $response) {
-        $this->rationalize_responses($response);      // May throw if subqtext have changed.
-        $checkunit = new answer_unit_conversion;
-        $c = 0;
+    public function get_num_parts_right(array $response): array {
+        // Normalize all student answers.
+        $response = $this->normalize_response($response);
+
+        $numcorrect = 0;
         foreach ($this->parts as $part) {
-            list( $answercorrect, $unitcorrect) = $this->grade_responses_individually($part, $response, $checkunit);
-            if ($answercorrect * $unitcorrect >= .999) {
-                $c++;
+            list('answer' => $answercorrect, 'unit' => $unitcorrect) = $part->grade($response);
+
+            if ($answercorrect >= 0.999 && $unitcorrect == true) {
+                $numcorrect++;
             }
         }
-        return array($c, $this->numpart);
+        return [$numcorrect, $this->numparts];
     }
 
     /**
-     * What data would need to be submitted to get this question correct.
-     * If there is more than one correct answer, this method should just
-     * return one possibility.
-     *
-     * @return array parameter name => value.
+     * Return the expected fields and data types for all answer boxes of the question. For every
+     * answer box, we have one entry named "i_j" with i being the part's index and j being the
+     * answer's index inside the part. Indices start at 0, so the first box of the first part
+     * corresponds to 0_0, the third box of the second part is 1_2. If part *i* has *n* answer
+     * boxes and a separate unit field, it will be named "i_n". For parts with a combined input
+     * field for the answer and the unit (only possible for single answer parts), we use "i_".
      */
-    public function get_correct_response() {
-        $responses = array();
+    public function get_expected_data(): array {
+        $expected = [];
         foreach ($this->parts as $part) {
-            $tmp = $this->get_correct_responses_individually($part);
-            if ($tmp === null) {
-                return array(); // TODO : really examine what to return in that case empty array or null ?
-            }
-            if ($part->part_has_combined_unit_field()) {
-                $tmp[$part->partindex . "_"] = $tmp[$part->partindex . "_0"] . $tmp[$part->partindex . "_1"];
-                unset($tmp[$part->partindex . "_0"], $tmp[$part->partindex . "_1"]);
-            } else if (!$part->part_has_separate_unit_field()) {
-                unset($tmp[$part->partindex . "_" . $part->numbox]);
-            }
-            $responses = array_merge($responses, $tmp);
+            $expected += $part->get_expected_data();
+        }
+        return $expected;
+    }
+
+    /**
+     * Return the model answers as entered by the teacher. These answers should normally be sufficient
+     * to get the maximum grade.
+     *
+     * @param qtype_formulas_part|null model answer for every answer / unit box of each part
+     * @return array model answer for every answer / unit box of each part
+     */
+    public function get_correct_response(?qtype_formulas_part $part = null): array {
+        // If the caller has requested one specific part, just return that response.
+        if (isset($part)) {
+            return $part->get_correct_response();
+        }
+
+        // Otherwise, fetch them all.
+        $responses = [];
+        foreach ($this->parts as $part) {
+            $responses += $part->get_correct_response();
         }
         return $responses;
     }
 
     /**
-     * Used by many of the behaviours, to work out whether the student's
-     * response to the question is complete. That is, whether the question attempt
-     * should move to the COMPLETE or INCOMPLETE state.
+     * Replace variables (if needed) and apply parent's format_text().
      *
-     * @param array $response responses, as returned by
-     *      {@link question_attempt_step::get_qt_data()}.
-     * @return bool whether this response is a complete answer to this question.
+     * @param string $text text to be output
+     * @param int $format format (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN)
+     * @param question_attempt $qa question attempt
+     * @param string $component component ID, used for rewriting file area URLs
+     * @param string $filearea file area
+     * @param int $itemid the item id
+     * @param bool $clean whether HTML needs to be cleaned (generally not needed for parts of the question)
+     * @return string text formatted for output by format_text
      */
-    public function is_complete_response(array $response) {
-        // TODO add tests to verify it works in all cases : combined and separate unit field, no unit field.
-        $complete = true;
-        foreach ($this->parts as $part) {
-            if ($part->part_has_combined_unit_field()) {
-                $complete = $complete && array_key_exists($part->partindex . "_", $response)
-                        && $response[$part->partindex . "_"] !== '';
-            } else {
-                foreach (range(0, $part->numbox - 1) as $j) {
-                    $complete = $complete && array_key_exists($part->partindex . "_$j", $response)
-                            && $response[$part->partindex . "_$j"] !== '';
-                }
-                if ($part->part_has_separate_unit_field()) {
-                    $complete = $complete && array_key_exists($part->partindex . "_" . $part->numbox, $response)
-                            && $response[$part->partindex . "_" . $part->numbox] != '';
-                }
-            }
+    public function format_text($text, $format, $qa, $component, $filearea, $itemid, $clean = false): string {
+        // Doing a quick check whether there *might be* placeholders in the text. If this
+        // is positive, we run it through the evaluator, even if it might not be needed.
+        if (strpos($text, '{') !== false) {
+            $text = $this->evaluator->substitute_variables_in_text($text);
         }
-        return $complete;
+        return parent::format_text($text, $format, $qa, $component, $filearea, $itemid, $clean);
     }
 
     /**
-     * Use by many of the behaviours to determine whether the student's
-     * response has changed. This is normally used to determine that a new set
-     * of responses can safely be discarded.
+     * Checks whether the users is allowed to be served a particular file. Overriding the parent method
+     * is needed for the additional file areas (part text and feedback per part).
      *
-     * @param array $prevresponse the responses previously recorded for this question,
-     *      as returned by {@link question_attempt_step::get_qt_data()}
-     * @param array $newresponse the new responses, in the same format.
-     * @return bool whether the two sets of responses are the same - that is
-     *      whether the new set of responses can safely be discarded.
+     * @param question_attempt $qa question attempt being displayed
+     * @param question_display_options $options options controlling display of the question
+     * @param string $component component ID, used for rewriting file area URLs
+     * @param string $filearea file area
+     * @param array $args remaining bits of the file path
+     * @param bool $forcedownload whether the user must be forced to download the file
+     * @return bool whether the user can access this file
      */
-    public function is_same_response(array $prevresponse, array $newresponse) {
-        foreach ($this->get_expected_data() as $name => $notused) {
-            if (!question_utils::arrays_same_at_key_missing_is_blank(
-                    $prevresponse, $newresponse, $name)) {
+    public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload): bool {
+        // If $args is not properly specified, we won't grant access.
+        if (!isset($args[0])) {
+            return false;
+        }
+        // The first (remaining) element in the $args array is the item ID. This is either the question ID
+        // or the part ID.
+        $itemid = $args[0];
+
+        // Files from the part's question text should be shown if the part ID matches one of our parts.
+        if ($component === 'qtype_formulas' && $filearea === 'answersubqtext') {
+            foreach ($this->parts as $part) {
+                if ($part->id == $itemid) {
+                    return true;
+                }
+            }
+            // If we did not find a matching part, we don't serve the file.
+            return false;
+        }
+
+        // If the question is not finished, we don't serve files belong to any feedback field.
+        $ownfeedbackareas = ['answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];
+        if ($component === 'qtype_formulas' && in_array($filearea, $ownfeedbackareas)) {
+            // If the $itemid does not belong to our parts, we can leave.
+            $validpart = false;
+            foreach ($this->parts as $part) {
+                if ($part->id == $itemid) {
+                    $validpart = true;
+                    break;
+                }
+            }
+            if (!$validpart) {
+                return false;
+            }
+
+            // If the question is not finished, check if we have a gradable response. If we do,
+            // calculate the grade and proceed. Otherwise, do not grant access to feedback files.
+            $state = $qa->get_state();
+            if (!$state->is_finished()) {
+                $response = $qa->get_last_qt_data();
+                if (!$this->is_gradable_response($response)) {
+                    return false;
+                }
+                // Response is gradable, so try to grade and get the corresponding state.
+                list($ignored, $state) = $this->grade_response($response);
+            }
+
+            // Files from the answerfeedback area belong to the part's general feedback. It is showed
+            // for all answers, if feedback is enabled in the display options.
+            if ($filearea === 'answerfeedback') {
+                return $options->generalfeedback;
+            }
+
+            // Fetching the feedback class, i. e. 'correct' or 'partiallycorrect' or 'incorrect'.
+            $feedbackclass = $state->get_feedback_class();
+
+            // Only show files from specific feedback area if the given answer matches the kind of
+            // feedback and if specific feedback is enabled in the display options.
+            return ($options->feedback && $filearea === "part{$feedbackclass}fb");
+        }
+
+        $combinedfeedbackareas = ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
+        if ($component === 'question' && in_array($filearea, $combinedfeedbackareas)) {
+            return $this->check_combined_feedback_file_access($qa, $options, $filearea, $args);
+        }
+
+        if ($component === 'question' && $filearea === 'hint') {
+            return $this->check_hint_file_access($qa, $options, $args);
+        }
+
+        return parent::check_file_access($qa, $options, $component, $filearea, $args, $forcedownload);
+    }
+
+    /**
+     * Used by many of the behaviours to determine whether the student has provided enough of an answer
+     * for the question to be graded automatically, or whether it must be considered aborted.
+     *
+     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @return bool whether this response can be graded
+     */
+    public function is_gradable_response(array $response): bool {
+        // Iterate over all parts. If one is not gradable, we return early.
+        foreach ($this->parts as $part) {
+            if (!$part->is_gradable_response($response)) {
                 return false;
             }
         }
+
+        // Still here? Then the question is gradable.
         return true;
     }
 
     /**
-     * Are two responses the same insofar as a certain part is concerned. This is
-     * used so we do not penalise the same mistake twice.
-     * This is in fact just a wrapper for the part method because it is needed by
-     * adaptive multipart behaviour.
-     * @param string $part a part indentifier. Whether the two responses are the same
-     *      for the given part.
-     * @param array $prevresponse the responses previously recorded for this question,
-     *      as returned by {@link question_attempt_step::get_qt_data()}
-     * @param array $newresponse the new responses, in the same format.
-     * @return bool whether the two sets of responses are the same for the given
-     *      part.
+     * Used by many of the behaviours, to work out whether the student's response to the question is
+     * complete. That is, whether the question attempt should move to the COMPLETE or INCOMPLETE state.
+     *
+     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @return bool whether this response is a complete answer to this question
      */
-    public function is_same_response_for_part($i, array $prevresponse, array $newresponse) {
-        return $this->parts[$i]->part_is_same_response($prevresponse, $newresponse);
+    public function is_complete_response(array $response): bool {
+        // Iterate over all parts. If one part is not complete, we can return early.
+        foreach ($this->parts as $part) {
+            if (!$part->is_complete_response($response)) {
+                return false;
+            }
+        }
+
+        // Still here? Then all parts have been fully answered.
+        return true;
     }
 
     /**
-     * Produce a plain text summary of a response.
-     * @param $response a response, as might be passed to {@link grade_response()}.
-     * @return string a plain text summary of that response, that could be used in reports.
+     * Used by many of the behaviours to determine whether the student's response has changed. This
+     * is normally used to determine that a new set of responses can safely be discarded.
+     *
+     * @param array $prevresponse previously recorded responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @param array $newresponse new responses, in the same format
+     * @return bool whether the two sets of responses are the same
+     */
+    public function is_same_response(array $prevresponse, array $newresponse) {
+        // Check each part. If there is a difference in one part, we leave early.
+        foreach ($this->parts as $part) {
+            if (!$part->is_same_response($prevresponse, $newresponse)) {
+                return false;
+            }
+        }
+
+        // Still here? Then it's the same response.
+        return true;
+    }
+
+    /**
+     * Produce a plain text summary of a response to be used e. g. in reports.
+     *
+     * @param array $response student's response, as might be passed to {@link grade_response()}
+     * @return string plain text summary
      */
     public function summarise_response(array $response) {
-        $summary = array();
-        foreach ($this->parts as $part) {
-            $summary[] = $part->part_summarise_response($response);
-        }
-        $summary = implode(', ', $summary);
-        return $summary;
+        $summary = [];
 
+        // Summarise each part's answers.
+        foreach ($this->parts as $part) {
+            $summary[] = $part->summarise_response($response);
+        }
+        return implode(', ', $summary);
     }
 
     /**
-     * Categorise the student's response according to the categories defined by
-     * get_possible_responses.
-     * @param $response a response, as might be passed to {@link grade_response()}.
-     * @return array subpartid => {@link question_classified_response} objects.
-     *      returns an empty array if no analysis is possible.
+     * Categorise the student's response according to the categories defined by get_possible_responses.
+     *
+     * @param array $response response, as might be passed to {@link grade_response()}
+     * @return array subpartid => {@link question_classified_response} objects;  empty array if no analysis is possible
      */
     public function classify_response(array $response) {
-        $this->rationalize_responses($response);
-        $classification = array();
+        // First, we normalize the student's answers.
+        $response = $this->normalize_response($response);
 
+        $classification = [];
+        // Now, we do the classification for every part.
         foreach ($this->parts as $part) {
-            if ($part->part_is_unanswered($response)) {
+            // Unanswered parts can immediately be classified.
+            if ($part->is_unanswered($response)) {
                 $classification[$part->partindex] = question_classified_response::no_response();
                 continue;
             }
-            $checkunit = new answer_unit_conversion;
-            list($anscorr, $unitcorr)
-                    = $this->grade_responses_individually($part, $response, $checkunit);
 
-            if ($part->postunit != '') {
-                if ($anscorr == 1 && $unitcorr == 1) {
+            // If there is an answer, we check its correctness.
+            list('answer' => $answergrade, 'unit' => $unitcorrect) = $part->grade($response);
+
+            if ($part->postunit !== '') {
+                // The unit can only be correct (1.0) or wrong (0.0).
+                // The answer can be any float from 0.0 to 1.0 inclusive.
+                if ($answergrade >= 0.999 && $unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'right', $part->part_summarise_response($response), 1);
-                }
-                if ($anscorr == 0 && $unitcorr == 1) {
+                            'right', $part->summarise_response($response), 1);
+                } else if ($unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrongvalue', $part->part_summarise_response($response), 0);
-                }
-                if ($anscorr == 1 && $unitcorr == 0) {
+                            'wrongvalue', $part->summarise_response($response), 0);
+                } else if ($answergrade >= 0.999) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrongunit', $part->part_summarise_response($response), 1 - $part->unitpenalty);
-                }
-                if ($anscorr == 0 && $unitcorr == 0) {
+                            'wrongunit', $part->summarise_response($response), 1 - $part->unitpenalty);
+                } else {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrong', $part->part_summarise_response($response), 0);
+                            'wrong', $part->summarise_response($response), 0);
                 }
             } else {
-                $fraction = $anscorr * ($unitcorr ? 1 : (1 - $part->unitpenalty));
-                if ($fraction > .999) {
+                if ($answergrade >= .999) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'right', $part->part_summarise_response($response), $fraction);
+                            'right', $part->summarise_response($response), $answergrade);
                 } else {
                      $classification[$part->partindex] = new question_classified_response(
-                            'wrong', $part->part_summarise_response($response), $fraction);
+                            'wrong', $part->summarise_response($response), $answergrade);
                 }
             }
-
         }
         return $classification;
     }
 
     /**
-     * Use by many of the behaviours to determine whether the student
-     * has provided enough of an answer for the question to be graded automatically,
-     * or whether it must be considered aborted.
+     * This method is called by the renderer when the question is in "invalid" state, i. e. if it
+     * does not have a complete response (for immediate feedback or interactive mode) or if it has
+     * an invalid part (in adaptive multipart mode).
      *
-     * @param array $response responses, as returned by
-     *      {@link question_attempt_step::get_qt_data()}.
-     * @return bool whether this response can be graded.
+     * @param array $response student's response
+     * @return string error message
      */
-    public function is_gradable_response(array $response) {
-        // TODO is an unit alone enought to be gradable ? If I read Tim comment correctly, I think yes,
-        // but in fact it depends on $part->unitpenalty.
-        // TODO if student response is invalid decide what to do.
-        foreach ($this->parts as $part) {
-            foreach (range(0, $part->numbox) as $j) {
-                if (array_key_exists($part->partindex . "_$j", $response) &&
-                        ($response[$part->partindex . "_$j"] || $response[$part->partindex . "_$j"] === '0'
-                                || $response[$part->partindex . "_$j"] === 0)) {
-                    return true;
-                }
-            }
-            if (array_key_exists($part->partindex . '_', $response) &&
-                    ($response[$part->partindex . '_'] || $response[$part->partindex . '_'] === '0'
-                            || $response[$part->partindex . '_'] === 0)) {
-                return true;
-            }
+    public function get_validation_error(array $response): string {
+        // If is_any_part_invalid() is true, that means no part is gradable, i. e. no fields
+        // have been filled.
+        if ($this->is_any_part_invalid($response)) {
+            return get_string('allfieldsempty', 'qtype_formulas');
         }
-        return false;
-    }
 
-    /**
-     * In situations where is_gradable_response() returns false, this method
-     * should generate a description of what the problem is.
-     * @return string the message.
-     */
-    public function get_validation_error(array $response) {
-        if ($this->is_complete_response($response)) {
-            return '';
-        }
+        // If at least one part is gradable and yet the question is in "invalid" state, that means
+        // that the behaviour expected all fields to be filled.
         return get_string('pleaseputananswer', 'qtype_formulas');
     }
 
     /**
-     * Grade a response to the question, returning a fraction between
-     * get_min_fraction() and 1.0, and the corresponding {@link question_state}
-     * right, partial or wrong.
-     * @param array $response responses, as returned by
-     *      {@link question_attempt_step::get_qt_data()}.
-     * @return array (number, integer) the fraction, and the state.
+     * Grade a response to the question, returning a fraction between get_min_fraction()
+     * and 1.0, and the corresponding {@link question_state} right, partial or wrong. This
+     * method is used with immediate feedback, with adaptive mode and with interactive mode. It
+     * is called after the studenet clicks "submit and finish" when deferred feedback is active.
+     *
+     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @return array [0] => fraction (grade) and [1] => corresponding question state
      */
     public function grade_response(array $response) {
-        global $OUTPUT;
+        $response = $this->normalize_response($response);
 
-        // We cant' rely on question defaultmark for restored questions.
-        $totalvalue = 0;
-        $this->rationalize_responses($response);
-        $checkunit = new answer_unit_conversion(); // Defined here for the possibility of reusing parsed default set.
+        $totalpossible = 0;
+        $achievedmarks = 0;
+        // Separately grade each part.
         foreach ($this->parts as $part) {
-            try {
-                list($this->anscorrs[$part->partindex], $this->unitcorrs[$part->partindex])
-                        = $this->grade_responses_individually($part, $response, $checkunit);
-            } catch (Exception $e) {
-                // There should normally be no error, but if there is, we display it here.
-                // This will not terminate the script, so the attempt should be in a valid state.
-                $OUTPUT->notification(get_string('error_grading_error', 'qtype_formulas'), 'error');
-                // We consider this part as wrong.
-                $this->anscorrs[$part->partindex] = 0;
-                $this->unitcorrs[$part->partindex] = 0;
-            }
-            $this->fractions[$part->partindex] = $this->anscorrs[$part->partindex] * ($this->unitcorrs[$part->partindex]
-                                                    ? 1
-                                                    : (1 - $part->unitpenalty));
-            $this->raw_grades[$part->partindex] = $part->answermark * $this->fractions[$part->partindex];
-            $totalvalue += $part->answermark;
-        }
+            // Count the total number of points for this part.
+            $totalpossible += $part->answermark;
 
-        $fraction = array_sum($this->raw_grades) / $totalvalue;
-        return array($fraction, question_state::graded_state_for_fraction($fraction));
-    }
-
-    // Compute the correct response for the given question part.
-    public function get_correct_responses_individually($part) {
-        try {
-            $res = $this->get_evaluated_answer($part);
-            // If the answer is algebraic formulas (i.e. string), then replace the variable with numeric value by their number.
-            $localvars = $this->get_local_variables($part);
-            if (is_string($res[0])) {
-                $res = $this->qv->substitute_partial_formula($localvars, $res);
-            }
-        } catch (Exception $e) {
-            return null;
-        }
-
-        foreach (range(0, count($res) - 1) as $j) {
-            $responses[$part->partindex."_$j"] = $res[$j]; // Coordinates.
-        }
-        $tmp = explode('=', $part->postunit, 2);
-        $responses[$part->partindex."_".count($res)] = $tmp[0];  // Postunit.
-        return $responses;
-    }
-
-    // Compute the correct response for the given question part.
-    // Formatted for display.
-    public function correct_response_formatted($part) {
-        $localvars = $this->get_local_variables($part);
-        $tmp = $this->get_correct_responses_individually($part);
-        // Get all part's answer boxes.
-        $boxes = $part->part_answer_boxes($part->subqtext);
-
-        // Find all multichoice coordinates in the part.
-        foreach ($boxes as $key => $box) {
-            if (strlen($box->options) != 0) { // It's a multichoice coordinate.
-                // Calculate all the choices.
-                try {
-                    // Remove the : at the beginning of options and evaluate it.
-                    $stexts = $this->qv->evaluate_general_expression($localvars, substr($box->options, 1));
-                } catch (Exception $e) {
-                    // The $stexts variable will be null if evaluation fails.
-                    $stexts = null;
-                }
-                if ($stexts != null) {
-                    // Replace index with calculated choice.
-                     $tmp["{$part->partindex}". $key] = $stexts->value[$tmp["{$part->partindex}". $key]];
-                }
+            $partsgrade = $part->grade($response);
+            $fraction = $partsgrade['answer'];
+            // If unit is wrong, make the necessary deduction.
+            if ($partsgrade['unit'] === false) {
+                $fraction = $fraction * (1 - $part->unitpenalty);
             }
 
-        }
-        if ($part->part_has_combined_unit_field()) {
-            $correctanswer = implode(' ', $tmp);
-        } else {
-            if (!$part->part_has_separate_unit_field()) {
-                unset($tmp["{$part->partindex}_" . (count($tmp) - 1)]);
-            }
-            $correctanswer = implode(', ', $tmp);
-        }
-        return $correctanswer;
-    }
-
-    // Add the set of special variables that may be useful to check the correctness of the user input.
-    public function add_special_correctness_variables(&$vars, $_a, $_r, $diff, $is_number) {
-        // Calculate other special variables.
-        $sum0 = $sum1 = $sum2 = 0;
-        foreach ($_r as $idx => $coord) {
-            $sum2 += $diff[$idx] * $diff[$idx];
-        }
-        $t = is_string($_r[0]) ? 's' : 'n';
-        // Add the special variables to the variable pool for later grading.
-        foreach ($_r as $idx => $coord) {
-            $this->qv->vstack_update_variable($vars, '_'.$idx, null, $t, $coord);  // Individual scaled response.
-        }
-        $this->qv->vstack_update_variable($vars, '_r', null, 'l'.$t, $_r); // Array of scaled responses.
-        $this->qv->vstack_update_variable($vars, '_a', null, 'l'.$t, $_a); // Array of model answers.
-        // Array of difference between responses and model answers.
-        $this->qv->vstack_update_variable($vars, '_d', null, 'ln', $diff);
-        // Error in Euclidean space, L-2 norm, sqrt(sum(map("pow",_diff,2))).
-        $this->qv->vstack_update_variable($vars, '_err', null, 'n', sqrt($sum2));
-
-        // Calculate the relative error. We only define relative error for number or numerical expression.
-        if ($is_number) {
-            $norm_sqr = 0;
-            foreach ($_a as $idx => $coord) {
-                $norm_sqr += $coord * $coord;
-            }
-            // If the model answer is zero, the answer from student must also match exactly.
-            $relerr = $norm_sqr != 0 ? sqrt($sum2 / $norm_sqr) : ($sum2 == 0 ? 0 : 1e30);
-            $this->qv->vstack_update_variable($vars, '_relerr', null, 'n', $relerr);
-        }
-    }
-
-    // Check whether the format of the response is correct and evaluate the corresponding expression
-    // @return difference between coordinate and model answer. null if format incorrect. Note: $r will have evaluated value.
-    public function compute_response_difference(&$vars, &$a, &$r, $cfactor, $gradingtype) {
-        $res = (object)array('is_number' => true, 'diff' => null);
-        if ($gradingtype != 10 && $gradingtype != 100 && $gradingtype != 1000) {
-            $gradingtype = 0;   // Treat as number if grading type unknown.
-        }
-        $res->is_number = $gradingtype != 1000;    // 1000 is the algebraic answer type.
-
-        // Note that the same format check has been performed on the client side by the javascript "formatcheck.js".
-        try {
-            if (!$res->is_number) {  // Unit has no meaning for algebraic format, so do nothing for it.
-                $res->diff = $this->qv->compute_algebraic_formula_difference($vars, $a, $r);
-            } else {
-                $res->diff = $this->qv->compute_numerical_formula_difference($a, $r, $cfactor, $gradingtype);
-            }
-        } catch (Exception $e) { // @codingStandardsIgnoreLine
-            // Any error will return null.
-        }
-        if ($res->diff === null) {
-            return null;
-        }
-        return $res;
-    }
-
-    // Grade response for part, and return a list with answer correctness and unit correctness.
-    public function grade_responses_individually($part, $response, &$checkunit, $forvalidation = false) {
-        // Step 1: Split the student's responses to the part into coordinates and unit.
-        $coordinates = array();
-        $i = $part->partindex;
-        foreach (range(0, $part->numbox - 1) as $j) {
-            $coordinates[$j] = trim($response["{$i}_$j"]);
-        }
-        $postunit = trim($response["{$i}_{$part->numbox}"]);
-
-        // Step 2: Use the unit system to check whether the unit in student responses is *convertible* to the true unit.
-        $conversionrules = new unit_conversion_rules;
-        $entry = $conversionrules->entry($part->ruleid);
-        $checkunit->assign_default_rules($part->ruleid, $entry[1]);
-        $checkunit->assign_additional_rules($part->otherrule);
-        $checked = $checkunit->check_convertibility($postunit, $part->postunit);
-        $cfactor = $checked->cfactor;
-        $unitcorrect = $checked->convertible ? 1 : 0;  // Convertible is regarded as correct here.
-
-        // Step 3: Unit is always correct if all coordinates are 0.
-        // Note that numbers must be explicit zero, expression sin(0) is not acceptable.
-        $is_origin = true;
-        foreach ($coordinates as $c) {
-            if (!is_numeric($c)) {
-                $is_origin = false;
-            }
-            if ($is_origin == false) {
-                break;    // Stop earlier when one of coordinates is not zero.
-            }
-            $is_origin = $is_origin && (floatval($c) == 0);
-        }
-        if ($is_origin) {
-            $unitcorrect = 1;
+            // Add the number of points achieved to the total.
+            $achievedmarks += $part->answermark * $fraction;
         }
 
-        // Step 4: If any coordinates is an empty string, it is considered as incorrect.
-        foreach ($coordinates as $c) {
-            if (strlen($c) == 0) {
-                return array(0, $unitcorrect);   // Graded unit is still returned.
-            }
-        }
-
-        // Step 5: Get the model answer, which is an array of numbers or strings.
-        $modelanswers = $this->get_evaluated_answer($part);
-        if (count($coordinates) != count($modelanswers)) {
-            throw new Exception('Database record inconsistence: number of answers in part!');
-        }
-
-        // Step 6: Check the format of the student response and transform them into variables for grading later.
-        $vars = $this->get_local_variables($part);     // Contains both global and local variables.
-        $gradingtype = $part->answertype;
-        $dres = $this->compute_response_difference($vars, $modelanswers, $coordinates, $cfactor, $gradingtype);
-        if ($dres === null) {
-            return array(0, $unitcorrect); // If the answer cannot be evaluated under the grading type.
-        }
-        $this->add_special_correctness_variables($vars, $modelanswers, $coordinates, $dres->diff, $dres->is_number);
-
-        // Step 7: Evaluate the grading variables and grading criteria to determine whether the answer is correct.
-        // Both steps can be in the same try-catch block, because upon validation, the grading vars
-        // are checked by another method and *before* the grading criterion. If they are invalid,
-        // the form validation stops therefore stops before validation the grading criterion and
-        // the error will not be linked to the wrong field.
-        try {
-            $vars = $this->qv->evaluate_assignments($vars, $part->vars2);
-            $correctness = $this->qv->evaluate_general_expression($vars, $part->correctness);
-        } catch (Throwable $t) {
-            // If the criterion cannot be evaluated (possible e.g. if the teacher uses part of the student's
-            // response in a denominator), we consider the answer to be wrong. We store the error message in
-            // case it is needed for the form validation.
-            $correctness = (object)['type' => 'n', 'value' => 0, 'error' => $t->getMessage()];
-        }
-        // If this has been called for validation, we need to throw the exception again, in order
-        // for the error message to be shown in the edit form.
-        if (isset($correctness->error) && $forvalidation) {
-            throw new Exception($correctness->error);
-        }
-
-        // Step 8: Restrict the correctness value within 0 and 1 (inclusive). Also, all non-finite numbers are incorrect.
-        $answercorrect = is_finite($correctness->value) ? min(max((float) $correctness->value, 0.0), 1.0) : 0.0;
-        return array($answercorrect, $unitcorrect);
-    }
-
-    // Fill all 'missing' responses by default value and remove unwanted characters.
-    public function rationalize_responses_for_part($part, array &$response) {
-        foreach (range(0, $part->numbox) as $j) {
-            $name = $part->partindex . "_$j";
-            // Replace all missing responses with an empty string.
-            $response[$name] = isset($response[$name]) ? trim($response[$name]) : '';
-            if (strlen($response[$name]) > 128) {
-                $response[$name] = substr($response[$name], 0, 128);    // Restrict length to 128.
-            }
-        }
-        // For a combined answer box, always parse it into a number and unit, "i_0" and "i_1".
-        // The else case may occur if there is no submission for answer "i_",
-        // in which case "i_0" and "i_1" were already rationalized.
-        if (isset($response[$part->partindex . "_"])) {
-                $response[$part->partindex . "_"] = (string) substr(trim($response[$part->partindex . "_"]), 0, 128);
-                $tmp = $this->qv->split_formula_unit($response[$part->partindex . "_"]);
-                $response[$part->partindex . "_0"] = $tmp[0]; // It will be checked later if tmp[0] is a number.
-                $response[$part->partindex . "_1"] = isset($tmp[1]) ? $tmp[1] : '';
-        }
-    }
-
-    public function rationalize_responses(array &$response) {
-        foreach ($this->parts as $part) {
-            $this->rationalize_responses_for_part($part, $response);
-        }
-    }
-
-
-    // Return the variable type and data in the global variable text defined in the formula question. May throw error.
-    public function get_global_variables() {
-        // TODO I don't understand why this is needed because it has been done in apply_attempt_state.
-        $this->randomsvars = $this->qv->evaluate_assignments($this->qv->vstack_create(), $this->randomsvarstext);
-        if (!isset($this->globalvars)) {
-            // Perform lazy evaluation, when global variables don't already exist.
-            $this->globalvars = $this->qv->evaluate_assignments($this->randomsvars, $this->varsglobal);
-        }
-        return $this->globalvars;
-    }
-
-
-    // Return the variable type and data in the local variable defined in the $part. May throw error.
-    public function get_local_variables($part) {
-        if (!isset($this->localvars[$part->partindex])) {
-            // Perform lazy evaluation, when local variables don't already exist.
-            $this->localvars[$part->partindex] = $this->qv->evaluate_assignments($this->get_global_variables(), $part->vars1);
-        }
-        return $this->localvars[$part->partindex];
+        // Finally, calculate the overall fraction of points received vs. possible points
+        // and return the fraction together with the correct question state (i. e. correct,
+        // partiall correct or wrong).
+        $fraction = $achievedmarks / $totalpossible;
+        return [$fraction, question_state::graded_state_for_fraction($fraction)];
     }
 
     /**
-     * Grade those parts of the question that can be graded, and return the grades and penalties.
-     * @param array $response the current response being processed. Response variable name => value.
-     * @param array $lastgradedresponses array part name => $response array from the last
-     *      time this part registered a try. If a particular part has not yet registered a
-     *      try, then there will not be an entry in the array for it.
-     * @param bool $finalsubmit set to true when the student click submit all and finish,
-     *      since the question is ending, we make a final attempt to award the student as much
-     *      credit as possible for what they did.
-     * @return array part name => qbehaviour_adaptivemultipart_part_result. There should
-     *      only be entries in this array for those parts of the question where this
-     *      sumbission counts as a new try at that part.
+     * This method is called in multipart adaptive mode to grade the of the question
+     * that can be graded. It returns the grade and penalty for each part, if (and only if)
+     * the answer to that part has been changed since the last try. For parts that were
+     * not retried, no grade or penalty should be returned.
+     *
+     * @param array $response current response (all fields)
+     * @param array $lastgradedresponses array containing the (full) response given when each part registered
+     *      an attempt for the last time; if there has been no try for a certain part, the corresponding key
+     *      will be missing. Note that this is not the "history record" of all tries.
+     * @param bool $finalsubmit true when the student clicks "submit all and finish"
+     * @return array part name => qbehaviour_adaptivemultipart_part_result
      */
     public function grade_parts_that_can_be_graded(array $response, array $lastgradedresponses, $finalsubmit) {
-        $partresults = array();
-        $checkunit = new answer_unit_conversion;
+        $partresults = [];
 
         foreach ($this->parts as $part) {
-            $name = (string) $part->partindex;
-            if (array_key_exists($name, $lastgradedresponses)) {
-                // There is a response for this part in the last graded responses array.
-                $lastresponse = $lastgradedresponses[$name];
-            } else {
-                // No response in last graded responses array.
-                $lastresponse = array();
+            // Check whether we already have an attempt for this part. If we don't, we create an
+            // empty response.
+            $lastresponse = [];
+            if (array_key_exists($part->partindex, $lastgradedresponses)) {
+                $lastresponse = $lastgradedresponses[$part->partindex];
             }
 
-            if ($part->part_is_same_response($lastresponse, $response)) {
-                // Response for that part has not changed.
+            // Check whether the response has been changed since the last attempt. If it has not,
+            // we are done for this part.
+            if ($part->is_same_response($lastresponse, $response)) {
                 continue;
             }
 
-            // In that case we need to grade the new response.
-            $this->rationalize_responses_for_part($part, $response);
-            list($anscorr, $unitcorr) = $this->grade_responses_individually($part, $response, $checkunit);
-            $fraction = $anscorr * ($unitcorr ? 1 : (1 - $part->unitpenalty));
-            $partresults[$name] = new qbehaviour_adaptivemultipart_part_result(
-                    $name, $fraction, $this->penalty);
+            $partsgrade = $part->grade($response);
+            $fraction = $partsgrade['answer'];
+            // If unit is wrong, make the necessary deduction.
+            if ($partsgrade['unit'] === false) {
+                $fraction = $fraction * (1 - $part->unitpenalty);
+            }
+
+            $partresults[$part->partindex] = new qbehaviour_adaptivemultipart_part_result(
+                $part->partindex, $fraction, $this->penalty
+            );
         }
+
         return $partresults;
     }
 
     /**
-     * Get a list of all the parts of the question, and the weight they have within
+     * Get a list of all the parts of the question and the weight they have within
      * the question.
-     * @return array part identifier => weight. The sum of all the weights should be 1.
+     *
+     * @return array part identifier => weight
      */
     public function get_parts_and_weights() {
-        $weights = array();
+        // First, we calculate the sum of all marks.
+        $sum = 0;
         foreach ($this->parts as $part) {
-            $weights[$part->partindex] = $part->answermark;
+            $sum += $part->answermark;
         }
-        $totalvalue = array_sum($weights);
-        foreach ($weights as &$w) {
-            $w /= $totalvalue;
+
+        // Now that the total is known, we calculate each part's weight.
+        $weights = [];
+        foreach ($this->parts as $part) {
+            $weights[$part->partindex] = $part->answermark / $sum;
         }
+
         return $weights;
     }
 
     /**
-     * @param array $response the current response being processed. Response variable name => value.
-     * @return bool true if any part of the response is invalid.
+     * Check whether two responses for a given part (and only for that part) are identical.
+     * This is used when working with multiple tries in order to avoid getting a penalty
+     * deduction for an unchanged wrong answer that has already been counted before.
+     *
+     * @param string $id part indentifier
+     * @param array $prevresponse previously recorded responses (for entire question)
+     * @param array $newresponse new responses (for entire question)
+     * @return bool
      */
-    public function is_any_part_invalid(array $response) {
-        // TODO find in what case a formulas part is to be considered as invalid.
-        return false;
-    }
-
-    // Return the evaluated answer array (number will be converted to array). Throw on error.
-    public function get_evaluated_answer($part) {
-        if (!isset($this->evaluatedanswer[$part->partindex])) {   // Perform lazy evaluation.
-            $vstack = $this->get_local_variables($part);
-            $res = $this->qv->evaluate_general_expression($vstack, $part->answer);
-            // Convert to numbers array.
-            $this->evaluatedanswer[$part->partindex] = $res->type[0] == 'l' ? $res->value : array($res->value);
-            $a = $res->type[strlen($res->type) - 1];
-            if (($part->answertype == 1000 ? $a != 's' : $a != 'n')) {
-                throw new Exception(get_string('error_answertype_mistmatch', 'qtype_formulas'));
-            }
-        }   // Perform the evaluation only when the local variable does not exist before.
-        return $this->evaluatedanswer[$part->partindex]; // No type information needed, it returns numbers or strings array.
-    }
-
-    public function check_file_access($qa, $options, $component, $filearea, $args, $forcedownload) {
-        $itemid = reset($args);
-        if ($component == 'qtype_formulas' && ($filearea == 'answersubqtext' || $filearea == 'answerfeedback'
-                || $filearea == 'partcorrectfb' || $filearea == 'partpartiallycorrectfb' || $filearea == 'partincorrectfb')) {
-            // Check if answer id exists.
-            for ($i = 0; $i < $this->numpart; $i++) {
-                if ($this->parts[$i]->id == $itemid) {
-                    return true;
-                }
-            }
-            return false;
-        } else if ($component == 'question' && in_array($filearea,
-                array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'))) {
-            return $this->check_combined_feedback_file_access($qa, $options, $filearea, $args);
-        } else if ($component == 'question' && $filearea == 'hint') {
-            return $this->check_hint_file_access($qa, $options, $args);
-
-        } else {
-            return parent::check_file_access($qa, $options, $component, $filearea,
-                    $args, $forcedownload);
-        }
-
+    public function is_same_response_for_part($id, array $prevresponse, array $newresponse): bool {
+        return $this->parts[$id]->is_same_response($prevresponse, $newresponse);
     }
 
     /**
-     * Work out a final grade for this attempt, taking into account all the
-     * tries the student made.
-     * @param array $responses the response for each try. Each element of this
-     * array is a response array, as would be passed to {@link grade_response()}.
-     * There may be between 1 and $totaltries responses.
-     * @param int $totaltries The maximum number of tries allowed.
-     * @return numeric the fraction that should be awarded for this
-     * sequence of response.
+     * This is called by adaptive multiplart behaviour in order to determine whether the question
+     * state should be moved to question_state::$invalid; many behaviours mainly or exclusively
+     * use !is_complete_response() for that. We will return true if *no* part is gradable,
+     * because in that case it does not make sense to proceed. If at least one part has been
+     * answered (at least partially), we say that no part is invalid, because that allows the student
+     * to get feedback for the answered parts.
+     *
+     * @param array $response student's response
+     * @return bool returning false
      */
-    public function compute_final_grade($responses, $totaltries) {
-        $fractionsum = 0;
-        $fractionmax = 0;
-        $checkunit = new answer_unit_conversion;
-
+    public function is_any_part_invalid(array $response): bool {
+        // Iterate over all parts. If at least one part is gradable, we can leave early.
         foreach ($this->parts as $part) {
-            $fractionmax += $part->answermark;
-            $lastresponse = array();
-            $lastchange = 0;
-            $partfraction = 0;
-            foreach ($responses as $responseindex => $response) {
-                if ($part->part_is_same_response($lastresponse, $response)) {
-                    continue;
-                }
-                $lastresponse = $response;
-                $lastchange = $responseindex;
-                $this->rationalize_responses($response);
-                list($anscorrs, $unitcorrs) = $this->grade_responses_individually($part, $response, $checkunit);
-                $partfraction = $anscorrs * ($unitcorrs ? 1 : (1 - $part->unitpenalty));
+            if ($part->is_gradable_response($response)) {
+                return false;
             }
-            $fractionsum += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
         }
 
-        return $fractionsum / $fractionmax;
+        return true;
+    }
+
+    /**
+     * Work out a final grade for this attempt, taking into account all the tries the student made.
+     * This method is called in interactive mode when all tries are done or when the user hits
+     * 'Submit and finish'.
+     *
+     * @param array $responses response for each try, each element (1 <= n <= $totaltries) is a response array
+     * @param int $totaltries maximum number of tries allowed
+     * @return float grade that should be awarded for this sequence of responses
+     */
+    public function compute_final_grade($responses, $totaltries): float {
+        $obtainedgrade = 0;
+        $maxgrade = 0;
+
+        foreach ($this->parts as $part) {
+            $maxgrade += $part->answermark;
+
+            // We start with an empty last response.
+            $lastresponse = [];
+            $lastchange = 0;
+
+            $partfraction = 0;
+
+            foreach ($responses as $responseindex => $response) {
+                // If the response has not changed, we have nothing to do.
+                if ($part->is_same_response($lastresponse, $response)) {
+                    continue;
+                }
+
+                $response = $this->normalize_response($response);
+
+                // Otherwise, save this as the last response and store the index where
+                // the response was changed for the last time.
+                $lastresponse = $response;
+                $lastchange = $responseindex;
+
+                // Obtain the grade for the current response.
+                $partgrade = $part->grade($response);
+
+                $partfraction = $partgrade['answer'];
+                // If unit is wrong, make the necessary deduction.
+                if ($partgrade['unit'] === false) {
+                    $partfraction = $partfraction * (1 - $part->unitpenalty);
+                }
+            }
+            $obtainedgrade += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
+        }
+
+        return $obtainedgrade / $maxgrade;
+    }
+
+    /**
+     * Set up an evaluator class for every part and have it evaluate the local variables.
+     *
+     * @return void
+     */
+    public function initialize_part_evaluators(): void {
+        // For every part, we clone the question's evaluator in order to have the
+        // same set of (instantiated) random and global variables.
+        foreach ($this->parts as $part) {
+            $part->evaluator = clone $this->evaluator;
+
+            // Parse and evaluate the local variables, if there are any. We do not need to
+            // retrieve or store the result, because the vars will be set inside the evaluator.
+            if (!empty($part->vars1)) {
+                $parser = new parser($part->vars1);
+                $part->evaluator->evaluate($parser->get_statements());
+            }
+
+            // Parse, evaluate and store the model answers. They will be returned as tokens,
+            // so we need to "unpack" them. We always store the model answers as an array; if
+            // there is only one answer, we wrap the value into an array.
+            $part->get_evaluated_answers();
+        }
+    }
+
+    /**
+     * Normalize student response for each part, i. e. split number and unit for combined answer
+     * fields, trim answers and set missing answers to empty string to make sure all expected
+     * response fields are set.
+     *
+     * @param array $response the student's response
+     * @return array normalized response
+     */
+    public function normalize_response(array $response): array {
+        $result = [];
+
+        // Normalize the responses for each part.
+        foreach ($this->parts as $part) {
+            $result += $part->normalize_response($response);
+        }
+
+        // Set the 'normalized' key in order to mark the response as normalized; this is useful for
+        // certain other functions, because it changes a combined field e.g. from 0_ to 0_0 and 0_1.
+        $result['normalized'] = true;
+
+        return $result;
     }
 }
 
@@ -929,41 +831,94 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * Class to represent a question subpart, loaded from the question_answers table
  * in the database.
  *
- * @copyright  2012 Jean-Michel V�drine
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  2012 Jean-Michel Védrine, 2023 Philipp Imhof
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {
-    // Definition of properties used in legacy code or tests, for compatibility with PHP 8.2.
-    // This will be cleaner with the new parser code.
-    public $questionid;
 
-    /** @var integer the answer id. */
-    public $id;
-    public $partindex;
-    public $placeholder;
-    public $answermark;
-    public $answertype;
-    public $numbox;
-    public $vars1;
-    public $vars2;
-    public $answer;
-    public $answernotunique;
-    public $correctness;
-    public $unitpenalty;
-    public $postunit;
-    public $ruleid;
-    public $otherrule;
-    public $subqtext;
-    public $subqtextformat;
-    public $feedback;
-    public $feedbackformat;
-    public $partcorrectfb;
-    public $partcorrectfbformat;
-    public $partpartiallycorrectfb;
-    public $partpartiallycorrectfbformat;
-    public $partincorrectfb;
-    public $partincorrectfbformat;
+    /** @var ?evaluator the part's evaluator class */
+    public ?evaluator $evaluator = null;
 
+    /** @var array store the evaluated model answer(s) */
+    public array $evaluatedanswers = [];
+
+    /** @var int the part's id */
+    public int $id;
+
+    /** @var int the parents question's id */
+    public int $questionid;
+
+    /** @var int the part's position among all parts of the question */
+    public int $partindex;
+
+    /** @var string the part's placeholder, e.g. #1 */
+    public string $placeholder;
+
+    /** @var float the maximum grade for this part */
+    public float $answermark;
+
+    /** @var int answer type (number, numerical, numerical formula, algebraic) */
+    public int $answertype;
+
+    /** @var int number of answer boxes (not including a possible unit box) for this part */
+    public int $numbox;
+
+    /** @var string definition of local variables */
+    public string $vars1;
+
+    /** @var string definition of grading variables */
+    public string $vars2;
+
+    /** @var string definition of the model answer(s) */
+    public string $answer;
+
+    /** @var int whether there are multiple possible answers */
+    public int $answernotunique;
+
+    /** @var string definition of the grading criterion */
+    public string $correctness;
+
+    /** @var float deduction for a wrong unit */
+    public float $unitpenalty;
+
+    /** @var string unit */
+    public string $postunit;
+
+    /** @var int the set of basic unit conversion rules to be used */
+    public int $ruleid;
+
+    /** @var string additional conversion rules for other accepted base units */
+    public string $otherrule;
+
+    /** @var string the part's text */
+    public string $subqtext;
+
+    /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
+    public int $subqtextformat;
+
+    /** @var string general feedback for the part */
+    public string $feedback;
+
+    /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
+    public int $feedbackformat;
+
+    /** @var string part's feedback for any correct response */
+    public string $partcorrectfb;
+
+    /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
+    public int $partcorrectfbformat;
+
+    /** @var string part's feedback for any partially correct response */
+    public string $partpartiallycorrectfb;
+
+    /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
+    public int $partpartiallycorrectfbformat;
+
+    /** @var string part's feedback for any incorrect response */
+    public string $partincorrectfb;
+
+    /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
+    public int $partincorrectfbformat;
 
     /**
      * Constructor.
@@ -971,136 +926,770 @@ class qtype_formulas_part {
     public function __construct() {
     }
 
-    public function part_has_unit() {
-        return strlen($this->postunit) != 0;
-    }
-
-    public function part_has_separate_unit_field() {
-        return strlen($this->postunit) != 0 && $this->part_has_combined_unit_field() == false;
-    }
-
-    public function part_has_combined_unit_field() {
-        return strlen($this->postunit) != 0 && $this->numbox == 1 && $this->answertype != 1000
-                && (
-                  strpos($this->subqtext, "{_0}{_u}") !== false
-                  || (strpos($this->subqtext, "{_0}") === false
-                  && strpos($this->subqtext, "{_u}") === false)
-                );
+    /**
+     * Whether or not a unit field is used in this part.
+     *
+     * @return bool
+     */
+    public function has_unit(): bool {
+        return $this->postunit !== '';
     }
 
     /**
-     * Are two responses the same insofar as this part is concerned. This is
-     * used so we do not penalise the same mistake twice.
+     * Whether or not the part has a combined input field for the number and the unit.
      *
-     * @param array $prevresponse the responses previously recorded for this question,
-     *      as returned by {@link question_attempt_step::get_qt_data()}
-     * @param array $newresponse the new responses, in the same format.
-     * @return bool whether the two sets of responses are the same for the given
-     *      part.
+     * @return bool
      */
-    public function part_is_same_response(array $prevresponse, array $newresponse) {
-        foreach ($this->part_get_expected_data() as $name => $type) {
-            if (!question_utils::arrays_same_at_key_missing_is_blank($prevresponse, $newresponse, $name)) {
+    public function has_combined_unit_field(): bool {
+        // In order to have a combined unit field, we must first assure that:
+        // - there is a unit
+        // - there is not more than one answer box
+        // - the answer is not of the type algebraic formula.
+        if (!$this->has_unit() || $this->numbox > 1 || $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            return false;
+        }
+
+        // Furthermore, there must be either a {_0}{_u} without whitespace in the part's text
+        // (meaning the user explicitly wants a combined unit field) or no answer box placeholders
+        // at all, neither for the answer nor for the unit.
+        $combinedrequested = strpos($this->subqtext, '{_0}{_u}') !== false;
+        $noplaceholders = strpos($this->subqtext, '{_0}') === false && strpos($this->subqtext, '{_u}') === false;
+        return $combinedrequested || $noplaceholders;
+    }
+
+    /**
+     * Whether or not the part has a separate input field for the unit.
+     *
+     * @return bool
+     */
+    public function has_separate_unit_field(): bool {
+        return $this->has_unit() && !$this->has_combined_unit_field();
+    }
+
+    /**
+     * Check whether the previous response and the new response are the same for this part's fields.
+     *
+     * @param array $prevresponse previously recorded responses (for entire question)
+     * @param array $newresponse new responses (for entire question)
+     * @return bool
+     */
+    public function is_same_response(array $prevresponse, array $newresponse): bool {
+        // Compare previous response and new response for every expected key.
+        // If we have a difference at one point, we can return early.
+        foreach (array_keys($this->get_expected_data()) as $key) {
+            if (!question_utils::arrays_same_at_key_missing_is_blank($prevresponse, $newresponse, $key)) {
                 return false;
             }
         }
+
+        // Still here? That means they are all the same.
         return true;
     }
 
-    public function part_get_expected_data() {
-        $expected = array();
-        $i = $this->partindex;
-        if ($this->part_has_combined_unit_field()) {
-                $expected["{$i}_"] = PARAM_RAW;
-        } else {
-            foreach (range(0, $this->numbox - 1) as $j) {
-                $expected["{$i}_$j"] = PARAM_RAW;
-            }
-            if ($this->part_has_separate_unit_field()) {
-                $expected["{$i}_{$this->numbox}"] = PARAM_RAW;
-            }
+    /**
+     * Return the expected fields and data types for all answer boxes this part. This function
+     * is called by the main question's {@link get_expected_data()} method.
+     *
+     * @return array
+     */
+    public function get_expected_data(): array {
+        // The combined unit field is only possible for parts with one
+        // single answer box. If there are multiple input boxes, the
+        // number and unit box will not be merged.
+        if ($this->has_combined_unit_field()) {
+            return ["{$this->partindex}_" => PARAM_RAW];
+        }
+
+        // First, we expect the answers, counting from 0 to numbox - 1.
+        $expected = [];
+        for ($i = 0; $i < $this->numbox; $i++) {
+            $expected["{$this->partindex}_$i"] = PARAM_RAW;
+        }
+
+        // If there is a separate unit field, we add it to the list.
+        if ($this->has_separate_unit_field()) {
+            $expected["{$this->partindex}_{$this->numbox}"] = PARAM_RAW;
         }
         return $expected;
     }
-    /**
-     * Parse a string with placeholders and return
-     * the corresponding array of answer boxes.
-     * Each box is an object with 3 strings properties
-     * pattern, options and stype.
-     * pattern is the placeholder as _0, _1, ..., _u
-     * options is empty except for multichoice answers
-     * where it is the name of a variable containing the list of choices
-     * stype is empty for radio buttons or :MCE for drop down
-     * select menu.
-     *
-     * @param $text string to be parsed.
-     * @return array.
-     */
 
-    public function part_answer_boxes($text) {
-        $pattern = '\{(_[0-9u][0-9]*)(:[^{}:]+)?(:[^{}:]+)?\}';
-        preg_match_all('/'.$pattern.'/', $text, $matches);
-        $boxes = array();
-        foreach ($matches[1] as $j => $match) {
-            if (!array_key_exists($match, $boxes)) {  // If there is duplication, it will be skipped.
-                $boxes[$match] = (object)array(
-                  'pattern' => $matches[0][$j],
-                  'options' => $matches[2][$j],
-                  'stype' => $matches[3][$j]
-                );
+    /**
+     * Parse a string (i. e. the part's text) looking for answer box placeholders.
+     * Answer box placeholders have one of the following forms:
+     * - {_u} for the unit box
+     * - {_n} for an answer box, n must be an integer
+     * - {_n:str} for radio buttons, str must be a variable name
+     * - {_n:str:MCE} for a drop down field, MCE must be verbatim
+     * Note: {_0:MCE} is valid and will lead to radio boxes based on the variable MCE.
+     * Every answer box in the array will itself be an associative array with the
+     * keys 'placeholder' (the entire placeholder), 'options' (the name of the variable containing
+     * the options for the radio list or the dropdown) and 'dropdown' (true or false).
+     * The method is declared static in order to allow its usage during form validation when
+     * there is no actual question object.
+     * TODO: allow {_n|50px} or {_n|10} to control size of the input field
+     *
+     * @param string $text string to be parsed
+     * @return array
+     */
+    public static function scan_for_answer_boxes(string $text): array {
+        // Match the text and store the matches.
+        preg_match_all('/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE))?)?\}/', $text, $matches);
+
+        $boxes = [];
+
+        // The array $matches[1] contains the matches of the first capturing group, i. e. _1 or _u.
+        foreach ($matches[1] as $i => $match) {
+            // Duplicates are not allowed.
+            if (array_key_exists($match, $boxes)) {
+                throw new Exception(get_string('error_answerbox_duplicate', 'qtype_formulas', $match));
             }
+            // The array $matches[0] contains the entire pattern, e.g. {_1:var:MCE} or simply {_3}. This
+            // text is later needed to replace the placeholder by the input element.
+            // With $matches[3], we can access the name of the variable containing the options for the radio
+            // boxes or the drop down list.
+            // Finally, the array $matches[4] will contain ':MCE' in case this has been specified. Otherwise,
+            // there will be an empty string.
+            // TODO: add option 'size' (for characters) or 'width' (for pixel width).
+            $boxes[$match] = [
+                'placeholder' => $matches[0][$i],
+                'options' => $matches[3][$i],
+                'dropdown' => ($matches[4][$i] === ':MCE'),
+            ];
         }
         return $boxes;
     }
 
-    public function part_has_multichoice_coordinate() {
-        $boxes = $this->part_answer_boxes($this->subqtext);
-        foreach ($boxes as $box) {
-            if (strlen($box->options) != 0) { // Multichoice.
-                return true;
+    /**
+     * Produce a plain text summary of a response for the part.
+     *
+     * @param array $response a response, as might be passed to {@link grade_response()}.
+     * @return string a plain text summary of that response, that could be used in reports.
+     */
+    public function summarise_response(array $response) {
+        $summary = [];
+
+        $isnormalized = array_key_exists('normalized', $response);
+
+        // If the part has a combined unit field, we want to have the number and the unit
+        // to appear together in the summary.
+        if ($this->has_combined_unit_field()) {
+            // If the answer is normalized, the combined field has already been split, so we
+            // recombine both parts.
+            if ($isnormalized) {
+                return trim($response["{$this->partindex}_0"] . " " . $response["{$this->partindex}_1"]);
+            }
+
+            // Otherwise, we check whether the key 0_ or similar is present in the response. If it is,
+            // we return that value.
+            if (isset($response["{$this->partindex}_"])) {
+                return $response["{$this->partindex}_"];
             }
         }
+
+        // Iterate over all expected answer fields and if there is a corresponding
+        // answer in $response, add its value to the summary array.
+        foreach (array_keys($this->get_expected_data()) as $key) {
+            if (array_key_exists($key, $response)) {
+                $summary[] = $response[$key];
+            }
+        }
+
+        // Transform the array to a comma-separated list for a nice summary.
+        return implode(', ', $summary);
+    }
+
+    /**
+     * Normalize student response for current part, i. e. split number and unit for combined answer
+     * fields, trim answers and set missing answers to empty string to make sure all expected
+     * response fields are set.
+     *
+     * @param array $response student's full response
+     * @return array normalized response for this part only
+     */
+    public function normalize_response(array $response): array {
+        $result = [];
+
+        // There might be a combined field for number and unit which would be called i_.
+        // We check this first. A combined field is only possible, if there is not more
+        // than one answer, so we can safely use i_0 for the number and i_1 for the unit.
+        $name = "{$this->partindex}_";
+        if (isset($response[$name])) {
+            $combined = trim($response[$name]);
+
+            // We try to parse the student's response in order to find the position where
+            // the unit presumably starts. If parsing fails (e. g. because there is a syntax
+            // error), we consider the entire response to be the "number". It will later be graded
+            // wrong anyway.
+            try {
+                $parser = new answer_parser($combined);
+                $splitindex = $parser->find_start_of_units();
+            } catch (Throwable $t) {
+                // TODO: convert to non-capturing catch.
+                $splitindex = PHP_INT_MAX;
+            }
+
+            $number = trim(substr($combined, 0, $splitindex));
+            $unit = trim(substr($combined, $splitindex));
+
+            $result["{$name}0"] = $number;
+            $result["{$name}1"] = $unit;
+            return $result;
+        }
+
+        // Otherwise, we iterate from 0 to numbox, inclusive (if there is a unit field) or exclusive.
+        $count = $this->numbox;
+        if ($this->has_unit()) {
+            $count++;
+        }
+        for ($i = 0; $i < $count; $i++) {
+            $name = "{$this->partindex}_$i";
+
+            // If there is an answer, we strip white space from the start and end.
+            // Missing answers should be empty strings.
+            if (isset($response[$name])) {
+                $result[$name] = trim($response[$name]);
+            } else {
+                $result[$name] = '';
+            }
+
+            // Restrict the answer's length to 128 characters. There is no real need
+            // for this, but it was done in the first versions, so we'll keep it for
+            // backwards compatibility.
+            if (strlen($result[$name]) > 128) {
+                $result[$name] = substr($result[$name], 0, 128);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determines whether the student has entered enough in order for this part to
+     * be graded. We consider a part gradable, if it is not unanswered, i. e. if at
+     * least some field has been filled.
+     *
+     * @param array $response
+     * @return bool
+     */
+    public function is_gradable_response(array $response): bool {
+        return !$this->is_unanswered($response);
+    }
+
+    /**
+     * Determines whether the student has provided a complete answer to this part,
+     * i. e. if all fields have been filled. This method can be called before the
+     * response is normalized, so we cannot be sure all array keys exist as we would
+     * expect them.
+     *
+     * @param array $response
+     * @return bool
+     */
+    public function is_complete_response(array $response): bool {
+        // First, we check if there is a combined unit field. In that case, there will
+        // be only one field to verify.
+        if ($this->has_combined_unit_field()) {
+            return !empty($response["{$this->partindex}_"]) && strlen($response["{$this->partindex}_"]) > 0;
+        }
+
+        // If we are still here, we do now check all "normal" fields. If one is empty,
+        // we can return early.
+        for ($i = 0; $i < $this->numbox; $i++) {
+            if (!isset($response["{$this->partindex}_{$i}"]) || strlen($response["{$this->partindex}_{$i}"]) == 0) {
+                return false;
+            }
+        }
+
+        // Finally, we check whether there is a separate unit field and, if necessary,
+        // make sure it is not empty.
+        if ($this->has_separate_unit_field()) {
+            return !empty($response["{$this->partindex}_{$this->numbox}"])
+                && strlen($response["{$this->partindex}_{$this->numbox}"]) > 0;
+        }
+
+        // Still here? That means no expected field was missing and no fields were empty.
+        return true;
+    }
+
+    /**
+     * Determines whether the part (as a whole) is unanswered.
+     *
+     * @param array $response
+     * @return bool
+     */
+    public function is_unanswered(array $response): bool {
+        $isnormalized = array_key_exists('normalized', $response);
+
+        // If there is a combined number/unit answer, we know that there are no other
+        // answers, so we just check this one. However, if the response has already been
+        // "normalized", we cannot use this shortcut, because then the combined unit field's
+        // content has already been split into _0 (the number) and _1 (the unit).
+        if ($isnormalized === false && $this->has_combined_unit_field()) {
+            // If the key does not exist, there is a problem and we consider the part as
+            // unanswered.
+            if (!array_key_exists("{$this->partindex}_", $response)) {
+                return true;
+            }
+            // If the answer is empty, but not equivalent to zero, we consider the part as
+            // unanswered.
+            $tocheck = $response["{$this->partindex}_"];
+            return empty($tocheck) && !is_numeric($tocheck);
+        }
+
+        // Otherwise, we check all answer boxes (including a possible unit) of this part.
+        // If at least one is not empty, the part has been answered. If there is a unit field,
+        // we will check this in the same way, even if it should not actually be numeric. We don't
+        // need to care about that, because a wrong answer is still an answer.
+        // Note that $response will contain *all* answers for *all* parts.
+        $count = $this->numbox;
+        if ($this->has_unit()) {
+            $count++;
+        }
+        for ($i = 0; $i < $count; $i++) {
+            // If the key does not exist, there is a problem and we consider the part as
+            // unanswered.
+            if (!array_key_exists("{$this->partindex}_{$i}", $response)) {
+                return true;
+            }
+            // If the answer field is not empty or it is equivalent to zero, we consider
+            // the part as answered and leave early.
+            $tocheck = $response["{$this->partindex}_{$i}"];
+            if (!empty($tocheck) || is_numeric($tocheck)) {
+                return false;
+            }
+        }
+
+        // Still here? Then no fields were filled.
+        return true;
+    }
+
+    /**
+     * Return the part's evaluated answers. The teacher has probably entered them using the
+     * various (random, global and/or local) variables. This function calculates the numerical
+     * value of all answers. If the answer type is 'algebraic formula', the answers are not
+     * evaluated (this would not make sense), but the non-algebraic variables will be replaced
+     * by their respective values, e.g. "a*x^2" could become "2*x^2" if the variable a is defined
+     * to be 2.
+     *
+     * @return array
+     */
+    public function get_evaluated_answers(): array {
+        // If we already know the evaluated answers for this part, we can simply return them.
+        if (!empty($this->evaluatedanswers)) {
+            return $this->evaluatedanswers;
+        }
+
+        // Still here? Then let's evaluate the answers.
+        $result = [];
+
+        // Check whether the part uses the algebraic answer type.
+        $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
+
+        $parser = new parser($this->answer, $this->evaluator->export_variable_list());
+        $result = $this->evaluator->evaluate($parser->get_statements())[0];
+
+        // The $result will now be a token with its value being either a literal (string, number)
+        // or an array of literal tokens. If we have one single answer, we wrap it into an array
+        // before continuing. Otherwise we convert the array of tokens into an array of literals.
+        if ($result->type & token::ANY_LITERAL) {
+            $this->evaluatedanswers = [$result->value];
+        } else {
+            $this->evaluatedanswers = array_map(function ($element) {
+                return $element->value;
+            }, $result->value);
+        }
+
+        // If the answer type is algebraic, substitute all non-algebraic variables by
+        // their numerical value.
+        if ($isalgebraic) {
+            foreach ($this->evaluatedanswers as &$answer) {
+                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
+            }
+            // In case we later write to $answer, this would alter the last entry of the $modelanswers
+            // array, so we'd better remove the reference to make sure this won't happend.
+            unset($answer);
+        }
+
+        return $this->evaluatedanswers;
+    }
+
+    /**
+     * This function takes an array of algebraic formulas and wraps them in quotes. This is
+     * needed e.g. before we feed them to the parser for further processing.
+     *
+     * @param array $formulas the formulas to be wrapped in quotes
+     * @return array array containing wrapped formulas
+     */
+    private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
+        foreach ($formulas as &$formula) {
+            // If the formula is aready wrapped in quotes (e. g. after an earlier call to this
+            // function), there is nothing to do.
+            if (preg_match('/^\"[^\"]*\"$/', $formula)) {
+                continue;
+            }
+
+            $formula = '"' . $formula . '"';
+        }
+        // In case we later write to $formula, this would alter the last entry of the $formulas
+        // array, so we'd better remove the reference to make sure this won't happen.
+        unset($formula);
+
+        return $formulas;
+    }
+
+    /**
+     * Check whether algebraic formulas contain a PREFIX operator.
+     *
+     * @param array $formulas the formulas to check
+     * @return bool
+     */
+    private static function contains_prefix_operator(array $formulas): bool {
+        foreach ($formulas as $formula) {
+            $lexer = new lexer($formula);
+
+            foreach ($lexer->get_tokens() as $token) {
+                if ($token->type === token::PREFIX) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
     /**
-     * Produce a plain text summary of a response for the part.
-     * @param $response a response, as might be passed to {@link grade_response()}.
-     * @return string a plain text summary of that response, that could be used in reports.
+     * Add several special variables to the question part's evaluator, namely
+     * _a for the model answers (array)
+     * _r for the student's response (array)
+     * _d for the differences between _a and _r (array)
+     * _0, _1 and so on for the student's individual answers
+     * _err for the absolute error
+     * _relerr for the relative error, if applicable
+     *
+     * @param array $studentanswers the student's response
+     * @param float $conversionfactor unit conversion factor, if needed (1 otherwise)
+     * @param bool $formodelanswer whether we are doing this to test model answers, i. e. PREFIX operator is allowed
+     * @return void
      */
-    public function part_summarise_response(array $response) {
-        $summary = array();
-        foreach ($this->part_get_expected_data() as $name => $type) {
-            if (array_key_exists($name, $response)) {
-                $summary [] = $response[$name];
+    public function add_special_variables(array $studentanswers, float $conversionfactor, bool $formodelanswer = false): void {
+        $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
+
+        // First, we set _a to the array of model answers. We can use the
+        // evaluated answers. The function get_evaluated_answers() uses a cache.
+        // Answers of type alebraic formula must be wrapped in quotes.
+        $modelanswers = $this->get_evaluated_answers();
+        if ($isalgebraic) {
+            $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
+        }
+        $command = '_a = [' . implode(',', $modelanswers ). '];';
+
+        // The variable _r will contain the student's answers, scaled according to the unit,
+        // but not containing the unit. Also, the variables _0, _1, ... will contain the
+        // individual answers.
+        if ($isalgebraic) {
+            // Students are not allowed to use the PREFIX operator. If they do, we drop out
+            // here. Throwing an exception will make sure the grading function awards zero points.
+            // Also, we disallow usage of the PREFIX in an algebraic formula's model answer, because
+            // that would lead to bad feedback (showing the student a "correct" answer that they cannot
+            // type in). In this case, we use a different error message.
+            if (self::contains_prefix_operator($studentanswers)) {
+                if ($formodelanswer) {
+                    throw new Exception(get_string('error_model_answer_prefix', 'qtype_formulas'));
+                }
+                throw new Exception(get_string('error_prefix', 'qtype_formulas'));
+            }
+            $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);
+        }
+        $ssqstudentanswer = 0;
+        foreach ($studentanswers as $i => &$studentanswer) {
+            // We only do the calculation if the answer type is not algebraic. For algebraic
+            // answers, we don't do anything, because quotes have already been added.
+            if (!$isalgebraic) {
+                $studentanswer = $conversionfactor * $studentanswer;
+                $ssqstudentanswer += $studentanswer ** 2;
+            }
+            $command .= "_{$i} = {$studentanswer};";
+        }
+        unset($studentanswer);
+        $command .= '_r = [' . implode(',', $studentanswers) . '];';
+
+        // The variable _d will contain the absolute differences between the model answer
+        // and the student's response. Using the parser's diff() function will make sure
+        // that algebraic answers are correctly evaluated.
+        $command .= '_d = diff(_a, _r);';
+
+        // Prepare the variable _err which is the root of the sum of squared differences.
+        $command .= "_err = sqrt(sum(map('*', _d, _d)));";
+
+        // Finally, calculate the relative error, unless the question uses an algebraic answer.
+        if (!$isalgebraic) {
+            // We calculate the sum of squares of all model answers.
+            $ssqmodelanswer = 0;
+            foreach ($this->get_evaluated_answers() as $answer) {
+                $ssqmodelanswer += $answer ** 2;
+            }
+            // If the sum of squares is 0 (i.e. all answers are 0), then either the student
+            // answers are all 0 as well, in which case we set the relative error to 0. Or
+            // they are not, in which case we set the relative error to the greatest possible value.
+            // Otherwise, the relative error is simply the absolute error divided by the root
+            // of the sum of squares.
+            if ($ssqmodelanswer == 0) {
+                $command .= '_relerr = ' . ($ssqstudentanswer == 0 ? 0 : PHP_FLOAT_MAX);
             } else {
-                    $summary [] = '';
+                $command .= "_relerr = _err / sqrt({$ssqmodelanswer})";
             }
         }
-        $summary = implode(', ', $summary);
-        return $summary;
+
+        $parser = new parser($command, $this->evaluator->export_variable_list());
+        $this->evaluator->evaluate($parser->get_statements(), true);
     }
 
-    public function part_is_gradable_response(array $response) {
-        // TODO and after that use in is_gradable_response.
+    /**
+     * Grade the part and return its grade.
+     *
+     * @param array $response current response
+     * @param bool $finalsubmit true when the student clicks "submit all and finish"
+     * @return array 'answer' => grade (0...1) for this response, 'unit' => whether unit is correct (bool)
+     */
+    public function grade(array $response, bool $finalsubmit = false): array {
+        $isalgebraic = $this->answertype == qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
 
-    }
+        // Normalize the student's response for this part, removing answers from other parts.
+        $response = $this->normalize_response($response);
 
-    public function part_is_complete_response(array $response) {
-        // TODO and after that use it in is_complete_response.
-
-    }
-
-    public function part_is_unanswered(array$response) {
-        $i = $this->partindex;
-        if (array_key_exists("{$i}_", $response) && $response["{$i}_"] != '') {
-            return false;
+        // Store the unit as entered by the student and get rid of this part of the
+        // array, leaving only the inputs from the number fields.
+        $studentsunit = '';
+        if ($this->has_unit()) {
+            $studentsunit = trim($response["{$this->partindex}_{$this->numbox}"]);
+            unset($response["{$this->partindex}_{$this->numbox}"]);
         }
-        foreach (range(0, $this->numbox) as $j) {
-            if (array_key_exists("{$i}_$j", $response) && $response["{$i}_$j"] != '') {
-                    return false;
+
+        // For now, let's assume the unit is correct.
+        $unitcorrect = true;
+
+        // Check whether the student's unit is compatible, i. e. whether it can be converted to
+        // the unit set by the teacher. If this is the case, we calculate the conversion factor.
+        // Otherwise, we set $unitcorrect to false and let the conversion factor be 1, so the
+        // result will not be "scaled".
+        $conversionfactor = $this->is_compatible_unit($studentsunit);
+        if ($conversionfactor === false) {
+            $conversionfactor = 1;
+            $unitcorrect = false;
+        }
+
+        // The response array does not contain the unit anymore. If we are dealing with algebraic
+        // formulas, we must wrap the answers in quotes before we move on. Also, we reset the conversion
+        // factor, because it is not needed for algebraic answers.
+        if ($isalgebraic) {
+                $response = self::wrap_algebraic_formulas_in_quotes($response);
+            $conversionfactor = 1;
+        }
+
+        // Now we iterate over all student answers, feed them to the parser and evaluate them in order
+        // to build an array containing the evaluated response.
+        $evaluatedresponse = [];
+        foreach ($response as $answer) {
+            try {
+                // Using the known variables upon initialisation allows the teacher to "block"
+                // certain built-in functions for the student by overwriting them, e. g. by
+                // defining "sin = 1" in the global variables.
+                $parser = new answer_parser($answer, $this->evaluator->export_variable_list());
+
+                // Check whether the answer is valid for the given answer type. If it is not,
+                // we just throw an exception to make use of the catch block. Note that if the
+                // student's answer was empty, it will fail in this check.
+                if (!$parser->is_acceptable_for_answertype($this->answertype)) {
+                    throw new Exception();
+                }
+
+                // Make sure the stack is empty, as there might be left-overs from a previous
+                // failed evaluation, e.g. caused by an invalid answer.
+                $this->evaluator->clear_stack();
+
+                $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
+                $evaluatedresponse[] = token::unpack($evaluated);
+            } catch (Throwable $t) {
+                // TODO: convert to non-capturing catch
+                // If parsing, validity check or evaluation fails, we consider the answer as wrong.
+                // The unit might be correct, but that won't matter.
+                return ['answer' => 0, 'unit' => $unitcorrect];
             }
         }
-        return true;
+
+        // Add correctness variables using the evaluated response.
+        try {
+            $this->add_special_variables($evaluatedresponse, $conversionfactor);
+        } catch (Exception $e) {
+            // TODO: convert to non-capturing catch
+            // If the special variables cannot be evaluated, the answer will be considered as
+            // wrong. Partial credit may be given for the unit. We do not carry on, because
+            // evaluation of the grading criterion (and possibly grading variables) generally
+            // depends on these special variables.
+            return ['answer' => 0, 'unit' => $unitcorrect];
+        }
+
+        // Fetch and evaluate grading variables.
+        $gradingparser = new parser($this->vars2);
+        try {
+            $this->evaluator->evaluate($gradingparser->get_statements());
+        } catch (Exception $e) {
+            // TODO: convert to non-capturing catch
+            // If grading variables cannot be evaluated, the answer will be considered as
+            // wrong. Partial credit may be given for the unit. Thus, we do not need to
+            // carry on.
+            return ['answer' => 0, 'unit' => $unitcorrect];
+        }
+
+        // Fetch and evaluate the grading criterion. If evaluation is not possible,
+        // set grade to 0.
+        $correctnessparser = new parser($this->correctness);
+        try {
+            $evaluatedgrading = $this->evaluator->evaluate($correctnessparser->get_statements())[0];
+            $evaluatedgrading = $evaluatedgrading->value;
+        } catch (Exception $e) {
+            // TODO: convert to non-capturing catch.
+            $evaluatedgrading = 0;
+        }
+
+        // Restrict the grade to the closed interval [0,1].
+        $evaluatedgrading = min($evaluatedgrading, 1);
+        $evaluatedgrading = max($evaluatedgrading, 0);
+
+        return ['answer' => $evaluatedgrading, 'unit' => $unitcorrect];
+    }
+
+    /**
+     * Check whether the unit in the student's answer can be converted into the expected unit.
+     * TODO: refactor this once the unit system has been rewritten
+     *
+     * @param string $studentsunit unit provided by the student
+     * @return float|bool false if not compatible, conversion factor if compatible
+     */
+    private function is_compatible_unit(string $studentsunit) {
+        $checkunit = new answer_unit_conversion();
+        $conversionrules = new unit_conversion_rules();
+        $entry = $conversionrules->entry($this->ruleid);
+        $checkunit->assign_default_rules($this->ruleid, $entry[1]);
+        $checkunit->assign_additional_rules($this->otherrule);
+
+        $checked = $checkunit->check_convertibility($studentsunit, $this->postunit);
+        if ($checked->convertible) {
+            return $checked->cfactor;
+        }
+
+        return false;
+    }
+
+    /**
+     * Return an array containing the correct answers for this question part. If $forfeedback
+     * is set to true, multiple choice answers are translated from their list index to their
+     * value (e.g. the text) to provide feedback to the student. Also, quotes are stripped
+     * from algebraic formulas. Otherwise, the function returns the values as they are needed
+     * to obtain full mark at this question.
+     *
+     * @param bool $forfeedback whether we request correct answers for student feedback
+     * @return array list of correct answers
+     */
+    public function get_correct_response(bool $forfeedback = false): array {
+        // Fetch the evaluated answers.
+        $answers = $this->get_evaluated_answers();
+
+        // If we have a combined unit field, we return both the model answer plus the unit
+        // in "i_". Combined fields are only possible for parts with one signle answer.
+        if ($this->has_combined_unit_field()) {
+            return ["{$this->partindex}_" => trim($answers[0] . ' ' . $this->postunit)];
+        }
+
+        // Strip quotes around algebraic formulas, if the answers are used for feedback.
+        if ($forfeedback && $this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            $answers = str_replace('"', '', $answers);
+        }
+
+        // Otherwise, we build an array with all answers, according to our naming scheme.
+        $res = [];
+        for ($i = 0; $i < $this->numbox; $i++) {
+            $res["{$this->partindex}_{$i}"] = $answers[$i];
+        }
+
+        // Finally, if we have a separate unit field, we add this as well.
+        if ($this->has_separate_unit_field()) {
+            $res["{$this->partindex}_{$this->numbox}"] = $this->postunit;
+        }
+
+        if ($forfeedback) {
+            $res = $this->translate_mc_answers_for_feedback($res);
+        }
+
+        return $res;
+    }
+
+    /**
+     * When using multichoice options in a question (e.g. radio buttons or a dropdown list),
+     * the answer will be stored as a number, e.g. 1 for the *second* option. However, when
+     * giving feedback to the student, we want to show the actual *value* of the option and not
+     * its number. This function makes sure the stored answer is translated accordingly.
+     *
+     * @param array $response the response given by the student
+     * @return array updated response
+     */
+    public function translate_mc_answers_for_feedback(array $response): array {
+        // First, we fetch all answer boxes.
+        $boxes = self::scan_for_answer_boxes($this->subqtext);
+
+        foreach ($boxes as $key => $box) {
+            // If it is not a multiple choice answer, we have nothing to do.
+            if ($box['options'] === '') {
+                continue;
+            }
+
+            // Name of the array containing the choices.
+            $source = $box['options'];
+
+            // Student's choice.
+            $userschoice = $response["{$this->partindex}$key"];
+
+            // Fetch the value.
+            $parser = new parser("{$source}[$userschoice]");
+            try {
+                $result = $this->evaluator->evaluate($parser->get_statements()[0]);
+                $response["{$this->partindex}$key"] = $result->value;
+            } catch (Exception $e) {
+                // TODO: convert to non-capturing catch
+                // If there was an error, we leave the value as it is. This should
+                // not happen, because upon creation of the question, we check whether
+                // the variable containing the choices exists.
+                debugging('Could not translate multiple choice index back to its value. This should not happen. ' .
+                    'Please file a bug report.');
+            }
+        }
+
+        return $response;
+    }
+
+
+    /**
+     * If the part is not correctly answered, we will set all answers to the empty string. Otherwise, we
+     * just return an empty array. This function will be called by the main question (for every part) and
+     * will be used to reset answers from wrong parts.
+     *
+     * @param array $response student's response
+     * @return array either an empty array (if part is correct) or an array with all answers being the empty string
+     */
+    public function clear_from_response_if_wrong(array $response): array {
+        // First, we have the response graded.
+        list('answer' => $answercorrect, 'unit' => $unitcorrect) = $this->grade($response);
+
+        // If the part's answer is correct (including the unit, if any), we return an empty array.
+        // The caller of this function uses our values to overwrite the ones in the response, so
+        // that's fine.
+        if ($answercorrect >= 0.999 && $unitcorrect) {
+            return [];
+        }
+
+        $result = [];
+        foreach (array_keys($this->get_expected_data()) as $key) {
+            $result[$key] = '';
+        }
+        return $result;
     }
 }
