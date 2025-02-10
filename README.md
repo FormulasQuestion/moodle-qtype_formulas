@@ -1,7 +1,7 @@
-Formulas question type for Moodle
----------------------------------
+Formulas question type for Moodle (version 5.3.x)
+-------------------------------------------------
 
-[![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml/badge.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml/badge.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml) [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml/badge.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml) [![Coverage Status](https://coveralls.io/repos/github/FormulasQuestion/moodle-qtype_formulas/badge.svg)](https://coveralls.io/github/FormulasQuestion/moodle-qtype_formulas) [![GitHub
+[![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml) [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml) [![Coverage Status](https://coveralls.io/repos/github/FormulasQuestion/moodle-qtype_formulas/badge.svg?branch=STABLE_5.3)](https://coveralls.io/github/FormulasQuestion/moodle-qtype_formulas?branch=STABLE_5.3) [![GitHub
 Release](https://img.shields.io/github/release/FormulasQuestion/moodle-qtype_formulas.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/releases)
 
 This is a question type plugin for Moodle with random values and multiple answer fields.
@@ -17,7 +17,7 @@ still available at the [original author's website](https://code.google.com/p/moo
 at the date of this writing. It was then upgraded to the new question engine introduced in Moodle 2.1 by
 Jean-Michel Védrine.
 
-This version is compatible with Moodle 3.9 and newer. It has been tested with:
+This version is compatible with Moodle 3.9 - 4.5. It has been tested with:
 - Moodle 3.9 using PHP 7.4
 - Moodle 3.11 using PHP 7.4 and PHP 8.0
 - Moodle 4.0 using PHP 7.4 and PHP 8.0
