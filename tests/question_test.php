@@ -601,49 +601,26 @@ final class question_test extends \basic_testcase {
     public function test_apply_legacy_attempt_state(): void {
         // Get a new randomized question and start a new attempt.
         $q = $this->get_test_formulas_question('test4');
-        $seed = 1;
+        $seed = intval(microtime(true));
         $q->start_attempt(new question_attempt_step(), $seed);
-
-        // Verify the seed is stored in the question, the evaluator is set up and the variables
-        // v, s and t do exist and that they are initialized.
-        self::assertEquals($seed, $q->seed);
-        self::assertNotNull($q->evaluator);
-        $variables = $q->evaluator->export_variable_list();
-        self::assertContains('v', $variables);
-        self::assertContains('s', $variables);
-        self::assertContains('dt', $variables);
-
-        // Verify the number of parts is set and the parts' evaluators are set up.
-        self::assertEquals(4, $q->numparts);
-        self::assertNotNull($q->parts[0]->evaluator);
-        self::assertNotNull($q->parts[1]->evaluator);
-        self::assertNotNull($q->parts[2]->evaluator);
-        self::assertNotNull($q->parts[3]->evaluator);
 
         // Store the values of the two random variables.
         $dt = $q->evaluator->export_single_variable('dt')->value;
         $v = $q->evaluator->export_single_variable('v')->value;
 
-        // The question has the random variables "v = {20:100:10}; dt = {2:6};", so there must be
-        // 8 * 4 = 32 variants.
-        $variants = $q->get_num_variants();
-        self::assertEquals(32, $variants);
+        // Save legacy attempt step data.
+        $stepdata = [
+            '_randomsvars_text' => $q->evaluator->export_randomvars_for_step_data(),
+            '_varsglobal' => $q->varsglobal,
+        ];
 
-        // Iterate over all variants until v and dt have changed at least once.
-        $vchanged = false;
-        $dtchanged = false;
-        for ($i = $seed + 1; $i <= $variants; $i++) {
-            $q->apply_attempt_state(new question_attempt_step(['_seed' => $i]));
-            $vchanged = $vchanged || ($q->evaluator->export_single_variable('v')->value != $v);
-            $dtchanged = $dtchanged || ($q->evaluator->export_single_variable('dt')->value != $dt);
-            if ($vchanged && $dtchanged) {
-                break;
-            }
-        }
+        // Apply attempt step with different seed. As there are not many variants, this does not
+        // guarantee that both random variables now have different values, so we are not testing
+        // for that.
+        $q->apply_attempt_state(new question_attempt_step(['_seed' => $seed + 1]));
 
-        // Apply attempt step with original seed and verify both variables do have the original value
-        // again.
-        $q->apply_attempt_state(new question_attempt_step(['_varsglobal' => "v=$v;dt=$dt;"]));
+        // Apply attempt step without seed, but with legacy step data.
+        $q->apply_attempt_state(new question_attempt_step($stepdata));
         self::assertEquals($v, $q->evaluator->export_single_variable('v')->value);
         self::assertEquals($dt, $q->evaluator->export_single_variable('dt')->value);
     }

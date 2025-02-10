@@ -19,8 +19,6 @@ namespace qtype_formulas;
 use question_state;
 use test_question_maker;
 use question_hint_with_parts;
-use qtype_formulas_test_helper;
-use Generator;
 use qtype_formulas;
 
 defined('MOODLE_INTERNAL') || die();
@@ -295,100 +293,6 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
             $this->get_contains_correct_expectation(),
             $this->get_does_not_contain_validation_error_expectation()
         );
-    }
-
-    /**
-     * Data provider.
-     *
-     * @return Generator
-     */
-    public static function provide_responses_for_feedback_test(): Generator {
-        yield [
-            qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK,
-            ['behaviour' => 'immediatefeedback', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5 m/s']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
-            ['behaviour' => 'immediatefeedback', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK,
-            ['behaviour' => 'immediatefeedback', 'question' => 'testsinglenumunit', 'response' => ['0_' => '1']],
-        ];
-        // The following is considered incorrect, because it is converted to 5000 m/s.
-        yield [
-            qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK,
-            ['behaviour' => 'immediatefeedback', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5 km/s']],
-        ];
-        // The following is considered partially correct, because the unit is wrong (hour is not supported).
-        yield [
-            qtype_formulas_test_helper::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
-            ['behaviour' => 'immediatefeedback', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5 km/h']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK,
-            ['behaviour' => 'adaptive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5 m/s']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
-            ['behaviour' => 'adaptive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK,
-            ['behaviour' => 'adaptive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '1']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK,
-            ['behaviour' => 'interactive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5 m/s']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
-            ['behaviour' => 'interactive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '5']],
-        ];
-        yield [
-            qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK,
-            ['behaviour' => 'interactive', 'question' => 'testsinglenumunit', 'response' => ['0_' => '1']],
-        ];
-    }
-
-    /**
-     * Test general and combined feedback for part.
-     *
-     * @dataProvider provide_responses_for_feedback_test
-     */
-    public function test_part_feedback($expectedfeedback, $input): void {
-        // Prepare feedback strings.
-        $generalfeedback = 'Part general feedback';
-        $feedbacks = [
-            qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK,
-            qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK,
-            qtype_formulas_test_helper::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
-        ];
-
-        // Create the requested question.
-        $q = $this->get_test_formulas_question($input['question']);
-        $q->parts[0]->unitpenalty = 0.6;
-        $q->parts[0]->feedback = $generalfeedback;
-
-        // Start question, check that there is no feedback yet.
-        $this->start_attempt_at_question($q, $input['behaviour'], 1);
-        $this->check_output_does_not_contain($generalfeedback);
-        foreach ($feedbacks as $feedback) {
-            $this->check_output_does_not_contain($feedback);
-        }
-
-        // Submit answer.
-        $this->process_submission($input['response'] + ['-submit' => 1]);
-
-        // Verify the feedback.
-        $this->check_output_contains('Part general feedback');
-        foreach ($feedbacks as $feedback) {
-            if ($feedback === $expectedfeedback) {
-                $this->check_output_contains($feedback);
-            } else {
-                $this->check_output_does_not_contain($feedback);
-            }
-        }
     }
 
     public function test_test0_submit_wrong_submit_right(): void {

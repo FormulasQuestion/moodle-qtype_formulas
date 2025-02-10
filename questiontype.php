@@ -392,7 +392,9 @@ class qtype_formulas extends question_type {
         }
 
         // Still here? Then we must remove remaining parts and their files (if there are), because the
-        // user seems to have deleted them in the form.
+        // user seems to have deleted them in the form. This is only important for Moodle 3.11 and lower,
+        // because from Moodle 4.0 on, the parts and their files will remain in the DB, linked to the
+        // old question version.
         $fs = get_file_storage();
         foreach ($existingparts as $leftover) {
             $areas = ['answersubqtext', 'answerfeedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'];

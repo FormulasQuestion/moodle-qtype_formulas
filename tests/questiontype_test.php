@@ -41,12 +41,16 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
 
 /**
- * Unit tests for question/type/formulas/questiontype.php.
+ * Unit tests for question/type/formulas/questiontype.php. These tests include validation
+ * that is (and has to be) done in the question or the question parts, so we add them to
+ * the coverage. Most of the tests in this file are therefore not unit tests in the strict sense.
  *
  * @copyright  2013 Jean-Michel Vedrine
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers     \qtype_formulas
+ * @covers     \qtype_formulas_question
+ * @covers     \qtype_formulas_part
  * @covers     \qtype_formulas_edit_form
  */
 final class questiontype_test extends \advanced_testcase {
