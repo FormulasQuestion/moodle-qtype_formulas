@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,16 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * COMPONENT External functions unit tests
- *
- * @package    qtype_formulas
- * @category   external
- * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace qtype_formulas;
 
@@ -31,508 +22,528 @@ global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 /**
+ * Unit test for the instantiation web service.
+ *
+ * @copyright  2024 Philipp Imhof
+ * @package    qtype_formulas
+ * @category   test
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  * @runTestsInSeparateProcesses
+ * @covers \qtype_formulas\external\instantiation
  */
-class externallib_test extends \externallib_advanced_testcase {
+final class externallib_test extends \externallib_advanced_testcase {
     public function setUp(): void {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/classes/external/instantiation.php');
+
+        $this->resetAfterTest(true);
+        parent::setUp();
     }
 
-    public function test_check_random_global_vars() {
-        $this->resetAfterTest(true);
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_random_global_vars(): array {
+        return [
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => ''],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => 'a={1,2};', 'globalvars' => ''],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => 'a={1,2};', 'globalvars' => 'a=4'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'a=1'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'a={1:5}'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'a={1,2,3,4}'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => 'a={1,2}', 'globalvars' => 'b=a'],
+            ],
+            [
+                [
+                    'source' => 'random',
+                    'message' => 'Invalid definition of a random variable - you must provide a list of possible values.',
+                ],
+                ['randomvars' => 'a=1', 'globalvars' => ''],
+            ],
+            [
+                ['source' => 'global', 'message' => 'Unknown variable: a'],
+                ['randomvars' => '', 'globalvars' => 'b=a'],
+            ],
+            [
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '='."],
+                ['randomvars' => '', 'globalvars' => 'a='],
+            ],
+            [
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => '', 'globalvars' => 'a=+'],
+            ],
+        ];
+    }
 
-        $testcases = array(
-            array('randomvars' => '', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => 'a={1,2};', 'globalvars' => '', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => '', 'globalvars' => 'a=1', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => '', 'globalvars' => 'a={1:5}', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => '', 'globalvars' => 'a={1,2,3,4}', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => 'a={1,2}', 'globalvars' => 'b=a', 'return' => array('source' => '', 'message' => '')),
-            array('randomvars' => 'a=1', 'globalvars' => '', 'return' => array('source' => 'random', 'message' => '1: a: Syntax error.')),
-            array('randomvars' => '', 'globalvars' => 'b=a', 'return' => array(
-                'source' => 'global',
-                'message' => '1: Variable \'a\' has not been defined. in substitute_vname_by_variables'
-            )),
-            array('randomvars' => '', 'globalvars' => 'a=', 'return' => array(
-                'source' => 'global',
-                'message' => '1: A subexpression is empty.'
-            )),
-            array('randomvars' => '', 'globalvars' => 'a=+', 'return' => array(
-                'source' => 'global',
-                'message' => '1: Some expressions cannot be evaluated numerically.'
-            ))
+    /**
+     * Test for instantiation::check_random_global_vars().
+     *
+     * @dataProvider provide_random_global_vars
+     */
+    public function test_check_random_global_vars($expected, $input): void {
+        $returnvalue = external\instantiation::check_random_global_vars(
+            $input['randomvars'], $input['globalvars']
         );
 
-        foreach ($testcases as $case) {
-            $returnvalue = external\instantiation::check_random_global_vars(
-                $case['randomvars'], $case['globalvars']
-            );
-            $returnvalue = \external_api::clean_returnvalue(
-                external\instantiation::check_random_global_vars_returns(), $returnvalue
-            );
-            $this->assertEquals($case['return'], $returnvalue);
+        $returnvalue = \external_api::clean_returnvalue(
+            external\instantiation::check_random_global_vars_returns(), $returnvalue
+        );
+
+        self::assertEquals($expected['source'], $returnvalue['source']);
+        // As from PHP Unit 11.5, assertStringEndsWith() cannot be used to check for empty suffix anymore.
+        if ($expected['message'] === '') {
+            self::assertEmpty($returnvalue['message']);
+        } else {
+            self::assertStringEndsWith($expected['message'], $returnvalue['message']);
         }
     }
 
-    public function test_check_local_vars() {
-        $this->resetAfterTest(true);
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_random_global_local_vars(): array {
+        return [
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => ''],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1:5}'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1,2}'],
+            ],
+            [
+                ['source' => 'local', 'message' => 'Unknown variable: b'],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => 'b={1,2}', 'globalvars' => '', 'localvars' => 'a=b'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b'],
+            ],
+            [
+                ['source' => '', 'message' => ''],
+                ['randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a={1,2,3}'],
+            ],
+            [
+                ['source' => 'local', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+'],
+            ],
+            [
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2'],
+            ],
+            [
+                ['source' => 'global', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2'],
+            ],
+            [
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=2'],
+            ],
+            [
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=+++'],
+            ],
+            [
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => 'a=+', 'globalvars' => '', 'localvars' => 'c=+++'],
+            ],
+            [
+                ['source' => 'random', 'message' => "Syntax error: unexpected end of expression after '+'."],
+                ['randomvars' => 'a=+', 'globalvars' => 'b=++', 'localvars' => 'c=+++'],
+            ],
+            [
+                ['source' => 'local', 'message' => "Syntax error: unexpected end of expression after '='."],
+                ['randomvars' => '', 'globalvars' => '', 'localvars' => 'a='],
+            ],
+        ];
+    }
 
-        $testcases = array(
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => '', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=2', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1:5}', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a={1,2}', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=b', 'return' => array(
-                'source' => 'local',
-                'message' => '1: Variable \'b\' has not been defined. in substitute_vname_by_variables'
-            )),
-            array('randomvars' => 'b={1,2}', 'globalvars' => '', 'localvars' => 'a=b', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => 'b=1', 'localvars' => 'a=b', 'return' => array(
-                'source' => '',
-                'message' => ''
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=+', 'return' => array(
-                'source' => 'local',
-                'message' => '1: Some expressions cannot be evaluated numerically.'
-            )),
-            array('randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2', 'return' => array(
-                'source' => 'global',
-                'message' => '1: Some expressions cannot be evaluated numerically.'
-            )),
-            array('randomvars' => '', 'globalvars' => 'a=+', 'localvars' => 'b=2', 'return' => array(
-                'source' => 'global',
-                'message' => '1: Some expressions cannot be evaluated numerically.'
-            )),
-            array('randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=2', 'return' => array(
-                'source' => 'random',
-                'message' => '1: a: Syntax error.'
-            )),
-            array('randomvars' => 'a=+', 'globalvars' => 'b=1', 'localvars' => 'c=+++', 'return' => array(
-                'source' => 'random',
-                'message' => '1: a: Syntax error.'
-            )),
-            array('randomvars' => 'a=+', 'globalvars' => '', 'localvars' => 'c=+++', 'return' => array(
-                'source' => 'random',
-                'message' => '1: a: Syntax error.'
-            )),
-            array('randomvars' => 'a=+', 'globalvars' => 'b=++', 'localvars' => 'c=+++', 'return' => array(
-                'source' => 'random',
-                'message' => '1: a: Syntax error.'
-            )),
-            array('randomvars' => '', 'globalvars' => '', 'localvars' => 'a=', 'return' => array(
-                'source' => 'local',
-                'message' => '1: A subexpression is empty.'
-            )),
+    /**
+     * Test for instantiation::check_local_vars().
+     *
+     * @dataProvider provide_random_global_local_vars
+     */
+    public function test_check_local_vars($expected, $input): void {
+        $returnvalue = external\instantiation::check_local_vars(
+            $input['randomvars'], $input['globalvars'], $input['localvars']
         );
+        $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_local_vars_returns(), $returnvalue);
 
-        foreach ($testcases as $case) {
-            $returnvalue = external\instantiation::check_local_vars(
-                $case['randomvars'], $case['globalvars'], $case['localvars']
-            );
-            $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_local_vars_returns(), $returnvalue);
-            $this->assertEquals($case['return'], $returnvalue);
+        self::assertEquals($expected['source'], $returnvalue['source']);
+        // As from PHP Unit 11.5, assertStringEndsWith() cannot be used to check for empty suffix anymore.
+        if ($expected['message'] === '') {
+            self::assertEmpty($returnvalue['message']);
+        } else {
+            self::assertStringEndsWith($expected['message'], $returnvalue['message']);
         }
     }
 
-    public function test_render_question_text() {
-        $this->resetAfterTest(true);
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_question_texts(): array {
+        return [
+            [
+                ['question' => '', 'parts' => []],
+                ['questiontext' => '', 'parttexts' => [], 'globalvars' => '', 'partvars' => []],
+            ],
+            [
+                [
+                    'question' => "No preview available. Check your definition of random variables, " .
+                        "global variables, parts' local variables and answers. Original error message: " .
+                        "1:3:Syntax error: unexpected end of expression after '*'.",
+                    'parts' => [],
+                ],
+                ['questiontext' => '', 'parttexts' => [], 'globalvars' => 'a=*', 'partvars' => []],
+            ],
+            [
+                ['question' => 'Foo Bar 1', 'parts' => []],
+                ['questiontext' => 'Foo Bar {a}', 'parttexts' => [], 'globalvars' => 'a=1', 'partvars' => []],
+            ],
+            [
+                ['question' => 'Foo Bar {a}', 'parts' => []],
+                ['questiontext' => 'Foo Bar {a}', 'parttexts' => [], 'globalvars' => 'a="{a}"', 'partvars' => []],
+            ],
+            [
+                ['question' => 'Foo Bar {a}', 'parts' => []],
+                ['questiontext' => 'Foo Bar {a}', 'parttexts' => [], 'globalvars' => '', 'partvars' => []],
+            ],
+            [
+                ['question' => 'Foo Bar {a}', 'parts' => ['local 10']],
+                [
+                    'questiontext' => 'Foo Bar {a}',
+                    'parttexts' => ['local {a}'],
+                    'globalvars' => 'a={1,2,3}',
+                    'partvars' => ['a=10'],
+                ],
+            ],
+            [
+                ['question' => '', 'parts' => ['Foo Bar 1']],
+                ['questiontext' => '', 'parttexts' => ['Foo Bar {a}'], 'globalvars' => 'a=2', 'partvars' => ['a=1']],
+            ],
+            [
+                ['question' => 'Main', 'parts' => ['Foo Bar 1', 'Part 2 6', '2']],
+                [
+                    'questiontext' => 'Main', 'parttexts' => ['Foo Bar {a}', 'Part 2 {=2*a}',
+                    '{=sqrt(a)}'], 'globalvars' => 'a=4', 'partvars' => ['a=1', 'a=3', ''],
+                ],
+            ],
+            [
+                [
+                    'question' => "No preview available. Check your definition of random variables, " .
+                        "global variables, parts' local variables and answers. Original error message: " .
+                        "1:4:Division by zero is not defined.",
+                    'parts' => [],
+                ],
+                [
+                    'questiontext' => 'foo', 'parttexts' => ['bar {a}'], 'globalvars' => '',
+                    'partvars' => ['a=1/0'],
+                ],
+            ],
+        ];
+    }
 
-        $testcases = array(
-            array(
-                'questiontext' => '',
-                'parttexts' => array(),
-                'globalvars' => '',
-                'partvars' => array(),
-                'return' => array(
-                    'question' => '',
-                    'parts' => array()
-                )
-            ),
-            array(
-                'questiontext' => '',
-                'parttexts' => array(),
-                'globalvars' => 'a=*',
-                'partvars' => array(),
-                'return' => array(
-                    'question' => 'No preview available. Check your definition of random variables, ' .
-                        'global variables, parts\' local variables and answers. Original error message: ' .
-                        '1: Some expressions cannot be evaluated numerically.',
-                    'parts' => array()
-                )
-            ),
-            array(
-                'questiontext' => 'Foo Bar {a}',
-                'parttexts' => array(),
-                'globalvars' => 'a=1',
-                'partvars' => array(),
-                'return' => array(
-                    'question' => 'Foo Bar 1',
-                    'parts' => array()
-                )
-            ),
-            array(
-                'questiontext' => 'Foo Bar {a}',
-                'parttexts' => array(),
-                'globalvars' => 'a="{a}"',
-                'partvars' => array(),
-                'return' => array(
-                    'question' => 'Foo Bar {a}',
-                    'parts' => array()
-                )
-            ),
-            array(
-                'questiontext' => 'Foo Bar {a}',
-                'parttexts' => array(),
-                'globalvars' => '',
-                'partvars' => array(),
-                'return' => array(
-                    'question' => 'Foo Bar {a}',
-                    'parts' => array()
-                )
-            ),
-            array(
-                'questiontext' => 'Foo Bar {a}',
-                'parttexts' => array('local {a}'),
-                'globalvars' => 'a={1,2,3}',
-                'partvars' => array('a=10'),
-                'return' => array(
-                    'question' => 'Foo Bar {a}',
-                    'parts' => array('local 10')
-                )
-            ),
-            array(
-                'questiontext' => '',
-                'parttexts' => array('Foo Bar {a}'),
-                'globalvars' => 'a=2',
-                'partvars' => array('a=1'),
-                'return' => array(
-                    'question' => '',
-                    'parts' => array('Foo Bar 1')
-                )
-            ),
-            array(
-                'questiontext' => 'Main',
-                'parttexts' => array('Foo Bar {a}', 'Part 2 {=2*a}', '{=sqrt(a)}'),
-                'globalvars' => 'a=4',
-                'partvars' => array('a=1', 'a=3', ''),
-                'return' => array(
-                    'question' => 'Main',
-                    'parts' => array('Foo Bar 1', 'Part 2 6', '2')
-                )
-            ),
+    /**
+     * Test for instantiation::render_question_text().
+     *
+     * @dataProvider provide_question_texts
+     */
+    public function test_render_question_text($expected, $input): void {
+        $returnvalue = external\instantiation::render_question_text(
+            $input['questiontext'], $input['parttexts'], $input['globalvars'], $input['partvars']
         );
+        $returnvalue = \external_api::clean_returnvalue(external\instantiation::render_question_text_returns(), $returnvalue);
 
-        foreach ($testcases as $case) {
-            $returnvalue = external\instantiation::render_question_text(
-                $case['questiontext'], $case['parttexts'], $case['globalvars'], $case['partvars']
-            );
-            $returnvalue = \external_api::clean_returnvalue(external\instantiation::render_question_text_returns(), $returnvalue);
-            $this->assertEquals($case['return'], $returnvalue);
+        self::assertEquals($expected['question'], $returnvalue['question']);
+        foreach ($expected['parts'] as $i => $part) {
+            self::assertEquals($part, $returnvalue['parts'][$i]);
         }
     }
 
-    public function test_instantiate() {
-        $this->resetAfterTest(true);
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_instantiation_data(): array {
+        return [
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '1'],
+                        ['name' => 'b', 'value' => '2'],
+                        ['name' => 'c', 'value' => '0'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=1; b=2; c=(b<a);',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '3'],
+                        ['name' => 'b', 'value' => '2'],
+                        ['name' => 'c', 'value' => '6'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '6']]],
+                ]]],
+                [
+                    'n' => -1, 'randomvars' => '', 'globalvars' => 'a=3; b=2; c=a*b',
+                    'localvars' => [''], 'answers' => ['a*b'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '3'],
+                        ['name' => 'b', 'value' => '2'],
+                        ['name' => 'c', 'value' => '6'],
+                    ],
+                    'parts' => [[
+                        ['name' => '_0', 'value' => '6'],
+                        ['name' => '_1', 'value' => '6'],
+                        ['name' => '_2', 'value' => '6'],
+                    ]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=3; b=2; c=a*b',
+                    'localvars' => [''], 'answers' => ['[a*b,c,6]'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '{a}']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a={1,2,3}',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            // For the next case, we define a "random" variable with no randomness.
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [['name' => 'a', 'value' => '1']],
+                    'globalvars' => [['name' => 'a*', 'value' => '5']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => 'a={1,1}', 'globalvars' => 'a=5',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '{a}']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a={1:10}',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '[1, 2]']],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=[1,2]',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [['name' => 'a', 'value' => '{a}']],
+                    'parts' => [[
+                        ['name' => 'a*', 'value' => '{a}'],
+                        ['name' => '_0', 'value' => '1'],
+                    ]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a={1:10}',
+                    'localvars' => ['a={1,2,3}'], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'error', 'message' => "Algebraic variable 'a' cannot be used in this context."],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => ['a={1,3}'], 'answers' => ['a'],
+                ],
+            ],
+            [
+                ['status' => 'error', 'message' => 'Division by zero is not defined.'],
+                [
+                    'n' => -1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => ['a=2'], 'answers' => ['1/(a-a)'],
+                ],
+            ],
+            [
+                ['status' => 'error', 'message' => "Algebraic variable 'a' cannot be used in this context."],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => ['a={1:5}'], 'answers' => ['a'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => []],
+                [
+                    'n' => 0, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => [], 'answers' => [],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [['randomvars' => [], 'globalvars' => [], 'parts' => []]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => [], 'answers' => [],
+                ],
+            ],
+            [
+                ['status' => 'error', 'message' => "Syntax error: unexpected end of expression after '*'."],
+                [
+                    'n' => 1, 'randomvars' => 'a=*', 'globalvars' => '',
+                    'localvars' => [], 'answers' => [],
+                ],
+            ],
+            [
+                ['status' => 'error', 'message' => 'Division by zero is not defined.'],
+                [
+                    'n' => 50, 'randomvars' => 'a={0, 1}', 'globalvars' => 'b = 1/a',
+                    'localvars' => ['b = 1/a'], 'answers' => ['1/a'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '1'],
+                        ['name' => 'b', 'value' => '2'],
+                    ],
+                    'parts' => [[
+                        ['name' => 'a*', 'value' => '3'],
+                        ['name' => '_0', 'value' => '1'],
+                        ['name' => '_1', 'value' => '3'],
+                    ], [
+                        ['name' => '_0', 'value' => '1'],
+                        ['name' => '_1', 'value' => '2'],
+                    ], [
+                        ['name' => '_0', 'value' => '1'],
+                    ]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'a=1; b=2;',
+                    'localvars' => ['a=3', '', ''], 'answers' => ['[1,a]', '[a,b]', 'a'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => array_fill(0, 2, [
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '1'],
+                    ],
+                    'parts' => [],
+                ])],
+                [
+                    'n' => 2, 'randomvars' => '', 'globalvars' => 'a=1',
+                    'localvars' => [], 'answers' => [],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'sin', 'value' => '1'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '2']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 'sin=1',
+                    'localvars' => [], 'answers' => ['sin(2)'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => array_fill(0, 10, [
+                    'randomvars' => [],
+                    'globalvars' => [
+                        ['name' => 'a', 'value' => '1'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ])],
+                [
+                    'n' => 10, 'randomvars' => '', 'globalvars' => 'a=1',
+                    'localvars' => [], 'answers' => ['1'],
+                ],
+            ],
+        ];
+    }
 
-        $testcases = array(
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a=1; b=2; c=(b<a)',
-                'localvars' => array(''),
-                'answers' => array('1'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => '1'),
-                                array('name' => 'b', 'value' => '2'),
-                                array('name' => 'c', 'value' => '0')
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => '_0', 'value' => '1'),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a=3; b=2; c=a*b',
-                'localvars' => array(''),
-                'answers' => array('a*b'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => '3'),
-                                array('name' => 'b', 'value' => '2'),
-                                array('name' => 'c', 'value' => '6')
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => '_0', 'value' => '6'),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a=3; b=2; c=a*b',
-                'localvars' => array(''),
-                'answers' => array('[a*b,c,6]'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => '3'),
-                                array('name' => 'b', 'value' => '2'),
-                                array('name' => 'c', 'value' => '6')
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => '_0', 'value' => '6'),
-                                    array('name' => '_1', 'value' => '6'),
-                                    array('name' => '_2', 'value' => '6'),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a={1,2,3}',
-                'localvars' => array(''),
-                'answers' => array('1'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => '{a}')
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => '_0', 'value' => 1),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a={1:10}',
-                'localvars' => array(''),
-                'answers' => array('1'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => '{a}')
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => '_0', 'value' => 1),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => '',
-                'localvars' => array('a={1,3}'),
-                'answers' => array('a'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(),
-                            'parts' => array(
-                                array(
-                                    array('name' => 'a', 'value' => '{a}'),
-                                    array('name' => '_0', 'value' => '!!!'),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => '',
-                'localvars' => array('a={1:5}'),
-                'answers' => array('a'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(),
-                            'parts' => array(
-                                array(
-                                    array('name' => 'a', 'value' => '{a}'),
-                                    array('name' => '_0', 'value' => '!!!'),
-                                )
-                            ),
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 0,
-                'randomvars' => '',
-                'globalvars' => '',
-                'localvars' => array(),
-                'answers' => array(),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array()
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => '',
-                'localvars' => array(),
-                'answers' => array(),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(),
-                            'parts' => array()
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => 'a=*',
-                'globalvars' => '',
-                'localvars' => array(),
-                'answers' => array(),
-                'return' => array(
-                    'status' => 'error',
-                    'message' => '1: a: Syntax error.'
-                )
-            ),
-            array(
-                'n' => 1,
-                'randomvars' => '',
-                'globalvars' => 'a=1; b=2;',
-                'localvars' => array('a=3', '', ''),
-                'answers' => array('[1,a]', '[a,b]', 'a'),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(
-                                array('name' => 'a', 'value' => 1),
-                                array('name' => 'b', 'value' => 2)
-                            ),
-                            'parts' => array(
-                                array(
-                                    array('name' => 'a*', 'value' => 3),
-                                    array('name' => '_0', 'value' => 1),
-                                    array('name' => '_1', 'value' => 3)
-                                ),
-                                array(
-                                    array('name' => '_0', 'value' => 1),
-                                    array('name' => '_1', 'value' => 2)
-                                ),
-                                array(
-                                    array('name' => '_0', 'value' => 1)
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
-            array(
-                'n' => 2,
-                'randomvars' => '',
-                'globalvars' => 'a=1',
-                'localvars' => array(),
-                'answers' => array(),
-                'return' => array(
-                    'status' => 'ok',
-                    'data' => array(
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(array('name' => 'a', 'value' => 1)),
-                            'parts' => array()
-                        ),
-                        array(
-                            'randomvars' => array(),
-                            'globalvars' => array(array('name' => 'a', 'value' => 1)),
-                            'parts' => array()
-                        )
-                    )
-                )
-            ),
-        );
-
-        foreach ($testcases as $case) {
-            $returnvalue = external\instantiation::instantiate(
-                $case['n'], $case['randomvars'], $case['globalvars'], $case['localvars'], $case['answers']
-            );
-            $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
-            $this->assertEquals($case['return'], $returnvalue);
-        }
-
-        $case = array(
-            'n' => 10,
-            'randomvars' => '',
-            'globalvars' => 'a=1',
-            'localvars' => array(''),
-            'answers' => array('1')
-        );
+    /**
+     * Test for instantiation::instantiate().
+     *
+     * @dataProvider provide_instantiation_data
+     */
+    public function test_instantiate($expected, $input): void {
         $returnvalue = external\instantiation::instantiate(
-            $case['n'], $case['randomvars'], $case['globalvars'], $case['localvars'], $case['answers']
+            $input['n'], $input['randomvars'], $input['globalvars'], $input['localvars'], $input['answers']
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
-        $this->assertEquals(10, count($returnvalue['data']));
+
+        self::assertEquals($expected['status'], $returnvalue['status']);
+        if ($expected['status'] === 'error') {
+            self::assertStringEndsWith($expected['message'], $returnvalue['message']);
+        } else {
+            self::assertEquals($expected['data'], $returnvalue['data']);
+        }
     }
 }

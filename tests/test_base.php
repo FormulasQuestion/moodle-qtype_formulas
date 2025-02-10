@@ -23,7 +23,7 @@
  */
 
 namespace qtype_formulas;
-use html_writer;
+use question_pattern_expectation;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,78 +40,57 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
+    /** @var string|null $currentoutput */
     protected $currentoutput = null;
 
+    /**
+     * Render the question and fetch the generated HTML.
+     *
+     * @return void
+     */
     protected function render() {
         $this->currentoutput = $this->quba->render_question($this->slot, $this->displayoptions);
     }
 
-    protected function get_tag_matcher($tag, $attributes) {
-        return array(
-            'tag' => $tag,
-            'attributes' => $attributes,
-        );
+    /**
+     * Test whether the feedback concerning the number of correct parts is right.
+     *
+     * @param int $num
+     * @return void
+     */
+    protected function get_contains_num_parts_correct($num) {
+        $s = get_string('yougotoneright', 'qtype_formulas');
+        if ($num !== 1) {
+            $s = get_string('yougotnright', 'qtype_formulas', $num);
+        }
+
+        return new question_pattern_expectation('/<div class="numpartscorrect">' .
+            preg_quote($s, '/') . '/');
     }
 
-    protected function check_output_contains_text_input($name, $value = null, $enabled = true) {
-        $attributes = array(
-            'type' => 'text',
-            'name' => $this->quba->get_field_prefix($this->slot) . $name,
-        );
-        if (!is_null($value)) {
-            $attributes['value'] = $value;
-        }
-        if (!$enabled) {
-            $attributes['readonly'] = 'readonly';
-        }
-        $matcher = $this->get_tag_matcher('input', $attributes);
-        $this->assertTag($matcher, $this->currentoutput,
-                'Looking for an input with attributes ' . html_writer::attributes($attributes) . ' in ' . $this->currentoutput);
-
-        if ($enabled) {
-            $matcher['attributes']['readonly'] = 'readonly';
-            $this->assertNotTag($matcher, $this->currentoutput,
-                    'input with attributes ' . html_writer::attributes($attributes) .
-                    ' should not be read-only in ' . $this->currentoutput);
-        }
+    /**
+     * Create assertion to check that a hint with a given text is shown.
+     *
+     * @param string $text
+     * @return void
+     */
+    protected function get_contains_hint_expectation($text) {
+        return new question_pattern_expectation('/<div class="hint">' .
+            preg_quote($text, '/') . '/');
     }
 
-    protected function check_output_contains_part_feedback($name = null) {
-        $class = 'formulaspartfeedback';
-        if ($name) {
-            $class .= ' formulaspartfeedback-' . $name;
-        }
-        $this->assertTag(array('tag' => 'div', 'attributes' => array('class' => $class)), $this->currentoutput,
-                'part feedback for ' . $name . ' not found in ' . $this->currentoutput);
-    }
-
-    protected function check_output_does_not_contain_part_feedback($name = null) {
-        $class = 'formulaspartfeedback';
-        if ($name) {
-            $class .= ' formulaspartfeedback-' . $name;
-        }
-        $this->assertNotTag(array('tag' => 'div', 'attributes' => array('class' => $class)), $this->currentoutput,
-                'part feedback for ' . $name . ' should not be present in ' . $this->currentoutput);
-    }
-
+    /**
+     * Check whether there are placeholders for answer boxes, expressions and/or variables left in the HTML output,
+     * e. g. {_0} or {x} or {=2*a}.
+     *
+     * @return void
+     */
     protected function check_output_does_not_contain_stray_placeholders() {
         // Keeping the old way for 3.9 until it reaches end-of-life.
         if (version_compare(\PHPUnit\Runner\Version::id(), '9.0.0', '>=')) {
-            $this->assertDoesNotMatchRegularExpression('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
+            $this->assertDoesNotMatchRegularExpression('~\{|\}~', $this->currentoutput, 'Not all placehoders were replaced.');
         } else {
-            $this->assertNotRegexp('~\[\[|\]\]~', $this->currentoutput, 'Not all placehoders were replaced.');
+            $this->assertNotRegexp('~\{|\}~', $this->currentoutput, 'Not all placehoders were replaced.');
         }
-    }
-
-    protected function check_output_contains_lang_string($identifier, $component = '', $a = null) {
-        $string = get_string($identifier, $component, $a);
-        $this->assertNotContains($string, $this->currentoutput,
-                'Expected string ' . $string . ' not found in ' . $this->currentoutput);
-    }
-
-    protected function check_output_does_not_contain_lang_string($identifier, $component = '', $a = null) {
-        $string = get_string($identifier, $component, $a);
-        $this->assertContains($string, $this->currentoutput,
-                'The string ' . $string . ' should not be present in ' . $this->currentoutput);
     }
 }

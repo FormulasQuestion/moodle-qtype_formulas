@@ -31,12 +31,12 @@ $addons = [
                 'method' => 'mobile_get_formulas',
                 'styles' => [
                     'url' => '/question/type/formulas/mobile/styles_app.css',
-                    'version' => '1.00'
-                ]
-            ]
+                    'version' => '1.00',
+                ],
+            ],
         ],
         'lang' => [
             ['pluginname', 'qtype_formulas'], // Matching value in  lang/en/qtype_formulas.
         ],
-    ]
+    ],
 ];

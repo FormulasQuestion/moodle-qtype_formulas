@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * qtype_formulas external file
@@ -20,18 +20,22 @@
  * @package    qtype_formulas
  * @category   external
  * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qtype_formulas\external;
-use qtype_formulas\variables;
-use Exception;
 
+use Exception;
+use qtype_formulas\local\evaluator;
+use qtype_formulas\local\parser;
+use qtype_formulas\local\random_parser;
+use qtype_formulas\local\token;
+use qtype_formulas\local\variable;
 
 defined('MOODLE_INTERNAL') || die();
 
+// TODO: in the future, this must be changed to $CFG->dirrot . '/lib/externallib.php'.
 require_once($CFG->libdir . "/externallib.php");
-require_once($CFG->dirroot . '/question/type/formulas/variables.php');
 
 /**
  * Class containing various methods for validation of variable definitions and
@@ -54,92 +58,129 @@ class instantiation extends \external_api {
     }
 
     /**
-     * Remove variables that have just been copied from one variable stack to the next,
-     * unless they have been changed. In that case, they should be kept and their name can
-     * be marked to emphasize that change.
+     * Remove variables that have just been copied from one evaluator to the next, unless
+     * they have been changed. In that case, they should be kept and their name can be
+     * marked to emphasize that change.
      *
-     * @param object $superset the variable stack used as a base
-     * @param object $subset the derived variable stack
+     * @param array $base array of qtype_formulas\variable used as the base
+     * @param array $new array of qtype_formulas\variable with updated/added variables
      * @param string $mark optional mark for overridden variables
-     * @return object variable stack containing only new and overriden variables
+     * @return array array of qtype_formulas\variable containing filtered variables
      */
-    protected static function remove_duplicated_variables($superset, $subset, $mark = '*') {
-        $filtered = array();
-        foreach ($superset as $name => $value) {
+    protected static function remove_duplicated_variables(array $base, array $new, $mark = '*'): array {
+        $filtered = [];
+        foreach ($base as $name => $variable) {
             // If the key exists in the subset, we might be overriding it.
             // This can be made clear by appending an asterisk to the variable name.
             $suffix = '';
-            if (array_key_exists($name, $subset)) {
+            if (array_key_exists($name, $new)) {
                 $suffix = $mark;
             }
-            // Same value, so no need to include the variable in the subset.
-            if ($suffix == $mark && $subset[$name] == $value) {
+            // If the timestamp of both variables is the same, we do not include it in the
+            // subset, because there was no update.
+            if ($suffix === $mark && $new[$name]->timestamp == $variable->timestamp) {
                 continue;
             }
-            $filtered[$name . $suffix] = $value;
+            $filtered[$name . $suffix] = $variable;
         }
 
         return $filtered;
     }
 
     /**
+     * Convert the serialized variable context of an evaluator class into an array that
+     * suits our needs. In case of an error, return an empty array.
+     *
+     * @param array $data serialized variable context
+     * @return array
+     */
+    protected static function variable_context_to_array(array $data): array {
+        // The data comes directly from the evaluator's export_variable_context() function, so
+        // we don't have to expect an error.
+        $context = unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
+
+        $result = [];
+        foreach ($context as $name => $var) {
+            $result[$name] = $var;
+        }
+        return $result;
+    }
+
+    /**
      * Instiantiate one set of variables.
      *
-     * @param object $parsedrandomvars pre-parsed random variables (for performance reasons)
-     * @param string $globalvars string defining the global variables
-     * @param array $localvars array of strings, each one defining the corresponding part's local variables
-     * @param array $answers array of strings, each one defining the corresponding part's answers
+     * @param array $context variable context containing the random variables
+     * @param array $parsedglobalvars array of qtype_formulas\expression containing the parsed definition of global vars
+     * @param array $parsedlocalvars array of qtype_formulas\expression containing the parsed definition of local vars
+     * @param array $parsedanswers array of qtype_formulas\expression containing the parsed answers for each part
      * @return mixed associative array containing one data set or an error message, if instantiation failed
      */
-    protected static function fetch_one_instance($parsedrandomvars, $globalvars, $localvars, $answers) {
-        $vars = new variables();
-        $noparts = count($answers);
+    protected static function fetch_one_instance($context, $parsedglobalvars, $parsedlocalvars, $parsedanswers) {
+        $noparts = count($parsedanswers);
+        $evaluator = new evaluator($context);
+
         try {
-            $instantiatedrandomvars = $vars->instantiate_random_variables($parsedrandomvars);
-            $evaluatedglobalvars = $vars->evaluate_assignments($instantiatedrandomvars, $globalvars);
-            $evaluatedlocalvars = array();
-            $evaluatedanswers = array();
+            $evaluator->instantiate_random_variables(null);
+            $randomvars = self::variable_context_to_array($evaluator->export_variable_context());
+
+            $evaluator->evaluate($parsedglobalvars);
+            $globalvars = self::variable_context_to_array($evaluator->export_variable_context());
+
+            $localvars = [];
+            $answers = [];
             for ($i = 0; $i < $noparts; $i++) {
-                $evaluatedlocalvars[$i] = $vars->evaluate_assignments($evaluatedglobalvars, $localvars[$i]);
-                $evaluatedanswers[$i] = $vars->evaluate_general_expression($evaluatedlocalvars[$i], $answers[$i]);
+                // Clone the global evaluator. We do not need to keep it beyond the evaluations for
+                // the part.
+                $partevaluator = clone $evaluator;
+                // Only evaluate the local variable definitions if there are any.
+                if (isset($parsedlocalvars[$i])) {
+                    $partevaluator->evaluate($parsedlocalvars[$i]);
+                }
+                $localvars[$i] = self::variable_context_to_array($partevaluator->export_variable_context());
+                // Finally, evaluate the answer(s).
+                $answers[$i] = $partevaluator->evaluate($parsedanswers[$i])[0];
             }
         } catch (Exception $e) {
             return $e->getMessage();
         }
 
-        $row = array('randomvars' => array(), 'globalvars' => array(), 'parts' => array());
-        foreach ($instantiatedrandomvars->all as $name => $value) {
-            $row['randomvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
+        $row = ['randomvars' => [], 'globalvars' => [], 'parts' => []];
+        foreach ($randomvars as $name => $variable) {
+            $row['randomvars'][] = ['name' => $name, 'value' => self::stringify($variable->value)];
         }
-        $filteredglobalvars = self::remove_duplicated_variables($evaluatedglobalvars->all, $instantiatedrandomvars->all);
-        foreach ($filteredglobalvars as $name => $value) {
-            if (is_object($value->value)) {
-                $row['globalvars'][] = array('name' => $name, 'value' => "{{$name}}");
+        // Global variables might overwrite random variables. We mark those with a symbol.
+        $filteredglobalvars = self::remove_duplicated_variables($globalvars, $randomvars);
+        foreach ($filteredglobalvars as $name => $variable) {
+            // If the variable has type SET, it is an algebraic variable. We only output its name
+            // in curly braces to make that clear. For other variables, we put the value.
+            if ($variable->type === variable::ALGEBRAIC) {
+                $printname = str_replace('*', '', $name);
+                $row['globalvars'][] = ['name' => $name, 'value' => "{{$printname}}"];
             } else {
-                $row['globalvars'][] = array('name' => $name, 'value' => self::stringify($value->value));
+                $row['globalvars'][] = ['name' => $name, 'value' => self::stringify($variable->value)];
             }
         }
         for ($i = 0; $i < $noparts; $i++) {
-            $filteredlocalvars = self::remove_duplicated_variables($evaluatedlocalvars[$i]->all, $evaluatedglobalvars->all);
-            $row['parts'][$i] = array();
-            foreach ($filteredlocalvars as $name => $value) {
-                if (is_object($value->value)) {
-                    $row['parts'][$i][] = array('name' => $name, 'value' => "{{$name}}");
+            $filteredlocalvars = self::remove_duplicated_variables($localvars[$i], $globalvars);
+            $row['parts'][$i] = [];
+            foreach ($filteredlocalvars as $name => $variable) {
+                // If the variable has type SET, it is an algebraic variable. We only output its name
+                // in curly braces to make that clear. For other variables, we put the value.
+                if ($variable->type === variable::ALGEBRAIC) {
+                    $printname = str_replace('*', '', $name);
+                    $row['parts'][$i][] = ['name' => $name, 'value' => "{{$printname}}"];
                 } else {
-                    $row['parts'][$i][] = array('name' => $name, 'value' => $value->value);
+                    $row['parts'][$i][] = ['name' => $name, 'value' => self::stringify($variable->value)];
                 }
             }
-            // This should not happen.
-            if (is_object(($evaluatedanswers[$i]->value))) {
-                $row['parts'][$i][] = array('name' => '_0', 'value' => '!!!');
-                break;
-            }
-            if (is_scalar($evaluatedanswers[$i]->value)) {
-                $row['parts'][$i][] = array('name' => '_0', 'value' => $evaluatedanswers[$i]->value);
+            // If the value is a scalar, that means the part has only one answer and it is _0.
+            if (is_scalar($answers[$i]->value)) {
+                $row['parts'][$i][] = ['name' => '_0', 'value' => $answers[$i]->value];
                 continue;
             }
-            foreach ($evaluatedanswers[$i]->value as $idx => $value) {
-                $row['parts'][$i][] = array('name' => '_' . $idx, 'value' => $value);
+            // Otherwise, there are multiple answers from _0 to _n.
+            foreach ($answers[$i]->value as $index => $token) {
+                $row['parts'][$i][] = ['name' => "_{$index}", 'value' => self::stringify($token->value)];
             }
         }
 
@@ -148,22 +189,20 @@ class instantiation extends \external_api {
 
     /**
      * Description of the parameters for the external function 'instantiate'
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function instantiate_parameters() {
-        return new \external_function_parameters(
-            array(
-                'n' => new \external_value(PARAM_INT, 'number of data sets', VALUE_DEFAULT, 1),
-                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_REQUIRED),
-                'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_REQUIRED),
-                'localvars' => new \external_multiple_structure(
-                    new \external_value(PARAM_RAW, 'local variables, per part', VALUE_REQUIRED)
-                ),
-                'answers' => new \external_multiple_structure(
-                    new \external_value(PARAM_RAW, 'answers, per part', VALUE_REQUIRED)
-                )
-            )
-        );
+        return new \external_function_parameters([
+            'n' => new \external_value(PARAM_INT, 'number of data sets', VALUE_DEFAULT, 1),
+            'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_REQUIRED),
+            'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_REQUIRED),
+            'localvars' => new \external_multiple_structure(
+                new \external_value(PARAM_RAW, 'local variables, per part', VALUE_REQUIRED)
+            ),
+            'answers' => new \external_multiple_structure(
+                new \external_value(PARAM_RAW, 'answers, per part', VALUE_REQUIRED)
+            ),
+        ]);
     }
 
     /**
@@ -177,44 +216,59 @@ class instantiation extends \external_api {
      * @return mixed associative array containing the datasets, or an error message if instantiation failed
      */
     public static function instantiate($n, $randomvars, $globalvars, $localvars, $answers) {
-        $params = self::validate_parameters(self::instantiate_parameters(),
-                array(
-                    'n' => $n,
-                    'randomvars' => $randomvars,
-                    'globalvars' => $globalvars,
-                    'localvars' => $localvars,
-                    'answers' => $answers
-                )
-            );
+        $params = self::validate_parameters(
+            self::instantiate_parameters(),
+            ['n' => $n, 'randomvars' => $randomvars, 'globalvars' => $globalvars, 'localvars' => $localvars, 'answers' => $answers]
+        );
 
-        // First, we check whether the variables can be parsed and interpreted.
-        // We store the parsed random variables for better performance.
-        $vars = new variables();
-        $parsedrandomvars = null;
-        $noparts = count($answers);
+        // First, we check whether the variables can be parsed and we prepare an evaluator context
+        // containing the random variables for (probably very very) slightly better performance.
+        $noparts = count($params['answers']);
         try {
-            $parsedrandomvars = $vars->parse_random_variables($randomvars);
-            $instantiatedrandomvars = $vars->instantiate_random_variables($parsedrandomvars);
-            $evaluatedglobalvars = $vars->evaluate_assignments($instantiatedrandomvars, $globalvars);
-            $evaluatedlocalvars = array();
-            $evaluatedanswers = array();
+            $randomparser = new random_parser($params['randomvars']);
+            $evaluator = new evaluator();
+            $evaluator->evaluate($randomparser->get_statements());
+            $randomcontext = $evaluator->export_variable_context();
+
+            // When initializing the parser, use the known vars from the random parser.
+            $globalparser = new parser($params['globalvars'], $randomparser->export_known_variables());
+            $parsedglobalvars = $globalparser->get_statements();
+
+            $parsedlocalvars = [];
+            $parsedanswers = [];
             for ($i = 0; $i < $noparts; $i++) {
-                $evaluatedlocalvars[$i] = $vars->evaluate_assignments($evaluatedglobalvars, $localvars[$i]);
-                $evaluatedanswers[$i] = $vars->evaluate_general_expression($evaluatedlocalvars[$i], $answers[$i]);
+                // Get the known vars from the global parser and save them as a fallback.
+                $knownvars = $globalparser->export_known_variables();
+                if (!empty($params['localvars'][$i])) {
+                    // For each part parser, use the known vars from the global parser.
+                    $parser = new parser($params['localvars'][$i], $knownvars);
+                    $parsedlocalvars[$i] = $parser->get_statements();
+
+                    // If we are here, that means there are local variables. So we update the
+                    // list of known vars.
+                    $knownvars = $parser->export_known_variables();
+                }
+
+                // Initialize the answer parser using the known variables, either just the global ones
+                // or global plus local vars.
+                $parser = new parser($params['answers'][$i], $knownvars);
+                $parsedanswers[$i] = $parser->get_statements();
             }
         } catch (Exception $e) {
+            // If parsing failed, we leave now.
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
         // If requested number is -1, we try to instantiate all possible combinations, but not more than 1000.
+        $n = $params['n'];
         if ($n == -1) {
-            $n = min(1000, $vars->vstack_get_number_of_dataset_with_shuffle($parsedrandomvars));
+            $n = min(1000, $evaluator->get_number_of_variants());
         }
 
-        // All clear, we can now generate instances.
-        $data = array();
+        // All clear, we can now start to generate instances.
+        $data = [];
         for ($i = 0; $i < $n; $i++) {
-            $result = self::fetch_one_instance($parsedrandomvars, $globalvars, $localvars, $answers);
+            $result = self::fetch_one_instance($randomcontext, $parsedglobalvars, $parsedlocalvars, $parsedanswers);
             if (gettype($result) == 'string') {
                 return ['status' => 'error', 'message' => $result];
             }
@@ -229,28 +283,29 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function instantiate_returns() {
-        return new \external_single_structure(array(
+        return new \external_single_structure([
             'status' => new \external_value(PARAM_TEXT, 'status', VALUE_REQUIRED),
             'message' => new \external_value(PARAM_TEXT, 'error message, if failed', VALUE_OPTIONAL),
             'data' => new \external_multiple_structure(
-                new \external_single_structure(array(
+                new \external_single_structure([
                     'randomvars' => new \external_multiple_structure(
                         new \external_single_structure(
-                            array(
+                            [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
-                            ),
+                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                            ],
                             'description of each random variable',
-                            VALUE_REQUIRED),
+                            VALUE_REQUIRED
+                        ),
                         'list of random variables',
                         VALUE_REQUIRED
                     ),
                     'globalvars' => new \external_multiple_structure(
                         new \external_single_structure(
-                            array(
+                            [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
-                            ),
+                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                            ],
                             'description of each global variable',
                             VALUE_REQUIRED
                         ),
@@ -260,10 +315,10 @@ class instantiation extends \external_api {
                     'parts' => new \external_multiple_structure(
                         new \external_multiple_structure(
                             new \external_single_structure(
-                                array(
+                                [
                                     'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                    'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED)
-                                )
+                                    'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                                ]
                             ),
                             'list of variables for the corresponding part',
                             VALUE_REQUIRED
@@ -271,24 +326,22 @@ class instantiation extends \external_api {
                         'list of parts',
                         VALUE_REQUIRED
                     ),
-                )
+                ]
             ),
             'data, if successful',
             VALUE_OPTIONAL
-        )));
+        )]);
     }
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function check_random_global_vars_parameters() {
-        return new \external_function_parameters(
-            array(
-                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
-                'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, '')
-            )
-        );
+        return new \external_function_parameters([
+            'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
+            'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
+        ]);
     }
 
     /**
@@ -301,34 +354,31 @@ class instantiation extends \external_api {
      * @return string error message (if any) or empty string (if definitions are valid)
      */
     public static function check_random_global_vars($randomvars, $globalvars) {
-        $params = self::validate_parameters(self::check_random_global_vars_parameters(),
-                array(
-                    'randomvars' => $randomvars,
-                    'globalvars' => $globalvars
-                )
-            );
+        $params = self::validate_parameters(
+            self::check_random_global_vars_parameters(),
+            ['randomvars' => $randomvars, 'globalvars' => $globalvars]
+        );
 
-        $vars = new variables();
         // Evaluation of global variables can fail, because there is an error in the random
         // variables. In order to know that, we need to have two separate try-catch constructions.
         try {
-            $stack = $vars->parse_random_variables($randomvars);
+            $randomparser = new random_parser($params['randomvars']);
+            $evaluator = new evaluator();
+            $evaluator->evaluate($randomparser->get_statements());
         } catch (Exception $e) {
-            return array(
-                'source' => 'random',
-                'message' => $e->getMessage()
-            );
+            return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $vars->evaluate_assignments($vars->instantiate_random_variables($stack), $globalvars);
+            // Initialize the parser, taking into account the vars that are known after evaluation of
+            // random variables assignments.
+            $globalparser = new parser($params['globalvars'], $evaluator->export_variable_list());
+            $evaluator->instantiate_random_variables();
+            $evaluator->evaluate($globalparser->get_statements());
         } catch (Exception $e) {
-            return array(
-                'source' => 'global',
-                'message' => $e->getMessage()
-            );
+            return ['source' => 'global', 'message' => $e->getMessage()];
         }
 
-        return array('source' => '', 'message' => '');
+        return ['source' => '', 'message' => ''];
     }
 
     /**
@@ -336,24 +386,22 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function check_random_global_vars_returns() {
-        return new \external_single_structure(array(
+        return new \external_single_structure([
             'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
-            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
-        ));
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message'),
+        ]);
     }
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function check_local_vars_parameters() {
-        return new \external_function_parameters(
-            array(
-                'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
-                'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
-                'localvars' => new \external_value(PARAM_RAW, 'local variables', VALUE_DEFAULT, '')
-            )
-        );
+        return new \external_function_parameters([
+            'randomvars' => new \external_value(PARAM_RAW, 'random variables', VALUE_DEFAULT, ''),
+            'globalvars' => new \external_value(PARAM_RAW, 'global variables', VALUE_DEFAULT, ''),
+            'localvars' => new \external_value(PARAM_RAW, 'local variables', VALUE_DEFAULT, ''),
+        ]);
     }
 
     /**
@@ -366,43 +414,39 @@ class instantiation extends \external_api {
      * @return string error message (if any) or empty string (if definitions are valid)
      */
     public static function check_local_vars($randomvars, $globalvars, $localvars) {
-        $params = self::validate_parameters(self::check_local_vars_parameters(),
-                array(
-                    'randomvars' => $randomvars,
-                    'globalvars' => $globalvars,
-                    'localvars' => $localvars
-                )
-            );
+        $params = self::validate_parameters(
+            self::check_local_vars_parameters(),
+            ['randomvars' => $randomvars, 'globalvars' => $globalvars, 'localvars' => $localvars]
+        );
 
-        $vars = new variables();
         // Evaluation of global variables can fail, because there is an error in the random
-        // variables. In order to know that, we need to have three separate try-catch constructions.
+        // variables. In order to know that, we need to have two separate try-catch constructions.
         try {
-            $stack = $vars->parse_random_variables($randomvars);
+            $randomparser = new random_parser($params['randomvars']);
+            $evaluator = new evaluator();
+            $evaluator->evaluate($randomparser->get_statements());
         } catch (Exception $e) {
-            return array(
-                'source' => 'random',
-                'message' => $e->getMessage()
-            );
+            return ['source' => 'random', 'message' => $e->getMessage()];
         }
         try {
-            $evaluatedglobalvars = $vars->evaluate_assignments($vars->instantiate_random_variables($stack), $globalvars);
+            // Initialize the parser, taking into account the vars that are known after evaluation of
+            // random variables assignments.
+            $parser = new parser($params['globalvars'], $evaluator->export_variable_list());
+            $evaluator->instantiate_random_variables();
+            $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
-            return array(
-                'source' => 'global',
-                'message' => $e->getMessage()
-            );
+            return ['source' => 'global', 'message' => $e->getMessage()];
         }
         try {
-            $vars->evaluate_assignments($evaluatedglobalvars, $localvars);
+            // Initialize the local variable parser, taking into account all vars that have been created
+            // by random or global vars assignments.
+            $parser = new parser($params['localvars'], $evaluator->export_variable_list());
+            $evaluator->evaluate($parser->get_statements());
         } catch (Exception $e) {
-            return array(
-                'source' => 'local',
-                'message' => $e->getMessage()
-            );
-            return $e->getMessage();
+            return ['source' => 'local', 'message' => $e->getMessage()];
         }
-        return array('source' => '', 'message' => '');
+
+        return ['source' => '', 'message' => ''];
     }
 
     /**
@@ -410,34 +454,32 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function check_local_vars_returns() {
-        return new \external_single_structure(array(
+        return new \external_single_structure([
             'source' => new \external_value(PARAM_RAW, 'source of the error or empty string'),
-            'message' => new \external_value(PARAM_RAW, 'empty string or error message')
-        ));
+            'message' => new \external_value(PARAM_RAW, 'empty string or error message'),
+        ]);
     }
 
     /**
      * Returns description of method parameters
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function render_question_text_parameters() {
-        return new \external_function_parameters(
-            array(
-                'questiontext' => new \external_value(PARAM_RAW, 'question text with placeholders', VALUE_REQUIRED),
-                'parttexts' => new \external_multiple_structure(
-                    new \external_value(PARAM_RAW, 'text for each part', VALUE_REQUIRED)
-                ),
-                'globalvars' => new \external_value(
-                    PARAM_RAW,
-                    'definition for global (and instantiated random) variables',
-                    VALUE_DEFAULT,
-                    ''
-                ),
-                'partvars' => new \external_multiple_structure(
-                    new \external_value(PARAM_RAW, 'definition for part\'s local variables', VALUE_DEFAULT, '')
-                )
-            )
-        );
+        return new \external_function_parameters([
+            'questiontext' => new \external_value(PARAM_RAW, 'question text with placeholders', VALUE_REQUIRED),
+            'parttexts' => new \external_multiple_structure(
+                new \external_value(PARAM_RAW, 'text for each part', VALUE_REQUIRED)
+            ),
+            'globalvars' => new \external_value(
+                PARAM_RAW,
+                'definition for global (and instantiated random) variables',
+                VALUE_DEFAULT,
+                ''
+            ),
+            'partvars' => new \external_multiple_structure(
+                new \external_value(PARAM_RAW, 'definition for part\'s local variables', VALUE_DEFAULT, '')
+            ),
+        ]);
     }
 
     /**
@@ -453,30 +495,47 @@ class instantiation extends \external_api {
      * @return array associative array with the rendered question text and array of parts' texts
      */
     public static function render_question_text($questiontext, $parttexts, $globalvars, $partvars) {
-        $vars = new variables();
-        $stack = $vars->vstack_create();
+        $params = self::validate_parameters(
+            self::render_question_text_parameters(),
+            ['questiontext' => $questiontext, 'parttexts' => $parttexts, 'globalvars' => $globalvars, 'partvars' => $partvars]
+        );
+
+        $evaluator = new evaluator();
+
         // First prepare the main question text.
         try {
-            $evaluatedglobalvars = $vars->evaluate_assignments($stack, $globalvars);
+            // In this case, we do not start by parsing and evaluating random vars. Instead, the random vars
+            // are already instantiated and are treated like normal global vars. Therefore, we do not need
+            // to use known vars upon initialisation of the parser.
+            $parser = new parser($params['globalvars']);
+            $evaluator->evaluate($parser->get_statements());
+            $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
         } catch (Exception $e) {
-            return array(
+            return [
                 'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
-                'parts' => array()
-            );
+                'parts' => [],
+            ];
         }
-        $renderedquestion = $vars->substitute_variables_in_text($evaluatedglobalvars, $questiontext);
 
-        $renderedparts = array();
-        foreach ($partvars as $i => $partvar) {
+        $renderedparttexts = [];
+        foreach ($params['partvars'] as $i => $partvar) {
             try {
-                $evaluatedpartvars = $vars->evaluate_assignments($evaluatedglobalvars, $partvar);
-                $renderedparts[$i] = $vars->substitute_variables_in_text($evaluatedpartvars, $parttexts[$i]);
+                $partevaluator = clone $evaluator;
+                // Initialize the parser for each part's local variables, taking into account
+                // the (global and instantiated random) variables known so far.
+                $parser = new parser($partvar, $partevaluator->export_variable_list());
+                $partevaluator->evaluate($parser->get_statements());
+
+                $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($params['parttexts'][$i]);
             } catch (Exception $e) {
-                $renderedparts[$i] = $e->getMessage();
+                return [
+                    'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                    'parts' => [],
+                ];
             }
         }
 
-        return array('question' => $renderedquestion, 'parts' => $renderedparts);
+        return ['question' => $renderedquestiontext, 'parts' => $renderedparttexts];
     }
 
     /**
@@ -484,14 +543,13 @@ class instantiation extends \external_api {
      * @return external_description
      */
     public static function render_question_text_returns() {
-        return new \external_single_structure(array(
+        return new \external_single_structure([
             'question' => new \external_value(PARAM_RAW, 'rendered question text', VALUE_REQUIRED),
             'parts' => new \external_multiple_structure(
                 new \external_value(PARAM_RAW, 'rendered part text', VALUE_REQUIRED),
                 'array of rendered part texts',
                 VALUE_REQUIRED
-            )
-        ));
-        return new \external_value(PARAM_RAW, 'question text with placeholders replaced by their values');
+            ),
+        ]);
     }
 }
