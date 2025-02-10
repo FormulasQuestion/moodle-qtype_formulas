@@ -17,13 +17,12 @@
 /**
  * Formulas question type upgrade code.
  *
+ * This file keeps track of upgrades to the formulas qtype plugin.
+ *
  * @package    qtype_formulas
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// This file keeps track of upgrades to
-// the formulas qtype plugin.
 function xmldb_qtype_formulas_upgrade($oldversion=0) {
     global $DB, $CFG;
 
@@ -227,12 +226,18 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
 
     if ($oldversion < 2012071407) {
         // Get all formulas questions.
-        $questions = $DB->get_records('question',
-                array('qtype' => 'formulas'), 'id');
+        $questions = $DB->get_records(
+            'question',
+            ['qtype' => 'formulas'],
+            'id'
+        );
         foreach ($questions as $question) {
             $anscount = 0;
-            $rs = $DB->get_recordset('qtype_formulas_answers', array('questionid' => $question->id),
-                   'id');
+            $rs = $DB->get_recordset(
+                'qtype_formulas_answers',
+                ['questionid' => $question->id],
+                'id'
+            );
             foreach ($rs as $record) {
                 $record->partindex = $anscount;
                 $DB->update_record('qtype_formulas_answers', $record);
@@ -363,7 +368,7 @@ function xmldb_qtype_formulas_upgrade($oldversion=0) {
         // Import from xml code was wrong for answernumbering,
         // There was also a typo in the upgrade code.
         // Fix all broken questions in database.
-        $DB->set_field('qtype_formulas_options', 'answernumbering', 'none', array('answernumbering' => ''));
+        $DB->set_field('qtype_formulas_options', 'answernumbering', 'none', ['answernumbering' => '']);
 
         // Formulas savepoint reached.
         upgrade_plugin_savepoint(true, 2018080300, 'qtype', 'formulas');
