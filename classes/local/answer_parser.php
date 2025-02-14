@@ -86,6 +86,9 @@ class answer_parser extends parser {
         if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
             return $this->is_acceptable_algebraic_formula();
         }
+
+        // If an invalid answer type has been specified, we simply return false.
+        return false;
     }
 
     /**
