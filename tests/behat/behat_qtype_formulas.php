@@ -27,27 +27,19 @@ require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
 class behat_qtype_formulas extends behat_base {
 
     /**
-     * Return the list of partial named selectors.
+     * Return the list of exact named selectors.
      *
      * @return array
      */
-    public static function get_partial_named_selectors(): array {
+    public static function get_exact_named_selectors(): array {
         return [
             new behat_component_named_selector(
-                'Validation Warning Symbol',
-                ["//img[@class='formulas_input_warning'][contains(@style,'display: block')]"]
+                'Visible Validation Warning Symbol',
+                ["//span[@class='fa fa-exclamation-circle formulas_input_warning'][contains(@title, %locator%)][contains(@style, 'visible')]"]
             ),
             new behat_component_named_selector(
-                'Invisible Validation Warning Symbol',
-                ["//img[@class='formulas_input_warning'][contains(@style,'display: none')]"]
-            ),
-            new behat_component_named_selector(
-                'Validation Unit Tests Error Indicator',
-                ["//span[@id='validation-unittests-failed']"]
-            ),
-            new behat_component_named_selector(
-                'Validation Unit Tests Error Indicator',
-                ["//span[@id='validation-unittests-failed']"]
+                'Hidden Validation Warning Symbol',
+                ["//span[@class='fa fa-exclamation-circle formulas_input_warning'][contains(@title, %locator%)][not(contains(@style, 'visible'))]"]
             ),
         ];
     }

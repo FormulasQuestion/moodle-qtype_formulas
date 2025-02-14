@@ -49,6 +49,11 @@ export const init = () => {
             continue;
         }
 
+        // Also, we do not validate unit fields.
+        if (input.dataset.answertype == 'unit') {
+            continue;
+        }
+
         // Attach event listener for the input event.
         input.addEventListener('input', setDebounceTimer);
     }

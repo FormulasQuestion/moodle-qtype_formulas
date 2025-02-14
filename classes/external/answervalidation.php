@@ -27,11 +27,6 @@ namespace qtype_formulas\external;
 
 use Exception;
 use qtype_formulas\local\answer_parser;
-use qtype_formulas;
-use qtype_formulas\local\evaluator;
-use qtype_formulas\local\random_parser;
-use qtype_formulas\local\token;
-use qtype_formulas\local\variable;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -84,7 +79,6 @@ class answervalidation extends \external_api {
         if ($params['withunit']) {
             $splitindex = $parser->find_start_of_units();
             $number = trim(substr($answer, 0, $splitindex));
-            $unit = trim(substr($answer, $splitindex));
 
             $parser = new answer_parser($number);
         }
