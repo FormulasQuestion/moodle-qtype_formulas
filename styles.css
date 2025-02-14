@@ -1,14 +1,8 @@
-.que.formulas .formulas_input_warning_outer {
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
 .que.formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.6em;
+    margin-left: -20px;
+    position: relative;
+    visibility: hidden;
+    color: red;
 }
 
 .que.formulas .formulas_input_info_outer {
@@ -143,19 +137,6 @@
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
-}
-
-body#page-question-type-formulas .formulas_input_warning_outer {
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
-body#page-question-type-formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.6em;
 }
 
 body#page-question-type-formulas .formulas_input_info_outer {
