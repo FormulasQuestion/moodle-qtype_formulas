@@ -246,8 +246,8 @@ class answer_parser extends parser {
         ];
         $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
         foreach ($answertokens as $token) {
-            // Cut short, if it is a NUMBER token.
-            if ($token->type === token::NUMBER) {
+            // Cut short, if it is a NUMBER or CONSTANT token.
+            if (in_array($token->type, [token::NUMBER, token::CONSTANT])) {
                 continue;
             }
             if ($token->type === token::VARIABLE) {
@@ -310,7 +310,7 @@ class answer_parser extends parser {
         // should be only one single element on the stack.
         $stack = [];
         foreach ($tokens as $token) {
-            if (in_array($token->type, [token::STRING, token::NUMBER, token::VARIABLE])) {
+            if (in_array($token->type, [token::STRING, token::NUMBER, token::VARIABLE, token::CONSTANT])) {
                 $stack[] = $token->value;
             }
             if ($token->type === token::OPERATOR) {
