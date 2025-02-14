@@ -94,6 +94,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function head_code(question_attempt $qa) {
         global $CFG;
+        $this->page->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
 
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
@@ -274,6 +275,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $title = get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas');
             $inputattributes = [
                 'type' => 'text',
+                'data-answertype' => $part->answertype,
+                'data-withunit' => '1',
                 'name' => $inputname,
                 'data-toggle' => 'tooltip',
                 'data-title' => $title,
@@ -307,6 +310,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 ]
             );
             $input .= html_writer::empty_tag('input', $inputattributes);
+            $input .= html_writer::span('', 'fa fa-exclamation-circle formulas_input_warning', [
+                'id' => 'warning-' . $inputattributes['id'],
+                'role' => 'img',
+                'aria-label' => 'warning FIXME',
+                'title' => 'warning FIXME',
+            ]);
             $subqreplaced = str_replace("{_0}{_u}", $input, $subqreplaced);
         }
 
@@ -461,6 +470,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $inputattributes['data-toggle'] = 'tooltip';
                 $inputattributes['data-title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
+                $inputattributes['data-answertype'] = $part->answertype;
+                $inputattributes['data-withunit'] = 0;
                 $a = new stdClass();
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;
@@ -487,6 +498,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     ]
                 );
                 $inputs[$placeholder] .= html_writer::empty_tag('input', $inputattributes);
+                $inputs[$placeholder] .= html_writer::span('', 'fa fa-exclamation-circle formulas_input_warning', [
+                    'id' => 'warning-' . $inputattributes['id'],
+                    'role' => 'img',
+                    'aria-label' => 'warning FIXME',
+                    'title' => 'warning FIXME',
+                ]);
             }
         }
 
