@@ -620,7 +620,7 @@ function formulas_format_check() {
             var warning = document.createElement('span');
             warning.className = 'formulas_input_warning_outer';
             warning.appendChild(warning_inner);
-            input.parentNode.insertBefore(warning, input.nextSibling);
+            //input.parentNode.insertBefore(warning, input.nextSibling);
 
             var info_inner = document.createElement('div');
             info_inner.className = 'formulas_input_info';

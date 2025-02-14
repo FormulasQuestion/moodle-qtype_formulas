@@ -25,16 +25,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-$plugin->version = 2024100701;
+$plugin->version = 2024100702;
 
-$plugin->cron = 0;
-$plugin->requires = 2017111300;
-$plugin->dependencies = array(
+$plugin->cron      = 0;
+$plugin->requires  = 2022112800;
+$plugin->dependencies = [
     'qbehaviour_adaptive' => 2015111600,
     'qbehaviour_adaptivemultipart' => 2014092500,
     'qtype_multichoice' => 2015111600,
-);
-$plugin->supported = [39, 405];
-$plugin->release = '5.3.4.post0 for Moodle 3.9+';
+];
+$plugin->supported = [401, 405];
+$plugin->release = '6.0.0 for Moodle 4.1+';
 
 $plugin->maturity = MATURITY_STABLE;
