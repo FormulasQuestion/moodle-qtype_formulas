@@ -26,9 +26,7 @@ function formulas_format_check() {
     var use_format_check = true;    // If it is set to false, no format check will be used and initialized.
     var show_hinting_type = null;   // Show the type hinting under the input box, such as 'Number', 'Unit'. null means use the individual setting in variable types below.
     var show_interpretation = null;   // Show the interpretation of the formula under the input box. null means use the individual setting in variable types below.
-    var show_warning = null;   // Show the warning sign if the input is wrong/not interpretable. null means use the individual setting in variable types below.
-    var unittest_fail_show_icon = false; // Show an icon at the low right corner if the format check testing fails
-    var unittest_fail_show_details = false;  // Show the detail test case that it fails.
+    var show_warning = false;   // Show the warning sign if the input is wrong/not interpretable. null means use the individual setting in variable types below.
 
     // The following variable can fine control the information for each type in addition to the variable defined above
     // So, if the type name is commented out here, the corresponding format checking will be disabled
@@ -593,6 +591,8 @@ function formulas_format_check() {
             if (input.name.indexOf('postunit') == 0) {
                 input.classList.add('formulas_editing_unit');
                 input.title = M.util.get_string('unit', 'qtype_formulas');
+            } else {
+                continue;
             }
             var type = classify(input.className, types);
 
@@ -620,7 +620,7 @@ function formulas_format_check() {
             var warning = document.createElement('span');
             warning.className = 'formulas_input_warning_outer';
             warning.appendChild(warning_inner);
-            //input.parentNode.insertBefore(warning, input.nextSibling);
+            input.parentNode.insertBefore(warning, input.nextSibling);
 
             var info_inner = document.createElement('div');
             info_inner.className = 'formulas_input_info';
@@ -910,6 +910,7 @@ function formulas_format_check() {
     };
 
     function signal_fail(common) {
+        return; // FIXME
         var warning = document.createElement('span');
         warning.id = 'validation-unittests-failed';
         if (unittest_fail_show_icon) {

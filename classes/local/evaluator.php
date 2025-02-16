@@ -1129,7 +1129,7 @@ class evaluator {
      * @param token $token
      * @return bool
      */
-    private function is_binary_operator(token $token): bool {
+    public static function is_binary_operator(token $token): bool {
         $binaryoperators = ['=', '**', '*', '/', '%', '+', '-', '<<', '>>', '&', '^',
             '|', '&&', '||', '<', '>', '==', '>=', '<=', '!='];
 

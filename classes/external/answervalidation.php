@@ -80,7 +80,11 @@ class answervalidation extends \external_api {
             $splitindex = $parser->find_start_of_units();
             $number = trim(substr($answer, 0, $splitindex));
 
-            $parser = new answer_parser($number);
+            try {
+                $parser = new answer_parser($number);
+            } catch (Exception $e) {
+                return false;
+            }
         }
 
         return $parser->is_acceptable_for_answertype($answertype);

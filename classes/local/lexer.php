@@ -190,7 +190,8 @@ class lexer {
             if ($nextchar === '.') {
                 // A decimal point is only valid, if we don't have one yet and if we are in the mantissa.
                 if ($hascomma || $hasexponent) {
-                    break;
+                    $this->inputstream->read();
+                    $this->inputstream->die(get_string('error_unexpectedinput', 'qtype_formulas', $nextchar));
                 }
                 // Keep track that we do now have a decimal point in the number.
                 $hascomma = true;
@@ -222,7 +223,17 @@ class lexer {
             $currentchar = $this->inputstream->read();
             $result .= $currentchar;
         }
-        return new token(token::NUMBER, floatval($result), $startingposition['row'], $startingposition['column']);
+        // If the number is written in scientific notation (e. g. 1.25e3 or 5e-4), we store that information
+        // separately in the token's metadata.
+        $metadata = null;
+        if ($hasexponent) {
+            $split = explode('e', strtolower($result), 2);
+            $metadata = [
+                'mantissa' => floatval($split[0]),
+                'exponent' => intval($split[1]),
+            ];
+        };
+        return new token(token::NUMBER, floatval($result), $startingposition['row'], $startingposition['column'], $metadata);
     }
 
     /**

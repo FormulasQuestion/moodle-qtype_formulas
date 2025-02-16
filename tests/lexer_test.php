@@ -681,33 +681,45 @@ EOF;
      * cases involving numbers.
      */
     public function test_read_numbers_edge_cases(): void {
-        // Tokens: 5.127 (number) 0.3 (number) -> valid.
+        // Invalid, because there is already a decimal point.
         $input = '5.127.3';
-        $lexer = new lexer($input);
-        $expected = [
-            new token(token::NUMBER, 5.127, 1, 1),
-            new token(token::NUMBER, 0.3, 1, 6),
-        ];
-        self::assertEquals($expected, $lexer->get_tokens());
+        $error = '';
+        try {
+            new lexer($input);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+        self::assertEquals("1:6:Unexpected input: '.'", $error);
 
-        // Tokens: 5127 (number) 0.3 (number) -> valid.
+        // Invalid, because the exponent in scientific notation must be an integer.
         $input = '5.127e3.3';
-        $lexer = new lexer($input);
-        $expected = [
-            new token(token::NUMBER, 5127, 1, 1),
-            new token(token::NUMBER, 0.3, 1, 8),
-        ];
-        self::assertEquals($expected, $lexer->get_tokens());
+        $error = '';
+        try {
+            new lexer($input);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+        self::assertEquals("1:8:Unexpected input: '.'", $error);
 
-        $e = null;
         // Tokens: 5 (number), a2 (identifier), .b (invalid, unexpected .) -> fail.
         $input = '5.a2.b3.c4.d';
+        $error = '';
         try {
-            $lexer = new lexer($input);
+            new lexer($input);
         } catch (Exception $e) {
-            self::assertEquals("1:5:Unexpected input: '.'", $e->getMessage());
+            $error = $e->getMessage();
         }
-        self::assertNotNull($e);
+        self::assertEquals("1:5:Unexpected input: '.'", $error);
+
+        // Tokens: 5 (number), a2 (identifier), 2000 (number) with metadata.
+        $input = '5.a2 2.e3';
+        $lexer = new lexer($input);
+        $expectedtokens = [
+            new token(token::NUMBER, 5.0, 1, 1),
+            new token(token::IDENTIFIER, 'a2', 1, 3),
+            new token(token::NUMBER, 2000.0, 1, 6, ['mantissa' => 2.0, 'exponent' => 3]),
+        ];
+        self::assertEquals($expectedtokens, $lexer->get_tokens());
     }
 
     public function test_lexing_for_loop(): void {

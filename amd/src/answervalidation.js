@@ -25,6 +25,7 @@
 import * as Notification from 'core/notification';
 import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
+import {latexify} from 'qtype_formulas/latexify';
 
 /**
  * Array to store all pending timers, allowing to reset / cancel them.
@@ -80,17 +81,44 @@ const validateStudentAnswer = async(id) => {
         let validationResult = await fetchMany([{
             methodname: 'qtype_formulas_validate_student_answer',
             args: {
-                answer: field.value,
-                answertype: field.dataset.answertype,
-                withunit: field.dataset.withunit,
+                'answer': field.value,
+                'answertype': field.dataset.answertype,
+                'withunit': field.dataset.withunit,
             },
         }])[0];
         symbol.style.visibility = (validationResult ? 'hidden' : 'visible');
+        if (validationResult) {
+            let texcode = await latexify(field.value);
+            showMathJax(id, texcode);
+        }
     } catch (err) {
         Notification.exception(err);
     }
 
     pendingPromise.resolve();
+};
+
+const showMathJax = (id, texcode) => {
+    let field = document.getElementById(id);
+
+    let div = document.createElement('div');
+    div.className = 'formulas_input_info';
+    field.parentNode.insertBefore(div, field);
+
+    div.innerHTML = `\\( ${texcode} \\)`;
+
+    if (typeof window.MathJax === 'undefined') {
+        window.console.log('no mathjax');
+        return;
+    }
+    let version = window.MathJax.version;
+    if (version[0] == '2') {
+        window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, div]);
+        return;
+    }
+    if (version[0] == '3') {
+        window.MathJax.typesetPromise([div]);
+    }
 };
 
 /**

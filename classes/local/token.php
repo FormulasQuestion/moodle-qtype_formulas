@@ -123,8 +123,14 @@ class token {
     /** @var int used to designate a token storing an end-of-group marker (closing brace) */
     const END_GROUP = 4194304;
 
+    /** @var int used to designate a token storing a unit */
+    const UNIT = 8388608;
+
     /** @var mixed the token's content, will be the name for identifiers */
     public $value;
+
+    /** @var mixed additional information, e. g. the form how a number was entered */
+    public $metadata;
 
     /** @var int token type, e.g. number or string */
     public int $type;
@@ -142,9 +148,11 @@ class token {
      * @param mixed $value the value (e.g. name of identifier, string content, number value, operator)
      * @param int $row row where the token starts in the input stream
      * @param int $column column where the token starts in the input stream
+     * @param mixed $metadata additional information (e.g. the form how a number was entered)
      */
-    public function __construct(int $type, $value, int $row = -1, int $column = -1) {
+    public function __construct(int $type, $value, int $row = -1, int $column = -1, $metadata = null) {
         $this->value = $value;
+        $this->metadata = $metadata;
         $this->type = $type;
         $this->row = $row;
         $this->column = $column;
