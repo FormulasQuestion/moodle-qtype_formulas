@@ -30,7 +30,7 @@ class shunting_yard {
      * @param string $operator operator or function name
      * @return int
      */
-    private static function get_precedence(string $operator): int {
+    public static function get_precedence(string $operator): int {
         switch ($operator) {
             case '**':
                 return 160;
