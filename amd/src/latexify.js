@@ -33,20 +33,19 @@ import {call as fetchMany} from 'core/ajax';
  */
 const latexify = async(input) => {
     let pendingPromise = new Pending('qtype_formulas/latexify');
+    let texString = '';
     try {
-        let texString = await fetchMany([{
+        texString = await fetchMany([{
             methodname: 'qtype_formulas_latexify',
             args: {
                 'input': input,
             },
         }])[0];
-        return texString;
     } catch (err) {
         Notification.exception(err);
-        return '';
     }
-
     pendingPromise.resolve();
+    return texString;
 };
 
 export default {latexify};

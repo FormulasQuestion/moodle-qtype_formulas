@@ -26,6 +26,7 @@ import * as Notification from 'core/notification';
 import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
 import {latexify} from 'qtype_formulas/latexify';
+import {notifyFilterContentUpdated} from 'core_filters/events';
 
 /**
  * Array to store all pending timers, allowing to reset / cancel them.
@@ -102,23 +103,14 @@ const showMathJax = (id, texcode) => {
     let field = document.getElementById(id);
 
     let div = document.createElement('div');
-    div.className = 'formulas_input_info';
+    div.classList.add('formulas_input_info');
+    div.classList.add('filter_mathjaxloader_equation');
     field.parentNode.insertBefore(div, field);
 
     div.innerHTML = `\\( ${texcode} \\)`;
 
-    if (typeof window.MathJax === 'undefined') {
-        window.console.log('no mathjax');
-        return;
-    }
-    let version = window.MathJax.version;
-    if (version[0] == '2') {
-        window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, div]);
-        return;
-    }
-    if (version[0] == '3') {
-        window.MathJax.typesetPromise([div]);
-    }
+    // Tell the MathJax filter that we have added some content to be rendered.
+    notifyFilterContentUpdated(div.parentNode);
 };
 
 /**
