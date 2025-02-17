@@ -99,8 +99,9 @@ class latexifier {
                     $new = '\binom{' . $first['content'] . '}{' . $second['content'] . '}';
                 }
                 // The fact(), abs(), ceil() and floor() function are written by putting their single
-                // argument between delimiters.
-                if (in_array($funcname, ['fact', 'abs', 'ceil', 'floor'])) {
+                // argument between delimiters. Also, we use the same method for sqrt(), because it
+                // will be \sqrt{...} instead of \sqrt(...) in LaTeX.
+                if (in_array($funcname, ['sqrt', 'fact', 'abs', 'ceil', 'floor'])) {
                     $arg = array_pop($stack);
                     $new = self::build_onearg_wrapping_function($funcname, $arg);
                 }
@@ -131,13 +132,17 @@ class latexifier {
             $rdelim = '\right)';
         }
         switch ($function) {
+            case 'sqrt':
+                $ldelim = '\sqrt{';
+                $rdelim = '}';
+                break;
             case 'fact':
                 $ldelim = '';
                 $rdelim = '!';
                 break;
             case 'abs':
                 $ldelim = '\left|';
-                $rdelim = '\left|';
+                $rdelim = '\right|';
                 break;
             case 'ceil':
                 $ldelim = '\lceil';
@@ -171,8 +176,12 @@ class latexifier {
         }
 
         // Exponentiation is special, because the exponent has to be wrapped in braces, unless it
-        // consists of only one character.
+        // consists of only one character. Also, if the base is itself a power, it must be wrapped
+        // in braces.
         if ($operator === '**') {
+            if ($first['precedence'] == shunting_yard::get_precedence($operator)) {
+                $first['content'] = '\left(' . $first['content'] . '\right)';
+            }
             $second['content'] = '{' . $second['content'] . '}';
         }
 
@@ -239,7 +248,6 @@ class latexifier {
             case 'cosh':
             case 'sinh':
             case 'tanh':
-            case 'sqrt':
             case 'ln':
             case 'exp':
                 return '\\' . $funcname;

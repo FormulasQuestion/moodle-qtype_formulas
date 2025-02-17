@@ -58,6 +58,9 @@ export const init = () => {
 
         // Attach event listener for the input event.
         input.addEventListener('input', setDebounceTimer);
+
+        // FIXME: maybe add focus event to show rendered mathjax when the field gains focus again (if not empty)
+        // --> do not remove the div, but rather just hide it until we first use it for another field, then delete and recreate
     }
 };
 
@@ -91,26 +94,48 @@ const validateStudentAnswer = async(id) => {
         if (validationResult) {
             let texcode = await latexify(field.value);
             showMathJax(id, texcode);
+        } else {
+            removeDiv(null);
         }
     } catch (err) {
         Notification.exception(err);
     }
 
     pendingPromise.resolve();
+
+    // The event listener will not be added multiple times, because the handler is a named function.
+    // So we do not have to check whether we have already added it or not.
+    field.addEventListener('blur', removeDiv);
+};
+
+const removeDiv = (evt) => {
+    let div = document.getElementById('qtype_formulas_mathjax_display');
+    if (div !== null) {
+        div.remove();
+    }
+    if (evt !== null) {
+        evt.target.removeEventListener('blur', removeDiv, false);
+    }
 };
 
 const showMathJax = (id, texcode) => {
     let field = document.getElementById(id);
 
-    let div = document.createElement('div');
-    div.classList.add('formulas_input_info');
-    div.classList.add('filter_mathjaxloader_equation');
-    field.parentNode.insertBefore(div, field);
+    let div = document.getElementById('qtype_formulas_mathjax_display');
+    if (div === null) {
+        div = document.createElement('div');
+        div.id = 'qtype_formulas_mathjax_display';
+        div.classList.add('formulas_input_info');
+        div.classList.add('filter_mathjaxloader_equation');
+        field.parentNode.insertBefore(div, field);
+    }
 
-    div.innerHTML = `\\( ${texcode} \\)`;
+    div.innerText = `\\(\\displaystyle ${texcode} \\)`;
 
     // Tell the MathJax filter that we have added some content to be rendered.
     notifyFilterContentUpdated(div.parentNode);
+
+    return div;
 };
 
 /**

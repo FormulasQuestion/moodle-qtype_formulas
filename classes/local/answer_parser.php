@@ -335,6 +335,12 @@ class answer_parser extends parser {
             // by that element.
             if ($token->type === token::FUNCTION) {
                 $n = end($stack);
+                // If the top element on the stack was not a number, there must have been a syntax
+                // error. One case where this happens is a student's answer (parsed by answer_parser)
+                // of type algebraic formula that has a function name at the end, but no parens.
+                if (!is_numeric($n)) {
+                    return false;
+                }
                 $stack = array_slice($stack, 0, -$n);
             }
         }
