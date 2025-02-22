@@ -11,6 +11,16 @@
     z-index: 2;
 }
 
+.que.formulas div#qtype_formulas_mathjax_display {
+    background-color: #eef;
+    border: 1px solid #88c;
+    position: relative;
+    margin-left: 0px;
+    margin-top: 0px;
+    padding: 4px;
+    width: 150px;
+}
+
 .que.formulas .formulas_input_info {
     background-color: #eef;
     left: 0;
