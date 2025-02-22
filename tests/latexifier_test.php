@@ -55,6 +55,9 @@ final class latexifier_test extends \advanced_testcase {
         $input = '3 * sin(x^2)';
         $input = '3 * log(x^2, 7)';
         $input = '5.12e-3';
+        $input = 'sqrt(2)';
+        $input = '2^3(7+2)';
+        $input = '(2^3)^4';
         $parser = new answer_parser($input);
 
         var_dump(latexifier::latexify($parser->get_statements()[0]->body));

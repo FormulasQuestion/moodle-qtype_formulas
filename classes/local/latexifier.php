@@ -183,6 +183,7 @@ class latexifier {
                 $first['content'] = '\left(' . $first['content'] . '\right)';
             }
             $second['content'] = '{' . $second['content'] . '}';
+            return $first['content'] . self::translate_operator($operator) . $second['content'];
         }
 
         // If operator precedence is greater than precedence of argument, we need to wrap it in
@@ -252,7 +253,7 @@ class latexifier {
             case 'exp':
                 return '\\' . $funcname;
             case 'log10':
-                return '\log_{10}';
+                return '\lg';
             case 'atan2':
                 return '\mathrm{arctan2}';
             default:
