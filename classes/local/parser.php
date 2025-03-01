@@ -33,7 +33,7 @@ class parser {
     protected array $tokenlist;
 
     /** @var int number of (raw) tokens */
-    private int $count;
+    protected int $count;
 
     /** @var int position w.r.t. list of (raw) tokens */
     private int $position = -1;
@@ -98,7 +98,7 @@ class parser {
      *
      * @return void
      */
-    private function check_unbalanced_parens(): void {
+    protected function check_unbalanced_parens(): void {
         $parenstack = [];
         foreach ($this->tokenlist as $token) {
             $type = $token->type;
@@ -399,7 +399,7 @@ class parser {
      *
      * @return token|null
      */
-    private function read_next(): ?token {
+    protected function read_next(): ?token {
         $nexttoken = $this->peek();
         if ($nexttoken !== self::EOF) {
             $this->position++;
