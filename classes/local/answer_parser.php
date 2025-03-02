@@ -44,7 +44,6 @@ class answer_parser extends parser {
             $tokenlist = $lexer->get_tokens();
         }
 
-        $precededbyprefix = false;
         foreach ($tokenlist as $token) {
             // In the context of student answers, the caret (^) *always* means exponentiation (**) instead
             // of XOR. In model answers entered by the teacher, the caret *only* means exponentiation
@@ -55,27 +54,10 @@ class answer_parser extends parser {
                 }
             }
 
-            // Students are not allowed to use function names as variables, e.g. they cannot use a
-            // variable 'sin'. This is important, because teachers have that option and the regular
-            // parser will automatically consider 'sin' in the expression '3*sin x' as a variable,
-            // due to the missing parens. We want to avoid that, because it would conceal a syntax
-            // error. We make one exception: if the identifier has been labelled as a known variable,
-            // the token will be considered as a variable. This allows the teacher to use e.g. 'exp'
-            // as a unit name, if they want to.
-            if ($token->type === token::IDENTIFIER) {
-                if (in_array($token->value, $knownvariables) && !$precededbyprefix) {
-                    $token->type = token::VARIABLE;
-                } else if (array_key_exists($token->value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS)) {
-                    $token->type = token::FUNCTION;
-                }
-            }
-
             // Students are not allowed to use the PREFIX operator.
             if (!$formodelanswer && $token->type === token::PREFIX) {
                 $this->die(get_string('error_prefix', 'qtype_formulas'), $token);
             }
-
-            $precededbyprefix = ($token->type === token::PREFIX);
         }
 
         // Once this is done, we can parse the expression normally.
@@ -148,7 +130,7 @@ class answer_parser extends parser {
     /**
      * Check whether the given answer contains only valid tokens for the answer type NUMERIC, i. e.
      * - numbers
-     * - operators +, -, *, ** or ^
+     * - operators +, -, *, /, ** or ^
      * - round parens ( and )
      * - pi or pi() or π
      * - no functions
@@ -221,7 +203,7 @@ class answer_parser extends parser {
     /**
      * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
      * - everything allowed for numerical formulas
-     * - all functions and operators except assignment =
+     * - modulo operator %
      * - variables (TODO: maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @param bool $fornumericalformula whether we disallow the usage of variables and the PREFIX operator
@@ -252,6 +234,16 @@ class answer_parser extends parser {
             }
             if ($token->type === token::VARIABLE) {
                 if ($fornumericalformula) {
+                    return false;
+                }
+                // If a student writes 'sin 30', the token 'sin' will be classified as a variable,
+                // because it is not followed by parentheses. For all numerical answer types, this
+                // will invalidate the answer. Hence, the student will see a warning and can correct
+                // their answer to 'sin(30)', which is what they probably meant. However, in algebraic
+                // formulas, students are allowed to use variables, so the expression is syntactically
+                // valid and will be interpreted as 'sin*30' which is most certainly wrong. The
+                // following check will make sure that students do not use function names as variables.
+                if (in_array($token->value, $functionwhitelist)) {
                     return false;
                 }
                 /* TODO: maybe we should reject unknown variables, because that avoids mistakes
