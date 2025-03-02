@@ -239,8 +239,7 @@ class parser {
 
             // If the current token is a PREFIX and the next one is an IDENTIFIER, we will consider
             // that one as a FUNCTION. If the next token has already been classified as a function,
-            // there is nothing to do; this can happen if we are coming from an answer_parser subclass.
-            // Otherwise, this is a syntax error.
+            // there is nothing to do. Otherwise, this is a syntax error.
             if ($type === token::PREFIX) {
                 if ($nexttype === token::IDENTIFIER || $nexttype === token::FUNCTION) {
                     $nexttype = ($nexttoken->type = token::FUNCTION);

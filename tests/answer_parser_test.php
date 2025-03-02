@@ -248,31 +248,181 @@ final class answer_parser_test extends \advanced_testcase {
         }
     }
 
-    public function test_constructor_with_known_variables(): void {
-        // The function stdnormpdf() is not in the whitelist, so students are not allowed to use it.
-        // Also, used like this, it would be a syntax error anyway. But in this case, we make it
-        // available as a variable.
-        $parser = new answer_parser('3 stdnormpdf', ['stdnormpdf']);
-        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
-        // Verify it works even if written as a function. Actually, this expression would mean
-        // 3*stdnormpdf*2.
-        $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
-        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+    /**
+     * Test splitting of number and unit as entered in a combined answer box.
+     *
+     * @dataProvider provide_numbers_and_units
+     */
+    public function test_unit_split($expected, $input): void {
+        $parser = new answer_parser($input);
+        $index = $parser->find_start_of_units();
+        $number = substr($input, 0, $index);
+        $unit = substr($input, $index);
 
-        // If stdnormpdf is not made available, this should fail, because the function is not allowed.
+        self::assertEquals($expected[0], trim($number));
+        self::assertEquals($expected[1], $unit);
+    }
+
+    /**
+     * Provide combined responses with numbers and units to test splitting.
+     *
+     * @return array
+     */
+    public static function provide_numbers_and_units(): array {
+        return [
+            'missing unit' => [['123', ''], '123'],
+            'missing number' => [['', 'm/s'], 'm/s'],
+            'length 1' => [['100', 'm'], '100 m'],
+            'length 2' => [['100', 'cm'], '100cm'],
+            'length 3' => [['1.05', 'mm'], '1.05 mm'],
+            'length 4' => [['-1.3', 'nm'], '-1.3 nm'],
+            'area 1' => [['-7.5e-3', 'm^2'], '-7.5e-3 m^2'],
+            'area 2' => [['6241509.47e6', 'MeV'], '6241509.47e6 MeV'],
+            'speed' => [['1', 'km/s'], '1 km/s'],
+            'combination 1' => [['1', 'm g/us'], '1 m g/us'],
+            'combination 2' => [['1', 'kPa s^-2'], '1 kPa s^-2'],
+            'combination 3' => [['1', 'm kg s^-2'], '1 m kg s^-2'],
+            'numerical' => [['12 + 3 * 4/8', 'm^2'], '12 + 3 * 4/8 m^2'],
+            'numerical formula' => [['12 * sqrt(3)', 'kg/s'], '12 * sqrt(3) kg/s'],
+
+            [['.3', ''], '.3'],
+            [['3.1', ''], '3.1'],
+            [['3.1e-10', ''], '3.1e-10'],
+            [['3', 'm'], '3m'],
+            [['3', 'kg m/s'], '3kg m/s'],
+            [['3.', 'm/s'], '3.m/s'],
+            [['3.e-10', 'm/s'], '3.e-10m/s'],
+            [['- 3', 'm/s'], '- 3m/s'],
+            [['3', 'e10 m/s'], '3 e10 m/s'],
+            [['3', 'e 10 m/s'], '3e 10 m/s'],
+            [['3e8', 'e8 m/s'], '3e8e8 m/s'],
+            [['3+10*4', 'm/s'], '3+10*4 m/s'],
+            [['3+10^4', 'm/s'], '3+10^4 m/s'],
+            [['sin(3)', 'm/s'], 'sin(3) m/s'],
+            [['3+exp(4)', 'm/s'], '3+exp(4) m/s'],
+            [['3*4*5', 'm/s'], '3*4*5 m/s'],
+
+            'old unit tests, 18' => [['', 'm/s'], 'm/s'],
+            'old unit tests, 20' => [['sin(3)', 'kg m/s'], 'sin(3)kg m/s'],
+
+            [['3.1e-10', 'kg m/s'], '3.1e-10kg m/s'],
+            [['-3', 'kg m/s'], '-3kg m/s'],
+            [['- 3', 'kg m/s'], '- 3kg m/s'],
+            [['3', 'e'], '3e'],
+            [['3e8', ''], '3e8'],
+            [['3e8', 'e'], '3e8e'],
+
+            [['sin(3)', 'kg m/s'], 'sin(3)kg m/s'],
+            [['3*4*5', 'kg m/s'], '3*4*5 kg m/s'],
+
+            [['3e8(4.e8+2)(.5e8/2)5', 'kg m/s'], '3e8(4.e8+2)(.5e8/2)5kg m/s'],
+            [['3+exp(4+5)^sin(6+7)', 'kg m/s'], '3+exp(4+5)^sin(6+7)kg m/s'],
+            [['3+exp(4+5)^-sin(6+7)', 'kg m/s'], '3+exp(4+5)^-sin(6+7)kg m/s'],
+
+            [['3', 'e8'], '3 e8'],
+            [['3', 'e 8'], '3e 8'],
+            [['3e8', 'e8'], '3e8e8'],
+            [['3e8', 'e8e8'], '3e8e8e8'],
+
+            [['3 /', 's'], '3 /s'],
+            [['3', 'm+s'], '3 m+s'],
+            [['', 'a=b'], 'a=b'],
+
+            [['3 4 5', 'm/s'], '3 4 5 m/s'],
+            [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
+            [['3+4 5+10^4', 'kg m/s'], '3+4 5+10^4kg m/s'],
+            [['3 4 5', 'kg m/s'], '3 4 5 kg m/s'],
+        ];
+    }
+
+    /**
+     * Provide special cases with units that are named like existing functions.
+     *
+     * @return array
+     */
+    public static function provide_special_units(): array {
+        return [
+            [
+                ['number' => '3', 'unit' => 'exp^2'],
+                ['response' => '3 exp^2', 'knownvars' => ['exp']],
+            ],
+            [
+                ['number' => '3', 'unit' => 'exp^2'],
+                ['response' => '3 exp^2', 'knownvars' => []],
+            ],
+            [
+                ['number' => '3', 'unit' => 'exp^2'],
+                ['response' => '3exp^2', 'knownvars' => ['exp']],
+            ],
+            [
+                ['number' => '3', 'unit' => 'exp^2'],
+                ['response' => '3exp^2', 'knownvars' => []],
+            ],
+            [
+                ['number' => '5', 'unit' => 'min'],
+                ['response' => '5 min', 'knownvars' => ['min']],
+            ],
+            [
+                ['number' => '5', 'unit' => 'min'],
+                ['response' => '5 min', 'knownvars' => []],
+            ],
+            [
+                ['number' => '5', 'unit' => 'min'],
+                ['response' => '5min', 'knownvars' => ['min']],
+            ],
+            [
+                ['number' => '5', 'unit' => 'min'],
+                ['response' => '5min', 'knownvars' => []],
+            ],
+        ];
+    }
+
+    /**
+     * Test splitting of units if they are named like a function.
+     *
+     * @dataProvider provide_special_units
+     */
+    public function test_special_unit_split($expected, $input): void {
+        // As exp is not followed by parens, it is not considered as a function, but as a variable.
+        // Hence, splitting should work just fine.
+        $parser = new answer_parser($input['response'], $input['knownvars']);
+        $index = $parser->find_start_of_units();
+        $number = substr($input['response'], 0, $index);
+        $unit = substr($input['response'], $index);
+        self::assertEquals($expected['number'], trim($number));
+        self::assertEquals($expected['unit'], $unit);
+    }
+
+    public function test_constructor_with_known_variables(): void {
+        // The teacher should be able to block functions by defining variables with the same name,
+        // e. g. sin = 1.
+        $parser = new answer_parser('3 sin(30)', ['sin']);
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+        // In normal circumstances, the student should, of course, be able to use the sine function.
+        $parser = new answer_parser('3 sin(30)');
+        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+
+        // The function stdnormpdf() is not in the whitelist, so students are not allowed to use it in
+        // an algebraic formula. Also, they cannot use it as a variable, because of the name conflict.
+        // It does not make a difference whether stdnormpdf is a known variable or not.
         $parser = new answer_parser('3 stdnormpdf');
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
-        // Make sure that it did not just fail because of the syntax error.
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+        $parser = new answer_parser('3 stdnormpdf', ['stdnormpdf']);
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+
+        // If it is written as a function, it should not work either. The student must be warned that they
+        // are using a function that is not available for them.
         $parser = new answer_parser('3 stdnormpdf(2)');
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
-
-        // See whether we can separate an imaginary unit 'exp' in a number expression.
-        $input = '3 exp';
-        $parser = new answer_parser($input, ['exp']);
-        $splitindex = $parser->find_start_of_units();
-        $number = trim(substr($input, 0, $splitindex));
-        $unit = trim(substr($input, $splitindex));
-        self::assertEquals(3, $number);
-        self::assertEquals('exp', $unit);
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+        // If stdnormpdf is made available, this should still fail, because students may not use a variable
+        // named stdnormpdf.
+        $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
     }
 }
