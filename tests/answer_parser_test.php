@@ -344,35 +344,35 @@ final class answer_parser_test extends \advanced_testcase {
         return [
             [
                 ['number' => '3', 'unit' => 'exp^2'],
-                ['response' => '3 exp^2', 'knownvars' => ['exp']]
+                ['response' => '3 exp^2', 'knownvars' => ['exp']],
             ],
             [
                 ['number' => '3', 'unit' => 'exp^2'],
-                ['response' => '3 exp^2', 'knownvars' => []]
+                ['response' => '3 exp^2', 'knownvars' => []],
             ],
             [
                 ['number' => '3', 'unit' => 'exp^2'],
-                ['response' => '3exp^2', 'knownvars' => ['exp']]
+                ['response' => '3exp^2', 'knownvars' => ['exp']],
             ],
             [
                 ['number' => '3', 'unit' => 'exp^2'],
-                ['response' => '3exp^2', 'knownvars' => []]
+                ['response' => '3exp^2', 'knownvars' => []],
             ],
             [
                 ['number' => '5', 'unit' => 'min'],
-                ['response' => '5 min', 'knownvars' => ['min']]
+                ['response' => '5 min', 'knownvars' => ['min']],
             ],
             [
                 ['number' => '5', 'unit' => 'min'],
-                ['response' => '5 min', 'knownvars' => []]
+                ['response' => '5 min', 'knownvars' => []],
             ],
             [
                 ['number' => '5', 'unit' => 'min'],
-                ['response' => '5min', 'knownvars' => ['min']]
+                ['response' => '5min', 'knownvars' => ['min']],
             ],
             [
                 ['number' => '5', 'unit' => 'min'],
-                ['response' => '5min', 'knownvars' => []]
+                ['response' => '5min', 'knownvars' => []],
             ],
         ];
     }

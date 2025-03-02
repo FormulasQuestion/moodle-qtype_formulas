@@ -581,7 +581,7 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         $q->parts[0]->answer = '"3x"';
 
         // Start an attempt and submit the student answer "sin(x)". It should be wrong,
-        // because students are not allowed to use variables with functino names.
+        // because students are not allowed to use variables with function names.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_state(question_state::$todo);
         $this->process_submission(['0_0' => 'sin(x)', '-submit' => 1]);
