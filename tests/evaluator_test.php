@@ -1621,6 +1621,7 @@ final class evaluator_test extends \advanced_testcase {
      */
     public static function provide_other_invalid_stuff(): array {
         return [
+            ['1:6:Syntax error: function must be followed by opening parenthesis.', 'a = \sin 30'],
             ['1:7:Division by zero is not defined.', 'a = 5 % 0'],
             ['1:7:Unexpected token: ,', 'a = 15,2'],
             ['1:9:Syntax error: sets cannot be nested.', 'a = {1, {2, 3}}'],
