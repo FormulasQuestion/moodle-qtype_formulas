@@ -405,23 +405,23 @@ final class answer_parser_test extends \advanced_testcase {
         self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
 
         // The function stdnormpdf() is not in the whitelist, so students are not allowed to use it in
-        // an algebraic formula. But they might use a variable called stdnormpdf, whether or not it is
-        // listed as known. It must not be accepted in numerical formulas, however.
+        // an algebraic formula. Also, they cannot use it as a variable, because of the name conflict.
+        // It does not make a difference whether stdnormpdf is a known variable or not.
         $parser = new answer_parser('3 stdnormpdf');
-        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
         $parser = new answer_parser('3 stdnormpdf', ['stdnormpdf']);
-        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
 
-        // Verify it works even if written as a function. Actually, this expression would mean
-        // 3*stdnormpdf*2.
-        $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
-        self::assertTrue($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
-        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
-        // If stdnormpdf is not made available, this should fail, because the function is not in the
-        // whitelist.
+        // If it is written as a function, it should not work either. The student must be warned that they
+        // are using a function that is not available for them.
         $parser = new answer_parser('3 stdnormpdf(2)');
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
+        self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
+        // If stdnormpdf is made available, this should still fail, because students may not use a variable
+        // named stdnormpdf.
+        $parser = new answer_parser('3 stdnormpdf(2)', ['stdnormpdf']);
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_ALGEBRAIC));
         self::assertFalse($parser->is_acceptable_for_answertype(qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA));
     }
