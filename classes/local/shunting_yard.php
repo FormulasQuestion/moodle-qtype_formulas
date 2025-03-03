@@ -529,6 +529,133 @@ class shunting_yard {
     }
 
     /**
+     * Translate unit expression from infix into RPN notation via Dijkstra's shunting yard algorithm,
+     * because this makes evaluation much easier.
+     *
+     * @param array $tokens the tokens forming the expression that is to be translated
+     * @return array
+     */
+    public static function unit_infix_to_rpn($tokens): array {
+        $output = [];
+        $opstack = [];
+
+        $lasttoken = null;
+        $lasttype = null;
+        $lastvalue = null;
+        foreach ($tokens as $token) {
+            $type = $token->type;
+            $value = $token->value;
+
+            if (!is_null($lasttoken)) {
+                $lasttype = $lasttoken->type;
+                $lastvalue = $lasttoken->value;
+            }
+
+            // Insert inplicit multiplication sign between two consecutive UNIT tokens.
+            // For accurate error reporting, the row and column number of the implicit
+            // multiplication token are copied over from the current token which triggered
+            // the multiplication.
+            $unitunit = ($lasttype === token::UNIT && $type === token::UNIT);
+            $unitparen = ($lasttype === token::UNIT && $type === token::OPENING_PAREN);
+            $parenunit = ($lasttype === token::CLOSING_PAREN && $type === token::UNIT);
+            $parenparen = ($lasttype === token::CLOSING_PAREN && $type === token::OPENING_PAREN);
+            if ($unitunit || $unitparen || $parenunit || $parenparen) {
+                // For backwards compatibility, division will have a lower precedence than multiplication,
+                // in order for J / m K to be interpreted as J / (m K). Instead of introducing a special
+                // 'unit multiplication' pseudo-operator, we simply increase the multiplication's precedence
+                // by one when flushing operators from the opstack.
+                self::flush_higher_precedence($opstack, self::get_precedence('*') + 1, $output);
+                $opstack[] = new token(token::OPERATOR, '*', $token->row, $token->column);
+            }
+
+            // Two consecutive operators are only possible if the unary minus follows exponentiation.
+            // Note: We do not have to check whether the first of them is exponentiation, because we
+            // only allow - in the exponent anyway.
+            if ($type === token::OPERATOR && $lasttype === token::OPERATOR && $value !== '-') {
+                self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
+            }
+
+            switch ($type) {
+                // UNIT tokens go straight to the output queue.
+                case token::UNIT:
+                    $output[] = $token;
+                    break;
+
+                // Numbers go to the output queue.
+                case token::NUMBER:
+                    // If the last token was the unary minus, we multiply the number by -1 before
+                    // sending it to the output queue. Afterwards, we can remove the minus from the opstack.
+                    if ($lasttype === token::OPERATOR && $lastvalue === '-') {
+                        $token->value = -$token->value;
+                        array_pop($opstack);
+                    }
+                    $output[] = $token;
+                    break;
+
+                // Opening parentheses go straight to the operator stack.
+                case token::OPENING_PAREN:
+                    $opstack[] = $token;
+                    break;
+
+                // A closing parenthesis means we flush all operators until we get to the
+                // matching opening parenthesis.
+                case token::CLOSING_PAREN:
+                    // A closing parenthesis must not occur immediately after an operator.
+                    if ($lasttype === token::OPERATOR) {
+                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
+                    }
+                    self::flush_until_paren($opstack, token::OPENING_PAREN, $output);
+                    break;
+
+                // Deal with all the possible operators...
+                case token::OPERATOR:
+                    // Expressions must not start with an operator.
+                    if (is_null($lasttoken)) {
+                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
+                    }
+                    // Operators must not follow an opening parenthesis, except for the unary minus.
+                    if ($lasttype === token::OPENING_PAREN && $value !== '-') {
+                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
+                    }
+                    // Before fetching the precedence, we must translate ^ (caret) into **, because
+                    // the ^ operator normally has a different meaning with lower precedence.
+                    if ($value === '^') {
+                        $value = '**';
+                    }
+                    $thisprecedence = self::get_precedence($value);
+                    // We artificially increase the precedence of the division operator, because
+                    // legacy versions used implicit parens around the denominator, e. g.
+                    // the expression J / m K would be interpreted as J / (m * K). This is consistent
+                    // with what tools like Wolfram Alpha do, even though e. g. 1 / 2 3 would be read
+                    // as 3/2 both by Formulas Question and Wolfram Alpha. And even if it were not, it
+                    // is not possible to change that, because it could break existing questions.
+                    if ($value === '*') {
+                        $thisprecedence++;
+                    }
+                    // Flush operators with higher precedence, unless we have a unary minus, because
+                    // it is not left-associative.
+                    if ($value !== '-') {
+                        self::flush_higher_precedence($opstack, $thisprecedence, $output);
+                    }
+                    // Put the operator on the stack.
+                    $opstack[] = $token;
+                    break;
+
+                // If we still haven't dealt with the token, there must be a problem with the input.
+                default:
+                    self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
+
+            }
+
+            $lasttoken = $token;
+        }
+        // After last token, flush opstack. Last token must be either a number (in exponent),
+        // a closing parenthesis or a unit.
+        self::flush_all($opstack, $output);
+        return $output;
+    }
+
+    /**
      * Stop processing and indicate the human readable position (row/column) where the error occurred.
      *
      * @param string $message error message
