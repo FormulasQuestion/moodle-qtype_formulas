@@ -622,6 +622,12 @@ class shunting_yard {
                     if ($value === '^') {
                         $value = '**';
                     }
+                    // Exponents cannot follow a closing parenthesis, because things like (m/s)^2 cannot
+                    // be translated to legacy syntax before "unit arithmetic" is fully implemented. We use
+                    // $token->value instead of $value to have the operator like it was entered.
+                    if ($value === '**' && $lasttype === token::CLOSING_PAREN) {
+                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $token->value), $token);
+                    }
                     $thisprecedence = self::get_precedence($value);
                     // We artificially increase the precedence of the division operator, because
                     // legacy versions used implicit parens around the denominator, e. g.
