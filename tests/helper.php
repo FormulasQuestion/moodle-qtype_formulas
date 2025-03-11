@@ -1012,7 +1012,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $qdata->qtype = 'formulas';
         $qdata->name = 'test-methodsinparts';
         $qdata->questiontext = '<p>This question shows different display methods of the answer and unit box.</p>';
-        $qdata->generalfeedback = '';
+        $qdata->generalfeedback = 'This is the general feedback.';
         $qdata->defaultmark = 8;
         $qdata->penalty = 0.3;
 
