@@ -98,7 +98,7 @@ Feature: Mobile compatibility
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
     And I press "Submit" near "Once you submit" in the app
-    Then I should find "Your answer is correct." in the app
+    Then I should find "Correct answer, well done." in the app
 
   Scenario: Try to answer a question with one answer + one unit field
     When I press "Quiz 4" in the app
