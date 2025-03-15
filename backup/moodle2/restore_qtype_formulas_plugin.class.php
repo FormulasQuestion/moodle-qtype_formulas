@@ -173,37 +173,27 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
     public static function convert_backup_to_questiondata(array $backupdata): stdClass {
         $questiondata = parent::convert_backup_to_questiondata($backupdata);
 
-        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $record) {
-            foreach ($questiondata->options->answers as &$part) {
-                if ($part->id == $record['id']) {
-                    // FIXME
-                    continue 2;
-                }
-            }
+        // As our parts are backed up in a separate XML key rather than just "answers", the parent
+        // function did not add them to the questiondata.
+        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $answer) {
+            $questiondata->options->answers[] = (object) $answer;
         }
 
-        if (isset($backupdata['plugin_qtype_formulas_question'])) {
-            // FIXME
-        }
+        // Also, we must make sure that the specific options like varsrandom etc. are added to
+        // the questiondata object.
+        $questiondata->options = (object) array_merge(
+            (array) $questiondata->options,
+            $backupdata['plugin_qtype_formulas_question']['formulas'][0],
+        );
 
         return $questiondata;
     }
 
     protected function define_excluded_identity_hash_fields(): array {
-
-        // `$questiondata->options->questionid`, the path would be '/options/questionid'
-        // `$questiondata->options->answers[]`, the path '/options/answers/id' removes the 'id' field from each element of the 'answers' array
         return [
-            '/options/numparts',
             '/options/answers/id',
             '/options/answers/questionid',
+            '/options/numparts',
         ];
-    }
-
-    public static function remove_excluded_question_data(stdClass $questiondata, array $excludefields = []): stdClass {
-        if (isset($questiondata->options->numparts)) {
-            unset($questiondata->options->numparts);
-        }
-        return parent::remove_excluded_question_data($questiondata, $excludefields);
     }
 }
