@@ -1368,13 +1368,13 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => '', 'format' => FORMAT_HTML],
         ];
         $form->partcorrectfb = [
-            ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
-            ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partincorrectfb = [
-            ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->questiontext = ['text' => '<p>This question has 0 as answer to test problem when answer is equal to 0.</p>',
                 'format' => FORMAT_HTML];
@@ -1386,10 +1386,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = '';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => 'Parts, but only parts, of your response are correct.', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => 'That is not right at all.', 'format' => FORMAT_HTML];
         return $form;
     }
 
@@ -1564,7 +1564,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
         $p->id = 14;
-        $p->answermark = 1;
+        $p->answermark = 2;
         $p->answer = '1';
         $p->answernotunique = '1';
         $p->subqtext = '{_0:mychoices}';
@@ -1584,7 +1584,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->noanswers = 1;
         $form->answer = ['1'];
         $form->answernotunique = ['1'];
-        $form->answermark = [1];
+        $form->answermark = [2];
         $form->answertype = ['0'];
         $form->correctness = ['_relerr < 0.01'];
         $form->numbox = [1];
@@ -1600,13 +1600,13 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => '', 'format' => FORMAT_HTML],
         ];
         $form->partcorrectfb = [
-            ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
-            ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partincorrectfb = [
-            ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->questiontext = ['text' => '<p>This question has a multichoice answer.</p>',
                 'format' => FORMAT_HTML];
@@ -1618,10 +1618,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = '';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => 'Parts, but only parts, of your response are correct.', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => 'That is not right at all.', 'format' => FORMAT_HTML];
         $form->numhints = 0;
         return $form;
     }
@@ -1644,7 +1644,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->defaultmark = 2;
         $p = self::make_a_formulas_part();
         $p->id = 14;
-        $p->answermark = 1;
+        $p->answermark = 2;
         $p->answer = '1';
         $p->answernotunique = '1';
         $p->subqtext = '{_0:mychoices:MCE}';
@@ -1664,7 +1664,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->noanswers = 1;
         $form->answer = ['1'];
         $form->answernotunique = ['1'];
-        $form->answermark = [1];
+        $form->answermark = [2];
         $form->answertype = ['0'];
         $form->correctness = ['_relerr < 0.01'];
         $form->numbox = [1];
@@ -1680,13 +1680,13 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => '', 'format' => FORMAT_HTML],
         ];
         $form->partcorrectfb = [
-            ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
-            ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partincorrectfb = [
-            ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
+            ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->questiontext = ['text' => '<p>This question has a multichoice answer.</p>',
                 'format' => FORMAT_HTML];
@@ -1698,10 +1698,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = 'abc';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => 'Parts, but only parts, of your response are correct.', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => 'That is not right at all.', 'format' => FORMAT_HTML];
         $form->numhints = 0;
         return $form;
     }
@@ -1731,6 +1731,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answer = '1';
         $p1->answernotunique = '1';
         $p1->subqtext = '{_0:choices1:MCE}';
+        $p1->partcorrectfb = 'Your first answer is correct.';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
@@ -1738,6 +1739,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->answer = '1';
         $p2->answernotunique = '1';
         $p2->subqtext = '{_0:choices2:MCE}';
+        $p2->partcorrectfb = 'Your second answer is correct.';
         $q->parts[1] = $p2;
 
         return $q;
@@ -1776,14 +1778,14 @@ class qtype_formulas_test_helper extends question_test_helper {
             1 => ['text' => 'Your second answer is correct.', 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
-            0 => ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
-            1 => ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
+            0 => ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+            1 => ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partincorrectfb = [
-            0 => ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
-            1 => ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
+            0 => ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+            1 => ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
-        $form->questiontext = ['text' => '<p>This question has a multichoice answer.</p>',
+        $form->questiontext = ['text' => '<p>This question has two parts with a multichoice answer in each of them.</p>',
                 'format' => FORMAT_HTML];
         $form->generalfeedback = ['text' => '', 'format' => FORMAT_HTML];
         $form->defaultmark = 2;
@@ -1794,10 +1796,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = '';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => 'Parts, but only parts, of your response are correct.', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => 'That is not right at all.', 'format' => FORMAT_HTML];
         $form->numhints = 0;
         return $form;
     }
@@ -1827,6 +1829,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p1->answer = '1';
         $p1->answernotunique = '1';
         $p1->subqtext = 'Part 1 -- {_0:choices1}';
+        $p1->partcorrectfb = 'Your first answer is correct.';
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
@@ -1834,6 +1837,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p2->answer = '1';
         $p2->answernotunique = '1';
         $p2->subqtext = 'Part 2 -- {_0:choices2}';
+        $p2->partcorrectfb = 'Your second answer is correct.';
         $q->parts[1] = $p2;
 
         return $q;
@@ -1872,12 +1876,12 @@ class qtype_formulas_test_helper extends question_test_helper {
             1 => ['text' => 'Your second answer is correct.', 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
-            0 => ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
-            1 => ['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML],
+            0 => ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+            1 => ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partincorrectfb = [
-            0 => ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
-            1 => ['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML],
+            0 => ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+            1 => ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->questiontext = ['text' => '<p>This question has two parts with a multichoice answer in each of them.</p>',
                 'format' => FORMAT_HTML];
@@ -1890,10 +1894,10 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->answernumbering = '';
         $form->globalunitpenalty = 1;
         $form->globalruleid = 1;
-        $form->correctfeedback = ['text' => '', 'format' => FORMAT_HTML];
-        $form->partiallycorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->correctfeedback = ['text' => 'Well done!', 'format' => FORMAT_HTML];
+        $form->partiallycorrectfeedback = ['text' => 'Parts, but only parts, of your response are correct.', 'format' => FORMAT_HTML];
         $form->shownumcorrect = '0';
-        $form->incorrectfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->incorrectfeedback = ['text' => 'That is not right at all.', 'format' => FORMAT_HTML];
         $form->numhints = 0;
         return $form;
     }
@@ -1970,8 +1974,8 @@ class qtype_formulas_test_helper extends question_test_helper {
             1 => ['text' => '', 'format' => FORMAT_HTML],
         ];
         $form->partcorrectfb = [
-            0 => ['text' => 'Your answers in part 1 are correct.', 'format' => FORMAT_HTML],
-            1 => ['text' => 'Your answers in part 2 are correct.', 'format' => FORMAT_HTML],
+            0 => ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+            1 => ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->partpartiallycorrectfb = [
             0 => ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
