@@ -84,6 +84,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->varsrandom = '';
         $q->varsglobal = '';
         $q->answernumbering = 'abc';
+        $q->qv = new qtype_formulas\variables();
         $q->penalty = 0.2;
         $q->generalfeedback = '';
         test_question_maker::set_standard_combined_feedback_fields($q);
