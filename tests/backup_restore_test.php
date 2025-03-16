@@ -39,10 +39,17 @@ global $CFG;
 require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
-require_once($CFG->dirroot . '/mod/quiz/tests/quiz_question_helper_test_trait.php');
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
+
+if (file_exists($CFG->dirroot . '/mod/quiz/tests/quiz_question_helper_test_trait.php')) {
+    require_once($CFG->dirroot . '/mod/quiz/tests/quiz_question_helper_test_trait.php');
+    class_alias('\quiz_question_helper_test_trait', '\trait_class_alias');
+} else {
+    require_once($CFG->dirroot . '/question/type/formulas/tests/dummy_quiz_question_helper_test_trait.php');
+    class_alias('\qtype_formulas\dummy_quiz_question_helper_test_trait', '\trait_class_alias');
+}
 
 /**
  * Unit tests for backup and restore.
@@ -57,7 +64,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @covers     \qtype_formulas_part
  */
 final class backup_restore_test extends \advanced_testcase {
-    use \quiz_question_helper_test_trait;
+    use \trait_class_alias;
 
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
