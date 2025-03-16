@@ -37,7 +37,7 @@ Feature: Usage in quiz
       | quiz     | Quiz 7  | C1     | quiz7    |
       | quiz     | Quiz 8  | C1     | quiz8    |
       | quiz     | Quiz 9  | C1     | quiz9    |
-      | quiz     | Quiz 10 | C1     | quiz9    |
+      | quiz     | Quiz 10 | C1     | quiz10   |
     And quiz "Quiz 1" contains the following questions:
       | question  | page |
       | singlenum | 1    |
@@ -134,7 +134,7 @@ Feature: Usage in quiz
     And I press "Finish attempt"
     And I press "Submit all and finish"
     And I confirm the quiz submission in the modal dialog for the formulas plugin
-    Then I should see "Your answer is correct."
+    Then I should see "Correct answer, well done."
 
   Scenario: Try to answer a drowdown multiple choice formula question
     When I follow "Quiz 7"
@@ -143,7 +143,7 @@ Feature: Usage in quiz
     And I press "Finish attempt"
     And I press "Submit all and finish"
     # And I confirm the quiz submission in the modal dialog
-    Then I should see "Your answer is correct."
+    Then I should see "Correct answer, well done."
 
   Scenario: Try to answer a question with two parts, one drowdown multiple choice in each of them
     When I follow "Quiz 8"
