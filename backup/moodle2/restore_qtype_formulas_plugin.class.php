@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * @package    qtype_formulas
@@ -25,41 +25,50 @@
  * needed to restore one formulas qtype plugin
  *
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
     /**
-     * Returns the paths to be handled by the plugin at question level
+     * The Formulas question type uses some custom fields that have to be backed up, but are not
+     * accounted for in the default routines. This function defines the necessary XML paths.
+     *
+     * @return array
      */
     protected function define_question_plugin_structure() {
+        $paths = [];
 
-        $paths = array();
+        // Upon initial creation, the names have been derived from get_recommended_name(). These
+        // paths MUST NOT be changed, because that would break compatibility with existing backups.
+        // Those paths will be created as subpaths inside the <plugin_qtype_formulas_question>
+        // section. For every question, we will have <formulas_answers></formulas_answers> to enclose
+        // all parts. For each part, there will then be a <formulas_answer id="..."></formulas_answer>
+        // section containing the various data fields, e. g. <placeholder> or <numbox> etc. These
+        // are the fields stored in the qtype_formulas_answers table, except for the partindex.
+        $paths[] = new restore_path_element('formulas_answer', $this->get_pathfor('/formulas_answers/formulas_answer'));
 
-        // This qtype uses don't question_answers, qtype_formulas_answers are differents.
+        // Additionally, there will be <formulas id="..."></formulas> containing the custom data
+        // fields at the question level, e. g. <varsrandom>...</varsrandom> etc. These are the fields
+        // stored in the qtype_formulas_options table.
+        $paths[] = new restore_path_element('formulas', $this->get_pathfor('/formulas'));
 
-        // Add own qtype stuff.
-        $elename = 'formulas_answer';
-        $elepath = $this->get_pathfor('/formulas_answers/formulas_answer'); // We used get_recommended_name() so this works.
-        $paths[] = new restore_path_element($elename, $elepath);
-        $elename = 'formulas';
-        $elepath = $this->get_pathfor('/formulas'); // We used get_recommended_name() so this works.
-        $paths[] = new restore_path_element($elename, $elepath);
-
-        return $paths; // And we return the interesting paths.
+        return $paths;
     }
 
     /**
-     * Process the qtype/formulas element
+     * This function processes the <formulas> XML element for the backup, i. e. the part where the
+     * specific question level data like varsrandom or varsglobal are backed up. That's the data stored
+     * in the qtype_formulas_options table.
      */
     public function process_formulas($data) {
         global $DB;
 
         $data = (object)$data;
         $oldid = $data->id;
+
         // Detect if the question is created or mapped.
-        $oldquestionid   = $this->get_old_parentid('question');
-        $newquestionid   = $this->get_new_parentid('question');
+        $oldquestionid = $this->get_old_parentid('question');
+        $newquestionid = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
         // If the question has been created by restore, we need to create its qtype_formulas_options too.
@@ -93,7 +102,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
     }
 
     /**
-     * Process the qtype/formulasanswer element
+     * This function processes the <formulas_answer> XML element for the backup, i. e. the part where
+     * the specific part level data like answertype or subqtext are backed up. That's the data stored
+     * in the qtype_formulas_answers table.
      */
     public function process_formulas_answer($data) {
         global $DB;
@@ -102,8 +113,8 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         $oldid = $data->id;
 
         // Detect if the question is created or mapped.
-        $oldquestionid   = $this->get_old_parentid('question');
-        $newquestionid   = $this->get_new_parentid('question');
+        $oldquestionid = $this->get_old_parentid('question');
+        $newquestionid = $this->get_new_parentid('question');
         $questioncreated = $this->get_mappingid('question_created', $oldquestionid) ? true : false;
 
         // If the question has been created by restore, we need to create its qtype_formulas_answers too.
@@ -116,8 +127,11 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             }
             // All 2.0 backups are missing the part's index.
             if (!isset($data->partindex)) {
-                $data->partindex = (int)$DB->get_field('qtype_formulas_answers',
-                        'MAX(partindex) +1', array('questionid' => $newquestionid));
+                $data->partindex = (int)$DB->get_field(
+                    'qtype_formulas_answers',
+                    'MAX(partindex) + 1',
+                    ['questionid' => $newquestionid],
+                );
             }
             // Old backups are missing the part's combined feedback.
             if (!isset($data->partcorrectfb)) {
@@ -132,7 +146,10 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
                 $data->partincorrectfb = '';
                 $data->partincorrectfbformat = FORMAT_HTML;
             }
-
+            // Older backups might not yet have the answernotunique field.
+            if (!isset($data->answernotunique)) {
+                $data->answernotunique = '1';
+            }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
@@ -144,14 +161,60 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
      * Return the contents of this qtype to be processed by the links decoder
      */
     public static function define_decode_contents() {
-        return array(
-            new restore_decode_content('qtype_formulas_options',
-                    array('correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'),
-                    'qtype_formulas'),
-            new restore_decode_content('qtype_formulas_answers', array('subqtext', 'feedback',
-                    'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'),
-                    'qtype_formulas_answers'),
-        );
+        return [
+            new restore_decode_content(
+                'qtype_formulas_options',
+                ['correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'],
+                'qtype_formulas',
+            ),
+            new restore_decode_content(
+                'qtype_formulas_answers',
+                ['subqtext', 'feedback', 'partcorrectfb', 'partpartiallycorrectfb', 'partincorrectfb'],
+                'qtype_formulas_answers',
+            ),
+        ];
     }
 
+    /**
+     * Convert the backup structure of the Formulas question type into a structure matching its
+     * question data. This data will then be used to produce an identity hash for comparison with
+     * questions in the database. We have to override the parent function, because we use a special
+     * structure during backup.
+     *
+     * @param array $backupdata
+     * @return stdClass
+     */
+    public static function convert_backup_to_questiondata(array $backupdata): stdClass {
+        $questiondata = parent::convert_backup_to_questiondata($backupdata);
+
+        // As our parts are backed up in a separate XML key rather than just "answers", the parent
+        // function did not add them to the questiondata.
+        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $answer) {
+            $questiondata->options->answers[] = (object) $answer;
+        }
+
+        // Also, we must make sure that the specific options like varsrandom etc. are added to
+        // the questiondata object.
+        $questiondata->options = (object) array_merge(
+            (array) $questiondata->options,
+            $backupdata['plugin_qtype_formulas_question']['formulas'][0],
+        );
+
+        return $questiondata;
+    }
+
+    /**
+     * Return a list of paths to fields to be removed from questiondata before creating an identity hash.
+     * We have to remove the id and questionid property from all answers (parts) as well as the numparts
+     * field, because it is automatically calculated rather than stored in the database.
+     *
+     * @return array
+     */
+    protected function define_excluded_identity_hash_fields(): array {
+        return [
+            '/options/answers/id',
+            '/options/answers/questionid',
+            '/options/numparts',
+        ];
+    }
 }

@@ -46,20 +46,21 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
 
         // Now create the qtype own structures.
 
-        $formulas = new backup_nested_element('formulas', array('id'), array(
+        $formulas = new backup_nested_element('formulas', array('id'), [
             'varsrandom', 'varsglobal',
             'correctfeedback', 'correctfeedbackformat',
             'partiallycorrectfeedback', 'partiallycorrectfeedbackformat',
             'incorrectfeedback', 'incorrectfeedbackformat', 'shownumcorrect',
-            'answernumbering'));
+            'answernumbering',
+        ]);
 
         $formulasanswers = new backup_nested_element('formulas_answers');
-        $formulasanswer = new backup_nested_element('formulas_answer', array('id'), array(
-            'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2', 'correctness',
-            'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback', 'feedbackformat',
-            'partcorrectfb', 'partcorrectfbformat',
-            'partpartiallycorrectfb', 'partpartiallycorrectfbformat',
-            'partincorrectfb', 'partincorrectfbformat'));
+        $formulasanswer = new backup_nested_element('formulas_answer', ['id'], [
+            'partindex', 'placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
+            'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'subqtext', 'subqtextformat', 'feedback',
+            'feedbackformat', 'partcorrectfb', 'partcorrectfbformat', 'partpartiallycorrectfb', 'partpartiallycorrectfbformat',
+            'partincorrectfb', 'partincorrectfbformat',
+        ]);
 
         // Don't need to annotate ids nor files.
         // Now the own qtype tree.
