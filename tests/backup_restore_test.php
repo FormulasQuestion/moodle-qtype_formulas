@@ -67,15 +67,6 @@ final class backup_restore_test extends \advanced_testcase {
     use \trait_class_alias;
 
     /**
-     * Create a question object of a certain type, as defined in the helper.php file.
-     *
-     * @return qtype_formulas_question
-     */
-    protected function get_test_formulas_question($which = null) {
-        return test_question_maker::make_question('formulas', $which);
-    }
-
-    /**
      * Data provider.
      *
      * @return array
@@ -100,7 +91,11 @@ final class backup_restore_test extends \advanced_testcase {
      * @dataProvider provide_question_names
      */
     public function test_backup_and_restore(string $questionname): void {
-        global $USER, $DB;
+        global $CFG, $USER, $DB;
+
+        if ($CFG->branch < 400) {
+            $this->markTestSkipped('Not testing backup and restore in Moodle < 4.0');
+        }
 
         // Login as admin user.
         $this->resetAfterTest(true);
