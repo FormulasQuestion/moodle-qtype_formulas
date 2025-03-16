@@ -161,7 +161,7 @@ final class backup_restore_test extends \advanced_testcase {
         }
 
         // Next, we check the fields for each part.
-        $partfields = qtype_formulas::PART_BASIC_FIELDS + ['subqtext', 'subqtextformat', 'feedback', 'feedbackformat'];
+        $partfields = $qtype->part_tags() + ['subqtext', 'subqtextformat', 'feedback', 'feedbackformat'];
         foreach ($partfields as $field) {
             foreach ($questionrecord->options->answers as $i => $part) {
                 self::assertEquals($referencedata->parts[$i]->$field, $part->$field, $field);
