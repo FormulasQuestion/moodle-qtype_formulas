@@ -214,7 +214,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         return [
             '/options/answers/id',
             '/options/answers/questionid',
-            '/options/numparts',
+            '/options/numpart',
         ];
     }
 }

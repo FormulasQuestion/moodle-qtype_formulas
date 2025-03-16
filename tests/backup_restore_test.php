@@ -36,7 +36,6 @@ use backup_controller;
 use context_course;
 use core_question_generator;
 use qtype_formulas;
-use qtype_formulas_question;
 use restore_controller;
 use test_question_maker;
 
