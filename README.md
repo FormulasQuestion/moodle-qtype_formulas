@@ -1,6 +1,10 @@
 Formulas question type for Moodle (version 5.3.x)
 -------------------------------------------------
 
+Note: This version is no longer under active development. No further updates are planned.
+Please check out [our GitHub repository](https://github.com/FormulasQuestion/moodle-qtype_formulas)
+for the most recent version.
+
 [![Automated code checks](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/checks.yml) [![Automated acceptance tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/behat.yml) [![Automated unit tests](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml/badge.svg?branch=STABLE_5.3)](https://github.com/FormulasQuestion/moodle-qtype_formulas/actions/workflows/testing.yml) [![Coverage Status](https://coveralls.io/repos/github/FormulasQuestion/moodle-qtype_formulas/badge.svg?branch=STABLE_5.3)](https://coveralls.io/github/FormulasQuestion/moodle-qtype_formulas?branch=STABLE_5.3) [![GitHub
 Release](https://img.shields.io/github/release/FormulasQuestion/moodle-qtype_formulas.svg)](https://github.com/FormulasQuestion/moodle-qtype_formulas/releases)
 
