@@ -1,21 +1,24 @@
-.que.formulas .formulas_input_warning_outer {
-
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
 .que.formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.3em;
+    margin-left: -20px;
+    position: relative;
+    visibility: hidden;
+    color: red;
 }
 
 .que.formulas .formulas_input_info_outer {
     display: inline;
     position: absolute;
     z-index: 2;
+}
+
+.que.formulas div#qtype_formulas_mathjax_display {
+    background-color: #eef;
+    border: 1px solid #88c;
+    position: relative;
+    margin-left: 0px;
+    margin-top: 0px;
+    padding: 4px;
+    width: 150px;
 }
 
 .que.formulas .formulas_input_info {
@@ -136,20 +139,6 @@
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
-}
-
-body#page-question-type-formulas .formulas_input_warning_outer {
-
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
-body#page-question-type-formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.3em;
 }
 
 body#page-question-type-formulas .formulas_input_info_outer {

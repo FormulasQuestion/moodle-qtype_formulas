@@ -61,4 +61,22 @@ $functions = [
         'capabilities' => '',
         'services' => [],
     ],
+    'qtype_formulas_validate_student_answer' => [
+        'classname' => 'qtype_formulas\external\answervalidation',
+        'methodname' => 'validate_student_answer',
+        'description' => "Check whether a student's answer is (syntactically) valid",
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => '',
+        'services' => [],
+    ],
+    'qtype_formulas_latexify' => [
+        'classname' => 'qtype_formulas\external\latexify',
+        'methodname' => 'latexify',
+        'description' => "Convert the student's answer into LaTeX code",
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => '',
+        'services' => [],
+    ],
 ];
