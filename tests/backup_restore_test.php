@@ -634,9 +634,17 @@ final class backup_restore_test extends \advanced_testcase {
      * @dataProvider provide_edited_option_fields
      */
     public function test_restore_quiz_with_same_stamp_questions_edited_options(string $field, string $value): void {
-        global $DB, $USER;
+        global $CFG, $DB, $USER;
         $this->resetAfterTest();
         $this->setAdminUser();
+
+        // The changes introduced while fixing MDL-83541 are only present in Moodle 4.4 and newer. It
+        // does not make sense to perform this test with older versions.
+        if ($CFG->branch < 404) {
+            $this->markTestSkipped(
+                'Not testing detection of duplicates while restoring in Moodle versions prior to 4.4.',
+            );
+        }
 
         // Create a course and a user with editing teacher capabilities.
         $generator = $this->getDataGenerator();
