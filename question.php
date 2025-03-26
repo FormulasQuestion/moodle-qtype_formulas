@@ -206,6 +206,13 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      */
     public function formulas_format_text($vars, $text, $format, $qa, $component, $filearea, $itemid,
             $clean = false) {
+        $vars = clone $vars;
+        foreach($vars->all as $key => $var) {
+            if($var->type == 'n') {
+                $vars->all[$key] = clone $var;
+                $vars->all[$key]->value = str_replace('.', get_string('decsep', 'langconfig'), $var->value);
+            }
+        }
         return $this->format_text($this->qv->substitute_variables_in_text($vars, $text),
                  $format, $qa, $component, $filearea, $itemid, $clean);
     }
@@ -639,6 +646,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             if (!$res->is_number) {  // Unit has no meaning for algebraic format, so do nothing for it.
                 $res->diff = $this->qv->compute_algebraic_formula_difference($vars, $a, $r);
             } else {
+                $r = str_replace(get_string('decsep', 'langconfig'), '.', $r);
                 $res->diff = $this->qv->compute_numerical_formula_difference($a, $r, $cfactor, $gradingtype);
             }
         } catch (Exception $e) { // @codingStandardsIgnoreLine
