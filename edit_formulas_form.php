@@ -43,11 +43,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         global $PAGE;
         $config = get_config('qtype_formulas');
         $PAGE->requires->js_call_amd('qtype_formulas/editform', 'init', [get_config('qtype_formulas')->defaultcorrectness]);
-        $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
+        $PAGE->requires->js_call_amd('qtype_formulas/formatcheck', 'init', [get_string('decsep', 'langconfig'), get_string('unit', 'qtype_formulas')]);
         $PAGE->requires->css('/question/type/formulas/styles.css');
         $PAGE->requires->css('/question/type/formulas/tabulator.css');
-        // Legacy, needed until formatcheck.js is refactored.
-        $PAGE->requires->string_for_js('unit', 'qtype_formulas');
         // Hide the unused form fields.
         $mform->removeElement('defaultmark');
         $mform->addElement('hidden', 'defaultmark');
