@@ -29,7 +29,7 @@
  * @return
  */
 function formulas_format_check(decimal_separator, inputtitle) {
-    const regexp_decsep = decimal_separator == '.' ? '\.' : decimal_separator;
+    const regexp_decsep = decimal_separator == "." ? "\\." : decimal_separator;
     // If use_format_check is set to false, no format check will be used and initialized.
     var use_format_check = true;
     // Show the type hinting under the input box, such as 'Number', 'Unit'.
@@ -394,7 +394,7 @@ function formulas_format_check(decimal_separator, inputtitle) {
 
         // return the information of the formula by substituting numbers, variables and functions.
         get_formula_information : function(fn, str) {
-            var regexp = new RegExp("^[A-Za-z0-9" + regexp_decsep + "_ )(^\/*+-]*$");
+            var regexp = new RegExp("^[A-Za-z0-9" + decimal_separator + "_ )(^\/*+-]*$");
             if (regexp.test(str) == false) {
                 return null;   // formula can only contains these characters
             }
@@ -918,6 +918,7 @@ function formulas_format_check(decimal_separator, inputtitle) {
         var numcorrect = 0;
         var parsingtestcases = [
             // check for simple number
+            ['number', true, '-3' + decimal_separator + 'e10'],
             ['number', true, '3'],
             ['number', true, '3' + decimal_separator],
             ['number', true, decimal_separator + '3'],
