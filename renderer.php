@@ -275,6 +275,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $placeholder = ($j == $part->numbox) ? "_u" : "_$j";    // The last one is unit.
             $variablename = "{$i}_$j";
             $currentanswer = $qa->get_last_qt_var($variablename);
+            if(!empty($currentanswer)) {
+                $currentanswer = str_replace('.', get_string('decsep', 'langconfig'), $currentanswer);
+            }
             $inputname = $qa->get_qt_field_name($variablename);
             $inputattributes = array(
                 'name' => $inputname,
