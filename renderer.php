@@ -94,6 +94,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function head_code(question_attempt $qa) {
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
+        $this->page->requires->js_call_amd('theme_boost/bs4-compat', 'initBootstrap4Compatibility');
         return '';
     }
 
