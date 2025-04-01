@@ -93,8 +93,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     public function head_code(question_attempt $qa) {
+        global $CFG;
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
-        $this->page->requires->js_call_amd('theme_boost/bs4-compat', 'initBootstrap4Compatibility');
+        // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
+        if (file_exists($CFG->dirroot . '/question/type/formulas/questiontype.php')) {
+            $this->page->requires->js_call_amd('theme_boost/bs4-compat', 'initBootstrap4Compatibility');
+        }
         return '';
     }
 
@@ -264,12 +268,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $variablename = "{$i}_";
             $currentanswer = $qa->get_last_qt_var($variablename);
             $inputname = $qa->get_qt_field_name($variablename);
+            $title = get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas');
             $inputattributes = [
                 'type' => 'text',
                 'name' => $inputname,
                 'data-toggle' => 'tooltip',
-                'data-title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
-                'title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
+                'data-title' => $title,
+                'title' => $title,
                 'value' => $currentanswer,
                 'id' => $inputname,
                 'class' => 'form-control formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
@@ -309,13 +314,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $variablename = "{$i}_$j";
             $currentanswer = $qa->get_last_qt_var($variablename);
             $inputname = $qa->get_qt_field_name($variablename);
+            $title = get_string($placeholder == '_u' ? 'unit' : $gtype, 'qtype_formulas');
             $inputattributes = [
                 'name' => $inputname,
                 'value' => $currentanswer,
                 'id' => $inputname,
                 'data-toggle' => 'tooltip',
-                'data-title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
-                'title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
+                'data-title' => $title,
+                'title' => $title,
                 'maxlength' => 128,
                 'aria-labelledby' => 'lbl_' . str_replace(':', '__', $inputname),
             ];
