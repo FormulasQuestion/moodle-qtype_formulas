@@ -670,7 +670,10 @@ final class backup_restore_test extends \advanced_testcase {
         $DB->set_field('question', 'stamp', $question1->stamp, ['id' => $question2->id]);
 
         // Change the options of question2 to be different to question1.
-        $optionfields = ['varsrandom', 'varsglobal', 'answernumbering', 'shownumcorrect', 'correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback'];
+        $optionfields = [
+            'varsrandom', 'varsglobal', 'answernumbering', 'shownumcorrect',
+            'correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback',
+        ];
         if (in_array($field, $optionfields)) {
             $DB->set_field('qtype_formulas_options', $field, $value, ['questionid' => $question2->id]);
         } else {
