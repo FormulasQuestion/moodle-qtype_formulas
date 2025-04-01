@@ -607,7 +607,7 @@ function formulas_format_check() {
             self.last_value = null; // the input value in the last checking state, nothing by default.
             self.func = type.func;
             self.show_info = (type.show_type || type.show_interpretation);
-            self.show_type = type.show_type;
+            self.show_type = false;
             self.show_sign = type.show_sign;
             self.show_interpretation = type.show_interpretation;
             self.title = input.title;
