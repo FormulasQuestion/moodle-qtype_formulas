@@ -104,7 +104,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
         // We may safely assume that if the uncompbiled version is there, the minified one exists as well.
         if (file_exists($CFG->dirroot . '/theme/boost/amd/src/bs4-compat.js')) {
-            $this->page->requires->js_call_amd('theme_boost/bs4-compat', 'initBootstrap4Compatibility');
+            $this->page->requires->js_call_amd('theme_boost/bs4-compat');
         }
         self::$jsheaderloaded = true;
         return '';
