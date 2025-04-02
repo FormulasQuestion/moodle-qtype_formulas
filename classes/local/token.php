@@ -123,6 +123,9 @@ class token {
     /** @var int used to designate a token storing an end-of-group marker (closing brace) */
     const END_GROUP = 4194304;
 
+    /** @var int used to designate a token storing a unit */
+    const UNIT = 8388608;
+
     /** @var mixed the token's content, will be the name for identifiers */
     public $value;
 
