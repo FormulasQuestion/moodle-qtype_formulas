@@ -31,9 +31,6 @@
  */
 class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
-    /** @var bool track whether the JS header code has already been sent */
-    protected static $jsheaderloaded = false;
-
     /**
      * Generate the display of the formulation part of the question. This is the
      * area that contains the question text, and the controls for students to
@@ -97,16 +94,17 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function head_code(question_attempt $qa) {
         global $CFG;
-        if (self::$jsheaderloaded) {
-            return '';
-        }
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
         // We may safely assume that if the uncompbiled version is there, the minified one exists as well.
+        // We generate code similar to what js_call_amd() does, but we cannot use it directly,
+        // because it would try to call BS4Compat.() rather than BS4Compat().
         if (file_exists($CFG->dirroot . '/theme/boost/amd/src/bs4-compat.js')) {
-            $this->page->requires->js_call_amd('theme_boost/bs4-compat');
+            $code = "M.util.js_pending('theme_boost/bs4-compat'); ";
+            $code .= "require(['theme_boost/bs4-compat'], function(BS4Compat) { BS4Compat(); });";
+            $code .= "M.util.js_complete('theme_boost/bs4-compat');";
+            $this->page->requires->js_amd_inline($code);
         }
-        self::$jsheaderloaded = true;
         return '';
     }
 
