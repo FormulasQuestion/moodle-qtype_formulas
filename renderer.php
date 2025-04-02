@@ -97,12 +97,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
         // We may safely assume that if the uncompbiled version is there, the minified one exists as well.
-        // We generate code similar to what js_call_amd() does, but we cannot use it directly,
-        // because it would try to call BS4Compat.() rather than BS4Compat().
         if (file_exists($CFG->dirroot . '/theme/boost/amd/src/bs4-compat.js')) {
-            $code = "M.util.js_pending('theme_boost/bs4-compat'); ";
-            $code .= "require(['theme_boost/bs4-compat'], function(BS4Compat) { BS4Compat(); });";
-            $code .= "M.util.js_complete('theme_boost/bs4-compat');";
+            // We generate code similar to what js_call_amd() does, but we cannot use that function directly,
+            // because (written in the style below) it would try to call BS4Compat.() rather than BS4Compat().
+            $code = <<<EOF
+                M.util.js_pending('theme_boost/bs4-compat');
+                require(['theme_boost/bs4-compat'], function(BS4Compat) { BS4Compat(); });
+                M.util.js_complete('theme_boost/bs4-compat');
+            EOF;
             $this->page->requires->js_amd_inline($code);
         }
         return '';
