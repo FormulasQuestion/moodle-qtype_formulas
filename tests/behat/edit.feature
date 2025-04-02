@@ -57,6 +57,8 @@ Feature: Test editing a Formulas question
 
   Scenario: Check validation of grading vars
     When I am on the "formulas-001 for editing" "core_question > edit" page logged in as teacher1
+    And I follow "Part 1"
+    And I follow "Show more..."
     And I set the following fields to these values:
       | Grading variables | test = 1/0; |
     And I press "id_submitbutton"

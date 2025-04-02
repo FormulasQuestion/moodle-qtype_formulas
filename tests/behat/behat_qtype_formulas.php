@@ -64,6 +64,7 @@ class behat_qtype_formulas extends behat_base {
         $this->execute("behat_general::i_click_on", [$this->escape($xpath), "xpath_element"]);
     }
 
+    // phpcs:disable moodle.Files.LineLength.TooLong
     /**
      * Check values inside the instantiation table.
      *
@@ -75,6 +76,7 @@ class behat_qtype_formulas extends behat_base {
      * @param int $rownumber which row
      */
     public function i_should_see_in_the_field_of_row_of_the_formulas_question_instatiation_table(string $text, string $field, int $rownumber): void {
+        // phpcs:enable
         $field = behat_context_helper::escape($field);
 
         $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]"

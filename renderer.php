@@ -93,7 +93,20 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     public function head_code(question_attempt $qa) {
+        global $CFG;
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
+        // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
+        // We may safely assume that if the uncompbiled version is there, the minified one exists as well.
+        if (file_exists($CFG->dirroot . '/theme/boost/amd/src/bs4-compat.js')) {
+            // We generate code similar to what js_call_amd() does, but we cannot use that function directly,
+            // because (written in the style below) it would try to call BS4Compat.() rather than BS4Compat().
+            $code = <<<EOF
+                M.util.js_pending('theme_boost/bs4-compat');
+                require(['theme_boost/bs4-compat'], function(BS4Compat) { BS4Compat(); });
+                M.util.js_complete('theme_boost/bs4-compat');
+            EOF;
+            $this->page->requires->js_amd_inline($code);
+        }
         return '';
     }
 
@@ -263,13 +276,16 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $variablename = "{$i}_";
             $currentanswer = $qa->get_last_qt_var($variablename);
             $inputname = $qa->get_qt_field_name($variablename);
+            $title = get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas');
             $inputattributes = [
                 'type' => 'text',
                 'name' => $inputname,
-                'title' => get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas'),
+                'data-toggle' => 'tooltip',
+                'data-title' => $title,
+                'title' => $title,
                 'value' => $currentanswer,
                 'id' => $inputname,
-                'class' => 'formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
+                'class' => 'form-control formulas_' . $gtype . '_unit ' . $sub->feedbackclass,
                 'maxlength' => 128,
                 'aria-labelledby' => 'lbl_' . str_replace(':', '__', $inputname),
             ];
@@ -306,10 +322,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $variablename = "{$i}_$j";
             $currentanswer = $qa->get_last_qt_var($variablename);
             $inputname = $qa->get_qt_field_name($variablename);
+            $title = get_string($placeholder == '_u' ? 'unit' : $gtype, 'qtype_formulas');
             $inputattributes = [
                 'name' => $inputname,
                 'value' => $currentanswer,
                 'id' => $inputname,
+                'data-toggle' => 'tooltip',
+                'data-title' => $title,
+                'title' => $title,
                 'maxlength' => 128,
                 'aria-labelledby' => 'lbl_' . str_replace(':', '__', $inputname),
             ];
@@ -338,6 +358,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         $choices[$x] = $question->format_text($mctxt, $part->subqtextformat , $qa,
                                 'qtype_formulas', 'answersubqtext', $part->id, false);
                     }
+                    unset($inputattributes['data-toggle']);
+                    unset($inputattributes['data-title']);
                     $select = html_writer::select($choices, $inputname,
                             $currentanswer, ['' => ''], $inputattributes);
                     $output = html_writer::start_tag('span', ['class' => 'formulas_menu']);
@@ -386,6 +408,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                             $class .= ' ' . $sub->feedbackclass;
                         }
                         $output .= $this->choice_wrapper_start($class);
+                        unset($inputattributes['data-toggle']);
+                        unset($inputattributes['data-title']);
                         $output .= html_writer::empty_tag('input', $inputattributes);
                         $output .= html_writer::tag(
                             'label',
@@ -414,7 +438,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 // Check if it's an input for unit.
                 if (strlen($part->postunit) > 0) {
                     $inputattributes['title'] = get_string('unit', 'qtype_formulas');
-                    $inputattributes['class'] = 'formulas_unit '.$sub->unitfeedbackclass;
+                    $inputattributes['class'] = 'form-control formulas_unit '.$sub->unitfeedbackclass;
+                    $inputattributes['data-title'] = get_string('unit', 'qtype_formulas');
+                    $inputattributes['data-toggle'] = 'tooltip';
                     $a = new stdClass();
                     $a->part = $i + 1;
                     $a->numanswer = $j + 1;
@@ -436,7 +462,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 }
             } else {
                 $inputattributes['title'] = get_string($gtype, 'qtype_formulas');
-                $inputattributes['class'] = 'formulas_'.$gtype.' '.$sub->boxfeedbackclass;
+                $inputattributes['class'] = 'form-control formulas_'.$gtype.' '.$sub->boxfeedbackclass;
+                $inputattributes['data-toggle'] = 'tooltip';
+                $inputattributes['data-title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
                 $a = new stdClass();
                 $a->part = $i + 1;

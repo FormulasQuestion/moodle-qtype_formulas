@@ -357,6 +357,8 @@ $string['varsstatistics'] = 'Statistics';
 $string['yougotnright'] = 'You have correctly answered {$a} parts of this question.';
 $string['yougotoneright'] = 'You have correctly answered 1 part of this question.';
 
+// phpcs:disable moodle.Files.LangFilesOrdering.IncorrectOrder
+// phpcs:ignore moodle.Files.LangFilesOrdering.UnexpectedComment
 // Strings from the 5.3 branch that we keep in this file in order for them to remain in AMOS.
 $string['choiceno'] = 'No';
 $string['choiceyes'] = 'Yes';

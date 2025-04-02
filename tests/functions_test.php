@@ -616,6 +616,7 @@ final class functions_test extends \advanced_testcase {
             ["Invalid number of arguments for function 'decbin': 2 given.", 'decbin(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
+            // phpcs:ignore
             // ['1:1:decbin(): Argument #1 ($num) must be of type int, string given', 'decbin("a")'],
         ];
     }
@@ -639,6 +640,7 @@ final class functions_test extends \advanced_testcase {
             ["Invalid number of arguments for function 'dechex': 2 given.", 'dechex(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
+            // phpcs:ignore
             // ['1:1:dechex(): Argument #1 ($num) must be of type int, string given', 'dechex("a")'],
         ];
     }
@@ -662,6 +664,7 @@ final class functions_test extends \advanced_testcase {
             ["Invalid number of arguments for function 'bindec': 2 given.", 'bindec(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
+            // phpcs:ignore
             // ['1:1:bindec(): Argument #1 ($num) must be of type int, string given', 'bindec("a")'],
         ];
     }
@@ -683,6 +686,7 @@ final class functions_test extends \advanced_testcase {
             ["Invalid number of arguments for function 'decoct': 2 given.", 'decoct(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
+            // phpcs:ignore
             // ['1:1:decoct(): Argument #1 ($num) must be of type int, string given', 'decoct("a")'],
         ];
 
@@ -707,6 +711,7 @@ final class functions_test extends \advanced_testcase {
             ["Invalid number of arguments for function 'octdec': 2 given.", 'octdec(1, 2)'],
             // TODO: enable the following test once we drop support for PHP 7.4
             // the following will not throw an error in PHP 7.4; result will be 0.
+            // phpcs:ignore
             // ['1:1:octdec(): Argument #1 ($num) must be of type int, string given', 'octdec("a")'],
         ];
     }
