@@ -14,7 +14,7 @@
 .que.formulas div#qtype_formulas_mathjax_display {
     background-color: #eef;
     border: 1px solid #88c;
-    position: relative;
+    position: absolute;
     margin-left: 0px;
     margin-top: 0px;
     padding: 4px;
