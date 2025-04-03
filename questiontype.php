@@ -816,17 +816,20 @@ class qtype_formulas extends question_type {
             // local vars.
             // Note that data from the editors is stored in an array with the keys text, format and itemid.
             // Also note that local vars are entered in a textarea (and not an editor) and are PARAM_RAW_TRIMMED.
-            $noparttext = empty(trim($data->subqtext[$i]['text']));
-            $nogeneralfb = empty(trim($data->subqtext[$i]['text']));
-            $nolocalvars = empty($data->vars1[$i]);
+            $noparttext = strlen(trim($data->subqtext[$i]['text'])) === 0;
+            $nogeneralfb = strlen(trim($data->subqtext[$i]['text'])) === 0;
+            $nolocalvars = strlen(trim($data->vars1[$i])) === 0;
             $emptypart = $noparttext && $nogeneralfb && $nolocalvars;
 
             // Having no answermark is only allowed if the part is "empty" AND if there is no answer.
             if ($nomark && !($emptypart && $noanswer)) {
                 $errors["answermark[$i]"] = get_string('error_mark', 'qtype_formulas');
             }
-            // Similarly, having no answer is only allowed for "empty" parts that do not have an answermark.
-            if ($noanswer && !($emptypart && $nomark)) {
+            // On the other hand, having no answer is allowed for "empty" parts even if they
+            // do have an answermark. We do this, because the answermark field is set by default when
+            // the user clicks the "Blanks for 2 more parts" button. But if they do that by accident
+            // and don't want those parts, they should not have to worry about them.
+            if ($noanswer && !$emptypart) {
                 $errors["answer[$i]"] = get_string('error_answer_missing', 'qtype_formulas');
             }
 

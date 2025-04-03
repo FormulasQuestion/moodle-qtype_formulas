@@ -20,6 +20,7 @@ Feature: Test editing a Formulas question
     And the following "questions" exist:
       | questioncategory | qtype    | name                     | template       |
       | Test questions   | formulas | formulas-001 for editing | testthreeparts |
+      | Test questions   | formulas | simple                   | testsinglenum  |
 
   Scenario: Edit a Formulas question
     When I am on the "formulas-001 for editing" "core_question > edit" page logged in as teacher1
@@ -67,3 +68,16 @@ Feature: Test editing a Formulas question
       | Grading variables | test = 2; |
     And I press "id_submitbutton"
     Then I should not see "Division by zero is not defined."
+
+  Scenario: Adding additional parts that we don't actually want
+    When I am on the "simple" "core_question > edit" page logged in as teacher1
+    Then I should not see "Part 2"
+    And I should not see "Part 3"
+    And I press "id_addanswers"
+    And I wait until the page is ready
+    Then I should see "Part 2"
+    And I should see "Part 3"
+    And I press "id_updatebutton"
+    Then I should not see "No answer has been defined."
+    And I should not see "Part 2"
+    And I should not see "Part 3"
