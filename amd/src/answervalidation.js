@@ -63,6 +63,10 @@ export const init = () => {
 
         // Attach event listener for the input event.
         input.addEventListener('input', setDebounceTimer);
+
+        // Attach event listener for the focus and blur events.
+        input.addEventListener('focus', focusReceived);
+        input.addEventListener('blur', focusLost);
     }
 
     // If we have a recent version of Moodle, the MathJax filter will notify us when our LaTex is
@@ -77,6 +81,29 @@ export const init = () => {
     // on blur: hide mathjax preview
 
     // on input: if empty return, if invalid remove jax and show warning, if valid remove warning and show jax
+};
+
+const focusReceived = (evt) => {
+    let field = evt.target;
+    // If the field is empty, there is nothing to do.
+    if (field.value == '') {
+        return;
+    }
+    // If the field is not empty and there already is a MathJax display for this
+    // field, we can simply reactivate ist.
+    let div = document.getElementById('qtype_formulas_mathjax_display');
+    if (div !== null && div.dataset.for == field.id) {
+        div.style.visibility = 'visible';
+        return;
+    }
+    validateStudentAnswer(field.id);
+    // on focus: if empty return, if invalid retun, otherwise: render and show preview
+    //  --> if same as last focus, unhide preview, otherwise delete preview and recreate
+};
+
+const focusLost = () => {
+    hideMathJax();
+    // on blur: hide mathjax preview, but do not delete
 };
 
 const forceInitMathJax = () => {
@@ -145,47 +172,52 @@ const validateStudentAnswer = async(id) => {
             let texcode = await latexify(field.value);
             showMathJax(id, texcode);
         } else {
-            removeDiv(null);
+            hideMathJax();
         }
     } catch (err) {
         Notification.exception(err);
     }
 
     pendingPromise.resolve();
-
-    // The event listener will not be added multiple times, because the handler is a named function.
-    // So we do not have to check whether we have already added it or not.
-    field.addEventListener('blur', removeDiv);
 };
 
-const removeDiv = (evt) => {
+const hideMathJax = () => {
     let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null) {
-        //div.remove();
-    }
-    if (evt !== null) {
-        evt.target.removeEventListener('blur', removeDiv, false);
+        div.style.visibility = 'hidden';
     }
 };
 
 const showMathJax = (id, texcode) => {
     let field = document.getElementById(id);
 
+    // If the field does not have focus anymore, we stop here.
+    if (document.activeElement.id !== id) {
+        //return;
+    }
+
     let div = document.getElementById('qtype_formulas_mathjax_display');
+    // If the div exists, but does not belong to our input field, delete it.
+    if (div !== null && div.dataset.for !== id) {
+
+        div.dataset.for = id;
+        field.parentNode.insertBefore(div, field.nextSibling);
+    }
+    // If there is no div, create one.
     if (div === null) {
         div = document.createElement('div');
         div.id = 'qtype_formulas_mathjax_display';
         div.classList.add('filter_mathjaxloader_equation');
-        field.parentNode.insertBefore(div, field.nextSibling);
+        div.dataset.for = id;
     }
 
+    div.style.visibility = 'visible';
     div.innerText = `\\(\\displaystyle ${texcode} \\)`;
 
     // Tell the MathJax filter that we have added some content to be rendered.
     notifyFilterContentUpdated(div.parentNode);
 
-
-    return div;
+    //return div;
 };
 
 /**
