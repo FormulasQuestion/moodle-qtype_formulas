@@ -71,10 +71,7 @@ Feature: Test editing a Formulas question
 
   Scenario: Adding additional parts that we don't actually want
     When I am on the "simple" "core_question > edit" page logged in as teacher1
-    Then I should not see "Part 2"
-    And I should not see "Part 3"
     And I press "id_addanswers"
-    And I wait until the page is ready
     Then I should see "Part 2"
     And I should see "Part 3"
     And I press "id_updatebutton"

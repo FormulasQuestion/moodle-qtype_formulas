@@ -217,6 +217,8 @@ final class questiontype_test extends \advanced_testcase {
                     'answer' => [0 => ''],
                 ],
             ],
+            // The following should be valid, because the first part has no answer and no text.
+            [[], ['answer' => [0 => ''], 'subqtext' => ['0' => ['text' => '']]]],
             // The question has subqtexts defined for both parts, so the first part MUST have an answermark
             // and an answer.
             [
