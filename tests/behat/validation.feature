@@ -29,8 +29,8 @@ Feature: Validation of input
 
   Scenario: Check validation of input works
     When I set the field "Answer for part 2" to "1+"
-    Then "Answer for part 2" "qtype_formulas > Visible Validation Warning Symbol" should exist
+    Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Answer for part 2" to "1"
+    And I press tab
     And I wait "1" seconds
-    Then "Answer for part 2" "qtype_formulas > Visible Validation Warning Symbol" should not exist
-    And "Answer for part 2" "qtype_formulas > Hidden Validation Warning Symbol" should exist
+    Then "" "qtype_formulas > Formulas field with warning" should not exist

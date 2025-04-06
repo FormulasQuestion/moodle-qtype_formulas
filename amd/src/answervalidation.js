@@ -149,11 +149,10 @@ const handleRenderingComplete = (evt) => {
  */
 const validateStudentAnswer = async(id) => {
     let field = document.getElementById(id);
-    let symbol = document.getElementById(`warning-${id}`);
 
-    // Empty fields must not be validated and should not have a warning symbol.
+    // Empty fields must not be validated and should not be marked as invalid.
     if (field.value === '') {
-        symbol.style.visibility = 'hidden';
+        field.classList.remove('is-invalid');
         return;
     }
 
@@ -167,11 +166,12 @@ const validateStudentAnswer = async(id) => {
                 'withunit': field.dataset.withunit,
             },
         }])[0];
-        symbol.style.visibility = (validationResult ? 'hidden' : 'visible');
         if (validationResult) {
+            field.classList.remove('is-invalid');
             let texcode = await latexify(field.value);
             showMathJax(id, texcode);
         } else {
+            field.classList.add('is-invalid');
             hideMathJax();
         }
     } catch (err) {
@@ -193,15 +193,15 @@ const showMathJax = (id, texcode) => {
 
     // If the field does not have focus anymore, we stop here.
     if (document.activeElement.id !== id) {
-        //return;
+        return;
     }
 
     let div = document.getElementById('qtype_formulas_mathjax_display');
     // If the div exists, but does not belong to our input field, delete it.
     if (div !== null && div.dataset.for !== id) {
-
-        div.dataset.for = id;
-        field.parentNode.insertBefore(div, field.nextSibling);
+        div.remove();
+        div = null;
+        //div.dataset.for = id;
     }
     // If there is no div, create one.
     if (div === null) {
@@ -209,6 +209,7 @@ const showMathJax = (id, texcode) => {
         div.id = 'qtype_formulas_mathjax_display';
         div.classList.add('filter_mathjaxloader_equation');
         div.dataset.for = id;
+        field.parentNode.insertBefore(div, field.nextSibling);
     }
 
     div.style.visibility = 'visible';

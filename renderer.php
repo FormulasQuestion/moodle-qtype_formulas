@@ -310,12 +310,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 ]
             );
             $input .= html_writer::empty_tag('input', $inputattributes);
-            $input .= html_writer::span('', 'fa fa-exclamation-circle formulas_input_warning', [
-                'id' => 'warning-' . $inputattributes['id'],
-                'role' => 'img',
-                'aria-label' => 'FIXME warning in ' . $label,
-                'title' => 'FIXME warning in ' . $label,
-            ]);
             $subqreplaced = str_replace("{_0}{_u}", $input, $subqreplaced);
         }
 
@@ -499,12 +493,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     ]
                 );
                 $inputs[$placeholder] .= html_writer::empty_tag('input', $inputattributes);
-                $inputs[$placeholder] .= html_writer::span('', 'fa fa-exclamation-circle formulas_input_warning', [
-                    'id' => 'warning-' . $inputattributes['id'],
-                    'role' => 'img',
-                    'aria-label' => 'FIXME warning in ' . $label,
-                    'title' => 'FIXME warning in ' . $label,
-                ]);
             }
         }
 
