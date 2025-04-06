@@ -34,3 +34,21 @@ Feature: Validation of input
     And I press tab
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
+
+  Scenario: Check rendering of MathJax works
+    When I set the field "Answer for part 2" to "1e5"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    When I set the field "Answer for part 2" to "xxx"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    When I set the field "Answer for part 2" to "123"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    When I press tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    When I press tab
+    When I press shift tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
