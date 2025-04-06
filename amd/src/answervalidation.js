@@ -30,9 +30,9 @@ import {notifyFilterContentUpdated} from 'core_filters/events';
 import {eventTypes as filterEventTypes} from 'core_filters/events';
 
 /**
- * Array to store all pending timers, allowing to reset / cancel them.
+ * Array to store pending timer, allowing to reset / cancel it.
  */
-var timers = [];
+var timer = null;
 
 /**
  * Delay (in milliseconds) before sending the current input of a field to validation.
@@ -66,50 +66,49 @@ export const init = () => {
 
         // Attach event listener for the focus and blur events.
         input.addEventListener('focus', focusReceived);
-        input.addEventListener('blur', focusLost);
+        input.addEventListener('blur', hideMathJax);
     }
 
     // If we have a recent version of Moodle, the MathJax filter will notify us when our LaTex is
     // rendered.
     if (typeof filterEventTypes.filterContentRenderingComplete !== 'undefined') {
         document.addEventListener(filterEventTypes.filterContentRenderingComplete, handleRenderingComplete);
+    } else {
+        addLegacyMathJaxListener();
     }
-
-    // on focus: if empty return, if invalid retun, otherwise: render and show preview
-    //  --> if same as last focus, unhide preview, otherwise delete preview and recreate
-
-    // on blur: hide mathjax preview
-
-    // on input: if empty return, if invalid remove jax and show warning, if valid remove warning and show jax
 };
 
 const focusReceived = (evt) => {
     let field = evt.target;
+
     // If the field is empty, there is nothing to do.
     if (field.value == '') {
         return;
     }
-    // If the field is not empty and there already is a MathJax display for this
-    // field, we can simply reactivate ist.
+
+    // If the field is not empty and we already have a MathJax display for this
+    // field, we can simply reactivate it.
     let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null && div.dataset.for == field.id) {
         div.style.visibility = 'visible';
         return;
     }
-    validateStudentAnswer(field.id);
-    // on focus: if empty return, if invalid retun, otherwise: render and show preview
-    //  --> if same as last focus, unhide preview, otherwise delete preview and recreate
-};
 
-const focusLost = () => {
-    hideMathJax();
-    // on blur: hide mathjax preview, but do not delete
+    // In all other cases, we have to process the field's content again and recreate
+    // the MathJax preview.
+    validateStudentAnswer(field.id);
 };
 
 const forceInitMathJax = () => {
     if (typeof window.MathJax === 'undefined') {
         notifyFilterContentUpdated(document.querySelector('body'));
         setTimeout(forceInitMathJax, 200);
+    }
+};
+
+const addLegacyMathJaxListener = () => {
+    if (typeof window.MathJax === 'undefined') {
+        setTimeout(addLegacyMathJaxListener, 200);
     } else {
         window.MathJax.Hub.Register.MessageHook('New Math', handleRenderingComplete);
     }
@@ -117,6 +116,7 @@ const forceInitMathJax = () => {
 
 const handleRenderingComplete = (evt) => {
     let mathjaxSpan = null;
+
     // For older Moodle versions, we get an array of two strings. The first string
     // is just 'New Math' (message type), the second is 'MathJax-Element-xxx' indicating
     // the name of the new element.
@@ -138,7 +138,13 @@ const handleRenderingComplete = (evt) => {
     if (mathjaxSpan !== null) {
         width = mathjaxSpan.getBoundingClientRect().width;
     }
-    window.console.log(width);
+    let div = document.getElementById('qtype_formulas_mathjax_display');
+    if (div !== null) {
+        let style = window.getComputedStyle(div);
+        width += 3 * parseInt(style.padding);
+        width = Math.min(width, div.parentNode.getBoundingClientRect().width);
+        div.style.width = width + 'px';
+    }
 };
 
 /**
@@ -150,9 +156,11 @@ const handleRenderingComplete = (evt) => {
 const validateStudentAnswer = async(id) => {
     let field = document.getElementById(id);
 
-    // Empty fields must not be validated and should not be marked as invalid.
+    // Empty fields do not have to be validated and must not be marked as invalid.
+    // If the MathJax preview is currently shown, it must be hidden.
     if (field.value === '') {
         field.classList.remove('is-invalid');
+        hideMathJax();
         return;
     }
 
@@ -201,24 +209,23 @@ const showMathJax = (id, texcode) => {
     if (div !== null && div.dataset.for !== id) {
         div.remove();
         div = null;
-        //div.dataset.for = id;
     }
-    // If there is no div, create one.
+
+    // If there is no div (or no div anymore), create one.
     if (div === null) {
         div = document.createElement('div');
         div.id = 'qtype_formulas_mathjax_display';
         div.classList.add('filter_mathjaxloader_equation');
         div.dataset.for = id;
+        div.style.left = field.offsetLeft + 'px';
         field.parentNode.insertBefore(div, field.nextSibling);
     }
 
-    div.style.visibility = 'visible';
     div.innerText = `\\(\\displaystyle ${texcode} \\)`;
+    div.style.visibility = 'visible';
 
     // Tell the MathJax filter that we have added some content to be rendered.
     notifyFilterContentUpdated(div.parentNode);
-
-    //return div;
 };
 
 /**
@@ -228,11 +235,11 @@ const showMathJax = (id, texcode) => {
  */
 const setDebounceTimer = (evt) => {
     // If a timer has already been set, delete it.
-    if (typeof timers[evt.target.id] === 'number') {
-        clearTimeout(timers[evt.target.id]);
+    if (typeof timer === 'number') {
+        clearTimeout(timer);
     }
     // Set timer for given input field.
-    timers[evt.target.id] = setTimeout(validateStudentAnswer, DELAY, evt.target.id);
+    timer = setTimeout(validateStudentAnswer, DELAY, evt.target.id);
 };
 
 export default {init};

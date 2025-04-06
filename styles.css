@@ -1,9 +1,3 @@
-.que.formulas .formulas_input_info_outer {
-    display: inline;
-    position: absolute;
-    z-index: 2;
-}
-
 .que.formulas div#qtype_formulas_mathjax_display {
     background-color: #eef;
     border: 1px solid #88c;
@@ -12,29 +6,8 @@
     margin-top: 0px;
     padding: 4px;
     width: 150px;
-}
-
-.que.formulas .formulas_input_info {
-    background-color: #eef;
-    left: 0;
-    position: absolute;
-    top: 1.63em;
-    width: 150px;
-}
-
-.que.formulas .formulas_input_info_title {
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation {
-    border: 1px solid #88c;
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation_incorrect {
-    border: 1px solid #88c;
-    color: #bbb;
-    padding: 2px;
+    overflow-x: auto;
+    z-index: 1;
 }
 
 .que.formulas .formulas_unit {
@@ -108,7 +81,6 @@
     padding: 0.3em 0 0.3em 25px;
     text-indent: -25px;
 }
-
 
 .que.formulas .formulas_mark {
     display: inline;
