@@ -37,6 +37,10 @@ class behat_qtype_formulas extends behat_base {
                 'Formulas field with warning',
                 ["//input[contains(@class, 'formulas')][(contains(@class, 'is-invalid'))]"],
             ),
+            new behat_component_named_selector(
+                'MathJax display',
+                ["//div[@id='qtype_formulas_mathjax_display']"],
+            ),
         ];
     }
 

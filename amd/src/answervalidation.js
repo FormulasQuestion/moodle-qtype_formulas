@@ -70,7 +70,7 @@ export const init = () => {
     }
 
     // If we have a recent version of Moodle, the MathJax filter will notify us when our LaTex is
-    // rendered.
+    // rendered. Otherwise, we register a legacy callback.
     if (typeof filterEventTypes.filterContentRenderingComplete !== 'undefined') {
         document.addEventListener(filterEventTypes.filterContentRenderingComplete, handleRenderingComplete);
     } else {
