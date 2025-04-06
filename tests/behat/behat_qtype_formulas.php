@@ -34,12 +34,8 @@ class behat_qtype_formulas extends behat_base {
     public static function get_exact_named_selectors(): array {
         return [
             new behat_component_named_selector(
-                'Visible Validation Warning Symbol',
-                ["//span[@class='fa fa-exclamation-circle formulas_input_warning'][contains(@title, %locator%)][contains(@style, 'visible')]"]
-            ),
-            new behat_component_named_selector(
-                'Hidden Validation Warning Symbol',
-                ["//span[@class='fa fa-exclamation-circle formulas_input_warning'][contains(@title, %locator%)][not(contains(@style, 'visible'))]"]
+                'Formulas field with warning',
+                ["//input[contains(@class, 'formulas')][(contains(@class, 'is-invalid'))]"],
             ),
         ];
     }
