@@ -31,7 +31,7 @@ $addons = [
                 'method' => 'mobile_get_formulas',
                 'styles' => [
                     'url' => '/question/type/formulas/mobile/styles_app.css',
-                    'version' => '1.00',
+                    'version' => '2.0',
                 ],
             ],
         ],

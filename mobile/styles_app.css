@@ -1,88 +1,53 @@
-.que.formulas .formulas_input_warning_outer {
-
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
-.que.formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.3em;
-}
-
-.que.formulas .formulas_input_info_outer {
-    display: inline;
-    position: absolute;
-    z-index: 2;
-}
-
-.que.formulas .formulas_input_info {
-    background-color: #eef;
-    border: 1px solid #88c;
-    left: 0;
-    position: absolute;
-    top: 1.63em;
-    width: 150px;
-}
-
-.que.formulas .formulas_input_info_title {
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation {
-    border-top: 1px solid #88c;
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation_incorrect {
-    border-top: 1px solid #88c;
-    color: #bbb;
-    padding: 2px;
-}
-
 .que.formulas .formulas_unit {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 40px;
 }
 
 .que.formulas .formulas_number {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 40px;
 }
 
 .que.formulas .formulas_number_unit {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 80px;
 }
 
 .que.formulas .formulas_numeric {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 100px;
 }
 
 .que.formulas .formulas_numeric_unit {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 200px;
 }
 
 .que.formulas .formulas_numerical_formula {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 200px;
 }
 
 .que.formulas .formulas_numerical_formula_unit {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 300px;
 }
 
 .que.formulas .formulas_algebraic_formula {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 200px;
 }
 
 .que.formulas .formulas_algebraic_formula_unit {
+    display: inline-block;
     margin: 0 0 0 0;
     width: 300px;
 }
@@ -104,7 +69,6 @@
     padding: 0.3em 0 0.3em 25px;
     text-indent: -25px;
 }
-
 
 .que.formulas .formulas_mark {
     display: inline;
@@ -131,61 +95,4 @@
 .que.formulas .formulation .formulaspartfeedback .partiallycorrect,
 .que.formulas .formulation .formulaspartfeedback .incorrect {
     background: transparent;
-}
-
-/* Styles for the editing form. */
-body#page-question-type-formulas .formulas_correctness_show {
-    display: inline;
-}
-
-body#page-question-type-formulas .formulas_input_warning_outer {
-
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
-body#page-question-type-formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.3em;
-}
-
-body#page-question-type-formulas .formulas_input_info_outer {
-    display: inline;
-    position: absolute;
-    z-index: 2;
-}
-
-body#page-question-type-formulas .formulas_input_info {
-    background-color: #eef;
-    border: 1px solid #88c;
-    left: 0;
-    position: absolute;
-    top: 1.94em;
-    width: 150px;
-}
-*/
-body#page-question-type-formulas .formulas_input_info_title {
-    padding: 2px;
-}
-
-body#page-question-type-formulas .formulas_input_info_interpretation {
-    border-top: 1px solid #88c;
-    padding: 2px;
-}
-
-body#page-question-type-formulas .formulas_input_info_interpretation_incorrect {
-    border-top: 1px solid #88c;
-    color: #bbb;
-    padding: 2px;
-}
-
-/* RTL hacks */
-#page-question-type-formulas #id_varsrandom,
-#page-question-type-formulas #id_varsglobal {
-    height: 80px;
-    direction: ltr;
-    text-align: left;
 }
