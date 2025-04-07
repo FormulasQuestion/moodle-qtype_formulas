@@ -23,6 +23,10 @@ var result = {
     componentInit: function() {
         var div = document.createElement('div');
         div.innerHTML = this.question.html;
+
+        // We use Bootstrap tooltips in the classic renderer, but we don't want them in the
+        // Moodle App, because they can take away the focus.
+        div.innerHTML = div.innerHTML.replaceAll(/data(-bs)?-toggle="tooltip"/g, '');
         this.question.text = div.querySelector('.qtext').innerHTML;
 
         // Replace Moodle's correct/incorrect and feedback classes with our own.
