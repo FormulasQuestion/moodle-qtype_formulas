@@ -1,25 +1,25 @@
 .que.formulas div#qtype_formulas_mathjax_display {
     background-color: #eef;
     border: 1px solid #88c;
-    position: absolute;
     margin-left: 0px;
     margin-top: 0px;
-    padding: 4px;
-    width: 150px;
     overflow-x: auto;
+    padding: 4px;
+    position: absolute;
+    width: 150px;
     z-index: 1;
 }
 
 .que.formulas .formulas_unit {
     display: inline-block;
     margin: 0 0 0 0;
-    width: 40px;
+    width: 55px;
 }
 
 .que.formulas .formulas_number {
     display: inline-block;
     margin: 0 0 0 0;
-    width: 40px;
+    width: 55px;
 }
 
 .que.formulas .formulas_number_unit {
@@ -146,7 +146,7 @@ body#page-question-type-formulas .formulas_input_info_interpretation_incorrect {
 /* RTL hacks */
 #page-question-type-formulas #id_varsrandom,
 #page-question-type-formulas #id_varsglobal {
-    height: 80px;
     direction: ltr;
+    height: 80px;
     text-align: left;
 }
