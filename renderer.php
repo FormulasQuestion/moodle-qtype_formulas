@@ -94,6 +94,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function head_code(question_attempt $qa) {
         global $CFG;
+        $this->page->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
         $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
         // We may safely assume that if the uncompbiled version is there, the minified one exists as well.
@@ -279,6 +280,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $title = get_string($gtype . ($part->postunit == '' ? '' : '_unit'), 'qtype_formulas');
             $inputattributes = [
                 'type' => 'text',
+                'data-answertype' => $part->answertype,
+                'data-withunit' => '1',
                 'name' => $inputname,
                 'data-toggle' => 'tooltip',
                 'data-title' => $title,
@@ -441,6 +444,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     $inputattributes['class'] = 'form-control formulas_unit '.$sub->unitfeedbackclass;
                     $inputattributes['data-title'] = get_string('unit', 'qtype_formulas');
                     $inputattributes['data-toggle'] = 'tooltip';
+                    $inputattributes['data-answertype'] = 'unit';
                     $a = new stdClass();
                     $a->part = $i + 1;
                     $a->numanswer = $j + 1;
@@ -466,6 +470,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $inputattributes['data-toggle'] = 'tooltip';
                 $inputattributes['data-title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
+                $inputattributes['data-answertype'] = $part->answertype;
+                $inputattributes['data-withunit'] = 0;
                 $a = new stdClass();
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;

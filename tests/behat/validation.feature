@@ -29,12 +29,26 @@ Feature: Validation of input
 
   Scenario: Check validation of input works
     When I set the field "Answer for part 2" to "1+"
-    # First make sure the script has been loaded and parsed
-    Then "" "qtype_formulas > Invisible Validation Warning Symbol" should exist
-    # and the internal unit tests have passed
-    And "" "qtype_formulas > Validation Unit Tests Error Indicator" should not exist
-    # Now wrong input should give an error
-    And "" "qtype_formulas > Validation Warning Symbol" should exist
+    Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Answer for part 2" to "1"
-    # Finally, the error should be gone
-    Then "" "qtype_formulas > Validation Warning Symbol" should not exist
+    And I press tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > Formulas field with warning" should not exist
+
+  Scenario: Check rendering of MathJax works
+    When I set the field "Answer for part 2" to "1e5"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    When I set the field "Answer for part 2" to "xxx"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    When I set the field "Answer for part 2" to "123"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    When I press tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    When I press tab
+    When I press shift tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible

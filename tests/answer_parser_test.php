@@ -78,6 +78,7 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
+            [false, '(1+2)*ln'],
             [false, '\sin(3)'],
             [false, '\ 3'],
             [false, '3; 4'],
