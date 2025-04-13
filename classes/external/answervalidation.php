@@ -27,6 +27,7 @@ namespace qtype_formulas\external;
 
 use Exception;
 use qtype_formulas\local\answer_parser;
+use qtype_formulas\local\latexifier;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -59,9 +60,9 @@ class answervalidation extends \external_api {
      * @param string $answer student's answer
      * @param int $answertype answer type, as defined in qtype_formulas
      * @param bool $withunit whether or not the field also contains a unit (combined answer field)
-     * @return bool whether or not the answer is valid
+     * @return array array with status (error or success) and detail (error message or TeX code)
      */
-    public static function validate_student_answer(string $answer, int $answertype, bool $withunit): bool {
+    public static function validate_student_answer(string $answer, int $answertype, bool $withunit): array {
         $params = self::validate_parameters(
             self::validate_student_answer_parameters(),
             ['answer' => $answer, 'answertype' => $answertype, 'withunit' => $withunit]
@@ -70,24 +71,32 @@ class answervalidation extends \external_api {
         try {
             $parser = new answer_parser($params['answer']);
         } catch (Exception $e) {
-            // If there was an exception already during the creation of the parser,
-            // we can return false.
-            return false;
+            return ['status' => 'error', 'detail' => $e->getMessage()];
         }
 
-        // If we have a combined field, we split the unit from the number und parse again.
-        if ($params['withunit']) {
-            $splitindex = $parser->find_start_of_units();
-            $number = trim(substr($answer, 0, $splitindex));
-
-            try {
-                $parser = new answer_parser($number);
-            } catch (Exception $e) {
-                return false;
+        if ($params['withunit'] === false) {
+            if ($parser->is_acceptable_for_answertype($answertype)) {
+                return ['status' => 'success', 'detail' => latexifier::latexify($parser->get_statements()[0]->body)];
             }
+
+            return ['status' => 'error', 'detail' => 'FIXME answer not acceptable for answer type'];
         }
 
-        return $parser->is_acceptable_for_answertype($answertype);
+        // If we have a combined field, we split the unit from the number und parse again. This is needed,
+        // because the answer types (all answer types that can have a combined field) would not otherwise
+        // accept those tokens. Also, we want to validate the unit string and this must be done separately.
+        $splitindex = $parser->find_start_of_units();
+        $number = trim(substr($params['answer'], 0, $splitindex));
+        $unit = trim(substr($params['answer'], $splitindex));
+
+        try {
+            $parser = new answer_parser($number);
+        } catch (Exception $e) {
+            return ['status' => 'error', 'detail' => $e->getMessage()];
+        }
+
+        // FIXME-TODO: parse and validate unit
+
     }
 
     /**
@@ -96,6 +105,10 @@ class answervalidation extends \external_api {
      * @return external_description
      */
     public static function validate_student_answer_returns() {
-        return new \external_value(PARAM_BOOL, "whether or not the student's answer is syntactically valid", VALUE_REQUIRED);
+        return new \external_single_structure([
+            'status' => new \external_value(PARAM_RAW, "result of validation, i. e. 'error' or 'success'", VALUE_REQUIRED),
+            'detail' => new \external_value(PARAM_RAW, "error message in case of failed validation, TeX code otherwise", VALUE_REQUIRED),
+
+        ]);
     }
 }

@@ -25,12 +25,12 @@
 import * as Notification from 'core/notification';
 import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
-import {latexify} from 'qtype_formulas/latexify';
+// import {latexify} from 'qtype_formulas/latexify';
 import {notifyFilterContentUpdated} from 'core_filters/events';
 import {eventTypes as filterEventTypes} from 'core_filters/events';
 
 /**
- * Array to store pending timer, allowing to reset / cancel it.
+ * Variable to store pending timer, allowing to reset / cancel it.
  */
 var timer = null;
 
@@ -174,10 +174,9 @@ const validateStudentAnswer = async(id) => {
                 'withunit': field.dataset.withunit,
             },
         }])[0];
-        if (validationResult) {
+        if (validationResult.status === 'success') {
             field.classList.remove('is-invalid');
-            let texcode = await latexify(field.value);
-            showMathJax(id, texcode);
+            showMathJax(id, validationResult.detail);
         } else {
             field.classList.add('is-invalid');
             hideMathJax();
