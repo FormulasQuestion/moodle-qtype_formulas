@@ -609,10 +609,6 @@ class shunting_yard {
 
                 // Deal with all the possible operators...
                 case token::OPERATOR:
-                    // Expressions must not start with an operator.
-                    if (is_null($lasttoken)) {
-                        self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
-                    }
                     // Operators must not follow an opening parenthesis, except for the unary minus.
                     if ($lasttype === token::OPENING_PAREN && $value !== '-') {
                         self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
@@ -646,11 +642,6 @@ class shunting_yard {
                     // Put the operator on the stack.
                     $opstack[] = $token;
                     break;
-
-                // If we still haven't dealt with the token, there must be a problem with the input.
-                default:
-                    self::die(get_string('error_unexpectedtoken', 'qtype_formulas', $value), $token);
-
             }
 
             $lasttoken = $token;

@@ -42,7 +42,7 @@ final class unit_parser_test extends \advanced_testcase {
      *
      * @dataProvider provide_units
      */
-    public function test_parse_unit($expected, $input) {
+    public function test_parse_unit($expected, $input): void {
         $e = null;
         $error = '';
         try {
@@ -66,7 +66,7 @@ final class unit_parser_test extends \advanced_testcase {
      *
      * @dataProvider provide_units
      */
-    public function test_get_legacy_unit_string($expected, $input) {
+    public function test_get_legacy_unit_string($expected, $input): void {
         $e = null;
         try {
             $parser = new unit_parser($input);
@@ -146,7 +146,27 @@ final class unit_parser_test extends \advanced_testcase {
             ['kg m^2', 'kg m^2'],
             ['kg m^2', 'kg m ^ 2'],
             ['kg m s^(-1)', 'kg m s ^ - 1'],
-            ['!Unit already used: m', 'm kg / m'],
+            ['!Syntax error: integer expected, found 2.5 instead.', 'm^2.5'],
+            ["!Unbalanced parenthesis, stray ')' found.", 'm/s)'],
+            ["!Unbalanced parenthesis, '(' is never closed.", '(m/s'],
+            ["!Unexpected input: '@'", '@'],
+            ['!Unexpected token: s', 'm^s'],
+            ['!Unexpected token: -', 'm*-s'],
+            ['!Unexpected token: /', 'm/s/K'],
+            ['!Unexpected token: /', 'm/s * kg/m^2'],
+            ['!Unexpected token: π', 'm*π'],
+            ['!Unexpected token: ,', 'm,s'],
+            ['!Unexpected token: [', '[m/s]'],
+            ['!Unexpected token: )', '(m*)'],
+            ['!Unexpected token: +', 'm+km'],
+            ['!Unexpected token: *', '*'],
+            ['!Unexpected token: *', '*m'],
+            ['!Unexpected token: /', '/m'],
+            ['!Unexpected token: *', 'm*(*s)'],
+            ['!Unexpected token: *', '(*m)'],
+            ['!Unexpected token: **', '(**m)'],
+            ['!Unexpected token: ^', '(^m)'],
+            ['!Unexpected token: {', '{m/s}'],
             ['!Unexpected token: 1', 'm 1/s'],
             ['!Unexpected token: 1', '1/s'],
             ['!Unexpected token: 1', '1 m/s'],
@@ -163,7 +183,7 @@ final class unit_parser_test extends \advanced_testcase {
             ['!Unexpected token: +', 'm^+2'],
             ['!Unexpected token: ^', '(m/s)^2'],
             ['!Unexpected token: **', '(m/s)**2'],
-            ["!Unexpected input: '@'", '@'],
+            ['!Unit already used: m', 'm kg / m'],
         ];
     }
 }
