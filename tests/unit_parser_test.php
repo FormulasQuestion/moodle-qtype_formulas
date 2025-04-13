@@ -22,8 +22,6 @@ global $CFG;
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 
 use Exception;
-use qtype_formulas\local\lexer;
-use qtype_formulas\local\token;
 use qtype_formulas\local\unit_parser;
 
 /**
@@ -38,36 +36,6 @@ use qtype_formulas\local\unit_parser;
  * @covers \qtype_formulas\local\shunting_yard
  */
 final class unit_parser_test extends \advanced_testcase {
-
-    public function test_parse_unit_FIXME_REMOVE_WHEN_FINISHED() {
-        self::assertTrue(true);
-        return;
-        $input = '(m/s)^2';
-        $parser = new unit_parser($input);
-        var_dump($parser->get_statements()[0]);
-
-        echo $parser->get_legacy_unit_string();
-    }
-
-    public function test_parse_unit_rules_FIXME() {
-        $input = 'm: k da d c m u; s: m u; min = 60 s;';
-
-
-
-        $lexer = new lexer($input);
-        $tokens = $lexer->get_tokens();
-        var_dump($tokens);
-
-        $rules = [];
-        foreach ($tokens as $token) {
-
-
-            if ($token->type === token::END_OF_STATEMENT) {
-                $rules[] = $currentrule;
-            }
-        }
-
-    }
 
     /**
      * Test parsing of unit inputs.
