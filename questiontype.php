@@ -31,6 +31,7 @@ use qtype_formulas\local\random_parser;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\parser;
 use qtype_formulas\local\token;
+use qtype_formulas\local\unit_parser;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -1228,9 +1229,22 @@ class qtype_formulas extends question_type {
             // If a unit has been provided, check whether it can be parsed.
             if (!empty($part->postunit)) {
                 try {
-                    $unitcheck->parse_targets($part->postunit);
+                    $unitparser = new unit_parser($part->postunit);
+                    $unitcheck->parse_targets($unitparser->get_legacy_unit_string());
                 } catch (Exception $e) {
-                    $errors["postunit[$i]"] = get_string('error_unit', 'qtype_formulas');
+                    $trace = $e->getTraceAsString();
+                    // If we are coming from the newer code, use the detailed error message without
+                    // the row/column number. Otherwise just use the generic message provided by the
+                    // legacy code.
+                    // TODO: Use str_contains() once we drop support for PHP < 8.0.
+                    if (strstr($trace, 'unit_parser.php') !== false) {
+                        // The error message may contain line and column numbers, but they don't make
+                        // sense in this context, so we'd rather remove them.
+                        $errors["postunit[$i]"] = preg_replace('/([^:]+:)([^:]+:)/', '', $e->getMessage());
+
+                    } else {
+                        $errors["postunit[$i]"] = get_string('error_unit', 'qtype_formulas');
+                    }
                 }
             }
 
