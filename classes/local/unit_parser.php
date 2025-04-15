@@ -43,6 +43,13 @@ class unit_parser extends parser {
         }
         $this->tokenlist = $tokenlist;
 
+        // The unit_parser might have been called on an empty input. If this is the case, we store an
+        // empty statement and stop here.
+        if (empty($this->tokenlist)) {
+            $this->statements[] = [];
+            return;
+        }
+
         // Check for unbalanced / mismatched parentheses.
         $this->check_parens();
 

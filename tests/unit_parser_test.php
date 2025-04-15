@@ -53,7 +53,7 @@ final class unit_parser_test extends \advanced_testcase {
 
         // If we are expecting an error message, the exception object should not be null and
         // the message should match, without checking row and column number.
-        if ($expected[0] === '!') {
+        if (!empty($expected) && $expected[0] === '!') {
             self::assertNotNull($e);
             self::assertStringEndsWith(substr($expected, 1), $error);
         } else {
@@ -75,7 +75,7 @@ final class unit_parser_test extends \advanced_testcase {
         }
 
         // If we are not expecting an error, check that the input has been translated as expected.
-        if ($expected[0] !== '!') {
+        if (empty($expected) || $expected[0] !== '!') {
             self::assertEquals($expected, $parser->get_legacy_unit_string());
         } else {
             self::assertNotNull($e);
@@ -91,6 +91,7 @@ final class unit_parser_test extends \advanced_testcase {
      */
     public static function provide_units(): array {
         return [
+            ['', ''],
             ['J/(m K)', 'J / m K'],
             ['J/(m K)', 'J / m*K'],
             ['J/(m K)', 'J / (m K)'],
