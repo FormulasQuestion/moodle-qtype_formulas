@@ -244,14 +244,49 @@ const showOrClearValidationError = (fieldID, message, sameField = true) => {
         field.classList.remove('is-invalid');
         return;
     }
-    annotation.innerText = message;
+    // If row and column number are -1, we remove them.
+    annotation.innerText = message.replaceAll('-1:', '');
     field.classList.add('is-invalid');
     // If there is already an error in *this* field, we don't generally force the focus,
     // because that could trap the user. We do, however, set the focus, if the prior error
     // occured in another field.
     if (!alreadyWithError || !sameField) {
+        // We set the focus here, so we don't depend on the further processing.
         field.focus();
+
+        // If we have a row and column number, extract them and place the cursor accordingly.
+        let messageParts = message.split(':', 2);
+        if (messageParts.length < 2) {
+            return;
+        }
+        let row = parseInt(messageParts[0]);
+        let col = parseInt(messageParts[1]);
+        jumpToRowAndColumn(field, row, col);
     }
+};
+
+const jumpToRowAndColumn = (field, row, col) => {
+    let lines = field.value.split('\n');
+
+    // If the row number is invalid, we leave. Focus has already been set by the caller.
+    if (row == -1 || col == -1) {
+        return;
+    }
+
+    let cursorPosition = 0;
+    // First, for every line, advance the appropriate number of characters.
+    for (let i = 0; i < row - 1; i++) {
+        // Stop if the row number is too high. This will bring us to the end of the field.
+        if (i >= lines.length) {
+            break;
+        }
+        cursorPosition += lines[i].length + 1;
+    }
+    // Now shift the cursor (col - 1) characters to the right, but not more than the line's length.
+    // Also avoid shifting it to the left, in case col is 0.
+    cursorPosition += Math.max(0, Math.min(col - 1, lines[row - 1].length));
+    field.focus();
+    field.setSelectionRange(cursorPosition, cursorPosition);
 };
 
 /**
