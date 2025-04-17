@@ -269,15 +269,22 @@ const jumpToRowAndColumn = (field, row, col) => {
     let lines = field.value.split('\n');
 
     // If the row number is invalid, we leave. Focus has already been set by the caller.
-    if (row > lines.length || row == -1 || col == -1) {
+    if (row == -1 || col == -1) {
         return;
     }
 
     let cursorPosition = 0;
+    // First, for every line, advance the appropriate number of characters.
     for (let i = 0; i < row - 1; i++) {
+        // Stop if the row number is too high. This will bring us to the end of the field.
+        if (i >= lines.length) {
+            break;
+        }
         cursorPosition += lines[i].length + 1;
     }
-    cursorPosition += col - 1;
+    // Now shift the cursor (col - 1) characters to the right, but not more than the line's length.
+    // Also avoid shifting it to the left, in case col is 0.
+    cursorPosition += Math.max(0, Math.min(col - 1, lines[row - 1].length));
     field.focus();
     field.setSelectionRange(cursorPosition, cursorPosition);
 };
