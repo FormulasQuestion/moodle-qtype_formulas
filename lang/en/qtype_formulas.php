@@ -61,6 +61,7 @@ type if something is wrong. Please read the documentation for details.';
 $string['answertype_link'] = 'https://dynamiccourseware.org/';
 $string['answerunitmulti'] = 'Unit for part {$a->part}';
 $string['answerunitsingle'] = 'Unit';
+$string['caretwarning'] = 'Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead.';
 $string['checkvarshdr'] = 'Check variables instantiation';
 $string['commonsiunit'] = 'Common SI units';
 $string['correctansweris'] = 'One possible correct answer is: {$a}';
