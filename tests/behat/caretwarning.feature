@@ -34,3 +34,32 @@ Feature: Test the notice when a caret is used in model answers
     And I set the field "id_answer_1" to "1^"
     And I wait "2" seconds
     Then I should see "Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead."
+
+  Scenario: Check that warning does not interfere with existing validation error messages
+    When I follow "Part 1"
+    # First, the warning notice should be shown.
+    And I set the field "id_answer_0" to "1 ^ 2 +"
+    And I wait "2" seconds
+    Then I should see "Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead."
+    When I press "id_updatebutton"
+    And I wait until the page is ready
+    # Now, the validation error should have priority.
+    Then I should see "Syntax error: unexpected end of expression after '+'."
+    And I should not see "Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead."
+    When I set the field "id_answer_0" to "1"
+    And I wait "2" seconds
+    # The error message should not be removed.
+    Then I should see "Syntax error: unexpected end of expression after '+'."
+    When I press "id_updatebutton"
+    And I wait until the page is ready
+    And I follow "Part 1"
+    # Now the form is valid, so there should be no annotation at all for this field.
+    Then ".id_error_answer_0" "css_element" should not be visible
+    When I set the field "id_answer_0" to "1 ^"
+    And I wait "2" seconds
+    # As there was no error annotation, the warning notice should be shown again.
+    Then I should see "Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead."
+    When I press "id_updatebutton"
+    And I wait until the page is ready
+    Then I should see "Syntax error: unexpected end of expression after '^'."
+    And I should not see "Note that ^ means XOR in model answers, except for algebraic formulas. For exponentiation, use ** instead."
