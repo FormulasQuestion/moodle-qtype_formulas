@@ -26,6 +26,7 @@ import * as Notification from 'core/notification';
 import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
 import * as Instantiation from 'qtype_formulas/instantiation';
+import * as String from 'core/str';
 
 /**
  * Default grading criterion according to plugin settings (admin)
@@ -37,11 +38,29 @@ var defaultCorrectness = '';
  */
 var numberOfParts = 0;
 
+/**
+ * Pending timer, allowing to reset / cancel it.
+ */
+var timer = null;
+
+/**
+ * Delay (in milliseconds) before sending the current input of a field to validation.
+ */
+const DELAY = 200;
+
+/**
+ * Warning text for usage of caret in model answer.
+ */
+var caretWarning = '';
+
 export const init = (defCorrectness) => {
     defaultCorrectness = defCorrectness;
     numberOfParts = document.querySelectorAll('fieldset[id^=id_answerhdr_]').length;
 
     Instantiation.init(numberOfParts);
+
+    // Pre-fetch strings; currently there is only one.
+    fetchStrings();
 
     for (let i = 0; i < numberOfParts; i++) {
         let textfield = document.getElementById(`id_correctness_${i}`);
@@ -79,6 +98,9 @@ export const init = (defCorrectness) => {
         document.getElementById(`id_correctness_simple_tol_${i}`).addEventListener(
             'change', normalizeTolerance
         );
+
+        // Attach listener for input event to answer fields.
+        document.getElementById(`id_answer_${i}`).addEventListener('input', setDebounceTimer);
     }
 
     // When the form fields for random, global or any part's local variables loses focus,
@@ -111,6 +133,38 @@ export const init = (defCorrectness) => {
     } else {
         document.addEventListener('DOMContentLoaded', disableSimpleModeIfError.bind(null));
     }
+};
+
+const fetchStrings = async() => {
+    let pendingPromise = new Pending('qtype_formulas/editformstrings');
+    let strings = null;
+    try {
+        strings = await String.get_strings([
+            {key: 'caretwarning', component: 'qtype_formulas'},
+        ]);
+    } catch (err) {
+        Notification.exception(err);
+    }
+    pendingPromise.resolve();
+    // If fetching of strings was not successful, we quit here.
+    if (strings === null) {
+        return;
+    }
+    caretWarning = strings[0];
+};
+
+/**
+ * Event handler: set or re-initialize timer for a given input field.
+ *
+ * @param {Event} evt event
+ */
+const setDebounceTimer = (evt) => {
+    // If a timer has already been set, delete it.
+    if (typeof timer === 'number') {
+        clearTimeout(timer);
+    }
+    // Set timer for given input field.
+    timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
 };
 
 /**
@@ -262,6 +316,38 @@ const showOrClearValidationError = (fieldID, message, sameField = true) => {
         let row = parseInt(messageParts[0]);
         let col = parseInt(messageParts[1]);
         jumpToRowAndColumn(field, row, col);
+    }
+};
+
+/**
+ * Show a notice about the meaning of the caret (^) symbol in model answers.
+ *
+ * @param {string} id the answer field's id
+ */
+const warnAboutCaret = (id) => {
+    // If the string could not be loaded, we quit.
+    if (caretWarning === '') {
+        return;
+    }
+
+    let field = document.getElementById(id);
+    let annotation = document.getElementById(id.replace(/^id_(.*)$/, 'id_error_$1'));
+
+    // Display or hide the notice, depending on the presence of a caret in the model answer.
+    // Also, we make sure not to overwrite or hide existing error messages, e. g. from the
+    // form validation.
+    if (field.value.includes('^')) {
+        if (annotation.innerText.trim() !== '') {
+            return;
+        }
+        annotation.innerText = caretWarning;
+        annotation.style.display = 'block';
+    } else {
+        if (annotation.innerText !== caretWarning) {
+            return;
+        }
+        annotation.innerText = '';
+        annotation.style.display = '';
     }
 };
 
