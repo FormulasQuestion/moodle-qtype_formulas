@@ -36,6 +36,7 @@ use qtype_formulas\local\lexer;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\parser;
 use qtype_formulas\local\token;
+use qtype_formulas\local\unit_parser;
 use qtype_formulas\unit_conversion_rules;
 
 defined('MOODLE_INTERNAL') || die();
@@ -1481,7 +1482,7 @@ class qtype_formulas_part {
         // formulas, we must wrap the answers in quotes before we move on. Also, we reset the conversion
         // factor, because it is not needed for algebraic answers.
         if ($isalgebraic) {
-                $response = self::wrap_algebraic_formulas_in_quotes($response);
+            $response = self::wrap_algebraic_formulas_in_quotes($response);
             $conversionfactor = 1;
         }
 
@@ -1572,7 +1573,20 @@ class qtype_formulas_part {
         $checkunit->assign_default_rules($this->ruleid, $entry[1]);
         $checkunit->assign_additional_rules($this->otherrule);
 
-        $checked = $checkunit->check_convertibility($studentsunit, $this->postunit);
+        // Use the compatibility layer to parse the unit string and convert it into the old format.
+        // If parsing fails, we can immediately return false.
+        try {
+            $parser = new unit_parser($studentsunit);
+            $postunitparser = new unit_parser($this->postunit);
+        } catch (Exception $e) {
+            // TODO: convert to non-capturing catch
+            return false;
+        }
+
+        $checked = $checkunit->check_convertibility(
+            $parser->get_legacy_unit_string(),
+            $postunitparser->get_legacy_unit_string(),
+        );
         if ($checked->convertible) {
             return $checked->cfactor;
         }
