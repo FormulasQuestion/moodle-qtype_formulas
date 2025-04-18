@@ -135,7 +135,7 @@ export const init = (defCorrectness) => {
     }
 };
 
-const fetchStrings = async () => {
+const fetchStrings = async() => {
     let pendingPromise = new Pending('qtype_formulas/editformstrings');
     let strings = null;
     try {
