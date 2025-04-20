@@ -359,6 +359,7 @@ final class evaluator_test extends \advanced_testcase {
             'several arguments' => ['foo-bar-test', 'a="foo"; b="bar"; c="test"; join("-", a, b, c)'],
             'function with array' => [6, 'sum([1,2,3])'],
             'natural logarithm' => [2.708050201102210065996, 'ln(15)'],
+            'common logarithm' => [3, 'lg(1000)'],
             'nested function' => [-0.35473297204849, 'sin(4) + exp(cos(4+5))'],
         ];
     }
@@ -1499,6 +1500,14 @@ final class evaluator_test extends \advanced_testcase {
                 'ln() expects its argument to be a positive number.',
                 'x=ln(0)',
             ],
+            'undefined common logarithm' => [
+                'lg() expects its argument to be a positive number.',
+                'x=lg(-5)',
+            ],
+            'undefined common logarithm, 2' => [
+                'lg() expects its argument to be a positive number.',
+                'x=lg(0)',
+            ],
             'closing parenthesis when not opened' => [
                 "1:7:Unbalanced parenthesis, stray ')' found.",
                 's=fill);',
@@ -1990,7 +1999,7 @@ final class evaluator_test extends \advanced_testcase {
             [true, 'a+b^(c^d)+f'],
             [true, 'a+(b^c)^d+f'],
             [true, 'a+b^c^-d'],
-            [true, '1+ln(a)+log10(b)'],
+            [true, '1+ln(a)+log10(b)+lg(c)'],
             [true, 'asin(w t / 100)'],
             [true, 'a sin(w t)+ b cos(w t)'],
             [true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],

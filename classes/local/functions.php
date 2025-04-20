@@ -76,6 +76,7 @@ class functions {
         'join' => [2, INF],
         'lcm' => [2, 2],
         'len' => [1, 1],
+        'lg' => [1, 1],
         'ln' => [1, 1],
         'map' => [2, 3],
         'modinv' => [2, 2],
@@ -1087,6 +1088,19 @@ class functions {
             $res += self::binomialpdf($n, $p, $i);
         }
         return $res;
+    }
+
+    /**
+     * Calculate the common logarithm of a number.
+     *
+     * @param float $x number
+     * @return float
+     */
+    public static function lg(float $x): float {
+        if ($x <= 0) {
+            self::die('error_func_positive', 'lg()');
+        }
+        return log10($x);
     }
 
     /**

@@ -51,13 +51,13 @@ function formulas_format_check() {
 
     // The list of allowable (single parameter) function and their evaluation replacement.
     var funclist = {'sin': 1, 'cos': 1, 'tan': 1, 'asin': 1, 'acos': 1, 'atan': 1, 'exp': 1,
-        'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact': 1};
+        'lg': 1, 'log10': 1, 'ln': 1, 'sqrt': 1, 'abs': 1, 'ceil': 1, 'floor': 1, 'fact': 1};
 
     // The replacement list used when preform trial evaluation, note it is not the same as dispreplacelist
     // Replace 'fact' (factorial) by 'abs', because JS does not have a factorial function and
     // therefore, an expression containing fact() will always be considered as invalid. We use abs(),
     // because we just need some replacement function and are not interested in the actual result.
-    var evalreplacelist = {'ln': 'log', 'log10': '(1./log(10.))*log', 'fact': 'abs'}; // Natural log and log with base 10, no log allowed to avoid ambiguity.
+    var evalreplacelist = {'lg': 'log10', 'ln': 'log', 'log10': '(1./log(10.))*log', 'fact': 'abs'}; // Natural log and log with base 10, no log allowed to avoid ambiguity.
 
     // The replacement list used when the formula is displayed on the screen.
     var dispreplacelist = {'log10': 'log<sub>10</sub>', '3.14159265358979323846': '<i>π</i>'};
@@ -741,6 +741,7 @@ function formulas_format_check() {
             ['numerical_formula', true, '3+4^-9'],
             ['numerical_formula', true, '3+exp(4+5)^-sin(6+7)'],
             ['numerical_formula', true, '1+ln(3)'],
+            ['numerical_formula', true, '1+lg(3)'],
             ['numerical_formula', true, '1+log10(3)'],
             ['numerical_formula', true, 'pi'],
             ['numerical_formula', false, 'pi()'],
@@ -780,7 +781,7 @@ function formulas_format_check() {
             ['algebraic_formula', true, 'a+b^(c^d)+f'],
             ['algebraic_formula', true, 'a+(b^c)^d+f'],
             ['algebraic_formula', true, 'a+b^c^-d'],
-            ['algebraic_formula', true, '1+ln(a)+log10(b)'],
+            ['algebraic_formula', true, '1+ln(a)+log10(b)+lg(c)'],
             ['algebraic_formula', true, 'asin(w t)'],   // arcsin(w*t)
             ['algebraic_formula', true, 'a sin(w t)+ b cos(w t)'], // a*sin(w*t) + b*cos(w*t)
             ['algebraic_formula', true, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
