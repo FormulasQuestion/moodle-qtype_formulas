@@ -250,6 +250,7 @@ class latexifier {
             case 'sinh':
             case 'tanh':
             case 'ln':
+            case 'lg':
             case 'exp':
                 return '\\' . $funcname;
             case 'log10':
