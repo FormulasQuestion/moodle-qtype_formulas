@@ -177,10 +177,10 @@ class answer_parser extends parser {
     /**
      * Check whether the given answer contains only valid tokens for the answer type NUMERICAL_FORMULA, i. e.
      * - numerical expression
-     * - plus functions: sin, cos, tan, asin, acos, atan, atan2, sinh, cosh, tanh, asinh, acosh, atanh
-     * - plus functions: sqrt, exp, log, log10, ln
+     * - plus functions: sin, cos, tan, asin, acos, atan (but not atan2), sinh, cosh, tanh, asinh, acosh, atanh
+     * - plus functions: sqrt, exp, log10, ln, lg (but not log)
      * - plus functions: abs, ceil, floor
-     * - plus functions: fact, ncr, npr
+     * - plus functions: fact
      * - no variables
      *
      * @return bool
@@ -222,9 +222,14 @@ class answer_parser extends parser {
         $answertokens = $this->statements[0]->body;
 
         // Iterate over all tokens. If we find a FUNCTION token, we check whether it is in the white list.
+        // Note: We currently restrict the list of allowed functions to functions with only one argument.
+        // That assures full backwards compatibility, without limiting our future possibilities w.r.t. the
+        // usage of the comma as a decimal separator. We do not currently allow the 'log' function (which
+        // would mean the natural logarithm), because it was not allowed in earlier versions, creates ambiguity
+        // and would accept two arguments.
         $functionwhitelist = [
-            'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-            'sqrt', 'exp', 'log', 'log10', 'ln', 'abs', 'ceil', 'floor', 'fact', 'ncr', 'npr',
+            'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+            'sqrt', 'exp', 'log10', 'ln', 'lg', 'abs', 'ceil', 'floor', 'fact',
         ];
         $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
         foreach ($answertokens as $token) {

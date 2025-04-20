@@ -128,7 +128,7 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+b^(c^d)+f'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^d+f'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+b^c^-d'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '1+ln(a)+log10(b)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '1+ln(a)+log10(b)+lg(c)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'asin(w t)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a sin(w t)+ b cos(w t)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '2 (3) a sin(b)^c - (sin(x+y)+x^y)^-sin(z)c tan(z)(x^2)'],
