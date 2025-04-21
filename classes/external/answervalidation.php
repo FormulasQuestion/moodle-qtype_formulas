@@ -26,6 +26,7 @@
 namespace qtype_formulas\external;
 
 use Exception;
+use qtype_formulas;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\latexifier;
@@ -69,6 +70,13 @@ class answervalidation extends \external_api {
             ['answer' => $answer, 'answertype' => $answertype, 'withunit' => $withunit]
         );
 
+        // If we have just a unit field, we prepend the number 0 and pretend it is a combined field.
+        $unitonly = $params['answertype'] === -1;
+        if ($unitonly) {
+            $params['answer'] = '0 ' . $params['answer'];
+            $params['answertype'] = qtype_formulas::ANSWER_TYPE_NUMBER;
+        }
+
         try {
             $parser = new answer_parser($params['answer']);
         } catch (Exception $e) {
@@ -102,10 +110,13 @@ class answervalidation extends \external_api {
             return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
         }
 
-        $numberpart = latexifier::latexify($parser->get_statements()[0]->body);
+        $numberpart = '';
+        if (!$unitonly) {
+            $numberpart = latexifier::latexify($parser->get_statements()[0]->body) . '\quad';
+        }
         $unitpart = latexifier::latexify_unit($unitcheck);
 
-        return ['status' => 'success', 'detail' => "$numberpart \\quad $unitpart"];
+        return ['status' => 'success', 'detail' => "$numberpart $unitpart"];
     }
 
     /**

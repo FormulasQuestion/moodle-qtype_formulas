@@ -56,11 +56,6 @@ export const init = () => {
             continue;
         }
 
-        // Also, we do not currently validate unit fields.
-        if (input.dataset.answertype == 'unit') {
-            continue;
-        }
-
         // Attach event listener for the input event.
         input.addEventListener('input', setDebounceTimer);
 
@@ -167,12 +162,17 @@ const validateStudentAnswer = async(id) => {
 
     let pendingPromise = new Pending('qtype_formulas/validatestudentanswer');
     try {
+        let answertype = field.dataset.answertype;
+        if (answertype === 'unit') {
+            answertype = -1;
+        }
+
         let validationResult = await fetchMany([{
             methodname: 'qtype_formulas_validate_student_answer',
             args: {
                 'answer': field.value,
-                'answertype': field.dataset.answertype,
-                'withunit': field.dataset.withunit,
+                'answertype': answertype,
+                'withunit': (answertype < 0 ? true : field.dataset.withunit),
             },
         }])[0];
         if (validationResult.status === 'success') {
