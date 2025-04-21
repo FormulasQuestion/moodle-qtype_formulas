@@ -142,6 +142,7 @@ const handleRenderingComplete = (evt) => {
     if (div !== null) {
         let style = window.getComputedStyle(div);
         width += 3 * parseInt(style.padding);
+        // The preview should not be larger than the rectangle around the question.
         width = Math.min(width, div.parentNode.getBoundingClientRect().width);
         div.style.width = width + 'px';
     }
