@@ -25,6 +25,28 @@ namespace qtype_formulas\local;
  */
 class latexifier {
 
+    public static function latexify_unit(array $units): string {
+        $numeratorunits = [];
+        $denominatorunits = [];
+        foreach ($units as $unit => $exponent) {
+            $target = ($exponent > 0 ? 'numeratorunits' : 'denominatorunits');
+            $$target[] = '\mathrm{' . $unit . '}^{' . abs($exponent) . '}';
+        }
+
+        $numerator = join('\cdot', $numeratorunits);
+        $denominator = join('\cdot', $denominatorunits);
+
+        // Remove exponent 1 everywhere.
+        $numerator = str_replace('^{1}', '', $numerator);
+        $denominator = str_replace('^{1}', '', $denominator);
+
+        if (empty($denominator)) {
+            return $numerator;
+        }
+
+        return '\frac{' . $numerator . '}{' . $denominator . '}';
+    }
+
     public static function latexify(array $tokens): string {
         $stack = [];
 

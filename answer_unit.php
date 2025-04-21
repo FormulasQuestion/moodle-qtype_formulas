@@ -293,7 +293,7 @@ class answer_unit_conversion {
      *
      * @param string $unit_expression The input unit string
      * @param bool $no_divisor whether divisor '/' is acceptable. It is used to parse unit recursively
-     * @return an array of the form (base unit name => exponent), null on error
+     * @return array an array of the form (base unit name => exponent), null on error
      */
     public function parse_unit($unit_expression, $no_divisor=false) {
         if (strlen(trim($unit_expression)) == 0) {
