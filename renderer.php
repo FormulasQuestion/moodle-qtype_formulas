@@ -95,7 +95,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function head_code(question_attempt $qa) {
         global $CFG;
         $this->page->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
-        $this->page->requires->js('/question/type/formulas/script/formatcheck.js');
 
         // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
         // We may safely assume that if the uncompiled version is there, the minified one exists as well.

@@ -79,13 +79,4 @@ $functions = [
         'capabilities' => '',
         'services' => [],
     ],
-    'qtype_formulas_latexify' => [
-        'classname' => 'qtype_formulas\external\latexify',
-        'methodname' => 'latexify',
-        'description' => "Convert the student's answer into LaTeX code",
-        'type' => 'read',
-        'ajax' => true,
-        'capabilities' => '',
-        'services' => [],
-    ],
 ];
