@@ -25,7 +25,6 @@
 import * as Notification from 'core/notification';
 import Pending from 'core/pending';
 import {call as fetchMany} from 'core/ajax';
-// import {latexify} from 'qtype_formulas/latexify';
 import {notifyFilterContentUpdated} from 'core_filters/events';
 import {eventTypes as filterEventTypes} from 'core_filters/events';
 
@@ -37,10 +36,11 @@ var timer = null;
 /**
  * Delay (in milliseconds) before sending the current input of a field to validation.
  */
-const DELAY = 200;
+const DELAY = 250;
 
 /**
- * Initialisation, i. e. attaching event handlers to the input fields.
+ * Initialisation, i. e. attaching event handlers to the input fields and making sure MathJax
+ * is ready.
  */
 export const init = () => {
     // We will trigger MathJax to make sure it is initialized very early.
@@ -48,24 +48,16 @@ export const init = () => {
         forceInitMathJax();
     }
 
-    let inputs = document.getElementsByTagName('input');
+    // Attach event listener for the input, focus and blur events for all our answer fields.
+    let inputs = document.querySelectorAll("input[type='text'][class*='formulas_'],input[type='text'][id*='_postunit_']");
     for (let input of inputs) {
-        // First make sure the input belongs to our qtype. We only have text fields and
-        // they all have a 'formulas_' class, e. g. 'formulas_number_unit'.
-        if (input.type !== 'text' || !input.className.match('formulas_')) {
-            continue;
-        }
-
-        // Attach event listener for the input event.
         input.addEventListener('input', setDebounceTimer);
-
-        // Attach event listener for the focus and blur events.
         input.addEventListener('focus', focusReceived);
         input.addEventListener('blur', hideMathJax);
     }
 
-    // If we have a recent version of Moodle, the MathJax filter will notify us when our LaTex is
-    // rendered. Otherwise, we register a legacy callback.
+    // If we have a recent version of Moodle (4.3 and newer), the MathJax filter will notify us when our
+    // LaTex is rendered. Otherwise, we register a legacy callback.
     if (typeof filterEventTypes.filterContentRenderingComplete !== 'undefined') {
         document.addEventListener(filterEventTypes.filterContentRenderingComplete, handleRenderingComplete);
     } else {
@@ -73,17 +65,23 @@ export const init = () => {
     }
 };
 
+/**
+ * Event handler when input field receives focus.
+ *
+ * @param {Event} evt event with details
+ * @returns void
+ */
 const focusReceived = (evt) => {
-    let field = evt.target;
+    const field = evt.target;
 
     // If the field is empty, there is nothing to do.
     if (field.value == '') {
         return;
     }
 
-    // If the field is not empty and we already have a MathJax display for this
-    // field, we can simply reactivate it.
-    let div = document.getElementById('qtype_formulas_mathjax_display');
+    // If the field is not empty and we already have a MathJax display for this field,
+    // we can simply reactivate it.
+    const div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null && div.dataset.for == field.id) {
         div.style.visibility = 'visible';
         return;
@@ -94,6 +92,11 @@ const focusReceived = (evt) => {
     validateStudentAnswer(field.id);
 };
 
+/**
+ * Make sure MathJax is properly initialized. If the page contains MathJax content, e. g. in the question
+ * text, this will happen automatically. However, we might have a page with no other MathJax content and
+ * in this case, MathJax has just been loaded, but is not ready to typeset content.
+ */
 const forceInitMathJax = () => {
     if (typeof window.MathJax === 'undefined') {
         notifyFilterContentUpdated(document.querySelector('body'));
@@ -101,7 +104,12 @@ const forceInitMathJax = () => {
     }
 };
 
+/**
+ * This function is only needed in Moodle versions prior to 4.3. It registers a callback in the
+ * MathJax Hub in order to auto-resize our MathJax preview once the rendering is complete.
+ */
 const addLegacyMathJaxListener = () => {
+    // If MathJax is not ready yet, retry in a moment.
     if (typeof window.MathJax === 'undefined') {
         setTimeout(addLegacyMathJaxListener, 200);
     } else {
@@ -109,14 +117,19 @@ const addLegacyMathJaxListener = () => {
     }
 };
 
+/**
+ * Once MathJax rendering is complete, we can find the width of the rendered content and adjust
+ * our preview div's width accordingly.
+ *
+ * @param {Event|Array} evt event with details or array of two strings
+ */
 const handleRenderingComplete = (evt) => {
     let mathjaxSpan = null;
 
-    // For older Moodle versions, we get an array of two strings. The first string
-    // is just 'New Math' (message type), the second is 'MathJax-Element-xxx' indicating
-    // the name of the new element.
-    // For more recent versions, we get an event. The nodes will be stored in the array
-    // in evt.detail.nodes.
+    // For older Moodle versions (prior to 4.3), we get an array of two strings. The first string
+    // is just 'New Math' (message type), the second is 'MathJax-Element-xxx' indicating the name
+    // of the new element. For more recent versions, we get a CustomEvent. The nodes will be stored in
+    // the array in evt.detail.nodes.
     if (Array.isArray(evt)) {
         let id = evt[1];
         mathjaxSpan = document.querySelector(`span#${id}-Frame`);
@@ -124,20 +137,25 @@ const handleRenderingComplete = (evt) => {
         for (let element of evt.detail.nodes) {
             // Iterate until we find our preview <div>.
             if (element.id === 'qtype_formulas_mathjax_display') {
-                mathjaxSpan = document.querySelector('span[id^=MathJax-Element-][id$=Frame]');
+                mathjaxSpan = document.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
                 break;
             }
         }
     }
+
+    // Fetch the width from MathJax' <span> via the bounding rectangle.
     let width = 0;
     if (mathjaxSpan !== null) {
         width = mathjaxSpan.getBoundingClientRect().width;
     }
+
+    // Now fetch our preview <div> and set its width. We must account for the padding and
+    // want to make sure that the preview is not larger than the rectangle around the question
+    // itself.
     let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null) {
         let style = window.getComputedStyle(div);
         width += 3 * parseInt(style.padding);
-        // The preview should not be larger than the rectangle around the question.
         width = Math.min(width, div.parentNode.getBoundingClientRect().width);
         div.style.width = width + 'px';
     }
@@ -160,21 +178,24 @@ const validateStudentAnswer = async(id) => {
         return;
     }
 
-    let pendingPromise = new Pending('qtype_formulas/validatestudentanswer');
+    // Send the input to the appropriate webservice.
+    let pendingPromise = new Pending('qtype_formulas/validateanswer');
     try {
-        let answertype = field.dataset.answertype;
-        if (answertype === 'unit') {
-            answertype = -1;
-        }
-
-        let validationResult = await fetchMany([{
-            methodname: 'qtype_formulas_validate_student_answer',
-            args: {
+        let method, args;
+        if (field.dataset.answertype === 'unit' || field.id.includes('_postunit_')) {
+            method = 'qtype_formulas_validate_unit';
+            args = {'unit': field.value};
+        } else {
+            method = 'qtype_formulas_validate_student_answer';
+            args = {
                 'answer': field.value,
-                'answertype': answertype,
-                'withunit': (answertype < 0 ? true : field.dataset.withunit),
-            },
-        }])[0];
+                'answertype': field.dataset.answertype,
+                'withunit': field.dataset.withunit,
+            };
+        }
+        // The result will have a 'status' field ('success' or 'error') and a 'detail' field
+        // containing either the error message or the LaTeX code.
+        let validationResult = await fetchMany([{methodname: method, args: args}])[0];
         if (validationResult.status === 'success') {
             field.classList.remove('is-invalid');
             showMathJax(id, validationResult.detail);
@@ -185,10 +206,12 @@ const validateStudentAnswer = async(id) => {
     } catch (err) {
         Notification.exception(err);
     }
-
     pendingPromise.resolve();
 };
 
+/**
+ * Function to hide our MathJax preview <div>.
+ */
 const hideMathJax = () => {
     let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null) {
@@ -196,6 +219,13 @@ const hideMathJax = () => {
     }
 };
 
+/**
+ * Render LaTeX code and show the preview <div> at the right place.
+ *
+ * @param {string} id the input field's id
+ * @param {*} texcode LaTeX code to be rendered and shown
+ * @returns void
+ */
 const showMathJax = (id, texcode) => {
     let field = document.getElementById(id);
 
@@ -204,34 +234,42 @@ const showMathJax = (id, texcode) => {
         return;
     }
 
-    let div = document.getElementById('qtype_formulas_mathjax_display');
+    // If the field contains only a simple number (i. e. not in scientific notation) or
+    // a simple unit (i. e. one unit with no exponent), there is no need to show the MathJax
+    // rendering.
+    if (field.value.match(/^([A-Za-z]+|[0-9]*\.?[0-9]*)$/)) {
+        hideMathJax();
+        return;
+    }
+
     // If the div exists, but does not belong to our input field, delete it.
+    let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null && div.dataset.for !== id) {
         div.remove();
         div = null;
     }
 
-    // If there is no div (or no div anymore), create one.
+    // If there is no div (we might just have deleted it or it might not have existed at all), create one.
     if (div === null) {
         div = document.createElement('div');
         div.id = 'qtype_formulas_mathjax_display';
         div.classList.add('filter_mathjaxloader_equation');
         div.dataset.for = id;
         div.style.left = field.offsetLeft + 'px';
+        // We insert the div right after the relevant input field.
         field.parentNode.insertBefore(div, field.nextSibling);
     }
 
+    // Copy the LaTeX code into the div, show it and tell the MathJax filter that there is work to be done.
     div.innerText = `\\(\\displaystyle ${texcode} \\)`;
     div.style.visibility = 'visible';
-
-    // Tell the MathJax filter that we have added some content to be rendered.
     notifyFilterContentUpdated(div.parentNode);
 };
 
 /**
  * Event handler: set or re-initialize timer for a given input field.
  *
- * @param {Event} evt event
+ * @param {Event} evt event with details
  */
 const setDebounceTimer = (evt) => {
     // If a timer has already been set, delete it.

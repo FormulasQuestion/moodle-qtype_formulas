@@ -70,6 +70,15 @@ $functions = [
         'capabilities' => '',
         'services' => [],
     ],
+    'qtype_formulas_validate_unit' => [
+        'classname' => 'qtype_formulas\external\answervalidation',
+        'methodname' => 'validate_unit',
+        'description' => "Check whether unit is (syntactically) valid",
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => '',
+        'services' => [],
+    ],
     'qtype_formulas_latexify' => [
         'classname' => 'qtype_formulas\external\latexify',
         'methodname' => 'latexify',

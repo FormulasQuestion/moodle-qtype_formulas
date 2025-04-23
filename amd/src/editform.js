@@ -49,13 +49,18 @@ var timer = null;
 const DELAY = 200;
 
 /**
- * Warning text for usage of caret in model answer.
+ * Warning text for use of caret in model answer.
  */
 var caretWarning = '';
 
+/**
+ * FIXME
+ *
+ * @param {*} defCorrectness
+ */
 export const init = (defCorrectness) => {
     defaultCorrectness = defCorrectness;
-    numberOfParts = document.querySelectorAll('fieldset[id^=id_answerhdr_]').length;
+    numberOfParts = document.querySelectorAll("fieldset[id^='id_answerhdr_']").length;
 
     Instantiation.init(numberOfParts);
 
@@ -99,7 +104,7 @@ export const init = (defCorrectness) => {
             'change', normalizeTolerance
         );
 
-        // Attach listener for input event to answer fields.
+        // Attach listener for input event to answer and unit fields.
         document.getElementById(`id_answer_${i}`).addEventListener('input', setDebounceTimer);
     }
 
@@ -135,6 +140,11 @@ export const init = (defCorrectness) => {
     }
 };
 
+/**
+ * FIXME
+ *
+ * @returns
+ */
 const fetchStrings = async() => {
     let pendingPromise = new Pending('qtype_formulas/editformstrings');
     let strings = null;
@@ -163,8 +173,13 @@ const setDebounceTimer = (evt) => {
     if (typeof timer === 'number') {
         clearTimeout(timer);
     }
-    // Set timer for given input field.
-    timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
+    // Set timer for given input field. Callback is either 'warnAboutCaret' (for model answers)
+    // or 'validateUnit' (for the unit).
+    if (evt.target.id.includes('_answer_')) {
+        timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
+    } else if (evt.target.id.includes('_postunit_')) {
+        //timer = setTimeout(validateUnit, DELAY, evt.target.id);
+    }
 };
 
 /**
@@ -244,6 +259,12 @@ const validateRandomvars = async(evt) => {
     pendingPromise.resolve();
 };
 
+/**
+ * FIXME
+ *
+ * @param {*} part
+ * @returns
+ */
 const validateLocalvars = async(part) => {
     let fieldList = {
         'random': 'id_varsrandom',
@@ -351,6 +372,14 @@ const warnAboutCaret = (id) => {
     }
 };
 
+/**
+ * FIXME
+ *
+ * @param {*} field
+ * @param {*} row
+ * @param {*} col
+ * @returns
+ */
 const jumpToRowAndColumn = (field, row, col) => {
     let lines = field.value.split('\n');
 
@@ -389,6 +418,7 @@ const reenableCriterionTextfields = () => {
  * Handle change event for the elements that allow simplified entry of the grading criterion.
  * On each modification, the current criterion is propagated to the (hidden) textbox,
  * that will be used to store the criterion in the database upon submission of the form.
+ *
  * @param {number} partNumber number of the part
  */
 const handleSimpleCriterionChanges = (partNumber) => {
@@ -399,6 +429,7 @@ const handleSimpleCriterionChanges = (partNumber) => {
 /**
  * Parse the tolerance value into a number and put the value back into the textfield.
  * This allows for immediate simplification and some validation; invalid numbers will be replaced by 0.
+ *
  * @param {Event} event Event containing the textfield to be normalized
  */
 const normalizeTolerance = (event) => {
@@ -414,6 +445,7 @@ const normalizeTolerance = (event) => {
 
 /**
  * Switch between simplified and normal entry mode for the grading criterion.
+ *
  * @param {number} partNumber number of the part
  */
 const handleGradingCriterionModeSwitcher = (partNumber) => {
@@ -440,6 +472,7 @@ const handleGradingCriterionModeSwitcher = (partNumber) => {
 
 /**
  * Convert the simple grading criterion into the corresponding text.
+ *
  * @param {number} partNumber number of the part
  * @returns {string} text form of the grading criterion
  */
@@ -455,6 +488,7 @@ const convertSimpleCriterionToText = (partNumber) => {
 
 /**
  * Convert the grading criterion into the simplified form.
+ *
  * @param {number} partNumber number of the part
  * @returns {object} criterion the simplified grading criterion
  * @returns {number} criterion.type the type of error (relative or absolute)
@@ -481,8 +515,9 @@ const convertTextCriterionToSimple = (partNumber) => {
 /**
  * Check whether the current grading criterion can be converted into the simplified form.
  * If not, disable the checkbox that would allow switching to simple mode.
- * If yes, enable sais checkbox.
+ * If yes, enable said checkbox.
  * If the text box is empty, conversion is possible using the default value.
+ *
  * @param {number} partNumber number of the part
  */
 const blockModeSwitcherIfNeeded = (partNumber) => {

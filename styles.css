@@ -1,4 +1,4 @@
-.que.formulas div#qtype_formulas_mathjax_display {
+div#qtype_formulas_mathjax_display {
     background-color: #eef;
     border: 1px solid #88c;
     margin-left: 0px;
@@ -9,6 +9,11 @@
     position: absolute;
     width: 150px;
     z-index: 1;
+}
+
+div[id^='fitem_id_postunit_'] #qtype_formulas_mathjax_display {
+    margin-top: 30px;
+    margin-left: 10px;
 }
 
 .que.formulas .formulas_unit {

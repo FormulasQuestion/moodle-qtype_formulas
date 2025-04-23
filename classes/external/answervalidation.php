@@ -26,7 +26,6 @@
 namespace qtype_formulas\external;
 
 use Exception;
-use qtype_formulas;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\latexifier;
@@ -70,13 +69,6 @@ class answervalidation extends \external_api {
             ['answer' => $answer, 'answertype' => $answertype, 'withunit' => $withunit]
         );
 
-        // If we have just a unit field, we prepend the number 0 and pretend it is a combined field.
-        $unitonly = $params['answertype'] === -1;
-        if ($unitonly) {
-            $params['answer'] = '0 ' . $params['answer'];
-            $params['answertype'] = qtype_formulas::ANSWER_TYPE_NUMBER;
-        }
-
         try {
             $parser = new answer_parser($params['answer']);
         } catch (Exception $e) {
@@ -104,9 +96,8 @@ class answervalidation extends \external_api {
             return ['status' => 'error', 'detail' => $e->getMessage()];
         }
 
-        $unitconverter = new answer_unit_conversion();
-        $unitcheck = $unitconverter->parse_unit($unit);
-        if ($unitcheck === null) {
+        list('status' => $checkresult, 'detail' => $unitpart) = self::validate_unit($unit);
+        if ($checkresult === 'error') {
             return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
         }
 
@@ -114,7 +105,6 @@ class answervalidation extends \external_api {
         if (!$unitonly) {
             $numberpart = latexifier::latexify($parser->get_statements()[0]->body) . '\quad';
         }
-        $unitpart = latexifier::latexify_unit($unitcheck);
 
         return ['status' => 'success', 'detail' => "$numberpart $unitpart"];
     }
@@ -125,6 +115,48 @@ class answervalidation extends \external_api {
      * @return external_description
      */
     public static function validate_student_answer_returns() {
+        return new \external_single_structure([
+            'status' => new \external_value(PARAM_RAW, "result of validation, i. e. 'error' or 'success'", VALUE_REQUIRED),
+            'detail' => new \external_value(PARAM_RAW, "error message in case of failed validation, TeX code otherwise", VALUE_REQUIRED),
+
+        ]);
+    }
+
+    /**
+     * Description of the parameters for the external function 'validate_unit'
+     *
+     * @return \external_function_parameters
+     */
+    public static function validate_unit_parameters() {
+        return new \external_function_parameters([
+            'unit' => new \external_value(PARAM_RAW, "unit string", VALUE_REQUIRED),
+        ]);
+    }
+
+    /**
+     * AJAX function to validate a unit for the Formulas question plugin.
+     *
+     * @param string $unit unit string
+     * @return array array with status (error or success) and detail (error message or TeX code)
+     */
+    public static function validate_unit(string $unit): array {
+        $params = self::validate_parameters(self::validate_unit_parameters(), ['unit' => $unit]);
+
+        $unitconverter = new answer_unit_conversion();
+        $unitcheck = $unitconverter->parse_unit($params['unit']);
+        if ($unitcheck === null) {
+            return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
+        }
+
+        return ['status' => 'success', 'detail' => latexifier::latexify_unit($unitcheck)];
+    }
+
+    /**
+     * Description of the return value for the external function 'validate_unit'
+     *
+     * @return external_description
+     */
+    public static function validate_unit_returns() {
         return new \external_single_structure([
             'status' => new \external_value(PARAM_RAW, "result of validation, i. e. 'error' or 'success'", VALUE_REQUIRED),
             'detail' => new \external_value(PARAM_RAW, "error message in case of failed validation, TeX code otherwise", VALUE_REQUIRED),

@@ -17,7 +17,7 @@
 namespace qtype_formulas\local;
 
 /**
- * Helper class to convert an expression from RPN notation into LaTeX.
+ * Helper class to convert an expression from RPN notation or a unit expression into LaTeX.
  *
  * @package    qtype_formulas
  * @copyright  2025 Philipp Imhof
@@ -25,28 +25,48 @@ namespace qtype_formulas\local;
  */
 class latexifier {
 
+    /**
+     * Transform a unit expression as returned from answer_unit_conversion::parse_unit() into LaTeX
+     * code.
+     *
+     * @param array $units array containing the unit symbol (e. g. m or s) and the exponent
+     * @return string LaTeX code
+     */
     public static function latexify_unit(array $units): string {
         $numeratorunits = [];
         $denominatorunits = [];
+
+        // Iterate over all units and store them in the numerator or denominator, according to their
+        // exponent.
         foreach ($units as $unit => $exponent) {
             $target = ($exponent > 0 ? 'numeratorunits' : 'denominatorunits');
-            $$target[] = '\mathrm{' . $unit . '}^{' . abs($exponent) . '}';
+            ${$target}[] = '\mathrm{' . $unit . '}^{' . abs($exponent) . '}';
         }
 
+        // Generate the numerator and the denominator as products of units.
         $numerator = join('\cdot', $numeratorunits);
         $denominator = join('\cdot', $denominatorunits);
 
-        // Remove exponent 1 everywhere.
+        // Remove exponent 1 everywhere, if needed.
         $numerator = str_replace('^{1}', '', $numerator);
         $denominator = str_replace('^{1}', '', $denominator);
 
+        // If we do not have a denominator, just return the numerator.
         if (empty($denominator)) {
             return $numerator;
         }
 
+        // Otherwise, return a fraction with numerator and denominator.
         return '\frac{' . $numerator . '}{' . $denominator . '}';
     }
 
+    /**
+     * Transform an expression in RPN notation as returned from the answer_parser into LaTeX
+     * code.
+     *
+     * @param array $tokens the tokens in RPN notation, as return from answer_parser
+     * @return string LaTeX code
+     */
     public static function latexify(array $tokens): string {
         $stack = [];
 
@@ -147,7 +167,15 @@ class latexifier {
         return substr($output, 0, -1);
     }
 
-    private static function build_onearg_wrapping_function($function, $argument): string {
+    /**
+     * Generate LaTeX code for functions that "enclose" their single argument, e. g. abs(x) which
+     * becomes |x|.
+     *
+     * @param string $function function name
+     * @param [type] $argument FIXME
+     * @return string LaTeX code
+     */
+    protected static function build_onearg_wrapping_function(string $function, $argument): string {
         // This function can be "abused" to build the logarithm, so we check that first.
         if (substr($function, 0, 3) === 'log') {
             $ldelim = '\\' . $function . '\left(';
@@ -177,20 +205,33 @@ class latexifier {
         }
 
         return $ldelim . ' ' . $argument['content'] . ' ' . $rdelim;
-
     }
 
-    private static function build_general_function(string $function, array $args): string {
+    /**
+     * Generate LaTeX code for a general function like sin, cos and the like.
+     *
+     * @param string $function function name
+     * @param array $args FIXME
+     * @return string LaTeX code
+     */
+    protected static function build_general_function(string $function, array $args): string {
         $arglist = '';
         foreach ($args as $arg) {
             $arglist .= $arg['content'] . ', ';
         }
 
         return self::translate_function($function) . '\left(' . substr($arglist, 0, -2) . '\right)';
-
     }
 
-    private static function build_binary_part(string $operator, $first, $second): string {
+    /**
+     * FIXME
+     *
+     * @param string $operator
+     * @param [type] $first
+     * @param [type] $second
+     * @return string
+     */
+    protected static function build_binary_part(string $operator, $first, $second): string {
         // Division is special, because the fraction command cannot just be inserted between the
         // two arguments. Also, the arguments never need parentheses.
         if ($operator === '/') {
@@ -220,11 +261,23 @@ class latexifier {
         return $first['content'] . self::translate_operator($operator) . $second['content'];
     }
 
-    private static function wrap_in_parens(string $expression): string {
+    /**
+     * Wrap an expression in parentheses.
+     *
+     * @param string $expression expression to be wrapped
+     * @return string LaTeX code
+     */
+    protected static function wrap_in_parens(string $expression): string {
         return '\left(' . $expression . '\right)';
     }
 
-    private static function translate_operator(string $operator): string {
+    /**
+     * Translate operators into the corresponding LaTeX macro.
+     *
+     * @param string $operator operator symbol, e. g. '*'
+     * @return string LaTeX code
+     */
+    protected static function translate_operator(string $operator): string {
         switch ($operator) {
             case '_':
                 return '-';
@@ -255,7 +308,7 @@ class latexifier {
      * @param string $funcname
      * @return string
      */
-    private static function translate_function(string $funcname): string {
+    protected static function translate_function(string $funcname): string {
         switch ($funcname) {
             case 'acos':
             case 'asin':
@@ -284,8 +337,14 @@ class latexifier {
         }
     }
 
-    private static function build_frac($numerator, $denominator): string {
+    /**
+     * Generate LaTeX code for a fraction. FIXME
+     *
+     * @param [type] $numerator
+     * @param [type] $denominator
+     * @return string
+     */
+    protected static function build_frac($numerator, $denominator): string {
         return '\frac{' . $numerator['content'] . '}{' . $denominator['content'] . '}';
     }
-
 }
