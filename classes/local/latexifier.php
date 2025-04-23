@@ -242,7 +242,7 @@ class latexifier {
         // consists of only one character. Also, if the base is itself a power, it must be wrapped
         // in braces.
         if ($operator === '**') {
-            if ($first['precedence'] == shunting_yard::get_precedence($operator)) {
+            if ($first['precedence'] <= shunting_yard::get_precedence($operator)) {
                 $first['content'] = '\left(' . $first['content'] . '\right)';
             }
             $second['content'] = '{' . $second['content'] . '}';

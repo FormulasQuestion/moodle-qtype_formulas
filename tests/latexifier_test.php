@@ -31,35 +31,43 @@ use qtype_formulas\local\latexifier;
  */
 final class latexifier_test extends \advanced_testcase {
 
-    public function test_latexify(): void {
-        // FIXME: implement
-        self::assertTrue(true);
-        return;
-        $input = '1+2';
-        $input = '-1';
-        $input = '1*2+3';
-        $input = '1+2*3';
-        $input = '1*2*3';
-        $input = '(1+2)*(3+4)';
-        $input = '(1+2)**3';
-        $input = '5**3';
-        $input = '(2+4)/(3*4)';
-        $input = '5 == 3 + 4';
-        $input = '(-4)^3';
-        $input = '(a*b)^3';
-        $input = 'a*b^3';
-        $input = '1/2^3';
-        $input = '(1/2)^3';
-        $input = '7 % 5';
-        $input = '5 * 4 == 3 + 4';
-        $input = '3 * sin(x^2)';
-        $input = '3 * log(x^2, 7)';
-        $input = '5.12e-3';
-        $input = 'sqrt(2)';
-        $input = '2^3(7+2)';
-        $input = '(2^3)^4';
+    public static function provide_answers(): array {
+        return [
+            ['1+2', '1+2'],
+            ['-1', '-1'],
+            ['1+2\cdot 3', '1+(2*3)'],
+            ['1+\frac{2}{3}', '1+2/3'],
+            ['\frac{1+2}{3}', '(1+2)/3'],
+            ['1\cdot 2+3', '1*2+3'],
+            ['1+2\cdot 3', '1+2*3'],
+            ['1\cdot 2\cdot 3', '1*2*3'],
+            ['\left(1+2\right)\cdot \left(3+4\right)', '(1+2)*(3+4)'],
+            ['\left(1+2\right)^{3}', '(1+2)**3'],
+            ['5^{3}', '5**3'],
+            ['\frac{2+4}{3\cdot 4}', '(2+4)/(3*4)'],
+            ['5=3+4', '5 == 3 + 4'],
+            ['\left(-4\right)^{3}', '(-4)^3'],
+            ['\left(a\cdot b\right)^{3}', '(a*b)^3'],
+            ['a\cdot b^{3}', 'a*b^3'],
+            ['\frac{1}{2^{3}}', '1/2^3'],
+            ['\left(\frac{1}{2}\right)^{3}', '(1/2)^3'],
+            ['7\bmod 5', '7 % 5'],
+            ['5\cdot 4=3+4', '5 * 4 == 3 + 4'],
+            ['3\cdot \sin\left(x^{2}\right)', '3 * sin(x^2)'],
+            ['3\cdot \log_{7}\left( x^{2} \right)', '3 * log(x^2, 7)'],
+            ['5.12\cdot 10^{-3}', '5.12e-3'],
+            ['\sqrt{ 2 }', 'sqrt(2)'],
+            ['2^{3}\cdot \left(7+2\right)', '2^3(7+2)'],
+            ['\left(2^{3}\right)^{4}', '(2^3)^4'],
+        ];
+    }
+
+    /**
+     * @dataProvider provide_answers
+     */
+    public function test_latexify($expected, $input): void {
         $parser = new answer_parser($input);
 
-        var_dump(latexifier::latexify($parser->get_statements()[0]->body));
+        self::assertEquals($expected, latexifier::latexify($parser->get_statements()[0]->body));
     }
 }
