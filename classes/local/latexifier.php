@@ -56,6 +56,11 @@ class latexifier {
             return $numerator;
         }
 
+        // If we do not have a numerator, put 1 over the denominator.
+        if (empty($numerator)) {
+            return '\frac{1}{' . $denominator . '}';
+        }
+
         // Otherwise, return a fraction with numerator and denominator.
         return '\frac{' . $numerator . '}{' . $denominator . '}';
     }
@@ -95,11 +100,12 @@ class latexifier {
             if ($token->type === token::OPERATOR) {
                 $op = $token->value;
                 $second = array_pop($stack);
-                // For unary operators... FIXME
+                // Unary operators must be translated and can then be prepended their argument.
                 if (in_array($op, ['_', '!', '~'])) {
                     $new = self::translate_operator($op) . $second['content'];
                 }
-                // For binary operators... FIXME
+                // For binary operators, we must first fetch the other argument and then send
+                // everything to a dedicated function to build the next expression.
                 if (in_array($op, ['+', '-', '*', '/', '%', '**', '^', '==', '<=', '>=', '!='])) {
                     $first = array_pop($stack);
                     $new = self::build_binary_part($op, $first, $second);

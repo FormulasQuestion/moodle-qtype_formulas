@@ -165,6 +165,7 @@ final class answer_parser_test extends \advanced_testcase {
             [false, '@'],
             [false, '\ 4'],
             [false, '\sin(pi)'],
+            [false, '1+sin'],
         ];
     }
 

@@ -16,7 +16,7 @@
 
 namespace qtype_formulas;
 
-use Exception;
+use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\latexifier;
 
@@ -30,7 +30,19 @@ use qtype_formulas\local\latexifier;
  * @covers \qtype_formulas\local\latexifier
  */
 final class latexifier_test extends \advanced_testcase {
+    public function setUp(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 
+        $this->resetAfterTest(true);
+        parent::setUp();
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_answers(): array {
         return [
             ['1+2', '1+2'],
@@ -63,11 +75,58 @@ final class latexifier_test extends \advanced_testcase {
     }
 
     /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_units(): array {
+        return [
+            ['\frac{\mathrm{J}}{\mathrm{m}\cdot\mathrm{K}}', 'J / m K'],
+            ['\frac{\mathrm{J}}{\mathrm{m}\cdot\mathrm{K}}', 'J / (m K)'],
+            ['\frac{\mathrm{m}\cdot\mathrm{kg}}{\mathrm{s}^{2}}', 'm kg/s^2'],
+            ['\frac{1}{\mathrm{s}}', 's^-1'],
+            ['\mathrm{s}^{2}', 's^2'],
+            ['\frac{1}{\mathrm{s}}', 's^(-1)'],
+            ['\frac{\mathrm{m}}{\mathrm{s}}', 's^-1 / m^-1'],
+            ['\mathrm{m}', 'm'],
+            ['\mathrm{m}^{2}', 'm^2'],
+            ['\mathrm{m}^{2}', 'm ^ 2'],
+            ['\frac{1}{\mathrm{m}^{2}}', 'm^-2'],
+            ['\frac{1}{\mathrm{m}^{2}}', 'm^(-2)'],
+            ['\frac{1}{\mathrm{m}^{2}}', 'm ^ -2'],
+            ['\frac{1}{\mathrm{m}^{2}}', 'm ^ (-2)'],
+            ['\frac{\mathrm{m}}{\mathrm{s}}', 'm/s'],
+            ['\frac{\mathrm{m}}{\mathrm{s}}', 'm s^-1'],
+            ['\frac{\mathrm{m}}{\mathrm{s}}', 'm s^(-1)'],
+            ['\frac{\mathrm{kg}\cdot\mathrm{m}}{\mathrm{s}}', 'kg m/s'],
+            ['\frac{\mathrm{kg}\cdot\mathrm{m}}{\mathrm{s}}', 'kg m s^-1'],
+            ['\frac{\mathrm{kg}\cdot\mathrm{m}}{\mathrm{s}}', 'kg m s ^ -1'],
+            ['\mathrm{kg}\cdot\mathrm{m}^{2}', 'kg m^2'],
+            ['\mathrm{kg}\cdot\mathrm{m}^{2}', 'kg m ^ 2'],
+        ];
+    }
+
+    /**
+     * Test conversion of various answers into LaTeX code.
+     *
      * @dataProvider provide_answers
      */
-    public function test_latexify($expected, $input): void {
+    public function test_latexify(string $expected, string $input): void {
         $parser = new answer_parser($input);
 
         self::assertEquals($expected, latexifier::latexify($parser->get_statements()[0]->body));
+    }
+
+    /**
+     * Test conversion of units into LaTeX code.
+     *
+     * @dataProvider provide_units
+     */
+    public function test_latexify_unit(string $expected, string $input): void {
+        $unitconverter = new answer_unit_conversion();
+        $unitcheck = $unitconverter->parse_unit($input);
+
+        self::assertNotNull($unitcheck);
+        self::assertEquals($expected, latexifier::latexify_unit($unitcheck));
     }
 }

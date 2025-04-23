@@ -117,8 +117,11 @@ class answervalidation extends \external_api {
     public static function validate_student_answer_returns() {
         return new \external_single_structure([
             'status' => new \external_value(PARAM_RAW, "result of validation, i. e. 'error' or 'success'", VALUE_REQUIRED),
-            'detail' => new \external_value(PARAM_RAW, "error message in case of failed validation, TeX code otherwise", VALUE_REQUIRED),
-
+            'detail' => new \external_value(
+                PARAM_RAW,
+                "error message in case of failed validation, TeX code otherwise",
+                VALUE_REQUIRED,
+            ),
         ]);
     }
 
@@ -159,8 +162,11 @@ class answervalidation extends \external_api {
     public static function validate_unit_returns() {
         return new \external_single_structure([
             'status' => new \external_value(PARAM_RAW, "result of validation, i. e. 'error' or 'success'", VALUE_REQUIRED),
-            'detail' => new \external_value(PARAM_RAW, "error message in case of failed validation, TeX code otherwise", VALUE_REQUIRED),
-
+            'detail' => new \external_value(
+                PARAM_RAW,
+                "error message in case of failed validation, TeX code otherwise",
+                VALUE_REQUIRED,
+            ),
         ]);
     }
 }
