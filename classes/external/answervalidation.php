@@ -102,7 +102,7 @@ class answervalidation extends \external_api {
         }
 
         $numberpart = '';
-        if (!$unitonly) {
+        if (strlen($number) > 0) {
             $numberpart = latexifier::latexify($parser->get_statements()[0]->body) . '\quad';
         }
 
