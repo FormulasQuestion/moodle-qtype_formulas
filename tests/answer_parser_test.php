@@ -394,6 +394,11 @@ final class answer_parser_test extends \advanced_testcase {
         self::assertEquals($expected['unit'], $unit);
     }
 
+    public function test_is_acceptable_for_answertype_with_invalid_type(): void {
+        $parser = new answer_parser('1');
+        self::assertFalse($parser->is_acceptable_for_answertype(PHP_INT_MAX));
+    }
+
     public function test_constructor_with_known_variables(): void {
         // The teacher should be able to block functions by defining variables with the same name,
         // e. g. sin = 1.
