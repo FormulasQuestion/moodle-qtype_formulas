@@ -51,6 +51,22 @@ Feature: Validation of student responses
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
 
+  Scenario: Check returning to invalid field does not reactivate earlier preview.
+    # A number in scientific notation should be rendered.
+    When I set the field "Answer for part 2" to "1e5"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    # Entering an invalid value should make the preview disappear
+    When I set the field "Answer for part 2" to "x"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > Formulas field with warning" should exist
+    And "" "qtype_formulas > MathJax display" should not be visible
+    When I press tab
+    And I wait "1" seconds
+    And I press shift tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+
   Scenario: Check rendering of MathJax works in answer field
     # A number in scientific notation should be rendered.
     When I set the field "Answer for part 2" to "1e5"
