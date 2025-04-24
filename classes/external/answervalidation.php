@@ -90,11 +90,6 @@ class answervalidation extends \external_api {
         $number = trim(substr($params['answer'], 0, $splitindex));
         $unit = trim(substr($params['answer'], $splitindex));
 
-        try {
-            $parser = new answer_parser($number);
-        } catch (Exception $e) {
-            return ['status' => 'error', 'detail' => $e->getMessage()];
-        }
 
         list('status' => $checkresult, 'detail' => $unitpart) = self::validate_unit($unit);
         if ($checkresult === 'error') {
@@ -103,6 +98,15 @@ class answervalidation extends \external_api {
 
         $numberpart = '';
         if (strlen($number) > 0) {
+            try {
+                $parser = new answer_parser($number);
+                if (!$parser->is_acceptable_for_answertype($answertype)) {
+                    return ['status' => 'error', 'detail' => 'FIXME answer not acceptable for answer type'];
+                }
+            } catch (Exception $e) {
+                return ['status' => 'error', 'detail' => $e->getMessage()];
+            }
+
             $numberpart = latexifier::latexify($parser->get_statements()[0]->body) . '\quad';
         }
 
