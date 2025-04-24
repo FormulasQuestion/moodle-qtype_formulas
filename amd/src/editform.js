@@ -177,8 +177,6 @@ const setDebounceTimer = (evt) => {
     // or 'validateUnit' (for the unit).
     if (evt.target.id.includes('_answer_')) {
         timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
-    } else if (evt.target.id.includes('_postunit_')) {
-        //timer = setTimeout(validateUnit, DELAY, evt.target.id);
     }
 };
 

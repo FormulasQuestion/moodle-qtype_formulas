@@ -158,6 +158,7 @@ class latexifier {
                     $args = [];
                     for ($i = 0; $i < $numargs; $i++) {
                         $args[] = array_pop($stack);
+                        $args = array_reverse($args);
                     }
                     $new = self::build_general_function($funcname, $args);
                 }
@@ -193,6 +194,9 @@ class latexifier {
                 $rdelim = '}';
                 break;
             case 'fact':
+                if ($argument['precedence'] < PHP_INT_MAX) {
+                    $argument['content'] = '\left(' . $argument['content'] . '\right)';
+                }
                 $ldelim = '';
                 $rdelim = '!';
                 break;
@@ -319,11 +323,11 @@ class latexifier {
             case 'acos':
             case 'asin':
             case 'atan':
-                return '\\' . str_replace('a', 'arc', $funcname);
+                return '\arc' . substr($funcname, 1);
             case 'acosh':
             case 'asinh':
             case 'atanh':
-                return '\mathrm{' . str_replace('a', 'ar', $funcname) . '}';
+                return '\mathrm{ar' . substr($funcname, 1) . '}';
             case 'cos':
             case 'sin':
             case 'tan':
