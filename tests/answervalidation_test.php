@@ -44,18 +44,33 @@ final class answervalidation_test extends \advanced_testcase {
         parent::setUp();
     }
 
+    /**
+     * Data provider. We grab the test cases from the answer_parser test.
+     *
+     * @return array
+     */
     public static function provide_numbers(): array {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/tests/answer_parser_test.php');
         return answer_parser_test::provide_numbers();
     }
 
+    /**
+     * Data provider. We grab the test cases from the answer_parser test.
+     *
+     * @return array
+     */
     public static function provide_algebraic_formulas(): array {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/tests/answer_parser_test.php');
         return answer_parser_test::provide_algebraic_formulas();
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_numbers_and_units(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, '123'],

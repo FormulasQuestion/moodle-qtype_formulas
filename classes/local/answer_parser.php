@@ -232,7 +232,7 @@ class answer_parser extends parser {
         // and would accept two arguments.
         $functionwhitelist = [
             'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-            'sqrt', 'exp', 'log10', 'ln', 'lg', 'abs', 'ceil', 'floor', 'fact',
+            'sqrt', 'exp', 'log10', 'lb', 'ln', 'lg', 'abs', 'ceil', 'floor', 'fact',
         ];
         $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
         foreach ($answertokens as $token) {

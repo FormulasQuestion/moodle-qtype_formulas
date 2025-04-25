@@ -85,7 +85,7 @@ final class latexifier_test extends \advanced_testcase {
             ['4\neq 1', '4 != 1'],
             ['\arccos\left(0.5\right)+\arcsin\left(0.5\right)+\arctan\left(0.5\right)', 'acos(0.5) + asin(0.5) + atan(0.5)'],
             [
-                '\mathrm{arcosh}\left(0.5\right)+\mathrm{arsinh}\left(0.5\right)+\mathrm{artanh}\left(0.5\right)',
+                '\operatorname{arcosh}\left(0.5\right)+\operatorname{arsinh}\left(0.5\right)+\operatorname{artanh}\left(0.5\right)',
                 'acosh(0.5) + asinh(0.5) + atanh(0.5)',
             ],
             ['\tan\left(20\right)', 'tan(20)'],
@@ -94,8 +94,8 @@ final class latexifier_test extends \advanced_testcase {
             ['\ln\left(12\right)-\lg\left(12\right)', 'ln(12) - lg(12)'],
             ['\exp\left(10\right)', 'exp(10)'],
             ['\lg\left(12\right)', 'log10(12)'],
-            ['\mathrm{arctan2}\left(1, 3\right)', 'atan2(1,3)'],
-            ['\mathrm{pick}\left(12\right)', 'pick(12)'],
+            ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1,3)'],
+            ['\operatorname{pick}\left(12\right)', 'pick(12)'],
         ];
     }
 
