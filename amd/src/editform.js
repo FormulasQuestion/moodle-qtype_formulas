@@ -104,7 +104,7 @@ export const init = (defCorrectness) => {
             'change', normalizeTolerance
         );
 
-        // Attach listener for input event to answer and unit fields.
+        // Attach listener for input event to answer fields.
         document.getElementById(`id_answer_${i}`).addEventListener('input', setDebounceTimer);
     }
 
@@ -171,11 +171,8 @@ const setDebounceTimer = (evt) => {
     if (typeof timer === 'number') {
         clearTimeout(timer);
     }
-    // Set timer for given input field. Callback is either 'warnAboutCaret' (for model answers)
-    // or 'validateUnit' (for the unit).
-    if (evt.target.id.includes('_answer_')) {
-        timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
-    }
+    // Set timer for given input field.
+    timer = setTimeout(warnAboutCaret, DELAY, evt.target.id);
 };
 
 /**

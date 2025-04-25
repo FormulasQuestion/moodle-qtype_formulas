@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * qtype_formulas external file
+ * qtype_formulas web service for the validation of answers and units
  *
  * @package    qtype_formulas
  * @category   external

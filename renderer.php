@@ -465,7 +465,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $inputattributes['data-title'] = get_string($gtype, 'qtype_formulas');
                 $inputattributes['aria-labelledby'] = 'lbl_' . str_replace(':', '__', $inputattributes['id']);
                 $inputattributes['data-answertype'] = $part->answertype;
-                $inputattributes['data-withunit'] = 0;
+                $inputattributes['data-withunit'] = '0';
                 $a = new stdClass();
                 $a->part = $i + 1;
                 $a->numanswer = $j + 1;
