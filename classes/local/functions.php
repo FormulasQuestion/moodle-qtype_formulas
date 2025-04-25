@@ -74,6 +74,7 @@ class functions {
         'gcd' => [2, 2],
         'inv' => [1, 1],
         'join' => [2, INF],
+        'lb' => [1, 1],
         'lcm' => [2, 2],
         'len' => [1, 1],
         'lg' => [1, 1],
@@ -1101,6 +1102,19 @@ class functions {
             self::die('error_func_positive', 'lg()');
         }
         return log10($x);
+    }
+
+    /**
+     * Calculate the binary logarithm of a number.
+     *
+     * @param float $x number
+     * @return float
+     */
+    public static function lb(float $x): float {
+        if ($x <= 0) {
+            self::die('error_func_positive', 'lb()');
+        }
+        return log($x, 2);
     }
 
     /**

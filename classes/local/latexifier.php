@@ -312,8 +312,8 @@ class latexifier {
 
     /**
      * Convert a function name into its LaTeX equivalent, e. g. sqrt to \sqrt or asin to \arcsin.
-     * Note that we use \mathrm{} instead of \operatorname{}, because the latter is only available
-     * if the AMS extension is available and active, which we cannot control.
+     * The \operatorname command is avaible with Moodle's default settings. Using \mathrm instead is
+     * not a good choice, because spacing will be wrong in certain cases.
      *
      * @param string $funcname name of the function
      * @return string LaTeX equivalent of the function
@@ -327,7 +327,7 @@ class latexifier {
             case 'acosh':
             case 'asinh':
             case 'atanh':
-                return '\mathrm{ar' . substr($funcname, 1) . '}';
+                return '\operatorname{ar' . substr($funcname, 1) . '}';
             case 'cos':
             case 'sin':
             case 'tan':
@@ -341,9 +341,9 @@ class latexifier {
             case 'log10':
                 return '\lg';
             case 'atan2':
-                return '\mathrm{arctan2}';
+                return '\operatorname{arctan2}';
             default:
-                return '\mathrm{' . $funcname . '}';
+                return '\operatorname{' . $funcname . '}';
         }
     }
 

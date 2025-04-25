@@ -360,6 +360,7 @@ final class evaluator_test extends \advanced_testcase {
             'function with array' => [6, 'sum([1,2,3])'],
             'natural logarithm' => [2.708050201102210065996, 'ln(15)'],
             'common logarithm' => [3, 'lg(1000)'],
+            'binary logarithm' => [5, 'lb(32)'],
             'nested function' => [-0.35473297204849, 'sin(4) + exp(cos(4+5))'],
         ];
     }
