@@ -181,7 +181,7 @@ class answer_parser extends parser {
      * Check whether the given answer contains only valid tokens for the answer type NUMERICAL_FORMULA, i. e.
      * - numerical expression
      * - plus functions: sin, cos, tan, asin, acos, atan (but not atan2), sinh, cosh, tanh, asinh, acosh, atanh
-     * - plus functions: sqrt, exp, log10, ln, lg (but not log)
+     * - plus functions: sqrt, exp, log10, ln, lb, lg (but not log)
      * - plus functions: abs, ceil, floor
      * - plus functions: fact
      * - no variables
