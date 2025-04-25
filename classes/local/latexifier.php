@@ -179,10 +179,10 @@ class latexifier {
      * becomes |x|.
      *
      * @param string $function function name
-     * @param [type] $argument FIXME
+     * @param array $argument argument, associative array with 'content' and 'precedence'
      * @return string LaTeX code
      */
-    protected static function build_onearg_wrapping_function(string $function, $argument): string {
+    protected static function build_onearg_wrapping_function(string $function, array $argument): string {
         // This function can be "abused" to build the logarithm, so we check that first.
         if (substr($function, 0, 3) === 'log') {
             $ldelim = '\\' . $function . '\left(';
@@ -221,7 +221,7 @@ class latexifier {
      * Generate LaTeX code for a general function like sin, cos and the like.
      *
      * @param string $function function name
-     * @param array $args FIXME
+     * @param array $args arguments for the function
      * @return string LaTeX code
      */
     protected static function build_general_function(string $function, array $args): string {
@@ -234,14 +234,14 @@ class latexifier {
     }
 
     /**
-     * FIXME
+     * Build a binary expression, e. g. 1 + 2.
      *
-     * @param string $operator
-     * @param [type] $first
-     * @param [type] $second
+     * @param string $operator the operator
+     * @param array $first first argument, associative array with 'content' and 'precedence'
+     * @param array $second second argument, associative array with 'content' and 'precedence'
      * @return string
      */
-    protected static function build_binary_part(string $operator, $first, $second): string {
+    protected static function build_binary_part(string $operator, array $first, array $second): string {
         // Division is special, because the fraction command cannot just be inserted between the
         // two arguments. Also, the arguments never need parentheses.
         if ($operator === '/') {
@@ -311,12 +311,12 @@ class latexifier {
     }
 
     /**
-     * FIXME
-     * Note that we use \mathrm{} instead of \operatorname{}, because the latter is only
-     * available, if the AMS extension is available and active, which we cannot control.
+     * Convert a function name into its LaTeX equivalent, e. g. sqrt to \sqrt or asin to \arcsin.
+     * Note that we use \mathrm{} instead of \operatorname{}, because the latter is only available
+     * if the AMS extension is available and active, which we cannot control.
      *
-     * @param string $funcname
-     * @return string
+     * @param string $funcname name of the function
+     * @return string LaTeX equivalent of the function
      */
     protected static function translate_function(string $funcname): string {
         switch ($funcname) {
@@ -348,13 +348,13 @@ class latexifier {
     }
 
     /**
-     * Generate LaTeX code for a fraction. FIXME
+     * Generate LaTeX code for a fraction.
      *
-     * @param [type] $numerator
-     * @param [type] $denominator
+     * @param array $numerator numerator, associative array with keys 'content' and 'precendence'
+     * @param array $denominator denominator, associative array with keys 'content' and 'precendence'
      * @return string
      */
-    protected static function build_frac($numerator, $denominator): string {
+    protected static function build_frac(array $numerator, array $denominator): string {
         return '\frac{' . $numerator['content'] . '}{' . $denominator['content'] . '}';
     }
 }

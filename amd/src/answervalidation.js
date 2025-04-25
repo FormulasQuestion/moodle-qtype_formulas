@@ -82,7 +82,7 @@ const focusReceived = (evt) => {
     // If the field is not empty, not invalid and we already have a MathJax display for this field,
     // we can simply reactivate it.
     const div = document.getElementById('qtype_formulas_mathjax_display');
-    if (!field.classList.contains('is-invalid') && div !== null && div.dataset.for == field.id ) {
+    if (!field.classList.contains('is-invalid') && div !== null && div.dataset.for == field.id) {
         div.style.visibility = 'visible';
         return;
     }

@@ -26,6 +26,7 @@
 namespace qtype_formulas\external;
 
 use Exception;
+use qtype_formulas;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\latexifier;
@@ -69,48 +70,66 @@ class answervalidation extends \external_api {
             ['answer' => $answer, 'answertype' => $answertype, 'withunit' => $withunit]
         );
 
+        // Try to parse the answer. If this fails, it does not make sense to continue.
         try {
             $parser = new answer_parser($params['answer']);
         } catch (Exception $e) {
             return ['status' => 'error', 'detail' => $e->getMessage()];
         }
 
-        if ($params['withunit'] === false) {
-            if ($parser->is_acceptable_for_answertype($answertype)) {
-                return ['status' => 'success', 'detail' => latexifier::latexify($parser->get_statements()[0]->body)];
-            }
-
-            return ['status' => 'error', 'detail' => 'FIXME answer not acceptable for answer type'];
+        // If we have a combined field, we split the unit from the number. This is needed, because the
+        // answer types that allow for a combined field do not accept tokens like 'm' or 'cm' (they read
+        // them as variables). Also, the unit string must be validated separately.
+        if ($params['withunit']) {
+            $splitindex = $parser->find_start_of_units();
+            $number = trim(substr($params['answer'], 0, $splitindex));
+            $unit = trim(substr($params['answer'], $splitindex));
+        } else {
+            $number = $params['answer'];
+            $unit = '';
         }
 
-        // If we have a combined field, we split the unit from the number und parse again. This is needed,
-        // because the answer types (all answer types that can have a combined field) would not otherwise
-        // accept those tokens. Also, we want to validate the unit string and this must be done separately.
-        $splitindex = $parser->find_start_of_units();
-        $number = trim(substr($params['answer'], 0, $splitindex));
-        $unit = trim(substr($params['answer'], $splitindex));
-
-
-        list('status' => $checkresult, 'detail' => $unitpart) = self::validate_unit($unit);
-        if ($checkresult === 'error') {
-            return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
-        }
-
-        $numberpart = '';
+        // Now, check whether the number part is acceptable for the given answertype. If it is, we also
+        // translate it to LaTeX code. Re-parsing just the number part must still be in a try-catch, because
+        // it could fail now that the unit part is gone, e. g. if the response was '1+m', that would have
+        // parsed fine (sum of number 1 and variable m), but after splitting the "number" part would be
+        // just '1+' which results in a parse error (unexpected end of expression).
+        $numberpartlatex = '';
         if (strlen($number) > 0) {
             try {
                 $parser = new answer_parser($number);
+                // As we are in a try-catch block anyway, we can just throw an Exception if the answer
+                // is not acceptable.
                 if (!$parser->is_acceptable_for_answertype($answertype)) {
-                    return ['status' => 'error', 'detail' => 'FIXME answer not acceptable for answer type'];
+                    $answertypestrings = [
+                        qtype_formulas::ANSWER_TYPE_NUMBER => 'number',
+                        qtype_formulas::ANSWER_TYPE_NUMERIC => 'numeric',
+                        qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA => 'numerical_formula',
+                        qtype_formulas::ANSWER_TYPE_ALGEBRAIC => 'algebraic_formula',
+                    ];
+                    $message = get_string(
+                        'answernotacceptable',
+                        'qtype_formulas',
+                        get_string($answertypestrings[$answertype], 'qtype_formulas'),
+                    );
+                    throw new Exception($message);
                 }
             } catch (Exception $e) {
                 return ['status' => 'error', 'detail' => $e->getMessage()];
             }
-
-            $numberpart = latexifier::latexify($parser->get_statements()[0]->body) . '\quad';
+            $numberpartlatex = latexifier::latexify($parser->get_statements()[0]->body);
         }
 
-        return ['status' => 'success', 'detail' => "$numberpart $unitpart"];
+        // Finally, check the unit part and, if it is valid, translate to LaTeX.
+        list('status' => $checkresult, 'detail' => $unitpartlatex) = self::validate_unit($unit);
+        if ($checkresult === 'error') {
+            return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
+        }
+
+        // By using array_filter without a callback, it simply removes empty entries from the array.
+        // This way, we only get the \quad space if we really have a number *and* a unit.
+        $latex = implode(' \quad ', array_filter([$numberpartlatex, $unitpartlatex]));
+        return ['status' => 'success', 'detail' => $latex];
     }
 
     /**

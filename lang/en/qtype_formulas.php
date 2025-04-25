@@ -45,6 +45,7 @@ The default mark of the whole question is the sum of all its parts marks.
 Note: If this part\'s mark field is left blank and there is no answer, the part will be deleted when the question is saved.';
 $string['answermulti'] = 'Answer for part {$a->part}';
 $string['answerno'] = 'Part {$a}';
+$string['answernotacceptable'] = 'This answer is not valid for the given answer type: {$a}.';
 $string['answernotunique'] = 'There are other correct answers.';
 $string['answernotunique_help'] = 'If this option is checked, the student will see "One correct answer is: ..." instead of "The correct answer is: ..." when reviewing their attempt.';
 $string['answersingle'] = 'Answer';

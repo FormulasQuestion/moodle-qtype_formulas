@@ -46,7 +46,7 @@ var timer = null;
 /**
  * Delay (in milliseconds) before sending the current input of a field to validation.
  */
-const DELAY = 200;
+const DELAY = 250;
 
 /**
  * Warning text for use of caret in model answer.
@@ -54,9 +54,9 @@ const DELAY = 200;
 var caretWarning = '';
 
 /**
- * FIXME
+ * Initialization, i. e. registration of event handlers and stuff.
  *
- * @param {*} defCorrectness
+ * @param {string} defCorrectness default correctness criterion from admin settings
  */
 export const init = (defCorrectness) => {
     defaultCorrectness = defCorrectness;
@@ -141,9 +141,7 @@ export const init = (defCorrectness) => {
 };
 
 /**
- * FIXME
- *
- * @returns
+ * Pre-fetch strings from the language file.
  */
 const fetchStrings = async() => {
     let pendingPromise = new Pending('qtype_formulas/editformstrings');
@@ -258,10 +256,9 @@ const validateRandomvars = async(evt) => {
 };
 
 /**
- * FIXME
+ * Send text from local variables to web service for validation.
  *
- * @param {*} part
- * @returns
+ * @param {number} part number of part
  */
 const validateLocalvars = async(part) => {
     let fieldList = {
@@ -371,11 +368,11 @@ const warnAboutCaret = (id) => {
 };
 
 /**
- * FIXME
+ * Jump to a certain text position (row, column) in a textarea field.
  *
- * @param {*} field
- * @param {*} row
- * @param {*} col
+ * @param {HTMLElement} field
+ * @param {number} row the row
+ * @param {number} col the column
  * @returns
  */
 const jumpToRowAndColumn = (field, row, col) => {
