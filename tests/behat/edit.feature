@@ -78,3 +78,40 @@ Feature: Test editing a Formulas question
     Then I should not see "No answer has been defined."
     And I should not see "Part 2"
     And I should not see "Part 3"
+
+  Scenario: Check validation and MathJax rendering of unit
+    When I am on the "simple" "core_question > edit" page logged in as teacher1
+    And I follow "Part 1"
+    # Setting an invalid value, warning symbol should be shown.
+    And I set the field "id_postunit_0" to "m+s"
+    Then "" "qtype_formulas > Postunit field with warning" should exist
+    # Setting a valid value, warning should go away and MathJax preview should be there.
+    When I set the field "id_postunit_0" to "m/s"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > Postunit field with warning" should not exist
+    And "" "qtype_formulas > MathJax display" should be visible
+    # Setting a simple value, the MathJax preview should disappear.
+    When I set the field "id_postunit_0" to "m"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    # Setting a value with rendering again.
+    When I set the field "id_postunit_0" to "m kg / s^2"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    # Invalidating the value, the preview should disappear.
+    When I set the field "id_postunit_0" to "m+kg / s^2"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    # Setting a value with rendering again.
+    When I set the field "id_postunit_0" to "m/s"
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible
+    # Preview should disappear when focus is lost.
+    When I press tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should not be visible
+    When I press tab
+    # When coming back into the field, the preview must be shown again.
+    When I press shift tab
+    And I wait "1" seconds
+    Then "" "qtype_formulas > MathJax display" should be visible

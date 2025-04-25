@@ -78,7 +78,9 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
+            [false, '(1+2)*ln'],
             [false, '\sin(3)'],
+            [false, 'sin(3+)'],
             [false, '\ 3'],
             [false, '3; 4'],
             [false, '[1,2]'],
@@ -97,16 +99,16 @@ final class answer_parser_test extends \advanced_testcase {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8 4.e8 .5e8'],
-            [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '- 3'],
+            [qtype_formulas::ANSWER_TYPE_NUMBER, '- 3'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(pi)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(π)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)-3+exp(4)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)'],
-            [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+4^-(9)'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+4^-(9)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8(4.e8+2)(.5e8/2)5'],
+            [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8(4.e8+2)(.5e8/2)5'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b*c'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a b c'],
@@ -135,7 +137,7 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a**b'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a/(b-b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a+(b^c)^+f'], // TODO doc: now allowed, + is unary plus.
-            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'pi()'], // TODO doc: now allowed.
+            [qtype_formulas::ANSWER_TYPE_NUMBER, 'pi()'], // TODO doc: now allowed.
             // Note: the following is syntactically valid and is read as 3*e10; it can be evaluated if e10 is a valid variable.
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3 e10'],
             // Note: the following is syntactically valid and is read as 3e8*e8; it can be evaluated if e8 is a valid variable.
@@ -164,6 +166,7 @@ final class answer_parser_test extends \advanced_testcase {
             [false, '@'],
             [false, '\ 4'],
             [false, '\sin(pi)'],
+            [false, '1+sin'],
         ];
     }
 
@@ -391,6 +394,11 @@ final class answer_parser_test extends \advanced_testcase {
         $unit = substr($input['response'], $index);
         self::assertEquals($expected['number'], trim($number));
         self::assertEquals($expected['unit'], $unit);
+    }
+
+    public function test_is_acceptable_for_answertype_with_invalid_type(): void {
+        $parser = new answer_parser('1');
+        self::assertFalse($parser->is_acceptable_for_answertype(PHP_INT_MAX));
     }
 
     public function test_constructor_with_known_variables(): void {

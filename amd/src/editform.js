@@ -46,16 +46,21 @@ var timer = null;
 /**
  * Delay (in milliseconds) before sending the current input of a field to validation.
  */
-const DELAY = 200;
+const DELAY = 250;
 
 /**
- * Warning text for usage of caret in model answer.
+ * Warning text for use of caret in model answer.
  */
 var caretWarning = '';
 
+/**
+ * Initialization, i. e. registration of event handlers and stuff.
+ *
+ * @param {string} defCorrectness default correctness criterion from admin settings
+ */
 export const init = (defCorrectness) => {
     defaultCorrectness = defCorrectness;
-    numberOfParts = document.querySelectorAll('fieldset[id^=id_answerhdr_]').length;
+    numberOfParts = document.querySelectorAll("fieldset[id^='id_answerhdr_']").length;
 
     Instantiation.init(numberOfParts);
 
@@ -135,6 +140,9 @@ export const init = (defCorrectness) => {
     }
 };
 
+/**
+ * Pre-fetch strings from the language file.
+ */
 const fetchStrings = async() => {
     let pendingPromise = new Pending('qtype_formulas/editformstrings');
     let strings = null;
@@ -244,6 +252,11 @@ const validateRandomvars = async(evt) => {
     pendingPromise.resolve();
 };
 
+/**
+ * Send text from local variables to web service for validation.
+ *
+ * @param {number} part number of part
+ */
 const validateLocalvars = async(part) => {
     let fieldList = {
         'random': 'id_varsrandom',
@@ -351,6 +364,14 @@ const warnAboutCaret = (id) => {
     }
 };
 
+/**
+ * Jump to a certain text position (row, column) in a textarea field.
+ *
+ * @param {HTMLElement} field
+ * @param {number} row the row
+ * @param {number} col the column
+ * @returns
+ */
 const jumpToRowAndColumn = (field, row, col) => {
     let lines = field.value.split('\n');
 
@@ -389,6 +410,7 @@ const reenableCriterionTextfields = () => {
  * Handle change event for the elements that allow simplified entry of the grading criterion.
  * On each modification, the current criterion is propagated to the (hidden) textbox,
  * that will be used to store the criterion in the database upon submission of the form.
+ *
  * @param {number} partNumber number of the part
  */
 const handleSimpleCriterionChanges = (partNumber) => {
@@ -399,6 +421,7 @@ const handleSimpleCriterionChanges = (partNumber) => {
 /**
  * Parse the tolerance value into a number and put the value back into the textfield.
  * This allows for immediate simplification and some validation; invalid numbers will be replaced by 0.
+ *
  * @param {Event} event Event containing the textfield to be normalized
  */
 const normalizeTolerance = (event) => {
@@ -414,6 +437,7 @@ const normalizeTolerance = (event) => {
 
 /**
  * Switch between simplified and normal entry mode for the grading criterion.
+ *
  * @param {number} partNumber number of the part
  */
 const handleGradingCriterionModeSwitcher = (partNumber) => {
@@ -440,6 +464,7 @@ const handleGradingCriterionModeSwitcher = (partNumber) => {
 
 /**
  * Convert the simple grading criterion into the corresponding text.
+ *
  * @param {number} partNumber number of the part
  * @returns {string} text form of the grading criterion
  */
@@ -455,6 +480,7 @@ const convertSimpleCriterionToText = (partNumber) => {
 
 /**
  * Convert the grading criterion into the simplified form.
+ *
  * @param {number} partNumber number of the part
  * @returns {object} criterion the simplified grading criterion
  * @returns {number} criterion.type the type of error (relative or absolute)
@@ -481,8 +507,9 @@ const convertTextCriterionToSimple = (partNumber) => {
 /**
  * Check whether the current grading criterion can be converted into the simplified form.
  * If not, disable the checkbox that would allow switching to simple mode.
- * If yes, enable sais checkbox.
+ * If yes, enable said checkbox.
  * If the text box is empty, conversion is possible using the default value.
+ *
  * @param {number} partNumber number of the part
  */
 const blockModeSwitcherIfNeeded = (partNumber) => {

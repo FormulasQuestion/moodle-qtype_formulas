@@ -86,6 +86,9 @@ class answer_parser extends parser {
         if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
             return $this->is_acceptable_algebraic_formula();
         }
+
+        // If an invalid answer type has been specified, we simply return false.
+        return false;
     }
 
     /**
@@ -332,6 +335,11 @@ class answer_parser extends parser {
             // by that element.
             if ($token->type === token::FUNCTION) {
                 $n = end($stack);
+                // If the top element on the stack was not a number, there must have been a syntax
+                // error. This should not happen anymore, but it does no harm to keep the fallback.
+                if (!is_numeric($n)) {
+                    return false;
+                }
                 $stack = array_slice($stack, 0, -$n);
             }
         }

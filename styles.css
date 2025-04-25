@@ -1,55 +1,31 @@
-.que.formulas .formulas_input_warning_outer {
-    display: inline;
+div#qtype_formulas_mathjax_display {
+    background-color: #eef;
+    border: 1px solid #88c;
+    margin-left: 0;
+    margin-top: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px;
     position: absolute;
+    width: 150px;
     z-index: 1;
 }
 
-.que.formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.6em;
-}
-
-.que.formulas .formulas_input_info_outer {
-    display: inline;
-    position: absolute;
-    z-index: 2;
-}
-
-.que.formulas .formulas_input_info {
-    background-color: #eef;
-    left: 0;
-    position: absolute;
-    top: 1.63em;
-    width: 150px;
-}
-
-.que.formulas .formulas_input_info_title {
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation {
-    border: 1px solid #88c;
-    padding: 2px;
-}
-
-.que.formulas .formulas_input_info_interpretation_incorrect {
-    border: 1px solid #88c;
-    color: #bbb;
-    padding: 2px;
+div[id^='fitem_id_postunit_'] #qtype_formulas_mathjax_display {
+    margin-top: 30px;
+    margin-left: 10px;
 }
 
 .que.formulas .formulas_unit {
     display: inline-block;
     margin: 0 0 0 0;
-    width: 40px;
+    width: 55px;
 }
 
 .que.formulas .formulas_number {
     display: inline-block;
     margin: 0 0 0 0;
-    width: 40px;
+    width: 55px;
 }
 
 .que.formulas .formulas_number_unit {
@@ -112,7 +88,6 @@
     text-indent: -25px;
 }
 
-
 .que.formulas .formulas_mark {
     display: inline;
 }
@@ -143,19 +118,6 @@
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
-}
-
-body#page-question-type-formulas .formulas_input_warning_outer {
-    display: inline;
-    position: absolute;
-    z-index: 1;
-}
-
-body#page-question-type-formulas .formulas_input_warning {
-    background: transparent;
-    left: -1.3em;
-    position: absolute;
-    top: 0.6em;
 }
 
 body#page-question-type-formulas .formulas_input_info_outer {
@@ -190,7 +152,7 @@ body#page-question-type-formulas .formulas_input_info_interpretation_incorrect {
 /* RTL hacks */
 #page-question-type-formulas #id_varsrandom,
 #page-question-type-formulas #id_varsglobal {
-    height: 80px;
     direction: ltr;
+    height: 80px;
     text-align: left;
 }

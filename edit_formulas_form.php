@@ -44,11 +44,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         global $PAGE;
         $config = get_config('qtype_formulas');
         $PAGE->requires->js_call_amd('qtype_formulas/editform', 'init', [get_config('qtype_formulas')->defaultcorrectness]);
-        $PAGE->requires->js('/question/type/formulas/script/formatcheck.js');
+        $PAGE->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
         $PAGE->requires->css('/question/type/formulas/styles.css');
         $PAGE->requires->css('/question/type/formulas/tabulator.css');
-        // Legacy, needed until formatcheck.js is refactored.
-        $PAGE->requires->string_for_js('unit', 'qtype_formulas');
         // Hide the unused form fields.
         $mform->removeElement('defaultmark');
         $mform->addElement('hidden', 'defaultmark');
@@ -168,7 +166,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['answernotunique']['helpbutton'] = ['answernotunique', 'qtype_formulas'];
         // Part's unit.
         $repeated[] = $mform->createElement('text', 'postunit', get_string('postunit', 'qtype_formulas'),
-            ['size' => 60, 'class' => 'formulas_editing_unit']);
+            ['size' => 60]);
         $repeatedoptions['postunit']['helpbutton'] = ['postunit', 'qtype_formulas'];
         $repeatedoptions['postunit']['type'] = PARAM_RAW;
         // Part's grading criteria.
