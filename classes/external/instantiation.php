@@ -517,7 +517,7 @@ class instantiation extends \external_api {
             $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
         } catch (Exception $e) {
             return [
-                'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                'question' => get_string('previewerror', 'qtype_formulas', $e->getMessage()),
                 'parts' => [],
             ];
         }
@@ -534,7 +534,7 @@ class instantiation extends \external_api {
                 $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($params['parttexts'][$i]);
             } catch (Exception $e) {
                 return [
-                    'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                    'question' => get_string('previewerror', 'qtype_formulas', $e->getMessage()),
                     'parts' => [],
                 ];
             }
