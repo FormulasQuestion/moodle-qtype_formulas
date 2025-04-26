@@ -583,7 +583,7 @@ class qtype_formulas extends question_type {
      * because a Formulas question contains subparts.
      *
      * @param array $xml structure containing the XML data
-     * @param $question question object to fill
+     * @param object $question question object to fill
      * @param qformat_xml $format format class exporting the question
      * @param object $extra extra information (not required for importing this question in this format)
      * @return object question object

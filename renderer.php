@@ -702,7 +702,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param float $fraction the obtained grade
      * @return string HTML fragment
      */
-    protected function part_combined_feedback(question_attempt $qa, question_display_options $options, qtype_formulas_part $part, float $fraction) {
+    protected function part_combined_feedback(
+        question_attempt $qa,
+        question_display_options $options,
+        qtype_formulas_part $part,
+        float $fraction
+    ) {
         $feedback = '';
         $showfeedback = false;
         $gradingdetails = '';
