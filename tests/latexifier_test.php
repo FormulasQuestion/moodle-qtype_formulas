@@ -134,6 +134,8 @@ final class latexifier_test extends \advanced_testcase {
     /**
      * Test conversion of various answers into LaTeX code.
      *
+     * @param string $expected expected LaTeX output
+     * @param string $input simulated input
      * @dataProvider provide_answers
      */
     public function test_latexify(string $expected, string $input): void {
@@ -145,6 +147,8 @@ final class latexifier_test extends \advanced_testcase {
     /**
      * Test conversion of units into LaTeX code.
      *
+     * @param string $expected expected LaTeX output
+     * @param string $input simulated input
      * @dataProvider provide_units
      */
     public function test_latexify_unit(string $expected, string $input): void {

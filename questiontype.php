@@ -585,7 +585,8 @@ class qtype_formulas extends question_type {
      * @param array $xml structure containing the XML data
      * @param $question question object to fill
      * @param qformat_xml $format format class exporting the question
-     * @param $extra extra information (not required for importing this question in this format)
+     * @param object $extra extra information (not required for importing this question in this format)
+     * @return object question object
      */
     public function import_from_xml($xml, $question, qformat_xml $format, $extra = null) {
         // Return if data type is not our own one.
@@ -659,7 +660,7 @@ class qtype_formulas extends question_type {
      *
      * @param object $question question to be exported into XML format
      * @param qformat_xml $format format class exporting the question
-     * @param $extra extra information (not required for exporting this question in this format)
+     * @param object $extra extra information (not required for exporting this question in this format)
      * @return string containing the question data in XML format
      */
     public function export_to_xml($question, qformat_xml $format, $extra = null) {

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
 
@@ -22,7 +22,7 @@ require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
  * @package    qtype_formulas
  * @category   test
  * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_qtype_formulas extends behat_base {
 

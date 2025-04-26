@@ -35,7 +35,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  *
  * @package    qtype_formulas
  * @copyright  2024 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers     \qtype_formulas_renderer
  * @covers     \qtype_formulas_question

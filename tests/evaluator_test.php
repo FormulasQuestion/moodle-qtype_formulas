@@ -38,7 +38,7 @@ use qtype_formulas\local\token;
  * @package    qtype_formulas
  * @category   test
  * @copyright  2024 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\evaluator
  * @covers \qtype_formulas\local\parser

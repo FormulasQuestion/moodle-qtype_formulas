@@ -81,6 +81,8 @@ final class parser_test extends \advanced_testcase {
     /**
      * Test various assignments.
      *
+     * @param string $expected string representation of expected sequence of tokens after parsing
+     * @param string $input simulated input to be parsed
      * @dataProvider provide_assignments
      */
     public function test_assignments($expected, $input): void {
@@ -193,6 +195,8 @@ final class parser_test extends \advanced_testcase {
     /**
      * Test various expressions involving parentheses.
      *
+     * @param string $expected expected error message
+     * @param string $input simulated input
      * @dataProvider provide_paren_expressions
      */
     public function test_invalid_parens($expected, $input): void {
@@ -208,6 +212,8 @@ final class parser_test extends \advanced_testcase {
     /**
      * Test various expressions involving sets.
      *
+     * @param string $expected string representation of expected sequence of tokens after parsing
+     * @param string $input simulated input to be parsed
      * @dataProvider provide_sets
      */
     public function test_sets($expected, $input): void {
@@ -264,6 +270,8 @@ final class parser_test extends \advanced_testcase {
     /**
      * Test dealing with things that cannot normally be seen.
      *
+     * @param string $expected expected error message
+     * @param token $input token, will be appended to some standard input
      * @dataProvider provide_impossible_things
      */
     public function test_impossible_stuff($expected, $input): void {
