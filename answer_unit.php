@@ -243,9 +243,9 @@ class answer_unit_conversion {
      * Attempt to convert the $test_unit_name to one of the unit in the $base_unit_array,
      * using any of the conversion rule added in this class earlier. No throw
      *
-     * @param string $test_unit the name of the test unit
+     * @param string $test_unit_name the name of the test unit
      * @param array $base_unit_array in the format of array(unit => exponent, ...)
-     * @return array(conversion factor, unit exponent) if it can be converted, otherwise null.
+     * @return null|array (conversion factor, unit exponent) if it can be converted, otherwise null.
      */
     private function attempt_conversion($test_unit_name, $base_unit_array) {
         // If the unit does not exist, we leave early.

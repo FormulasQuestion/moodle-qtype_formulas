@@ -403,6 +403,8 @@ class functions {
      * This will call the poly_formatter() function accordingly.
      *
      * @param mixed $args,... arguments
+     * @return string the formatted string
+     * @throws Exception
      */
     public static function poly(...$args) {
         $numargs = count($args);
@@ -476,7 +478,7 @@ class functions {
      * @param mixed $coefficients one number or an array of numbers to be used as coefficients
      * @param string $forceplus symbol to be used for the normally invisible leading plus, optional
      * @param string $additionalseparator symbol to be used as separator between the terms, optional
-     * @return string  the formatted string
+     * @return string the formatted string
      */
     private static function poly_formatter($variables, $coefficients = null, $forceplus = '', $additionalseparator = '') {
         // If no variable is given and there is just one single number, simply force the plus sign
@@ -1055,11 +1057,12 @@ class functions {
     /**
      * Calculate the probability of up to $x successful outcomes for
      * $n trials under a binomial distribution with a probability of success
-     * of $p, known as the cumulative distribution function.
+     * of $p, known as the cumulative distribution function. Parameters are float
+     * instead of int to allow for better error reporting.
      *
-     * @param int $n number of trials
+     * @param float $n number of trials
      * @param float $p probability of success for each trial
-     * @param int $x number of successful outcomes
+     * @param float $x number of successful outcomes
      * @return float probability for up to $x successful outcomes
      * @throws Exception
      */

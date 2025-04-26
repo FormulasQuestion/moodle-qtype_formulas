@@ -240,7 +240,7 @@ class qtype_formulas extends question_type {
     /**
      * Saves question-type specific options
      *
-     * This is called by {@link save_question()} to save the question-type specific data
+     * This is called by {@see save_question()} to save the question-type specific data
      * @param object $formdata  This holds the information from the editing form,
      *      it is not a standard question object.
      * @return object $result->error or $result->notice

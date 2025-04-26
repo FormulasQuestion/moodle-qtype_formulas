@@ -116,9 +116,9 @@ class qtype_formulas_edit_form extends question_edit_form {
      *
      * @param MoodleQuickForm $mform the form being built
      * @param string $label label to use for each option
-     * @param $gradeoptions the possible grades for each answer.
-     * @param array $repeatedoptions reference to array of repeated options to fill
-     * @param array $answersoption reference to return the name of $question->options field holding an array of answers
+     * @param array $gradeoptions the possible grades for each answer.
+     * @param array &$repeatedoptions reference to array of repeated options to fill
+     * @param array &$answersoption reference to return the name of $question->options field holding an array of answers
      * @return array of form fields.
      */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
@@ -260,12 +260,13 @@ class qtype_formulas_edit_form extends question_edit_form {
     /**
      * Add a set of form fields, obtained from get_per_answer_fields, to the form,
      * one for each existing answer, with some blanks for some new ones.
-     * @param object $mform the form being built.
-     * @param $label the label to use for each option.
-     * @param $gradeoptions the possible grades for each answer.
-     * @param $minoptions the minimum number of answer blanks to display.
+     *
+     * @param MoodleQuickForm &$mform the form being built.
+     * @param array $label the label to use for each option.
+     * @param array $gradeoptions the possible grades for each answer.
+     * @param int $minoptions the minimum number of answer blanks to display.
      *      Default QUESTION_NUMANS_START.
-     * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
+     * @param int $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
      */
     protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
             $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
@@ -299,7 +300,7 @@ class qtype_formulas_edit_form extends question_edit_form {
     }
 
     /**
-     * Perform any preprocessing needed on the data passed to {@link set_data()}
+     * Perform any preprocessing needed on the data passed to {@see set_data()}
      * before it is used to initialise the form.
      *
      * @param object $question the data being passed to the form
@@ -352,9 +353,12 @@ class qtype_formulas_edit_form extends question_edit_form {
     }
 
     /**
-     * Validating the data returning from the form.
+     * Validating the data returning from the form. This checks for basic errors as well as specific
+     * errors of the question type by evaluating one instantiation.
      *
-     * The check the basic error as well as the formula error by evaluating one instantiation.
+     * @param array $fromform the form data
+     * @param array $files array of uploaded files 'element_name' => tmp_file_path
+     * @return array empty array if everything is OK, otherwise 'element_name' => 'error'
      */
     public function validation($fromform, $files) {
         $errors = parent::validation($fromform, $files);
