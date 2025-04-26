@@ -22,6 +22,21 @@
  * @license https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package qtype_formulas
  */
+
+/**
+ * Called by pluginfile.php to serve files related to our question type.
+ *
+ * Does not return, either calls send_file_not_found(); or serves the file.
+ *
+ * @param stdClass $course course settings object
+ * @param stdClass $cm course module
+ * @param stdClass $context context object
+ * @param string $filearea the name of the file area.
+ * @param array $args the remaining bits of the file path.
+ * @param bool $forcedownload whether the user must be forced to download the file.
+ * @param array $options additional options affecting the file serving
+ * @return void
+ */
 function qtype_formulas_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=[]) {
     global $CFG;
     require_once($CFG->libdir . '/questionlib.php');

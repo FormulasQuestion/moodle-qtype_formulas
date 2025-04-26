@@ -132,7 +132,7 @@ class shunting_yard {
      * @param array &$input input array, will be modified and have its internal pointer reset
      * @param array &$out output array, will be modified and have its internal pointer reset
      * @param callable $callback custom comparison function
-     * @param boolean $poplast whether the last element should be popped or not
+     * @param bool $poplast whether the last element should be popped or not
      */
     private static function flush_while(array &$input, array &$out, callable $callback,
             bool $poplast = false) {
@@ -168,9 +168,9 @@ class shunting_yard {
     /**
      * Flush operators with higher or same precedence from the operator stack.
      *
-     * @param array $opstack operator stack, will be modified
-     * @param integer $precedence precedence value to compare with
-     * @param array $output output queue, will be modified
+     * @param array &$opstack operator stack, will be modified
+     * @param int $precedence precedence value to compare with
+     * @param array &$output output queue, will be modified
      * @return void
      */
     private static function flush_higher_precedence(array &$opstack, int $precedence, array &$output): void {
@@ -196,9 +196,9 @@ class shunting_yard {
      * Flush everything from the operator stack until we reach the desired (opening) parenthesis.
      * The parenthesis itself will be popped and discarded.
      *
-     * @param array $opstack operator stack, will be modified
-     * @param integer $type type of (opening) parenthesis to look for
-     * @param array $output output queue, will be modified
+     * @param array &$opstack operator stack, will be modified
+     * @param int $type type of (opening) parenthesis to look for
+     * @param array &$output output queue, will be modified
      * @return void
      */
     private static function flush_until_paren(array &$opstack, int $type, array &$output): void {

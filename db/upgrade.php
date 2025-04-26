@@ -23,7 +23,13 @@
  * @copyright  2010 Hon Wai, Lau <lau65536@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-function xmldb_qtype_formulas_upgrade($oldversion=0) {
+
+/**
+ * DB upgrade code for the Formulas question plugin.
+ *
+ * @param int $oldversion
+ */
+function xmldb_qtype_formulas_upgrade($oldversion = 0) {
     global $DB, $CFG;
 
     $dbman = $DB->get_manager();

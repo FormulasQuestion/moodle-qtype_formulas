@@ -255,7 +255,7 @@ class evaluator {
      * returns a token (the variable's content) or a variable (the variable's actual definition).
      *
      * @param string $varname name of the variable
-     * @param boolean $exportasvariable whether to export as an instance of variable, otherwise just export the content
+     * @param bool $exportasvariable whether to export as an instance of variable, otherwise just export the content
      * @return token|variable
      */
     public function export_single_variable(string $varname, bool $exportasvariable = false) {
@@ -287,7 +287,7 @@ class evaluator {
      * Instantiate random variables, i. e. assigning a fixed value to them and make them available
      * as regular global variables.
      *
-     * @param integer|null $seed
+     * @param int|null $seed initialization seed for the PRNG
      * @return void
      */
     public function instantiate_random_variables(?int $seed = null): void {
@@ -307,7 +307,7 @@ class evaluator {
      * the optional parameter to false.
      *
      * @param array $data serialized context for randomvariables and variables
-     * @param boolean $overwrite whether to overwrite existing data with incoming context
+     * @param bool $overwrite whether to overwrite existing data with incoming context
      * @return void
      */
     public function import_variable_context(array $data, bool $overwrite = true) {
@@ -550,6 +550,7 @@ class evaluator {
      * Stop evaluating and indicate the human readable position (row/column) where the error occurred.
      *
      * @param string $message error message
+     * @param token $offendingtoken the token where the error occurred
      * @throws Exception
      */
     private function die(string $message, token $offendingtoken) {
@@ -665,6 +666,7 @@ class evaluator {
      * replaces the non-algebraic variables by their numerical value. Returns the resulting
      * string.
      *
+     * @param string $formula the algebraic formula
      * @return string
      */
     public function substitute_variables_in_algebraic_formula(string $formula): string {
@@ -727,7 +729,7 @@ class evaluator {
      *
      * @param array $first first list
      * @param array $second second list
-     * @param int $n number of points where algebraic expressions will be evaluated
+     * @param int|null $n number of points where algebraic expressions will be evaluated
      * @return array
      */
     public function diff($first, $second, ?int $n = null) {
@@ -1098,7 +1100,7 @@ class evaluator {
      * if the conditions are not met.
      *
      * @param token $token the token to check
-     * @param boolean $enforcenumeric whether the value must be numeric in addition to being scalar
+     * @param bool $enforcenumeric whether the value must be numeric in addition to being scalar
      * @return void
      * @throws Exception
      */

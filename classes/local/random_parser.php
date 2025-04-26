@@ -30,8 +30,8 @@ class random_parser extends parser {
      * to be able to distinguish random variables and normal variables. It also simplifies the
      * creation of shuffled (randomized) arrays by making the usage shuffle() optional.
      *
-     * @param [type] $tokenlist list of tokens as returned from the lexer or input string
-     * @param [type] $knownvariables
+     * @param string|array $tokenlist list of tokens as returned from the lexer or input string
+     * @param array $knownvariables list of known variables
      */
     public function __construct($tokenlist, array $knownvariables = []) {
         // If the input is given as a string, run it through the lexer first.

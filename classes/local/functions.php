@@ -400,8 +400,9 @@ class functions {
      * - (3) string, number, string => combine them and, if appropriate, force + sign
      * - (3) string, list of numbers, string => polynomial (one var) using third argument as separator (e.g. &)
      * - (3) list of strings, list of numbers, string => linear combination using third argument as separator
-     *
      * This will call the poly_formatter() function accordingly.
+     *
+     * @param mixed $args,... arguments
      */
     public static function poly(...$args) {
         $numargs = count($args);
@@ -1059,7 +1060,6 @@ class functions {
      * @param int $n number of trials
      * @param float $p probability of success for each trial
      * @param int $x number of successful outcomes
-     *
      * @return float probability for up to $x successful outcomes
      * @throws Exception
      */
@@ -1282,7 +1282,7 @@ class functions {
      * Apply an unary operator to a given argument.
      *
      * @param string $op operator, e.g. - or !
-     * @param mixed $first argument
+     * @param mixed $input argument
      * @return mixed
      */
     public static function apply_unary_operator($op, $input) {
