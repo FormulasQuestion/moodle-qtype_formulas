@@ -307,6 +307,24 @@ final class externallib_test extends \externallib_advanced_testcase {
     public static function provide_instantiation_data(): array {
         return [
             [
+                ['status' => 'error', 'message' => "No answer has been defined for part 1."],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => [''], 'answers' => [''],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => '',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
                 ['status' => 'ok', 'data' => [[
                     'randomvars' => [],
                     'globalvars' => [

@@ -86,6 +86,7 @@ $string['defaultunitpenalty_desc'] = 'Default penalty for wrong unit (0-1)';
 $string['error_algebraic_relerr'] = 'Relative error (_relerr) cannot be used with answer type algebraic formula.';
 $string['error_algvar_numbers'] = 'Algebraic variables can only be initialized with a list of numbers.';
 $string['error_answer_missing'] = 'No answer has been defined.';
+$string['error_answer_missing_in_part'] = 'No answer has been defined for part {$a}.';
 $string['error_answerbox_duplicate'] = 'Answer box placeholders must be unique, found second instance of {$a}.';
 $string['error_bitshift_integer'] = 'Bit shift operator should only be used with integers.';
 $string['error_bitshift_negative'] = 'Bit shift by negative number {$a} is not allowed.';
@@ -288,7 +289,7 @@ for inverse exponent. Any permutation of the base units are treated the same.
 
 Students are required to use the same input format. Examples:
 <pre class="prettyprint">1 m<br>0.1 m^2<br>20 m s^(-1)<br>400 kg m/s<br>100 kW</pre>';
-$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message:';
+$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message: {$a}';
 $string['privacy:metadata'] = 'The Formulas question type plugin does not store any personal data.';
 $string['qtextpreview'] = 'Preview';
 $string['questiontext'] = 'Question text';

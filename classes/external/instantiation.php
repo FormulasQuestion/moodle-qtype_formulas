@@ -137,8 +137,13 @@ class instantiation extends \external_api {
                     $partevaluator->evaluate($parsedlocalvars[$i]);
                 }
                 $localvars[$i] = self::variable_context_to_array($partevaluator->export_variable_context());
-                // Finally, evaluate the answer(s).
-                $answers[$i] = $partevaluator->evaluate($parsedanswers[$i])[0];
+                // Finally, evaluate the answer(s). If the model answer was empty, we cannot move on. As we
+                // are in a try-catch, we simply throw an exception with the appropriate error message.
+                $evaluationresult = $partevaluator->evaluate($parsedanswers[$i]);
+                if (empty($evaluationresult)) {
+                    throw new Exception(get_string('error_answer_missing_in_part', 'qtype_formulas', $i + 1));
+                }
+                $answers[$i] = reset($evaluationresult);
             }
         } catch (Exception $e) {
             return $e->getMessage();
@@ -512,7 +517,7 @@ class instantiation extends \external_api {
             $renderedquestiontext = $evaluator->substitute_variables_in_text($params['questiontext']);
         } catch (Exception $e) {
             return [
-                'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                'question' => get_string('previewerror', 'qtype_formulas', $e->getMessage()),
                 'parts' => [],
             ];
         }
@@ -529,7 +534,7 @@ class instantiation extends \external_api {
                 $renderedparttexts[$i] = $partevaluator->substitute_variables_in_text($params['parttexts'][$i]);
             } catch (Exception $e) {
                 return [
-                    'question' => get_string('previewerror', 'qtype_formulas') . ' ' . $e->getMessage(),
+                    'question' => get_string('previewerror', 'qtype_formulas', $e->getMessage()),
                     'parts' => [],
                 ];
             }
