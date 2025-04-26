@@ -416,8 +416,9 @@ const instantiate = async() => {
             }
         }])[0];
         if (response.status == 'error') {
-            let str = await String.get_string('previewerror', 'qtype_formulas');
-            document.getElementById('qtextpreview_display').innerHTML = `${str}<br>${response.message}`;
+            document.getElementById('qtextpreview_display').innerHTML = await String.get_string(
+                'previewerror', 'qtype_formulas', response.message
+            );
         } else {
             document.getElementById('qtextpreview_display').innerHTML = '';
             prepareTableColumns(response.data);

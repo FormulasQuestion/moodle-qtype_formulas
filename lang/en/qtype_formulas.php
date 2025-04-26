@@ -289,7 +289,7 @@ for inverse exponent. Any permutation of the base units are treated the same.
 
 Students are required to use the same input format. Examples:
 <pre class="prettyprint">1 m<br>0.1 m^2<br>20 m s^(-1)<br>400 kg m/s<br>100 kW</pre>';
-$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message:';
+$string['previewerror'] = 'No preview available. Check your definition of random variables, global variables, parts\' local variables and answers. Original error message: {$a}';
 $string['privacy:metadata'] = 'The Formulas question type plugin does not store any personal data.';
 $string['qtextpreview'] = 'Preview';
 $string['questiontext'] = 'Question text';
