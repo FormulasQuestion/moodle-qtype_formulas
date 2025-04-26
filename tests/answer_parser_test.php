@@ -194,6 +194,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test for answer_parser::is_acceptable_number().
      *
+     * @param int|bool $expected the lowest valid answer type or false if invalid
+     * @param string $input the simulated student answer
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_number($expected, $input): void {
@@ -209,6 +211,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test for answer_parser::is_acceptable_numberic().
      *
+     * @param int|bool $expected the lowest valid answer type or false if invalid
+     * @param string $input the simulated student answer
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_numeric($expected, $input): void {
@@ -224,6 +228,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test for answer_parser::is_acceptable_numberical_formula().
      *
+     * @param int|bool $expected the lowest valid answer type or false if invalid
+     * @param string $input the simulated student answer
      * @dataProvider provide_numbers
      */
     public function test_is_acceptable_numerical_formula($expected, $input): void {
@@ -239,6 +245,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test for answer_parser::is_acceptable_algebraic_formula().
      *
+     * @param int|bool $expected the lowest valid answer type or false if invalid
+     * @param string $input the simulated student answer
      * @dataProvider provide_numbers
      * @dataProvider provide_algebraic_formulas
      */
@@ -255,6 +263,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test splitting of number and unit as entered in a combined answer box.
      *
+     * @param array $expected expected outcome, array with number part and unit part (both strings)
+     * @param string $input the simulated input of a combined answer field
      * @dataProvider provide_numbers_and_units
      */
     public function test_unit_split($expected, $input): void {
@@ -384,6 +394,8 @@ final class answer_parser_test extends \advanced_testcase {
     /**
      * Test splitting of units if they are named like a function.
      *
+     * @param array $expected the expected result ('number' => string, 'unit' => string)
+     * @param array $input the simulated input ('response' => string and 'knownvars' => array)
      * @dataProvider provide_special_units
      */
     public function test_special_unit_split($expected, $input): void {

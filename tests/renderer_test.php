@@ -46,6 +46,7 @@ final class renderer_test extends walkthrough_test_base {
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
      *
+     * @param string|null $which the test question name
      * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
@@ -555,6 +556,8 @@ final class renderer_test extends walkthrough_test_base {
     /**
      * Test general and combined feedback for part.
      *
+     * @param string $expectedfeedback the feedback that should be shown
+     * @param array $input input data (behaviour, question name, simulated student response)
      * @dataProvider provide_responses_for_feedback_test
      */
     public function test_part_feedback($expectedfeedback, $input): void {

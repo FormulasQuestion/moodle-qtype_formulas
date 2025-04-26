@@ -402,7 +402,7 @@ class functions {
      * - (3) list of strings, list of numbers, string => linear combination using third argument as separator
      * This will call the poly_formatter() function accordingly.
      *
-     * @param mixed $args,... arguments
+     * @param mixed $args arguments
      * @return string the formatted string
      * @throws Exception
      */
