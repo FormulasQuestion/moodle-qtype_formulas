@@ -200,7 +200,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Format given number according to numbering style, e. g. abc or 123.
      *
      * @param int $num number
-     * @param string $style style to render the number in, acccording to {@link qtype_multichoice::get_numbering_styles()}
+     * @param string $style style to render the number in, acccording to {@see qtype_multichoice::get_numbering_styles()}
      * @return string number $num in the requested style
      */
     protected function number_in_style($num, $style) {
@@ -592,8 +592,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
     /**
      * We need to owerwrite this method to replace global variables by their value
-     * @param question_attempt $qa the question attempt to display.
-     * @return string HTML fragment.
+     *
+     * @param question_attempt $qa the question attempt to display
+     * @param question_hint $hint the hint to be shown
+     * @return string HTML fragment
      */
     protected function hint(question_attempt $qa, question_hint $hint) {
         /** @var qtype_formulas_question $question */
@@ -647,13 +649,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Gereate the part's general feedback. This is feedback is shown to all students.
      *
-     * @param int $i part index
      * @param question_attempt $qa question attempt being displayed
-     * @param question_definition $question question being displayed
      * @param question_display_options $options controls what should and should not be displayed
+     * @param qtype_formulas_part $part the question part
      * @return string HTML fragment
      */
-    protected function part_general_feedback(question_attempt $qa, question_display_options $options, $part) {
+    protected function part_general_feedback(question_attempt $qa, question_display_options $options, qtype_formulas_part $part) {
         if ($part->feedback == '') {
             return '';
         }
@@ -695,13 +696,18 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate HTML fragment for the part's combined feedback.
      *
-     * @param int $i part index
      * @param question_attempt $qa question attempt being displayed
-     * @param question_definition $question question being displayed
      * @param question_display_options $options controls what should and should not be displayed
+     * @param qtype_formulas_part $part the question part
+     * @param float $fraction the obtained grade
      * @return string HTML fragment
      */
-    protected function part_combined_feedback(question_attempt $qa, question_display_options $options, $part, $fraction) {
+    protected function part_combined_feedback(
+        question_attempt $qa,
+        question_display_options $options,
+        qtype_formulas_part $part,
+        float $fraction
+    ) {
         $feedback = '';
         $showfeedback = false;
         $gradingdetails = '';

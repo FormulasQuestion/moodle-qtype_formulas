@@ -166,6 +166,7 @@ class parser {
      * Stop processing and indicate the human readable position (row/column) where the error occurred.
      *
      * @param string $message error message
+     * @param token|null $offendingtoken the token where the error happened
      * @return void
      * @throws Exception
      */

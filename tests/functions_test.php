@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  * @package    qtype_formulas
  * @category   test
  * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\functions
  * @covers \qtype_formulas\local\evaluator
@@ -132,6 +132,8 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test functions::assure_numeric().
      *
+     * @param int|float|string $expected return value, either the cleaned number (integer/float) or the error message
+     * @param array $input input data ('value' => number, 'message' => string, 'conditions' => OR'ed constants from functions)
      * @dataProvider provide_cases_for_assure_numeric
      */
     public function test_assure_numeric($expected, $input): void {
@@ -330,6 +332,9 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test various combinatoric functions, e. g. ncr().
      *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
+     *
      * @dataProvider provide_ncr
      * @dataProvider provide_npr
      * @dataProvider provide_fact
@@ -375,6 +380,9 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test functions::len().
      *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
+     *
      * @dataProvider provide_len_inputs
      */
     public function test_len($expected, $input): void {
@@ -410,6 +418,9 @@ final class functions_test extends \advanced_testcase {
 
     /**
      * Test functions::sum().
+     *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_sum_inputs
      */
@@ -482,6 +493,9 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test functions::gcd() and functions::lcm().
      *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
+     *
      * @dataProvider provide_gcd_inputs
      * @dataProvider provide_lcm_inputs
      */
@@ -539,6 +553,9 @@ final class functions_test extends \advanced_testcase {
 
     /**
      * Test functions::pick().
+     *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_pick_inputs
      */
@@ -754,6 +771,9 @@ final class functions_test extends \advanced_testcase {
 
     /**
      * Test various functions for number conversion, e. g. functions::decbin() or functions::hexdec().
+     *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_decbin_calls
      * @dataProvider provide_dechex_calls
@@ -1029,6 +1049,9 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test invocation of known functions.
      *
+     * @param bool $expected whether the call should succeed or not
+     * @param string $input simulated input
+     *
      * @dataProvider provide_trigonometric_function_invocations
      * @dataProvider provide_algebraic_numerical_function_invocations
      * @dataProvider provide_string_array_function_invocations
@@ -1180,6 +1203,9 @@ final class functions_test extends \advanced_testcase {
 
     /**
      * Test functions::poly().
+     *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_poly_inputs
      */
@@ -1352,6 +1378,9 @@ final class functions_test extends \advanced_testcase {
     /**
      * Test various functions that return a string, e. g. functions::sigfig() or functions::join().
      *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
+     *
      * @dataProvider provide_sigfig_expressions
      * @dataProvider provide_join_calls
      */
@@ -1366,6 +1395,9 @@ final class functions_test extends \advanced_testcase {
 
     /**
      * Test various functions, e. g. functions::map() or functions::sort().
+     *
+     * @param mixed $expected expected evaluation result or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_various_function_calls
      * @dataProvider provide_modular_function_calls

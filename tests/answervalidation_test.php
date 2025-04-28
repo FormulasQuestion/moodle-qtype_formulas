@@ -126,6 +126,8 @@ final class answervalidation_test extends \advanced_testcase {
     /**
      * Test validation of a student answer.
      *
+     * @param bool|int $type the lowest answer type for which the input is valid, or false if invalid
+     * @param string $input the simulated input
      * @dataProvider provide_numbers
      * @dataProvider provide_algebraic_formulas
      */
@@ -157,6 +159,8 @@ final class answervalidation_test extends \advanced_testcase {
     /**
      * Test validation of a student answer in a combined field.
      *
+     * @param bool|int $type the lowest answer type for which the input is valid, or false if invalid
+     * @param string $input the simulated input
      * @dataProvider provide_numbers_and_units
      */
     public function test_validate_student_answer_with_unit($type, string $input): void {
@@ -186,6 +190,8 @@ final class answervalidation_test extends \advanced_testcase {
     /**
      * Test validation of a student answer in a combined field.
      *
+     * @param bool $expected whether or not the input should be valid
+     * @param string $input the simulated input
      * @dataProvider provide_units
      */
     public function test_validate_unit(bool $expected, string $input): void {

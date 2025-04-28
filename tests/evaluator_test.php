@@ -38,7 +38,7 @@ use qtype_formulas\local\token;
  * @package    qtype_formulas
  * @category   test
  * @copyright  2024 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\evaluator
  * @covers \qtype_formulas\local\parser
@@ -129,6 +129,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test evaluation of various expressions that will yield a numeric result.
      *
+     * @param int|float $expected expected output
+     * @param string $input simulated input
+     *
      * @dataProvider provide_expressions_with_functions
      * @dataProvider provide_simple_expressions
      * @dataProvider provide_ternary_expressions
@@ -211,6 +214,9 @@ final class evaluator_test extends \advanced_testcase {
 
     /**
      * Test evaluation related to arrays.
+     *
+     * @param array $expected expected output array
+     * @param string $input simulated input
      *
      * @dataProvider provide_arrays
      */
@@ -1016,6 +1022,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test assignment and evaluation related to random variables.
      *
+     * @param array $expected associative array ('name' => string, 'count' => int, 'shuffle' => bool, if not shuffled 'min', 'max')
+     * @param string $input simulated input
+     *
      * @dataProvider provide_random_variables
      */
     public function test_assignments_of_random_variables($expected, $input): void {
@@ -1093,6 +1102,9 @@ final class evaluator_test extends \advanced_testcase {
 
     /**
      * Test treatment of invalid definitions for random variables.
+     *
+     * @param string $expected expected error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_invalid_random_vars
      */
@@ -1245,6 +1257,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test various assignments.
      *
+     * @param array $expected associative array 'variable name' => variable token
+     * @param string $input simulated input
+     *
      * @dataProvider provide_valid_assignments
      * @dataProvider provide_sets
      */
@@ -1309,6 +1324,9 @@ final class evaluator_test extends \advanced_testcase {
 
     /**
      * Test nested lists.
+     *
+     * @param array $expected associative array 'variable name' => variable token
+     * @param string $input simulated input
      *
      * @dataProvider provide_nested_list_assignments
      */
@@ -1648,6 +1666,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test various invalid expressions.
      *
+     * @param string $expected expected error message
+     * @param string $input simulated input
+     *
      * @dataProvider provide_invalid_assignments
      * @dataProvider provide_invalid_colon
      * @dataProvider provide_invalid_for_loops
@@ -1691,6 +1712,9 @@ final class evaluator_test extends \advanced_testcase {
 
     /**
      * Test evaluation of algebraic formulas.
+     *
+     * @param int|string $expected expected output or error message
+     * @param string $input simulated input
      *
      * @dataProvider provide_algebraic_expressions
      */
@@ -1936,6 +1960,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test correct interpretation of e as exponential (EE) or variable e.
      *
+     * @param array $expected associative array 'input' => expected output (float) or error message
+     * @param string $vars prior definition of variables in the evaluator for context
+     *
      * @dataProvider provide_inputs_for_exponential_versus_e
      */
     public function test_exponential_versus_variable_e_precedence($expected, $vars): void {
@@ -2044,6 +2071,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test evaluation of responses given as algebraic formulas.
      *
+     * @param bool $expected whether the input should be accepted as valid or not
+     * @param string $input simulated input
+     *
      * @dataProvider provide_algebraic_formulas
      */
     public function test_algebraic_formulas($expected, $input): void {
@@ -2095,6 +2125,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test evaluation of responses given as numerical formulas.
      *
+     * @param float|bool $expected expected output or false, if invalid
+     * @param string $input simulated input
+     *
      * @dataProvider provide_numerical_formulas
      */
     public function test_numerical_formulas($expected, $input): void {
@@ -2126,6 +2159,9 @@ final class evaluator_test extends \advanced_testcase {
     /**
      * Test evaluation of responses given as numeric expressions.
      *
+     * @param float|bool $expected expected output or false, if invalid
+     * @param string $input simulated input
+     *
      * @dataProvider provide_numeric_answers
      */
     public function test_numeric_answer($expected, $input): void {
@@ -2156,6 +2192,9 @@ final class evaluator_test extends \advanced_testcase {
 
     /**
      * Test evaluation of responses given as numbers.
+     *
+     * @param float|bool $expected expected output or false, if invalid
+     * @param string $input simulated input
      *
      * @dataProvider provide_numbers
      */

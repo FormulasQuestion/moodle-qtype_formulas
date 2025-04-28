@@ -125,8 +125,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * the question later on. Finally, we initialize the evaluators for every part, because
      * they need the global and random variables from the main question.
      *
-     * @param question_attempt_step $step the step of the {@link question_attempt} being started
-     * @param int $variant the variant requested, integer between 1 and {@link get_num_variants()} inclusive
+     * @param question_attempt_step $step the step of the {@see question_attempt()} being started
+     * @param int $variant the variant requested, integer between 1 and {@see get_num_variants()} inclusive
      */
     public function start_attempt(question_attempt_step $step, $variant): void {
         // Take $variant as the seed, store it in the database (question_attempt_step_data)
@@ -160,12 +160,12 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     /**
-     * When reloading an in-progress {@link question_attempt} from the database, restore the question's
+     * When reloading an in-progress {@see \question_attempt} from the database, restore the question's
      * state, i. e. make sure the random variables are instantiated with the same values again. For more
      * recent versions, we do this by restoring the seed. For legacy questions, the instantiated values
      * are stored in the database.
      *
-     * @param question_attempt_step $step the step of the {@link question_attempt} being loaded
+     * @param question_attempt_step $step the step of the {@see \question_attempt} being loaded
      */
     public function apply_attempt_state(question_attempt_step $step): void {
         // Create an empty evaluator.
@@ -320,7 +320,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Return the model answers as entered by the teacher. These answers should normally be sufficient
      * to get the maximum grade.
      *
-     * @param qtype_formulas_part|null model answer for every answer / unit box of each part
+     * @param qtype_formulas_part|null $part model answer for every answer / unit box of each part
      * @return array model answer for every answer / unit box of each part
      */
     public function get_correct_response(?qtype_formulas_part $part = null): array {
@@ -447,7 +447,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Used by many of the behaviours to determine whether the student has provided enough of an answer
      * for the question to be graded automatically, or whether it must be considered aborted.
      *
-     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @param array $response responses, as returned by {@see \question_attempt_step::get_qt_data()}
      * @return bool whether this response can be graded
      */
     public function is_gradable_response(array $response): bool {
@@ -466,7 +466,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Used by many of the behaviours, to work out whether the student's response to the question is
      * complete. That is, whether the question attempt should move to the COMPLETE or INCOMPLETE state.
      *
-     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @param array $response responses, as returned by {@see \question_attempt_step::get_qt_data()}
      * @return bool whether this response is a complete answer to this question
      */
     public function is_complete_response(array $response): bool {
@@ -485,7 +485,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * Used by many of the behaviours to determine whether the student's response has changed. This
      * is normally used to determine that a new set of responses can safely be discarded.
      *
-     * @param array $prevresponse previously recorded responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @param array $prevresponse previously recorded responses, as returned by {@see \question_attempt_step::get_qt_data()}
      * @param array $newresponse new responses, in the same format
      * @return bool whether the two sets of responses are the same
      */
@@ -504,7 +504,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * Produce a plain text summary of a response to be used e. g. in reports.
      *
-     * @param array $response student's response, as might be passed to {@link grade_response()}
+     * @param array $response student's response, as might be passed to {@see grade_response()}
      * @return string plain text summary
      */
     public function summarise_response(array $response) {
@@ -520,8 +520,8 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     /**
      * Categorise the student's response according to the categories defined by get_possible_responses.
      *
-     * @param array $response response, as might be passed to {@link grade_response()}
-     * @return array subpartid => {@link question_classified_response} objects;  empty array if no analysis is possible
+     * @param array $response response, as might be passed to {@see grade_response()}
+     * @return array subpartid => {@see \question_classified_response} objects;  empty array if no analysis is possible
      */
     public function classify_response(array $response) {
         // First, we normalize the student's answers.
@@ -590,11 +590,11 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
     /**
      * Grade a response to the question, returning a fraction between get_min_fraction()
-     * and 1.0, and the corresponding {@link question_state} right, partial or wrong. This
+     * and 1.0, and the corresponding {@see \question_state} right, partial or wrong. This
      * method is used with immediate feedback, with adaptive mode and with interactive mode. It
      * is called after the studenet clicks "submit and finish" when deferred feedback is active.
      *
-     * @param array $response responses, as returned by {@link question_attempt_step::get_qt_data()}
+     * @param array $response responses, as returned by {@see \question_attempt_step::get_qt_data()}
      * @return array [0] => fraction (grade) and [1] => corresponding question state
      */
     public function grade_response(array $response) {
@@ -988,7 +988,7 @@ class qtype_formulas_part {
 
     /**
      * Return the expected fields and data types for all answer boxes this part. This function
-     * is called by the main question's {@link get_expected_data()} method.
+     * is called by the main question's {@see get_expected_data()} method.
      *
      * @return array
      */
@@ -1062,7 +1062,7 @@ class qtype_formulas_part {
     /**
      * Produce a plain text summary of a response for the part.
      *
-     * @param array $response a response, as might be passed to {@link grade_response()}.
+     * @param array $response a response, as might be passed to {@see grade_response()}.
      * @return string a plain text summary of that response, that could be used in reports.
      */
     public function summarise_response(array $response) {

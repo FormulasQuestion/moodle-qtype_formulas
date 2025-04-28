@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace qtype_formulas\local;
 
@@ -21,7 +21,7 @@ namespace qtype_formulas\local;
  *
  * @package    qtype_formulas
  * @copyright  2022 Philipp Imhof
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class shunting_yard {
     /**
@@ -129,10 +129,10 @@ class shunting_yard {
      * the first one *not* to satisfy the condition, should be popped (and discarded) or whether
      * it should be be left in the input array.
      *
-     * @param array &$input input array, will be modified and have its internal pointer reset
-     * @param array &$out output array, will be modified and have its internal pointer reset
+     * @param array $input input array, will be modified and have its internal pointer reset
+     * @param array $out output array, will be modified and have its internal pointer reset
      * @param callable $callback custom comparison function
-     * @param boolean $poplast whether the last element should be popped or not
+     * @param bool $poplast whether the last element should be popped or not
      */
     private static function flush_while(array &$input, array &$out, callable $callback,
             bool $poplast = false) {
@@ -169,7 +169,7 @@ class shunting_yard {
      * Flush operators with higher or same precedence from the operator stack.
      *
      * @param array $opstack operator stack, will be modified
-     * @param integer $precedence precedence value to compare with
+     * @param int $precedence precedence value to compare with
      * @param array $output output queue, will be modified
      * @return void
      */
@@ -182,8 +182,8 @@ class shunting_yard {
     /**
      * Flush all remaining operators (but not parens or functions) from the operator stack.
      *
-     * @param array &$opstack operator stack, will be modified
-     * @param array &$output output queue, will be modified
+     * @param array $opstack operator stack, will be modified
+     * @param array $output output queue, will be modified
      * @return void
      */
     private static function flush_all_operators(array &$opstack, array &$output): void {
@@ -197,7 +197,7 @@ class shunting_yard {
      * The parenthesis itself will be popped and discarded.
      *
      * @param array $opstack operator stack, will be modified
-     * @param integer $type type of (opening) parenthesis to look for
+     * @param int $type type of (opening) parenthesis to look for
      * @param array $output output queue, will be modified
      * @return void
      */

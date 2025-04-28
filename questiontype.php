@@ -240,7 +240,7 @@ class qtype_formulas extends question_type {
     /**
      * Saves question-type specific options
      *
-     * This is called by {@link save_question()} to save the question-type specific data
+     * This is called by {@see save_question()} to save the question-type specific data
      * @param object $formdata  This holds the information from the editing form,
      *      it is not a standard question object.
      * @return object $result->error or $result->notice
@@ -508,7 +508,7 @@ class qtype_formulas extends question_type {
      * Initialise instante of the qtype_formulas_question class and its parts which, in turn,
      * are instances of the qtype_formulas_part class.
      *
-     * @param qtype_formulas_question $question instance of a Formulas question
+     * @param question_definition $question instance of a Formulas question (qtype_formulas_question)
      * @param object $questiondata question data as stored in the DB
      */
     protected function initialise_question_instance(question_definition $question, $questiondata) {
@@ -516,6 +516,7 @@ class qtype_formulas extends question_type {
         parent::initialise_question_instance($question, $questiondata);
 
         // First, copy some data for the main question.
+        /** @var qtype_formulas_question $question */
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
         $question->answernumbering = $questiondata->options->answernumbering;
@@ -583,9 +584,10 @@ class qtype_formulas extends question_type {
      * because a Formulas question contains subparts.
      *
      * @param array $xml structure containing the XML data
-     * @param $question question object to fill
+     * @param object $question question object to fill
      * @param qformat_xml $format format class exporting the question
-     * @param $extra extra information (not required for importing this question in this format)
+     * @param object $extra extra information (not required for importing this question in this format)
+     * @return object question object
      */
     public function import_from_xml($xml, $question, qformat_xml $format, $extra = null) {
         // Return if data type is not our own one.
@@ -659,7 +661,7 @@ class qtype_formulas extends question_type {
      *
      * @param object $question question to be exported into XML format
      * @param qformat_xml $format format class exporting the question
-     * @param $extra extra information (not required for exporting this question in this format)
+     * @param object $extra extra information (not required for exporting this question in this format)
      * @return string containing the question data in XML format
      */
     public function export_to_xml($question, qformat_xml $format, $extra = null) {

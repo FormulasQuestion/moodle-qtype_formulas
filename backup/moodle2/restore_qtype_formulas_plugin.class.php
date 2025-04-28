@@ -54,6 +54,8 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
      * This function processes the <formulas> XML element for the backup, i. e. the part where the
      * specific question level data like varsrandom or varsglobal are backed up. That's the data stored
      * in the qtype_formulas_options table.
+     *
+     * @param array $data data from the XML element <formulas>
      */
     public function process_formulas($data) {
         global $DB;
@@ -100,6 +102,8 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
      * This function processes the <formulas_answer> XML element for the backup, i. e. the part where
      * the specific part level data like answertype or subqtext are backed up. That's the data stored
      * in the qtype_formulas_answers table.
+     *
+     * @param array $data data from the <formulas_answer> XML element
      */
     public function process_formulas_answer($data) {
         global $DB;

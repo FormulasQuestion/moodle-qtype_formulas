@@ -27,7 +27,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * @copyright  2024 Philipp Imhof
  * @package    qtype_formulas
  * @category   test
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @runTestsInSeparateProcesses
  * @covers \qtype_formulas\external\instantiation
@@ -101,6 +101,8 @@ final class externallib_test extends \externallib_advanced_testcase {
     /**
      * Test for instantiation::check_random_global_vars().
      *
+     * @param array $expected expected validation ('source' => string, 'message' => string)
+     * @param array $input form input to validate ('randomvars' => string, 'globalvars' => string)
      * @dataProvider provide_random_global_vars
      */
     public function test_check_random_global_vars($expected, $input): void {
@@ -198,6 +200,8 @@ final class externallib_test extends \externallib_advanced_testcase {
     /**
      * Test for instantiation::check_local_vars().
      *
+     * @param array $expected expected validation ('source' => string, 'message' => string)
+     * @param array $input form input to validate ('randomvars' => string, 'globalvars' => string, 'localvars' => string)
      * @dataProvider provide_random_global_local_vars
      */
     public function test_check_local_vars($expected, $input): void {
@@ -285,6 +289,8 @@ final class externallib_test extends \externallib_advanced_testcase {
     /**
      * Test for instantiation::render_question_text().
      *
+     * @param array $expected expected output ('question' => string, 'parts' => string[])
+     * @param array $input data ('questiontext' => string, 'parttexts' => string[], 'globalvars' => string, 'partvars' => string[])
      * @dataProvider provide_question_texts
      */
     public function test_render_question_text($expected, $input): void {
@@ -549,6 +555,9 @@ final class externallib_test extends \externallib_advanced_testcase {
     /**
      * Test for instantiation::instantiate().
      *
+     * @param array $expected expected output ('status' => 'ok'/'error', 'data' => array or 'message' => string)
+     * @param array $input expected input ('n' => int, 'randomvars' => string, 'globalvars' => string,
+     *      'localvars' => string[], 'answers' => string[])
      * @dataProvider provide_instantiation_data
      */
     public function test_instantiate($expected, $input): void {

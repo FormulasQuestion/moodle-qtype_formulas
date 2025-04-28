@@ -61,6 +61,7 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
      *
+     * @param string|null $which the test question name
      * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
@@ -259,6 +260,8 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test validation of question's edit form for multi-part questions.
      *
+     * @param array $expected expected validation errors (fieldname => message)
+     * @param array $input simulated form data
      * @dataProvider provide_multipart_data_for_form_validation
      */
     public function test_form_validation_multipart($expected, $input): void {
@@ -536,6 +539,8 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test validation of question's edit form for single-part questions.
      *
+     * @param array $expected expected validation errors (fieldname => message)
+     * @param array $input simulated form data
      * @dataProvider provide_single_part_data_for_form_validation
      */
     public function test_form_validation_single_part($expected, $input): void {
@@ -582,6 +587,8 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test calculation of the number of answer boxes based on the teacher's model answers.
      *
+     * @param int $expected expected number of answer boxes
+     * @param string $answer simulated model answer input
      * @dataProvider provide_answers_for_numbox_test
      */
     public function test_calculation_of_numbox_numbertype($expected, $answer): void {
@@ -615,6 +622,8 @@ final class questiontype_test extends \advanced_testcase {
      * Test calculation of the number of answer boxes based on the teacher's model answers
      * when the answer type is "algebraic formula".
      *
+     * @param int $expected expected number of answer boxes
+     * @param string $answer simulated model answer input
      * @dataProvider provide_algebraic_answers_for_numbox_test
      */
     public function test_calculation_of_numbox_algebraictype($expected, $answer): void {
@@ -748,6 +757,8 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test that files are properly moved if a question is moved from one category to another.
      *
+     * @param string $fieldname name of the form field containing the file reference
+     * @param string $areaname name of the file area
      * @dataProvider provide_fileareas_for_deletion_and_moving
      */
     public function test_move_question_with_file_in_part($fieldname, $areaname): void {
@@ -878,6 +889,7 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test initialisation of a question instance.
      *
+     * @param string $questionname name of the test question
      * @dataProvider provide_question_names
      */
     public function test_initialise_question_instance($questionname): void {
@@ -981,6 +993,8 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test importing a question from a prior XML export.
      *
+     * @param string $expected expected output after XML import
+     * @param string $filename path of fixture file to be used
      * @dataProvider provide_import_filenames
      */
     public function test_import_from_xml($expected, $filename): void {
@@ -1026,6 +1040,7 @@ final class questiontype_test extends \advanced_testcase {
     /**
      * Test exporting a question to XML and reimporting it.
      *
+     * @param string $questionname name of the test question
      * @dataProvider provide_question_names
      */
     public function test_export_and_reimport_xml($questionname): void {
