@@ -52,6 +52,7 @@ final class question_test extends \basic_testcase {
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
      *
+     * @param string|null $which the test question name
      * @return qtype_formulas_question
      */
     protected function get_test_formulas_question($which = null) {
@@ -421,6 +422,9 @@ final class question_test extends \basic_testcase {
     /**
      * Test for qtype_formulas_question::is_complete_response() with a single-part question.
      *
+     * @param bool $iscomplete whether or not the answer is considered as complete
+     * @param array $response simulated response data as in a real request (field name => input)
+     *
      * @dataProvider provide_response_for_singlenum_question
      */
     public function test_is_complete_response_test0($iscomplete, $response): void {
@@ -446,6 +450,9 @@ final class question_test extends \basic_testcase {
 
     /**
      * Test for qtype_formulas_question::is_complete_response() with a multi-part question.
+     *
+     * @param bool $iscomplete whether or not the answer is considered as complete
+     * @param array $response simulated response data as in a real request (field name => input)
      *
      * @dataProvider provide_response_for_testthreeparts_question
      */
@@ -979,6 +986,11 @@ final class question_test extends \basic_testcase {
     /**
      * Test for qtype_formulas_part::scan_for_answer_boxes().
      *
+     * @param array $expected associative array, key: answer variable (e. g. _0 or _u),
+     *      value: 'placeholder' => string (original text), 'options' => string (name of var containing the options),
+     *      'dropdown' => bool
+     * @param string $input simulated input
+     *
      * @dataProvider provide_answer_box_texts
      */
     public function test_scan_for_answer_boxes($expected, $input): void {
@@ -1004,6 +1016,9 @@ final class question_test extends \basic_testcase {
 
     /**
      * Test for qtype_formulas_part::scan_for_answer_boxes() with invalid input.
+     *
+     * @param string $expected field that should be flagged as invalid
+     * @param string $input simulated (invalid) input in text field
      *
      * @dataProvider provide_answer_box_texts_invalid
      */
@@ -1038,6 +1053,9 @@ final class question_test extends \basic_testcase {
 
     /**
      * Test for qtype_formulas_question::classify_response() for questions without unit.
+     *
+     * @param array $expected 'id' => classification or null, 'fraction' => float between 0 and 1
+     * @param string $input simulated response
      *
      * @dataProvider provide_responses_for_question_without_unit
      */
@@ -1094,6 +1112,9 @@ final class question_test extends \basic_testcase {
     /**
      * Test for qtype_formulas_question::classify_response() for questions with a combined unit field.
      *
+     * @param array $expected 'id' => classification or null, 'fraction' => float between 0 and 1
+     * @param string $input simulated response
+     *
      * @dataProvider provide_responses_for_combined_question
      */
     public function test_classify_response_combined_field($expected, $input): void {
@@ -1148,6 +1169,9 @@ final class question_test extends \basic_testcase {
     /**
      * Test for qtype_formulas_question::classify_response() for questions with a separate unit field.
      *
+     * @param array $expected 'id' => classification or null, 'fraction' => float between 0 and 1
+     * @param array $input two strings (number and unit)
+     *
      * @dataProvider provide_responses_for_question_with_separate_unit
      */
     public function test_classify_response_separate_unit_field($expected, $input): void {
@@ -1200,6 +1224,9 @@ final class question_test extends \basic_testcase {
     /**
      * Test for qtype_formulas_question::classify_response() for questions with a multi-part question.
      *
+     * @param array $expected 'id' => array ('wrong', 'right', null) and 'fraction' => float|null
+     * @param array $input answers (as strings)
+     *
      * @dataProvider provide_responses_for_threepart_question
      */
     public function test_classify_response_three_parts_without_unit($expected, $input): void {
@@ -1251,6 +1278,9 @@ final class question_test extends \basic_testcase {
 
     /**
      * Test for qtype_formulas_part::wrap_algebraic_formulas_in_quotes().
+     *
+     * @param string $expected
+     * @param string $input
      *
      * @dataProvider provide_formulas_for_wrapping
      */

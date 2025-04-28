@@ -117,8 +117,8 @@ class qtype_formulas_edit_form extends question_edit_form {
      * @param MoodleQuickForm $mform the form being built
      * @param string $label label to use for each option
      * @param array $gradeoptions the possible grades for each answer.
-     * @param-out array $repeatedoptions reference to array of repeated options to fill
-     * @param-out array $answersoption reference to return the name of $question->options field holding an array of answers
+     * @param array $repeatedoptions reference to array of repeated options to fill
+     * @param array $answersoption reference to return the name of $question->options field holding an array of answers
      * @return array of form fields.
      */
     protected function get_per_answer_fields($mform, $label, $gradeoptions,
@@ -261,7 +261,7 @@ class qtype_formulas_edit_form extends question_edit_form {
      * Add a set of form fields, obtained from get_per_answer_fields, to the form,
      * one for each existing answer, with some blanks for some new ones.
      *
-     * @param-out MoodleQuickForm $mform the form being built.
+     * @param MoodleQuickForm $mform reference to the form being built.
      * @param array $label the label to use for each option.
      * @param array $gradeoptions the possible grades for each answer.
      * @param int $minoptions the minimum number of answer blanks to display.
