@@ -1,27 +1,48 @@
 # Changelog
 
-### 6.0.0 (2025-xx-xx)
+### 6.0.0 (2025-04-30)
+
+Great care has been taken to make sure that this new version, despite the numerous changes and
+improvements, is fully backwards compatible with prior versions, i. e. all questions created
+in earlier versions will still work. Note, however, that questions including the new features
+listed below can no longer be imported to Moodle platforms using the 5.x.x versions of the
+Formulas question plugin.
+
+We have done extensive testing. However, we recommend you not to update the plugin while you have
+important exams open.
 
 - complete rewrite of the parsing / evaluation engine
 - new feature: access to grading variables and student answers in part feedback
-- new feature: allow == comparison of strings
 - new feature: allow use of strings in ternary expressions; no more obligation to use pick() for this
 - new feature: allow string concatenation with + operator; no more obligation to use join() for this
-- new feature: allow use of variables for the range delimiters and step size in for loop
-- new feature: mixed lists are now possible, i. e. lists including numbers and strings
-- new feature: lists may now be nested
-- new feature: allow use of ranges and elements side-by-side in a list, e. g. [1:10, 12]
 - new feature: access individual chars of a string, as one can do with list elements
 - new feature: allow negative indices to access chars or list elements "from the end"
+- new feature: allow use of variables for the range delimiters and step size in for loop
+- new feature: allow == comparison of strings
 - new feature: possibility to use escaped quotes inside string
 - new feature: allow to use single quote as string delimiter
 - new feature: strings can include line breaks and hence span multiple lines
+- new feature: mixed lists are now possible, i. e. lists including numbers and strings
+- new feature: lists may now be nested
+- new feature: allow use of ranges and elements side-by-side in a list, e. g. [1:10, 12]
+- new feature: shuffle() can now be used in global/local variables as well
 - new feature: allow usage of pi or π instead of pi() in expressions; pi() is still valid
-- improvement: precise error reporting, indicating (as much as possible) where the problem happened
+- new feature: warn teacher when using ^ in model answer
+- new feature: MathJax preview of student input and units
+- new feature: students can now use lg() for common logarithm and lb() for binary logarithm
+- new feature: precise error reporting, indicating what happened and where (if possible)
+
+- improvement: allow better duplicate check during restore, following fix of MDL-83541
+- improvement: show answer type in Bootstrap tooltip rather than own method
+- improvement: variable instantiation check (in edit form) can handle empty model answers better now
+
 - bugfix: no more loss of images when moving question between categories
 - bugfix: no more inconsistency errors when reviewing old attempts
+
+- internal: assure full compatibility with Moodle 5.0
 - internal: added extensive automated tests to bring code coverage > 90%
 - internal: no more use of eval() in the code
+- internal: all Javascript is now in AMD modules
 - internal: fixed all codesniffer errors and most warnings, except for legacy code
 
 ### 5.3.5 (2025-02-10)
