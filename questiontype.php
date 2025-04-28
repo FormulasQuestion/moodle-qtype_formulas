@@ -508,7 +508,7 @@ class qtype_formulas extends question_type {
      * Initialise instante of the qtype_formulas_question class and its parts which, in turn,
      * are instances of the qtype_formulas_part class.
      *
-     * @param qtype_formulas_question $question instance of a Formulas question
+     * @param question_definition $question instance of a Formulas question (qtype_formulas_question)
      * @param object $questiondata question data as stored in the DB
      */
     protected function initialise_question_instance(question_definition $question, $questiondata) {
@@ -516,6 +516,7 @@ class qtype_formulas extends question_type {
         parent::initialise_question_instance($question, $questiondata);
 
         // First, copy some data for the main question.
+        /** @var qtype_formulas_question $question */
         $question->varsrandom = $questiondata->options->varsrandom;
         $question->varsglobal = $questiondata->options->varsglobal;
         $question->answernumbering = $questiondata->options->answernumbering;
