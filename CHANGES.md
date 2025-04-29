@@ -1,14 +1,16 @@
 # Changelog
 
-### 5.3.5 (2025-02-10)
+### 5.3.5 (2025-03-17)
 
 - improvement: avoid possible precision problem with ncr()
+- improvement: implement changes made necessary by the fix for MDL-83541
+- internal: add unit tests for backup and restore
 - internal: drop support for upcoming Moodle 5.0
 
 This is the final regular version for the 5.x branch. It is compatible with Moodle 3.9 to
 Moodle 4.5. No updates are planned. Further development is done in the main branch, starting
-with version 6.0.0. While it might still work with Moodle 5.0, no tests have been done to make
-sure it does.
+with version 6.0.0. While this version might still work with Moodle 5.0, no tests have been
+done to make sure it does.
 
 ### 5.3.4.post0 (2024-10-07)
 - internal: explicitly list Moodle 4.5 as supported in version.php
