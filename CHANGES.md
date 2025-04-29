@@ -2,14 +2,14 @@
 
 ### 6.0.0 (2025-04-30)
 
-Great care has been taken to make sure that this new version, despite the numerous changes and
-improvements, is fully backwards compatible with prior versions, i. e. all questions created
+Great care has been taken to make sure that this new version -- despite the numerous changes and
+improvements -- is fully backwards compatible with prior versions, i. e. all questions created
 in earlier versions will still work. Note, however, that questions including the new features
-listed below can no longer be imported to Moodle platforms using the 5.x.x versions of the
-Formulas question plugin.
+listed below can no longer be imported to Moodle systems using a 5.x.x version of the Formulas
+question plugin.
 
 We have done extensive testing. However, we recommend you not to update the plugin while you have
-important exams open.
+pending attempts at important exams.
 
 - complete rewrite of the parsing / evaluation engine
 - new feature: access to grading variables and student answers in part feedback
@@ -48,7 +48,7 @@ important exams open.
 ### 5.3.5 (2025-02-10)
 
 - improvement: avoid possible precision problem with ncr()
-- internal: drop support for upcoming Moodle 5.0
+- internal: drop support for upcoming Moodle 5.0 for the legacy branch
 
 This is the final regular version for the 5.x branch. It is compatible with Moodle 3.9 to
 Moodle 4.5. No updates are planned. Further development is done in the main branch, starting
