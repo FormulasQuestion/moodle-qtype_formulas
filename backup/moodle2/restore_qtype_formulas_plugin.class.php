@@ -188,10 +188,15 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
 
         // As our parts are backed up in a separate XML key rather than just "answers", the parent
         // function did not add them to the questiondata. Old backups may lack the "answernotunique"
-        // key, in which case we add it here with the default value.
-        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $answer) {
+        // key, in which case we add it here with the default value. Also, backups might miss the
+        // "partindex" key. In that case, we add the key and order the parts according to their appearance
+        // in the file.
+        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $i => $answer) {
             if (!key_exists('answernotunique', $answer)) {
                 $answer['answernotunique'] = '1';
+            }
+            if (!key_exists('partindex', $answer)) {
+                $answer['partindex'] = $i;
             }
             $questiondata->options->answers[] = (object) $answer;
         }
@@ -219,7 +224,6 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         return [
             '/options/answers/id',
             '/options/answers/questionid',
-            '/options/answers/partindex',
             '/options/numparts',
         ];
     }

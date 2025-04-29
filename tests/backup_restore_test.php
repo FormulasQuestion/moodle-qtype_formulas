@@ -321,9 +321,9 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a question category.
         $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
 
-        // Create a quiz with a simple Formulas question.
+        // Create a quiz with a multipart Formulas question.
         $quiz = $this->create_test_quiz($course1);
-        $question = $questiongenerator->create_question('formulas', 'testsinglenum', ['category' => $cat->id]);
+        $question = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $cat->id]);
         quiz_add_quiz_question($question->id, $quiz, 0);
 
         // Backup quiz1.
@@ -354,7 +354,10 @@ final class backup_restore_test extends \advanced_testcase {
             \context_module::instance($quiz->cmid),
         );
         $restoredquiz = end($modules);
-        $restoredquizstructure = \mod_quiz\question\bank\qbank_helper::get_question_structure($restoredquiz->instance, $restoredquiz->context);
+        $restoredquizstructure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $restoredquiz->instance,
+            $restoredquiz->context,
+        );
         $this->assertEquals($quizstructure[1]->questionid, $restoredquizstructure[1]->questionid);
     }
 
