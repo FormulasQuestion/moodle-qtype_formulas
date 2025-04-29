@@ -290,7 +290,7 @@ final class backup_restore_test extends \advanced_testcase {
     }
 
     /**
-     * Restore a quiz with a question that does not have the partindex field set.
+     * Restore a quiz with a question where a field is missing in the backup.
      *
      * @param string $which the XML key to remove from the backup
      *
