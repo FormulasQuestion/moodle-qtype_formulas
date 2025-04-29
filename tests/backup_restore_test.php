@@ -240,7 +240,7 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a question category.
         $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
 
-        // Create 2 quizzes with 2 questions multichoice.
+        // Create 2 quizzes with 2 questions.
         $quiz1 = $this->create_test_quiz($course1);
         $question1 = $questiongenerator->create_question('formulas', $questionname, ['category' => $cat->id]);
         quiz_add_quiz_question($question1->id, $quiz1, 0);
@@ -286,6 +286,90 @@ final class backup_restore_test extends \advanced_testcase {
         $quiz2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($quiz2->instance, $quiz2->context);
         $this->assertEquals($quiz2structure[1]->questionid, $quiz2structure[1]->questionid);
         $this->assertEquals($quiz2structure[2]->questionid, $quiz2structure[2]->questionid);
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_xml_keys_to_remove(): array {
+        return [
+            ['answernotunique'],
+            ['partindex'],
+        ];
+    }
+
+    /**
+     * Restore a quiz with a question that does not have the partindex field set.
+     *
+     * @param string $which the XML key to remove from the backup
+     *
+     * @dataProvider provide_xml_keys_to_remove
+     */
+    public function test_restore_quiz_if_field_is_missing_in_backup(string $which): void {
+        global $CFG, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // The changes introduced while fixing MDL-83541 are only present in Moodle 4.4 and newer. It
+        // does not make sense to perform this test with older versions.
+        if ($CFG->branch < 404) {
+            $this->markTestSkipped(
+                'Not testing detection of duplicates while restoring in Moodle versions prior to 4.4.',
+            );
+        }
+
+        // Create a course and a user with editing teacher capabilities.
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course();
+        $teacher = $USER;
+        $generator->enrol_user($teacher->id, $course1->id, 'editingteacher');
+        $coursecontext = \context_course::instance($course1->id);
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        // Create a question category.
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+
+        // Create a quiz with a multipart Formulas question.
+        $quiz = $this->create_test_quiz($course1);
+        $question = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $cat->id]);
+        quiz_add_quiz_question($question->id, $quiz, 0);
+
+        // Backup quiz1.
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Delete requested entry from questions.xml file in the backup.
+        $xmlfile = $bc->get_plan()->get_basepath() . '/questions.xml';
+        $xml = file_get_contents($xmlfile);
+        $xml = preg_replace("=<$which>[^<]+</$which>=", '', $xml);
+        file_put_contents($xmlfile, $xml);
+
+        // Restore the (modified) backup into the same course.
+        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
+            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc->execute_precheck();
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Verify that the newly-restored quiz uses the same question as quiz1.
+        $modules = get_fast_modinfo($course1->id)->get_instances_of('quiz');
+        $this->assertCount(2, $modules);
+        $quizstructure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $quiz->id,
+            \context_module::instance($quiz->cmid),
+        );
+        $restoredquiz = end($modules);
+        $restoredquizstructure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $restoredquiz->instance,
+            $restoredquiz->context,
+        );
+        $this->assertEquals($quizstructure[1]->questionid, $restoredquizstructure[1]->questionid);
     }
 
     /**
@@ -554,7 +638,7 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a question category.
         $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
 
-        // Create 2 questions multichoice.
+        // Create 2 questions.
         $quiz1 = $this->create_test_quiz($course1);
         $question1 = $questiongenerator->create_question('formulas', $questionname, ['category' => $cat->id]);
         quiz_add_quiz_question($question1->id, $quiz1, 0);
@@ -591,6 +675,121 @@ final class backup_restore_test extends \advanced_testcase {
         $rc->destroy();
 
         // Verify that the newly-restored quiz uses the same question as quiz2.
+        $modules = get_fast_modinfo($course1->id)->get_instances_of('quiz');
+        $this->assertCount(2, $modules);
+        $quiz1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $quiz1->id,
+            \context_module::instance($quiz1->cmid),
+        );
+        $quiz2 = end($modules);
+        $quiz2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($quiz2->instance, $quiz2->context);
+        $this->assertEquals($quiz1structure[1]->questionid, $quiz2structure[1]->questionid);
+        $this->assertEquals($quiz1structure[2]->questionid, $quiz2structure[2]->questionid);
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_edited_option_fields(): array {
+        return [
+            ['varsrandom', 'a={1,2,3};'],
+            ['varsglobal', 'b=1;'],
+            ['answernumbering', 'ABC'],
+            ['shownumcorrect', '0'],
+            ['correctfeedback', 'edited'],
+            ['partiallycorrectfeedback', 'edited'],
+            ['incorrectfeedback', 'edited'],
+
+            ['answermark', '5'],
+            ['answertype', '100'],
+            ['vars1', 'c=5;'],
+            ['vars2', 'd=9;'],
+            ['correctness', '_err < 0.01'],
+            ['answer', '17'],
+            ['answernotunique', '0'],
+            ['unitpenalty', '0.5'],
+            ['postunit', 'm'],
+            ['ruleid', '2'],
+            ['otherrule', '60 s = 1 min'],
+            ['subqtext', 'edited'],
+            ['feedback', 'edited'],
+            ['partcorrectfb', 'edited'],
+            ['partpartiallycorrectfb', 'edited'],
+            ['partincorrectfb', 'edited'],
+        ];
+    }
+
+    /**
+     * Restore a quiz with questions of same stamp into the same course, but different qtype-specific options.
+     *
+     * @param string $field The answer field to edit
+     * @param string $value The value to set
+     * @dataProvider provide_edited_option_fields
+     */
+    public function test_restore_quiz_with_same_stamp_questions_edited_options(string $field, string $value): void {
+        global $CFG, $DB, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // The changes introduced while fixing MDL-83541 are only present in Moodle 4.4 and newer. It
+        // does not make sense to perform this test with older versions.
+        if ($CFG->branch < 404) {
+            $this->markTestSkipped(
+                'Not testing detection of duplicates while restoring in Moodle versions prior to 4.4.',
+            );
+        }
+
+        // Create a course and a user with editing teacher capabilities.
+        $generator = $this->getDataGenerator();
+        $course1 = $generator->create_course();
+        $teacher = $USER;
+        $generator->enrol_user($teacher->id, $course1->id, 'editingteacher');
+        $coursecontext = \context_course::instance($course1->id);
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        // Create a question category.
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+
+        // A quiz with 2 questions.
+        $quiz1 = $this->create_test_quiz($course1);
+        $question1 = $questiongenerator->create_question('formulas', 'testsinglenum', ['category' => $cat->id]);
+        quiz_add_quiz_question($question1->id, $quiz1, 0);
+
+        $question2 = $questiongenerator->create_question('formulas', 'testsinglenum', ['category' => $cat->id]);
+        quiz_add_quiz_question($question2->id, $quiz1, 0);
+
+        // Update question2 to have the same stamp as question1.
+        $DB->set_field('question', 'stamp', $question1->stamp, ['id' => $question2->id]);
+
+        // Change the options of question2 to be different to question1.
+        $optionfields = [
+            'varsrandom', 'varsglobal', 'answernumbering', 'shownumcorrect',
+            'correctfeedback', 'partiallycorrectfeedback', 'incorrectfeedback',
+        ];
+        if (in_array($field, $optionfields)) {
+            $DB->set_field('qtype_formulas_options', $field, $value, ['questionid' => $question2->id]);
+        } else {
+            $DB->set_field('qtype_formulas_answers', $field, $value, ['questionid' => $question2->id]);
+        }
+
+        // Backup quiz.
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Restore the backup into the same course.
+        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
+            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc->execute_precheck();
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Verify that the newly-restored quiz questions match their quiz1 counterparts.
         $modules = get_fast_modinfo($course1->id)->get_instances_of('quiz');
         $this->assertCount(2, $modules);
         $quiz1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
