@@ -39,7 +39,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         // section. For every question, we will have <formulas_answers></formulas_answers> to enclose
         // all parts. For each part, there will then be a <formulas_answer id="..."></formulas_answer>
         // section containing the various data fields, e. g. <placeholder> or <numbox> etc. These
-        // are the fields stored in the qtype_formulas_answers table, except for the partindex.
+        // are the fields stored in the qtype_formulas_answers table.
         $paths[] = new restore_path_element('formulas_answer', $this->get_pathfor('/formulas_answers/formulas_answer'));
 
         // Additionally, there will be <formulas id="..."></formulas> containing the custom data
@@ -187,8 +187,12 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         $questiondata = parent::convert_backup_to_questiondata($backupdata);
 
         // As our parts are backed up in a separate XML key rather than just "answers", the parent
-        // function did not add them to the questiondata.
+        // function did not add them to the questiondata. Old backups may lack the "answernotunique"
+        // key, in which case we add it here with the default value.
         foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $answer) {
+            if (!key_exists('answernotunique', $answer)) {
+                $answer['answernotunique'] = '1';
+            }
             $questiondata->options->answers[] = (object) $answer;
         }
 
@@ -205,7 +209,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
     /**
      * Return a list of paths to fields to be removed from questiondata before creating an identity hash.
      * We have to remove the id and questionid property from all answers (parts) as well as the numparts
-     * field, because it is automatically calculated rather than stored in the database.
+     * field, because it is automatically calculated rather than stored in the database. We also remove
+     * the partindex, because (i) it might not be there in older backups and (ii) if a question only
+     * differs in the ordering of the parts, it does not make sense to duplicate it.
      *
      * @return array
      */
