@@ -74,7 +74,6 @@ final class answervalidation_test extends \advanced_testcase {
     public static function provide_numbers_and_units(): array {
         return [
             [qtype_formulas::ANSWER_TYPE_NUMBER, '123'],
-            [qtype_formulas::ANSWER_TYPE_NUMBER, 'm/s'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '100 m'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '100cm'],
             [qtype_formulas::ANSWER_TYPE_NUMBER, '1.05 mm'],
@@ -110,6 +109,7 @@ final class answervalidation_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)kg m/s'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)kg m/s'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^-sin(6+7)kg m/s'],
+            [false, 'm/s'],
             [false, '3 e10 m/s'],
             [false, '3e 10 m/s'],
             [false, '3e8e8 m/s'],

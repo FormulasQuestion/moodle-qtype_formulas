@@ -75,7 +75,7 @@ const focusReceived = (evt) => {
     const field = evt.target;
 
     // If the field is empty, there is nothing to do.
-    if (field.value == '') {
+    if (field.value.trim() == '') {
         return;
     }
 
@@ -172,7 +172,7 @@ const validateStudentAnswer = async(id) => {
 
     // Empty fields do not have to be validated and must not be marked as invalid.
     // If the MathJax preview is currently shown, it must be hidden.
-    if (field.value === '') {
+    if (field.value.trim() === '') {
         field.classList.remove('is-invalid');
         hideMathJax();
         return;

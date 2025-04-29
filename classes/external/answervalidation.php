@@ -94,31 +94,30 @@ class answervalidation extends \external_api {
         // it could fail now that the unit part is gone, e. g. if the response was '1+m', that would have
         // parsed fine (sum of number 1 and variable m), but after splitting the "number" part would be
         // just '1+' which results in a parse error (unexpected end of expression).
-        $numberpartlatex = '';
-        if (strlen($number) > 0) {
-            try {
-                $parser = new answer_parser($number);
-                // As we are in a try-catch block anyway, we can just throw an Exception if the answer
-                // is not acceptable.
-                if (!$parser->is_acceptable_for_answertype($answertype)) {
-                    $answertypestrings = [
-                        qtype_formulas::ANSWER_TYPE_NUMBER => 'number',
-                        qtype_formulas::ANSWER_TYPE_NUMERIC => 'numeric',
-                        qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA => 'numerical_formula',
-                        qtype_formulas::ANSWER_TYPE_ALGEBRAIC => 'algebraic_formula',
-                    ];
-                    $message = get_string(
-                        'answernotacceptable',
-                        'qtype_formulas',
-                        get_string($answertypestrings[$answertype], 'qtype_formulas'),
-                    );
-                    throw new Exception($message);
-                }
-            } catch (Exception $e) {
-                return ['status' => 'error', 'detail' => $e->getMessage()];
+        // If the number part is empty, it will not validate. This is intentional, because a student will
+        // not get points when entering only a unit without a number in a combined answer field.
+        try {
+            $parser = new answer_parser($number);
+            // As we are in a try-catch block anyway, we can just throw an Exception if the answer
+            // is not acceptable.
+            if (!$parser->is_acceptable_for_answertype($answertype)) {
+                $answertypestrings = [
+                    qtype_formulas::ANSWER_TYPE_NUMBER => 'number',
+                    qtype_formulas::ANSWER_TYPE_NUMERIC => 'numeric',
+                    qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA => 'numerical_formula',
+                    qtype_formulas::ANSWER_TYPE_ALGEBRAIC => 'algebraic_formula',
+                ];
+                $message = get_string(
+                    'answernotacceptable',
+                    'qtype_formulas',
+                    get_string($answertypestrings[$answertype], 'qtype_formulas'),
+                );
+                throw new Exception($message);
             }
-            $numberpartlatex = latexifier::latexify($parser->get_statements()[0]->body);
+        } catch (Exception $e) {
+            return ['status' => 'error', 'detail' => $e->getMessage()];
         }
+        $numberpartlatex = latexifier::latexify($parser->get_statements()[0]->body);
 
         // Finally, check the unit part and, if it is valid, translate to LaTeX.
         list('status' => $checkresult, 'detail' => $unitpartlatex) = self::validate_unit($unit);
