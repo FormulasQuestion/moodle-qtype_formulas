@@ -1,5 +1,9 @@
 # Changelog
 
+### 5.3.6 (2025-04-29)
+
+- bugfix: avoid creating duplicates when restoring older backups
+
 ### 5.3.5 (2025-03-17)
 
 - improvement: avoid possible precision problem with ncr()
