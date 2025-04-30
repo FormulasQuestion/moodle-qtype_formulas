@@ -214,9 +214,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
     /**
      * Return a list of paths to fields to be removed from questiondata before creating an identity hash.
      * We have to remove the id and questionid property from all answers (parts) as well as the numparts
-     * field, because it is automatically calculated rather than stored in the database. We also remove
-     * the partindex, because (i) it might not be there in older backups and (ii) if a question only
-     * differs in the ordering of the parts, it does not make sense to duplicate it.
+     * field, because it is automatically calculated rather than stored in the database.
      *
      * @return array
      */
