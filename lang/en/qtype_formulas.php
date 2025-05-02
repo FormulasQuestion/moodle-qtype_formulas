@@ -168,6 +168,7 @@ $string['error_grading_single_expression'] = 'The grading criterion should be on
 $string['error_import_missing_field'] = 'Import error. Missing field: {$a} ';
 $string['error_in_answer'] = 'Error in answer #{$a->answerno}: {$a->message}';
 $string['error_indexoutofrange'] = 'Evaluation error: index {$a} out of range.';
+$string['error_integerexpected'] = 'Syntax error: integer expected, found {$a} instead.';
 $string['error_inv_consec'] = 'When using inv(), the numbers in the list must be consecutive.';
 $string['error_inv_integers'] = 'inv() expects all elements of the list to be integers; floats will be truncated.';
 $string['error_inv_list'] = 'inv() expects a list.';
