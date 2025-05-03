@@ -1363,15 +1363,18 @@ class functions {
                 break;
             case '+':
                 // If at least one operand is a string, we use concatenation instead
-                // of addition.
-                if (is_string($first) || is_string($second)) {
+                // of addition, *UNLESS* both strings are numeric, in which case
+                // we follow PHP's type juggling and add those numbers. The user
+                // will have to use join() in such cases.
+                $bothnumeric = is_numeric($first) && is_numeric($second);
+                if (is_string($first) || is_string($second) && !$bothnumeric) {
                     self::abort_if_not_scalar($first, '+', false);
                     self::abort_if_not_scalar($second, '+', false);
                     $output = $first . $second;
                     break;
                 }
                 // In all other cases, addition must (currently) be numeric, so we abort
-                // if the arguments are not numbers.
+                // if the arguments are not numbers or numeric strings.
                 self::abort_if_not_scalar($first, '+');
                 self::abort_if_not_scalar($second, '+');
                 $output = $first + $second;
