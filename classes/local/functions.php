@@ -1274,7 +1274,7 @@ class functions {
         if (!is_scalar($value)) {
             self::die("error_{$variant}_{$expectation}", $a);
         }
-        $isnumber = is_float($value) || is_int($value);
+        $isnumber = is_numeric($value);
         if ($enforcenumeric && !$isnumber) {
             $a->found = $value;
             self::die("error_{$variant}_{$expectation}_found", $a);
