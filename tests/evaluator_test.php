@@ -137,6 +137,7 @@ final class evaluator_test extends \advanced_testcase {
      * @dataProvider provide_ternary_expressions
      * @dataProvider provide_for_loops
      * @dataProvider provide_boolean_and_logical
+     * @dataProvider provide_numeric_string_expressions
      */
     public function test_expressions_with_numeric_result($expected, $input): void {
         $parser = new parser($input);
@@ -372,6 +373,32 @@ final class evaluator_test extends \advanced_testcase {
     }
 
     /**
+     * Provide various expressions where numbers are written as strings.
+     *
+     * @return array
+     */
+    public static function provide_numeric_string_expressions(): array {
+        return [
+            [3, '"1" + "2"'],
+            [3, '1 + "2"'],
+            [3, '"1" + 2'],
+            [-1, '"1" - "2"'],
+            [-1, '1 - "2"'],
+            [-1, '"1" - 2'],
+            [8, '"4" * "2"'],
+            [8, '"4" * 2'],
+            [8, '4 * "2"'],
+            [1/2, '"1" / "2"'],
+            [1/2, '1 / "2"'],
+            [1/2, '"1" / 2'],
+            [16, '"4" ** "2"'],
+            [16, '"4" ** 2'],
+            [16, '4 ** "2"'],
+            [5, '[1,5]["1"]'],
+        ];
+    }
+
+    /**
      * Provide various simple expressions, i. e. expressions involving only operators but no functions.
      *
      * @return array
@@ -485,6 +512,18 @@ final class evaluator_test extends \advanced_testcase {
                     's' => new variable('s', 'Hello World!', variable::STRING),
                 ],
                 's = "Hello" + " World!";',
+            ],
+            'string concatenation, direct, string with number' => [
+                [
+                    's' => new variable('s', 'a1', variable::STRING),
+                ],
+                's = "a" + "1";',
+            ],
+            'string concatenation, direct, number with string' => [
+                [
+                    's' => new variable('s', '1a', variable::STRING),
+                ],
+                's = "1" + "a";',
             ],
             'string concatenation, from variables' => [
                 [

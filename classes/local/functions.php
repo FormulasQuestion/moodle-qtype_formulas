@@ -1367,7 +1367,7 @@ class functions {
                 // we follow PHP's type juggling and add those numbers. The user
                 // will have to use join() in such cases.
                 $bothnumeric = is_numeric($first) && is_numeric($second);
-                if (is_string($first) || is_string($second) && !$bothnumeric) {
+                if ((is_string($first) || is_string($second)) && !$bothnumeric) {
                     self::abort_if_not_scalar($first, '+', false);
                     self::abort_if_not_scalar($second, '+', false);
                     $output = $first . $second;
