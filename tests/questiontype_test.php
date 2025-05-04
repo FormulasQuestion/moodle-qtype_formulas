@@ -388,9 +388,10 @@ final class questiontype_test extends \advanced_testcase {
             ],
             [
                 ['answer[0]' => get_string('error_number_for_numeric_answertypes', 'qtype_formulas')],
-                [
-                    'answer' => [0 => '"3"'],
-                ],
+                ['answer' => [0 => '"3x"']],
+            ],
+            [
+                [], ['answer' => [0 => 'sigfig(1.234, 2)']],
             ],
             [
                 ['answer[0]' => get_string('error_string_for_algebraic_formula', 'qtype_formulas')],
