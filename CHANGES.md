@@ -1,5 +1,9 @@
 # Changelog
 
+### 6.0.1 (2025-05-04)
+
+- improvement: also accept numeric strings in places where numbers are expected
+
 ### 6.0.0 (2025-04-30)
 
 Great care has been taken to make sure that this new version -- despite the numerous changes and
