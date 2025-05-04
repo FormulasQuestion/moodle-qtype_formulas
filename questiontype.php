@@ -1117,13 +1117,14 @@ class qtype_formulas extends question_type {
             }
 
             // As $modelanswers is now an array, we can iterate over all answers. If the answer type is
-            // "algebraic formula", they must all be strings. Otherwise, they must all be numbers.
+            // "algebraic formula", they must all be strings. Otherwise, they must all be numbers or
+            // at least numeric strings.
             foreach ($modelanswers as $answer) {
                 if ($isalgebraic && $answer->type !== token::STRING) {
                     $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                     continue;
                 }
-                if (!$isalgebraic && $answer->type !== token::NUMBER) {
+                if (!$isalgebraic && !($answer->type === token::NUMBER || is_numeric($answer->value))) {
                     $errors["answer[$i]"] = get_string('error_number_for_numeric_answertypes', 'qtype_formulas');
                     continue;
                 }

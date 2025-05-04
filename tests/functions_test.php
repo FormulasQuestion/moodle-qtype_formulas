@@ -160,6 +160,7 @@ final class functions_test extends \advanced_testcase {
             [0.990184671371355, 'normcdf(135, 100, 15)'],
             [0.246921118121914, 'normcdf(10, 23, 19)'],
             [0.022750131948179, 'normcdf(-4, 2, 3)'],
+            [0.022750131948179, 'normcdf("-4", "2", "3")'],
         ];
     }
 
@@ -181,6 +182,7 @@ final class functions_test extends \advanced_testcase {
             [0.9772498680518207927997, 'stdnormcdf(2)'],
             [0.99865010196836990547335, 'stdnormcdf(3)'],
             [0.9999997133484281208060883, 'stdnormcdf(5)'],
+            [0.9999997133484281208060883, 'stdnormcdf("5")'],
             [0.9999999999999999999999999, 'stdnormcdf(10)'],
             [0.9999999999999999999999999, 'stdnormcdf(20)'],
         ];
@@ -197,6 +199,7 @@ final class functions_test extends \advanced_testcase {
             [0.241970724519143349797830, 'stdnormpdf(1)'],
             [0.241970724519143349797830, 'stdnormpdf(-1)'],
             [0.0539909665131880519505642, 'stdnormpdf(2)'],
+            [0.0539909665131880519505642, 'stdnormpdf("2")'],
             [0.0539909665131880519505642, 'stdnormpdf(-2)'],
             [0.3520653267642994777746804, 'stdnormpdf(0.5)'],
             [0.3520653267642994777746804, 'stdnormpdf(-0.5)'],
@@ -215,6 +218,7 @@ final class functions_test extends \advanced_testcase {
             [1, 'ncr(5, 0)'],
             [5, 'ncr(5, 1)'],
             [10, 'ncr(5, 2)'],
+            [10, 'ncr("5", "2")'],
             [10, 'ncr(5, 3)'],
             [5, 'ncr(5, 4)'],
             [1, 'ncr(5, 5)'],
@@ -238,6 +242,7 @@ final class functions_test extends \advanced_testcase {
             [0, 'npr(1, 5)'],
             [1, 'npr(5, 0)'],
             [5, 'npr(5, 1)'],
+            [5, 'npr("5", "1")'],
             [20, 'npr(5, 2)'],
             [60, 'npr(5, 3)'],
             [120, 'npr(5, 4)'],
@@ -257,6 +262,7 @@ final class functions_test extends \advanced_testcase {
      */
     public static function provide_fact(): array {
         return [
+            [6, 'fact("3")'],
             [1, 'fact(0)'],
             [1, 'fact(1)'],
             [2, 'fact(2)'],
@@ -282,6 +288,7 @@ final class functions_test extends \advanced_testcase {
             [0, 'binomialpdf(10, 1, 20)'],
             [0.125, 'binomialpdf(3, 0.5, 0)'],
             [0.375, 'binomialpdf(3, 0.5, 1)'],
+            [0.375, 'binomialpdf("3", "0.5", "1")'],
             [0.375, 'binomialpdf(3, 0.5, 2)'],
             [0.125, 'binomialpdf(3, 0.5, 3)'],
             ['binomialpdf() expects the probability to be at least 0 and not more than 1.', 'binomialpdf(10, 3, 5)'],
@@ -302,6 +309,7 @@ final class functions_test extends \advanced_testcase {
             [0, 'binomialcdf(1, 1, 0)'],
             [1, 'binomialcdf(10, 0.3, 10)'],
             [1, 'binomialcdf(10, 0.3, 20)'],
+            [1, 'binomialcdf("10", "0.3", "20")'],
             [0.125, 'binomialcdf(3, 0.5, 0)'],
             [0.5, 'binomialcdf(3, 0.5, 1)'],
             [0.875, 'binomialcdf(3, 0.5, 2)'],
@@ -319,6 +327,7 @@ final class functions_test extends \advanced_testcase {
     public static function provide_inv(): array {
         return [
             [[0, 1, 2, 3], 'a=inv([0, 1, 2, 3]);'],
+            [[0, 1, 2, 3], 'a=inv(["0", "1", "2", "3"]);'],
             [[1, 2, 3, 4], 'a=inv([1, 2, 3, 4]);'],
             ["Invalid number of arguments for function 'inv': 0 given.", 'a=inv();'],
             ["Invalid number of arguments for function 'inv': 2 given.", 'a=inv([1, 2, 3], [4, 5, 6]);'],
@@ -451,6 +460,7 @@ final class functions_test extends \advanced_testcase {
             [10, 'gcd(10, 0)'],
             [10, 'gcd(0, 10)'],
             [1, 'gcd(3, 2)'],
+            [1, 'gcd("3", "2")'],
             [3, 'gcd(6, 3)'],
             [3, 'gcd(12, 9)'],
             [1, 'gcd(2, 3)'],
@@ -478,6 +488,7 @@ final class functions_test extends \advanced_testcase {
             [0, 'lcm(0, 10)'],
             [6, 'lcm(3, 2)'],
             [6, 'lcm(6, 3)'],
+            [6, 'lcm("6", "3")'],
             [36, 'lcm(12, 9)'],
             [6, 'lcm(2, 3)'],
             [6, 'lcm(3, 6)'],
@@ -521,6 +532,7 @@ final class functions_test extends \advanced_testcase {
     public static function provide_pick_inputs(): array {
         return [
             [3, 'pick(3,[0,1,2,3,4,5])'],
+            [3, 'pick("3",[0,1,2,3,4,5])'],
             [3, 'pick(3.9,[0,1,2,3,4,5])'],
             [0, 'pick(10,[0,1,2,3,4,5])'],
             [0, 'pick(10.9,[0,1,2,3,4,5])'],
@@ -594,6 +606,7 @@ final class functions_test extends \advanced_testcase {
             ['-20', 'sigfig(-17.1, 1)'],
 
             ['0.0123', 'sigfig(.012345, 3)'],
+            ['0.0123', 'sigfig(".012345", "3")'],
             ['0.01235', 'sigfig(.012345, 4)'],
             ['0.0123450', 'sigfig(.012345, 6)'],
             ['-0.0123', 'sigfig(-.012345, 3)'],
@@ -935,6 +948,9 @@ final class functions_test extends \advanced_testcase {
             [false, 'a=log10();'],
             [false, 'a=log10(1, 2);'],
             [true, 'a=lg(0.5);'],
+            [true, 'a=lg("0.5");'],
+            [true, 'a=lb("0.5");'],
+            [true, 'a=ln("0.5");'],
             [false, 'a=lg();'],
             [false, 'a=lg(1, 2);'],
             [true, 'a=log1p(0.5);'],
@@ -1310,6 +1326,7 @@ final class functions_test extends \advanced_testcase {
             [15, 'fmod(35,20)'],
             [5, 'fmod(-35, 20)'],
             [-5, 'fmod(35, -20)'],
+            [-5, 'fmod("35", "-20")'],
             [-15, 'fmod(-35, -20)'],
             [0, 'fmod(12, 3)'],
             [5, 'fmod(5, 8)'],
@@ -1331,6 +1348,7 @@ final class functions_test extends \advanced_testcase {
             [5, 'modinv(3, 7)'],
             [2, 'modinv(4, 7)'],
             [3, 'modinv(5, 7)'],
+            [3, 'modinv("5", "7")'],
             [6, 'modinv(6, 7)'],
             [3, 'modinv(-3, 5)'],
             ['modinv() expects its second argument to be a positive integer.', 'modinv(8, -3)'],
@@ -1343,6 +1361,7 @@ final class functions_test extends \advanced_testcase {
             [11, 'modpow(2, 7, 13)'],
             [3, 'modpow(3, 7, 13)'],
             [4, 'modpow(4, 7, 13)'],
+            [4, 'modpow("4", "7", "13")'],
             [8, 'modpow(5, 7, 13)'],
             [7, 'modpow(6, 7, 13)'],
             [6, 'modpow(7, 7, 13)'],

@@ -1110,11 +1110,13 @@ class evaluator {
         if ($token->type !== token::NUMBER) {
             if ($token->type === token::SET) {
                 $found = '_algebraicvar';
-                $value = "algebraic variable";
             } else if ($token->type === token::LIST) {
                 $found = '_list';
-                $value = "list";
             } else if ($enforcenumeric) {
+                // Let's be lenient if the token is not a NUMBER, but its value is numeric.
+                if (is_numeric($token->value)) {
+                    return;
+                }
                 $a->found = "'{$token->value}'";
             } else if ($token->type === token::STRING) {
                 return;
