@@ -357,6 +357,12 @@ class lexer {
         }
         // Eat up all white space following the comment.
         $this->consume_whitespace();
+
+        // If the next char is a # again, the comment seems to continue on the next line,
+        // so we go for another round.
+        if ($this->inputstream->peek() === '#') {
+            $this->consume_comment();
+        }
     }
 
     /**

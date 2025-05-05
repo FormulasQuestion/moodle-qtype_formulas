@@ -424,6 +424,48 @@ EOF;
         }
     }
 
+    public function test_get_token_list_with_subsequent_comments(): void {
+        $input = <<<EOF
+        # First comment
+        # Second comment
+        a = 1;
+
+        # Comment
+
+        # Comment
+
+        b = 2;
+
+        # Comment
+           # comment with indentation
+        #### comment
+
+        c = 3;
+EOF;
+
+        // We are not testing the positions anymore.
+        $output = [
+            new token(token::IDENTIFIER, 'a'),
+            new token(token::OPERATOR, '='),
+            new token(token::NUMBER, 1),
+            new token(token::END_OF_STATEMENT, ';'),
+            new token(token::IDENTIFIER, 'b'),
+            new token(token::OPERATOR, '='),
+            new token(token::NUMBER, 2),
+            new token(token::END_OF_STATEMENT, ';'),
+            new token(token::IDENTIFIER, 'c'),
+            new token(token::OPERATOR, '='),
+            new token(token::NUMBER, 3),
+            new token(token::END_OF_STATEMENT, ';'),
+        ];
+
+        $tokens = (new lexer($input))->get_tokens();
+        foreach ($tokens as $i => $token) {
+            self::assertEquals($output[$i]->type, $token->type);
+            self::assertEquals($output[$i]->value, $token->value);
+        }
+    }
+
     public function test_pi(): void {
         $input = 'π + π(1 + 2) + pi + pi() + pi(2) + pi(1 + 2)';
 
