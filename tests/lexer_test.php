@@ -435,6 +435,12 @@ EOF;
         # Comment
 
         b = 2;
+
+        # Comment
+           # comment with indentation
+        #### comment
+
+        c = 3;
 EOF;
 
         // We are not testing the positions anymore.
@@ -446,6 +452,10 @@ EOF;
             new token(token::IDENTIFIER, 'b'),
             new token(token::OPERATOR, '='),
             new token(token::NUMBER, 2),
+            new token(token::END_OF_STATEMENT, ';'),
+            new token(token::IDENTIFIER, 'c'),
+            new token(token::OPERATOR, '='),
+            new token(token::NUMBER, 3),
             new token(token::END_OF_STATEMENT, ';'),
         ];
 
