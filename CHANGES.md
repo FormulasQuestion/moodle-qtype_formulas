@@ -1,5 +1,9 @@
 # Changelog
 
+### 6.0.2 (2025-05-06)
+
+- bugfix: fix problem with subsequent comments in variable definitions
+
 ### 6.0.1 (2025-05-04)
 
 - improvement: also accept numeric strings in places where numbers are expected
