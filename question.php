@@ -1219,27 +1219,14 @@ class qtype_formulas_part {
     public function is_unanswered(array $response): bool {
         $isnormalized = array_key_exists('normalized', $response);
 
-        // If there is a combined number/unit answer, we know that there are no other
-        // answers, so we just check this one. However, if the response has already been
-        // "normalized", we cannot use this shortcut, because then the combined unit field's
-        // content has already been split into _0 (the number) and _1 (the unit).
-        if ($isnormalized === false && $this->has_combined_unit_field()) {
-            // If the key does not exist, there is a problem and we consider the part as
-            // unanswered.
-            if (!array_key_exists("{$this->partindex}_", $response)) {
-                return true;
-            }
-            // If the answer is empty, but not equivalent to zero, we consider the part as
-            // unanswered.
-            $tocheck = $response["{$this->partindex}_"];
-            return empty($tocheck) && !is_numeric($tocheck);
+        if (!$isnormalized) {
+            $response = $this->normalize_response($response);
         }
 
-        // Otherwise, we check all answer boxes (including a possible unit) of this part.
-        // If at least one is not empty, the part has been answered. If there is a unit field,
-        // we will check this in the same way, even if it should not actually be numeric. We don't
-        // need to care about that, because a wrong answer is still an answer.
-        // Note that $response will contain *all* answers for *all* parts.
+        // Check all answer boxes (including a possible unit) of this part. If at least one is not empty,
+        // the part has been answered. If there is a unit field, we will check this in the same way, even
+        // if it should not actually be numeric. We don't need to care about that, because a wrong answer
+        // is still an answer. Note that $response will contain *all* answers for *all* parts.
         $count = $this->numbox;
         if ($this->has_unit()) {
             $count++;
