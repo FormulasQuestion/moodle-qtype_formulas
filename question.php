@@ -707,7 +707,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
     }
 
     /**
-     * This is called by adaptive multiplart behaviour in order to determine whether the question
+     * This is called by adaptive multipart behaviour in order to determine whether the question
      * state should be moved to question_state::$invalid; many behaviours mainly or exclusively
      * use !is_complete_response() for that. We will return true if *no* part is gradable,
      * because in that case it does not make sense to proceed. If at least one part has been
@@ -1217,9 +1217,7 @@ class qtype_formulas_part {
      * @return bool
      */
     public function is_unanswered(array $response): bool {
-        $isnormalized = array_key_exists('normalized', $response);
-
-        if (!$isnormalized) {
+        if (!array_key_exists('normalized', $response)) {
             $response = $this->normalize_response($response);
         }
 
@@ -1232,11 +1230,6 @@ class qtype_formulas_part {
             $count++;
         }
         for ($i = 0; $i < $count; $i++) {
-            // If the key does not exist, there is a problem and we consider the part as
-            // unanswered.
-            if (!array_key_exists("{$this->partindex}_{$i}", $response)) {
-                return true;
-            }
             // If the answer field is not empty or it is equivalent to zero, we consider
             // the part as answered and leave early.
             $tocheck = $response["{$this->partindex}_{$i}"];
