@@ -365,16 +365,16 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
-        $variablename = $part->partindex;
-        if ($part->has_combined_unit_field()) {
-            $variablename .= '_';
-        } else {
-            $variablename .= ($answerindex == $part->numbox ? '_u' : "_{$answerindex}");
-        }
-
         // The variable name will be N_M for answer #M in part #N or N_ for the (single) combined
         // unit field of part N, or N_u for the (single) unit field of part N.
-        $variablename = "{$part->partindex}_{$answerindex}";
+        // FIXME: N_xxx for unit field with xxx = numbox
+        $variablename = $part->partindex . '_';
+        if ($answerindex === self::UNIT_FIELD) {
+            $variablename .= $part->numbox;
+        } else {
+            $variablename .= ($answerindex === self::COMBINED_FIELD ? '' : $answerindex);
+        }
+
         $currentanswer = $qa->get_last_qt_var($variablename);
         $inputname = $qa->get_qt_field_name($variablename);
 
@@ -392,8 +392,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             default:
                 $titlestring = 'number';
         }
-        if ($part->postunit !== '') {
+        if ($answerindex === self::COMBINED_FIELD) {
             $titlestring .= '_unit';
+        }
+        if ($answerindex === self::UNIT_FIELD) {
+            $titlestring = 'unit';
         }
         $title = get_string($titlestring, 'qtype_formulas');
 
