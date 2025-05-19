@@ -22,8 +22,6 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core\output\html_writer;
-
 /**
  * Base class for generating the bits of output for formulas questions.
  *
@@ -417,7 +415,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         ];
 
         if ($displayoptions->readonly) {
-            $inputattributes['disabled'] = 'disabled';
+            $inputattributes['readonly'] = 'readonly';
         }
 
         // For accessibility, a label has to be added. The string is depends on the number of parts (single or multi part),
