@@ -145,8 +145,8 @@ Feature: Mobile compatibility
   Scenario: Try to answer a question with two parts, one drowdown multiple choice in each of them
     When I press "Quiz 8" in the app
     And I press "Attempt quiz now" in the app
-    And I set the field "Answer field 1 for part 1" to "Cat"
-    And I set the field "Answer field 1 for part 2" to "Blue"
+    And I set the field "Answer for part 1" to "Cat"
+    And I set the field "Answer for part 2" to "Blue"
     And I press "Submit" in the app
     And I press "Submit all and finish" in the app
     And I press "Submit" near "Once you submit" in the app
