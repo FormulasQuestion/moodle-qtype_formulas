@@ -225,14 +225,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Create a set of radio boxes for a multiple choice answer input.
      *
      * @param qtype_formulas_part $part question part
-     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
      * @param question_display_options $displayoptions controls what should and should not be displayed
      * @param string $feedbackclass
      * @return string HTML fragment
      */
-    protected function create_radio_mc_answer(qtype_formulas_part $part, mixed $answerindex, question_attempt $qa,
+    protected function create_radio_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
             array $answeroptions, question_display_options $displayoptions, string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -338,13 +338,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Create a <select> field for a multiple choice answer input.
      *
      * @param qtype_formulas_part $part question part
-     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
      * @param question_display_options $displayoptions controls what should and should not be displayed
      * @return string HTML fragment
      */
-    protected function create_dropdown_mc_answer(qtype_formulas_part $part, mixed $answerindex, question_attempt $qa,
+    protected function create_dropdown_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
             array $answeroptions, question_display_options $displayoptions): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -390,13 +390,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * into account. Returns the appropriate string from the language file. Examples are "Answer field for
      * part X", "Answer field X for part Y" or "Answer and unit for part X".
      *
-     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param int $totalanswers number of answers for the given part
      * @param int $partindex number of the part (starting at 0) in this question
      * @param int $totalparts number of parts in the question
      * @return string localized string
      */
-    protected function generate_accessibility_label_text(mixed $answerindex, int $totalanswers, int $partindex,
+    protected function generate_accessibility_label_text($answerindex, int $totalanswers, int $partindex,
             int $totalparts): string {
 
         // Some language strings need parameters.
@@ -431,13 +431,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Create an <input> field.
      *
      * @param qtype_formulas_part $part question part
-     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $displayoptions controls what should and should not be displayed
      * @param string $feedbackclass
      * @return string HTML fragment
      */
-    protected function create_input_box(qtype_formulas_part $part, mixed $answerindex,
+    protected function create_input_box(qtype_formulas_part $part, $answerindex,
             question_attempt $qa, question_display_options $displayoptions, string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
