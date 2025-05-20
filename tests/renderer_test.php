@@ -405,24 +405,28 @@ final class renderer_test extends walkthrough_test_base {
     }
 
     public function test_render_mce_accessibility_labels(): void {
-        // FIXME: also with no other answer field
         // Create a single part multiple choice (dropdown) question.
+        $q = $this->get_test_formulas_question('testmce');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer'),
+        );
+
+        // Create a single part multiple choice (dropdown) question with an additional field.
         $q = $this->get_test_formulas_question('testmce');
         $q->parts[0]->numbox = 2;
         $q->parts[0]->answer = '[1, 1]';
-
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
             new \question_contains_tag_with_contents('label', 'Answer field 1'),
             new \question_contains_tag_with_contents('label', 'Answer field 2'),
         );
 
-        // Create a two-part multiple choice (dropdown) question.
-        $q->numparts = 2;
-        $q->textfragments = [0 => $q->parts[0]->subqtext, 1 => '', 2 => ''];
-        $q->parts[] = qtype_formulas_test_helper::make_a_formulas_part();
+        // Create a two-part multiple choice (dropdown) question with an additional field in each part.
+        $q = $this->get_test_formulas_question('testmcetwoparts');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
         $q->parts[1]->numbox = 2;
-        $q->parts[1]->partindex = 1;
         $q->parts[1]->answer = '[1, 1]';
 
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
@@ -430,6 +434,44 @@ final class renderer_test extends walkthrough_test_base {
             new \question_contains_tag_with_contents('label', 'Answer field 1 for part 1'),
             new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
             new \question_contains_tag_with_contents('label', 'Answer field 1 for part 2'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 2'),
+        );
+    }
+
+    public function test_render_mc_accessibility_labels(): void {
+        // Create a single part multiple choice (radio) question.
+        $q = $this->get_test_formulas_question('testmc');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_attribute('span', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer'),
+        );
+
+        // Create a single part multiple choice (radio) question with an additional field.
+        $q = $this->get_test_formulas_question('testmc');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2'),
+        );
+
+        // Create a two-part multiple choice (radio) question with an additional field in each part.
+        $q = $this->get_test_formulas_question('testmctwoparts');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $q->parts[1]->numbox = 2;
+        $q->parts[1]->answer = '[1, 1]';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1 for part 2'),
             new \question_contains_tag_with_contents('label', 'Answer field 2 for part 2'),
         );
     }

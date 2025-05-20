@@ -241,8 +241,17 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $inputattributes['disabled'] = 'disabled';
         }
 
-        // First, we open a <div> around the entire group of options.
-        $output = html_writer::start_tag('div', ['class' => 'multichoice_answer']);
+        // First, we open a <fieldset> around the entire group of options.
+        $output = html_writer::start_tag('fieldset', ['class' => 'multichoice_answer']);
+
+        // Inside the fieldset, we put the accessibility label, following the example of core's multichoice
+        // question type, i. e. the label is inside a <span> with class 'sr-only', wrapped in a <legend>.
+        $output .= html_writer::start_tag('legend', ['class' => 'sr-only']);
+        $output .= html_writer::span(
+            $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
+            'sr-only'
+        );
+        $output .= html_writer::end_tag('legend');
 
         // Iterate over all options.
         foreach ($answeroptions as $i => $optiontext) {
@@ -272,18 +281,18 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if ($displayoptions->correctness && $isselected) {
                 $divclass .= ' ' . $feedbackclass;
             }
-            $output .= html_writer::start_tag('div', ['class' => $divclass]);
+            $output .= html_writer::start_div($divclass);
 
             // Now add the <input> tag and its <label>.
             $output .= html_writer::empty_tag('input', $inputattributes);
             $output .= $label['html'];
 
             // Close the option's <div>.
-            $output .= html_writer::end_tag('div');
+            $output .= html_writer::end_div();
         }
 
-        // Close the option group's <div>.
-        $output .= html_writer::end_tag('div');
+        // Close the option group's <fieldset>.
+        $output .= html_writer::end_tag('fieldset');
 
         return $output;
     }
@@ -315,17 +324,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $inputattributes['value'] = $currentanswer;
         $inputattributes['id'] = $inputname;
 
-        // For accessibility, a label has to be added. The string is either "Answer field X for part Y" or just "Answer field for
-        // part Y", depending on the number of answers that part accepts.
-        $labeldata = new stdClass();
-        $labeldata->numanswer = $answerindex + 1;
-        if (count($question->parts) > 1) {
-            $labeldata->part = $part->partindex + 1;
-            $labeltext = get_string('answercoordinatemulti', 'qtype_formulas', $labeldata);
-        } else {
-            $labeltext = get_string('answercoordinatesingle', 'qtype_formulas', $labeldata);
-        }
-        $label = $this->create_label_for_input($labeltext, $inputname);
+        $label = $this->create_label_for_input(
+            $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
+            $inputname
+        );
         $inputattributes['aria-labelledby'] = $label['id'];
 
         if ($displayoptions->readonly) {
@@ -347,6 +349,31 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $output .= html_writer::end_tag('span');
 
         return $output;
+    }
+
+    protected function generate_accessibility_label_text($answerindex, $totalanswers, $partindex, $totalparts): string {
+        // For accessibility, a label has to be added. The string is depends on the number of parts (single or multi part),
+        // the number of answer boxes in the part and the type of field (answer only, unit only, combined).
+        // Examples are "Answer field for part X", "Answer field X for part Y" or "Answer and unit for part X".
+        $labeldata = new stdClass();
+        $labelstring = 'answer';
+        if ($answerindex === self::UNIT_FIELD) {
+            $labelstring .= 'unit';
+        } else if ($answerindex === self::COMBINED_FIELD) {
+            $labelstring .= 'combinedunit';
+        } else if ($totalanswers > 1) {
+            $labelstring .= 'coordinate';
+            $labeldata->numanswer = $answerindex + 1;
+        }
+
+        if ($totalparts > 1) {
+            $labelstring .= 'multi';
+            $labeldata->part = $partindex + 1;
+        } else {
+            $labelstring .= 'single';
+        }
+
+        return get_string($labelstring, 'qtype_formulas', $labeldata);
     }
 
     /**
@@ -420,28 +447,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $inputattributes['readonly'] = 'readonly';
         }
 
-        // For accessibility, a label has to be added. The string is depends on the number of parts (single or multi part),
-        // the number of answer boxes in the part and the type of field (answer only, unit only, combined).
-        // Examples are "Answer field for part X", "Answer field X for part Y" or "Answer and unit for part X".
-        $labeldata = new stdClass();
-        $labelstring = 'answer';
-        if ($answerindex === self::UNIT_FIELD) {
-            $labelstring .= 'unit';
-        } else if (substr($variablename, -1) === '_') {
-            $labelstring .= 'combinedunit';
-        } else if ($part->numbox > 1) {
-            $labelstring .= 'coordinate';
-            $labeldata->numanswer = $answerindex + 1;
-        }
-
-        if ($question->numparts > 1) {
-            $labelstring .= 'multi';
-            $labeldata->part = $part->partindex + 1;
-        } else {
-            $labelstring .= 'single';
-        }
-
-        $label = $this->create_label_for_input(get_string($labelstring, 'qtype_formulas', $labeldata), $inputname);
+        $label = $this->create_label_for_input(
+            $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
+            $inputname
+        );
         $inputattributes['aria-labelledby'] = $label['id'];
 
         $output = $label['html'];
