@@ -482,7 +482,6 @@ final class renderer_test extends walkthrough_test_base {
             new \question_contains_tag_with_attribute('input', 'data-title', 'Number'),
             new \question_contains_tag_with_attribute('input', 'data-title', 'Unit'),
         );
-
     }
 
     public function test_render_mc_accessibility_labels(): void {

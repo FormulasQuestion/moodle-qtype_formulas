@@ -306,7 +306,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $output;
     }
 
-
     /**
      * Create a <label> element for a given input control (e. g. a text field). Returns the
      * HTML and the label's ID.
