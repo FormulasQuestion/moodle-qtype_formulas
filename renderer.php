@@ -311,7 +311,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $currentanswer = $qa->get_last_qt_var($variablename);
         $inputname = $qa->get_qt_field_name($variablename);
 
-        $inputattributes['type'] = 'radio';
         $inputattributes['name'] = $inputname;
         $inputattributes['value'] = $currentanswer;
         $inputattributes['id'] = $inputname;
@@ -426,7 +425,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // Examples are "Answer field for part X", "Answer field X for part Y" or "Answer and unit for part X".
         $labeldata = new stdClass();
         $labelstring = 'answer';
-        if (substr($variablename, -2) === '_u') {
+        if ($answerindex === self::UNIT_FIELD) {
             $labelstring .= 'unit';
         } else if (substr($variablename, -1) === '_') {
             $labelstring .= 'combinedunit';
@@ -447,7 +446,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         $output = $label['html'];
         $output .= html_writer::empty_tag('input', $inputattributes);
-        $output .= html_writer::end_tag('span');
 
         return $output;
     }
