@@ -159,7 +159,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
      * @param qtype_formulas_part $part question part
-     * @return object
+     * @return stdClass
      */
     public function get_part_feedback_class_and_symbol(question_attempt $qa, question_display_options $options,
             qtype_formulas_part $part): stdClass {
@@ -520,7 +520,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
      * @param qtype_formulas_part $part question part
-     * @param object $sub class and symbol for the part feedback
+     * @param stdClass $sub class and symbol for the part feedback
      * @return string HTML fragment
      */
     public function get_part_formulation(question_attempt $qa, question_display_options $options,
