@@ -509,19 +509,16 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // FIXME: maybe combine with loop above
         for ($i = 0; $i <= $part->numbox; $i++) {
-            if ($i === $part->numbox) {
-                if (empty($part->postunit)) {
-                    continue;
-                }
-                $answerindex = self::UNIT_FIELD;
-                $placeholder = '_u';
-            } else {
+            if ($i < $part->numbox) {
                 $answerindex = $i;
                 $placeholder = "_$i";
+            } else if (!empty($part->postunit)) {
+                $answerindex = self::UNIT_FIELD;
+                $placeholder = '_u';
             }
 
             $optiontexts = null;
-            if (strlen($boxes[$placeholder]['options']) !== 0) {
+            if (!empty($boxes[$placeholder]['options'])) {
                 try {
                     $optiontexts = $part->evaluator->export_single_variable($boxes[$placeholder]['options']);
                 } catch (Exception $e) {
