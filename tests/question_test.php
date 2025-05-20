@@ -47,7 +47,7 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @covers     \qtype_formulas_part
  * @covers     \qtype_formulas
  */
-final class question_test extends \basic_testcase {
+final class question_test extends \advanced_testcase {
 
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
@@ -474,6 +474,30 @@ final class question_test extends \basic_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n",
                 $q->get_question_summary());
+    }
+
+    public function test_translate_mc_answers_for_feedback(): void {
+        $q = $this->get_test_formulas_question('testsinglenum');
+
+        // Change the part's text to use a multi-choice answer field.
+        $q->varsglobal = 'options = ["foo", "bar"]';
+        $q->parts[0]->subqtext = '{_0:options}';
+
+        // Start the attempt (to initialize everything) and check the translation works.
+        $q->start_attempt(new question_attempt_step(), 1);
+        $translation = $q->parts[0]->translate_mc_answers_for_feedback(['0_0' => '1']);
+        self::assertArrayHasKey('0_0', $translation);
+        self::assertEquals('bar', $translation['0_0']);
+
+        // Change the variable reference to a bad name and check whether the error is caught.
+        $q->parts[0]->subqtext = '{_0:xxx}';
+        $q->start_attempt(new question_attempt_step(), 1);
+        $translation = $q->parts[0]->translate_mc_answers_for_feedback(['0_0' => '1']);
+        self::assertDebuggingCalled(
+            'Could not translate multiple choice index back to its value. This should not happen. Please file a bug report.'
+        );
+        self::assertArrayHasKey('0_0', $translation);
+        self::assertEquals('1', $translation['0_0']);
     }
 
     public function test_get_question_summary_test2(): void {

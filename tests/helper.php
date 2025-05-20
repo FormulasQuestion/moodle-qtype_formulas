@@ -98,7 +98,7 @@ class qtype_formulas_test_helper extends question_test_helper {
      *
      * @return qtype_formulas_part
      */
-    protected static function make_a_formulas_part(): qtype_formulas_part {
+    public static function make_a_formulas_part(): qtype_formulas_part {
         question_bank::load_question_definition_classes('formulas');
 
         $p = new qtype_formulas_part();
