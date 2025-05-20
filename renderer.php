@@ -36,21 +36,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /** @var string */
     const COMBINED_FIELD = '';
 
-    protected static function format_text_wrapper(string $text, question_attempt $qa): string {
-        if (strlen($text) === 0) {
-            return '';
-        }
-        /** @var qtype_formulas_question $question */
-        $question = $qa->get_question();
-
-        return $question->format_text($text, $question->questiontextformat, $qa, 'question', 'questiontext', $question->id, false);
-    }
-
     /**
-     * Generate the display of the formulation part of the question. This is the
-     * area that contains the question text, and the controls for students to
-     * input their answers. Once the question is answered, it will contain the green tick
-     * or the red cross and the part's general / combined feedback.
+     * Generate the display of the formulation part of the question. This is the area that
+     * contains the question text and the controls for students to input their answers.
+     * Once the question is answered, it will contain the green tick or the red cross and
+     * the part's general / combined feedback.
      *
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
@@ -70,12 +60,17 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // First, iterate over all parts, put the corresponding fragment of the main question text at the
         // right position, followed by the part's text, input and (if applicable) feedback elements.
         foreach ($question->parts as $part) {
-            $questiontext .= self::format_text_wrapper($question->textfragments[$part->partindex], $qa);
+            $questiontext .= $question->format_text(
+                $question->textfragments[$part->partindex], $question->questiontextformat,
+                $qa, 'question', 'questiontext', $question->id, false
+            );
             $questiontext .= $this->part_formulation_and_controls($qa, $options, $part);
         }
         // All parts are done. We now append the final fragment of the main question text. Note that this fragment
         // might be empty.
-        $questiontext .= self::format_text_wrapper(end($question->textfragments), $qa);
+        $questiontext .= $question->format_text(
+            end($question->textfragments), $question->questiontextformat, $qa, 'question', 'questiontext', $question->id, false
+        );
 
         // Pack everything in a <div> and, if the question is in an invalid state, append the appropriate error message
         // at the very end.
@@ -98,7 +93,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @return string HTML fragment
      */
-    public function head_code(question_attempt $qa) {
+    public function head_code(question_attempt $qa): string {
         global $CFG;
         $this->page->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
 
@@ -115,12 +110,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Return the part text, controls, grading details and feedbacks.
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
-     * @param question_display_options $options
-     * @param qtype_formulas_part $part
+     * @param question_display_options $options controls what should and should not be displayed
+     * @param qtype_formulas_part $part question part
      * @return void
      */
     public function part_formulation_and_controls(question_attempt $qa, question_display_options $options,
-            qtype_formulas_part $part) {
+            qtype_formulas_part $part): string {
 
         // The behaviour might change the display options per part, so it is safer to clone them here.
         $partoptions = clone $options;
@@ -161,12 +156,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Return class and symbol for the part feedback.
      *
-     * @param question_attempt $qa
-     * @param question_display_options $options
-     * @param qtype_formulas_part $part
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param question_display_options $options controls what should and should not be displayed
+     * @param qtype_formulas_part $part question part
      * @return object
      */
-    public function get_part_feedback_class_and_symbol($qa, $options, $part) {
+    public function get_part_feedback_class_and_symbol(question_attempt $qa, question_display_options $options,
+            qtype_formulas_part $part): stdClass {
         // Prepare a new object to hold the different elements.
         $result = new stdClass;
 
@@ -188,7 +184,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         if ($options->correctness) {
             $result->feedbacksymbol = $this->feedback_image($result->fraction);
             $result->feedbackclass = $this->feedback_class($result->fraction);
-            // FIXME: unitfeedbackclass, boxfeedbackclass -- put them back?
         }
         return $result;
     }
@@ -200,7 +195,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param string $style style to render the number in, acccording to {@see qtype_multichoice::get_numbering_styles()}
      * @return string number $num in the requested style
      */
-    protected static function number_in_style($num, $style) {
+    protected static function number_in_style(int $num, string $style): string {
         switch ($style) {
             case 'abc':
                 $number = chr(ord('a') + $num);
@@ -226,8 +221,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $number . '. ';
     }
 
-    protected function create_radio_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
-            $answeroptions, $displayoptions, $feedbackclass = '') {
+    /**
+     * Create a set of radio boxes for a multiple choice answer input.
+     *
+     * @param qtype_formulas_part $part question part
+     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param array $answeroptions array of strings containing the answer options to choose from
+     * @param question_display_options $displayoptions controls what should and should not be displayed
+     * @param string $feedbackclass
+     * @return string HTML fragment
+     */
+    protected function create_radio_mc_answer(qtype_formulas_part $part, mixed $answerindex, question_attempt $qa,
+            array $answeroptions, question_display_options $displayoptions, string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -266,6 +272,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $label = $this->create_label_for_input($labeltext, $inputattributes['id'], ['class' => 'ml-3']);
             $inputattributes['aria-labelledby'] = $label['id'];
 
+            // We must make sure $currentanswer is not null, because otherwise the first radio box
+            // might be selected if there is no answer at all. It seems better to avoid strict equality,
+            // because we might compare a string to a number.
             $isselected = ($i == $currentanswer && !is_null($currentanswer));
 
             // We do not reset the $inputattributes array on each iteration, so we have to add/remove the
@@ -297,22 +306,46 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $output;
     }
 
-    protected function create_label_for_input($text, $inputid, $additionalattributes = []) {
+
+    /**
+     * Create a <label> element for a given input control (e. g. a text field). Returns the
+     * HTML and the label's ID.
+     *
+     * @param string $text the label's text
+     * @param string $inputid ID of the input control for which the label is created
+     * @param array $additionalattributes possibility to add custom attributes, attribute name => value
+     * @return array 'id' => label's ID to be used in 'aria-labelledby' attribute, 'html' => HTML code
+     */
+    protected function create_label_for_input(string $text, string $inputid, array $additionalattributes = []): array {
         $labelid = 'lbl_' . str_replace(':', '__', $inputid);
         $attributes = [
             'class' => 'subq accesshide',
             'for' => $inputid,
             'id' => $labelid,
         ];
+
+        // Merging the additional attributes with the default attributes; left array has precedence when
+        // using the + operator.
         $attributes = $additionalattributes + $attributes;
+
         return [
             'id' => $labelid,
             'html' => html_writer::tag('label', $text, $attributes),
         ];
     }
 
-    protected function create_dropdown_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
-            $answeroptions, $displayoptions) {
+    /**
+     * Create a <select> field for a multiple choice answer input.
+     *
+     * @param qtype_formulas_part $part question part
+     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param array $answeroptions array of strings containing the answer options to choose from
+     * @param question_display_options $displayoptions controls what should and should not be displayed
+     * @return string HTML fragment
+     */
+    protected function create_dropdown_mc_answer(qtype_formulas_part $part, mixed $answerindex, question_attempt $qa,
+            array $answeroptions, question_display_options $displayoptions): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -351,11 +384,27 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return $output;
     }
 
-    protected function generate_accessibility_label_text($answerindex, $totalanswers, $partindex, $totalparts): string {
-        // For accessibility, a label has to be added. The string is depends on the number of parts (single or multi part),
-        // the number of answer boxes in the part and the type of field (answer only, unit only, combined).
-        // Examples are "Answer field for part X", "Answer field X for part Y" or "Answer and unit for part X".
+    /**
+     * Generate the right label for the input control, depending on the number of answers in the given part
+     * and the number of parts in the question. Special cases (combined field, unit field) are also taken
+     * into account. Returns the appropriate string from the language file. Examples are "Answer field for
+     * part X", "Answer field X for part Y" or "Answer and unit for part X".
+     *
+     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param int $totalanswers number of answers for the given part
+     * @param int $partindex number of the part (starting at 0) in this question
+     * @param int $totalparts number of parts in the question
+     * @return string localized string
+     */
+    protected function generate_accessibility_label_text(mixed $answerindex, int $totalanswers, int $partindex,
+            int $totalparts): string {
+
+        // Some language strings need parameters.
         $labeldata = new stdClass();
+
+        // The language strings start with 'answerunit' for a separate unit field, 'answercombinedunit' for
+        // a combined field, 'answercoordinate' for an answer field when there are multiple answers in the
+        // part or just 'answer' if there is a single field.
         $labelstring = 'answer';
         if ($answerindex === self::UNIT_FIELD) {
             $labelstring .= 'unit';
@@ -366,6 +415,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $labeldata->numanswer = $answerindex + 1;
         }
 
+        // The language strings end with 'multi' for multi-part questions or 'single' for single-part
+        // questions.
         if ($totalparts > 1) {
             $labelstring .= 'multi';
             $labeldata->part = $partindex + 1;
@@ -377,23 +428,25 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * Undocumented function
+     * Create an <input> field.
      *
-     * @param qtype_formulas_part $part
-     * @param [type] $answerindex ---> 0...n, 'u' for 'unit', '' for combined?
-     * @param question_attempt $qa
-     * @param [type] $displayoptions
+     * @param qtype_formulas_part $part question part
+     * @param mixed $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param question_display_options $displayoptions controls what should and should not be displayed
      * @param string $feedbackclass
-     * @return string
+     * @return string HTML fragment
      */
-    protected function create_input_box(qtype_formulas_part $part, $answerindex,
-            question_attempt $qa, $displayoptions, $feedbackclass = '') {
+    protected function create_input_box(qtype_formulas_part $part, mixed $answerindex,
+            question_attempt $qa, question_display_options $displayoptions, string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
-        // The variable name will be N_M for answer #M in part #N or N_ for the (single) combined
-        // unit field of part N, or N_u for the (single) unit field of part N.
-        // FIXME: N_xxx for unit field with xxx = numbox
+        // The variable name will be N_ for the (single) combined unit field of part N,
+        // or N_M for answer #M in part #N. If #M is equal to the part's numbox (i. e. the
+        // number of answers), it is a unit field; note that the fields are numbered starting
+        // from 0, so with 3 answers, we have N_0, N_1, N_2 and only use N_3 if there is a
+        // unit.
         $variablename = $part->partindex . '_';
         if ($answerindex === self::UNIT_FIELD) {
             $variablename .= $part->numbox;
@@ -404,6 +457,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $currentanswer = $qa->get_last_qt_var($variablename);
         $inputname = $qa->get_qt_field_name($variablename);
 
+        // Text fields will have a tooltip attached. The tooltip's content depends on the
+        // answer type. Special tooltips exist for combined or separate unit fields.
         switch ($part->answertype) {
             case qtype_formulas::ANSWER_TYPE_NUMERIC:
                 $titlestring = 'numeric';
@@ -462,13 +517,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Return the part's text with variables replaced by their values.
      *
-     * @param question_attempt $qa
-     * @param question_display_options $options
-     * @param int $i part index
-     * @param object $sub class and image for the part feedback
-     * @return string
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @param question_display_options $options controls what should and should not be displayed
+     * @param qtype_formulas_part $part question part
+     * @param object $sub class and symbol for the part feedback
+     * @return string HTML fragment
      */
-    public function get_part_formulation(question_attempt $qa, question_display_options $options, $part, $sub) {
+    public function get_part_formulation(question_attempt $qa, question_display_options $options,
+            qtype_formulas_part $part, stdClass $sub): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -507,8 +563,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             return str_replace('{_0}{_u}', $combinedfieldhtml, $subqreplaced);
         }
 
-        // FIXME: maybe combine with loop above
+        // Iterate over all boxes again, this time creating the appropriate input control and insert it
+        // at the position indicated by the placeholder.
         for ($i = 0; $i <= $part->numbox; $i++) {
+            // For normal answer fields, the placeholder is {_N} with N being the number of the
+            // answer, starting from 0. The unit field, if there is one, comes last and has the
+            // {_u} placeholder.
             if ($i < $part->numbox) {
                 $answerindex = $i;
                 $placeholder = "_$i";
@@ -517,6 +577,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $placeholder = '_u';
             }
 
+            // If the user has requested a multi-choice element, they must have specified an array
+            // variable containing the options. We try to fetch that variable. If this fails, we
+            // simply continue and build a text field instead.
             $optiontexts = null;
             if (!empty($boxes[$placeholder]['options'])) {
                 try {
@@ -558,7 +621,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Correct response for the question. This is not needed for the Formulas question, because
      * answers are relative to parts.
      *
-     * @param question_attempt $qa the question attempt to display
+     * @param question_attempt $qa question attempt that will be displayed on the page
      * @return string empty string
      */
     public function correct_response(question_attempt $qa) {
@@ -568,7 +631,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate an automatic description of the correct response for a given part.
      *
-     * @param qtype_formulas_part $part
+     * @param qtype_formulas_part $part question part
      * @return string HTML fragment
      */
     public function part_correct_response($part) {
@@ -584,8 +647,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate a brief statement of how many sub-parts of this question the
      * student got right.
-     * @param question_attempt $qa the question attempt to display.
-     * @return string HTML fragment.
+     *
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @return string HTML fragment
      */
     protected function num_parts_correct(question_attempt $qa) {
         /** @var qtype_formulas_question $question */
@@ -604,9 +668,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * We need to owerwrite this method to replace global variables by their value
+     * We need to owerwrite this method to replace global variables by their value.
      *
-     * @param question_attempt $qa the question attempt to display
+     * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_hint $hint the hint to be shown
      * @return string HTML fragment
      */
@@ -621,8 +685,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate HTML fragment for the question's combined feedback.
      *
-     * @param question_attempt $qa question attempt being displayed
-     * @return string
+     * @param question_attempt $qa question attempt that will be displayed on the page
+     * @return string HTML fragment
      */
     protected function combined_feedback(question_attempt $qa) {
         /** @var qtype_formulas_question $question */
@@ -659,7 +723,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * Generate the specific feedback. This is feedback that varies according to
      * the response the student gave.
      *
-     * @param question_attempt $qa question attempt being displayed
+     * @param question_attempt $qa question attempt that will be displayed on the page
      * @return string
      */
     public function specific_feedback(question_attempt $qa) {
@@ -669,9 +733,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Gereate the part's general feedback. This is feedback is shown to all students.
      *
-     * @param question_attempt $qa question attempt being displayed
+     * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part the question part
+     * @param qtype_formulas_part $part question part
      * @return string HTML fragment
      */
     protected function part_general_feedback(question_attempt $qa, question_display_options $options, qtype_formulas_part $part) {
@@ -716,18 +780,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate HTML fragment for the part's combined feedback.
      *
-     * @param question_attempt $qa question attempt being displayed
+     * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part the question part
+     * @param qtype_formulas_part $part question part
      * @param float $fraction the obtained grade
      * @return string HTML fragment
      */
-    protected function part_combined_feedback(
-        question_attempt $qa,
-        question_display_options $options,
-        qtype_formulas_part $part,
-        float $fraction
-    ) {
+    protected function part_combined_feedback(question_attempt $qa, question_display_options $options,
+        qtype_formulas_part $part, float $fraction): string {
         $feedback = '';
         $showfeedback = false;
         /** @var qtype_formulas_question $question */
