@@ -1630,6 +1630,10 @@ final class evaluator_test extends \advanced_testcase {
                 'Scalar value expected, found list.',
                 'a = "a" + [1, 2, 3]',
             ],
+            'invalid lb' => [
+                'lb() expects its argument to be a positive number.',
+                'a = lb(-5)',
+            ],
             'invalid 0^0' => [
                 'Power 0^0 is not defined.',
                 'a = 0 ** 0',

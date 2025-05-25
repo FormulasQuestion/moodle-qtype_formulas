@@ -125,7 +125,6 @@ final class backup_restore_test extends \advanced_testcase {
 
         // Create a new course and restore the backup.
         $newcourse = $generator->create_course();
-        $context = context_course::instance($newcourse->id);
         $rc = new restore_controller(
             $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
         );
@@ -359,6 +358,113 @@ final class backup_restore_test extends \advanced_testcase {
             $restoredquiz->context,
         );
         $this->assertEquals($quizstructure[1]->questionid, $restoredquizstructure[1]->questionid);
+    }
+
+    public function test_restore_of_legacy_backup_with_missing_fields(): void {
+        global $DB, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a course and a user with editing teacher capabilities.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $teacher = $USER;
+        $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $coursecontext = \context_course::instance($course->id);
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        // Create a question category.
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+
+        // Create a quiz with a multipart Formulas question.
+        $quiz = $this->create_test_quiz($course);
+        $question = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $cat->id]);
+        quiz_add_quiz_question($question->id, $quiz, 0);
+
+        // Backup quiz.
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Delete requested entry from questions.xml file in the backup.
+        $xmlfile = $bc->get_plan()->get_basepath() . '/questions.xml';
+        $xml = file_get_contents($xmlfile);
+
+        // List of fields that can be missing from older backups. We use the default
+        // value that will be assigned in restore_qtype_formulas_plugin.class.php.
+        $fieldstoremove = [
+            'answernotunique' => '1',
+            'shownumcorrect' => 0,
+            'answernumbering' => 'none',
+            'feedbackformat' => FORMAT_HTML,
+            'partindex' => null,
+            'correctfeedback' => '',
+            'partiallycorrectfeedback' => '',
+            'incorrectfeedback' => '',
+            'partcorrectfb' => '',
+            'partpartiallycorrectfb' => '',
+            'partincorrectfb' => '',
+        ];
+        // Remove these fields from the backup file.
+        foreach (array_keys($fieldstoremove) as $field) {
+            $xml = preg_replace("#<$field( format=\"html\")?>[^<]+</$field>#", '', $xml);
+        }
+        file_put_contents($xmlfile, $xml);
+
+        // Delete the current course to make sure there is no data.
+        delete_course($course, false);
+
+        // Create a new course and restore the backup.
+        $newcourse = $generator->create_course();
+        $rc = new restore_controller(
+            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+        );
+        $rc->execute_precheck();
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Fetch the quiz and question ID.
+        $modules = get_fast_modinfo($newcourse->id)->get_instances_of('quiz');
+        $quiz = reset($modules);
+        $structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($quiz->instance, $quiz->context);
+        $question = reset($structure);
+
+        // Fetch the question and its additional data (random vars, global vars, parts) from the DB.
+        $questionrecord = $DB->get_record('question', ['id' => $question->questionid], '*', MUST_EXIST);
+        $qtype = new qtype_formulas();
+        $qtype->get_question_options($questionrecord);
+
+        // Check whether the previously removed fields have been populated with their
+        // respective default values.
+        foreach ($fieldstoremove as $field => $defaultvalue) {
+            // The fields 'shownumcorrect', 'answernumbering' and '...feedback' (combined
+            // feedback) are stored at the options level.
+            if ($field == 'shownumcorrect' || $field == 'answernumbering' || preg_match('/feedback$/', $field)) {
+                self::assertEquals($defaultvalue, $questionrecord->options->$field, $field);
+                if (strstr($field, 'num') === false) {
+                    $format = $field . 'format';
+                    self::assertEquals(FORMAT_HTML, $questionrecord->options->$format, $format);
+                }
+            } else {
+                // All other fields are stored at the answers level. We check all parts. The partindex
+                // will be assigned according to the appearance. For the other fields, we use the default
+                // value. The combined feedback fields are stored as part....fb.
+                foreach ($questionrecord->options->answers as $i => $answer) {
+                    if ($field === 'partindex') {
+                        self::assertEquals($i, $answer->$field, $field);
+                    } else {
+                        self::assertEquals($defaultvalue, $answer->$field, $field);
+                    }
+                    if (strstr($field, 'fb') !== false) {
+                        $format = $field . 'format';
+                        self::assertEquals(FORMAT_HTML, $answer->$format, $format);
+                    }
+                }
+            }
+        }
     }
 
     /**
