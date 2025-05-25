@@ -19,6 +19,7 @@ namespace qtype_formulas;
 use question_hint_with_parts;
 use question_state;
 use test_question_maker;
+use qtype_formulas;
 use qtype_formulas_test_helper;
 use Generator;
 
@@ -311,26 +312,42 @@ final class renderer_test extends walkthrough_test_base {
                 $this->get_contains_num_parts_correct(1)
         );
         $this->check_current_mark(0.7);
+
+        // Restart with immediate feedback to check the radio box is disabled when showing the feedback.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1', '-submit' => 1]);
+        $this->check_current_output(
+            $this->get_contains_radio_expectation(['id' => $this->quba->get_field_prefix($this->slot) . '0_0_0'], false, false),
+            $this->get_contains_radio_expectation(['id' => $this->quba->get_field_prefix($this->slot) . '0_0_1'], false, true),
+            $this->get_contains_radio_expectation(['id' => $this->quba->get_field_prefix($this->slot) . '0_0_2'], false, false),
+            $this->get_contains_radio_expectation(['id' => $this->quba->get_field_prefix($this->slot) . '0_0_3'], false, false),
+        );
     }
 
     public function test_render_mce_question(): void {
-        // Create a single part multiple choice (radio) question.
+        // Create a single part multiple choice (dropdown) question.
         $q = $this->get_test_formulas_question('testmce');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         $this->render();
-        $this->check_output_contains_selectoptions(
-                $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'])
-        );
+        // Using check_current_output to make sure that the <select> is actually there. Using
+        // check_output_contains_selectoptions only makes sure that the options are there
+        // *among* existing <select>s; if no <select> is there, the options do not need to exist.
         $this->check_current_output(
-                $this->get_does_not_contain_specific_feedback_expectation()
+            new \question_contains_tag_with_attribute('select', 'name', $this->quba->get_field_prefix($this->slot) . '0_0'),
+            $this->get_does_not_contain_specific_feedback_expectation(),
+            new \question_contains_tag_with_contents('label', 'Answer'),
+            new \question_contains_tag_with_attribute('label', 'class', 'subq accesshide'),
+        );
+        $this->check_output_contains_selectoptions(
+            $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
         );
 
         // Submit wrong answer.
         $this->process_submission(['0_0' => '0', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedwrong);
         $this->check_output_contains_selectoptions(
-                $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
+            $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
         );
         $this->check_current_mark(0);
         $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', 'Cat');
@@ -340,10 +357,176 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => '1', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedright);
         $this->check_output_contains_selectoptions(
-                $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 1)
+            $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 1, false)
         );
         $this->check_current_mark(1);
         $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', 'Cat');
+    }
+
+    public function test_render_mc_question_with_missing_options(): void {
+        // Create a single part multiple choice (dropdown) question.
+        $q = $this->get_test_formulas_question('testmce');
+        $q->parts[0]->subqtext = '{_0:xxxx}';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->render();
+        // The options are not available, so a text box should be rendered instead.
+        $this->check_output_contains_text_input('0_0', '', true);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer'),
+        );
+
+        // Create a single part multiple choice (radio) question.
+        $q = $this->get_test_formulas_question('testmc');
+        $q->parts[0]->subqtext = '{_0:xxxx}';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->render();
+        // The options are not available, so a text box should be rendered instead.
+        $this->check_output_contains_text_input('0_0', '', true);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer'),
+        );
+    }
+
+    public function test_render_mce_accessibility_labels(): void {
+        // Create a single part multiple choice (dropdown) question.
+        $q = $this->get_test_formulas_question('testmce');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer'),
+        );
+
+        // Create a single part multiple choice (dropdown) question with an additional field.
+        $q = $this->get_test_formulas_question('testmce');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer field 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2'),
+        );
+
+        // Create a two-part multiple choice (dropdown) question with an additional field in each part.
+        $q = $this->get_test_formulas_question('testmcetwoparts');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $q->parts[1]->numbox = 2;
+        $q->parts[1]->answer = '[1, 1]';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer field 1 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 1 for part 2'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 2'),
+        );
+    }
+
+    public function test_textbox_tooltip_title(): void {
+        // Create a simple test question.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Number'),
+        );
+
+        // Change answer type to numeric.
+        $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_NUMERIC;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Numeric'),
+        );
+
+        // Change answer type to numerical formula.
+        $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Numerical formula'),
+        );
+
+        // Change answer type to algebraic formula.
+        $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Algebraic formula'),
+        );
+
+        // Create a simple test question with a combined field.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Number and unit'),
+        );
+
+        // Create a simple test question with a separate unit field.
+        $q = $this->get_test_formulas_question('testsinglenumunitsep');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Number'),
+            new \question_contains_tag_with_attribute('input', 'data-title', 'Unit'),
+        );
+    }
+
+    public function test_render_mc_accessibility_labels(): void {
+        // Create a single part multiple choice (radio) question.
+        $q = $this->get_test_formulas_question('testmc');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_attribute('span', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer'),
+        );
+
+        // Create a single part multiple choice (radio) question with an additional field.
+        $q = $this->get_test_formulas_question('testmc');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2'),
+        );
+
+        // Create a two-part multiple choice (radio) question with an additional field in each part.
+        $q = $this->get_test_formulas_question('testmctwoparts');
+        $q->parts[0]->numbox = 2;
+        $q->parts[0]->answer = '[1, 1]';
+        $q->parts[1]->numbox = 2;
+        $q->parts[1]->answer = '[1, 1]';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
+            new \question_contains_tag_with_contents('span', 'Answer field 1 for part 2'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 2'),
+        );
+    }
+
+    public function test_render_textbox_accessibility_labels(): void {
+        // Create a multi-part question with a combined and a separate unit field.
+        $q = $this->get_test_formulas_question('testmethodsinparts');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer and unit for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer for part 2'),
+            new \question_contains_tag_with_contents('label', 'Unit for part 2'),
+            new \question_contains_tag_with_contents('label', 'Answer for part 3'),
+            new \question_contains_tag_with_contents('label', 'Answer for part 4'),
+        );
+
+        // Create a multi-part question with a combined and a separate unit field.
+        $q = $this->get_test_formulas_question('testtwoandtwo');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_contents('label', 'Answer field 1 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
+            new \question_contains_tag_with_contents('label', 'Answer field 1 for part 2'),
+            new \question_contains_tag_with_contents('label', 'Answer field 2 for part 2'),
+        );
     }
 
     public function test_question_with_hint(): void {
