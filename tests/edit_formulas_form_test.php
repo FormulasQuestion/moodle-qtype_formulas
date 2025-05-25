@@ -114,7 +114,12 @@ final class edit_formulas_form_test extends \advanced_testcase {
         // are stored in the DB, to the global form fields.
         $globalfields = ['globalruleid', 'globalunitpenalty'];
         foreach ($globalfields as $field) {
-            self::assertObjectHasProperty($field, $processedquestion);
+            // For backwards compatibility with PHPUnit 9.5, used in Moodle 4.1 and 4.2.
+            if (method_exists(__CLASS__, 'assertObjectHasProperty')) {
+                self::assertObjectHasProperty($field, $processedquestion);
+            } else {
+                self::assertObjectHasAttribute($field, $processedquestion);
+            }
             self::assertEquals($formdata->$field, $processedquestion->$field);
 
         }
