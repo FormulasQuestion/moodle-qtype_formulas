@@ -496,7 +496,18 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
 
         foreach ($inputs as $placeholder => $replacement) {
-            $subqreplaced = preg_replace('/'.$boxes[$placeholder]['placeholder'].'/', $replacement, $subqreplaced, 1);
+            // The replacement text *might* contain a backslash and in the worst case this might
+            // lead to an erroneous backreference, e. g. if the student's answer was \1. Thus,
+            // we better use preg_replace_callback() instead of just preg_replace(), as this allows
+            // us to ignore such unintentional backreferences.
+            $subqreplaced = preg_replace_callback(
+                '/' . $boxes[$placeholder]['placeholder'] . '/',
+                function ($matches) use ($replacement) {
+                    return $replacement;
+                },
+                $subqreplaced,
+                1
+            );
         }
         return $subqreplaced;
     }
