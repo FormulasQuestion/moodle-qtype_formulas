@@ -240,12 +240,10 @@ class parser {
 
             // If the current token is a PREFIX and the next one is an IDENTIFIER, we will consider
             // that one as a FUNCTION. If the next token has already been classified as a function,
-            // there is nothing to do. Otherwise, this is a syntax error.
+            // there is nothing to do. Otherwise, the PREFIX is simply useless and we ignore it.
             if ($type === token::PREFIX) {
                 if ($nexttype === token::IDENTIFIER || $nexttype === token::FUNCTION) {
                     $nexttype = ($nexttoken->type = token::FUNCTION);
-                } else {
-                    $this->die(get_string('error_prefix', 'qtype_formulas'));
                 }
             }
 
@@ -364,7 +362,10 @@ class parser {
             }
             // Otherwise, let's read the next token and append it to the list of tokens for this statement.
             $currenttoken = $this->read_next();
-            $expression[] = $currenttoken;
+            // FIXME: update comment -- we do not add the PREFIX token to the list
+            if ($currenttoken->type !== token::PREFIX) {
+                $expression[] = $currenttoken;
+            }
         }
 
         // Feed the expression to the shunting yard algorithm and return the result.
