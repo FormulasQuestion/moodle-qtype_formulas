@@ -454,6 +454,22 @@ final class evaluator_test extends \advanced_testcase {
      */
     public static function provide_valid_assignments(): array {
         return [
+            'accepting useless prefix before number' => [
+                ['a' => new variable('a', 2, variable::NUMERIC)],
+                'a = \2',
+            ],
+            'accepting useless prefix' => [
+                ['a' => new variable('a', 4, variable::NUMERIC)],
+                'a = \ (3 + 1)',
+            ],
+            'accepting useless prefix, not swallowing parens' => [
+                ['a' => new variable('a', 20, variable::NUMERIC)],
+                'a = \ (3 + 1) * 5',
+            ],
+            'correctly reading a whole bunch of useless and useful PREFIXES' => [
+                ['a' => new variable('a', 20, variable::NUMERIC)],
+                'a \ = \ ( \ 3 \ + \ 1 \ ) \ * \ 5 * \cos(0)',
+            ],
             'one number' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
                 'a = 1;',
@@ -1502,10 +1518,6 @@ final class evaluator_test extends \advanced_testcase {
                 'Left-hand side of assignment must be a variable.',
                 'π = 3',
             ],
-            'invalid use of prefix with number' => [
-                'Syntax error: invalid use of prefix character \.',
-                'a = \ 2',
-            ],
             'invalid argument for unary operator' => [
                 "Number expected, found 'foo'.",
                 'a = -"foo"',
@@ -1513,10 +1525,6 @@ final class evaluator_test extends \advanced_testcase {
             'invalid argument for unary operator, indirect' => [
                 "Number expected, found 'foo'.",
                 's = "foo"; a = -s',
-            ],
-            'invalid use of prefix with paren' => [
-                'Syntax error: invalid use of prefix character \.',
-                'a = \ (3 + 1)',
             ],
             'assignment to invalid variable' => [
                 '1:1:Invalid variable name: _a.',
