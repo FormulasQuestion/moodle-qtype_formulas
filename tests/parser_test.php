@@ -287,4 +287,27 @@ final class parser_test extends \advanced_testcase {
         }
         self::assertNotNull($e);
     }
+
+    /**
+     * Test that the shunting yard algorithm correctly deals with a PREFIX token
+     * that might have gotten into the list of tokens.
+     */
+    public function test_shunting_yard_prefix_token(): void {
+        $tokens = [
+            new token(token::VARIABLE, 'a'),
+            new token(token::OPERATOR, '='),
+            new token(token::PREFIX, '\\'),
+            new token(token::FUNCTION, 'sin'),
+            new token(token::OPENING_PAREN, '('),
+            new token(token::NUMBER, '2'),
+            new token(token::CLOSING_PAREN, ')'),
+        ];
+
+        $output = shunting_yard::infix_to_rpn($tokens);
+        $output = array_map(function($token) {
+            return $token->value;
+        }, $output);
+
+        self::assertEquals('a,2,1,sin,=', implode(',', $output));
+    }
 }

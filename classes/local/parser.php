@@ -361,8 +361,8 @@ class parser {
                 break;
             }
             // Otherwise, let's read the next token and append it to the list of tokens for this statement.
+            // Note that we do not add the PREFIX token to the list, because it has already served its purpose.
             $currenttoken = $this->read_next();
-            // FIXME: update comment -- we do not add the PREFIX token to the list
             if ($currenttoken->type !== token::PREFIX) {
                 $expression[] = $currenttoken;
             }
