@@ -325,6 +325,10 @@ final class questiontype_test extends \advanced_testcase {
                 ],
             ],
             [
+                ['answer[0]' => '1:1:Syntax error: invalid use of prefix character \.'],
+                ['answer' => [0 => '\idontexist(20)']],
+            ],
+            [
                 ['answer[0]' => get_string('error_model_answer_no_content', 'qtype_formulas')],
                 ['answer' => [0 => '#']],
             ],

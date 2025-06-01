@@ -1506,8 +1506,8 @@ final class evaluator_test extends \advanced_testcase {
                 'Individual chars of a string cannot be modified.',
                 's = "foo"; s[1] = "x"',
             ],
-            'assignment with invalid function' => [
-                "Unknown function: 'idontexist'",
+            'prefix with invalid function' => [
+                'Syntax error: invalid use of prefix character \.',
                 'a = \idontexist(5)',
             ],
             'assignment to constant' => [
@@ -2322,6 +2322,22 @@ final class evaluator_test extends \advanced_testcase {
         }
         self::assertNotNull($e);
 
+        // Trying to execute an unknown function should yield the appropriate error message.
+        $statement = new expression([
+            new token(token::VARIABLE, 'a'),
+            new token(token::NUMBER, 5),
+            new token(token::NUMBER, 1),
+            new token(token::FUNCTION, 'idontexist'),
+            new token(token::OPERATOR, '='),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith("Unknown function: 'idontexist'", $e->getMessage());
+        }
+        self::assertNotNull($e);
+
         // When executing the ternary operator, we must have enough stuff (and the right stuff) on the stack.
         $statement = new expression([
             new token(token::OPERATOR, '?'),
@@ -2350,6 +2366,8 @@ final class evaluator_test extends \advanced_testcase {
             self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
+
+
     }
 
     /**
