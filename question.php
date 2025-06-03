@@ -451,15 +451,15 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return bool whether this response can be graded
      */
     public function is_gradable_response(array $response): bool {
-        // Iterate over all parts. If one is not gradable, we return early.
+        // Iterate over all parts. If at least one part is gradable, we can leave early.
         foreach ($this->parts as $part) {
-            if (!$part->is_gradable_response($response)) {
-                return false;
+            if ($part->is_gradable_response($response)) {
+                return true;
             }
         }
 
-        // Still here? Then the question is gradable.
-        return true;
+        // Still here? Then the question is not gradable.
+        return false;
     }
 
     /**

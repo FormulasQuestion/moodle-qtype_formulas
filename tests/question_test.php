@@ -929,6 +929,19 @@ final class question_test extends \basic_testcase {
         self::assertTrue($q->is_gradable_response(['0_0' => 5]));
     }
 
+    public function test_is_gradable_response_multipart(): void {
+        $q = $this->get_test_formulas_question('testthreeparts');
+
+        self::assertFalse($q->is_gradable_response([]));
+        self::assertTrue($q->is_gradable_response(['0_0' => '1']));
+        self::assertTrue($q->is_gradable_response(['1_0' => '1']));
+        self::assertTrue($q->is_gradable_response(['2_0' => '1']));
+        self::assertTrue($q->is_gradable_response(['0_0' => '1', '1_0' => '2']));
+        self::assertTrue($q->is_gradable_response(['0_0' => '1', '2_0' => '2']));
+        self::assertTrue($q->is_gradable_response(['1_0' => '1', '2_0' => '2']));
+        self::assertTrue($q->is_gradable_response(['0_0' => '0', '1_0' => '1', '2_0' => '2']));
+    }
+
     public function test_get_validation_error_multipart(): void {
         $q = $this->get_test_formulas_question('testmethodsinparts');
 

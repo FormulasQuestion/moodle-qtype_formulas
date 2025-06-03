@@ -118,6 +118,126 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         );
     }
 
+    public function test_deferred_partially_answered(): void {
+        // Create the formulas question 'testsinglenum'.
+        $q = $this->get_test_formulas_question('testthreeparts');
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
+        self::assertEquals(
+            'deferredfeedback',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('0_0', 'incorrect');
+        $this->check_output_contains_text_input('1_0');
+        $this->check_output_does_not_contain_text_input_with_class('1_0', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('1_0', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('1_0', 'incorrect');
+        $this->check_output_contains_text_input('2_0');
+        $this->check_output_does_not_contain_text_input_with_class('2_0', 'correct');
+        $this->check_output_does_not_contain_text_input_with_class('2_0', 'partiallycorrect');
+        $this->check_output_does_not_contain_text_input_with_class('2_0', 'incorrect');
+        $this->check_current_output(
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_does_not_contain_feedback_expectation(),
+        );
+
+        // Submit the empty form. The question should be counted as "gave up" with no grade.
+        // The feedback should be "incorrect".
+        $this->finish();
+        $this->check_current_state(question_state::$gaveup);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_current_output(
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_contains_incorrect_expectation(),
+        );
+
+        // Submit a partial answer, answering only the first part. The question should be
+        // graded partially correct. The student's response should be shown in the text field.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '5']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedpartial);
+        $this->check_current_mark(1);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('1_0', '', false);
+        $this->check_output_contains_text_input('2_0', '', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(1),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_contains_partcorrect_expectation(),
+        );
+
+        // Submit a partial answer, not answering the first part. The question should be
+        // graded partially correct. The student's response should be shown in the text fields.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['1_0' => '6', '2_0' => '7']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedpartial);
+        $this->check_current_mark(2);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', false);
+        $this->check_output_contains_text_input('1_0', '6', false);
+        $this->check_output_contains_text_input('2_0', '7', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(2),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_contains_partcorrect_expectation(),
+        );
+
+        // Submit a partial answer, answering only the second part, but wrong. The question should be
+        // graded incorrect. The student's response should be shown in the text field.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['1_0' => '5']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', false);
+        $this->check_output_contains_text_input('1_0', '5', false);
+        $this->check_output_contains_text_input('2_0', '', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_contains_incorrect_expectation(),
+        );
+
+        // Finally, submit a full and correct answer. The question should be graded right.
+        // The student's response should be shown in the text fields. All text fields should
+        // be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '5', '1_0' => '6', '2_0' => '7']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(3);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('1_0', '6', false);
+        $this->check_output_contains_text_input('2_0', '7', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(3),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_contains_correct_expectation(),
+        );
+    }
+
     public function test_submit_empty_then_right_with_combined_unit(): void {
         // Create the formulas question 'testsinglenumunit'.
         $q = $this->get_test_formulas_question('testsinglenumunit');
