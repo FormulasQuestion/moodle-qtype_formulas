@@ -4,6 +4,7 @@
 
 - bugfix: fix error message for partially answered questions in interactive mode
 - bugfix: make sure partially answered questions are graded in deferred feedback mode
+- bugfix: always use correct MathJax container to fetch preview width
 - improvement: silently discard useless PREFIX for better backwards compatibility
 - internal: increased test coverage
 
