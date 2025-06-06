@@ -239,13 +239,15 @@ class parser {
             $nextvalue = $nexttoken->value;
 
             // If the current token is a PREFIX and the next one is an IDENTIFIER, we will consider
-            // that one as a FUNCTION. If the next token has already been classified as a function,
-            // there is nothing to do. Otherwise, this is a syntax error.
+            // that one as a FUNCTION, unless it is not a known function name. If the PREFIX is not
+            // followed by an identifier, we silently ignore it for maximum backwards compatibility, as
+            // legacy versions used to remove backslashes from variable definitions.
             if ($type === token::PREFIX) {
-                if ($nexttype === token::IDENTIFIER || $nexttype === token::FUNCTION) {
+                if ($nexttype === token::IDENTIFIER) {
+                    if (!self::is_valid_function_name($nextvalue)) {
+                        $this->die(get_string('error_prefix', 'qtype_formulas'));
+                    }
                     $nexttype = ($nexttoken->type = token::FUNCTION);
-                } else {
-                    $this->die(get_string('error_prefix', 'qtype_formulas'));
                 }
             }
 
@@ -266,7 +268,7 @@ class parser {
             // break existing questions.
             if ($type === token::IDENTIFIER) {
                 $isnotavariable = !$this->is_known_variable($currenttoken);
-                $isknownfunction = array_key_exists($value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS);
+                $isknownfunction = self::is_valid_function_name($value);
                 $nextisparen = $nexttype === token::OPENING_PAREN;
                 if ($isnotavariable && $isknownfunction && $nextisparen) {
                     $type = ($currenttoken->type = token::FUNCTION);
@@ -369,6 +371,16 @@ class parser {
 
         // Feed the expression to the shunting yard algorithm and return the result.
         return new expression(shunting_yard::infix_to_rpn($expression));
+    }
+
+    /**
+     * Check if a given name is a valid function name.
+     *
+     * @param string $identifier the name to check
+     * @return bool
+     */
+    public static function is_valid_function_name(string $identifier): bool {
+        return array_key_exists($identifier, functions::FUNCTIONS + evaluator::PHPFUNCTIONS);
     }
 
     /**

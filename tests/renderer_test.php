@@ -103,6 +103,22 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_lang_string('uniquecorrectansweris', 'qtype_formulas', '5');
     }
 
+    public function test_show_response_with_backslash(): void {
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->render();
+        $this->check_current_state(question_state::$todo);
+        $this->check_output_contains_text_input('0_0', '', true);
+
+        // Submit wrong answer. The \1 must not be gobbled.
+        $this->process_submission(['0_0' => '\1', '-submit' => 1]);
+        $this->render();
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_output_contains(qtype_formulas_test_helper::DEFAULT_INCORRECT_FEEDBACK);
+        $this->check_output_contains_text_input('0_0', '\1', false);
+    }
+
     public function test_render_question_with_combined_unit_field(): void {
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $q->parts[0]->unitpenalty = 0.5;

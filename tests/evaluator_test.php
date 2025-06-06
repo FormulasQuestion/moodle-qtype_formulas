@@ -454,6 +454,22 @@ final class evaluator_test extends \advanced_testcase {
      */
     public static function provide_valid_assignments(): array {
         return [
+            'accepting useless prefix before number' => [
+                ['a' => new variable('a', 2, variable::NUMERIC)],
+                'a = \2',
+            ],
+            'accepting useless prefix' => [
+                ['a' => new variable('a', 4, variable::NUMERIC)],
+                'a = \ (3 + 1)',
+            ],
+            'accepting useless prefix, not swallowing parens' => [
+                ['a' => new variable('a', 20, variable::NUMERIC)],
+                'a = \ (3 + 1) * 5',
+            ],
+            'correctly reading a whole bunch of useless and useful PREFIXES' => [
+                ['a' => new variable('a', 20, variable::NUMERIC)],
+                'a \ = \ ( \ 3 \ + \ 1 \ ) \ * \ 5 * \cos(0)',
+            ],
             'one number' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
                 'a = 1;',
@@ -1490,8 +1506,8 @@ final class evaluator_test extends \advanced_testcase {
                 'Individual chars of a string cannot be modified.',
                 's = "foo"; s[1] = "x"',
             ],
-            'assignment with invalid function' => [
-                "Unknown function: 'idontexist'",
+            'prefix with invalid function' => [
+                'Syntax error: invalid use of prefix character \.',
                 'a = \idontexist(5)',
             ],
             'assignment to constant' => [
@@ -1502,10 +1518,6 @@ final class evaluator_test extends \advanced_testcase {
                 'Left-hand side of assignment must be a variable.',
                 'π = 3',
             ],
-            'invalid use of prefix with number' => [
-                'Syntax error: invalid use of prefix character \.',
-                'a = \ 2',
-            ],
             'invalid argument for unary operator' => [
                 "Number expected, found 'foo'.",
                 'a = -"foo"',
@@ -1513,10 +1525,6 @@ final class evaluator_test extends \advanced_testcase {
             'invalid argument for unary operator, indirect' => [
                 "Number expected, found 'foo'.",
                 's = "foo"; a = -s',
-            ],
-            'invalid use of prefix with paren' => [
-                'Syntax error: invalid use of prefix character \.',
-                'a = \ (3 + 1)',
             ],
             'assignment to invalid variable' => [
                 '1:1:Invalid variable name: _a.',
@@ -2314,6 +2322,22 @@ final class evaluator_test extends \advanced_testcase {
         }
         self::assertNotNull($e);
 
+        // Trying to execute an unknown function should yield the appropriate error message.
+        $statement = new expression([
+            new token(token::VARIABLE, 'a'),
+            new token(token::NUMBER, 5),
+            new token(token::NUMBER, 1),
+            new token(token::FUNCTION, 'idontexist'),
+            new token(token::OPERATOR, '='),
+        ]);
+        $e = null;
+        try {
+            $evaluator->evaluate($statement);
+        } catch (Exception $e) {
+            self::assertStringEndsWith("Unknown function: 'idontexist'", $e->getMessage());
+        }
+        self::assertNotNull($e);
+
         // When executing the ternary operator, we must have enough stuff (and the right stuff) on the stack.
         $statement = new expression([
             new token(token::OPERATOR, '?'),
@@ -2342,6 +2366,8 @@ final class evaluator_test extends \advanced_testcase {
             self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
+
+
     }
 
     /**

@@ -251,7 +251,7 @@ class answer_parser extends parser {
                 // formulas, students are allowed to use variables, so the expression is syntactically
                 // valid and will be interpreted as 'sin*30' which is most certainly wrong. The
                 // following check will make sure that students do not use function names as variables.
-                if (array_key_exists($token->value, functions::FUNCTIONS + evaluator::PHPFUNCTIONS)) {
+                if (self::is_valid_function_name($token->value)) {
                     return false;
                 }
                 /* TODO: maybe we should reject unknown variables, because that avoids mistakes
