@@ -105,7 +105,9 @@ class qtype_formulas_edit_form extends question_edit_form {
         $numdatasetgroup[] = $mform->createElement('button', 'instantiatebtn', get_string('instantiate', 'qtype_formulas'));
         $mform->addElement('group', 'instantiationctrl', get_string('numdataset', 'qtype_formulas'), $numdatasetgroup, null, false);
         $mform->addElement('static', 'varsdata', get_string('varsdata', 'qtype_formulas'), '<div id="varsdata_display"></div>');
-        $mform->addElement('static', 'qtextpreview', '', '<div id="qtextpreview_display"></div>');
+        $mform->addElement(
+            'static', 'qtextpreview', '', '<div id="qtextpreview_display" class="filter_mathjaxloader_equation"></div>'
+        );
 
         $this->add_combined_feedback_fields(true);
         $this->add_interactive_settings(true, true);

@@ -22,11 +22,12 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- import * as Notification from 'core/notification';
- import * as String from 'core/str';
- import Pending from 'core/pending';
- import {call as fetchMany} from 'core/ajax';
- import {TabulatorFull as Tabulator} from 'qtype_formulas/tabulator';
+import * as Notification from 'core/notification';
+import * as String from 'core/str';
+import Pending from 'core/pending';
+import {call as fetchMany} from 'core/ajax';
+import {notifyFilterContentUpdated} from 'core_filters/events';
+import {TabulatorFull as Tabulator} from 'qtype_formulas/tabulator';
 
 /**
  * Number of subquestions (parts)
@@ -202,25 +203,6 @@ const previewQuestionWithDataset = async(row) => {
 };
 
 /**
- * Trigger MathJax rendering for the question.
- *
- * @param {Element} element the <div> element where the question text is shown
- */
-const triggerMathJax = (element) => {
-    if (typeof window.MathJax === 'undefined') {
-        return;
-    }
-    let version = window.MathJax.version;
-    if (version[0] == '2') {
-        window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, element]);
-        return;
-    }
-    if (version[0] == '3') {
-        window.MathJax.typesetPromise([element]);
-    }
-};
-
-/**
  * This function is called after the AJAX request to the backend is completed. It will inject
  * the rendered texts into the preview div.
  *
@@ -232,7 +214,7 @@ const showRenderedQuestionAndParts = (data) => {
     for (let text of data.parts) {
         div.innerHTML += text;
     }
-    triggerMathJax(div);
+    notifyFilterContentUpdated(div.parentNode);
 };
 
 /**
