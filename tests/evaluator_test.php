@@ -2366,8 +2366,6 @@ final class evaluator_test extends \advanced_testcase {
             self::assertStringEndsWith('Evaluation error: not enough arguments for ternary operator.', $e->getMessage());
         }
         self::assertNotNull($e);
-
-
     }
 
     /**

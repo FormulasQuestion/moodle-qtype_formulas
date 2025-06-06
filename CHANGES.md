@@ -1,5 +1,15 @@
 # Changelog
 
+### 6.0.3 (2025-06-06)
+
+- bugfix: fix error message for partially answered questions in interactive mode
+- bugfix: make sure partially answered questions are graded in deferred feedback mode
+- bugfix: always use correct MathJax container to fetch preview width
+- improvement: assure compatibility with MathJax v3
+- improvement: silently discard useless PREFIX for better backwards compatibility
+- internal: increased test coverage
+- internal: update test_restore_course_with_same_stamp_questions after MDL-85556
+
 ### 6.0.2 (2025-05-06)
 
 - bugfix: fix problem with subsequent comments in variable definitions
