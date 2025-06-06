@@ -34,8 +34,8 @@ namespace qtype_formulas;
 use backup;
 use backup_controller;
 use context_course;
-use core\exception\coding_exception;
 use core_question_generator;
+use Exception;
 use qtype_formulas;
 use restore_controller;
 use test_question_maker;
@@ -647,7 +647,7 @@ final class backup_restore_test extends \advanced_testcase {
         try {
             $qbank = $generator->get_plugin_generator('mod_qbank')->create_instance(['course' => $course2->id]);
             $context = \context_module::instance($qbank->cmid);
-        } catch (coding_exception $e) {
+        } catch (Exception $e) {
             $context = \context_system::instance();
         }
         $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
