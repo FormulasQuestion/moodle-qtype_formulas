@@ -137,7 +137,7 @@ const handleRenderingComplete = (evt) => {
         for (let element of evt.detail.nodes) {
             // Iterate until we find our preview <div>.
             if (element.id === 'qtype_formulas_mathjax_display') {
-                mathjaxSpan = document.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
+                mathjaxSpan = element.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
                 break;
             }
         }
