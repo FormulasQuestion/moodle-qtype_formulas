@@ -672,7 +672,7 @@ final class backup_restore_test extends \advanced_testcase {
                 $newanswer = '"a*x^3"';
             }
             $answer->answer = $newanswer;
-            //$DB->update_record('qtype_formulas_answers', $answer);
+            $DB->update_record('qtype_formulas_answers', $answer);
         }
 
         $course1q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
