@@ -118,6 +118,22 @@ const addLegacyMathJaxListener = () => {
 };
 
 /**
+ * Fetch the element containing the rendered MathJax, according to the MathJax version being
+ * used.
+ *
+ * @param {Element} element DOM element where the MathJax was rendered
+ * @returns Element
+ */
+const getMathJaxContainer = (element) => {
+    // If we are using MathJax v3, the rendered output is in a custom <mjx-container> tag.
+    // If we are using MathJax v2, the rendered output is in a <span> with a certain id.
+    let v3container = element.querySelector('mjx-container');
+    let v2container = element.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
+
+    return v3container || v2container;
+};
+
+/**
  * Once MathJax rendering is complete, we can find the width of the rendered content and adjust
  * our preview div's width accordingly.
  *
@@ -137,7 +153,7 @@ const handleRenderingComplete = (evt) => {
         for (let element of evt.detail.nodes) {
             // Iterate until we find our preview <div>.
             if (element.id === 'qtype_formulas_mathjax_display') {
-                mathjaxSpan = element.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
+                mathjaxSpan = getMathJaxContainer(element);
                 break;
             }
         }
