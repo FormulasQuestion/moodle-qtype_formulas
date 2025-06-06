@@ -35,6 +35,7 @@ use backup;
 use backup_controller;
 use context_course;
 use core_question_generator;
+use Exception;
 use qtype_formulas;
 use restore_controller;
 use test_question_maker;
@@ -632,7 +633,7 @@ final class backup_restore_test extends \advanced_testcase {
             );
         }
 
-        // Create three courses and a user with editing teacher capabilities.
+        // Create two courses and a user with editing teacher capabilities.
         $generator = $this->getDataGenerator();
         $course1 = $generator->create_course();
         $course2 = $generator->create_course();
@@ -643,8 +644,13 @@ final class backup_restore_test extends \advanced_testcase {
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
 
         // Create a question category.
-        $systemcontext = \context_system::instance();
-        $cat = $questiongenerator->create_question_category(['contextid' => $systemcontext->id]);
+        try {
+            $qbank = $generator->get_plugin_generator('mod_qbank')->create_instance(['course' => $course2->id]);
+            $context = \context_module::instance($qbank->cmid);
+        } catch (Exception $e) {
+            $context = \context_system::instance();
+        }
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
 
         // Create quiz with question.
         $quiz1 = $this->create_test_quiz($course1);
@@ -669,6 +675,15 @@ final class backup_restore_test extends \advanced_testcase {
             $DB->update_record('qtype_formulas_answers', $answer);
         }
 
+        $course1q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $quiz1->id, \context_module::instance($quiz1->cmid)
+        );
+        $this->assertEquals($question1->id, $course1q1structure[1]->questionid);
+        $course1q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+            $quiz2->id, \context_module::instance($quiz2->cmid)
+        );
+        $this->assertEquals($question2->id, $course1q2structure[1]->questionid);
+
         // Backup course1.
         $bc = new backup_controller(backup::TYPE_1COURSE, $course1->id, backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
@@ -685,19 +700,21 @@ final class backup_restore_test extends \advanced_testcase {
 
         // Verify that the newly-restored course's quizzes use the same questions as their counterparts of course1.
         $modules = get_fast_modinfo($course2->id)->get_instances_of('quiz');
-        $course1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+        $course1q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
                 $quiz1->id, \context_module::instance($quiz1->cmid));
         $course2quiz1 = array_shift($modules);
-        $course2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+        $course2q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
                 $course2quiz1->instance, $course2quiz1->context);
-        $this->assertEquals($course1structure[1]->questionid, $course2structure[1]->questionid);
+        $this->assertEquals($question1->id, $course1q1structure[1]->questionid);
+        $this->assertEquals($question1->id, $course2q1structure[1]->questionid);
 
-        $course1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+        $course1q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
                 $quiz2->id, \context_module::instance($quiz2->cmid));
         $course2quiz2 = array_shift($modules);
-        $course2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
+        $course2q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
                 $course2quiz2->instance, $course2quiz2->context);
-        $this->assertEquals($course1structure[1]->questionid, $course2structure[1]->questionid);
+        $this->assertEquals($question2->id, $course1q2structure[1]->questionid);
+        $this->assertEquals($question2->id, $course2q2structure[1]->questionid);
     }
 
     /**
