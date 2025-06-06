@@ -24,7 +24,6 @@
 
 namespace qtype_formulas;
 
-use qtype_formulas_edit_form;
 use qtype_formulas;
 use qtype_formulas_question;
 use qtype_formulas_test_helper;
@@ -74,7 +73,7 @@ final class edit_formulas_form_test extends \advanced_testcase {
     }
 
     public function test_data_preprocessing(): void {
-        global $DB, $USER;
+        global $DB, $USER, $PAGE;
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -100,6 +99,7 @@ final class edit_formulas_form_test extends \advanced_testcase {
         $questionrecord->formoptions->repeatelements = true;
         $questionrecord->beingcopied = false;
 
+        $PAGE->set_url('/question/bank/editquestion/question.php');
         $form = $this->qtype->create_editing_form('question.php', $questionrecord, $category, $contexts, true);
 
         // Use reflection to access protected method.

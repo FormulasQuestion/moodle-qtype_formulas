@@ -152,9 +152,11 @@ body#page-question-type-formulas .formulas_input_info_interpretation_incorrect {
 /* Form rows normally have 1rem of bottom margin. However, if the form field's ID is answer_xxx,
    that margin will be forced to 0 for nicer rendering in the multichoice qtype's edit form. We
    now have to force the margin again to get it back. */
+/* stylelint-disable declaration-no-important  */
 body#page-question-type-formulas div[id^="fitem_id_answer_"].mb-3 {
     margin-bottom: 1rem !important;
 }
+/* stylelint-enable declaration-no-important  */
 
 /* RTL hacks */
 #page-question-type-formulas #id_varsrandom,

@@ -1,5 +1,12 @@
 # Changelog
 
+### 6.0.3 (2025-06-06)
+
+- bugfix: fix error message for partially answered questions in interactive mode
+- bugfix: make sure partially answered questions are graded in deferred feedback mode
+- improvement: silently discard useless PREFIX for better backwards compatibility
+- internal: increased test coverage
+
 ### 6.0.2 (2025-05-06)
 
 - bugfix: fix problem with subsequent comments in variable definitions
