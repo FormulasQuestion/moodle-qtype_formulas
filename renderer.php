@@ -604,9 +604,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // we better use preg_replace_callback() instead of just preg_replace(), as this allows
             // us to ignore such unintentional backreferences.
             $subqreplaced = preg_replace_callback(
-                '/' . $boxes[$placeholder]['placeholder'] . '/',
-                function ($matches) use ($replacement) {
-                    return $replacement;
+                '/' . preg_quote($boxes[$placeholder]['placeholder'], '/') . '/',
+                function ($matches) use ($inputfieldhtml) {
+                    return $inputfieldhtml;
                 },
                 $subqreplaced,
                 1
