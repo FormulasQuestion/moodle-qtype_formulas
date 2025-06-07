@@ -148,7 +148,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         }
 
         // Put all feedback into a <div> with the appropriate CSS class and append it to the output.
-        $output .= html_writer::nonempty_tag('div', $feedback, ['class' => 'formulaspartoutcome']);
+        $output .= html_writer::nonempty_tag('div', $feedback, ['class' => 'formulaspartoutcome outcome']);
 
         return html_writer::tag('div', $output , ['class' => 'formulaspart']);
     }
