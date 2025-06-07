@@ -148,8 +148,8 @@ Feature: Usage in quiz
   Scenario: Try to answer a question with two parts, one drowdown multiple choice in each of them
     When I follow "Quiz 8"
     And I press "Attempt quiz"
-    And I set the field "Answer field 1 for part 1" to "Cat"
-    And I set the field "Answer field 1 for part 2" to "Blue"
+    And I set the field "Answer for part 1" to "Cat"
+    And I set the field "Answer for part 2" to "Blue"
     And I press "Finish attempt"
     And I press "Submit all and finish"
     # And I confirm the quiz submission in the modal dialog

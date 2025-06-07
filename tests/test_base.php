@@ -80,6 +80,30 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
     }
 
     /**
+     * Create assertion to check that a <div> with certain class attributes is shown.
+     *
+     * @param string $class
+     * @return void
+     */
+    protected function get_contains_div_with_class_expectation($class) {
+        return new \question_contains_tag_with_attributes(
+            'div', ['class' => $class]
+        );
+    }
+
+    /**
+     * Create assertion to check that a <div> with certain class attributes is *not* shown.
+     *
+     * @param string $class
+     * @return void
+     */
+    protected function get_does_not_contain_div_with_class_expectation($class) {
+        return new \question_does_not_contain_tag_with_attributes(
+            'div', ['class' => $class]
+        );
+    }
+
+    /**
      * Check whether there are placeholders for answer boxes, expressions and/or variables left in the HTML output,
      * e. g. {_0} or {x} or {=2*a}.
      *
