@@ -738,41 +738,58 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function part_general_feedback(question_attempt $qa, question_display_options $options, qtype_formulas_part $part) {
-        // If the part's general feedback is empty, we can leave right away, returning an empty string.
-        if (strlen(trim($part->feedback)) === 0) {
-            return '';
-        }
-
-        $gradingdetails = '';
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $state = $qa->get_state();
 
+        // If no feedback should be shown, we return an empty string.
+        if (!$options->feedback) {
+            return '';
+        }
+
+        // If we use the adaptive multipart behaviour, there will be some feedback about the grading,
+        // e. g. the obtained marks for this submission and the attracted penalty.
+        $gradingdetailsdiv = '';
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
-            $gradingdetails = $renderer->render_adaptive_marks($details, $options);
+            $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
             $state = $details->state;
         }
-        $showfeedback = $options->feedback && $state->get_feedback_class() != '';
-        if ($showfeedback) {
-            // Clone the part's evaluator and substitute local / grading vars first.
-            $feedbacktext = $part->evaluator->substitute_variables_in_text($part->feedback);
-
-            $feedbacktext = $question->format_text(
-              $feedbacktext,
-              FORMAT_HTML,
-              $qa,
-              'qtype_formulas',
-              'answerfeedback',
-              $part->id,
-              false
-            );
-            $feedback = html_writer::tag('div', $feedbacktext , ['class' => 'feedback formulaslocalfeedback']);
-            return html_writer::nonempty_tag('div', $feedback . $gradingdetails,
-                    ['class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex]);
+        // If the question is in a state that does not yet allow to give a feedback,
+        // we return an empty string.
+        if (empty($state->get_feedback_class())) {
+            return '';
         }
+
+        // If we have a general feedback, we substitute local / grading variables and
+        // wrap it in a <div>.
+        $feedbackdiv = '';
+        if (strlen(trim($part->feedback)) !== 0) {
+            $feedbacktext = $part->evaluator->substitute_variables_in_text($part->feedback);
+            $feedbacktext = $question->format_text(
+                $feedbacktext,
+                FORMAT_HTML,
+                $qa,
+                'qtype_formulas',
+                'answerfeedback',
+                $part->id,
+                false
+            );
+            $feedbackdiv = html_writer::tag('div', $feedbacktext , ['class' => 'feedback formulaslocalfeedback']);
+        }
+
+        // Append the grading details, if they exist. If the result is not empty, wrap in
+        // a <div> and return.
+        $feedbackdiv .= $gradingdetailsdiv;
+        if (!empty($feedbackdiv)) {
+            return html_writer::nonempty_tag(
+                'div', $feedbackdiv, ['class' => 'formulaspartfeedback formulaspartfeedback-' . $part->partindex]
+            );
+        }
+
+        // Still here? Then we return an empty string.
         return '';
     }
 

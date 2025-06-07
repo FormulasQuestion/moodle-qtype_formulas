@@ -120,6 +120,48 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_0', '\1', false);
     }
 
+    public function test_adaptive_grading_details_are_shown(): void {
+        // Create a simple test question with no feedback strings at all.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->feedback = '';
+        $q->parts[0]->partcorrectfb = '';
+        $q->parts[0]->partpartiallycorrectfb = '';
+        $q->parts[0]->partincorrectfb = '';
+
+        // Initially, there should be no feedback.
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->render();
+        $this->check_current_output(
+            $this->get_does_not_contain_div_with_class_expectation('formulaspartfeedback-0'),
+            $this->get_does_not_contain_div_with_class_expectation('formulaslocalfeedback'),
+            $this->get_does_not_contain_div_with_class_expectation('gradingdetails'),
+        );
+
+        // After submitting an answer, the grading details should be shown, but there
+        // should be no empty <div> for the part's (inexistent) feedback.
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
+        $this->render();
+        $this->check_current_output(
+            $this->get_does_not_contain_div_with_class_expectation('formulaslocalfeedback'),
+            $this->get_contains_div_with_class_expectation('gradingdetails'),
+        );
+        $this->check_output_contains('Marks for this submission');
+        $this->check_output_contains('This submission attracted a penalty of');
+
+        // If there is a general feedback, it should be there now.
+        $q->parts[0]->feedback = 'foo bar feedback';
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
+        $this->render();
+        $this->check_current_output(
+            $this->get_contains_div_with_class_expectation('formulaslocalfeedback'),
+            $this->get_contains_div_with_class_expectation('gradingdetails'),
+        );
+        $this->check_output_contains('foo bar feedback');
+        $this->check_output_contains('Marks for this submission');
+        $this->check_output_contains('This submission attracted a penalty of');
+    }
+
     public function test_render_question_with_combined_unit_field(): void {
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $q->parts[0]->unitpenalty = 0.5;
