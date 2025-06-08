@@ -98,7 +98,7 @@ class qtype_formulas_test_helper extends question_test_helper {
      *
      * @return qtype_formulas_part
      */
-    protected static function make_a_formulas_part(): qtype_formulas_part {
+    public static function make_a_formulas_part(): qtype_formulas_part {
         question_bank::load_question_definition_classes('formulas');
 
         $p = new qtype_formulas_part();
@@ -1744,6 +1744,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
+        $p2->partindex = 1;
         $p2->answermark = 1;
         $p2->answer = '1';
         $p2->answernotunique = '1';
@@ -1845,6 +1846,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q->parts[0] = $p1;
         $p2 = self::make_a_formulas_part();
         $p2->id = 15;
+        $p2->partindex = 1;
         $p2->answermark = 1;
         $p2->answer = '1';
         $p2->answernotunique = '1';
