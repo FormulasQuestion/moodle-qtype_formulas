@@ -159,8 +159,9 @@ class evaluator {
                 if ($skiplists && in_array($result->type, [token::LIST, token::SET])) {
                     continue;
                 }
-                // If the result is a number, we try to localize it.
-                if ($result->type === token::NUMBER) {
+                // If the result is a number, we try to localize it, unless the admin settings do not
+                // allow the decimal comma.
+                if ($result->type === token::NUMBER && get_config('qtype_formulas', 'allowdecimalcomma')) {
                     $result = format_float($result->value, -1);
                 }
 
