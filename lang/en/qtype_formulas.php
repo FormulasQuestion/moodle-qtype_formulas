@@ -312,6 +312,8 @@ $string['ruleid_help'] = 'This question type has a built-in unit conversion syst
 
 The basic one is the "Common SI units" rules that will convert standard units such as unit for length,
 say, km, m, cm and mm. This option has no effect if no unit has been used.';
+$string['settingallowdecimalcomma'] = 'Localised decimal separator';
+$string['settingallowdecimalcomma_desc'] = 'Allow all students to use the comma as decimal separator in answers.<br>If activated, numbers will be displayed according to the locale settings.';
 $string['settingusepopup'] = 'Use tooltips';
 $string['settingusepopup_desc'] = 'Display correct answer and feedback in a tooltip';
 $string['subqoptions'] = 'Unit settings';

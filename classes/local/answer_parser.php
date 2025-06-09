@@ -40,11 +40,11 @@ class answer_parser extends parser {
             bool $formodelanswer = false) {
         // If the input is given as a string, run it through the lexer first. Also, if we aren't parsing
         // a model answer (coming from the teacher), we replace all commas by points, because there is no
-        // situation where the comma would be a valid character.
+        // situation where the comma would be a valid character. Replacement is only done if the admin
+        // settings allow the use of the decimal comma.
         if (is_string($tokenlist)) {
-            if (!$formodelanswer) {
-                // Only replace commas that are not followed by whitespace.
-                $tokenlist = preg_replace('/,(?!\s)/', '.', $tokenlist);
+            if (!$formodelanswer && get_config('qtype_formulas', 'allowdecimalcomma')) {
+                $tokenlist = str_replace(',', '.', $tokenlist);
             }
             $lexer = new lexer($tokenlist);
             $tokenlist = $lexer->get_tokens();
