@@ -43,7 +43,8 @@ class answer_parser extends parser {
         // situation where the comma would be a valid character.
         if (is_string($tokenlist)) {
             if (!$formodelanswer) {
-                $tokenlist = str_replace(',', '.', $tokenlist);
+                // Only replace commas that are not followed by whitespace.
+                $tokenlist = preg_replace('/,(?!\s)/', '.', $tokenlist);
             }
             $lexer = new lexer($tokenlist);
             $tokenlist = $lexer->get_tokens();
