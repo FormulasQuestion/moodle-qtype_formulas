@@ -106,7 +106,7 @@ class functions {
      * @return string
      */
     public static function fqversionnumber(): string {
-        return get_config('qtype_formulas')->version;
+        return get_config('qtype_formulas', 'version');
     }
 
     /**

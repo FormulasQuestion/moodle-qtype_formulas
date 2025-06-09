@@ -84,14 +84,18 @@ class latexifier {
             // Numbers only need special treatment, if they are in scientific notation.
             // Also, we make sure that the user's decimal separator is used.
             if ($token->type === token::NUMBER) {
+                $allowcomma = get_config('qtype_formulas', 'allowdecimalcomma');
                 if (is_null($token->metadata)) {
-                    $stack[] = ['content' => format_float($token->value, -1), 'precedence' => PHP_INT_MAX];
+                    $stack[] = [
+                        'content' => format_float($token->value, -1, $allowcomma),
+                        'precedence' => PHP_INT_MAX,
+                    ];
                     continue;
                 }
                 $mantissa = $token->metadata['mantissa'];
                 $exponent = $token->metadata['exponent'];
                 $stack[] = [
-                    'content' => format_float($mantissa, -1) . '\cdot 10^{' . $exponent . '}',
+                    'content' => format_float($mantissa, -1, $allowcomma) . '\cdot 10^{' . $exponent . '}',
                     'precedence' => shunting_yard::get_precedence('*'),
                 ];
             }

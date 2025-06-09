@@ -1574,9 +1574,9 @@ class qtype_formulas_part {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
 
-        // Numeric answers should be localized.
+        // Numeric answers should be localized, if that functionality is enabled.
         foreach ($answers as &$answer) {
-            if (is_numeric($answer)) {
+            if (is_numeric($answer) && get_config('qtype_formulas', 'allowdecimalcomma')) {
                 $answer = format_float($answer, -1);
             }
         }
@@ -1687,4 +1687,6 @@ class qtype_formulas_part {
         }
         return $result;
     }
+
+
 }
