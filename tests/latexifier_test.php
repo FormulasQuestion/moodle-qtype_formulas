@@ -94,7 +94,7 @@ final class latexifier_test extends \advanced_testcase {
             ['\ln\left(12\right)-\lg\left(12\right)', 'ln(12) - lg(12)'],
             ['\exp\left(10\right)', 'exp(10)'],
             ['\lg\left(12\right)', 'log10(12)'],
-            ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1,3)'],
+            ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1, 3)'],
             ['\operatorname{pick}\left(12\right)', 'pick(12)'],
         ];
     }
