@@ -82,15 +82,16 @@ class latexifier {
                 continue;
             }
             // Numbers only need special treatment, if they are in scientific notation.
+            // Also, we make sure that the user's decimal separator is used.
             if ($token->type === token::NUMBER) {
                 if (is_null($token->metadata)) {
-                    $stack[] = ['content' => $token->value, 'precedence' => PHP_INT_MAX];
+                    $stack[] = ['content' => format_float($token->value, -1), 'precedence' => PHP_INT_MAX];
                     continue;
                 }
                 $mantissa = $token->metadata['mantissa'];
                 $exponent = $token->metadata['exponent'];
                 $stack[] = [
-                    'content' => $mantissa . '\cdot 10^{' . $exponent . '}',
+                    'content' => format_float($mantissa, -1) . '\cdot 10^{' . $exponent . '}',
                     'precedence' => shunting_yard::get_precedence('*'),
                 ];
             }

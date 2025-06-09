@@ -159,6 +159,11 @@ class evaluator {
                 if ($skiplists && in_array($result->type, [token::LIST, token::SET])) {
                     continue;
                 }
+                // If the result is a number, we try to localize it.
+                if ($result->type === token::NUMBER) {
+                    $result = format_float($result->value, -1);
+                }
+
                 $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
                 // TODO: use non-capturing exception when we drop support for old PHP.

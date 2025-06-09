@@ -1577,6 +1577,15 @@ class qtype_formulas_part {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
 
+        // Numeric answers should be localized.
+        foreach ($answers as &$answer) {
+            if (is_numeric($answer)) {
+                $answer = format_float($answer, -1);
+            }
+        }
+        // Make sure we do not accidentally write to $answer later.
+        unset($answer);
+
         // If we have a combined unit field, we return both the model answer plus the unit
         // in "i_". Combined fields are only possible for parts with one signle answer.
         if ($this->has_combined_unit_field()) {
