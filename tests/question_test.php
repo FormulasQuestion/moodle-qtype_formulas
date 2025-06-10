@@ -527,7 +527,7 @@ final class question_test extends \advanced_testcase {
 
         // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
         qtype_formulas_test_helper::define_local_decimal_separator();
-        self::assertFalse(get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
 
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->parts[0]->answer = '3.5';
@@ -548,7 +548,7 @@ final class question_test extends \advanced_testcase {
 
         // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
         qtype_formulas_test_helper::define_local_decimal_separator();
-        self::assertFalse(get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
 
         $q = $this->get_test_formulas_question('testalgebraic');
         $q->parts[0]->answer = '"1.5x"';
