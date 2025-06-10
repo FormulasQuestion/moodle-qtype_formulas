@@ -2129,4 +2129,24 @@ class qtype_formulas_test_helper extends question_test_helper {
         return $qdata;
     }
 
+    /**
+     * Fake a language pack in order to define the comma (or any other character) as the current
+     * decimal separator.
+     *
+     * @param string $decsep the desired separator
+     */
+    public static function define_local_decimal_separator(string $decsep = ','): void {
+        global $SESSION, $CFG;
+
+        $SESSION->lang = 'xx';
+        $langconfig = "<?php\n\$string['decsep'] = '$decsep';";
+        $langfolder = $CFG->dataroot . '/lang/xx';
+        check_dir_exists($langfolder);
+        file_put_contents($langfolder . '/langconfig.php', $langconfig);
+
+        // Ensure the new value is picked up and not taken from the cache.
+        $stringmanager = get_string_manager();
+        $stringmanager->reset_caches(true);
+    }
+
 }

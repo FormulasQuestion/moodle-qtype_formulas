@@ -26,6 +26,7 @@ use question_hint_with_parts;
 use question_usage_by_activity;
 use qtype_formulas_part;
 use qtype_formulas_question;
+use qtype_formulas_test_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -518,6 +519,48 @@ final class question_test extends \advanced_testcase {
         EOF;
 
         self::assertEquals($expectedsummary, $q->get_question_summary());
+    }
+
+    public function test_get_correct_response_localised(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertFalse(get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->answer = '3.5';
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        // If the decimal comma is not activated in the admin settings, there should be no comma.
+        self::assertEquals(['0_0' => '3.5'], $q->get_correct_response());
+
+        // Now allowing the decimal comma to be used.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals(['0_0' => '3,5'], $q->get_correct_response());
+    }
+
+    public function test_get_correct_response_algebraic_localised(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertFalse(get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        $q = $this->get_test_formulas_question('testalgebraic');
+        $q->parts[0]->answer = '"1.5x"';
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        // If the decimal comma is not activated in the admin settings, there should be no comma.
+        self::assertEquals(['0_0' => '1.5x'], $q->get_correct_response());
+
+        // Now allowing the decimal comma to be used.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals(['0_0' => '1,5x'], $q->get_correct_response());
     }
 
     public function test_get_correct_response_singlenum(): void {

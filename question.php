@@ -1596,7 +1596,9 @@ class qtype_formulas_part {
         // Also, if the answer is requested for feedback, we must strip the quotes.
         // Strip quotes around algebraic formulas, if the answers are used for feedback.
         if ($this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
-            $answers = str_replace('.', get_string('decsep', 'langconfig'), $answers);
+            if (get_config('qtype_formulas', 'allowdecimalcomma')) {
+                $answers = str_replace('.', get_string('decsep', 'langconfig'), $answers);
+            }
 
             if ($forfeedback) {
                 $answers = str_replace('"', '', $answers);

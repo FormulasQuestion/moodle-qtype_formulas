@@ -20,6 +20,7 @@ use Exception;
 use Generator;
 use Throwable;
 use qtype_formulas;
+use qtype_formulas_test_helper;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\parser;
@@ -54,6 +55,8 @@ final class evaluator_test extends \advanced_testcase {
         global $CFG;
         parent::setUpBeforeClass();
 
+        require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
+        require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
         require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
     }
 
@@ -1206,6 +1209,33 @@ final class evaluator_test extends \advanced_testcase {
         // all evaluation points) and at most 72 (if we have the value 9 in all cases).
         self::assertGreaterThanOrEqual(0, $result[3]->value);
         self::assertLessThanOrEqual(72, $result[3]->value);
+    }
+
+    public function test_substitute_variables_in_text_localization(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertFalse(get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        // Define, parse and evaluate some variables.
+        $vars = 'a=1.5; b=[2.3,3.5,4];';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        // The output should contain a decimal point in all three cases despite the separator being a comma.
+        $text = '{a} -- {b[0]} -- {=b[2]/8}';
+        $output = $evaluator->substitute_variables_in_text($text);
+        self::assertEquals('1.5 -- 2.3 -- 0.5', $output);
+
+        // Now allowing the decimal comma to be used. The numbers should now be written with a comma.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        $output = $evaluator->substitute_variables_in_text($text);
+        self::assertEquals('1,5 -- 2,3 -- 0,5', $output);
     }
 
     public function test_substitute_variables_in_text(): void {
