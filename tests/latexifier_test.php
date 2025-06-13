@@ -178,6 +178,6 @@ final class latexifier_test extends \advanced_testcase {
         set_config('allowdecimalcomma', 1, 'qtype_formulas');
         self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
         $output = latexifier::latexify($parser->get_statements()[0]->body);
-        self::assertEquals('1,5\cdot 10^{3}+2,5', $output);
+        self::assertEquals('1{,}5\cdot 10^{3}+2{,}5', $output);
     }
 }
