@@ -246,7 +246,7 @@ const hideMathJax = () => {
  * @returns bool
  */
 const doesNotNeedRendering = (content) => {
-    return content.trim().match(/^([A-Za-z]+|[0-9]*\.?[0-9]*)$/);
+    return content.trim().match(/^([A-Za-z]+|[0-9]*[.,]?[0-9]*)$/);
 };
 
 /**

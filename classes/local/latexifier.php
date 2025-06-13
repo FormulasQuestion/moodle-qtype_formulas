@@ -86,18 +86,22 @@ class latexifier {
             if ($token->type === token::NUMBER) {
                 $allowcomma = get_config('qtype_formulas', 'allowdecimalcomma');
                 if (is_null($token->metadata)) {
-                    $stack[] = [
-                        'content' => format_float($token->value, -1, $allowcomma),
-                        'precedence' => PHP_INT_MAX,
-                    ];
-                    continue;
+                    $content = format_float($token->value, -1, $allowcomma);
+                    $precedence = PHP_INT_MAX;
+                } else {
+                    $mantissa = $token->metadata['mantissa'];
+                    $exponent = $token->metadata['exponent'];
+                    $content = format_float($mantissa, -1, $allowcomma) . '\cdot 10^{' . $exponent . '}';
+                    $precedence = shunting_yard::get_precedence('*');
                 }
-                $mantissa = $token->metadata['mantissa'];
-                $exponent = $token->metadata['exponent'];
-                $stack[] = [
-                    'content' => format_float($mantissa, -1, $allowcomma) . '\cdot 10^{' . $exponent . '}',
-                    'precedence' => shunting_yard::get_precedence('*'),
-                ];
+
+                // There is one last thing to do: If we were using the comma, we must write it as {,} in order
+                // to have correct spacing.
+                if ($allowcomma && get_string('decsep', 'langconfig') == ',') {
+                    $content = str_replace(',', '{,}', $content);
+                }
+
+                $stack[] = ['content' => $content, 'precedence' => $precedence];
             }
 
             // Operators take arguments from the stack, stick them together and
