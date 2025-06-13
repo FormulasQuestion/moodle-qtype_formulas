@@ -341,6 +341,70 @@ final class renderer_test extends walkthrough_test_base {
         );
     }
 
+    public function test_render_shuffled_mc(): void {
+        // Create a single part multiple choice (radio) question. Activate shuffling of the options
+        // and disable numbering of the answers, as that makes it easier to test.
+        $q = $this->get_test_formulas_question('testmc');
+        $q->answernumbering = '';
+        $q->parts[0]->subqtext = '{_0:mychoices:MCS}';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        // Count how many times each option appears first. Re-render the question until all options have been
+        // on the first position at least once. In case something is off, stop after 100 tries at latest.
+        $countfirst = ['Dog' => 0, 'Cat' => 0, 'Bird' => 0, 'Fish' => 0];
+        $allwerefirst = false;
+        $safety = 0;
+        while (!$allwerefirst && $safety < 100) {
+            $this->render();
+            $fieldset = preg_replace('=^(.*)<fieldset[^>]+>(.+)</fieldset>(.*)$=', '\\2', $this->currentoutput);
+            $answers = str_replace('Answer', '', strip_tags($fieldset));
+
+            foreach ($countfirst as $option => &$count) {
+                if (strstr($answers, $option, true) === '') {
+                    $count++;
+                }
+                $allwerefirst = (array_product($countfirst) > 0);
+            }
+            $safety++;
+        }
+
+        // Make sure we're not here just because of the safety switch.
+        self::assertTrue($allwerefirst);
+    }
+
+    public function test_render_shuffled_mce(): void {
+        // Create a single part multiple choice (dropdown) question. Activate shuffling of the options
+        // and disable numbering of the answers, as that makes it easier to test.
+        $q = $this->get_test_formulas_question('testmce');
+        $q->answernumbering = '';
+        $q->parts[0]->subqtext = '{_0:mychoices:MCES}';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        // Count how many times each option appears first. Re-render the question until all options have been
+        // on the first position at least once. In case something is off, stop after 100 tries at latest.
+        $countfirst = ['Dog' => 0, 'Cat' => 0, 'Bird' => 0, 'Fish' => 0];
+        $allwerefirst = false;
+        $safety = 0;
+        while (!$allwerefirst && $safety < 100) {
+            $this->render();
+            $select = preg_replace('=^(.*)<select[^>]+>(.+)</select>(.*)$=', '\\2', $this->currentoutput);
+            $answers = strip_tags($select);
+
+            foreach ($countfirst as $option => &$count) {
+                if (strstr($answers, $option, true) === '') {
+                    $count++;
+                }
+                $allwerefirst = (array_product($countfirst) > 0);
+            }
+            $safety++;
+        }
+
+        // Make sure we're not here just because of the safety switch.
+        self::assertTrue($allwerefirst);
+    }
+
     public function test_render_mc_question(): void {
         // Create a single part multiple choice (radio) question.
         $q = $this->get_test_formulas_question('testmc');

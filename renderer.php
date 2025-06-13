@@ -228,12 +228,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
+     * @param bool $shuffle whether the options should be shuffled
      * @param question_display_options $displayoptions controls what should and should not be displayed
      * @param string $feedbackclass
      * @return string HTML fragment
      */
     protected function create_radio_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
-            array $answeroptions, question_display_options $displayoptions, string $feedbackclass = ''): string {
+            array $answeroptions, bool $shuffle, question_display_options $displayoptions, string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -258,6 +259,18 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             'sr-only'
         );
         $output .= html_writer::end_tag('legend');
+
+        // If needed, shuffle the options while maintaining the keys.
+        if ($shuffle) {
+            $keys = array_keys($answeroptions);
+            shuffle($keys);
+
+            $shuffledoptions = [];
+            foreach ($keys as $key) {
+                $shuffledoptions[$key] = $answeroptions[$key];
+            }
+            $answeroptions = $shuffledoptions;
+        }
 
         // Iterate over all options.
         foreach ($answeroptions as $i => $optiontext) {
@@ -340,11 +353,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
+     * @param bool $shuffle whether the options should be shuffled
      * @param question_display_options $displayoptions controls what should and should not be displayed
      * @return string HTML fragment
      */
     protected function create_dropdown_mc_answer(qtype_formulas_part $part, $answerindex, question_attempt $qa,
-            array $answeroptions, question_display_options $displayoptions): string {
+            array $answeroptions, bool $shuffle, question_display_options $displayoptions): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -377,6 +391,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $optiontext, $part->subqtextformat , $qa, 'qtype_formulas', 'answersubqtext', $part->id, false
             );
         }
+
+        // If needed, shuffle the options while maintaining the keys.
+        if ($shuffle) {
+            $keys = array_keys($entries);
+            shuffle($keys);
+
+            $shuffledentries = [];
+            foreach ($keys as $key) {
+                $shuffledentries[$key] = $entries[$key];
+            }
+            $entries = $shuffledentries;
+        }
+
         $output .= html_writer::select($entries, $inputname, $currentanswer, ['' => ''], $inputattributes);
         $output .= html_writer::end_tag('span');
 
@@ -592,10 +619,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             if ($optiontexts === null) {
                 $inputfieldhtml = $this->create_input_box($part, $answerindex, $qa, $options, $sub->feedbackclass);
             } else if ($boxes[$placeholder]['dropdown']) {
-                $inputfieldhtml = $this->create_dropdown_mc_answer($part, $i, $qa, $optiontexts->value, $options);
+                $inputfieldhtml = $this->create_dropdown_mc_answer(
+                    $part, $i, $qa, $optiontexts->value, $boxes[$placeholder]['shuffle'], $options
+                );
             } else {
                 $inputfieldhtml = $this->create_radio_mc_answer(
-                    $part, $i, $qa, $optiontexts->value, $options, $sub->feedbackclass
+                    $part, $i, $qa, $optiontexts->value, $boxes[$placeholder]['shuffle'], $options, $sub->feedbackclass
                 );
             }
 
