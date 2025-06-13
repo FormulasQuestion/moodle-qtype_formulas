@@ -1246,7 +1246,7 @@ final class functions_test extends \advanced_testcase {
      */
     public static function provide_various_function_calls(): array {
         return [
-            [get_config('qtype_formulas')->version, 'fqversionnumber()'],
+            [get_config('qtype_formulas', 'version'), 'fqversionnumber()'],
             ['str() expects a scalar argument, e. g. a number.', 's = str([])'],
             ['str() expects a scalar argument, e. g. a number.', 's = str([1, 2, 3])'],
         ];
