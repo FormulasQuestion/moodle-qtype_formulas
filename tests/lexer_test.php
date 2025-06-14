@@ -616,12 +616,12 @@ EOF;
             ['foo"bar', '"foo\"bar"'],
             // Test useage of a single quote in a double quote string.
             ["foo'bar", '"foo\'bar"'],
-            // Test usage of the escape sequence \n in a single quote string.
-            ["foo\nbar", "'foo\\nbar'"],
+            // Test usage of the escape sequence \n in a single quote string. It should be taken literally.
+            ['foo\nbar', "'foo\\nbar'"],
             // Test usage of the escape sequence \n in a double quote string.
             ["foo\nbar", '"foo\nbar"'],
-            // Test usage of the escape sequence \t in a single quote string.
-            ["foo\tbar", "'foo\\tbar'"],
+            // Test usage of the escape sequence \t in a single quote string.  It should be taken literally.
+            ['foo\tbar', "'foo\\tbar'"],
             // Test usage of the escape sequence \t in a double quote string.
             ["foo\tbar", '"foo\tbar"'],
             // Test usage of an unescaped backslash in a double quote string.

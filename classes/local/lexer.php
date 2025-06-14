@@ -239,7 +239,7 @@ class lexer {
     /**
      * Read various escape sequences in strings.
      *
-     * @param boolean $doublequote whether the string is delimited by double quotes
+     * @param bool $doublequote whether the string is delimited by double quotes
      * @return string
      */
     private function read_escape_sequence(bool $doublequote = true): string {
