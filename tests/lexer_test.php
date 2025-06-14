@@ -702,6 +702,93 @@ EOF;
     }
 
     /**
+     * Data provider
+     *
+     * @return array
+     */
+    public static function provide_escape_sequences(): array {
+        return [
+            ['a' . PHP_EOL . 'x', '"a\nx"'],
+            ['"', '"\""'],
+            ['\\', '"\\\\"'],
+            ['"', '"\\""'],
+            [PHP_EOL, '"\n"'],
+            ["\t", '"\t"'],
+            ['$', '"\$"'],
+            ['\m', '"\m"'],
+            ['A1', '"\1011"'],
+            ['8', '"\70"'],
+            ['A', '"\101"'],
+            [chr(7), '"\7"'],
+            ['8', '"\70"'],
+            ['\90', '"\90"'],
+            ['S4', '"\1234"'],
+            ['A', '"\x41"'],
+            ['A3', '"\x413"'],
+            ['\xG13', '"\xG13"'],
+            ['\u', '"\u"'],
+            ['\u1234', '"\u1234"'],
+            ['A', '"\u{41}"'],
+            ["\u{10FFFF}", '"\u{10FFFF}"'],
+            ['🐘', '"\u{1F418}"'],
+            ['!Unterminated string, started at row 1, column 1.', '"\\"'],
+            ['!Invalid UTF-8 codepoint escape sequence: Codepoint larger than 0x10FFFF.', '"\u{110000}"'],
+            ['!Invalid UTF-8 codepoint escape sequence.', '"\u{}"'],
+            // For strings that are delimited by single quotes, only \\ and \' are special.
+            ['a\nx', "'a\\nx'"],
+            ["'", "'\\''"],
+            ['\\', "'\\\\'"],
+            ["'", "'\\''"],
+            ['\n', "'\\n'"],
+            ['\t', "'\\t'"],
+            ['\$', "'\\$'"],
+            ['\1011', "'\\1011'"],
+            ['\70', "'\\70'"],
+            ['\101', "'\\101'"],
+            ['\7', "'\\7'"],
+            ['\70', "'\\70'"],
+            ['\90', "'\\90'"],
+            ['\1234', "'\\1234'"],
+            ['\x41', "'\\x41'"],
+            ['\x413', "'\\x413'"],
+            ['\xG13', "'\\xG13'"],
+            ['\u', "'\\u'"],
+            ['\u123', "'\\u123'"],
+            ['\u{41}', "'\\u{41}'"],
+            ['\u{10FFFF}', "'\\u{10FFFF}'"],
+            ['\u{1F418}', "'\\u{1F418}'"],
+            ['!Unterminated string, started at row 1, column 1.', "'\\'"],
+            ['\u{110000}', "'\\u{110000}'"],
+            ['\u{}', "'\\u{}'"],
+        ];
+    }
+
+    /**
+     * Test interpretation of escape sequences
+     *
+     * @param string $expected expected interpretation or error message (marked with ! at start)
+     * @param string $input simulated input
+     * @dataProvider provide_escape_sequences
+     */
+    public function test_escape_sequences($expected, $input): void {
+        $message = '';
+        try {
+            $lexer = new lexer($input);
+            $tokens = $lexer->get_tokens();
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        if ($expected[0] === '!') {
+            self::assertStringEndsWith(substr($expected, 1), $message);
+            return;
+        }
+
+        self::assertEmpty($message);
+        self::assertEquals($expected, reset($tokens)->value);
+    }
+
+    /**
      * Data provider.
      *
      * @return array
