@@ -253,16 +253,27 @@ class lexer {
         while ($currentchar !== input_stream::EOF) {
             $nextchar = $this->inputstream->peek();
             // A backslash could be used to escape the opening/closing delimiter inside the string.
+            // Also, we can have \n for newline or \t for tabulator. Furthermore, it is possible
+            // to write \\ for the backslash. However, escaping is not mandatory, so it is
+            // perfectly valid to have 2 \ 3 which would mean two-backslash-three.
             if ($nextchar == '\\') {
                 $followedby = $this->inputstream->peek(1);
                 if ($followedby === $opener) {
                     // Consume the backslash. The quote will be appended later.
                     $this->inputstream->read();
+                } else if ($followedby === '\\') {
+                    $this->inputstream->read();
+                    $currentchar = $this->inputstream->read();
+                    $result .= '\\';
+                    continue;
                 } else if ($followedby === 't' || $followedby === 'n') {
                     $this->inputstream->read();
                     $currentchar = $this->inputstream->read();
                     $result .= ($followedby === 't' ? "\t" : "\n");
                     continue;
+                } else {
+                    $this->inputstream->read();
+                    $result .= '\\';
                 }
             } else if ($nextchar === $opener) {
                 $this->inputstream->read();

@@ -625,13 +625,21 @@ EOF;
             // Test usage of the escape sequence \t in a double quote string.
             ["foo\tbar", '"foo\tbar"'],
             // Test usage of an unescaped backslash in a double quote string.
-            ['foo\bar', '"foo\bar"'],
+            ['foo\bar', '"foo\\bar"'],
             // Test usage of an unescaped backslash in single quote string.
             ['foo\bar', "'foo\\bar'"],
             // Test usage of an escaped backslash in a double quote string.
-            ['foo\\\\bar', '"foo\\\\bar"'],
+            ['foo\bar', '"foo\\\\bar"'],
             // Test usage of an escaped backslash in single quote string.
-            ['foo\\\\bar', "'foo\\\\bar'"],
+            ['foo\bar', "'foo\\\\bar'"],
+            // Test usage of a verbatim \n (not a \n newline code) in a string.
+            ['2\neq3', '"2\\\\neq3"'],
+            // Test of backslash in various situations.
+            ['\\', '"\\\\"'],
+            [' \ ', '" \ "'],
+            [' \ ', '" \\ "'],
+            ['2 \ 3', '"2 \\ 3"'],
+            ['2 \ 3', '"2 \ 3"'],
         ];
     }
 
