@@ -19,6 +19,7 @@ namespace qtype_formulas;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\latexifier;
+use qtype_formulas_test_helper;
 
 /**
  * Tests for the latexifier class.
@@ -33,6 +34,8 @@ final class latexifier_test extends \advanced_testcase {
     public function setUp(): void {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
+        require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
+        require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 
         $this->resetAfterTest(true);
         parent::setUp();
@@ -94,7 +97,7 @@ final class latexifier_test extends \advanced_testcase {
             ['\ln\left(12\right)-\lg\left(12\right)', 'ln(12) - lg(12)'],
             ['\exp\left(10\right)', 'exp(10)'],
             ['\lg\left(12\right)', 'log10(12)'],
-            ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1,3)'],
+            ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1, 3)'],
             ['\operatorname{pick}\left(12\right)', 'pick(12)'],
         ];
     }
@@ -157,5 +160,24 @@ final class latexifier_test extends \advanced_testcase {
 
         self::assertNotNull($unitcheck);
         self::assertEquals($expected, latexifier::latexify_unit($unitcheck));
+    }
+
+    public function test_localised_number(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        $parser = new answer_parser('1.5e3 + 2.5');
+        $output = latexifier::latexify($parser->get_statements()[0]->body);
+        self::assertEquals('1.5\cdot 10^{3}+2.5', $output);
+
+        // Now allowing the decimal comma to be used.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        $output = latexifier::latexify($parser->get_statements()[0]->body);
+        self::assertEquals('1{,}5\cdot 10^{3}+2{,}5', $output);
     }
 }

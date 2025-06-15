@@ -1177,4 +1177,29 @@ final class questiontype_test extends \advanced_testcase {
             }
         }
     }
+
+    public function test_format_float(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // The following number will be formatted as '2.800000000000000' by Moodle's format_float()
+        // with auto-detection of decimal places.
+        $float = 2.1 + 7 * 0.1;
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals('2.8', qtype_formulas::format_float($float));
+
+        // For LaTeX output, the result should not differ.
+        self::assertEquals('2.8', qtype_formulas::format_float($float, true));
+
+        // Now allowing the decimal comma to be used.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        self::assertEquals('2,8', qtype_formulas::format_float($float));
+
+        // For LaTeX output, we should have curly braces around the comma.
+        self::assertEquals('2{,}8', qtype_formulas::format_float($float, true));
+    }
 }
