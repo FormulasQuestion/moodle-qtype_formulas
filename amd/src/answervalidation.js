@@ -80,9 +80,11 @@ const focusReceived = (evt) => {
     }
 
     // If the field is not empty, not invalid and we already have a MathJax display for this field,
-    // we can simply reactivate it.
+    // we can simply reactivate it -- unless the field does not need rendering, because in that case,
+    // the content might not be accurate.
     const div = document.getElementById('qtype_formulas_mathjax_display');
-    if (!field.classList.contains('is-invalid') && div !== null && div.dataset.for == field.id) {
+    let isOurDiv = div !== null && div.dataset.for == field.id;
+    if (!doesNotNeedRendering(field.value) && !field.classList.contains('is-invalid') && isOurDiv) {
         div.style.visibility = 'visible';
         return;
     }
@@ -236,6 +238,18 @@ const hideMathJax = () => {
 };
 
 /**
+ * If the field contains only a simple number (i. e. not in scientific notation) or
+ * a simple unit (i. e. one unit with no exponent), there is no need to show the MathJax
+ * rendering.
+ *
+ * @param {string} content the field's content
+ * @returns bool
+ */
+const doesNotNeedRendering = (content) => {
+    return content.trim().match(/^([A-Za-z]+|[0-9]*\.?[0-9]*)$/);
+};
+
+/**
  * Render LaTeX code and show the preview <div> at the right place.
  *
  * @param {string} id the input field's id
@@ -250,10 +264,7 @@ const showMathJax = (id, texcode) => {
         return;
     }
 
-    // If the field contains only a simple number (i. e. not in scientific notation) or
-    // a simple unit (i. e. one unit with no exponent), there is no need to show the MathJax
-    // rendering.
-    if (field.value.match(/^([A-Za-z]+|[0-9]*\.?[0-9]*)$/)) {
+    if (doesNotNeedRendering(field.value)) {
         hideMathJax();
         return;
     }
