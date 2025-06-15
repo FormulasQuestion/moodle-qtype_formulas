@@ -616,22 +616,30 @@ EOF;
             ['foo"bar', '"foo\"bar"'],
             // Test useage of a single quote in a double quote string.
             ["foo'bar", '"foo\'bar"'],
-            // Test usage of the escape sequence \n in a single quote string.
-            ["foo\nbar", "'foo\\nbar'"],
+            // Test usage of the escape sequence \n in a single quote string. It should be taken literally.
+            ['foo\nbar', "'foo\\nbar'"],
             // Test usage of the escape sequence \n in a double quote string.
             ["foo\nbar", '"foo\nbar"'],
-            // Test usage of the escape sequence \t in a single quote string.
-            ["foo\tbar", "'foo\\tbar'"],
+            // Test usage of the escape sequence \t in a single quote string.  It should be taken literally.
+            ['foo\tbar', "'foo\\tbar'"],
             // Test usage of the escape sequence \t in a double quote string.
             ["foo\tbar", '"foo\tbar"'],
             // Test usage of an unescaped backslash in a double quote string.
-            ['foo\bar', '"foo\bar"'],
+            ['foo\bar', '"foo\\bar"'],
             // Test usage of an unescaped backslash in single quote string.
             ['foo\bar', "'foo\\bar'"],
             // Test usage of an escaped backslash in a double quote string.
-            ['foo\\\\bar', '"foo\\\\bar"'],
+            ['foo\bar', '"foo\\\\bar"'],
             // Test usage of an escaped backslash in single quote string.
-            ['foo\\\\bar', "'foo\\\\bar'"],
+            ['foo\bar', "'foo\\\\bar'"],
+            // Test usage of a verbatim \n (not a \n newline code) in a string.
+            ['2\neq3', '"2\\\\neq3"'],
+            // Test of backslash in various situations.
+            ['\\', '"\\\\"'],
+            [' \ ', '" \ "'],
+            [' \ ', '" \\ "'],
+            ['2 \ 3', '"2 \\ 3"'],
+            ['2 \ 3', '"2 \ 3"'],
         ];
     }
 
@@ -691,6 +699,105 @@ EOF;
         $lexer = new lexer($input);
         $tokens = $lexer->get_tokens();
         self::assertEquals($expected, $tokens[0]->value);
+    }
+
+    /**
+     * Data provider
+     *
+     * @return array
+     */
+    public static function provide_escape_sequences(): array {
+        return [
+            ['a' . PHP_EOL . 'x', '"a\nx"'],
+            ['"', '"\""'],
+            ['\\', '"\\\\"'],
+            ['"', '"\\""'],
+            ["\n", '"\n"'],
+            ["\t", '"\t"'],
+            ["\r", '"\r"'],
+            ["\v", '"\v"'],
+            ["\e", '"\e"'],
+            ["\f", '"\f"'],
+            ['$', '"\$"'],
+            ['\m', '"\m"'],
+            ['A1', '"\1011"'],
+            ['8', '"\70"'],
+            ['A', '"\101"'],
+            [chr(7), '"\7"'],
+            [chr(7) . '9', '"\79"'],
+            ['8', '"\70"'],
+            ['\90', '"\90"'],
+            ['S4', '"\1234"'],
+            ['A', '"\x41"'],
+            ["\n", '"\xA"'],
+            ['A3', '"\x413"'],
+            ['\xG13', '"\xG13"'],
+            ['\u', '"\u"'],
+            ['\u1234', '"\u1234"'],
+            ['A', '"\u{41}"'],
+            ["\u{10FFFF}", '"\u{10FFFF}"'],
+            ['🐘', '"\u{1F418}"'],
+            ['!Unterminated string, started at row 1, column 1.', '"\\"'],
+            ['!Invalid UTF-8 codepoint escape sequence: Codepoint larger than 0x10FFFF.', '"\u{110000}"'],
+            ['!Invalid UTF-8 codepoint escape sequence.', '"\u{}"'],
+            // For strings that are delimited by single quotes, only \\ and \' are special.
+            ['a\nx', "'a\\nx'"],
+            ["'", "'\\''"],
+            ['\\', "'\\\\'"],
+            [' \\ ', "' \\ '"],
+            ["'", "'\\''"],
+            ['\n', "'\\n'"],
+            ['\t', "'\\t'"],
+            ['\r', "'\\r'"],
+            ['\v', "'\\v'"],
+            ['\e', "'\\e'"],
+            ['\f', "'\\f'"],
+            ['\$', "'\\$'"],
+            ['\1011', "'\\1011'"],
+            ['\70', "'\\70'"],
+            ['\101', "'\\101'"],
+            ['\7', "'\\7'"],
+            ['\70', "'\\70'"],
+            ['\90', "'\\90'"],
+            ['\1234', "'\\1234'"],
+            ['\xA', "'\\xA'"],
+            ['\x41', "'\\x41'"],
+            ['\x413', "'\\x413'"],
+            ['\xG13', "'\\xG13'"],
+            ['\u', "'\\u'"],
+            ['\u123', "'\\u123'"],
+            ['\u{41}', "'\\u{41}'"],
+            ['\u{10FFFF}', "'\\u{10FFFF}'"],
+            ['\u{1F418}', "'\\u{1F418}'"],
+            ['!Unterminated string, started at row 1, column 1.', "'\\'"],
+            ['\u{110000}', "'\\u{110000}'"],
+            ['\u{}', "'\\u{}'"],
+        ];
+    }
+
+    /**
+     * Test interpretation of escape sequences
+     *
+     * @param string $expected expected interpretation or error message (marked with ! at start)
+     * @param string $input simulated input
+     * @dataProvider provide_escape_sequences
+     */
+    public function test_escape_sequences($expected, $input): void {
+        $message = '';
+        try {
+            $lexer = new lexer($input);
+            $tokens = $lexer->get_tokens();
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        if ($expected[0] === '!') {
+            self::assertStringEndsWith(substr($expected, 1), $message);
+            return;
+        }
+
+        self::assertEmpty($message);
+        self::assertEquals($expected, reset($tokens)->value);
     }
 
     /**

@@ -237,6 +237,136 @@ class lexer {
     }
 
     /**
+     * Read various escape sequences in strings.
+     *
+     * @param bool $doublequote whether the string is delimited by double quotes
+     * @return string
+     */
+    private function read_escape_sequence(bool $doublequote = true): string {
+        // Consume the backslash and look at the character immediately following.
+        $this->inputstream->read();
+        $afterbackslash = $this->inputstream->peek();
+
+        // If the backslash is followed by another backslash, also consume the second and
+        // return a backslash.
+        if ($afterbackslash === '\\') {
+            $this->inputstream->read();
+            return '\\';
+        }
+
+        // If the string is delimited by single quotes, we simply return the backslash, because
+        // all other escape sequences are treated literally. Note that this function
+        // is not called if the backslash was used to escape the string's opening delimiter.
+        if (!$doublequote) {
+            return '\\';
+        }
+
+        // In strings delimited by double quotes, some escape sequences have a special meaning.
+        // We return them here. The character following the backslash has to be consumed.
+        switch ($afterbackslash) {
+            case 'n':
+                $this->inputstream->read();
+                return "\n";
+            case 'r':
+                $this->inputstream->read();
+                return "\r";
+            case 't':
+                $this->inputstream->read();
+                return "\t";
+            case 'v':
+                $this->inputstream->read();
+                return "\v";
+            case 'e':
+                $this->inputstream->read();
+                return "\e";
+            case 'f':
+                $this->inputstream->read();
+                return "\f";
+            case '$':
+                $this->inputstream->read();
+                return "\$";
+        }
+
+        // The backslash can be followed by an octal number, i. e. one, two or three digits from 0
+        // up to and including 7. In this case, we return the character. If it's more than 3 digits,
+        // the remaining digits are not considered, but appended after the escape sequence.
+        if (preg_match('/[0-7]/', $afterbackslash)) {
+            $octal = 0;
+            $digits = 0;
+            $possiblenextdigit = $this->inputstream->peek();
+            while (preg_match('/[0-7]/', $possiblenextdigit) && $digits < 3) {
+                $digits++;
+                $octal = 8 * $octal + intval($this->inputstream->read());
+                $possiblenextdigit = $this->inputstream->peek();
+            }
+            return chr($octal);
+        }
+
+        // The backslash can be followed by x in order to have a hexadecimal escale sequence.
+        // In this case, there must be one or two hexadecimal digits after the x; if it's more,
+        // that is not an error, but the digits will simply not be part of the escape sequence.
+        if ($afterbackslash === 'x') {
+            $hex = null;
+            $digits = 0;
+            $afterx = $this->inputstream->peek(1);
+            while (preg_match('/[0-9A-F]/i', $afterx) && $digits < 2) {
+                $digits++;
+                $hex = 16 * $hex + hexdec($afterx);
+                $this->inputstream->read();
+                $afterx = $this->inputstream->peek(1);
+            }
+            // If there was no hexadecimal digit after the x, we must simply return \x verbatim.
+            // Note that the x character must be consumed.
+            if ($hex === null) {
+                $this->inputstream->read();
+                return '\x';
+            }
+            // Consume the last digit.
+            $this->inputstream->read();
+            return chr($hex);
+        }
+
+        // Finally, the backslash can be use to reference a unicode codepoint. The codepoint must be
+        // wrapped in curly braces and must be given as a hexadecimal number, not larger than 0x10FFFF.
+        // A missing or an invalid codepoint shall trigger an error message, mimicking PHP's behaviour.
+        if ($afterbackslash === 'u') {
+            $afteru = $this->inputstream->peek(1);
+            // If the u is not followed by an opening brace, we just return the backslash. The u
+            // and all the rest will be read separately.
+            if ($afteru != '{') {
+                return '\\';
+            }
+            // So there was an opening brace, let's consume the u character.
+            $this->inputstream->read();
+
+            // Read all digits and calculate the codepoint's value.
+            $possibledigit = $this->inputstream->peek(1);
+            $codepoint = null;
+            while (preg_match('/[0-9A-F]/i', $possibledigit)) {
+                $codepoint = 16 * $codepoint + hexdec($possibledigit);
+                $this->inputstream->read();
+                $possibledigit = $this->inputstream->peek(1);
+            }
+            // If the character following the last digit is not a closing curly brace, that is a
+            // syntax error.
+            if ($possibledigit != '}' || $codepoint === null) {
+                $this->inputstream->die(get_string('error_invalidcodepoint', 'qtype_formulas'));
+            }
+            // Make sure the codepoint is not too large.
+            if ($codepoint > 0x10FFFF) {
+                $this->inputstream->die(get_string('error_invalidcodepoint_toolarge', 'qtype_formulas'));
+            }
+            // Consume the last digit and the curly brace and return the (probably multi-byte) character.
+            $this->inputstream->read();
+            $this->inputstream->read();
+            return mb_chr($codepoint);
+        }
+
+        // No escape sequence found? Then just return the backslash.
+        return '\\';
+    }
+
+    /**
      * Read a string token from the input stream.
      *
      * @return token the string token
@@ -253,15 +383,16 @@ class lexer {
         while ($currentchar !== input_stream::EOF) {
             $nextchar = $this->inputstream->peek();
             // A backslash could be used to escape the opening/closing delimiter inside the string.
+            // Also, we can have \n for newline or \t for tabulator. Furthermore, it is possible
+            // to write \\ for the backslash. However, escaping is not mandatory, so it is
+            // perfectly valid to have 2 \ 3 which would mean two-backslash-three.
             if ($nextchar == '\\') {
                 $followedby = $this->inputstream->peek(1);
                 if ($followedby === $opener) {
                     // Consume the backslash. The quote will be appended later.
                     $this->inputstream->read();
-                } else if ($followedby === 't' || $followedby === 'n') {
-                    $this->inputstream->read();
-                    $currentchar = $this->inputstream->read();
-                    $result .= ($followedby === 't' ? "\t" : "\n");
+                } else {
+                    $result .= $this->read_escape_sequence($opener === '"');
                     continue;
                 }
             } else if ($nextchar === $opener) {
