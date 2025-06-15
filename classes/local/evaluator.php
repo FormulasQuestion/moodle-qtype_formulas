@@ -19,6 +19,10 @@ namespace qtype_formulas\local;
 use qtype_formulas;
 use Throwable, Exception;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+
 /**
  * Evaluator for qtype_formulas
  *

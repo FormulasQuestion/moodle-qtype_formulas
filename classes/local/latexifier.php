@@ -18,6 +18,10 @@ namespace qtype_formulas\local;
 
 use qtype_formulas;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+
 /**
  * Helper class to convert an expression from RPN notation or a unit expression into LaTeX.
  *
