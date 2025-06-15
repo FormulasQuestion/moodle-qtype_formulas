@@ -342,7 +342,7 @@ class lexer {
             // Read all digits and calculate the codepoint's value.
             $possibledigit = $this->inputstream->peek(1);
             $codepoint = null;
-            while (preg_match('/[0-9A-Fa-f]/', $possibledigit)) {
+            while (preg_match('/[0-9A-F]/i', $possibledigit)) {
                 $codepoint = 16 * $codepoint + hexdec($possibledigit);
                 $this->inputstream->read();
                 $possibledigit = $this->inputstream->peek(1);
