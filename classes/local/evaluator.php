@@ -161,8 +161,8 @@ class evaluator {
                 }
                 // If the result is a number, we try to localize it, unless the admin settings do not
                 // allow the decimal comma.
-                if ($result->type === token::NUMBER && get_config('qtype_formulas', 'allowdecimalcomma')) {
-                    $result = format_float($result->value, -1);
+                if ($result->type === token::NUMBER) {
+                    $result = qtype_formulas::format_float($result->value);
                 }
 
                 $text = str_replace("{{$match}}", strval($result), $text);

@@ -1579,8 +1579,8 @@ class qtype_formulas_part {
 
         // Numeric answers should be localized, if that functionality is enabled.
         foreach ($answers as &$answer) {
-            if (is_numeric($answer) && get_config('qtype_formulas', 'allowdecimalcomma')) {
-                $answer = format_float($answer, -1);
+            if (is_numeric($answer)) {
+                $answer = qtype_formulas::format_float($answer);
             }
         }
         // Make sure we do not accidentally write to $answer later.

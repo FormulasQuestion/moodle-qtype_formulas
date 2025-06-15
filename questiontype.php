@@ -1289,4 +1289,33 @@ class qtype_formulas extends question_type {
 
         return $ordered;
     }
+
+    /**
+     * Similar to Moodle's format_float() function, this function will output a float number
+     * with the locale's decimal separator. It checks the admin setting (allowdecimalcomma)
+     * before doing so; if the decimal comma is not activated, the point will be used in
+     * all cases. We are not using the library function, because it can lead to unnecessary
+     * trailing zeroes. When using the function for LaTeX output, it will wrap the comma in
+     * curly braces for correct spacing.
+     *
+     * @param float|string $float a number or numeric string to be formatted
+     * @param bool $forlatex whether the output is for LaTeX code
+     * @return string
+     */
+    public static function format_float($float, bool $forlatex = false): string {
+        // If use of decimal comma (or other local decimal separator) is not allowed, we
+        // return the number as-is.
+        if (!get_config('qtype_formulas', 'allowdecimalcomma')) {
+            return strval($float);
+        }
+
+        // Get the correct decimal separator according to the user's locale. If necessary,
+        // put braces around it.
+        $decsep = get_string('decsep', 'langconfig');
+        if ($forlatex && $decsep === ',') {
+            $decsep = '{' . $decsep . '}';
+        }
+
+        return str_replace('.', $decsep, strval($float));
+    }
 }
