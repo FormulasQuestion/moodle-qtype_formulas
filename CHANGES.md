@@ -1,5 +1,12 @@
 # Changelog
 
+### 6.0.4 (2025-06-16)
+
+- bugfix: avoid outdated MathJax preview being re-activated
+- bugfix: solve problem with \n in strings used for MathJax rendering
+- improvement: implement PHP-like escape sequences in strings
+- internal: complete rewrite of renderer.php
+
 ### 6.0.3 (2025-06-06)
 
 - bugfix: fix error message for partially answered questions in interactive mode
