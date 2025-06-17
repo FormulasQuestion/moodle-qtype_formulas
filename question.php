@@ -1033,7 +1033,7 @@ class qtype_formulas_part {
      */
     public static function scan_for_answer_boxes(string $text): array {
         // Match the text and store the matches.
-        preg_match_all('/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE))?)?\}/', $text, $matches);
+        preg_match_all('/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE|MCES|MCS))?)?((\|[\w =#]*)*)\}/', $text, $matches);
 
         $boxes = [];
 
@@ -1054,9 +1054,31 @@ class qtype_formulas_part {
                 'placeholder' => $matches[0][$i],
                 'options' => $matches[3][$i],
                 'dropdown' => ($matches[4][$i] === ':MCE'),
+                'format' => self::parse_box_formatting_options(substr($matches[6][$i], 1)),
             ];
         }
         return $boxes;
+    }
+
+    /**
+     * FIXME
+     *
+     * @param string $settings
+     * @return array
+     */
+    protected static function parse_box_formatting_options(string $settings): array {
+        $options = explode('|', $settings);
+
+        $result = [];
+        foreach ($options as $option) {
+            if (strstr($option, '=') === false) {
+                continue;
+            }
+            $namevalue = explode('=', $option);
+            $result[$namevalue[0]] = $namevalue[1];
+        }
+
+        return $result;
     }
 
     /**
