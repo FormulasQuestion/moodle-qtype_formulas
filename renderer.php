@@ -319,7 +319,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // Define some regex pattern.
         $hexcolor = '#([0-9A-F]{8}|[0-9A-F]{6}|[0-9A-F]{3}|[0-9A-F]{4})';
         $namedcolor = '[A-Z]+';
-        $length = '\d+(px|em|rem|ch|rhc)?';
+        $length = '\d+(px|em|rem)?';
         $alignment = 'start|end|left|right|center';
 
         $styles = [];
@@ -341,8 +341,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     if (!preg_match("/^$length$/i", $value)) {
                         break;
                     }
-                    // If no unit is given, append rch which is the width of the glyph 0 in the element's font.
-                    $styles[] = "width: $value" . (preg_match('/^\d+$/', $value) ? 'rhc' : '');
+                    // If no unit is given, append px.
+                    $styles[] = "width: $value" . (preg_match('/^\d+$/', $value) ? 'px' : '');
                     break;
                 case 'align':
                     if (!preg_match("/^$alignment$/i", $value)) {
@@ -353,7 +353,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
         }
 
-        // FIXME: take into account the default width from the admin settings, once implemented
         return implode(';', $styles);
     }
 
@@ -531,6 +530,17 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $titlestring = 'unit';
         }
         $title = get_string($titlestring, 'qtype_formulas');
+
+        $defaultoptions = [];
+        $defaultwidth = get_config('qtype_formulas', "defaultwidth_{$titlestring}");
+        if (is_numeric($defaultwidth)) {
+            $defaultwidthunit = get_config('qtype_formulas', "defaultwidthunit");
+            if ($defaultwidthunit === false) {
+                $defaultwidthunit = 'px';
+            }
+            $defaultoptions = ['w' => $defaultwidth . $defaultwidthunit];
+        }
+        $formatoptions = $formatoptions + $defaultoptions;
 
         $inputattributes = [
             'type' => 'text',
