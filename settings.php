@@ -25,6 +25,13 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
+
+    $settings->add(new admin_setting_heading(
+        'qtype_formulas/settings',
+        new lang_string('settings_heading_general', 'qtype_formulas'),
+        new lang_string('settings_heading_general_desc', 'qtype_formulas'),
+    ));
+
     // Whether students are allowed to use the comma as decimal separator.
     $settings->add(new admin_setting_configcheckbox(
         'qtype_formulas/allowdecimalcomma',
@@ -32,13 +39,7 @@ if ($ADMIN->fulltree) {
         new lang_string('settingallowdecimalcomma_desc', 'qtype_formulas'),
         0
     ));
-    // Use tooltip or not to display correct answer.
-    $settings->add(new admin_setting_configcheckbox(
-        'qtype_formulas/usepopup',
-        new lang_string('settingusepopup', 'qtype_formulas'),
-        new lang_string('settingusepopup_desc', 'qtype_formulas'),
-        0
-    ));
+
     // Default answer type.
     $settings->add(new admin_setting_configselect(
         'qtype_formulas/defaultanswertype',
@@ -55,22 +56,121 @@ if ($ADMIN->fulltree) {
     // Default correctness.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultcorrectness',
-        get_string('defaultcorrectness', 'qtype_formulas'),
-        get_string('defaultcorrectness_desc', 'qtype_formulas'),
+        new lang_string('defaultcorrectness', 'qtype_formulas'),
+        new lang_string('defaultcorrectness_desc', 'qtype_formulas'),
         '_relerr < 0.01'
     ));
     // Default answermark.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultanswermark',
-        get_string('defaultanswermark', 'qtype_formulas'),
-        get_string('defaultanswermark_desc', 'qtype_formulas'),
-        1
+        new lang_string('defaultanswermark', 'qtype_formulas'),
+        new lang_string('defaultanswermark_desc', 'qtype_formulas'),
+        1,
+        PARAM_FLOAT,
+        4
     ));
     // Default unit penalty.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultunitpenalty',
-        get_string('defaultunitpenalty', 'qtype_formulas'),
-        get_string('defaultunitpenalty_desc', 'qtype_formulas'),
-        1
+        new lang_string('defaultunitpenalty', 'qtype_formulas'),
+        new lang_string('defaultunitpenalty_desc', 'qtype_formulas'),
+        1,
+        PARAM_FLOAT,
+        4
+    ));
+
+    $settings->add(new admin_setting_heading(
+        'qtype_formulas/defaultwidths',
+        new lang_string('settings_heading_width', 'qtype_formulas'),
+        new lang_string('settings_heading_width_desc', 'qtype_formulas'),
+    ));
+
+    // Unit for default widths.
+    $settings->add(new admin_setting_configselect(
+        'qtype_formulas/defaultwidthunit',
+        new lang_string('defaultwidthunit', 'qtype_formulas'),
+        new lang_string('defaultwidthunit_desc', 'qtype_formulas'),
+        0,
+        ['px' => 'px', 'em' => 'em', 'rem' => 'rem'],
+    ));
+
+    // Default width for answer type "Number".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_number',
+        new lang_string('defaultwidth_number', 'qtype_formulas'),
+        new lang_string('defaultwidth_number_desc', 'qtype_formulas'),
+        55,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for combined answer field of type "Number".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_number_unit',
+        new lang_string('defaultwidth_number_unit', 'qtype_formulas'),
+        new lang_string('defaultwidth_number_unit_desc', 'qtype_formulas'),
+        80,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for answer type "Numeric".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_numeric',
+        new lang_string('defaultwidth_numeric', 'qtype_formulas'),
+        new lang_string('defaultwidth_numeric_desc', 'qtype_formulas'),
+        100,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for combined answer field of type "Numeric".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_numeric_unit',
+        new lang_string('defaultwidth_numeric_unit', 'qtype_formulas'),
+        new lang_string('defaultwidth_numeric_unit_desc', 'qtype_formulas'),
+        200,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for answer type "Numerical formula".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_numerical_formula',
+        new lang_string('defaultwidth_numerical_formula', 'qtype_formulas'),
+        new lang_string('defaultwidth_numerical_formula_desc', 'qtype_formulas'),
+        200,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for combined answer field of type "Numerical formula".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_numerical_formula_unit',
+        new lang_string('defaultwidth_numerical_formula_unit', 'qtype_formulas'),
+        new lang_string('defaultwidth_numerical_formula_unit_desc', 'qtype_formulas'),
+        300,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for answer type "Algebraic formula".
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_algebraic_formula',
+        new lang_string('defaultwidth_algebraic_formula', 'qtype_formulas'),
+        new lang_string('defaultwidth_algebraic_formula_desc', 'qtype_formulas'),
+        200,
+        PARAM_FLOAT,
+        6
+    ));
+
+    // Default width for separate unit field; not to be confused with the unit for the width (px, em, rem).
+    $settings->add(new admin_setting_configtext(
+        'qtype_formulas/defaultwidth_unit',
+        new lang_string('defaultwidth_unit', 'qtype_formulas'),
+        new lang_string('defaultwidth_unit_desc', 'qtype_formulas'),
+        55,
+        PARAM_FLOAT,
+        6
     ));
 }

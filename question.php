@@ -233,6 +233,14 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                 $summary .= $chunk;
             }
         }
+
+        // For the question summary, it seems useful to simplify the answer box placeholders.
+        $summary = preg_replace(
+            '/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE|MCES|MCS))?)?((\|[\w =#]*)*)\}/',
+            '{\1}',
+            $summary,
+        );
+
         return $summary;
     }
 

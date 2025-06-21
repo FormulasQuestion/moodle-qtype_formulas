@@ -332,7 +332,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // Define some regex pattern.
         $hexcolor = '#([0-9A-F]{8}|[0-9A-F]{6}|[0-9A-F]{3}|[0-9A-F]{4})';
         $namedcolor = '[A-Z]+';
-        $length = '\d+(px|em|rem|ch|rhc)?';
+        // We accept floating point numbers with or without a leading integer part and integers.
+        // Floating point numbers with a trailing decimal point do not work in all browsers.
+        $length = '(\d+\.\d+|\d*\.\d+|\d+)(px|em|rem)?';
         $alignment = 'start|end|left|right|center';
 
         $styles = [];
@@ -354,8 +356,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     if (!preg_match("/^$length$/i", $value)) {
                         break;
                     }
-                    // If no unit is given, append rch which is the width of the glyph 0 in the element's font.
-                    $styles[] = "width: $value" . (preg_match('/^\d+$/', $value) ? 'rhc' : '');
+                    // If no unit is given, append px.
+                    $styles[] = "width: $value" . (preg_match('/\d$/', $value) ? 'rem' : '');
                     break;
                 case 'align':
                     if (!preg_match("/^$alignment$/i", $value)) {
@@ -366,7 +368,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
         }
 
-        // FIXME: take into account the default width from the admin settings, once implemented
         return implode(';', $styles);
     }
 
@@ -559,6 +560,22 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $titlestring = 'unit';
         }
         $title = get_string($titlestring, 'qtype_formulas');
+
+        // Fetch the configured default width and use it, if the setting exists. Otherwise,
+        // the plugin's default as defined in styles.css will be used. If the user did not
+        // specify a unit, we use pixels (px). Note that this is different from the renderer
+        // where rem is used in order to allow for the short syntax 'w=3' (3 chars wide).
+        $defaultformat = [];
+        $defaultwidth = get_config('qtype_formulas', "defaultwidth_{$titlestring}");
+        if (is_numeric($defaultwidth)) {
+            $defaultwidthunit = get_config('qtype_formulas', "defaultwidthunit");
+            if ($defaultwidthunit === false) {
+                $defaultwidthunit = 'px';
+            }
+            $defaultformat = ['w' => $defaultwidth . $defaultwidthunit];
+        }
+        // Using the union operator the values from the left array will be kept.
+        $formatoptions = $formatoptions + $defaultformat;
 
         $inputattributes = [
             'type' => 'text',
