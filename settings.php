@@ -25,6 +25,13 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
+    // Whether students are allowed to use the comma as decimal separator.
+    $settings->add(new admin_setting_configcheckbox(
+        'qtype_formulas/allowdecimalcomma',
+        new lang_string('settingallowdecimalcomma', 'qtype_formulas'),
+        new lang_string('settingallowdecimalcomma_desc', 'qtype_formulas'),
+        0
+    ));
     // Use tooltip or not to display correct answer.
     $settings->add(new admin_setting_configcheckbox(
         'qtype_formulas/usepopup',
