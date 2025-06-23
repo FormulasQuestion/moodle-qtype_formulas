@@ -24,6 +24,7 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 use Exception;
 use qtype_formulas;
 use qtype_formulas\local\answer_parser;
+use qtype_formulas\local\token;
 
 /**
  * Unit tests for the answer_parser class.
@@ -412,6 +413,32 @@ final class answer_parser_test extends \advanced_testcase {
     public function test_is_acceptable_for_answertype_with_invalid_type(): void {
         $parser = new answer_parser('1');
         self::assertFalse($parser->is_acceptable_for_answertype(PHP_INT_MAX));
+    }
+
+    public function test_localized_number_format(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        $parser = new answer_parser('1,5');
+        self::assertCount(1, $parser->get_tokens());
+
+        $token = $parser->get_tokens()[0];
+        self::assertEquals(token::NUMBER, $token->type);
+        self::assertEqualsWithDelta(1.5, $token->value, 1e-6);
+
+        // Disabling the comma should invalidate the input.
+        set_config('allowdecimalcomma', 0, 'qtype_formulas');
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
+        $message = '';
+        try {
+            $parser = new answer_parser('1,5');
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('1:2:Unexpected token: ,', $message);
     }
 
     public function test_constructor_with_known_variables(): void {
