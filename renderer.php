@@ -369,6 +369,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $inputattributes['name'] = $inputname;
         $inputattributes['value'] = $currentanswer;
         $inputattributes['id'] = $inputname;
+        $inputattributes['class'] = 'formulas-select';
 
         $label = $this->create_label_for_input(
             $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
