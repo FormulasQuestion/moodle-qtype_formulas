@@ -831,6 +831,32 @@ final class question_test extends \advanced_testcase {
         self::assertEquals($expected, $partscores);
     }
 
+    public function test_grade_with_unit_compatibility_layer(): void {
+        $q = $this->get_test_formulas_question('testmethodsinparts');
+
+        // We overwrite the postunit. In the first part, we use the old syntax for the model unit and
+        // the new syntax in the response. In the second part, we use the new syntax for the model
+        // unit and the old syntax in the response.
+        $q->parts[0]->postunit = 'm s';
+        $q->parts[1]->postunit = 'm*s';
+
+        $q->start_attempt(new question_attempt_step(), 1);
+
+        // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
+        $response = ['0_' => '40 m*s', '1_0' => '40', '1_1' => 'm s', '2_0' => '40', '3_0' => '40'];
+        $partscores = $q->grade_parts_that_can_be_graded($response, [], false);
+
+        // The latest $response is correct for all parts #0 and #2. Note that the penalty value will
+        // be set according to the question data; it does not mean that a deduction occurred.
+        $expected = [
+            '0' => new qbehaviour_adaptivemultipart_part_result('0', 1, 0.3),
+            '1' => new qbehaviour_adaptivemultipart_part_result('1', 1, 0.3),
+            '2' => new qbehaviour_adaptivemultipart_part_result('2', 1, 0.3),
+            '3' => new qbehaviour_adaptivemultipart_part_result('3', 1, 0.3),
+        ];
+        self::assertEquals($expected, $partscores);
+    }
+
     public function test_get_parts_and_weights_singlenum(): void {
         $q = $this->get_test_formulas_question('testsinglenum');
 

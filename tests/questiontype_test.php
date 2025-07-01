@@ -475,10 +475,18 @@ final class questiontype_test extends \advanced_testcase {
                     'correctness' => [0 => '1/0'],
                 ],
             ],
+            [[], ['postunit' => [0 => 'a/b*c']],
+            ],
             [
-                ['postunit[0]' => get_string('error_unit', 'qtype_formulas')],
+                ['postunit[0]' => 'Unit already used: m'],
                 [
-                    'postunit' => [0 => 'a/b*c'],
+                    'postunit' => [0 => 'm*m'],
+                ],
+            ],
+            [
+                ['postunit[0]' => 'Unexpected token: ^'],
+                [
+                    'postunit' => [0 => '(m/s)^2'],
                 ],
             ],
             [
