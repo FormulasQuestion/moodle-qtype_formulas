@@ -38,15 +38,19 @@ final class lazylist_test extends \advanced_testcase {
 
         $list->append_value(new token(token::NUMBER, 5));
         self::assertEquals(1, $list->count());
+        self::assertEquals(1, count($list));
 
         $list->append_range(new range(1, 10));
         self::assertEquals(10, $list->count());
+        self::assertEquals(10, count($list));
 
         $list->append_value(new token(token::STRING, 'foo'));
         self::assertEquals(11, $list->count());
+        self::assertEquals(11, count($list));
 
         $list->append_range(new range(1, 2, .01));
         self::assertEquals(111, $list->count());
+        self::assertEquals(111, count($list));
     }
 
     public function test_iterate_with_foreach(): void {
@@ -72,6 +76,5 @@ final class lazylist_test extends \advanced_testcase {
             self::assertEquals($i + 1, $list[$i]->value);
         }
     }
-
 
 }

@@ -86,4 +86,29 @@ final class range_test extends \advanced_testcase {
         self::assertEquals(19, $range->count());
     }
 
+    public function test_count_if_size_and_step_dont_match(): void {
+        $range = new range(.1, .95, .1);
+        self::assertEquals(9, $range->count());
+
+        $range = new range(.9, .05, -.1);
+        self::assertEquals(9, $range->count());
+    }
+
+    public function test_iterate_with_foreach(): void {
+        $range = new range(1, 10);
+        self::assertEquals(9, $range->count());
+
+        foreach ($range as $i => $num) {
+            self::assertEquals($i + 1, $num->value);
+        }
+    }
+
+    public function test_array_access_of_elements(): void {
+        $range = new range(1, 10);
+        self::assertEquals(9, $range->count());
+
+        for ($i = 0; $i < 9; $i++) {
+            self::assertEquals($i + 1, $range[$i]->value);
+        }
+    }
 }
