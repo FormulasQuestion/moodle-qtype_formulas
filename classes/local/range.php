@@ -16,7 +16,11 @@
 
 namespace qtype_formulas\local;
 
+use ArrayAccess;
+use Countable;
 use Exception;
+use IteratorAggregate;
+use Traversable;
 
 /**
  * range token for qtype_formulas parser
@@ -25,7 +29,7 @@ use Exception;
  * @copyright  2025 Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class range {
+class range implements ArrayAccess, Countable, IteratorAggregate {
     /** @var float start value */
     public float $start;
 
@@ -57,7 +61,7 @@ class range {
      * @return int
      */
     public function count(): int {
-        return ($this->end - $this->start) / $this->step;
+        return ceil(($this->end - $this->start) / $this->step);
     }
 
     /**
@@ -118,5 +122,62 @@ class range {
         }
 
         return $index;
+    }
+
+    /**
+     * FIXME
+     *
+     * @return Traversable
+     */
+    public function getIterator(): Traversable {
+        for ($i = 0; $i < $this->count(); $i++) {
+            yield token::wrap($this->get_element($i), token::NUMBER);
+        }
+    }
+
+    /**
+     * FIXME
+     *
+     * @param mixed $offset
+     * @return boolean
+     */
+    public function offsetExists($offset): bool {
+        return $offset >= 0 && $offset < $this->count();
+    }
+
+    /**
+     * FIXME
+     *
+     * @param [type] $offset
+     * @return mixed
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetGet($offset) {
+        if (!$this->offsetExists($offset)) {
+            throw new \OutOfBoundsException("Invalid index: $offset for range");
+        }
+
+        return $this->get_element($offset);
+    }
+
+    /**
+     * FIXME
+     *
+     * @param [type] $offset
+     * @param [type] $value
+     * @return void
+     */
+    public function offsetSet($offset, $value): void {
+        throw new Exception('offsetSet() not implemented for range class');
+    }
+
+    /**
+     * FIXME
+     *
+     * @param integer $offset
+     * @return void
+     */
+    public function offsetUnset($offset): void {
+        throw new Exception('offsetUnset() not implemented for range class');
     }
 }

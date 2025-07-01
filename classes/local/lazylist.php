@@ -58,6 +58,17 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     /**
      * FIXME
      *
+     * @param token $value
+     * @return void
+     */
+    public function prepend_value(token $value): void {
+        array_unshift($this->elements, ['type' => 'value', 'value' => $value, 'count' => 1]);
+        $this->cachedcount = null;
+    }
+
+    /**
+     * FIXME
+     *
      * @param range $range
      * @return void
      */
@@ -65,6 +76,20 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
         $count = $range->count();
         if ($count > 0) {
             $this->elements[] = ['type' => 'range', 'value' => $range, 'count' => $count];
+            $this->cachedcount = null;
+        }
+    }
+
+    /**
+     * FIXME
+     *
+     * @param range $range
+     * @return void
+     */
+    public function prepend_range(range $range): void {
+        $count = $range->count();
+        if ($count > 0) {
+            array_unshift($this->elements, ['type' => 'range', 'value' => $range, 'count' => $count]);
             $this->cachedcount = null;
         }
     }

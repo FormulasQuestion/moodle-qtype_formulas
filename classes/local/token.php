@@ -117,6 +117,9 @@ class token {
     /** @var int used to designate a token storing a set */
     const SET = 1048576;
 
+    /** @var int used to designate a token storing a range */
+    const RANGE = 1572864;
+
     /** @var int used to designate a token storing a start-of-group marker (opening brace) */
     const START_GROUP = 2097152;
 
@@ -231,6 +234,9 @@ class token {
             // compatibility, we will convert this into a number with TRUE = 1 and FALSE = 0.
             $type = self::NUMBER;
             $value = ($value ? 1 : 0);
+        } else if ($value instanceof lazylist) {
+            $type = variable::ALGEBRAIC;
+            // FIXME: maybe use token::SET? or new type?
         } else {
             if (is_null($value)) {
                 $value = 'null';
