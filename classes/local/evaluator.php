@@ -323,8 +323,8 @@ class evaluator {
     public function import_variable_context(array $data, bool $overwrite = true) {
         // If the data is invalid, unserialize() will issue an E_NOTICE. We suppress that,
         // because we have our own error message.
-        $randomvariables = @unserialize($data['randomvariables'], ['allowed_classes' => [random_variable::class, token::class]]);
-        $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class]]);
+        $randomvariables = @unserialize($data['randomvariables'], ['allowed_classes' => [random_variable::class, token::class, lazylist::class]]);
+        $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class, lazylist::class]]);
         if ($randomvariables === false || $variables === false) {
             throw new Exception(get_string('error_invalidcontext', 'qtype_formulas'));
         }
