@@ -1008,6 +1008,13 @@ final class evaluator_test extends \advanced_testcase {
                 ],
                 'a=1; b=2; c=3; d=4; e=(a==b ? b : c)',
             ],
+            'assignment with empty statements' => [
+                [
+                    'a' => new variable('a', 1, variable::NUMERIC),
+                    'b' => new variable('b', 2, variable::NUMERIC),
+                ],
+                ';; a=1;;;;;;; b=2 ;;;;;;',
+            ],
         ];
 
     }
