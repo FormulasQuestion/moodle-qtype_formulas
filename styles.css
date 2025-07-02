@@ -115,6 +115,10 @@ div[id^='fitem_id_postunit_'] #qtype_formulas_mathjax_display {
     background: transparent;
 }
 
+.que .formulation .formulas-select {
+    display: inline-block;
+}
+
 /* Styles for the editing form. */
 body#page-question-type-formulas .formulas_correctness_show {
     display: inline;
