@@ -85,7 +85,12 @@ class parser {
      * @return for_loop|expression
      */
     private function parse_the_right_thing(token $token) {
-        if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
+        if ($token->type === token::END_OF_STATEMENT) {
+            // If the statement starts with a semicolon, we simply consume it and return an empty
+            // expression.
+            $this->read_next();
+            return new expression([]);
+        } else if ($token->type === token::RESERVED_WORD && $token->value === 'for') {
             return $this->parse_forloop();
         } else {
             return $this->parse_general_expression();

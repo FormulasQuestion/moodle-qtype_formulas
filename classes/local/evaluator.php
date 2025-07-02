@@ -825,6 +825,10 @@ class evaluator {
      */
     private function evaluate_the_right_thing($input, bool $godmode = false) {
         if ($input instanceof expression) {
+            // If the expression is empty, we simply ignore it.
+            if (empty($input->body)) {
+                return;
+            }
             return $this->evaluate_single_expression($input, $godmode);
         }
         if ($input instanceof for_loop) {
