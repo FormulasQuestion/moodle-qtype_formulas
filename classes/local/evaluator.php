@@ -411,8 +411,13 @@ class evaluator {
         }
 
         // If there is an index and we are setting a random variable, we throw an error.
-        if ($israndomvar) {
+        if ($israndomvar || array_key_exists($basename, $this->randomvariables)) {
             $this->die(get_string('error_setindividual_randvar', 'qtype_formulas'), $value);
+        }
+
+        // If there is an index and we are setting an algebraic variable, we throw an error.
+        if ($this->variables[$basename]->type === variable::ALGEBRAIC) {
+            $this->die(get_string('error_setindividual_algebraicvar', 'qtype_formulas'), $value);
         }
 
         // If there is an index, but the variable is a string, we throw an error. Setting
