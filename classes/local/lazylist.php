@@ -20,8 +20,9 @@ use ArrayAccess;
 use Countable;
 use Exception;
 use IteratorAggregate;
-use ReturnTypeWillChange;
 use Traversable;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 /**
  * lazy list class for qtype_formulas parser
@@ -38,16 +39,9 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     private ?int $cachedcount = null;
 
     /**
-     * Constructor. FIXME.
+     * Append a single value (as a token) to the list.
      *
-     */
-    public function __construct() {
-    }
-
-    /**
-     * FIXME
-     *
-     * @param token $value
+     * @param token $value the value token
      * @return void
      */
     public function append_value(token $value): void {
@@ -56,9 +50,9 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Add a single value (as a token) to the beginning of the list.
      *
-     * @param token $value
+     * @param token $value the value token
      * @return void
      */
     public function prepend_value(token $value): void {
@@ -67,9 +61,9 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Append a range of numbers to the list.
      *
-     * @param range $range
+     * @param range $range the range of numbers
      * @return void
      */
     public function append_range(range $range): void {
@@ -81,7 +75,7 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Add a range of numbers to the beginning of the list.
      *
      * @param range $range
      * @return void
@@ -95,28 +89,31 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Create the iterator to walk through the lazylist in a foreach loop.
      *
      * @return Traversable
      */
     public function getIterator(): Traversable {
         foreach ($this->elements as $element) {
-            if ($element['type'] === 'value') {
-                yield $element['value'];
-            } else {
+            if ($element['type'] === 'range') {
+                // For ranges, we return each number via the range class' methods.
                 for ($i = 0; $i < $element['value']->count(); $i++) {
                     yield $element['value']->get_element($i);
                 }
+            } else {
+                // Single-value elements can be returned directly.
+                yield $element['value'];
             }
         }
     }
 
     /**
-     * FIXME
+     * Return the number of elements that are stored in this lazylist.
      *
      * @return int
      */
     public function count(): int {
+        // Update the cached count, if necessary.
         if ($this->cachedcount === null) {
             $this->cachedcount = array_sum(array_column($this->elements, 'count'));
         }
@@ -124,9 +121,9 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Check whether a given index is valid.
      *
-     * @param mixed $offset
+     * @param mixed $offset index
      * @return boolean
      */
     public function offsetExists($offset): bool {
@@ -134,23 +131,28 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Get the element at a given index.
      *
-     * @param [type] $offset
+     * @param int $offset
      * @return mixed
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
         if (!$this->offsetExists($offset)) {
-            throw new \OutOfBoundsException("Invalid index: $offset for lazylist");
+            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
         }
 
         $i = 0;
+        // Iterate over all single-value or range elements of the list. If the current element would bring
+        // the count of passed elements over the requested index, either get the single-value token or the
+        // appropriate value from the range. Otherwise, increase the counter and move to the next element.
         foreach ($this->elements as $element) {
             if ($offset < $i + $element['count']) {
                 if ($element['type'] === 'value') {
                     return $element['value'];
                 } else {
+                    // The range element to fetch is the difference between the requested index and the
+                    // total number of list elements that have already passed.
                     $relative = $offset - $i;
                     return $element['value']->get_element($relative);
                 }
@@ -160,10 +162,11 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Mandatory override of method from ArrayAccess interface. We do not currently support setting
+     * individual elements of a lazylist.
      *
-     * @param [type] $offset
-     * @param [type] $value
+     * @param int $offset
+     * @param mixed $value
      * @return void
      */
     public function offsetSet($offset, $value): void {
@@ -171,12 +174,27 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Mandatory override of method from ArrayAccess interface. We do not currently support removing
+     * individual elements from a lazylist.
      *
-     * @param integer $offset
+     * @param int $offset
      * @return void
      */
     public function offsetUnset($offset): void {
         throw new Exception('offsetUnset() not implemented for lazylist class');
+    }
+
+    /**
+     * Convert the lazylist to a fully developed array. If needed, the array can be
+     * limited in size; if the list is too large, an error will be thrown instead.
+     *
+     * @param int $maxsize size of list not to be exceeded
+     * @return void
+     */
+    public function convert_to_limited_array(int $maxsize = 0) {
+        if ($maxsize > 0 && $this->count() > $maxsize) {
+            // FIXME: output error list size > 1000
+        }
+        return iterator_to_array($this);
     }
 }
