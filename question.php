@@ -1577,15 +1577,32 @@ class qtype_formulas_part {
         // Fetch the evaluated answers.
         $answers = $this->get_evaluated_answers();
 
+        // Numeric answers should be localized, if that functionality is enabled.
+        foreach ($answers as &$answer) {
+            if (is_numeric($answer)) {
+                $answer = qtype_formulas::format_float($answer);
+            }
+        }
+        // Make sure we do not accidentally write to $answer later.
+        unset($answer);
+
         // If we have a combined unit field, we return both the model answer plus the unit
         // in "i_". Combined fields are only possible for parts with one signle answer.
         if ($this->has_combined_unit_field()) {
             return ["{$this->partindex}_" => trim($answers[0] . ' ' . $this->postunit)];
         }
 
+        // As algebraic formulas are not numbers, we must replace the decimal point separately.
+        // Also, if the answer is requested for feedback, we must strip the quotes.
         // Strip quotes around algebraic formulas, if the answers are used for feedback.
-        if ($forfeedback && $this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
-            $answers = str_replace('"', '', $answers);
+        if ($this->answertype === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            if (get_config('qtype_formulas', 'allowdecimalcomma')) {
+                $answers = str_replace('.', get_string('decsep', 'langconfig'), $answers);
+            }
+
+            if ($forfeedback) {
+                $answers = str_replace('"', '', $answers);
+            }
         }
 
         // Otherwise, we build an array with all answers, according to our naming scheme.
@@ -1675,4 +1692,6 @@ class qtype_formulas_part {
         }
         return $result;
     }
+
+
 }

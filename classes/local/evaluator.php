@@ -19,6 +19,10 @@ namespace qtype_formulas\local;
 use qtype_formulas;
 use Throwable, Exception;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+
 /**
  * Evaluator for qtype_formulas
  *
@@ -159,6 +163,12 @@ class evaluator {
                 if ($skiplists && in_array($result->type, [token::LIST, token::SET])) {
                     continue;
                 }
+                // If the result is a number, we try to localize it, unless the admin settings do not
+                // allow the decimal comma.
+                if ($result->type === token::NUMBER) {
+                    $result = qtype_formulas::format_float($result->value);
+                }
+
                 $text = str_replace("{{$match}}", strval($result), $text);
             } catch (Exception $e) {
                 // TODO: use non-capturing exception when we drop support for old PHP.

@@ -38,8 +38,14 @@ class answer_parser extends parser {
      */
     public function __construct($tokenlist, array $knownvariables = [], bool $caretmeanspower = true,
             bool $formodelanswer = false) {
-        // If the input is given as a string, run it through the lexer first.
+        // If the input is given as a string, run it through the lexer first. Also, if we aren't parsing
+        // a model answer (coming from the teacher), we replace all commas by points, because there is no
+        // situation where the comma would be a valid character. Replacement is only done if the admin
+        // settings allow the use of the decimal comma.
         if (is_string($tokenlist)) {
+            if (!$formodelanswer && get_config('qtype_formulas', 'allowdecimalcomma')) {
+                $tokenlist = str_replace(',', '.', $tokenlist);
+            }
             $lexer = new lexer($tokenlist);
             $tokenlist = $lexer->get_tokens();
         }

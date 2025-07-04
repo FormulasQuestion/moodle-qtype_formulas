@@ -16,6 +16,12 @@
 
 namespace qtype_formulas\local;
 
+use qtype_formulas;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+
 /**
  * Helper class to convert an expression from RPN notation or a unit expression into LaTeX.
  *
@@ -82,17 +88,19 @@ class latexifier {
                 continue;
             }
             // Numbers only need special treatment, if they are in scientific notation.
+            // Also, we make sure that the user's decimal separator is used.
             if ($token->type === token::NUMBER) {
                 if (is_null($token->metadata)) {
-                    $stack[] = ['content' => $token->value, 'precedence' => PHP_INT_MAX];
-                    continue;
+                    $content = qtype_formulas::format_float($token->value, true);
+                    $precedence = PHP_INT_MAX;
+                } else {
+                    $mantissa = $token->metadata['mantissa'];
+                    $exponent = $token->metadata['exponent'];
+                    $content = qtype_formulas::format_float($mantissa, true) . '\cdot 10^{' . $exponent . '}';
+                    $precedence = shunting_yard::get_precedence('*');
                 }
-                $mantissa = $token->metadata['mantissa'];
-                $exponent = $token->metadata['exponent'];
-                $stack[] = [
-                    'content' => $mantissa . '\cdot 10^{' . $exponent . '}',
-                    'precedence' => shunting_yard::get_precedence('*'),
-                ];
+
+                $stack[] = ['content' => $content, 'precedence' => $precedence];
             }
 
             // Operators take arguments from the stack, stick them together and
