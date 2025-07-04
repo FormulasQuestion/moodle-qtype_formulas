@@ -125,11 +125,7 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
         return $index;
     }
 
-    /**
-     * Create the iterator to walk through the range in a foreach loop.
-     *
-     * @return Traversable
-     */
+    #[\Override]
     public function getIterator(): Traversable {
         for ($i = 0; $i < $this->count(); $i++) {
             yield token::wrap($this->get_element($i), token::NUMBER);
