@@ -77,7 +77,7 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
             throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
         }
 
-        $which = $this->translate_negative_index($index);
+        $index = $this->translate_negative_index($index);
         return token::wrap($this->start + $index * $this->step, token::NUMBER);
     }
 
