@@ -385,8 +385,7 @@ class evaluator {
                 if (is_scalar($value->value)) {
                     $this->die(get_string('error_invalidrandvardef', 'qtype_formulas'), $value);
                 }
-                // FIXME: if shuffle --> must provide array instead of lazylist
-                // maybe convert to developed array
+                // FIXME: if shuffle --> must provide array instead of lazylist or convert lazylist to array
                 $randomvar = new random_variable($basename, $value->value, $useshuffle);
                 $this->randomvariables[$basename] = $randomvar;
                 return token::wrap($randomvar->reservoir);
@@ -403,7 +402,6 @@ class evaluator {
                     }
                 }
 
-                // FIXME: must store as lazylist, which is not yet accepted by token::wrap
                 // FIXME: maybe use token::SET or something new
                 $value->type = variable::ALGEBRAIC;
             }
@@ -1011,9 +1009,8 @@ class evaluator {
     }
 
     /**
-     * Build a list of (NUMBER) tokens based on a range definition. The lower and upper limit
-     * and, if present, the step will be taken from the stack.
-     * FIXME: update doc
+     * Build a range of numbers. The lower and upper limit and, if present, the step will be taken from
+     * the stack.
      * FIXME: auto-detect sign of step, e.g. if range from 5 to 1 and step 1 --> set step := -1 instead of error
      *
      * @return token
@@ -1059,14 +1056,6 @@ class evaluator {
         }
 
         return new token(token::RANGE, new range($start, $end, $step));
-        // FIXME remove old code
-        $result = [];
-        $numofsteps = ($end - $start) / $step;
-        // Choosing multiplication of step instead of repeated addition for better numerical accuracy.
-        for ($i = 0; $i < $numofsteps; $i++) {
-            $result[] = new token(token::NUMBER, $start + $i * $step);
-        }
-        return $result;
     }
 
     /**
@@ -1084,7 +1073,7 @@ class evaluator {
                 array_pop($this->stack);
                 break;
             }
-            // FIXME: as stack is LIFO, it might be better to prepend instead of appending
+            // As the stack is LIFO, we *pre*pend the new value or range.
             $token = $this->pop_real_value();
             if ($head->type === token::RANGE) {
                 $list->prepend_range($token->value);
@@ -1106,13 +1095,13 @@ class evaluator {
         $elements = [];
         $head = end($this->stack);
         while ($head !== false) {
+            // FIXME: make sure cumulative array size does not exceed 1000
             if ($head->type === token::OPENING_BRACKET) {
                 array_pop($this->stack);
                 break;
             }
             $element = $this->pop_real_value();
             if ($element->type === token::RANGE) {
-                // FIXME: check if range size > 1000
                 // Convert the range into an array that actually contains all the necessary values.
                 // As the stack is generally in LIFO order, we must reverse the generated array,
                 // in order to blend in with other values that might or might not have to be included

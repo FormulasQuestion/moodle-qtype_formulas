@@ -31,6 +31,8 @@ use qtype_formulas\local\token;
 
 // TODO: reorder those tests later; some are unit tests for the functions and should go there.
 
+// FIXME: add test for random variable with large range, e.g. 1:1e9
+
 /**
  * Unit tests for the evaluator class. Most tests simultaneously test other classes, e. g. parser,
  * random_parser, functions, because it makes sense to test them in combination with the evaluation,

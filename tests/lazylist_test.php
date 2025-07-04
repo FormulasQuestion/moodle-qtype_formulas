@@ -77,4 +77,7 @@ final class lazylist_test extends \advanced_testcase {
         }
     }
 
+    public function test_conversion_to_array(): void {
+        // FIXME: implement test
+    }
 }

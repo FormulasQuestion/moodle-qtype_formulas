@@ -69,16 +69,16 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
      * $this->count() - 1. We explicitly allow indexing "from the end" by using negative
      * indices, e. g. get_element(-1) will return the last element.
      *
-     * @param int $which
+     * @param int $index
      * @return token
      */
-    public function get_element(int $which): token {
-        if (!$this->is_within_bounds($which)) {
-            throw new Exception('FIXME');
+    public function get_element(int $index): token {
+        if (!$this->is_within_bounds($index)) {
+            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
         }
 
-        $which = $this->translate_index($which);
-        return token::wrap($this->start + $which * $this->step, token::NUMBER);
+        $which = $this->translate_negative_index($index);
+        return token::wrap($this->start + $index * $this->step, token::NUMBER);
     }
 
     /**
@@ -91,17 +91,17 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
      */
     public function split(int $index): array {
         if (!$this->is_within_bounds($index)) {
-            throw new Exception('FIXME');
+            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
         }
 
-        $index = $this->translate_index($index);
+        $index = $this->translate_negative_index($index);
         $left = new range($this->start, $this->get_element($index)->value, $this->step);
         $right = new range($this->get_element($index)->value, $this->end, $this->step);
         return [$left, $right];
     }
 
     /**
-     * FIXME
+     * Check whether a given index is valid for this range.
      *
      * @param int $index
      * @return bool
@@ -111,12 +111,13 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Convert a negative index (access from the end of the range) to a
+     * regular index.
      *
      * @param int $index
      * @return int
      */
-    private function translate_index(int $index): int {
+    private function translate_negative_index(int $index): int {
         if ($index < 0) {
             $index = $index + $this->count();
         }
@@ -125,7 +126,7 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Create the iterator to walk through the range in a foreach loop.
      *
      * @return Traversable
      */
@@ -136,7 +137,7 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Check whether a given index is valid.
      *
      * @param mixed $offset
      * @return boolean
@@ -146,25 +147,26 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Get the number at a given index.
      *
-     * @param [type] $offset
+     * @param int $offset
      * @return mixed
      */
     #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
         if (!$this->offsetExists($offset)) {
-            throw new \OutOfBoundsException("Invalid index: $offset for range");
+            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
         }
 
         return $this->get_element($offset);
     }
 
     /**
-     * FIXME
+     * Mandatory override of method from ArrayAccess interface. We do not currently support setting
+     * individual elements of a range.
      *
-     * @param [type] $offset
-     * @param [type] $value
+     * @param int $offset
+     * @param mixed $value
      * @return void
      */
     public function offsetSet($offset, $value): void {
@@ -172,9 +174,10 @@ class range implements ArrayAccess, Countable, IteratorAggregate {
     }
 
     /**
-     * FIXME
+     * Mandatory override of method from ArrayAccess interface. We do not currently support removing
+     * individual elements from a lazylist.
      *
-     * @param integer $offset
+     * @param int $offset
      * @return void
      */
     public function offsetUnset($offset): void {
