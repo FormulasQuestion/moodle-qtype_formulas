@@ -88,11 +88,7 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
         }
     }
 
-    /**
-     * Create the iterator to walk through the lazylist in a foreach loop.
-     *
-     * @return Traversable
-     */
+    #[\Override]
     public function getIterator(): Traversable {
         foreach ($this->elements as $element) {
             if ($element['type'] === 'range') {

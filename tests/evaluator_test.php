@@ -1346,7 +1346,7 @@ final class evaluator_test extends \advanced_testcase {
             ['Invalid definition of a random variable - you must provide a list of possible values.', 'a = 1'],
             ["Syntax error: unexpected end of expression after '='.", 'a = '],
             ['Evaluation error: range from 10 to 1 with step 1 will be empty.', 'a = {10:1:1}'],
-            ['Setting individual list elements is not supported for random variables.', 'a[1] = {1,2,3}'],
+            ['Setting individual elements is not supported for random variables.', 'a[1] = {1,2,3}'],
             ['Syntax error: invalid use of separator token \',\'.', 'a = {1:10,}'],
             ["Syntax error: incomplete ternary operator or misplaced '?'.", 'a = {1:10?}'],
             ['Number expected, found algebraic variable.', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
