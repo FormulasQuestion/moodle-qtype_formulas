@@ -16,6 +16,7 @@
 
 namespace qtype_formulas;
 
+use Exception;
 use qtype_formulas\local\lazylist;
 use qtype_formulas\local\range;
 use qtype_formulas\local\token;
@@ -38,19 +39,44 @@ final class lazylist_test extends \advanced_testcase {
 
         $list->append_value(new token(token::NUMBER, 5));
         self::assertEquals(1, $list->count());
-        self::assertEquals(1, count($list));
+        self::assertCount(1, $list);
 
         $list->append_range(new range(1, 10));
         self::assertEquals(10, $list->count());
-        self::assertEquals(10, count($list));
+        self::assertCount(10, $list);
 
         $list->append_value(new token(token::STRING, 'foo'));
         self::assertEquals(11, $list->count());
-        self::assertEquals(11, count($list));
+        self::assertCount(11, $list);
 
         $list->append_range(new range(1, 2, .01));
         self::assertEquals(111, $list->count());
-        self::assertEquals(111, count($list));
+        self::assertCount(111, $list);
+    }
+
+    public function test_prepend_value_and_range(): void {
+        $list = new lazylist();
+        self::assertCount(0, $list);
+
+        $list->prepend_value(new token(token::NUMBER, 5));
+        self::assertCount(1, $list);
+        self::assertEquals(5, $list[0]->value);
+
+        $list->prepend_range(new range(1, 10));
+        self::assertCount(10, $list);
+        self::assertEquals(1, $list[0]->value);
+        self::assertEquals(5, $list[9]->value);
+
+        $list->prepend_value(new token(token::STRING, 'foo'));
+        self::assertCount(11, $list);
+        self::assertEquals('foo', $list[0]->value);
+        self::assertEquals(1, $list[1]->value);
+        self::assertEquals(5, $list[10]->value);
+
+        $list->prepend_range(new range(1, 2, .01));
+        self::assertCount(111, $list);
+        self::assertEquals(1, $list[0]->value);
+        self::assertEquals(1.01, $list[1]->value);
     }
 
     public function test_iterate_with_foreach(): void {
@@ -75,6 +101,57 @@ final class lazylist_test extends \advanced_testcase {
         for ($i = 0; $i < 10; $i++) {
             self::assertEquals($i + 1, $list[$i]->value);
         }
+
+        $invalid = null;
+        $message = '';
+        try {
+            $invalid = $list[10];
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('Evaluation error: index 10 out of range.', $message);
+        self::assertNull($invalid);
+    }
+
+    public function test_unimplemented_methods(): void {
+        $list = new lazylist();
+
+        $message = '';
+        try {
+            $list[] = 1;
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetSet() not implemented for lazylist class', $message);
+        self::assertCount(0, $list);
+
+        $message = '';
+        try {
+            $list->offsetSet(0, 'foo');
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetSet() not implemented for lazylist class', $message);
+        self::assertCount(0, $list);
+
+        $message = '';
+        $list->append_value(new token(token::NUMBER, 1));
+        try {
+            $list->offsetUnset(0);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetUnset() not implemented for lazylist class', $message);
+        self::assertCount(1, $list);
+
+        $message = '';
+        try {
+            unset($list[0]);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetUnset() not implemented for lazylist class', $message);
+        self::assertCount(1, $list);
     }
 
     public function test_conversion_to_array(): void {

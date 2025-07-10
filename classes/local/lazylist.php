@@ -135,7 +135,7 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
     #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
         if (!$this->offsetExists($offset)) {
-            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $index));
+            throw new Exception(get_string('error_indexoutofrange', 'qtype_formulas', $offset));
         }
 
         $i = 0;
