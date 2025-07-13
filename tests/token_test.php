@@ -16,6 +16,7 @@
 
 namespace qtype_formulas;
 
+use qtype_formulas\local\lazylist;
 use qtype_formulas\local\token;
 
 /**
@@ -107,6 +108,11 @@ final class token_test extends \advanced_testcase {
         $three = new token(token::NUMBER, 3);
         $foo = new token(token::STRING, 'foo');
         $list = new token(token::LIST, [$one, $two, $three]);
+        $lazylist = new lazylist();
+        $lazylist->append_value($one);
+        $lazylist->append_value($two);
+        $lazylist->append_value($three);
+        $set = new token(token::SET, $lazylist);
 
         return [
             [$one, $one],
@@ -120,6 +126,7 @@ final class token_test extends \advanced_testcase {
             [new token(token::NUMBER, 1.5), 1.5],
             [new token(token::STRING, '1'), ['value' => 1, 'type' => token::STRING]],
             [$list, [$one, $two, $three]],
+            [$set, $lazylist],
             [new token(token::LIST, [$list]), [[1, 2, 3]]],
             [$one, ['value' => '1', 'type' => token::NUMBER]],
             ['Cannot wrap a non-numeric value into a NUMBER token.', ['value' => 'a', 'type' => token::NUMBER]],
