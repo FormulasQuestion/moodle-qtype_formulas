@@ -16,6 +16,7 @@
 
 namespace qtype_formulas;
 
+use Exception;
 use qtype_formulas\local\range;
 
 /**
@@ -52,6 +53,16 @@ final class range_test extends \advanced_testcase {
         self::assertEquals(17, $left->get_element(-1)->value);
         self::assertEquals(16, $right->get_element(0)->value);
         self::assertEquals(11, $right->get_element(-1)->value);
+
+        $invalid = null;
+        $message = '';
+        try {
+            $invalid = $range->split(100);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('Evaluation error: index 100 out of range.', $message);
+        self::assertNull($invalid);
     }
 
     public function test_get_element(): void {
@@ -110,5 +121,55 @@ final class range_test extends \advanced_testcase {
         for ($i = 0; $i < 9; $i++) {
             self::assertEquals($i + 1, $range[$i]->value);
         }
+
+        $invalid = null;
+        $message = '';
+        try {
+            $invalid = $range[10];
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('Evaluation error: index 10 out of range.', $message);
+        self::assertNull($invalid);
+    }
+
+    public function test_unimplemented_methods(): void {
+        $range = new range(1, 10);
+
+        $message = '';
+        try {
+            $range[] = 1;
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetSet() not implemented for range class', $message);
+        self::assertCount(9, $range);
+
+        $message = '';
+        try {
+            $range->offsetSet(0, 42);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetSet() not implemented for range class', $message);
+        self::assertCount(9, $range);
+
+        $message = '';
+        try {
+            $range->offsetUnset(0);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetUnset() not implemented for range class', $message);
+        self::assertCount(9, $range);
+
+        $message = '';
+        try {
+            unset($range[0]);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('offsetUnset() not implemented for range class', $message);
+        self::assertCount(9, $range);
     }
 }

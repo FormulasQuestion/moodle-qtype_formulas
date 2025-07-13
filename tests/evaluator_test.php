@@ -1551,6 +1551,10 @@ final class evaluator_test extends \advanced_testcase {
                 'Individual chars of a string cannot be modified.',
                 's = "foo"; s[1] = "x"',
             ],
+            'assignment to element of algebraic variable' => [
+                'Setting individual elements is not supported for algebraic variables.',
+                'a = {1,2,3,4}; a[0] = 5;',
+            ],
             'prefix with invalid function' => [
                 'Syntax error: invalid use of prefix character \.',
                 'a = \idontexist(5)',

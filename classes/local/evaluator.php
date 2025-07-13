@@ -1163,8 +1163,6 @@ class evaluator {
                 $found = '_algebraicvar';
             } else if ($token->type === token::LIST) {
                 $found = '_list';
-            } else if ($token->type === token::RANGE) {
-                $found = '_range';
             } else if ($enforcenumeric) {
                 // Let's be lenient if the token is not a NUMBER, but its value is numeric.
                 if (is_numeric($token->value)) {
