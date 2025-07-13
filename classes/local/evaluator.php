@@ -401,8 +401,6 @@ class evaluator {
                         $this->die(get_string('error_algvar_numbers', 'qtype_formulas'), $value);
                     }
                 }
-
-                // FIXME: maybe use token::SET or something new
                 $value->type = variable::ALGEBRAIC;
             }
             $var = new variable($basename, $value->value, $value->type, microtime(true));

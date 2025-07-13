@@ -235,8 +235,7 @@ class token {
             $type = self::NUMBER;
             $value = ($value ? 1 : 0);
         } else if ($value instanceof lazylist) {
-            $type = variable::ALGEBRAIC;
-            // FIXME: maybe use token::SET? or new type?
+            $type = self::SET;
         } else {
             if (is_null($value)) {
                 $value = 'null';
