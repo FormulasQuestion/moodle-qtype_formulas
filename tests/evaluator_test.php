@@ -31,8 +31,6 @@ use qtype_formulas\local\token;
 
 // TODO: reorder those tests later; some are unit tests for the functions and should go there.
 
-// FIXME: add test for random variable with large range, e.g. 1:1e9
-
 /**
  * Unit tests for the evaluator class. Most tests simultaneously test other classes, e. g. parser,
  * random_parser, functions, because it makes sense to test them in combination with the evaluation,
@@ -80,6 +78,19 @@ final class evaluator_test extends \advanced_testcase {
         // Re-instantiate with the same seed, so we should get the same values as for the first step.
         $evaluator->instantiate_random_variables($seed);
         self::assertEquals($export, $evaluator->export_randomvars_for_step_data());
+
+        // Try a random variable with a very large reservoir.
+        $command = 'a = {1:1e9:0.1};';
+        $randomparser = new random_parser($command);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+
+        // Instantiate random variables with a given seed and store their values for comparison.
+        $seed = intval(microtime(true));
+        $evaluator->instantiate_random_variables($seed);
+        $token = $evaluator->export_single_variable('a');
+        self::assertGreaterThanOrEqual(1, $token->value);
+        self::assertLessThan(1e9, $token->value);
     }
 
     public function test_remove_special_vars(): void {
@@ -589,9 +600,9 @@ final class evaluator_test extends \advanced_testcase {
                 ['e' => new variable('e', [], variable::LIST)],
                 'e=[];',
             ],
-            'large list (10000 entries) via fill' => [
-                ['c' => new variable('e', array_fill(0, 10000, 'rr'), variable::LIST)],
-                'c=fill(10000,"rr")',
+            'large list (1000 entries) via fill' => [
+                ['c' => new variable('e', array_fill(0, 1000, 'rr'), variable::LIST)],
+                'c=fill(1000,"rr")',
             ],
             'list filled with count from expression' => [
                 [
@@ -1554,6 +1565,26 @@ final class evaluator_test extends \advanced_testcase {
             'assignment to element of algebraic variable' => [
                 'Setting individual elements is not supported for algebraic variables.',
                 'a = {1,2,3,4}; a[0] = 5;',
+            ],
+            'creating array with size > 1000, direct' => [
+                'List must not contain more than 1000 elements.',
+                'a = [' . implode(',', range(1, 1001)) . ']',
+            ],
+            'creating array with size > 1000, via fill' => [
+                'List must not contain more than 1000 elements.',
+                'a = fill(10000, 1)',
+            ],
+            'creating array with size > 1000, via range' => [
+                'List must not contain more than 1000 elements.',
+                'a = [0:1001]',
+            ],
+            'creating array with size > 1000, via multiple ranges' => [
+                'List must not contain more than 1000 elements.',
+                'a = [0:500, 1000:1500, 2000:2100]',
+            ],
+            'creating array with size > 1000, via nesting' => [
+                'List must not contain more than 1000 elements.',
+                'a = [[0:500, 1000:1500], [[2000:2100], [3000:3100]]]',
             ],
             'prefix with invalid function' => [
                 'Syntax error: invalid use of prefix character \.',

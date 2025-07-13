@@ -187,10 +187,23 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
      * @param int $maxsize size of list not to be exceeded
      * @return void
      */
-    public function convert_to_limited_array(int $maxsize = 0) {
-        if ($maxsize > 0 && $this->count() > $maxsize) {
-            // FIXME: output error list size > 1000
+    public function convert_to_limited_array(int $maxsize = PHP_INT_MAX) {
+        // If any of the elements are arrays, take that into account as well.
+        $additional = 0;
+        foreach ($this->elements as $element) {
+            // Ranges are already counted right.
+            if ($element['type'] === 'range') {
+                continue;
+            }
+            $token = $element['value'];
+            $additional += token::recursive_count($token) - 1;
         }
+
+        // If we exceed the maximum size, throw an error.
+        if ($maxsize > 0 && $this->count() + $additional > $maxsize) {
+            throw new Exception(get_string('error_list_too_large', 'qtype_formulas', $maxsize));
+        }
+
         return iterator_to_array($this);
     }
 }

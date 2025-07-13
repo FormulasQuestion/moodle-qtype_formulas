@@ -155,6 +155,51 @@ final class lazylist_test extends \advanced_testcase {
     }
 
     public function test_conversion_to_array(): void {
-        // FIXME: implement test
+        // First, create a lazylist with just a range.
+        $list = new lazylist();
+        $list->append_range(new range(0, 1000));
+        self::assertCount(1000, $list);
+        $array = $list->convert_to_limited_array(1000);
+        self::assertCount(1000, $array);
+
+        // Limiting the size to 999 should lead to an error.
+        $array = null;
+        $message = '';
+        try {
+            $array = $list->convert_to_limited_array(999);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('List must not contain more than 999 elements.', $message);
+        self::assertNull($array);
+
+        // Adding a single value to the start. Now conversion should fail even if 1000 elements are allowed.
+        $list->prepend_value(new token(token::NUMBER, 42));
+        self::assertCount(1001, $list);
+        $array = null;
+        $message = '';
+        try {
+            $array = $list->convert_to_limited_array(1000);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('List must not contain more than 1000 elements.', $message);
+        self::assertNull($array);
+
+        // Adding an array as the first value. Note that we use PHP's range() function
+        // and are not creating an instance of our own range class. The count should go
+        // up by 1 only (one more element), but conversion should fail, because the
+        // nested tokens still eat up memory.
+        $list->prepend_value(token::wrap(range(1, 1000)));
+        self::assertCount(1002, $list);
+        $array = null;
+        $message = '';
+        try {
+            $array = $list->convert_to_limited_array(2000);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+        }
+        self::assertEquals('List must not contain more than 2000 elements.', $message);
+        self::assertNull($array);
     }
 }

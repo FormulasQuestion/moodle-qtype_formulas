@@ -323,7 +323,10 @@ class evaluator {
     public function import_variable_context(array $data, bool $overwrite = true) {
         // If the data is invalid, unserialize() will issue an E_NOTICE. We suppress that,
         // because we have our own error message.
-        $randomvariables = @unserialize($data['randomvariables'], ['allowed_classes' => [random_variable::class, token::class, lazylist::class]]);
+        $randomvariables = @unserialize(
+            $data['randomvariables'],
+            ['allowed_classes' => [random_variable::class, token::class, lazylist::class]],
+        );
         $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class, lazylist::class]]);
         if ($randomvariables === false || $variables === false) {
             throw new Exception(get_string('error_invalidcontext', 'qtype_formulas'));
@@ -385,7 +388,6 @@ class evaluator {
                 if (is_scalar($value->value)) {
                     $this->die(get_string('error_invalidrandvardef', 'qtype_formulas'), $value);
                 }
-                // FIXME: if shuffle --> must provide array instead of lazylist or convert lazylist to array
                 $randomvar = new random_variable($basename, $value->value, $useshuffle);
                 $this->randomvariables[$basename] = $randomvar;
                 return token::wrap($randomvar->reservoir);
@@ -1014,7 +1016,6 @@ class evaluator {
     /**
      * Build a range of numbers. The lower and upper limit and, if present, the step will be taken from
      * the stack.
-     * FIXME: auto-detect sign of step, e.g. if range from 5 to 1 and step 1 --> set step := -1 instead of error
      *
      * @return token
      */
@@ -1097,14 +1098,20 @@ class evaluator {
     private function build_array(): token {
         $elements = [];
         $head = end($this->stack);
+        $count = 0;
         while ($head !== false) {
-            // FIXME: make sure cumulative array size does not exceed 1000
             if ($head->type === token::OPENING_BRACKET) {
                 array_pop($this->stack);
                 break;
             }
             $element = $this->pop_real_value();
             if ($element->type === token::RANGE) {
+                // Check whether the count will exceed the limit of 1000 list elements.
+                $count += count($element->value);
+                if ($count > qtype_formulas::MAX_LIST_SIZE) {
+                    throw new Exception(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE));
+                }
+
                 // Convert the range into an array that actually contains all the necessary values.
                 // As the stack is generally in LIFO order, we must reverse the generated array,
                 // in order to blend in with other values that might or might not have to be included
@@ -1112,12 +1119,16 @@ class evaluator {
                 $rangearray = iterator_to_array($element->value);
                 $elements = array_merge($elements, array_reverse($rangearray));
             } else {
+                $count += token::recursive_count($element);
+                if ($count > qtype_formulas::MAX_LIST_SIZE) {
+                    throw new Exception(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE));
+                }
+
                 $elements[] = $element;
             }
 
             $head = end($this->stack);
         }
-        // FIXME: make sure array count is not > 1000, otherwise issue error message
         // Return reversed list, because the stack ist LIFO.
         return new token(token::LIST, array_reverse($elements));
     }

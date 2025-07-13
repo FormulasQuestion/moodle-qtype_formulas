@@ -76,6 +76,7 @@ final class token_test extends \advanced_testcase {
      *
      * @param token $expected expected token after wrapping
      * @param mixed $input input value to be wrapped (string, number, another token etc.)
+     *
      * @dataProvider provide_tokens_to_wrap
      */
     public function test_wrap($expected, $input): void {
@@ -131,6 +132,9 @@ final class token_test extends \advanced_testcase {
             [$one, ['value' => '1', 'type' => token::NUMBER]],
             ['Cannot wrap a non-numeric value into a NUMBER token.', ['value' => 'a', 'type' => token::NUMBER]],
             ['Cannot wrap the given value into a STRING token.', ['value' => [1, 2], 'type' => token::STRING]],
+            ['List must not contain more than 1000 elements.', range(1, 2000)],
+            ['List must not contain more than 1000 elements.', [range(1, 500), range(1, 500), range(1, 500)]],
+            ['List must not contain more than 1000 elements.', [[range(1, 500), range(1, 500)], [[[range(1, 500)]]]]],
             ["The given value 'null' has an invalid data type and cannot be converted to a token.", null],
         ];
     }
@@ -207,4 +211,32 @@ final class token_test extends \advanced_testcase {
             ],
         ];
     }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_tokens_to_count(): array {
+        return [
+            [1, token::wrap(1)],
+            [1, token::wrap('foo')],
+            [3, token::wrap([1, 2, 3])],
+            [6, token::wrap([[1, 2], [2, 3], [3, 4]])],
+        ];
+    }
+
+    /**
+     * Test recursive counting of tokens.
+     *
+     * @param int $expected the expected number of tokens
+     * @param token $input the token to be counted
+     * @return void
+     *
+     * @dataProvider provide_tokens_to_count
+     */
+    public function test_recursive_count($expected, $input): void {
+        self::assertEquals($expected, token::recursive_count($input));
+    }
+
 }

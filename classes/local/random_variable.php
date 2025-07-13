@@ -67,7 +67,6 @@ class random_variable extends variable {
         if ($this->shuffle) {
             $this->type = variable::LIST;
             $this->value = $this->reservoir;
-            // FIXME: make sure the reservoir is an array and not a lazylist
             shuffle($this->value);
         } else {
             $i = mt_rand(0, count($this->reservoir) - 1);

@@ -183,6 +183,7 @@ $string['error_invalidrangesep'] = 'Syntax error: invalid use of range separator
 $string['error_invalidunary'] = 'Invalid use of unary operator: {$a}.';
 $string['error_invalidvarname'] = 'Invalid variable name: {$a}.';
 $string['error_len_argument'] = 'len() expects a list or a string.';
+$string['error_list_too_large'] = 'List must not contain more than {$a} elements.';
 $string['error_map_unknown'] = 'Evaluation error in map(): {$a}';
 $string['error_mark'] = 'The answer mark must take a value larger than 0.';
 $string['error_model_answer_no_content'] = 'Invalid answer: the model answer contains no evaluable symbols.';
