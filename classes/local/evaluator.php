@@ -1093,10 +1093,10 @@ class evaluator {
     /**
      * Create a LIST token based on elements on the stack.
      *
-     * @param token $reportingtoken opening bracket token, used for error reporting
+     * @param token $opener opening bracket token, used for error reporting
      * @return token
      */
-    private function build_array(token $reportingtoken): token {
+    private function build_array(token $opener): token {
         $elements = [];
         $head = end($this->stack);
         $count = 0;
@@ -1110,7 +1110,7 @@ class evaluator {
                 // Check whether the count will exceed the limit of 1000 list elements.
                 $count += count($element->value);
                 if ($count > qtype_formulas::MAX_LIST_SIZE) {
-                    $this->die(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE), $reportingtoken);
+                    $this->die(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE), $opener);
                 }
 
                 // Convert the range into an array that actually contains all the necessary values.
@@ -1122,7 +1122,7 @@ class evaluator {
             } else {
                 $count += token::recursive_count($element);
                 if ($count > qtype_formulas::MAX_LIST_SIZE) {
-                    $this->die(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE), $reportingtoken);
+                    $this->die(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE), $opener);
                 }
 
                 $elements[] = $element;
