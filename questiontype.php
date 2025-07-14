@@ -60,7 +60,7 @@ class qtype_formulas extends question_type {
     /** @var int */
     const ANSWER_TYPE_ALGEBRAIC = 1000;
 
-    /** @var int */
+    /** @var int maximum allowed size for lists (arrays) */
     const MAX_LIST_SIZE = 1000;
 
     /**

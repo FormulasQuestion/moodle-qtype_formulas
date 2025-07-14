@@ -22,8 +22,6 @@ use Exception;
 use IteratorAggregate;
 use Traversable;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
-
 /**
  * lazy list class for qtype_formulas parser
  *
