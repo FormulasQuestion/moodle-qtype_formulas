@@ -1237,6 +1237,27 @@ final class evaluator_test extends \advanced_testcase {
         self::assertLessThanOrEqual(72, $result[3]->value);
     }
 
+    public function test_algebraic_diff_with_large_reservoir(): void {
+        // Initialize the evaluator with global algebraic vars.
+        $vars = 'x={1:2:1e-6}; y={-2:-1:1e-6};';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        $command = 'diff(["x", "1+x+y+3", "x+y*y"], ["0", "2+x+y+2", "x+y^2"]);';
+        $parser = new parser($command);
+        $statements = $parser->get_statements();
+        $result = $evaluator->evaluate($statements)[0]->value;
+
+        // The first expression should have a difference greater than 0.
+        self::assertGreaterThan(0, $result[0]->value);
+
+        // The second and third expressions should have (virtually) zero difference.
+        self::assertEqualsWithDelta(0, $result[1]->value, 1e-10);
+        self::assertEqualsWithDelta(0, $result[2]->value, 1e-10);
+    }
+
     public function test_substitute_variables_in_text_localization(): void {
         $this->resetAfterTest();
         $this->setAdminUser();

@@ -204,4 +204,26 @@ class lazylist implements ArrayAccess, Countable, IteratorAggregate {
 
         return iterator_to_array($this);
     }
+
+    /**
+     * Check whether all elements of the lazylist are numeric.
+     *
+     * @return bool
+     */
+    public function are_all_numeric(): bool {
+        foreach ($this->elements as $element) {
+            // Currently, ranges can only contain numbers.
+            if ($element['type'] === 'range') {
+                continue;
+            }
+
+            // If we encounter a token that is not a number, we leave early.
+            if ($element['value']->type != token::NUMBER) {
+                return false;
+            }
+        }
+
+        // Still here? Then all elements are numbers.
+        return true;
+    }
 }

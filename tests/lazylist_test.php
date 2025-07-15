@@ -202,4 +202,31 @@ final class lazylist_test extends \advanced_testcase {
         self::assertEquals('List must not contain more than 2000 elements.', $message);
         self::assertNull($array);
     }
+
+    public function test_are_all_numeric(): void {
+        $list = new lazylist();
+
+        // The empty list has no non-numeric entries.
+        self::assertTrue($list->are_all_numeric());
+
+        // Add numbers.
+        $list->append_value(new token(token::NUMBER, 1));
+        self::assertTrue($list->are_all_numeric());
+        $list->append_value(new token(token::NUMBER, 2));
+        self::assertTrue($list->are_all_numeric());
+
+        // Add a range.
+        $list->append_range(new range(1, 100));
+        self::assertTrue($list->are_all_numeric());
+
+        $otherlist = clone $list;
+
+        // Add a string to the list.
+        $list->append_value(new token(token::STRING, 'foo'));
+        self::assertFalse($list->are_all_numeric());
+
+        // Add a numeric string to the other list.
+        $otherlist->append_value(new token(token::STRING, '1'));
+        self::assertFalse($otherlist->are_all_numeric());
+    }
 }

@@ -325,7 +325,7 @@ class evaluator {
         // because we have our own error message.
         $randomvariables = @unserialize(
             $data['randomvariables'],
-            ['allowed_classes' => [random_variable::class, token::class, lazylist::class]],
+            ['allowed_classes' => [random_variable::class, token::class, lazylist::class, range::class]],
         );
         $variables = @unserialize($data['variables'], ['allowed_classes' => [variable::class, token::class, lazylist::class]]);
         if ($randomvariables === false || $variables === false) {
@@ -398,10 +398,8 @@ class evaluator {
             if ($value->type === token::SET) {
                 // Algebraic variables only accept a list of numbers; they must not contain
                 // strings or nested lists.
-                foreach ($value->value as $entry) {
-                    if ($entry->type != token::NUMBER) {
-                        $this->die(get_string('error_algvar_numbers', 'qtype_formulas'), $value);
-                    }
+                if (!$value->value->are_all_numeric()) {
+                    $this->die(get_string('error_algvar_numbers', 'qtype_formulas'), $value);
                 }
                 $value->type = variable::ALGEBRAIC;
             }
