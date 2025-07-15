@@ -675,7 +675,7 @@ final class questiontype_test extends \advanced_testcase {
      * Test to make sure that loading of question options works, including in an error case.
      */
     public function test_get_question_options(): void {
-        global $DB;
+        global $CFG, $DB;
 
         $this->resetAfterTest(true);
         $this->setAdminUser();
@@ -710,17 +710,28 @@ final class questiontype_test extends \advanced_testcase {
         // Now we are going to delete the options record.
         $DB->delete_records('qtype_formulas_options', ['questionid' => $question->id]);
 
-        // Notifications we expect due to missing options.
-        $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options' .
-                                  ' for questionid ' . $question->id . ' !!' . "\n" .
-                                  '!! Failed to load question options from the table qtype_formulas_options for '.
-                                  'questionid ' . $question->id . ' !!' . "\n");
-
         // Now see what happens.
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         $this->qtype->get_question_options($question);
 
-        self::assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        // With MDL-85721, the error reporting has changed for Moodle 4.5 and later. Instead of a notification,
+        // the "Failed to load question options" error is now output via debugging as well.
+        // is now output via debugging.
+        if ($CFG->branch < 405) {
+            self::assertDebuggingCalled("Formulas question ID {$question->id} was missing an options record. Using default.");
+
+            // Notifications we expect due to missing options. We expect it twice, because we do two tests (one further down).
+            $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options' .
+                                    ' for questionid ' . $question->id . ' !!' . "\n" .
+                                    '!! Failed to load question options from the table qtype_formulas_options for ' .
+                                    'questionid ' . $question->id . ' !!' . "\n");
+        } else {
+            self::assertdebuggingcalledcount(2, [
+                "Formulas question ID {$question->id} was missing an options record. Using default.",
+                "Failed to load question options from the table qtype_formulas_options for questionid {$question->id}",
+            ]);
+        }
+
         self::assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         self::assertEquals($question->id, $options->questionid);
@@ -736,7 +747,14 @@ final class questiontype_test extends \advanced_testcase {
         $question = $DB->get_record('question', ['id' => $returnedfromsave->id], '*', MUST_EXIST);
         $this->qtype->get_question_options($question);
 
-        self::assertDebuggingCalled('Formulas question ID '.$question->id.' was missing an options record. Using default.');
+        if ($CFG->branch < 405) {
+            self::assertDebuggingCalled("Formulas question ID {$question->id} was missing an options record. Using default.");
+        } else {
+            self::assertdebuggingcalledcount(2, [
+                "Formulas question ID {$question->id} was missing an options record. Using default.",
+                "Failed to load question options from the table qtype_formulas_options for questionid {$question->id}",
+            ]);
+        }
         self::assertInstanceOf(stdClass::class, $question->options);
         $options = $question->options;
         self::assertEquals($question->id, $options->questionid);
