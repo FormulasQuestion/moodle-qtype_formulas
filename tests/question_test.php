@@ -1061,6 +1061,9 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0|}', 'format' => []],
             ], '{_0|}'],
             [[
+                '_0' => ['placeholder' => '{_0|w=2.5px}', 'format' => ['w' => '2.5px']],
+            ], '{_0|w=2.5px}'],
+            [[
                 '_0' => ['placeholder' => '{_0|align=center|bgcol=red|w=10}', 'format' => $formatarray],
             ], '{_0|align=center|bgcol=red|w=10}'],
             [[

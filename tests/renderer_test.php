@@ -315,6 +315,8 @@ final class renderer_test extends walkthrough_test_base {
             [['width: 3em'], '{_0|w=3em}'],
             [['width: 3rem'], '{_0|w=3rem}'],
             [['width: 3px'], '{_0|w=3px}'],
+            [['width: .3px'], '{_0|w=.3px}'],
+            [['width: 3.5px'], '{_0|w=3.5px}'],
             [['background-color: yellow'], '{_0|bgcol=yellow}'],
             [['background-color: #00AAFF'], '{_0|bgcol=#00AAFF}'],
             [['background-color: #0AF'], '{_0|bgcol=#0AF}'],
@@ -332,6 +334,13 @@ final class renderer_test extends walkthrough_test_base {
             [['text-align: end'], '{_0|align=end}'],
             [['width: 3rem', 'background-color: yellow'], '{_0|w=3|bgcol=yellow}'],
             [['width: 3rem', 'background-color: yellow'], '{_0|bgcol=yellow|w=3||}'],
+            [['background-color: yellow'], '{_0|bgcol=yellow|w=x}'],
+            [['background-color: yellow'], '{_0|bgcol=yellow|w=px}'],
+            [['background-color: yellow'], '{_0|bgcol=yellow|w=10cm}'],
+            [['background-color: yellow'], '{_0|bgcol=yellow|w=3.px}'],
+            [['width: 3rem'], '{_0|bgcol=#axcvaa|w=3|}'],
+            [['width: 3rem'], '{_0|txtcol=#axcvaa|w=3|}'],
+            [['width: 3rem'], '{_0|align=foobar|w=3|}'],
         ];
     }
 
