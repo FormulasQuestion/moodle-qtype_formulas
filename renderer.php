@@ -320,12 +320,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
-     * FIXME: Undocumented function
-     * color: hex triplet rgb or rgba (1 or 2 digit; digits are doubled) or css named color
-     * width: px or em or rem or cap or rcap or ch or rch; if just number: rch
-     * align: start, end, left, right, center
+     * Translate an array containing formatting options into a CSS format string, e. g. from
+     * ['w' => '50px', 'bgcol' => 'yellow'] to 'width: 50px; background-color: yellow'. Note:
+     * - colors can be defined in 3 or 6 digit hex RGB, in 4 or 8 digit hex RGBA or as CSS named color
+     * - widths can be defined as a number followed by the units px, rem or em; if the unit is omitted, rem will be used
+     * - alignment can be defined as left, right, center, start or end
      *
-     * @param array $options
+     * @param array $options associative array containing options (in our own denomination) and their settings
      * @return string
      */
     protected function get_css_properties(array $options): string {
@@ -356,8 +357,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     if (!preg_match("/^($length)$/i", $value)) {
                         break;
                     }
-                    // If no unit is given, append px.
-                    // FIXME: append according to admin setting
+                    // If no unit is given, append rem.
                     $styles[] = "width: $value" . (preg_match('/\d$/', $value) ? 'rem' : '');
                     break;
                 case 'align':
@@ -514,12 +514,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $displayoptions controls what should and should not be displayed
-     * @param array $formatoptions FIXME
+     * @param array $formatoptions associative array 'optionname' => 'value', e. g. 'w' => '50px'
      * @param string $feedbackclass
      * @return string HTML fragment
      */
     protected function create_input_box(qtype_formulas_part $part, $answerindex,
-            question_attempt $qa, question_display_options $displayoptions, array $formatoptions = [], string $feedbackclass = ''): string {
+            question_attempt $qa, question_display_options $displayoptions, array $formatoptions = [],
+            string $feedbackclass = ''): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -568,9 +569,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // where rem is used in order to allow for the short syntax 'w=3' (3 chars wide).
         $defaultformat = [];
         $defaultwidth = get_config('qtype_formulas', "defaultwidth_{$titlestring}");
+        // If the default width has not been set for the current answer box type, $defaultwidth will
+        // be false and thus not numeric.
         if (is_numeric($defaultwidth)) {
             $defaultwidthunit = get_config('qtype_formulas', "defaultwidthunit");
-            if ($defaultwidthunit === false) {
+            if (!in_array($defaultwidthunit, ['px', 'rem', 'em'])) {
                 $defaultwidthunit = 'px';
             }
             $defaultformat = ['w' => $defaultwidth . $defaultwidthunit];
@@ -651,14 +654,21 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // If the placeholder does not exist yet, we create it with default settings, i. e. no multi-choice
             // and no styling.
             if (!array_key_exists($placeholder, $boxes)) {
-                $boxes[$placeholder] = ['placeholder' => '{' . $placeholder . '}', 'options' => '', 'dropdown' => false, 'format' => []];
+                $boxes[$placeholder] = [
+                    'placeholder' => '{' . $placeholder . '}',
+                    'options' => '',
+                    'dropdown' => false,
+                    'format' => [],
+                ];
                 $subqreplaced .= '{' . $placeholder . '}';
             }
         }
 
         // If part has combined unit answer input.
         if ($part->has_combined_unit_field()) {
-            $combinedfieldhtml = $this->create_input_box($part, self::COMBINED_FIELD, $qa, $options, $boxes[$placeholder]['format'], $sub->feedbackclass);
+            $combinedfieldhtml = $this->create_input_box(
+                $part, self::COMBINED_FIELD, $qa, $options, $boxes[$placeholder]['format'], $sub->feedbackclass
+            );
             return str_replace('{_0}{_u}', $combinedfieldhtml, $subqreplaced);
         }
 
@@ -690,7 +700,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             }
 
             if ($optiontexts === null) {
-                $inputfieldhtml = $this->create_input_box($part, $answerindex, $qa, $options, $boxes[$placeholder]['format'], $sub->feedbackclass);
+                $inputfieldhtml = $this->create_input_box(
+                    $part, $answerindex, $qa, $options, $boxes[$placeholder]['format'], $sub->feedbackclass
+                );
             } else if ($boxes[$placeholder]['dropdown']) {
                 $inputfieldhtml = $this->create_dropdown_mc_answer(
                     $part, $i, $qa, $optiontexts->value, $boxes[$placeholder]['shuffle'], $options

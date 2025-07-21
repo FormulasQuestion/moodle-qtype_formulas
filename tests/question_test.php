@@ -1094,7 +1094,12 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => false],
             ], '{_0:foo:MCE}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}', 'options' => 'foo', 'dropdown' => true, 'format' => $formatarray],
+                '_0' => [
+                    'placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}',
+                    'options' => 'foo',
+                    'dropdown' => true,
+                    'format' => $formatarray,
+                ],
             ], '{_0:foo:MCE|align=center|bgcol=red|w=10}'],
             [[
                 '_0' => ['placeholder' => '{_0}'],

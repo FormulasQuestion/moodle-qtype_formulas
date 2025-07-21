@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/test_base.php');
 require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 
 /**
  * Unit tests for the formulas question type.
@@ -364,7 +365,104 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_output(...$expectations);
     }
 
-    // FIXME: add test checking for default unit and default widths per answer type according to admin settings
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_answer_box_types(): array {
+        return [
+            ['px', qtype_formulas::ANSWER_TYPE_NUMBER],
+            ['px', qtype_formulas::ANSWER_TYPE_NUMERIC],
+            ['px', qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA],
+            ['px', qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+            ['rem', qtype_formulas::ANSWER_TYPE_NUMBER],
+            ['rem', qtype_formulas::ANSWER_TYPE_NUMERIC],
+            ['rem', qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA],
+            ['rem', qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+            ['em', qtype_formulas::ANSWER_TYPE_NUMBER],
+            ['em', qtype_formulas::ANSWER_TYPE_NUMERIC],
+            ['em', qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA],
+            ['em', qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+            ['', qtype_formulas::ANSWER_TYPE_NUMBER],
+            ['', qtype_formulas::ANSWER_TYPE_NUMERIC],
+            ['', qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA],
+            ['', qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+            ['!', qtype_formulas::ANSWER_TYPE_NUMBER],
+            ['!', qtype_formulas::ANSWER_TYPE_NUMERIC],
+            ['!', qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA],
+            ['!', qtype_formulas::ANSWER_TYPE_ALGEBRAIC],
+        ];
+    }
+
+    /**
+     * Test that the default widths as configured in the admin settings are taken into account.
+     *
+     * @param string $unit the unit of length (px, rem, em or an invalid setting)
+     * @param int $answertype answer type constants, e. g. ANSWER_TYPE_NUMBER
+     * @return void
+     *
+     * @dataProvider provide_answer_box_types
+     */
+    public function test_render_uses_default_widths($unit, $answertype): void {
+        // Set the default width for the given answer type.
+        $answertypes = [
+            '0' => 'number',
+            '10' => 'numeric',
+            '100' => 'numerical_formula',
+            '1000' => 'algebraic_formula',
+        ];
+        $optionstring = 'defaultwidth_' . $answertypes[$answertype];
+        set_config($optionstring, '99', 'qtype_formulas');
+
+        // Set the default width unit according to received data.
+        set_config('defaultwidthunit', $unit, 'qtype_formulas');
+
+        // Also test that rendering works for an invalid default unit setting.
+        if ($unit === '') {
+            unset_config('defaultwidthunit', 'qtype_formulas');
+            $unit = 'px';
+        }
+
+        // Also test that rendering works for an invalid default unit setting.
+        if ($unit === '!') {
+            $unit = 'px';
+        }
+
+        // Use a simple question with just one box.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->answertype = $answertype;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            $this->get_contains_input_with_css_expectation("width: 99$unit")
+        );
+
+        // For all but the algebraic formula, we also test the combined unit field.
+        if ($answertype !== qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            set_config($optionstring . '_unit', '999', 'qtype_formulas');
+            $q = $this->get_test_formulas_question('testsinglenumunit');
+            $q->parts[0]->answertype = $answertype;
+            $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+            $this->check_current_output(
+                $this->get_contains_input_with_css_expectation("width: 999$unit")
+            );
+        }
+    }
+
+    public function test_render_uses_default_width_for_separate_unit_box(): void {
+        set_config('defaultwidth_unit', '99', 'qtype_formulas');
+        set_config('defaultwidthunit', 'px', 'qtype_formulas');
+
+        // Use a simple question with a separate unit box.
+        $q = $this->get_test_formulas_question('testsinglenumunitsep');
+        $q->parts[0]->subqtext = '{_0|w=123px} {_u}';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            $this->get_contains_input_with_css_expectation("width: 123px"),
+            $this->get_contains_input_with_css_expectation("width: 99px")
+        );
+    }
+
 
     public function test_render_question_with_multiple_parts(): void {
         $q = $this->get_test_formulas_question('testmethodsinparts');
@@ -925,6 +1023,7 @@ final class renderer_test extends walkthrough_test_base {
      *
      * @param string $expectedfeedback the feedback that should be shown
      * @param array $input input data (behaviour, question name, simulated student response)
+     *
      * @dataProvider provide_responses_for_feedback_test
      */
     public function test_part_feedback($expectedfeedback, $input): void {

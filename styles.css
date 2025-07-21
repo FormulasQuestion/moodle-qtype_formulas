@@ -64,12 +64,6 @@ div[id^='fitem_id_postunit_'] #qtype_formulas_mathjax_display {
     width: 200px;
 }
 
-.que.formulas .formulas_algebraic_formula_unit {
-    display: inline-block;
-    margin: 0 0 0 0;
-    width: 300px;
-}
-
 .que.formulas .formulation .formulaspart {
     display: block;
     margin: 0 0 1.2em 0;

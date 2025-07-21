@@ -1072,10 +1072,11 @@ class qtype_formulas_part {
     }
 
     /**
-     * FIXME: doc
+     * Parse a string of format options, as used in the definition of a text box placeholder,
+     * e. g. |w=10px|bgcol=yellow.
      *
-     * @param string $settings
-     * @return array
+     * @param string $settings format settings
+     * @return array associative array 'optionname' => 'value', e. g. 'w' => '50px'
      */
     protected static function parse_box_formatting_options(string $settings): array {
         $options = explode('|', $settings);
