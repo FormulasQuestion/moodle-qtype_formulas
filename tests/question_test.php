@@ -1114,6 +1114,15 @@ final class question_test extends \advanced_testcase {
                 '_u' => ['placeholder' => '{_u}'],
             ], '{_0:MCES} {_u}'],
             [[
+                '_0' => ['placeholder' => '{_0:MCE:MCE}', 'options' => 'MCE', 'dropdown' => true],
+            ], '{_0:MCE:MCE}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCS:MCS}', 'options' => 'MCS', 'shuffle' => true],
+            ], '{_0:MCS:MCS}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCES:MCES}', 'options' => 'MCES', 'dropdown' => true, 'shuffle' => true],
+            ], '{_0:MCES:MCES}'],
+            [[
                 '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true],
                 '_u' => ['placeholder' => '{_u}'],
             ], '{_0:foo:MCE} {_u}'],
@@ -1143,6 +1152,7 @@ final class question_test extends \advanced_testcase {
             'placeholder' => '',
             'options' => '',
             'dropdown' => false,
+            'shuffle' => false,
             'format' => [],
         ];
         foreach ($expected as $key => $value) {

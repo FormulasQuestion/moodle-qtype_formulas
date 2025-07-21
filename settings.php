@@ -90,7 +90,7 @@ if ($ADMIN->fulltree) {
         'qtype_formulas/defaultwidthunit',
         new lang_string('defaultwidthunit', 'qtype_formulas'),
         new lang_string('defaultwidthunit_desc', 'qtype_formulas'),
-        0,
+        'px',
         ['px' => 'px', 'em' => 'em', 'rem' => 'rem'],
     ));
 

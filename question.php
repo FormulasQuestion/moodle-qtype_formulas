@@ -1072,7 +1072,7 @@ class qtype_formulas_part {
     }
 
     /**
-     * FIXME
+     * FIXME: doc
      *
      * @param string $settings
      * @return array

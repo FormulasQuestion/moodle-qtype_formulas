@@ -357,6 +357,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                         break;
                     }
                     // If no unit is given, append px.
+                    // FIXME: append according to admin setting
                     $styles[] = "width: $value" . (preg_match('/\d$/', $value) ? 'rem' : '');
                     break;
                 case 'align':

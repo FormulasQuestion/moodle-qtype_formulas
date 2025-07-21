@@ -304,6 +304,59 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_1', 'm/s', false);
     }
 
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
+    public static function provide_styles(): array {
+        return [
+            [['width: 3rem'], '{_0|w=3}'],
+            [['width: 3em'], '{_0|w=3em}'],
+            [['width: 3rem'], '{_0|w=3rem}'],
+            [['width: 3px'], '{_0|w=3px}'],
+            [['background-color: yellow'], '{_0|bgcol=yellow}'],
+            [['background-color: #00AAFF'], '{_0|bgcol=#00AAFF}'],
+            [['background-color: #0AF'], '{_0|bgcol=#0AF}'],
+            [['background-color: #00AAFFFF'], '{_0|bgcol=#00AAFFFF}'],
+            [['background-color: #0AFF'], '{_0|bgcol=#0AFF}'],
+            [['color: yellow'], '{_0|txtcol=yellow}'],
+            [['color: #00AAFF'], '{_0|txtcol=#00AAFF}'],
+            [['color: #0AF'], '{_0|txtcol=#0AF}'],
+            [['color: #00AAFFFF'], '{_0|txtcol=#00AAFFFF}'],
+            [['color: #0AFF'], '{_0|txtcol=#0AFF}'],
+            [['text-align: left'], '{_0|align=left}'],
+            [['text-align: right'], '{_0|align=right}'],
+            [['text-align: center'], '{_0|align=center}'],
+            [['text-align: start'], '{_0|align=start}'],
+            [['text-align: end'], '{_0|align=end}'],
+            [['width: 3rem', 'background-color: yellow'], '{_0|w=3|bgcol=yellow}'],
+            [['width: 3rem', 'background-color: yellow'], '{_0|bgcol=yellow|w=3||}'],
+        ];
+    }
+
+    /**
+     * Test CSS options are rendered as expected.
+     *
+     * @param array $styles style settings to be checked for
+     * @param string $placeholder placeholder definition with formatting
+     * @return void
+     *
+     * @dataProvider provide_styles
+     */
+    public function test_render_formatted_input_box($styles, $placeholder): void {
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->subqtext = $placeholder;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $expectations = [];
+        foreach ($styles as $style) {
+            $expectations[] = $this->get_contains_input_with_css_expectation($style);
+        }
+        $this->check_current_output(...$expectations);
+    }
+
+    // FIXME: add test checking for default unit and default widths per answer type according to admin settings
+
     public function test_render_question_with_multiple_parts(): void {
         $q = $this->get_test_formulas_question('testmethodsinparts');
         $this->start_attempt_at_question($q, 'immediatefeedback', 8);
