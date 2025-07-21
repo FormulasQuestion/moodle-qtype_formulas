@@ -341,19 +341,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         foreach ($options as $name => $value) {
             switch ($name) {
                 case 'bgcol':
-                    if (!preg_match("/^($hexcolor)|($namedcolor)$/i", $value)) {
+                    if (!preg_match("/^(($hexcolor)|($namedcolor))$/i", $value)) {
                         break;
                     }
                     $styles[] = "background-color: $value";
                     break;
                 case 'txtcol':
-                    if (!preg_match("/^($hexcolor)|($namedcolor)$/i", $value)) {
+                    if (!preg_match("/^(($hexcolor)|($namedcolor))$/i", $value)) {
                         break;
                     }
                     $styles[] = "color: $value";
                     break;
                 case 'w':
-                    if (!preg_match("/^$length$/i", $value)) {
+                    if (!preg_match("/^($length)$/i", $value)) {
                         break;
                     }
                     // If no unit is given, append px.
@@ -361,7 +361,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                     $styles[] = "width: $value" . (preg_match('/\d$/', $value) ? 'rem' : '');
                     break;
                 case 'align':
-                    if (!preg_match("/^$alignment$/i", $value)) {
+                    if (!preg_match("/^($alignment)$/i", $value)) {
                         break;
                     }
                     $styles[] = "text-align: $value";
