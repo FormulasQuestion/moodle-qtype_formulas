@@ -1771,6 +1771,10 @@ final class evaluator_test extends \advanced_testcase {
                 'Syntax error: did you forget to put an operator?',
                 'a = 4 "foo"',
             ],
+            'fill with too large count' => [
+                'List must not contain more than 1000 elements.',
+                'a = fill(2000, 1)',
+            ],
         ];
     }
 
