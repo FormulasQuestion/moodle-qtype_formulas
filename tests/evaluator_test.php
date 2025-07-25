@@ -1213,7 +1213,7 @@ final class evaluator_test extends \advanced_testcase {
         $evaluator = new evaluator();
         $evaluator->evaluate($statements);
 
-        $command = 'diff(["x", "1+x+y+3", "(1+sqrt(x))^2", "x*x+y*y"], ["0", "2+x+y+2", "1+x", "x+y^2"]);';
+        $command = 'diff(["x", "1+x+y+3", "(1+sqrt(x))^2", "x*x+y*y", "x"], ["0", "2+x+y+2", "1+x", "x+y^2", ""]);';
         $parser = new parser($command);
         $statements = $parser->get_statements();
         $result = $evaluator->evaluate($statements)[0]->value;
@@ -1231,10 +1231,14 @@ final class evaluator_test extends \advanced_testcase {
         // for all values of x.
         self::assertEqualsWithDelta(PHP_FLOAT_MAX, $result[2]->value, 1e-8);
 
-        // For the last expression, the difference is at least 0 (if x and y were to be chosen as 1 for
+        // For the fourth expression, the difference is at least 0 (if x and y were to be chosen as 1 for
         // all evaluation points) and at most 72 (if we have the value 9 in all cases).
         self::assertGreaterThanOrEqual(0, $result[3]->value);
         self::assertLessThanOrEqual(72, $result[3]->value);
+
+        // For the last expression, the difference should be PHP_FLOAT_MAX again, because the second
+        // input is the empty string.
+        self::assertEqualsWithDelta(PHP_FLOAT_MAX, $result[4]->value, 1e-8);
     }
 
     public function test_algebraic_diff_with_large_reservoir(): void {

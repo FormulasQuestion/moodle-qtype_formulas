@@ -88,6 +88,8 @@ final class answer_parser_test extends \advanced_testcase {
             [false, '{1,2}'],
             [false, 'stdnormpdf(0.5)'],
             [false, '#'],
+            [false, ''],
+            [false, '""'],
         ];
     }
 
@@ -108,6 +110,7 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, 'sin(3)-3+exp(4)'],
             [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA, '3+exp(4+5)^sin(6+7)'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3+4^-(9)'],
+            [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '"foo"'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'sin(a)-a+exp(b)'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_NUMERIC, '3e8(4.e8+2)(.5e8/2)5'],
@@ -169,6 +172,8 @@ final class answer_parser_test extends \advanced_testcase {
             [false, '\ 4'],
             [false, '\sin(pi)'],
             [false, '1+sin'],
+            [false, '""'],
+            [false, '5 "foo"'],
         ];
     }
 
@@ -210,7 +215,7 @@ final class answer_parser_test extends \advanced_testcase {
     }
 
     /**
-     * Test for answer_parser::is_acceptable_numberic().
+     * Test for answer_parser::is_acceptable_numeric().
      *
      * @param int|bool $expected the lowest valid answer type or false if invalid
      * @param string $input the simulated student answer
@@ -227,7 +232,7 @@ final class answer_parser_test extends \advanced_testcase {
     }
 
     /**
-     * Test for answer_parser::is_acceptable_numberical_formula().
+     * Test for answer_parser::is_acceptable_numerical_formula().
      *
      * @param int|bool $expected the lowest valid answer type or false if invalid
      * @param string $input the simulated student answer
@@ -252,6 +257,8 @@ final class answer_parser_test extends \advanced_testcase {
      * @dataProvider provide_algebraic_formulas
      */
     public function test_is_acceptable_algebraic_formula($expected, $input): void {
+        $input = '5 "b"';
+        $expected = false;
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false) {

@@ -167,6 +167,11 @@ class answer_parser extends parser {
             if ($token->type === token::FUNCTION || $token->type === token::VARIABLE) {
                 return false;
             }
+            // If we find a STRING literal, we can stop, because those are not
+            // allowed in the numeric answer type.
+            if ($token->type === token::STRING) {
+                return false;
+            }
             // If it is an OPERATOR, it has to be +, -, *, /, ^, ** or the unary minus _.
             $allowedoperators = ['+', '-', '*', '/', '^', '**', '_'];
             if ($token->type === token::OPERATOR && !in_array($token->value, $allowedoperators)) {
@@ -246,6 +251,12 @@ class answer_parser extends parser {
             if (in_array($token->type, [token::NUMBER, token::CONSTANT])) {
                 continue;
             }
+            // If we find a STRING literal and we are testing for a numerical formula, we can stop,
+            // because those are not allowed in that case.
+            if ($fornumericalformula && $token->type === token::STRING) {
+                return false;
+            }
+
             if ($token->type === token::VARIABLE) {
                 if ($fornumericalformula) {
                     return false;
@@ -350,7 +361,13 @@ class answer_parser extends parser {
             }
         }
 
-        return (count($stack) === 1);
+        // The element must not be the empty string. As empty() returns true for the number 0, we
+        // check whether the element is numeric. If it is, that's fine. Also, the stack must have
+        // exactly one element.
+        $element = reset($stack);
+        $countok = count($stack) === 1;
+        $notemptystring = !empty($element) || is_numeric($element);
+        return $countok && $notemptystring;
     }
 
 }
