@@ -850,7 +850,7 @@ class qtype_formulas extends question_type {
 
             // The grading criterion must not be empty. Also, if there is no grading criterion, it does
             // not make sense to continue the validation.
-            if (empty(trim($data->correctness[$i])) && !is_numeric(trim($data->answer[$i]))) {
+            if (empty(trim($data->correctness[$i])) && !is_numeric(trim($data->correctness[$i]))) {
                 $errors["correctness[$i]"] = get_string('error_criterion_empty', 'qtype_formulas');
                 continue;
             }

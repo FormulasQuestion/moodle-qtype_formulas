@@ -464,6 +464,12 @@ final class questiontype_test extends \advanced_testcase {
                 ],
             ],
             [
+                ['correctness[0]' => get_string('error_grading_not_one', 'qtype_formulas', 0)],
+                [
+                    'correctness' => [0 => '0'],
+                ],
+            ],
+            [
                 ['correctness[0]' => get_string('error_grading_single_expression', 'qtype_formulas', 2)],
                 [
                     'correctness' => [0 => 'a=1; b=2'],
