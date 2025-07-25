@@ -92,6 +92,21 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
     }
 
     /**
+     * Create assertion to check that an <input> has a certain CSS style set.
+     *
+     * @param string $style
+     * @return void
+     */
+    protected function get_contains_input_with_css_expectation($style) {
+        $pattern = '/<input type="text" name="[^"]+" id="[^"]+" style="[^"]*' . preg_quote($style, '/') . '[^"]*"[^>]+>/';
+
+        return new \question_pattern_expectation(
+            $pattern,
+            "No text input box with style $style found in the output.",
+        );
+    }
+
+    /**
      * Create assertion to check that a <div> with certain class attributes is *not* shown.
      *
      * @param string $class

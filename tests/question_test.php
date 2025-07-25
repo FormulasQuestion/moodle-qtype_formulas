@@ -1034,9 +1034,15 @@ final class question_test extends \advanced_testcase {
      * @return array
      */
     public static function provide_answer_box_texts(): array {
+        $formatarray = [
+            'align' => 'center',
+            'bgcol' => 'red',
+            'w' => '10',
+        ];
         return [
             [[], ''],
             [[], '{ _0}'],
+            [[], '{_0'],
             [[], '{_ 0}'],
             [[], '{_0 }'],
             [[], '{_0::}'],
@@ -1049,19 +1055,34 @@ final class question_test extends \advanced_testcase {
             [[], '{_u }'],
             [[], '{_a}'],
             [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0}'],
             ], '{_0}'],
             [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0|}', 'format' => []],
+            ], '{_0|}'],
+            [[
+                '_0' => ['placeholder' => '{_0|w=2.5px}', 'format' => ['w' => '2.5px']],
+            ], '{_0|w=2.5px}'],
+            [[
+                '_0' => ['placeholder' => '{_0|align=center|bgcol=red|w=10}', 'format' => $formatarray],
+            ], '{_0|align=center|bgcol=red|w=10}'],
+            [[
+                '_0' => ['placeholder' => '{_0|align=center|}', 'format' => ['align' => 'center']],
+            ], '{_0|align=center|}'],
+            [[
+                '_0' => ['placeholder' => '{_0|align=center}', 'format' => ['align' => 'center']],
+            ], '{_0|align=center}'],
+            [[
+                '_0' => ['placeholder' => '{_0}'],
             ], '{_0} {_1:}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo'],
             ], '{_0:foo}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCS}', 'options' => 'foo', 'dropdown' => false, 'shuffle' => true],
-            ], '{_0:foo:MCS}'],
+                '_0' => ['placeholder' => '{_0:foo|align=center|bgcol=red|w=10}', 'options' => 'foo', 'format' => $formatarray],
+            ], '{_0:foo|align=center|bgcol=red|w=10}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE'],
             ], '{_0:MCE}'],
             [[
                 '_0' => ['placeholder' => '{_0:MCS}', 'options' => 'MCS', 'dropdown' => false, 'shuffle' => false],
@@ -1073,31 +1094,45 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => false],
             ], '{_0:foo:MCE}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCES}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => true],
-            ], '{_0:foo:MCES}'],
+                '_0' => [
+                    'placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}',
+                    'options' => 'foo',
+                    'dropdown' => true,
+                    'format' => $formatarray,
+                ],
+            ], '{_0:foo:MCE|align=center|bgcol=red|w=10}'],
             [[
-                '_0' => ['placeholder' => '{_0}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0}'],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0}{_u}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo', 'dropdown' => false, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo'],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0:foo} {_u}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE', 'dropdown' => false, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE'],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0:MCE} {_u}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCS}', 'options' => 'MCS', 'dropdown' => false, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCS}', 'options' => 'MCS'],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0:MCS} {_u}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCES}', 'options' => 'MCES', 'dropdown' => false, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCES}', 'options' => 'MCES'],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0:MCES} {_u}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => false],
-                '_u' => ['placeholder' => '{_u}', 'options' => '', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCE:MCE}', 'options' => 'MCE', 'dropdown' => true],
+            ], '{_0:MCE:MCE}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCS:MCS}', 'options' => 'MCS', 'shuffle' => true],
+            ], '{_0:MCS:MCS}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCES:MCES}', 'options' => 'MCES', 'dropdown' => true, 'shuffle' => true],
+            ], '{_0:MCES:MCES}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true],
+                '_u' => ['placeholder' => '{_u}'],
             ], '{_0:foo:MCE} {_u}'],
             [[
                 '_0' => ['placeholder' => '{_0:foo:MCES}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => true],
@@ -1121,8 +1156,18 @@ final class question_test extends \advanced_testcase {
      * @dataProvider provide_answer_box_texts
      */
     public function test_scan_for_answer_boxes($expected, $input): void {
+        $default = [
+            'placeholder' => '',
+            'options' => '',
+            'dropdown' => false,
+            'shuffle' => false,
+            'format' => [],
+        ];
+        foreach ($expected as $key => $value) {
+            $expected[$key] = $value + $default;
+        }
         $boxes = qtype_formulas_part::scan_for_answer_boxes($input);
-        self::assertSame($expected, $boxes);
+        self::assertEquals($expected, $boxes);
     }
 
     /**
