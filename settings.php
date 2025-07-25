@@ -61,6 +61,7 @@ if ($ADMIN->fulltree) {
             1000 => new lang_string('algebraic_formula', 'qtype_formulas'),
         ]
     ));
+
     // Default correctness.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultcorrectness',
@@ -68,6 +69,7 @@ if ($ADMIN->fulltree) {
         new lang_string('defaultcorrectness_desc', 'qtype_formulas'),
         '_relerr < 0.01'
     ));
+
     // Default answermark.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultanswermark',
@@ -77,6 +79,7 @@ if ($ADMIN->fulltree) {
         PARAM_FLOAT,
         4
     ));
+
     // Default unit penalty.
     $settings->add(new admin_setting_configtext(
         'qtype_formulas/defaultunitpenalty',
