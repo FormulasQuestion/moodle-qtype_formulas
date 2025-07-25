@@ -361,15 +361,13 @@ class answer_parser extends parser {
             }
         }
 
-        // If there is more than one element on the stack, there must have been a syntax error.
-        if (count($stack) > 1) {
-            return false;
-        }
-
         // The element must not be the empty string. As empty() returns true for the number 0, we
-        // check whether the element is numeric. If it is, that's fine.
+        // check whether the element is numeric. If it is, that's fine. Also, the stack must have
+        // exactly one element.
         $element = reset($stack);
-        return !empty($element) || is_numeric($element);
+        $countok = count($stack) === 1;
+        $notemptystring = !empty($element) || is_numeric($element);
+        return $countok && $notemptystring;
     }
 
 }

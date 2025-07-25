@@ -173,6 +173,7 @@ final class answer_parser_test extends \advanced_testcase {
             [false, '\sin(pi)'],
             [false, '1+sin'],
             [false, '""'],
+            [false, '5 "foo"'],
         ];
     }
 
@@ -256,6 +257,8 @@ final class answer_parser_test extends \advanced_testcase {
      * @dataProvider provide_algebraic_formulas
      */
     public function test_is_acceptable_algebraic_formula($expected, $input): void {
+        $input = '5 "b"';
+        $expected = false;
         $parser = self::prepare_answer_parser($input);
 
         if ($expected === false) {
