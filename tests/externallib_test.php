@@ -620,6 +620,6 @@ final class externallib_test extends \externallib_advanced_testcase {
 
         $b = $data[0]['globalvars'][0];
         self::assertEquals('b', $b['name']);
-        self::assertEqualsWithDelta(2*$a['value'], $b['value'], 1e-12);
+        self::assertEqualsWithDelta(2 * $a['value'], $b['value'], 1e-12);
     }
 }
