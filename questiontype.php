@@ -258,7 +258,7 @@ class qtype_formulas extends question_type {
         // Validate the data from the edit form.
         $filtered = $this->validate($formdata);
         if (!empty($filtered->errors)) {
-            return (object)['error' => get_string('error_damaged_question', 'qtype_formulas')];
+            return (object)['error' => implode("\n", $filtered->errors)];
         }
 
         // Order the parts according to how they appear in the question.
@@ -850,7 +850,7 @@ class qtype_formulas extends question_type {
 
             // The grading criterion must not be empty. Also, if there is no grading criterion, it does
             // not make sense to continue the validation.
-            if (empty(trim($data->correctness[$i]))) {
+            if (empty(trim($data->correctness[$i])) && !is_numeric(trim($data->answer[$i]))) {
                 $errors["correctness[$i]"] = get_string('error_criterion_empty', 'qtype_formulas');
                 continue;
             }
@@ -965,7 +965,7 @@ class qtype_formulas extends question_type {
         // depending on those variables (model answers, correctness criterion) and unit
         // stuff. This check also allows us to calculate the number of answers for each part,
         // a value that we store as 'numbox'.
-        $evaluationresult = $this->check_variables_and_expressions($data, $parts);
+        $evaluationresult = $this->check_variables_and_expressions($data, $parts, $isfromimport);
         $errors += $evaluationresult->errors;
         $parts = $evaluationresult->parts;
 
@@ -1027,9 +1027,10 @@ class qtype_formulas extends question_type {
      *
      * @param object $data
      * @param object[] $parts
+     * @param bool $fromimport whether the check is performed during an import process
      * @return object stdClass with 'errors' and 'parts'
      */
-    public function check_variables_and_expressions(object $data, array $parts): object {
+    public function check_variables_and_expressions(object $data, array $parts, bool $fromimport = false): object {
         // Collect all errors.
         $errors = [];
 
@@ -1224,7 +1225,11 @@ class qtype_formulas extends question_type {
             }
 
             // We used the model answers, so the grading criterion should always evaluate to 1 (or more).
-            if ($grade < 0.999) {
+            // This check is omitted when importing questions, because it did not exist in legacy versions,
+            // so teachers might have questions with "wrong" model answers and their import will fail.
+            $lenientimport = get_config('qtype_formulas', 'lenientimport');
+            $checkthis = !$lenientimport || !$fromimport;
+            if ($checkthis && $grade < 0.999) {
                 $errors["correctness[$i]"] = get_string('error_grading_not_one', 'qtype_formulas', $grade);
             }
 

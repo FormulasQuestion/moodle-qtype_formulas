@@ -40,6 +40,14 @@ if ($ADMIN->fulltree) {
         0
     ));
 
+    // Whether we should omit the check the model answer's correctness during imports.
+    $settings->add(new admin_setting_configcheckbox(
+        'qtype_formulas/lenientimport',
+        new lang_string('settinglenientimport', 'qtype_formulas'),
+        new lang_string('settinglenientimport_desc', 'qtype_formulas'),
+        0
+    ));
+
     // Default answer type.
     $settings->add(new admin_setting_configselect(
         'qtype_formulas/defaultanswertype',
