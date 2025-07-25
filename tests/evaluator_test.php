@@ -733,6 +733,12 @@ final class evaluator_test extends \advanced_testcase {
                 ],
                 'a=4; A = fill(2,0); B= fill ( 3,"Hello"); C=fill(a,4);',
             ],
+            'change element of list that was initialised with fill()' => [
+                [
+                    'a' => new variable('a', [6, 5, 4], variable::LIST),
+                ],
+                'a=fill(3, 1); a[0] = 6; a[1] = 5; a[2] = 4;',
+            ],
             'assign with indirect fill()' => [
                 [
                     'a' => new variable('a', [1, 2, 3, 4], variable::LIST),

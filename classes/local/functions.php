@@ -692,7 +692,15 @@ class functions {
         if ($count < 1) {
             self::die('error_func_first_posint', 'fill()');
         }
-        return array_fill(0, $count, token::wrap($value));
+
+        // We cannot use array_fill() here, because it will create the token only once and
+        // populate the array with multiple references to the same instance. Therefore,
+        // it will not be possible to change just one element of a list later.
+        $result = [];
+        for ($i = 0; $i < $count; $i++) {
+            $result[] = token::wrap($value);
+        }
+        return $result;
     }
 
     /**
