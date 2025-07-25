@@ -199,7 +199,6 @@ final class renderer_test extends walkthrough_test_base {
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         $this->render();
-        echo $this->currentoutput;
         $this->check_output_contains_text_input('0_0', '', true);
 
         // Submit wrong answer.
