@@ -334,6 +334,19 @@ final class externallib_test extends \externallib_advanced_testcase {
                 ['status' => 'ok', 'data' => [[
                     'randomvars' => [],
                     'globalvars' => [
+                        ['name' => 's', 'value' => 'a<br>b'],
+                    ],
+                    'parts' => [[['name' => '_0', 'value' => '1']]],
+                ]]],
+                [
+                    'n' => 1, 'randomvars' => '', 'globalvars' => 's = join("<br>", "a", "b");',
+                    'localvars' => [''], 'answers' => ['1'],
+                ],
+            ],
+            [
+                ['status' => 'ok', 'data' => [[
+                    'randomvars' => [],
+                    'globalvars' => [
                         ['name' => 'a', 'value' => '1'],
                         ['name' => 'b', 'value' => '2'],
                         ['name' => 'c', 'value' => '0'],

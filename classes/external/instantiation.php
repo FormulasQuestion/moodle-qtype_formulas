@@ -297,7 +297,7 @@ class instantiation extends \external_api {
                         new \external_single_structure(
                             [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                                'value' => new \external_value(PARAM_RAW, 'value', VALUE_REQUIRED),
                             ],
                             'description of each random variable',
                             VALUE_REQUIRED
@@ -309,7 +309,7 @@ class instantiation extends \external_api {
                         new \external_single_structure(
                             [
                                 'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                                'value' => new \external_value(PARAM_RAW, 'value', VALUE_REQUIRED),
                             ],
                             'description of each global variable',
                             VALUE_REQUIRED
@@ -322,7 +322,7 @@ class instantiation extends \external_api {
                             new \external_single_structure(
                                 [
                                     'name' => new \external_value(PARAM_TEXT, 'variable name', VALUE_REQUIRED),
-                                    'value' => new \external_value(PARAM_TEXT, 'value', VALUE_REQUIRED),
+                                    'value' => new \external_value(PARAM_RAW, 'value', VALUE_REQUIRED),
                                 ]
                             ),
                             'list of variables for the corresponding part',
