@@ -78,6 +78,19 @@ final class evaluator_test extends \advanced_testcase {
         // Re-instantiate with the same seed, so we should get the same values as for the first step.
         $evaluator->instantiate_random_variables($seed);
         self::assertEquals($export, $evaluator->export_randomvars_for_step_data());
+
+        // Try a random variable with a very large reservoir.
+        $command = 'a = {1:1e9:0.1};';
+        $randomparser = new random_parser($command);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+
+        // Instantiate random variables with a given seed and store their values for comparison.
+        $seed = intval(microtime(true));
+        $evaluator->instantiate_random_variables($seed);
+        $token = $evaluator->export_single_variable('a');
+        self::assertGreaterThanOrEqual(1, $token->value);
+        self::assertLessThan(1e9, $token->value);
     }
 
     public function test_remove_special_vars(): void {
@@ -587,9 +600,9 @@ final class evaluator_test extends \advanced_testcase {
                 ['e' => new variable('e', [], variable::LIST)],
                 'e=[];',
             ],
-            'large list (10000 entries) via fill' => [
-                ['c' => new variable('e', array_fill(0, 10000, 'rr'), variable::LIST)],
-                'c=fill(10000,"rr")',
+            'large list (1000 entries) via fill' => [
+                ['c' => new variable('e', array_fill(0, 1000, 'rr'), variable::LIST)],
+                'c=fill(1000,"rr")',
             ],
             'list filled with count from expression' => [
                 [
@@ -1224,6 +1237,27 @@ final class evaluator_test extends \advanced_testcase {
         self::assertLessThanOrEqual(72, $result[3]->value);
     }
 
+    public function test_algebraic_diff_with_large_reservoir(): void {
+        // Initialize the evaluator with global algebraic vars.
+        $vars = 'x={1:2:1e-6}; y={-2:-1:1e-6};';
+        $parser = new parser($vars);
+        $statements = $parser->get_statements();
+        $evaluator = new evaluator();
+        $evaluator->evaluate($statements);
+
+        $command = 'diff(["x", "1+x+y+3", "x+y*y"], ["0", "2+x+y+2", "x+y^2"]);';
+        $parser = new parser($command);
+        $statements = $parser->get_statements();
+        $result = $evaluator->evaluate($statements)[0]->value;
+
+        // The first expression should have a difference greater than 0.
+        self::assertGreaterThan(0, $result[0]->value);
+
+        // The second and third expressions should have (virtually) zero difference.
+        self::assertEqualsWithDelta(0, $result[1]->value, 1e-10);
+        self::assertEqualsWithDelta(0, $result[2]->value, 1e-10);
+    }
+
     public function test_substitute_variables_in_text_localization(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -1344,7 +1378,7 @@ final class evaluator_test extends \advanced_testcase {
             ['Invalid definition of a random variable - you must provide a list of possible values.', 'a = 1'],
             ["Syntax error: unexpected end of expression after '='.", 'a = '],
             ['Evaluation error: range from 10 to 1 with step 1 will be empty.', 'a = {10:1:1}'],
-            ['Setting individual list elements is not supported for random variables.', 'a[1] = {1,2,3}'],
+            ['Setting individual elements is not supported for random variables.', 'a[1] = {1,2,3}'],
             ['Syntax error: invalid use of separator token \',\'.', 'a = {1:10,}'],
             ["Syntax error: incomplete ternary operator or misplaced '?'.", 'a = {1:10?}'],
             ['Number expected, found algebraic variable.', 'a = {0, 1:3:0.1, 10:30, 100}*3'],
@@ -1549,6 +1583,30 @@ final class evaluator_test extends \advanced_testcase {
                 'Individual chars of a string cannot be modified.',
                 's = "foo"; s[1] = "x"',
             ],
+            'assignment to element of algebraic variable' => [
+                'Setting individual elements is not supported for algebraic variables.',
+                'a = {1,2,3,4}; a[0] = 5;',
+            ],
+            'creating array with size > 1000, direct' => [
+                'List must not contain more than 1000 elements.',
+                'a = [' . implode(',', range(1, 1001)) . ']',
+            ],
+            'creating array with size > 1000, via fill' => [
+                'List must not contain more than 1000 elements.',
+                'a = fill(10000, 1)',
+            ],
+            'creating array with size > 1000, via range' => [
+                'List must not contain more than 1000 elements.',
+                'a = [0:1001]',
+            ],
+            'creating array with size > 1000, via multiple ranges' => [
+                'List must not contain more than 1000 elements.',
+                'a = [0:500, 1000:1500, 2000:2100]',
+            ],
+            'creating array with size > 1000, via nesting' => [
+                'List must not contain more than 1000 elements.',
+                'a = [[0:500, 1000:1500], [[2000:2100], [3000:3100]]]',
+            ],
             'prefix with invalid function' => [
                 'Syntax error: invalid use of prefix character \.',
                 'a = \idontexist(5)',
@@ -1712,6 +1770,10 @@ final class evaluator_test extends \advanced_testcase {
             'string after number' => [
                 'Syntax error: did you forget to put an operator?',
                 'a = 4 "foo"',
+            ],
+            'fill with too large count' => [
+                'List must not contain more than 1000 elements.',
+                'a = fill(2000, 1)',
             ],
         ];
     }

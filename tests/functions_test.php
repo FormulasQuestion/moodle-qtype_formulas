@@ -1020,6 +1020,7 @@ final class functions_test extends \advanced_testcase {
             [false, 'a=diff(1, 2);'],
             [true, 'a=fill(3, "x");'],
             [true, 'a=fill(3, 0);'],
+            [false, 'a=fill(2000, 0);'],
             [false, 'a=fill(0);'],
             [false, 'a=fill(3, 3, 3);'],
             [true, 'a=join(" ", ["a", "b"]);'],

@@ -60,6 +60,9 @@ class qtype_formulas extends question_type {
     /** @var int */
     const ANSWER_TYPE_ALGEBRAIC = 1000;
 
+    /** @var int maximum allowed size for lists (arrays) */
+    const MAX_LIST_SIZE = 1000;
+
     /**
      * The following array contains some of the column names of the table qtype_formulas_answers,
      * the table that holds the parts (not just answers) of a question. These columns undergo similar

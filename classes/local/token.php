@@ -15,7 +15,14 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace qtype_formulas\local;
+
 use Exception;
+use qtype_formulas;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
+
 
 /**
  * Class for individual tokens
@@ -117,6 +124,9 @@ class token {
     /** @var int used to designate a token storing a set */
     const SET = 1048576;
 
+    /** @var int used to designate a token storing a range */
+    const RANGE = 1572864;
+
     /** @var int used to designate a token storing a start-of-group marker (opening brace) */
     const START_GROUP = 2097152;
 
@@ -183,9 +193,10 @@ class token {
      *
      * @param mixed $value value to be wrapped
      * @param int $type if desired, type of the resulting token (use pre-defined constants)
+     * @param int $carry intermediate count, useful when recursively wrapping arrays
      * @return token
      */
-    public static function wrap($value, $type = null): token {
+    public static function wrap($value, $type = null, $carry = 0): token {
         // If the value is already a token, we do nothing.
         if ($value instanceof token) {
             return $value;
@@ -222,15 +233,28 @@ class token {
             $type = self::NUMBER;
         } else if (is_array($value)) {
             $type = self::LIST;
+            $count = $carry;
             // Values must be wrapped recursively.
             foreach ($value as &$val) {
-                $val = self::wrap($val);
+                if (is_array($val)) {
+                    $count += count($val);
+                } else {
+                    $count++;
+                }
+
+                if ($count > qtype_formulas::MAX_LIST_SIZE) {
+                    throw new Exception(get_string('error_list_too_large', 'qtype_formulas', qtype_formulas::MAX_LIST_SIZE));
+                }
+
+                $val = self::wrap($val, null, $count);
             }
         } else if (is_bool($value)) {
             // Some PHP functions (e. g. is_nan and similar) will return a boolean value. For backwards
             // compatibility, we will convert this into a number with TRUE = 1 and FALSE = 0.
             $type = self::NUMBER;
             $value = ($value ? 1 : 0);
+        } else if ($value instanceof lazylist) {
+            $type = self::SET;
         } else {
             if (is_null($value)) {
                 $value = 'null';
@@ -293,6 +317,31 @@ class token {
         $result .= ']';
         $result = str_replace(', ]', ']', $result);
         return $result;
+    }
+
+    /**
+     * Recursively count the tokens inside this token. This is useful for nested lists only.
+     *
+     * @param token $token the token to be counted
+     * @return int
+     */
+    public static function recursive_count(token $token): int {
+        $count = 0;
+
+        // Literals consist of one single token.
+        if (in_array($token->type, [self::NUMBER, self::STRING])) {
+            return 1;
+        }
+
+        // For lists, we recursively count all tokens.
+        if ($token->type === self::LIST) {
+            $elements = $token->value;
+            foreach ($elements as $element) {
+                $count += self::recursive_count($element);
+            }
+        }
+
+        return $count;
     }
 
 }
