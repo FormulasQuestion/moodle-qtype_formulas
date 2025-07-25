@@ -196,9 +196,12 @@ final class renderer_test extends walkthrough_test_base {
 
     public function test_render_question_with_algebraic_answer(): void {
         $q = $this->get_test_formulas_question('testalgebraic');
+        $q->parts[0]->subqtext = '{b} {c}';
+        $q->parts[0]->vars2 = 'b = 1; c = "x"';
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
 
         $this->render();
+        echo $this->currentoutput;
         $this->check_output_contains_text_input('0_0', '', true);
 
         // Submit wrong answer.
@@ -257,6 +260,24 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_0', '', true);
         $this->check_output_contains_text_input('0_1', '', true);
         $this->check_output_does_not_contain_text_input_with_class('0_');
+    }
+
+    public function test_substitution_of_local_variable(): void {
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->subqtext = '{b} {c}';
+        $q->parts[0]->vars1 = 'b = 1; c = "x"';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->render();
+        $this->check_output_does_not_contain_stray_placeholders();
+
+        $q = $this->get_test_formulas_question('testalgebraic');
+        $q->parts[0]->subqtext = '{b} {c}';
+        $q->parts[0]->vars1 = 'b = 1; c = "x"';
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        $this->render();
+        $this->check_output_does_not_contain_stray_placeholders();
+
     }
 
     public function test_render_question_with_separate_unit_field(): void {

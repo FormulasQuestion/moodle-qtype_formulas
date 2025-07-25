@@ -1495,7 +1495,7 @@ class qtype_formulas_part {
         // formulas, we must wrap the answers in quotes before we move on. Also, we reset the conversion
         // factor, because it is not needed for algebraic answers.
         if ($isalgebraic) {
-                $response = self::wrap_algebraic_formulas_in_quotes($response);
+            $response = self::wrap_algebraic_formulas_in_quotes($response);
             $conversionfactor = 1;
         }
 
