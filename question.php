@@ -1500,7 +1500,7 @@ class qtype_formulas_part {
             try {
                 $response = self::wrap_algebraic_formulas_in_quotes($response);
             } catch (Throwable $t) {
-                // TODO: convert to non-capturing catch
+                // TODO: convert to non-capturing catch.
                 return ['answer' => 0, 'unit' => $unitcorrect];
             }
             $conversionfactor = 1;
