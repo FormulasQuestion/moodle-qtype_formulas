@@ -113,7 +113,6 @@ $string['error_bitwor_integer'] = 'Bitwise OR should only be used with integers.
 $string['error_bitwxor_integer'] = 'Bitwise XOR should only be used with integers.';
 $string['error_cannotusealgebraic'] = 'Algebraic variable \'{$a}\' cannot be used in this context.';
 $string['error_criterion_empty'] = 'The grading criterion must not be empty.';
-$string['error_damaged_question'] = 'Invalid data. The Formulas question might have been damaged, e. g. during a failed import or restore process.';
 $string['error_db_delete'] = 'Could not delete record from the database, table {$a}.';
 $string['error_db_missing_options'] = 'Formulas question ID {$a} was missing an options record. Using default.';
 $string['error_db_read'] = 'Could not read from to the database, table {$a}.';
@@ -334,6 +333,8 @@ The basic one is the "Common SI units" rules that will convert standard units su
 say, km, m, cm and mm. This option has no effect if no unit has been used.';
 $string['settingallowdecimalcomma'] = 'Localised decimal separator';
 $string['settingallowdecimalcomma_desc'] = 'Allow all students to use the comma as decimal separator in answers.<br>If activated, numbers will be displayed according to the locale settings.';
+$string['settinglenientimport'] = 'Lenient check on import';
+$string['settinglenientimport_desc'] = 'When importing a question, do not check whether the provided model answers would receive full marks. <br>Note: You should only activate this setting temporarily.';
 $string['settings_heading_general'] = 'General preferences';
 $string['settings_heading_general_desc'] = '';
 $string['settings_heading_width'] = 'Default widths';
@@ -394,6 +395,7 @@ $string['choiceyes'] = 'Yes';
 $string['error_algebraic_var'] = 'Syntax error of defining algebraic variable.';
 $string['error_answertype_mistmatch'] = 'Answer type mismatch: Numerical answer type requires number and algebraic answer type requires string';
 $string['error_criterion'] = 'The grading criterion must be evaluated to a single number.';
+$string['error_damaged_question'] = 'Invalid data. The Formulas question might have been damaged, e. g. during a failed import or restore process.';
 $string['error_eval_numerical'] = 'Some expressions cannot be evaluated numerically.';
 $string['error_fixed_range'] = 'Syntax error of a fixed range.';
 $string['error_forbid_char'] = 'Formula or expression contains forbidden characters or operators.';

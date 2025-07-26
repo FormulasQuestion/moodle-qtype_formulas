@@ -464,6 +464,12 @@ final class questiontype_test extends \advanced_testcase {
                 ],
             ],
             [
+                ['correctness[0]' => get_string('error_grading_not_one', 'qtype_formulas', 0)],
+                [
+                    'correctness' => [0 => '0'],
+                ],
+            ],
+            [
                 ['correctness[0]' => get_string('error_grading_single_expression', 'qtype_formulas', 2)],
                 [
                     'correctness' => [0 => 'a=1; b=2'],
@@ -995,7 +1001,7 @@ final class questiontype_test extends \advanced_testcase {
     }
 
     /**
-     * Data provider.
+     * Data provider. For invalid imports, we introduce the expected error message by adding an exclamation mark.
      *
      * @return array
      */
@@ -1008,16 +1014,26 @@ final class questiontype_test extends \advanced_testcase {
                 $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.3.0.xml',
             ],
             [
+                '!At least one answer is required.',
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_no_answer.xml',
+            ],
+            [
+                '!The grading criterion should evaluate to 1 for correct answers.',
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_grading_model_answer.xml',
+            ],
+            [
                 'For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria',
                 $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.2.0.xml',
             ],
         ];
     }
+
     /**
      * Test importing a question from a prior XML export.
      *
-     * @param string $expected expected output after XML import
+     * @param string $expected expected output after XML import (starting with ! for expected errors)
      * @param string $filename path of fixture file to be used
+     *
      * @dataProvider provide_import_filenames
      */
     public function test_import_from_xml($expected, $filename): void {
@@ -1053,7 +1069,89 @@ final class questiontype_test extends \advanced_testcase {
 
         // Import our XML file.
         self::assertTrue($qformat->importpreprocess());
-        self::assertTrue($qformat->importprocess());
+        if ($expected[0] !== '!') {
+            self::assertTrue($qformat->importprocess());
+        } else {
+            $expected = substr($expected, 1);
+            self::assertFalse($qformat->importprocess());
+        }
+        self::assertTrue($qformat->importpostprocess());
+
+        // Importing generates output. Make sure the tests expects that.
+        $this->expectOutputRegex('/\+\+ Importing 1 questions from file \+\+.*' . preg_quote($expected, '/') . '/s');
+    }
+
+    /**
+     * Data provider. For invalid imports, we introduce the expected error message by adding an exclamation mark.
+     *
+     * @return array
+     */
+    public static function provide_import_filenames_for_lenient_import(): array {
+        global $CFG;
+
+        return [
+            [
+                '!At least one answer is required.',
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_no_answer.xml',
+            ],
+            [
+                'Question text',
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_grading_model_answer.xml',
+            ],
+        ];
+    }
+
+    /**
+     * Test lenient check of imported question.
+     *
+     * @param string $expected expected output after XML import (starting with ! for expected errors)
+     * @param string $filename path of fixture file to be used
+     *
+     * @dataProvider provide_import_filenames_for_lenient_import
+     */
+    public function test_lenient_import_from_xml($expected, $filename): void {
+        global $CFG;
+
+        // Login as admin user.
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        // Create a course and a question category.
+        $course = $this->getDataGenerator()->create_course();
+        $context = context_system::instance();
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $category = $questiongenerator->create_question_category(['contextid' => $context->id]);
+
+        // Prepare the XML format class.
+        require_once($CFG->dirroot . '/question/format/xml/format.php');
+        $qformat = new \qformat_xml();
+        $qformat->setCategory($category);
+        if (class_exists('\core_question\local\bank\question_edit_contexts')) {
+            $contexts = new \core_question\local\bank\question_edit_contexts($context);
+        } else {
+            $contexts = new \question_edit_contexts($context);
+        }
+        $qformat->setContexts($contexts);
+        $qformat->setCourse($course);
+        $qformat->setFilename($filename);
+        $qformat->setMatchgrades(false);
+        $qformat->setCatfromfile(false);
+        $qformat->setContextfromfile(false);
+        $qformat->setStoponerror(true);
+
+        // Activate lenient import.
+        set_config('lenientimport', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'lenientimport'));
+
+        // Import our XML file.
+        self::assertTrue($qformat->importpreprocess());
+        if ($expected[0] !== '!') {
+            self::assertTrue($qformat->importprocess());
+        } else {
+            $expected = substr($expected, 1);
+            self::assertFalse($qformat->importprocess());
+        }
         self::assertTrue($qformat->importpostprocess());
 
         // Importing generates output. Make sure the tests expects that.
