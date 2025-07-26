@@ -355,10 +355,10 @@ class evaluator {
      *
      * @param token $vartoken
      * @param token $value
-     * @param bool $israndomvar
+     * @param bool $definingrandomvar
      * @return token
      */
-    private function set_variable_to_value(token $vartoken, token $value, $israndomvar = false): token {
+    private function set_variable_to_value(token $vartoken, token $value, $definingrandomvar = false): token {
         // Get the "basename" of the variable, e.g. foo in case of foo[1][2].
         $basename = $vartoken->value;
         if (strpos($basename, '[') !== false) {
@@ -383,7 +383,7 @@ class evaluator {
         if ($basename === $vartoken->value) {
             // If we are assigning to a random variable, we create a new instance and
             // return the value of the first instantiation.
-            if ($israndomvar) {
+            if ($definingrandomvar) {
                 $useshuffle = $value->type === variable::LIST;
                 if (is_scalar($value->value)) {
                     $this->die(get_string('error_invalidrandvardef', 'qtype_formulas'), $value);
@@ -408,8 +408,14 @@ class evaluator {
             return token::wrap($var->value);
         }
 
-        // If there is an index and we are setting a random variable, we throw an error.
-        if ($israndomvar || array_key_exists($basename, $this->randomvariables)) {
+        // If there is an index, we MUST NOT be in an assignment of random variables (in the random variables
+        // section of the question). Also the target variable MUST NOT be a random variable, unless it is a
+        // "shuffle" variable, i. e. it containis a shuffled array.
+        $cannotsetelement = false;
+        if (array_key_exists($basename, $this->randomvariables)) {
+            $cannotsetelement = !$this->randomvariables[$basename]->shuffle;
+        }
+        if ($definingrandomvar || $cannotsetelement) {
             $this->die(get_string('error_setindividual_randvar', 'qtype_formulas'), $value);
         }
 

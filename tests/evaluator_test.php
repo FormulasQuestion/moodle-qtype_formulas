@@ -1423,6 +1423,35 @@ final class evaluator_test extends \advanced_testcase {
         }
     }
 
+    public function test_setting_element_in_random_variables(): void {
+        // Setup and instantiate a random variable.
+        $randomvars = 'a=shuffle([1,2,3]); b={1,2,3}';
+        $randomparser = new random_parser($randomvars);
+        $evaluator = new evaluator();
+        $evaluator->evaluate($randomparser->get_statements());
+        $evaluator->instantiate_random_variables();
+
+        // Globally change one value in a.
+        $globalvars = 'a[0] = 111;';
+        $globalparser = new parser($globalvars);
+        $evaluator->evaluate($globalparser->get_statements());
+        $a = $evaluator->export_single_variable('a')->value;;
+        self::assertEquals(111, $a[0]->value);
+
+        // Try to change a value in b. This should fail.
+        $error = '';
+        $e = null;
+        try {
+            $globalvars = 'b[0] = 111;';
+            $globalparser = new parser($globalvars);
+            $evaluator->evaluate($globalparser->get_statements());
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+        self::assertNotNull($e);
+        self::assertStringEndsWith('Setting individual elements is not supported for random variables.', $error);
+    }
+
     /**
      * Provide nested lists.
      *

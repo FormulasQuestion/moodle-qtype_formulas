@@ -40,7 +40,7 @@ class random_variable extends variable {
     public $value = null;
 
     /** @var bool if the variable is a shuffled array */
-    private bool $shuffle;
+    public bool $shuffle;
 
     /**
      * Constructor.
