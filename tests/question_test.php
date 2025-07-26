@@ -1445,11 +1445,11 @@ final class question_test extends \advanced_testcase {
         return [
             [['""'], ['']],
             [['"a"'], ['a']],
-            [['"a"'], ['"a"']],
+            ['!', ['"a"']],
             [['"1"', '"2"'], ['1', '2']],
             [['""', '""'], ['', '']],
-            [['""', '""'], ['""', '""']],
-            [['"1"', '"x"'], ['"1"', '"x"']],
+            ['!', ['""', '""']],
+            ['!', ['"1"', '"x"']],
         ];
     }
 
@@ -1465,7 +1465,17 @@ final class question_test extends \advanced_testcase {
         $func = new \ReflectionMethod(qtype_formulas_part::class, 'wrap_algebraic_formulas_in_quotes');
         $func->setAccessible(true);
 
-        $wrapped = $func->invoke(null, $input);
+        $error = false;
+        try {
+            $wrapped = $func->invoke(null, $input);
+        } catch (Exception $e) {
+            $error = true;
+        }
+
+        if ($expected === '!') {
+            self::assertTrue($error);
+            return;
+        }
 
         foreach ($expected as $i => $exp) {
             self::assertEquals($exp, $wrapped[$i]);
