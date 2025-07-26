@@ -1,5 +1,28 @@
 # Changelog
 
+### 6.1.0 (2025-07-26)
+
+- improvement: allow use of local decimal separator (comma) in student answers
+- improvement: use local decimal separator when displaying numbers in feedback or question text
+- improvement: simplifiy shuffling options in multi-choice answer fields using ":MCS" or ":MCES"
+- improvement: implement basic formatting of input fields (width, color, alignment)
+- improvement: add option to skip checking correctness of model answer when importing questions
+- improvement: better error reporting if importing a question fails
+- bugfix: ignore empty statements or subsequent semicolons in variable definitions
+- bugfix: avoid undesired linebreak around dropdown fields with Moodle 5.0 and above
+- bugfix: avoid re-activation of outdated MathJax preview
+- bugfix: fix instantiation check for variables that contain HTML
+- bugfix: allow setting individual elements in lists that are initialised with fill()
+- bugfix: allow large reservoirs for random and algebraic variables
+- bugfix: fix rendering of local variables in questions with answer type algebraic formula
+- bugfix: flag quotes and strings in student answers as invalid
+- internal: fix failing unit tests for Moodle 4.5+ after MDL-85721
+- internal: improve language strings
+- internal: improve layout of admin settings page
+- internal: remove obsolete admin setting "usepopup"
+
+Details: https://github.com/FormulasQuestion/moodle-qtype_formulas/compare/v6.0.4...v6.1.0
+
 ### 6.0.4 (2025-06-16)
 
 - bugfix: avoid outdated MathJax preview being re-activated
