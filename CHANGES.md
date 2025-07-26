@@ -1,5 +1,9 @@
 # Changelog
 
+### 6.1.1 (2025-07-27)
+
+- bugfix: allow assigning values to elements of shuffled lists
+
 ### 6.1.0 (2025-07-26)
 
 - improvement: allow use of local decimal separator (comma) in student answers
