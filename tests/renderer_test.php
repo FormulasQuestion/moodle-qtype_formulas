@@ -213,6 +213,19 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5 * x^2');
         $this->check_output_does_not_contain('a*x^2');
 
+        // Submit correct answer in quotes, which will be graded wrong.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '"5x^2"', '-submit' => 1]);
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->check_current_output(
+                $this->get_contains_mark_summary(0),
+        );
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '"5x^2"', false);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5 * x^2');
+        $this->check_output_does_not_contain('a*x^2');
+
         // Submit right answer.
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->process_submission(['0_0' => '5*x^2', '-submit' => 1]);
