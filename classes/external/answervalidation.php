@@ -100,7 +100,9 @@ class answervalidation extends \external_api {
             $parser = new answer_parser($number);
             // As we are in a try-catch block anyway, we can just throw an Exception if the answer
             // is not acceptable.
-            if (!$parser->is_acceptable_for_answertype($answertype)) {
+            $isacceptable = $parser->is_acceptable_for_answertype($answertype);
+            $containsquote = preg_match('/[\'"]/', $number);
+            if (!$isacceptable || $containsquote) {
                 $answertypestrings = [
                     qtype_formulas::ANSWER_TYPE_NUMBER => 'number',
                     qtype_formulas::ANSWER_TYPE_NUMERIC => 'numeric',

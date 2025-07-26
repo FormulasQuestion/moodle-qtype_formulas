@@ -1335,10 +1335,12 @@ class qtype_formulas_part {
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
         foreach ($formulas as &$formula) {
-            // If the formula is aready wrapped in quotes (e. g. after an earlier call to this
-            // function), there is nothing to do.
+            // If the formula is aready wrapped in quotes, we throw an Exception, because that
+            // should not happen. It will happen, if the student puts quotes around their response, but
+            // we want that to be graded wrong. The exception will be caught and dealt with upstream,
+            // so we do not need to be more precise.
             if (preg_match('/^\"[^\"]*\"$/', $formula)) {
-                continue;
+                throw new Exception();
             }
 
             $formula = '"' . $formula . '"';
@@ -1495,7 +1497,12 @@ class qtype_formulas_part {
         // formulas, we must wrap the answers in quotes before we move on. Also, we reset the conversion
         // factor, because it is not needed for algebraic answers.
         if ($isalgebraic) {
-            $response = self::wrap_algebraic_formulas_in_quotes($response);
+            try {
+                $response = self::wrap_algebraic_formulas_in_quotes($response);
+            } catch (Throwable $t) {
+                // TODO: convert to non-capturing catch
+                return ['answer' => 0, 'unit' => $unitcorrect];
+            }
             $conversionfactor = 1;
         }
 
