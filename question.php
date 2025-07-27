@@ -236,7 +236,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         // For the question summary, it seems useful to simplify the answer box placeholders.
         $summary = preg_replace(
-            '/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE|MCES|MCS))?)?((\|[\w =#]*)*)\}/',
+            '/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MC|MCE|MCES|MCS))?)?((\|[\w =#]*)*)\}/',
             '{\1}',
             $summary,
         );
@@ -1026,7 +1026,7 @@ class qtype_formulas_part {
      * Answer box placeholders have one of the following forms:
      * - {_u} for the unit box
      * - {_n} for an answer box, n must be an integer
-     * - {_n:str} for radio buttons, str must be a variable name
+     * - {_n:str} or {_n:str:MC} for radio buttons, str must be a variable name
      * - {_n:str:MCS} for *shuffled* radio buttons, str must be a variable name
      * - {_n:str:MCE} for a drop down field, MCE must be verbatim
      * - {_n:str:MCES} for a *shuffled* drop down field, MCE must be verbatim
@@ -1043,7 +1043,7 @@ class qtype_formulas_part {
      */
     public static function scan_for_answer_boxes(string $text): array {
         // Match the text and store the matches.
-        preg_match_all('/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MCE|MCS|MCES))?)?((\|[\w .=#]*)*)\}/', $text, $matches);
+        preg_match_all('/\{(_u|_\d+)(:(_[A-Za-z]|[A-Za-z]\w*)(:(MC|MCE|MCS|MCES))?)?((\|[\w .=#]*)*)\}/', $text, $matches);
 
         $boxes = [];
 
@@ -1057,9 +1057,8 @@ class qtype_formulas_part {
             // text is later needed to replace the placeholder by the input element.
             // With $matches[3], we can access the name of the variable containing the options for the radio
             // boxes or the drop down list.
-            // Finally, the array $matches[4] will contain ':MCE', ':MCES' or ':MCS' in case this has been
+            // Finally, the array $matches[4] will contain ':MC', ':MCE', ':MCES' or ':MCS' in case this has been
             // specified. Otherwise, there will be an empty string.
-            // TODO: add option 'size' (for characters) or 'width' (for pixel width).
             $boxes[$match] = [
                 'placeholder' => $matches[0][$i],
                 'options' => $matches[3][$i],
