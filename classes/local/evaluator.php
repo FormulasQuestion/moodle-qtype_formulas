@@ -790,22 +790,30 @@ class evaluator {
         // This is needed for the diff() function, because strings are evaluated as algebraic
         // formulas, i. e. in a completely different way. Also, both lists must have the same data
         // type.
-        // FIXME: correctly find type from first token ≠ $EMPTY
-        $type = $first[0]->type;
-        if ($type === token::EMPTY) {
-            $type = token::NUMBER;
-        }
-        if (!in_array($type, [token::NUMBER, token::STRING])) {
-            throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
-        }
+        $type = token::EMPTY;
         for ($i = 0; $i < $count; $i++) {
-            // Note: the $EMPTY token is allowed in lists of strings or numbers.
+            // As long as we have not found a "real" (i. e. non-empty) element, we update the type.
+            // If the type is not valid, we throw an error.
+            if ($type === token::EMPTY) {
+                $type = $first[$i]->type;
+            }
+            // If the current element's type does not match, we throw an error, unless it is the
+            // $EMPTY token, because it may appear in a list of numbers or strings.
             if ($first[$i]->type !== $type && $first[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_firstlist_mismatch', 'qtype_formulas', $i));
             }
             if ($second[$i]->type !== $type && $second[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_secondlist_mismatch', 'qtype_formulas', $i));
             }
+        }
+        // If all elements of the first list are $EMPTY, we treat the list as a list of numbers, because
+        // that's the most straightforward way to calculate the difference. There's probably no real use
+        // case to have only empty answers in a question, but there's no reason to forbid it, either.
+        if ($type === token::EMPTY) {
+            $type = token::NUMBER;
+        }
+        if (!in_array($type, [token::NUMBER, token::STRING])) {
+            throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
         }
 
         // If we are working with numbers, we can directly calculate the differences and return.
@@ -817,11 +825,13 @@ class evaluator {
 
             $result = [];
             for ($i = 0; $i < $count; $i++) {
-                if ($first[$i]->type === token::EMPTY) {
-                    // If the model answer is $EMPTY, the student answer must also be $EMPTY. Otherwise,
-                    // the difference is considered to be PHP_FLOAT_MAX.
-                    // FIXME: better comment (--> needed when diff used for grading)
-                    $diff = ($second[$i]->type === token::EMPTY ? 0 : PHP_FLOAT_MAX);
+                // This function is also used to calculate the difference between the model answers
+                // and the student's response. In that case, the difference between an $EMPTY answer
+                // and any other value shall always be PHP_FLOAT_MAX. The difference between an
+                // $EMPTY answer and an empty response shall, of course, be 0. For "real" values,
+                // the difference is calculated normally.
+                if ($first[$i]->type === token::EMPTY || $second[$i]->type === token::EMPTY) {
+                    $diff = ($second[$i]->type === $first[$i]->type ? 0 : PHP_FLOAT_MAX);
                 } else {
                     $diff = abs($first[$i]->value - $second[$i]->value);
                 }
@@ -839,6 +849,14 @@ class evaluator {
         // Iterate over all strings and calculate the root mean square difference between the two expressions.
         // FIXME: special provision for $EMPTY model answers.
         for ($i = 0; $i < $count; $i++) {
+            // If both list elements are the $EMPTY token, the difference is zero and we do not have to
+            // do any more calculations. Otherwise, we just carry on. The calculation will fail later
+            // and the difference will automatically be PHP_FLOAT_MAX.
+            if ($first[$i]->type === token::EMPTY && $second[$i]->type === token::EMPTY) {
+                $result[$i] = token::wrap(0, token::NUMBER);
+                continue;
+            }
+
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
 
