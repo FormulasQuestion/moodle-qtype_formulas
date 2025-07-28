@@ -36,6 +36,7 @@ use qtype_formulas\local\lexer;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\parser;
 use qtype_formulas\local\token;
+use qtype_formulas\local\variable;
 use qtype_formulas\unit_conversion_rules;
 
 defined('MOODLE_INTERNAL') || die();
@@ -539,6 +540,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // Now, we do the classification for every part.
         foreach ($this->parts as $part) {
             // Unanswered parts can immediately be classified.
+            // FIXME: change this if part allows empty fields
             if ($part->is_unanswered($response)) {
                 $classification[$part->partindex] = question_classified_response::no_response();
                 continue;
@@ -883,6 +885,10 @@ class qtype_formulas_part {
     /** @var int whether there are multiple possible answers */
     public int $answernotunique;
 
+    /** @var int whether students can leave one or more fields empty */
+    public int $emptyallowed = 1;
+    // FIXME: change this once the DB is updated
+
     /** @var string definition of the grading criterion */
     public string $correctness;
 
@@ -1205,6 +1211,11 @@ class qtype_formulas_part {
      * @return bool
      */
     public function is_gradable_response(array $response): bool {
+        // If the part allows empty fields, we do not have to check anything; the response would be
+        // gradable even if all fields were empty.
+        if ($this->emptyallowed) {
+            return true;
+        }
         return !$this->is_unanswered($response);
     }
 
@@ -1218,6 +1229,11 @@ class qtype_formulas_part {
      * @return bool
      */
     public function is_complete_response(array $response): bool {
+        // If the part allows empty fields, we do not have to check anything; the response can be
+        // considered complete even if all fields are empty.
+        if ($this->emptyallowed) {
+            return true;
+        }
         // First, we check if there is a combined unit field. In that case, there will
         // be only one field to verify.
         if ($this->has_combined_unit_field()) {
@@ -1304,10 +1320,11 @@ class qtype_formulas_part {
         // or an array of literal tokens. If we have one single answer, we wrap it into an array
         // before continuing. Otherwise we convert the array of tokens into an array of literals.
         if ($result->type & token::ANY_LITERAL) {
-            $this->evaluatedanswers = [$result->value];
+            $this->evaluatedanswers = [$result];
         } else {
+            // FIXME: simplify later
             $this->evaluatedanswers = array_map(function ($element) {
-                return $element->value;
+                return $element;
             }, $result->value);
         }
 
@@ -1315,7 +1332,7 @@ class qtype_formulas_part {
         // their numerical value.
         if ($isalgebraic) {
             foreach ($this->evaluatedanswers as &$answer) {
-                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
+                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer->value);
             }
             // In case we later write to $answer, this would alter the last entry of the $modelanswers
             // array, so we'd better remove the reference to make sure this won't happend.
@@ -1395,7 +1412,8 @@ class qtype_formulas_part {
         if ($isalgebraic) {
             $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
         }
-        $command = '_a = [' . implode(',', $modelanswers ). '];';
+        $this->evaluator->import_single_variable('_a', new variable('_a', $modelanswers, variable::LIST));
+        //$command = '_a = [' . implode(',', $modelanswers ). '];';
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
@@ -1418,28 +1436,53 @@ class qtype_formulas_part {
         foreach ($studentanswers as $i => &$studentanswer) {
             // We only do the calculation if the answer type is not algebraic. For algebraic
             // answers, we don't do anything, because quotes have already been added.
-            if (!$isalgebraic) {
-                $studentanswer = $conversionfactor * $studentanswer;
-                $ssqstudentanswer += $studentanswer ** 2;
+            if (!$isalgebraic && $studentanswer->type !== token::EMPTY) {
+                $studentanswer->value = $conversionfactor * $studentanswer->value;
+                $ssqstudentanswer += $studentanswer->value ** 2;
             }
-            $command .= "_{$i} = {$studentanswer};";
+            $this->evaluator->import_single_variable("_{$i}", new variable("_{$i}", $studentanswer->value, $studentanswer->type));
         }
         unset($studentanswer);
-        $command .= '_r = [' . implode(',', $studentanswers) . '];';
+        //$command .= '_r = [' . implode(',', $studentanswers) . '];';
+
+        $this->evaluator->import_single_variable('_r', new variable('_r', $studentanswers, variable::LIST));
 
         // The variable _d will contain the absolute differences between the model answer
         // and the student's response. Using the parser's diff() function will make sure
         // that algebraic answers are correctly evaluated.
-        $command .= '_d = diff(_a, _r);';
+        // $command .= '_d = diff(_a, _r);';
+        // Note: We *must* send the model answer first, because the function has a special check for the
+        // EMPTY token.
+        $diff = $this->evaluator->diff($modelanswers, $studentanswers);
+        $this->evaluator->import_single_variable('_d', new variable('_d', $diff, variable::LIST));
+
+        $err = 0;
+        $root = true;
+        foreach ($diff as $i => $singlediff) {
+            // Make sure the error will not grow bigger than PHP_FLOAT_MAX.
+            if ($err + $singlediff->value ** 2 >= PHP_FLOAT_MAX) {
+                $err = PHP_FLOAT_MAX;
+                $root = false;
+                break;
+            }
+            $err += $singlediff->value ** 2;
+        }
+        if ($root) {
+            $err = sqrt($err);
+        }
+        $this->evaluator->import_single_variable('_err', new variable('_err', $err, variable::NUMERIC));
 
         // Prepare the variable _err which is the root of the sum of squared differences.
-        $command .= "_err = sqrt(sum(map('*', _d, _d)));";
+        //$command .= "_err = sqrt(sum(map('*', _d, _d)));";
 
         // Finally, calculate the relative error, unless the question uses an algebraic answer.
         if (!$isalgebraic) {
             // We calculate the sum of squares of all model answers.
             $ssqmodelanswer = 0;
             foreach ($this->get_evaluated_answers() as $answer) {
+                if ($answer->type === token::EMPTY) {
+                    continue;
+                }
                 $ssqmodelanswer += $answer ** 2;
             }
             // If the sum of squares is 0 (i.e. all answers are 0), then either the student
@@ -1448,14 +1491,15 @@ class qtype_formulas_part {
             // Otherwise, the relative error is simply the absolute error divided by the root
             // of the sum of squares.
             if ($ssqmodelanswer == 0) {
-                $command .= '_relerr = ' . ($ssqstudentanswer == 0 ? 0 : PHP_FLOAT_MAX);
+                $relerr = ($ssqstudentanswer == 0 ? 0 : PHP_FLOAT_MAX);
             } else {
-                $command .= "_relerr = _err / sqrt({$ssqmodelanswer})";
+                $relerr = $err / sqrt($ssqmodelanswer);
             }
+            $this->evaluator->import_single_variable('_relerr', new variable('_relerr', $relerr, variable::NUMERIC));
         }
 
-        $parser = new parser($command, $this->evaluator->export_variable_list());
-        $this->evaluator->evaluate($parser->get_statements(), true);
+        //$parser = new parser($command, $this->evaluator->export_variable_list());
+        //$this->evaluator->evaluate($parser->get_statements(), true);
     }
 
     /**
@@ -1518,7 +1562,7 @@ class qtype_formulas_part {
                 // Check whether the answer is valid for the given answer type. If it is not,
                 // we just throw an exception to make use of the catch block. Note that if the
                 // student's answer was empty, it will fail in this check.
-                if (!$parser->is_acceptable_for_answertype($this->answertype)) {
+                if (!$parser->is_acceptable_for_answertype($this->answertype, $this->emptyallowed)) {
                     throw new Exception();
                 }
 
@@ -1526,8 +1570,13 @@ class qtype_formulas_part {
                 // failed evaluation, e.g. caused by an invalid answer.
                 $this->evaluator->clear_stack();
 
-                $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
-                $evaluatedresponse[] = token::unpack($evaluated);
+                // Evaluate, if not empty.
+                if (empty($answer) && !is_numeric($answer)) {
+                    $evaluated = new token(token::EMPTY, '$EMPTY');
+                } else {
+                    $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
+                }
+                $evaluatedresponse[] = $evaluated; //token::unpack($evaluated);
             } catch (Throwable $t) {
                 // TODO: convert to non-capturing catch
                 // If parsing, validity check or evaluation fails, we consider the answer as wrong.
