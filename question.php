@@ -1414,7 +1414,6 @@ class qtype_formulas_part {
             $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
         }
         $this->evaluator->import_single_variable('_a', new variable('_a', $modelanswers, variable::LIST));
-        //$command = '_a = [' . implode(',', $modelanswers ). '];';
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
@@ -1444,37 +1443,32 @@ class qtype_formulas_part {
             $this->evaluator->import_single_variable("_{$i}", new variable("_{$i}", $studentanswer->value, $studentanswer->type));
         }
         unset($studentanswer);
-        //$command .= '_r = [' . implode(',', $studentanswers) . '];';
-
         $this->evaluator->import_single_variable('_r', new variable('_r', $studentanswers, variable::LIST));
 
         // The variable _d will contain the absolute differences between the model answer
         // and the student's response. Using the parser's diff() function will make sure
         // that algebraic answers are correctly evaluated.
-        // $command .= '_d = diff(_a, _r);';
         // Note: We *must* send the model answer first, because the function has a special check for the
         // EMPTY token.
-        $diff = $this->evaluator->diff($modelanswers, $studentanswers);
-        $this->evaluator->import_single_variable('_d', new variable('_d', $diff, variable::LIST));
+        $differences = $this->evaluator->diff($modelanswers, $studentanswers);
+        $this->evaluator->import_single_variable('_d', new variable('_d', $differences, variable::LIST));
 
         $err = 0;
         $root = true;
-        foreach ($diff as $i => $singlediff) {
-            // Make sure the error will not grow bigger than PHP_FLOAT_MAX.
-            if ($err + $singlediff->value ** 2 >= PHP_FLOAT_MAX) {
+        foreach ($differences as $i => $diff) {
+            // Make sure the error will not grow bigger than PHP_FLOAT_MAX. If we get there, don't calculate
+            // the square root in the end.
+            if ($err + $diff->value ** 2 >= PHP_FLOAT_MAX) {
                 $err = PHP_FLOAT_MAX;
                 $root = false;
                 break;
             }
-            $err += $singlediff->value ** 2;
+            $err += $diff->value ** 2;
         }
         if ($root) {
             $err = sqrt($err);
         }
         $this->evaluator->import_single_variable('_err', new variable('_err', $err, variable::NUMERIC));
-
-        // Prepare the variable _err which is the root of the sum of squared differences.
-        //$command .= "_err = sqrt(sum(map('*', _d, _d)));";
 
         // Finally, calculate the relative error, unless the question uses an algebraic answer.
         if (!$isalgebraic) {
@@ -1484,7 +1478,7 @@ class qtype_formulas_part {
                 if ($answer->type === token::EMPTY) {
                     continue;
                 }
-                $ssqmodelanswer += $answer ** 2;
+                $ssqmodelanswer += $answer->value ** 2;
             }
             // If the sum of squares is 0 (i.e. all answers are 0), then either the student
             // answers are all 0 as well, in which case we set the relative error to 0. Or
@@ -1498,9 +1492,6 @@ class qtype_formulas_part {
             }
             $this->evaluator->import_single_variable('_relerr', new variable('_relerr', $relerr, variable::NUMERIC));
         }
-
-        //$parser = new parser($command, $this->evaluator->export_variable_list());
-        //$this->evaluator->evaluate($parser->get_statements(), true);
     }
 
     /**
