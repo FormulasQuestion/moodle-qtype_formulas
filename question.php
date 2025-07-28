@@ -454,6 +454,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return bool whether this response can be graded
      */
     public function is_gradable_response(array $response): bool {
+        if (array_key_exists('_seed', $response)) {
+            return false;
+        }
         // Iterate over all parts. If at least one part is gradable, we can leave early.
         foreach ($this->parts as $part) {
             if ($part->is_gradable_response($response)) {
@@ -517,7 +520,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         foreach ($this->parts as $part) {
             $summary[] = $part->summarise_response($response);
         }
-        return implode(', ', $summary);
+        return implode('; ', $summary);
     }
 
     /**
@@ -534,6 +537,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         // Now, we do the classification for every part.
         foreach ($this->parts as $part) {
             // Unanswered parts can immediately be classified.
+            // FIXME: change this if part allows empty fields
             if ($part->is_unanswered($response)) {
                 $classification[$part->partindex] = question_classified_response::no_response();
                 continue;

@@ -95,6 +95,10 @@ class lexer {
         if ($currentchar === input_stream::EOF) {
             return self::EOF;
         }
+        // If we have a $ character, this could introduce the $EMPTY token.
+        if ($currentchar === '$') {
+            return $this->read_empty_token();
+        }
         // If we have a " or ' character, this is the start of a string.
         if ($currentchar === '"' || $currentchar === "'") {
             return $this->read_string();
@@ -452,6 +456,35 @@ class lexer {
             $type = token::IDENTIFIER;
         }
         return new token($type, $result, $startingposition['row'], $startingposition['column']);
+    }
+
+    /**
+     * Read the special $EMPTY token from the input stream.
+     *
+     * @return token the $EMPTY token
+     */
+    private function read_empty_token(): token {
+        // Start by reading the first char. If we are here, that means it was a $ symbol.
+        $currentchar = $this->inputstream->read();
+        $result = $currentchar;
+
+        // Record position of the $ symbol.
+        $startingposition = $this->inputstream->get_position();
+
+        while ($currentchar !== input_stream::EOF) {
+            $nextchar = $this->inputstream->peek();
+            // Identifiers may contain letters, digits or underscores.
+            if (!preg_match('/[EMPTY]/', $nextchar)) {
+                break;
+            }
+            $currentchar = $this->inputstream->read();
+            $result .= $currentchar;
+        }
+        if ($result === '$EMPTY') {
+            return new token(token::EMPTY, $result, $startingposition['row'], $startingposition['column']);
+        }
+
+        $this->inputstream->die(get_string('error_invalid_dollar', 'qtype_formulas'));
     }
 
     /**

@@ -82,7 +82,7 @@ class qtype_formulas extends question_type {
      * - otherrule: additional rules for unit conversion
      */
     const PART_BASIC_FIELDS = ['placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
-        'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
+        'emptyallowed', 'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
 
     /**
      * This function returns the "simple" additional fields defined in the qtype_formulas_options
@@ -285,6 +285,7 @@ class qtype_formulas extends question_type {
                     'numbox' => 1,
                     'answer' => '',
                     'answernotunique' => 1,
+                    'emptyallowed' => 0,
                     'correctness' => '',
                     'ruleid' => 1,
                     'subqtext' => '',
@@ -1155,7 +1156,7 @@ class qtype_formulas extends question_type {
                     $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                     continue;
                 }
-                if (!$isalgebraic && !($answer->type === token::NUMBER || is_numeric($answer->value))) {
+                if (!$isalgebraic && !($answer->type === token::EMPTY || $answer->type === token::NUMBER || is_numeric($answer->value))) {
                     $errors["answer[$i]"] = get_string('error_number_for_numeric_answertypes', 'qtype_formulas');
                     continue;
                 }
