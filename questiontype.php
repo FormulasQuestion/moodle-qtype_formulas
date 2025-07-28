@@ -285,7 +285,7 @@ class qtype_formulas extends question_type {
                     'numbox' => 1,
                     'answer' => '',
                     'answernotunique' => 1,
-                    'emptyallowed' => 0,
+                    'emptyallowed' => 1,
                     'correctness' => '',
                     'ruleid' => 1,
                     'subqtext' => '',
@@ -890,6 +890,11 @@ class qtype_formulas extends question_type {
             $partdata[$i] = (object)['questionid' => $data->id];
             // Set the basic fields, e.g. mark, placeholder or definition of local variables.
             foreach (self::PART_BASIC_FIELDS as $field) {
+                // FIXME: remove this later, when the DB is updated
+                if ($field === 'emptyallowed') {
+                    $partdata[$i]->emptyallowed = 1;
+                    continue;
+                }
                 // In the edit form, the part's 'unitpenalty' and 'ruleid' are set via the global options
                 // 'globalunitpenalty' and 'globalruleid'. When importing a question, they do not need
                 // special treatment, because they are already stored with the part. Also, all other fields

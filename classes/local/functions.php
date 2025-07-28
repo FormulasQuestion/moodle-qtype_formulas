@@ -1363,12 +1363,7 @@ class functions {
                 $output = $first ** $second;
                 break;
             case '*':
-                // Little trick for error calculation with $EMPTY token.
-                if ($first === PHP_FLOAT_MAX && $second === $first) {
-                    $output = PHP_FLOAT_MAX;
-                } else {
-                    $output = $first * $second;
-                }
+                $output = $first * $second;
                 break;
             case '/':
             case '%':
