@@ -88,7 +88,12 @@ class answer_parser extends parser {
      * @param int $type the answer type, a constant from the qtype_formulas class
      * @return bool
      */
-    public function is_acceptable_for_answertype(int $type): bool {
+    public function is_acceptable_for_answertype(int $type, bool $acceptempty = false): bool {
+        // An empty answer is never acceptable regardless of the answer type, unless empty fields
+        // are explicitly allowed for a question's part.
+        if (empty($this->tokenlist)) {
+            return $acceptempty;
+        }
         if ($type === qtype_formulas::ANSWER_TYPE_NUMBER) {
             return $this->is_acceptable_number();
         }

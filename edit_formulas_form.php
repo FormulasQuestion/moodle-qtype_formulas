@@ -220,6 +220,15 @@ class qtype_formulas_edit_form extends question_edit_form {
         );
         $repeatedoptions['answer']['helpbutton'] = ['answer', 'qtype_formulas'];
         $repeatedoptions['answer']['type'] = PARAM_RAW_TRIMMED;
+        // Whether the part allows leaving one or more fields empty.
+        // FIXME: add some validation: if $EMPTY in model answers, this must be checked
+        // FIXME: add validation: at least one answer must be ≠ $EMPTY
+        $repeated[] = $mform->createElement(
+            'advcheckbox',
+            'emptyallowed',
+            get_string('emptyallowed', 'qtype_formulas')
+        );
+        $repeatedoptions['emptyallowed']['helpbutton'] = ['emptyallowed', 'qtype_formulas'];
         // Whether the question has multiple answers.
         $repeated[] = $mform->createElement(
             'advcheckbox',
@@ -435,6 +444,10 @@ class qtype_formulas_edit_form extends question_edit_form {
                 $tags = qtype_formulas::PART_BASIC_FIELDS;
                 foreach ($question->options->answers as $key => $answer) {
                     foreach ($tags as $tag) {
+                        // FIXME: remove this later, when the DB is updated
+                        if ($tag === 'emptyallowed') {
+                            continue;
+                        }
                         if ($tag === 'unitpenalty' || $tag === 'ruleid') {
                             $defaultvalues['global' . $tag] = $answer->$tag;
                         } else {

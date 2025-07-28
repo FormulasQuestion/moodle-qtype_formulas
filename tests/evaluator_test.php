@@ -1937,6 +1937,29 @@ final class evaluator_test extends \advanced_testcase {
         self::assertStringEndsWith($expected, $error);
     }
 
+    public function test_fixme_test(): void {
+        $error = '';
+        $result = [];
+        $statements = [
+            new expression([
+                new token(token::NUMBER, 2),
+                new token(token::NUMBER, NAN),
+                new token(token::OPERATOR, '*'),
+            ])
+        ];
+        $parser = new parser('a = [1, 2]');
+        $statements = $parser->get_statements();
+
+        try {
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            echo $error . PHP_EOL;
+        }
+        var_dump($result);
+    }
+
     /**
      * Provide various (valid and invalid) algebraic expressions.
      *

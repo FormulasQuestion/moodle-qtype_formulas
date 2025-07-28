@@ -277,6 +277,20 @@ class evaluator {
     }
 
     /**
+     * FIXME
+     *
+     * @param string $name name of the variable
+     * @param variable $variable variable instance
+     */
+    public function import_single_variable(string $name, variable $variable, bool $overwrite = false): void {
+        if (array_key_exists($name, $this->variables) && !$overwrite) {
+            return;
+        }
+
+        $this->variables[$name] = $variable;
+    }
+
+    /**
      * Calculate the number of possible variants according to the defined random variables.
      *
      * @return int
@@ -776,15 +790,20 @@ class evaluator {
         // This is needed for the diff() function, because strings are evaluated as algebraic
         // formulas, i. e. in a completely different way. Also, both lists must have the same data
         // type.
+        // FIXME: correctly find type from first token ≠ $EMPTY
         $type = $first[0]->type;
+        if ($type === token::EMPTY) {
+            $type = token::NUMBER;
+        }
         if (!in_array($type, [token::NUMBER, token::STRING])) {
             throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
         }
         for ($i = 0; $i < $count; $i++) {
-            if ($first[$i]->type !== $type) {
+            // Note: the $EMPTY token is allowed in lists of strings or numbers.
+            if ($first[$i]->type !== $type && $first[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_firstlist_mismatch', 'qtype_formulas', $i));
             }
-            if ($second[$i]->type !== $type) {
+            if ($second[$i]->type !== $type && $second[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_secondlist_mismatch', 'qtype_formulas', $i));
             }
         }
@@ -798,8 +817,15 @@ class evaluator {
 
             $result = [];
             for ($i = 0; $i < $count; $i++) {
-                $diff = abs($first[$i]->value - $second[$i]->value);
-                $result[$i] = token::wrap($diff);
+                if ($first[$i]->type === token::EMPTY) {
+                    // If the model answer is $EMPTY, the student answer must also be $EMPTY. Otherwise,
+                    // the difference is considered to be PHP_FLOAT_MAX.
+                    // FIXME: better comment (--> needed when diff used for grading)
+                    $diff = ($second[$i]->type === token::EMPTY ? 0 : PHP_FLOAT_MAX);
+                } else {
+                    $diff = abs($first[$i]->value - $second[$i]->value);
+                }
+                $result[$i] = token::wrap($diff, token::NUMBER);
             }
             return $result;
         }
@@ -811,6 +837,7 @@ class evaluator {
 
         $result = [];
         // Iterate over all strings and calculate the root mean square difference between the two expressions.
+        // FIXME: special provision for $EMPTY model answers.
         for ($i = 0; $i < $count; $i++) {
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
