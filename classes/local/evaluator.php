@@ -793,7 +793,6 @@ class evaluator {
         $type = token::EMPTY;
         for ($i = 0; $i < $count; $i++) {
             // As long as we have not found a "real" (i. e. non-empty) element, we update the type.
-            // If the type is not valid, we throw an error.
             if ($type === token::EMPTY) {
                 $type = $first[$i]->type;
             }
@@ -812,6 +811,7 @@ class evaluator {
         if ($type === token::EMPTY) {
             $type = token::NUMBER;
         }
+        // If the type is not valid, we throw an error.
         if (!in_array($type, [token::NUMBER, token::STRING])) {
             throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
         }
@@ -847,7 +847,6 @@ class evaluator {
 
         $result = [];
         // Iterate over all strings and calculate the root mean square difference between the two expressions.
-        // FIXME: special provision for $EMPTY model answers.
         for ($i = 0; $i < $count; $i++) {
             // If both list elements are the $EMPTY token, the difference is zero and we do not have to
             // do any more calculations. Otherwise, we just carry on. The calculation will fail later
@@ -859,6 +858,8 @@ class evaluator {
 
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
+            // FIXME: get rid of this again
+            $expression = str_replace('"', '', $expression);
 
             // Flag that we will set to TRUE if a difference cannot be evaluated. This
             // is to make sure that the difference will be PHP_FLOAT_MAX and not
