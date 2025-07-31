@@ -107,6 +107,9 @@ class answer_parser extends parser {
         }
 
         if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            if (count($this->tokenlist) === 1 && $this->tokenlist[0]->value === '') {
+                return $acceptempty;
+            }
             return $this->is_acceptable_algebraic_formula();
         }
 

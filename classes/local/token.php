@@ -290,9 +290,9 @@ class token {
         if (in_array($token->type, [self::NUMBER, self::STRING])) {
             return $token->value;
         }
-        // If the token is the $EMPTY token, return NAN.
+        // If the token is the $EMPTY token, return the string '$EMPTY'.
         if ($token->type === self::EMPTY) {
-            return NAN;
+            return '$EMPTY';
         }
 
         // If the token is a list or set, we have to unpack all elements separately and recursively.

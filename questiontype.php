@@ -1157,7 +1157,7 @@ class qtype_formulas extends question_type {
             // "algebraic formula", they must all be strings. Otherwise, they must all be numbers or
             // at least numeric strings.
             foreach ($modelanswers as $answer) {
-                if ($isalgebraic && $answer->type !== token::STRING) {
+                if ($isalgebraic && ($answer->type !== token::STRING && $answer->type !== token::EMPTY)) {
                     $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                     continue;
                 }
@@ -1167,7 +1167,8 @@ class qtype_formulas extends question_type {
                 }
             }
             // Finally, we convert the array of tokens into an array of literals.
-            $modelanswers = token::unpack($modelanswers);
+            // FIXME: remove this
+            // $modelanswers = token::unpack($modelanswers);
 
             // Now that we know the model answers, we can set the $numbox property for the part,
             // i. e. the number of answer boxes that are to be shown.
@@ -1176,10 +1177,14 @@ class qtype_formulas extends question_type {
             // If the answer type is algebraic, we must now try to do algebraic evaluation of each answer
             // to check for bad formulas.
             if ($isalgebraic) {
-                foreach ($modelanswers as $k => $answer) {
+                foreach ($modelanswers as $k => $answertoken) {
+                    // If it is the $EMPTY token, we have nothing to do.
+                    if ($answertoken->type === token::EMPTY) {
+                        continue;
+                    }
                     // Evaluating the string should give us a numeric value.
                     try {
-                        $result = $partevaluator->calculate_algebraic_expression($answer);
+                        $result = $partevaluator->calculate_algebraic_expression($answertoken->value);
                     } catch (Exception $e) {
                         $a = (object)[
                             // Answers are zero-indexed, but users normally count from 1.

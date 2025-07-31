@@ -1957,7 +1957,7 @@ final class evaluator_test extends \advanced_testcase {
             $error = $e->getMessage();
             echo $error . PHP_EOL;
         }
-        var_dump($result);
+        //var_dump($result);
     }
 
     /**
