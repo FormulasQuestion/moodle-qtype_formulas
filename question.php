@@ -1321,11 +1321,10 @@ class qtype_formulas_part {
         // or an array of literal tokens. If we have one single answer, we wrap it into an array
         // before continuing. Otherwise we convert the array of tokens into an array of literals.
         if ($result->type & token::ANY_LITERAL) {
-            $this->evaluatedanswers = [$result];
+            $this->evaluatedanswers = [$result->value];
         } else {
-            // FIXME: simplify later
             $this->evaluatedanswers = array_map(function ($element) {
-                return $element;
+                return $element->value;
             }, $result->value);
         }
 
@@ -1333,7 +1332,11 @@ class qtype_formulas_part {
         // their numerical value.
         if ($isalgebraic) {
             foreach ($this->evaluatedanswers as &$answer) {
-                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer->value);
+                // If the answer is $EMPTY, there is nothing to do.
+                if ($answer === '$EMPTY') {
+                    continue;
+                }
+                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
             }
             // In case we later write to $answer, this would alter the last entry of the $modelanswers
             // array, so we'd better remove the reference to make sure this won't happend.
@@ -1352,6 +1355,11 @@ class qtype_formulas_part {
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
         foreach ($formulas as &$formula) {
+            // We do not have to wrap the $EMPTY token in quotes.
+            if ($formula === '$EMPTY') {
+                continue;
+            }
+
             // If the formula is aready wrapped in quotes, we throw an Exception, because that
             // should not happen. It will happen, if the student puts quotes around their response, but
             // we want that to be graded wrong. The exception will be caught and dealt with upstream,
@@ -1413,7 +1421,15 @@ class qtype_formulas_part {
         if ($isalgebraic) {
             $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
         }
-        $this->evaluator->import_single_variable('_a', new variable('_a', $modelanswers, variable::LIST));
+        $wrappedmodelanswers = [];
+        foreach ($modelanswers as $modelanswer) {
+            $type = null;
+            if ($modelanswer === '$EMPTY') {
+                $type = token::EMPTY;
+            }
+            $wrappedmodelanswers[] = token::wrap($modelanswer, $type);
+        }
+        $this->evaluator->import_single_variable('_a', new variable('_a', $wrappedmodelanswers, variable::LIST));
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
@@ -1433,14 +1449,21 @@ class qtype_formulas_part {
             $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);
         }
         $ssqstudentanswer = 0;
+        $wrappedstudentanswers = [];
         foreach ($studentanswers as $i => &$studentanswer) {
             // We only do the calculation if the answer type is not algebraic. For algebraic
             // answers, we don't do anything, because quotes have already been added.
-            if (!$isalgebraic && $studentanswer->type !== token::EMPTY) {
-                $studentanswer->value = $conversionfactor * $studentanswer->value;
-                $ssqstudentanswer += $studentanswer->value ** 2;
+            if (!$isalgebraic && $studentanswer !== '$EMPTY') {
+                $studentanswer = $conversionfactor * $studentanswer;
+                $ssqstudentanswer += $studentanswer ** 2;
             }
-            $this->evaluator->import_single_variable("_{$i}", new variable("_{$i}", $studentanswer->value, $studentanswer->type));
+            $type = null;
+            if ($studentanswer === '$EMPTY' || trim($studentanswer) === '' || $studentanswer === '""') {
+                $type = token::EMPTY;
+            }
+            $wrappedanswer = token::wrap($studentanswer, $type);
+            $wrappedstudentanswers[] = $wrappedanswer;
+            $this->evaluator->import_single_variable("_{$i}", new variable("_{$i}", $studentanswer, $wrappedanswer->type));
         }
         unset($studentanswer);
         $this->evaluator->import_single_variable('_r', new variable('_r', $studentanswers, variable::LIST));
@@ -1450,7 +1473,8 @@ class qtype_formulas_part {
         // that algebraic answers are correctly evaluated.
         // Note: We *must* send the model answer first, because the function has a special check for the
         // EMPTY token.
-        $differences = $this->evaluator->diff($modelanswers, $studentanswers);
+
+        $differences = $this->evaluator->diff($wrappedmodelanswers, $wrappedstudentanswers);
         $this->evaluator->import_single_variable('_d', new variable('_d', $differences, variable::LIST));
 
         $err = 0;
@@ -1475,10 +1499,10 @@ class qtype_formulas_part {
             // We calculate the sum of squares of all model answers.
             $ssqmodelanswer = 0;
             foreach ($this->get_evaluated_answers() as $answer) {
-                if ($answer->type === token::EMPTY) {
+                if ($answer === '$EMPTY' || trim($answer) === '') {
                     continue;
                 }
-                $ssqmodelanswer += $answer->value ** 2;
+                $ssqmodelanswer += $answer ** 2;
             }
             // If the sum of squares is 0 (i.e. all answers are 0), then either the student
             // answers are all 0 as well, in which case we set the relative error to 0. Or
@@ -1563,12 +1587,12 @@ class qtype_formulas_part {
                 $this->evaluator->clear_stack();
 
                 // Evaluate, if not empty.
-                if (empty($answer) && !is_numeric($answer)) {
+                if ($answer === '""' || (empty($answer) && !is_numeric($answer))) {
                     $evaluated = new token(token::EMPTY, '$EMPTY');
                 } else {
                     $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
                 }
-                $evaluatedresponse[] = $evaluated; //token::unpack($evaluated);
+                $evaluatedresponse[] = token::unpack($evaluated); // $evaluated;
             } catch (Throwable $t) {
                 // TODO: convert to non-capturing catch
                 // If parsing, validity check or evaluation fails, we consider the answer as wrong.
