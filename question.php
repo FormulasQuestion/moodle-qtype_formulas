@@ -1421,15 +1421,7 @@ class qtype_formulas_part {
         if ($isalgebraic) {
             $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
         }
-        $wrappedmodelanswers = [];
-        foreach ($modelanswers as $modelanswer) {
-            $type = null;
-            if ($modelanswer === '$EMPTY') {
-                $type = token::EMPTY;
-            }
-            $wrappedmodelanswers[] = token::wrap($modelanswer, $type);
-        }
-        $this->evaluator->import_single_variable('_a', new variable('_a', $wrappedmodelanswers, variable::LIST));
+        $command = '_a = [' . implode(',', $modelanswers ). '];';
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
@@ -1449,7 +1441,6 @@ class qtype_formulas_part {
             $studentanswers = self::wrap_algebraic_formulas_in_quotes($studentanswers);
         }
         $ssqstudentanswer = 0;
-        $wrappedstudentanswers = [];
         foreach ($studentanswers as $i => &$studentanswer) {
             // We only do the calculation if the answer type is not algebraic. For algebraic
             // answers, we don't do anything, because quotes have already been added.
@@ -1457,42 +1448,18 @@ class qtype_formulas_part {
                 $studentanswer = $conversionfactor * $studentanswer;
                 $ssqstudentanswer += $studentanswer ** 2;
             }
-            $type = null;
-            if ($studentanswer === '$EMPTY' || trim($studentanswer) === '' || $studentanswer === '""') {
-                $type = token::EMPTY;
-            }
-            $wrappedanswer = token::wrap($studentanswer, $type);
-            $wrappedstudentanswers[] = $wrappedanswer;
-            $this->evaluator->import_single_variable("_{$i}", new variable("_{$i}", $studentanswer, $wrappedanswer->type));
+            $command .= "_{$i} = {$studentanswer};";
         }
         unset($studentanswer);
-        $this->evaluator->import_single_variable('_r', new variable('_r', $studentanswers, variable::LIST));
+        $command .= '_r = [' . implode(',', $studentanswers) . '];';
 
         // The variable _d will contain the absolute differences between the model answer
         // and the student's response. Using the parser's diff() function will make sure
         // that algebraic answers are correctly evaluated.
         // Note: We *must* send the model answer first, because the function has a special check for the
         // EMPTY token.
-
-        $differences = $this->evaluator->diff($wrappedmodelanswers, $wrappedstudentanswers);
-        $this->evaluator->import_single_variable('_d', new variable('_d', $differences, variable::LIST));
-
-        $err = 0;
-        $root = true;
-        foreach ($differences as $i => $diff) {
-            // Make sure the error will not grow bigger than PHP_FLOAT_MAX. If we get there, don't calculate
-            // the square root in the end.
-            if ($err + $diff->value ** 2 >= PHP_FLOAT_MAX) {
-                $err = PHP_FLOAT_MAX;
-                $root = false;
-                break;
-            }
-            $err += $diff->value ** 2;
-        }
-        if ($root) {
-            $err = sqrt($err);
-        }
-        $this->evaluator->import_single_variable('_err', new variable('_err', $err, variable::NUMERIC));
+        $command .= '_d = diff(_a, _r);';
+        $command .= "_err = sqrt(sum(map('*', _d, _d)));";
 
         // Finally, calculate the relative error, unless the question uses an algebraic answer.
         if (!$isalgebraic) {
@@ -1510,12 +1477,13 @@ class qtype_formulas_part {
             // Otherwise, the relative error is simply the absolute error divided by the root
             // of the sum of squares.
             if ($ssqmodelanswer == 0) {
-                $relerr = ($ssqstudentanswer == 0 ? 0 : PHP_FLOAT_MAX);
+                $command .= '_relerr = ' . ($ssqstudentanswer == 0 ? 0 : PHP_FLOAT_MAX);
             } else {
-                $relerr = $err / sqrt($ssqmodelanswer);
+                $command .= "_relerr = _err / sqrt({$ssqmodelanswer})";
             }
-            $this->evaluator->import_single_variable('_relerr', new variable('_relerr', $relerr, variable::NUMERIC));
         }
+        $parser = new parser($command, $this->evaluator->export_variable_list());
+        $this->evaluator->evaluate($parser->get_statements(), true);
     }
 
     /**
