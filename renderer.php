@@ -852,6 +852,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function part_correct_response($part) {
         $answers = $part->get_correct_response(true);
+        foreach ($answers as &$answer) {
+            if ($answer === '') {
+                $answer = get_string('emptyanswer', 'qtype_formulas');
+            }
+        }
         $answertext = implode('; ', $answers);
 
         $string = ($part->answernotunique ? 'correctansweris' : 'uniquecorrectansweris');
