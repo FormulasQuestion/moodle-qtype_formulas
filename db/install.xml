@@ -36,6 +36,7 @@
         <FIELD NAME="vars1" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="answer" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="answernotunique" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="emptyallowed" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="vars2" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="correctness" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="unitpenalty" TYPE="float" NOTNULL="false" SEQUENCE="false"/>

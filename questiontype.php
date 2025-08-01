@@ -624,12 +624,16 @@ class qtype_formulas extends question_type {
                 $question->partindex[$i] = $partindex;
             }
             foreach (self::PART_BASIC_FIELDS as $field) {
-                // Older questions do not have this field, so we do not want to issue an error message.
-                // Also, for maximum backwards compatibility, we set the default value to 1. With this,
-                // nothing changes for old questions.
+                // Older questions do not have the 'answernotunique' field, so we do not want to issue an
+                // error message. For maximum backwards compatibility, we set the default value to 1. With
+                // this, nothing changes for old questions. Also, questions exported prior to version 6.2
+                // won't have the 'emptyallowed' field. We will set it to 0 (false) for backwards compatiblity.
                 if ($field === 'answernotunique') {
                     $ifnotexists = '';
                     $default = '1';
+                } else if ($field === 'emptyallowed') {
+                    $ifnotexists = '';
+                    $default = '0';
                 } else {
                     $ifnotexists = get_string('error_import_missing_field', 'qtype_formulas', $field);
                     $default = '0';
@@ -890,11 +894,6 @@ class qtype_formulas extends question_type {
             $partdata[$i] = (object)['questionid' => $data->id];
             // Set the basic fields, e.g. mark, placeholder or definition of local variables.
             foreach (self::PART_BASIC_FIELDS as $field) {
-                // FIXME: remove this later, when the DB is updated
-                if ($field === 'emptyallowed') {
-                    $partdata[$i]->emptyallowed = 1;
-                    continue;
-                }
                 // In the edit form, the part's 'unitpenalty' and 'ruleid' are set via the global options
                 // 'globalunitpenalty' and 'globalruleid'. When importing a question, they do not need
                 // special treatment, because they are already stored with the part. Also, all other fields
