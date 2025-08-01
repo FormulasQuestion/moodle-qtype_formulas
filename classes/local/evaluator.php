@@ -913,13 +913,18 @@ class evaluator {
     /**
      * Evaluate a single expression or an array of expressions.
      *
-     * @param expression|for_loop|array $input
+     * @param expression|for_loop|array|false $input
      * @param bool $godmode whether to run the evaluation in god mode
      * @return token|array
      */
     public function evaluate($input, bool $godmode = false) {
         if (($input instanceof expression) || ($input instanceof for_loop)) {
             return $this->evaluate_the_right_thing($input, $godmode);
+        }
+        // For convenience, the evaluator accepts FALSE as an input, This allows
+        // passing reset($array) with a possibly empty array.
+        if ($input === false) {
+            return new token(token::EMPTY, '$EMPTY');
         }
         if (!is_array($input)) {
             throw new Exception(get_string('error_evaluate_invocation', 'qtype_formulas', 'evaluate()'));
