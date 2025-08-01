@@ -1465,7 +1465,7 @@ class qtype_formulas_part {
             // We calculate the sum of squares of all model answers.
             $ssqmodelanswer = 0;
             foreach ($this->get_evaluated_answers() as $answer) {
-                if ($answer === '$EMPTY' || trim($answer) === '') {
+                if ($answer === '$EMPTY') {
                     continue;
                 }
                 $ssqmodelanswer += $answer ** 2;
@@ -1553,13 +1553,12 @@ class qtype_formulas_part {
                 // failed evaluation, e.g. caused by an invalid answer.
                 $this->evaluator->clear_stack();
 
-                // Evaluate, if not empty.
-                if ($answer === '""' || (empty($answer) && !is_numeric($answer))) {
-                    $evaluated = new token(token::EMPTY, '$EMPTY');
-                } else {
-                    $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
-                }
-                $evaluatedresponse[] = token::unpack($evaluated); // $evaluated;
+                // Evaluate. If the answer was empty (an empty string or the '$EMPTY'), the parser
+                // will create an appropriate evaluable statement or return an empty array. The evaluator,
+                // on the other hand, will know how to deal with the "false" return value from reset()
+                // and return the $EMPTY token.
+                $statements = $parser->get_statements();
+                $evaluatedresponse[] = token::unpack($this->evaluator->evaluate(reset($statements)));
             } catch (Throwable $t) {
                 // TODO: convert to non-capturing catch
                 // If parsing, validity check or evaluation fails, we consider the answer as wrong.
