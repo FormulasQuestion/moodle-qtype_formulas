@@ -103,6 +103,7 @@ $string['defaultwidthunit'] = 'Unit of length';
 $string['defaultwidthunit_desc'] = 'Unit of length used for the default width settings below. The units "em" or "rem" correspond approximately to the width of one digit.';
 $string['emptyallowed'] = 'Students may leave one or more fields empty.';
 $string['emptyallowed_help'] = 'Check this option for parts where not all fields have to be filled, e. g. when you have two fields for an equation that could have just one solution, and you do not want to give away the number of solutions.';
+$string['emptyanswer'] = '[empty]';
 $string['error_algebraic_relerr'] = 'Relative error (_relerr) cannot be used with answer type algebraic formula.';
 $string['error_algvar_numbers'] = 'Algebraic variables can only be initialized with a list of numbers.';
 $string['error_answer_missing'] = 'No answer has been defined.';
