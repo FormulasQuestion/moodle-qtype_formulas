@@ -460,6 +460,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return bool whether this response can be graded
      */
     public function is_gradable_response(array $response): bool {
+        if (array_key_exists('_seed', $response)) {
+            return false;
+        }
         // Iterate over all parts. If at least one part is gradable, we can leave early.
         foreach ($this->parts as $part) {
             if ($part->is_gradable_response($response)) {
@@ -523,7 +526,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
         foreach ($this->parts as $part) {
             $summary[] = $part->summarise_response($response);
         }
-        return implode(', ', $summary);
+        return implode('; ', $summary);
     }
 
     /**
@@ -1266,6 +1269,9 @@ class qtype_formulas_part {
      * @return bool
      */
     public function is_unanswered(array $response): bool {
+        if (array_key_exists('_seed', $response)) {
+            return true;
+        }
         if (!array_key_exists('normalized', $response)) {
             $response = $this->normalize_response($response);
         }
@@ -1646,8 +1652,12 @@ class qtype_formulas_part {
         $answers = $this->get_evaluated_answers();
 
         // Numeric answers should be localized, if that functionality is enabled.
+        // Empty answers should be just the empty string; a more user-friendly
+        // output will be created in the renderer.
         foreach ($answers as &$answer) {
-            if (is_numeric($answer)) {
+            if ($answer === '$EMPTY') {
+                $answer = '';
+            } else if (is_numeric($answer)) {
                 $answer = qtype_formulas::format_float($answer);
             }
         }
