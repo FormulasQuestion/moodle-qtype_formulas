@@ -886,8 +886,7 @@ class qtype_formulas_part {
     public int $answernotunique;
 
     /** @var int whether students can leave one or more fields empty */
-    public int $emptyallowed = 1;
-    // FIXME: change this once the DB is updated
+    public int $emptyallowed;
 
     /** @var string definition of the grading criterion */
     public string $correctness;
