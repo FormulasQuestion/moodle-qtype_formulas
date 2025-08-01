@@ -105,9 +105,6 @@ class answer_parser extends parser {
         if (count($this->tokenlist) === 1 && $firsttoken->type === token::EMPTY) {
             return $acceptempty;
         }
-        if (empty($this->tokenlist)) {
-            return $acceptempty;
-        }
 
         if ($type === qtype_formulas::ANSWER_TYPE_NUMBER) {
             return $this->is_acceptable_number();
