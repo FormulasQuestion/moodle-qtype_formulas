@@ -148,6 +148,11 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             if (!isset($data->answernotunique)) {
                 $data->answernotunique = '1';
             }
+            // Backups prior to 6.2 do not yet have the emptyallowed field. In that case, we set it
+            // to false. It should default to true for *new* questions only.
+            if (!isset($data->emptyallowed)) {
+                $data->emptyallowed = '0';
+            }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
@@ -193,6 +198,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] ?? [] as $i => $answer) {
             if (!key_exists('answernotunique', $answer)) {
                 $answer['answernotunique'] = '1';
+            }
+            if (!key_exists('emptyallowed', $answer)) {
+                $answer['emptyallowed'] = '0';
             }
             if (!key_exists('partindex', $answer)) {
                 $answer['partindex'] = $i;

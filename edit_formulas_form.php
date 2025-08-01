@@ -444,10 +444,6 @@ class qtype_formulas_edit_form extends question_edit_form {
                 $tags = qtype_formulas::PART_BASIC_FIELDS;
                 foreach ($question->options->answers as $key => $answer) {
                     foreach ($tags as $tag) {
-                        // FIXME: remove this later, when the DB is updated
-                        if ($tag === 'emptyallowed') {
-                            continue;
-                        }
                         if ($tag === 'unitpenalty' || $tag === 'ruleid') {
                             $defaultvalues['global' . $tag] = $answer->$tag;
                         } else {
