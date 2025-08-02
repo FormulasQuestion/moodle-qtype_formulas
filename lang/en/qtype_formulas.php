@@ -141,6 +141,7 @@ $string['error_diff_unary_operator'] = 'When using map() with the unary operator
 $string['error_distribution_outcomes'] = '{$a} expects the number of successful outcomes to be a non-negative integer.';
 $string['error_distribution_tries'] = '{$a} expects the number of tries to be a non-negative integer.';
 $string['error_divzero'] = 'Division by zero is not defined.';
+$string['error_emptyparens'] = 'Parse error: closing {$a->close} immediately after opening {$a->open}.';
 $string['error_emptyrange'] = 'Evaluation error: range from {$a->start} to {$a->end} with step {$a->step} will be empty.';
 $string['error_emptystack'] = 'Evaluation error: empty stack - did you pass enough arguments for the function or operator?';
 $string['error_evaluate_invocation'] = 'Bad invocation of {$a}.';
