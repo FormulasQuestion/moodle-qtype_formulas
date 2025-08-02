@@ -81,7 +81,8 @@ class answer_parser extends parser {
         // If we only have one single token and it is an empty string, we set it to the $EMPTY token.
         $firsttoken = reset($tokenlist);
         if (count($tokenlist) === 1 && $firsttoken->value === '') {
-            $tokenlist[0] = new token(token::EMPTY, '$EMPTY', $firsttoken->row, $firsttoken->column);
+            // FIXME: temporarily disabling this
+            // $tokenlist[0] = new token(token::EMPTY, '$EMPTY', $firsttoken->row, $firsttoken->column);
         }
 
         // Once this is done, we can parse the expression normally.
