@@ -368,6 +368,17 @@ class parser {
                 $this->die(get_string('error_invalidrangesep', 'qtype_formulas'), $nexttoken);
             }
 
+            // We do not allow to a closing paren immediately after an opening paren of the same type.
+            $openingparen = ($type & token::ANY_OPENING_PAREN);
+            $nextclosing = ($nexttype & token::ANY_CLOSING_PAREN);
+            if ($openingparen && $nextclosing) {
+                $a = (object)[
+                    'open' => $value,
+                    'close' => $nextvalue,
+                ];
+                $this->die(get_string('error_emptyparens', 'qtype_formulas', $a), $nexttoken);
+            }
+
             // If we're one token away from the end of the statement, we just read and discard the end-of-statement marker.
             if ($nexttype === token::END_OF_STATEMENT || $nexttype === token::END_GROUP) {
                 $this->read_next();
