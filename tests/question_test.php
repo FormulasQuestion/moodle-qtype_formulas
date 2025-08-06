@@ -1085,14 +1085,20 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:MCE}', 'options' => 'MCE'],
             ], '{_0:MCE}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCS}', 'options' => 'MCS', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MC}', 'options' => 'MC'],
+            ], '{_0:MC}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCS}', 'options' => 'MCS'],
             ], '{_0:MCS}'],
             [[
-                '_0' => ['placeholder' => '{_0:MCES}', 'options' => 'MCES', 'dropdown' => false, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:MCES}', 'options' => 'MCES'],
             ], '{_0:MCES}'],
             [[
-                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true, 'shuffle' => false],
+                '_0' => ['placeholder' => '{_0:foo:MCE}', 'options' => 'foo', 'dropdown' => true],
             ], '{_0:foo:MCE}'],
+            [[
+                '_0' => ['placeholder' => '{_0:foo:MC}', 'options' => 'foo'],
+            ], '{_0:foo:MC}'],
             [[
                 '_0' => [
                     'placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}',
@@ -1127,6 +1133,15 @@ final class question_test extends \advanced_testcase {
             [[
                 '_0' => ['placeholder' => '{_0:MCS:MCS}', 'options' => 'MCS', 'shuffle' => true],
             ], '{_0:MCS:MCS}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MC:MC}', 'options' => 'MC'],
+            ], '{_0:MC:MC}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MC:MCS}', 'options' => 'MC', 'shuffle' => true],
+            ], '{_0:MC:MCS}'],
+            [[
+                '_0' => ['placeholder' => '{_0:MCS:MC}', 'options' => 'MCS'],
+            ], '{_0:MCS:MC}'],
             [[
                 '_0' => ['placeholder' => '{_0:MCES:MCES}', 'options' => 'MCES', 'dropdown' => true, 'shuffle' => true],
             ], '{_0:MCES:MCES}'],
