@@ -959,9 +959,18 @@ class qtype_formulas_part {
 
         // Furthermore, there must be either a {_0}{_u} without whitespace in the part's text
         // (meaning the user explicitly wants a combined unit field) or no answer box placeholders
-        // at all, neither for the answer nor for the unit.
-        $combinedrequested = strpos($this->subqtext, '{_0}{_u}') !== false;
-        $noplaceholders = strpos($this->subqtext, '{_0}') === false && strpos($this->subqtext, '{_u}') === false;
+        // at all, neither for the answer nor for the unit. As the placeholders may contain formatting
+        // options, it makes sense to first simplify the part's question text by removing those. Note
+        // that the regex is different from e. g. the one in scan_for_answer_boxes(), because there
+        // MUST NOT be an :options-variable or a :MC/:MCE/:MCES/:MCS part.
+        $simplifiedtext = preg_replace(
+            '/\{(_u|_\d+)((\|[\w =#]*)*)\}/',
+            '{\1}',
+            $this->subqtext,
+        );
+
+        $combinedrequested = strpos($simplifiedtext, '{_0}{_u}') !== false;
+        $noplaceholders = strpos($simplifiedtext, '{_0}') === false && strpos($this->subqtext, '{_u}') === false;
         return $combinedrequested || $noplaceholders;
     }
 

@@ -399,6 +399,85 @@ final class renderer_test extends walkthrough_test_base {
      *
      * @return array
      */
+    public static function provide_combined_box_formatting(): array {
+        return [
+            [[], '{_0}{_u}'],
+            [['width: 100px'], '{_0|w=100px}{_u}'],
+            [['width: 100px'], '{_0}{_u|w=100px}'],
+            [['width: 80px', 'background-color: blue'], '{_0|w=100px|bgcol=red}{_u|w=80px|bgcol=blue}'],
+            [['width: 100px', 'background-color: red'], '{_0|w=100px|bgcol=red}{_u}'],
+            [['width: 100px', 'background-color: red'], '{_0}{_u|w=100px|bgcol=red}'],
+            [['width: 80px', 'background-color: blue'], '{_0|w=100px|bgcol=red}{_u|w=80px|bgcol=blue}'],
+            [['width: 80px', 'background-color: blue', 'text-align: right'], '{_0|w=100px|align=right}{_u|w=80px|bgcol=blue}'],
+        ];
+    }
+
+    /**
+     * Test formatting of combined unit field works as expected.
+     *
+     * @param array $styles (combined) style settings to be checked for
+     * @param string $placeholder placeholder definition with formatting
+     * @return void
+     *
+     * @dataProvider provide_combined_box_formatting
+     */
+    public function test_formatting_of_combined_unit_box($styles, $placeholder): void {
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->subqtext = $placeholder;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        // Check that there is a combined unit field and no other fields or stray placeholders.
+        $this->render();
+        $this->check_output_contains_text_input('0_');
+        $this->check_output_does_not_contain_text_input_with_class('0_0');
+        $this->check_output_does_not_contain_text_input_with_class('0_1');
+        $this->check_output_does_not_contain_stray_placeholders();
+
+        // Check the formatting.
+        $expectations = [];
+        foreach ($styles as $style) {
+            $expectations[] = $this->get_contains_input_with_css_expectation($style);
+        }
+        $this->check_current_output(...$expectations);
+    }
+
+    /**
+     * Test formatting of separate unit field works as expected.
+     *
+     * @param array $styles style settings to be checked for
+     * @param string $placeholder placeholder definition with formatting
+     * @return void
+     *
+     * @dataProvider provide_styles
+     */
+    public function test_formatting_of_separate_unit_box($styles, $placeholder): void {
+        // We take the formatting intended for the number box and use it for the unit box. Also,
+        // we add a placeholder for an unformatted number box in front of it.
+        $placeholder = str_replace('{_0', '{_0} {_u', $placeholder);
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->subqtext = $placeholder;
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+
+        // There must be a number box and a unit box, no combined field and no stray placeholders.
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_contains_text_input('0_1');
+        $this->check_output_does_not_contain_text_input_with_class('0_');
+        $this->check_output_does_not_contain_stray_placeholders();
+
+        // Check the formatting.
+        $expectations = [];
+        foreach ($styles as $style) {
+            $expectations[] = $this->get_contains_input_with_css_expectation($style);
+        }
+        $this->check_current_output(...$expectations);
+    }
+
+    /**
+     * Data provider.
+     *
+     * @return array
+     */
     public static function provide_answer_box_types(): array {
         return [
             ['px', qtype_formulas::ANSWER_TYPE_NUMBER],
