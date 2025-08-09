@@ -133,7 +133,8 @@ final class evaluator_test extends \advanced_testcase {
             ['The first argument of diff() must be a list.', 'diff("", "");'],
             ['The second argument of diff() must be a list.', 'diff([1,2,3], 1);'],
             ['diff() expects two lists of the same size.', 'diff([1,2,3], [1,2]);'],
-            ['When using diff(), the first list must contain only numbers or only strings.', 'diff([[1,2]], [1]);'],
+            ['When using diff(), the first list must contain only numbers or only strings.', 'diff([[1,2]], [[1,2]]);'],
+            ['diff(): type mismatch for element #0 (zero-indexed) of the second list.', 'diff([[1,2]], [1]);'],
             ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff([1,"a"], [1,2]);'],
             ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff(["a",1], ["a","b"]);'],
             ['diff(): type mismatch for element #0 (zero-indexed) of the second list.', 'diff([1,2], ["a",2]);'],
@@ -1878,6 +1879,29 @@ final class evaluator_test extends \advanced_testcase {
             $error = $e->getMessage();
         }
         self::assertStringEndsWith($expected, $error);
+    }
+
+    public function test_fixme_test(): void {
+        $error = '';
+        $result = [];
+        $statements = [
+            new expression([
+                new token(token::NUMBER, 2),
+                new token(token::NUMBER, NAN),
+                new token(token::OPERATOR, '*'),
+            ])
+        ];
+        $parser = new parser('a = [1, 2]');
+        $statements = $parser->get_statements();
+
+        try {
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            echo $error . PHP_EOL;
+        }
+        //var_dump($result);
     }
 
     /**
