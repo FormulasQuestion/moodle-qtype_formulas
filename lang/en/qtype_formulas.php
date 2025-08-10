@@ -333,6 +333,8 @@ The basic one is the "Common SI units" rules that will convert standard units su
 say, km, m, cm and mm. This option has no effect if no unit has been used.';
 $string['settingallowdecimalcomma'] = 'Localised decimal separator';
 $string['settingallowdecimalcomma_desc'] = 'Allow all students to use the comma as decimal separator in answers.<br>If activated, numbers will be displayed according to the locale settings.';
+$string['settingdebouncedelay'] = 'Delay before on-the-fly validation';
+$string['settingdebouncedelay_desc'] = 'The timespan between the last modification of an answer field and the on-the-fly validation.';
 $string['settinglenientimport'] = 'Lenient check on import';
 $string['settinglenientimport_desc'] = 'When importing a question, do not check whether the provided model answers would receive full marks. <br>Note: You should only activate this setting temporarily.';
 $string['settings_heading_general'] = 'General preferences';

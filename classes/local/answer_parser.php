@@ -64,6 +64,12 @@ class answer_parser extends parser {
             if (!$formodelanswer && $token->type === token::PREFIX) {
                 $this->die(get_string('error_prefix', 'qtype_formulas'), $token);
             }
+
+            // Answers must currently not contain the semicolon.
+            if ($token->type === token::END_OF_STATEMENT) {
+                $this->die(get_string('error_unexpectedtoken', 'qtype_formulas', ';'), $token);
+            }
+
         }
 
         // Once this is done, we can parse the expression normally.
