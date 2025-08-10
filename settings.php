@@ -40,6 +40,15 @@ if ($ADMIN->fulltree) {
         0
     ));
 
+    // Default delay for the on-the-fly validation's debounce timer.
+    $settings->add(new admin_setting_configselect(
+        'qtype_formulas/debouncedelay',
+        new lang_string('settingdebouncedelay', 'qtype_formulas'),
+        new lang_string('settingdebouncedelay_desc', 'qtype_formulas'),
+        300,
+        [300 => '300 ms', 400 => '400 ms', 500 => '500 ms', 600 => '600 ms', 750 => '750 ms', 1000 => '1 s'],
+    ));
+
     // Whether we should omit the check the model answer's correctness during imports.
     $settings->add(new admin_setting_configcheckbox(
         'qtype_formulas/lenientimport',
