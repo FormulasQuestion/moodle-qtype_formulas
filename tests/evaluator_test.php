@@ -2081,6 +2081,40 @@ final class evaluator_test extends \advanced_testcase {
         self::assertNotNull($e);
     }
 
+    public function test_import_single_variable(): void {
+        // Prepare an empty evaluator.
+        $evaluator = new evaluator();
+
+        // Add variables.
+        $evaluator->import_single_variable('_foo', new variable('_foo', 'value', token::STRING));
+        $evaluator->import_single_variable('bar', new variable('bar', 1234, token::NUMBER));
+
+        // Verify the evaluator contains the correct variables with the correct values.
+        $variables = $evaluator->export_variable_list();
+        self::assertCount(2, $variables);
+        self::assertContains('_foo', $variables);
+        self::assertContains('bar', $variables);
+
+        $foo = $evaluator->export_single_variable('_foo');
+        self::assertEquals(token::STRING, $foo->type);
+        self::assertEquals('value', $foo->value);
+
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(token::NUMBER, $bar->type);
+        self::assertEquals(1234, $bar->value);
+
+        // Try to set variable again without specifying the overwrite parameter. The value should not change.
+        $evaluator->import_single_variable('bar', new variable('bar', 5678, token::NUMBER));
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(1234, $bar->value);
+
+        // Try again, forcing overwrite this time. The value should thus change.
+        $evaluator->import_single_variable('bar', new variable('bar', 5678, token::NUMBER), true);
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(5678, $bar->value);
+    }
+
+
     /**
      * Provide answers of answer type number.
      *
