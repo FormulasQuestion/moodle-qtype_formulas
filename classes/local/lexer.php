@@ -471,17 +471,9 @@ class lexer {
         // Record position of the $ symbol.
         $startingposition = $this->inputstream->get_position();
 
-        while ($currentchar !== input_stream::EOF) {
-            $nextchar = $this->inputstream->peek();
-            // Identifiers may contain letters, digits or underscores.
-            if (!preg_match('/[EMPTY]/', $nextchar)) {
-                break;
-            }
-            $currentchar = $this->inputstream->read();
-            $result .= $currentchar;
-        }
-        if ($result === '$EMPTY') {
-            return new token(token::EMPTY, $result, $startingposition['row'], $startingposition['column']);
+        $identifier = $this->read_identifier();
+        if ($identifier->value === 'EMPTY') {
+            return new token(token::EMPTY, '$EMPTY', $startingposition['row'], $startingposition['column']);
         }
 
         $this->inputstream->die(get_string('error_invalid_dollar', 'qtype_formulas'));
