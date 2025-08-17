@@ -42,6 +42,8 @@ class qtype_formulas_test_helper extends question_test_helper {
         return [
             // Minimal formulas question: one part, not randomised, answer = 5.
             'testsinglenum',
+            // Minimal formulas question: one part, not randomised, one answer = 1, one answer = empty.
+            'testnumandempty',
              // Formulas question with algebraic answer.
             'testalgebraic',
              // Minimal formulas question: one part, two numbers, answer = 2 and 3.
@@ -361,6 +363,200 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'answer' => '5',
                 'answernotunique' => '1',
                 'emptyallowed' => '0',
+                'correctness' => '_relerr < 0.01',
+                'unitpenalty' => 1,
+                'postunit' => '',
+                'ruleid' => 1,
+                'otherrule' => '',
+                'subqtext' => '',
+                'subqtextformat' => FORMAT_HTML,
+                'feedback' => '',
+                'feedbackformat' => FORMAT_HTML,
+                'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
+                'partcorrectfbformat' => FORMAT_HTML,
+                'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
+                'partpartiallycorrectfbformat' => FORMAT_HTML,
+                'partincorrectfb' => self::DEFAULT_INCORRECT_FEEDBACK,
+                'partincorrectfbformat' => FORMAT_HTML,
+                'partindex' => 0,
+            ],
+        ];
+
+        $qdata->options->numparts = 1;
+
+        $qdata->hints = [
+            (object) [
+                'id' => '101',
+                'hint' => 'Hint 1.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 0,
+                'options' => 0,
+            ],
+            (object) [
+                'id' => '102',
+                'hint' => 'Hint 2.',
+                'hintformat' => FORMAT_HTML,
+                'shownumcorrect' => 1,
+                'clearwrong' => 1,
+                'options' => 1,
+            ],
+        ];
+
+        return $qdata;
+    }
+
+    /**
+     * Create a single-part test question with one number and one empty field.
+     *
+     * @return qtype_formulas_question
+     */
+    public static function make_formulas_question_testnumandempty() {
+        $q = self::make_a_formulas_question();
+
+        $q->name = 'test-numandempty';
+        $q->questiontext = '<p>This is a minimal question. The first answer is 1, the second is empty.</p>';
+
+        $q->penalty = 0.3; // Non-zero and not the default.
+        $q->textfragments = [
+            0 => '<p>This is a minimal question. The first answer is 1, the second is empty.</p>',
+            1 => '',
+        ];
+        $q->numparts = 1;
+        $q->defaultmark = 2;
+        $q->generalfeedback = '';
+        $p = self::make_a_formulas_part();
+        $p->questionid = $q->id;
+        $p->id = 14;
+        $p->placeholder = '';
+        $p->numbox = 2;
+        $p->answermark = 2;
+        $p->answer = '[1, $EMPTY]';
+        $p->answernotunique = '1';
+        $p->emptyallowed = '1';
+        $p->subqtext = '';
+        $q->parts[0] = $p;
+
+        $q->hints = [
+            new question_hint_with_parts(101, 'Hint 1.', FORMAT_HTML, 1, 0),
+            new question_hint_with_parts(102, 'Hint 2.', FORMAT_HTML, 1, 1),
+        ];
+        return $q;
+    }
+
+    /**
+     * Gets the question form data for the testnumandempty formulas question
+     *
+     * @return stdClass
+     */
+    public function get_formulas_question_form_data_testnumandempty(): stdClass {
+        $form = new stdClass();
+
+        $form->name = 'test-numandempty';
+        $form->noanswers = 1;
+        $form->answer = ['1', '$EMPTY'];
+        $form->answernotunique = ['1'];
+        $form->emptyallowed = ['1'];
+        $form->answermark = [2];
+        $form->answertype = ['0'];
+        $form->correctness = ['_relerr < 0.01'];
+        $form->numbox = [2];
+        $form->placeholder = [''];
+        $form->vars1 = [''];
+        $form->vars2 = [''];
+        $form->postunit = [''];
+        $form->otherrule = [''];
+        $form->subqtext = [
+            ['text' => '', 'format' => FORMAT_HTML],
+        ];
+        $form->feedback = [
+            ['text' => '', 'format' => FORMAT_HTML],
+        ];
+        $form->partcorrectfb = [
+            ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+        ];
+        $form->partpartiallycorrectfb = [
+            ['text' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+        ];
+        $form->partincorrectfb = [
+            ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
+        ];
+        $form->questiontext = [
+            'text' => '<p>This is a minimal question. The first answer is 1, the second is empty.</p>',
+            'format' => FORMAT_HTML,
+            ];
+        $form->generalfeedback = ['text' => '', 'format' => FORMAT_HTML];
+        $form->defaultmark = 2;
+        $form->penalty = 0.3;
+        $form->varsrandom = '';
+        $form->varsglobal = '';
+        $form->answernumbering = 'abc';
+        $form->globalunitpenalty = 1;
+        $form->globalruleid = 1;
+        $form->correctfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
+        $form->partiallycorrectfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
+        $form->incorrectfeedback = [
+            'text' => test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK,
+            'format' => FORMAT_HTML,
+        ];
+        $form->shownumcorrect = '1';
+        $form->hint = [
+            ['text' => 'Hint 1.', 'format' => FORMAT_HTML],
+            ['text' => 'Hint 2.', 'format' => FORMAT_HTML],
+        ];
+        $form->hintclearwrong = [0, 1];
+        $form->hintshownumcorrect = [1, 1];
+        return $form;
+    }
+
+    /**
+     * Return question data for a single-part question with one number and an empty field.
+     *
+     * @return stdClass
+     */
+    public static function get_formulas_question_data_testnumandempty(): stdClass {
+        $qdata = new stdClass();
+        test_question_maker::initialise_question_data($qdata);
+
+        $qdata->qtype = 'formulas';
+        $qdata->name = 'test-numandempty';
+        $qdata->questiontext = '<p>This is a minimal question. The first answer is 1, the second is empty.</p>';
+        $qdata->generalfeedback = '';
+        $qdata->defaultmark = 2;
+        $qdata->penalty = 0.3;
+
+        $qdata->options = new stdClass();
+        $qdata->contextid = context_system::instance()->id;
+        $qdata->options->varsrandom = '';
+        $qdata->options->varsglobal = '';
+        $qdata->options->answernumbering = 'abc';
+        $qdata->options->shownumcorrect = 1;
+        $qdata->options->correctfeedback = test_question_maker::STANDARD_OVERALL_CORRECT_FEEDBACK;
+        $qdata->options->correctfeedbackformat = FORMAT_HTML;
+        $qdata->options->partiallycorrectfeedback = test_question_maker::STANDARD_OVERALL_PARTIALLYCORRECT_FEEDBACK;
+        $qdata->options->partiallycorrectfeedbackformat = FORMAT_HTML;
+        $qdata->options->incorrectfeedback = test_question_maker::STANDARD_OVERALL_INCORRECT_FEEDBACK;
+        $qdata->options->incorrectfeedbackformat = FORMAT_HTML;
+
+        $qdata->options->answers = [
+            14 => (object) [
+                'id' => 14,
+                'questionid' => $qdata->id,
+                'placeholder' => '',
+                'answermark' => 2,
+                'answertype' => '0',
+                'numbox' => 2,
+                'vars1' => '',
+                'vars2' => '',
+                'answer' => '[1, $EMPTY]',
+                'answernotunique' => '1',
+                'emptyallowed' => '1',
                 'correctness' => '_relerr < 0.01',
                 'unitpenalty' => 1,
                 'postunit' => '',
