@@ -133,19 +133,19 @@ class lexer {
             return $this->read_operator();
         }
         // There are some single-character tokens...
-        if (preg_match('/[]\[(){},;π\\\]/u', $currentchar)) {
-            $types = [
-                '[' => token::OPENING_BRACKET,
-                '(' => token::OPENING_PAREN,
-                '{' => token::OPENING_BRACE,
-                ']' => token::CLOSING_BRACKET,
-                ')' => token::CLOSING_PAREN,
-                '}' => token::CLOSING_BRACE,
-                ',' => token::ARG_SEPARATOR,
-                '\\' => token::PREFIX,
-                ';' => token::END_OF_STATEMENT,
-                'π' => token::CONSTANT,
-            ];
+        $types = [
+            '[' => token::OPENING_BRACKET,
+            '(' => token::OPENING_PAREN,
+            '{' => token::OPENING_BRACE,
+            ']' => token::CLOSING_BRACKET,
+            ')' => token::CLOSING_PAREN,
+            '}' => token::CLOSING_BRACE,
+            ',' => token::ARG_SEPARATOR,
+            '\\' => token::PREFIX,
+            ';' => token::END_OF_STATEMENT,
+            'π' => token::CONSTANT,
+        ];
+        if (in_array($currentchar, array_keys($types))) {
             return $this->read_single_char_token($types[$currentchar]);
         }
         // If we are still here, that's not good at all. We need to read the char (it is only peeked
