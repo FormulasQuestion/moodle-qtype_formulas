@@ -666,10 +666,16 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // If part has combined unit answer input.
         if ($part->has_combined_unit_field()) {
+            // For a combined unit field, we try to merge the formatting options from the {_0} and the
+            // {_u} placeholder, giving precedence to the latter.
+            $mergedformat = $boxes['_u']['format'] + $boxes['_0']['format'];
             $combinedfieldhtml = $this->create_input_box(
-                $part, self::COMBINED_FIELD, $qa, $options, $boxes[$placeholder]['format'], $sub->feedbackclass
+                $part, self::COMBINED_FIELD, $qa, $options, $mergedformat, $sub->feedbackclass
             );
-            return str_replace('{_0}{_u}', $combinedfieldhtml, $subqreplaced);
+            // The combined field must be placed where the user has the {_0}{_u} placeholders, possibly with
+            // their formatting options.
+            $boxplaceholders = $boxes['_0']['placeholder'] . $boxes['_u']['placeholder'];
+            return str_replace($boxplaceholders, $combinedfieldhtml, $subqreplaced);
         }
 
         // Iterate over all boxes again, this time creating the appropriate input control and insert it
