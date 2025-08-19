@@ -40,6 +40,8 @@ class qtype_formulas_test_helper extends question_test_helper {
      */
     public function get_test_questions(): array {
         return [
+            // FIXME: one question algebraic 'x' and '$EMPTY'
+            // FIXME: one question multipart: 1 in first part, $EMPTY in second part
             // Minimal formulas question: one part, not randomised, answer = 5.
             'testsinglenum',
             // Minimal formulas question: one part, not randomised, one answer = 1, one answer = empty.
