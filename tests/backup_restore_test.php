@@ -74,6 +74,7 @@ final class backup_restore_test extends \advanced_testcase {
     public static function provide_question_names(): array {
         return [
             ['testsinglenum'],
+            ['testnumandempty'],
             ['testalgebraic'],
             ['testtwonums'],
             ['testsinglenumunit'],

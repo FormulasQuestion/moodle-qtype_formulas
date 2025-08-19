@@ -858,6 +858,7 @@ final class questiontype_test extends \advanced_testcase {
     public static function provide_question_names(): array {
         return [
             ['testsinglenum'],
+            ['testnumandempty'],
             ['testsinglenumunit'],
             ['testsinglenumunitsep'],
             ['testmethodsinparts'],
