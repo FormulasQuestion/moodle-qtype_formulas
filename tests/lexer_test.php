@@ -829,6 +829,16 @@ EOF;
         self::assertNotNull($e);
     }
 
+    public function test_unexpected_unicode_char_in_input(): void {
+        $e = null;
+        try {
+            new lexer('I’m');
+        } catch (Exception $e) {
+            self::assertEquals("1:2:Unexpected input: '’'", $e->getMessage());
+        }
+        self::assertNotNull($e);
+    }
+
     /**
      * Test whether the read() function of the tokenizer class correctly parses special
      * cases involving numbers.
