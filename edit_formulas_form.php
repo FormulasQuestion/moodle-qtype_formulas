@@ -43,8 +43,8 @@ class qtype_formulas_edit_form extends question_edit_form {
     protected function definition_inner($mform) {
         global $PAGE;
         $config = get_config('qtype_formulas');
-        $PAGE->requires->js_call_amd('qtype_formulas/editform', 'init', [get_config('qtype_formulas')->defaultcorrectness]);
-        $PAGE->requires->js_call_amd('qtype_formulas/answervalidation', 'init');
+        $PAGE->requires->js_call_amd('qtype_formulas/editform', 'init', [$config->defaultcorrectness]);
+        $PAGE->requires->js_call_amd('qtype_formulas/answervalidation', 'init', [get_config('qtype_formulas', 'debouncedelay')]);
         $PAGE->requires->css('/question/type/formulas/styles.css');
         $PAGE->requires->css('/question/type/formulas/tabulator.css');
         // Hide the unused form fields.

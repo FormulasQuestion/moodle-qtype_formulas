@@ -34,15 +34,27 @@ import {eventTypes as filterEventTypes} from 'core_filters/events';
 var timer = null;
 
 /**
+ * Number of cycles to wait until we really send the input to the validation script.
+ */
+var remainingWaitCycles = 1;
+
+/**
  * Delay (in milliseconds) before sending the current input of a field to validation.
  */
-const DELAY = 250;
+var delay = 300;
 
 /**
  * Initialisation, i. e. attaching event handlers to the input fields and making sure MathJax
  * is ready.
+ *
+ * @param {boolean|number} debounceDelay delay for debounce timer or false if setting could not be retrieved
  */
-export const init = () => {
+export const init = (debounceDelay) => {
+    // If the admin setting for the debounce timer could not be retrieved, the value will be FALSE.
+    let parsedDelay = parseInt(debounceDelay);
+    if (parsedDelay) {
+        delay = parsedDelay;
+    }
     // We will trigger MathJax to make sure it is initialized very early.
     if (typeof window.MathJax === 'undefined') {
         forceInitMathJax();
@@ -196,6 +208,26 @@ const validateStudentAnswer = async(id) => {
         return;
     }
 
+    // If the input field has only one character, we defer the validation.
+    if (field.value.trim().length === 1) {
+        if (remainingWaitCycles > 0) {
+            remainingWaitCycles--;
+            // The setDebounceTimer() function expects an event, but only uses one specific property,
+            // so we create a pseudo-event.
+            let pseudoevent = {
+                target: {
+                    id: id
+                }
+            };
+            // Reset the timer in order to trigger the validation again.
+            setDebounceTimer(pseudoevent);
+            return;
+        }
+    } else {
+        // Make sure that the wait cycle counter is reset.
+        remainingWaitCycles = 1;
+    }
+
     // Send the input to the appropriate webservice.
     let pendingPromise = new Pending('qtype_formulas/validateanswer');
     try {
@@ -304,7 +336,7 @@ const setDebounceTimer = (evt) => {
         clearTimeout(timer);
     }
     // Set timer for given input field.
-    timer = setTimeout(validateStudentAnswer, DELAY, evt.target.id);
+    timer = setTimeout(validateStudentAnswer, delay, evt.target.id);
 };
 
 export default {init};
