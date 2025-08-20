@@ -1,5 +1,13 @@
 # Changelog
 
+### 6.1.2 (2025-08-20)
+
+- improvement: allow :MC suffix for radio-box multi-choice
+- improvement: better UX for on-the-fly validation of student answers
+- bugfix: certain Unicode characters caused a parse error
+- bugfix: fix problem with rendering of formatted combined unit field
+- internal: update CI to use PostgreSQL 15
+
 ### 6.1.1 (2025-07-27)
 
 - bugfix: allow assigning values to elements of shuffled lists
