@@ -205,7 +205,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         // the questiondata object.
         $questiondata->options = (object) array_merge(
             (array) $questiondata->options,
-            $backupdata['plugin_qtype_formulas_question']['formulas'][0],
+            $backupdata['plugin_qtype_formulas_question']['formulas'][0] ?? [],
         );
 
         return $questiondata;
