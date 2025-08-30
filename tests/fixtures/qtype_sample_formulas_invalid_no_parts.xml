@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 8192  -->
+  <question type="formulas">
+    <name>
+      <text>Formulas question with no parts</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Question text]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <correctfeedback format="html">
+      <text>Your answer is correct.</text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text>Your answer is partially correct.</text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text>Your answer is incorrect.</text>
+    </incorrectfeedback>
+<varsrandom><text></text>
+</varsrandom>
+<varsglobal><text></text>
+</varsglobal>
+<shownumcorrect><text>0</text>
+</shownumcorrect>
+<answernumbering><text>none</text>
+</answernumbering>
+  </question>
+
+</quiz>

@@ -608,7 +608,14 @@ class qtype_formulas extends question_type {
         $question->varsglobal = $format->getpath($xml, ['#', 'varsglobal', 0, '#', 'text', 0, '#'], '', true);
         $question->answernumbering = $format->getpath($xml, ['#', 'answernumbering', 0, '#', 'text', 0, '#'], 'none', true);
 
-        // Loop over each answer block found in the XML.
+        // If there are no answers (parts) in the XML, fetch a pseudo-path in order to generate an error
+        // in the same format as for missing fields.
+        if (!isset($xml['#']['answers'])) {
+            $xml['#']['answers'] = [];
+            $errormessage = get_string('error_import_missing_parts', 'qtype_formulas', $question->name);
+            $format->getpath($xml, ['#', 'xxx'], null, false, $errormessage);
+        }
+        // Otherwise, loop over each answer block found in the XML.
         foreach ($xml['#']['answers'] as $i => $part) {
             $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
             if ($partindex !== false) {
@@ -654,7 +661,7 @@ class qtype_formulas extends question_type {
         }
 
         // Make the defaultmark consistent if not specified.
-        $question->defaultmark = array_sum($question->answermark);
+        $question->defaultmark = array_sum($question->answermark ?? []);
 
         return $question;
     }
