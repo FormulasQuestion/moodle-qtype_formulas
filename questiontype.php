@@ -804,14 +804,15 @@ class qtype_formulas extends question_type {
      */
     public function check_and_filter_parts(object $data): object {
         // This function is also called when importing a question.
-        // The answers of imported questions already have their unitpenalty and ruleid set.
-        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+        $isfromimport = property_exists($data, 'import_process');
 
         $partdata = [];
         $errors = [];
         $hasoneanswer = false;
 
-        foreach (array_keys($data->answermark) as $i) {
+        // Note: If we are importing and the data is damaged, there might be no parts at all. Hence,
+        // it is safer to use the ?? operator.
+        foreach (array_keys($data->answermark ?? []) as $i) {
             // The answermark must not be empty or 0.
             $nomark = empty(trim($data->answermark[$i]));
 
@@ -906,7 +907,7 @@ class qtype_formulas extends question_type {
             // the part was otherwise empty, that will not have triggered an error message so far,
             // because it might have been on purpose (to delete the unused part). But now that
             // there seems to be no part left, we should add an error message to the field.
-            if (empty($data->answermark[$i])) {
+            if (empty($data->answermark[0])) {
                 $errors['answermark[0]'] = get_string('error_mark', 'qtype_formulas');
             }
         }
@@ -930,9 +931,7 @@ class qtype_formulas extends question_type {
         // because they are defined at the question level, even though they affect the parts.
         // If we are importing a question, those fields will not be present, because the values
         // are already stored with the parts.
-        // Note: we validate this first, because the fields will be referenced during validation
-        // of the parts.
-        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+        $isfromimport = property_exists($data, 'import_process');
         if (!$isfromimport) {
             $errors += $this->validate_global_unit_fields($data);
         }
