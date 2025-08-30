@@ -886,7 +886,7 @@ final class questiontype_test extends \advanced_testcase {
         $formdata->varsrandom = 'foo = {1,2,3}';
         $formdata->varsglobal = 'bar = foo * 2';
         $formdata->globalunitpenalty = '0.9';
-        $formdata->globalruleid = 99;
+        $formdata->globalruleid = 1;
         $formdata->subqtext = [['text' => 'testing text for part', 'format' => FORMAT_HTML]];
         $formdata->answertype = [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA];
         $formdata->vars1 = ['local = 1 + foo + bar'];
@@ -904,7 +904,7 @@ final class questiontype_test extends \advanced_testcase {
         // should now be stored with the part (as unitpenalty and ruleid) and not with the question.
         self::assertEquals('foo = {1,2,3}', $savedquestion->options->varsrandom);
         self::assertEquals('bar = foo * 2', $savedquestion->options->varsglobal);
-        self::assertEquals('99', $savedpart->ruleid);
+        self::assertEquals('1', $savedpart->ruleid);
         self::assertEquals('0.9', $savedpart->unitpenalty);
         self::assertEquals('testing text for part', $savedpart->subqtext);
         self::assertEquals('local = 1 + foo + bar', $savedpart->vars1);
