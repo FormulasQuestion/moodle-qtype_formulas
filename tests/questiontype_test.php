@@ -1080,7 +1080,11 @@ final class questiontype_test extends \advanced_testcase {
         } else if ($expected[0] === '?') {
             $prefix = '\+\+ Parsing questions from import file. \+\+.*';
             $expected = substr($expected, 1);
-            self::assertFalse($qformat->importprocess());
+            if ($CFG->branch < 404) {
+                self::assertTrue($qformat->importprocess());
+            } else {
+                self::assertFalse($qformat->importprocess());
+            }
         } else {
             $prefix = '';
             self::assertTrue($qformat->importprocess());
