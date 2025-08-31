@@ -593,9 +593,6 @@ final class backup_restore_test extends \advanced_testcase {
         $rc = new restore_controller(
             $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
         );
-
-        // We have corrupt input data, so there will be a warning about the missing array key. We don't want
-        // that warning, but rather we want to provoke the real TypeError exception, so we suppress warnings.
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
