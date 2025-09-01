@@ -191,7 +191,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         // key, in which case we add it here with the default value. Also, backups might miss the
         // "partindex" key. In that case, we add the key and order the parts according to their appearance
         // in the file.
-        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] as $i => $answer) {
+        foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] ?? [] as $i => $answer) {
             if (!key_exists('answernotunique', $answer)) {
                 $answer['answernotunique'] = '1';
             }
@@ -205,7 +205,7 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         // the questiondata object.
         $questiondata->options = (object) array_merge(
             (array) $questiondata->options,
-            $backupdata['plugin_qtype_formulas_question']['formulas'][0],
+            $backupdata['plugin_qtype_formulas_question']['formulas'][0] ?? [],
         );
 
         return $questiondata;

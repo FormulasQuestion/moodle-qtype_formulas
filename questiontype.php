@@ -608,7 +608,14 @@ class qtype_formulas extends question_type {
         $question->varsglobal = $format->getpath($xml, ['#', 'varsglobal', 0, '#', 'text', 0, '#'], '', true);
         $question->answernumbering = $format->getpath($xml, ['#', 'answernumbering', 0, '#', 'text', 0, '#'], 'none', true);
 
-        // Loop over each answer block found in the XML.
+        // If there are no answers (parts) in the XML, fetch a pseudo-path in order to generate an error
+        // in the same format as for missing fields.
+        if (!isset($xml['#']['answers'])) {
+            $xml['#']['answers'] = [];
+            $errormessage = get_string('error_import_missing_parts', 'qtype_formulas', $question->name);
+            $format->getpath($xml, ['#', 'xxx'], null, false, $errormessage);
+        }
+        // Otherwise, loop over each answer block found in the XML.
         foreach ($xml['#']['answers'] as $i => $part) {
             $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
             if ($partindex !== false) {
@@ -654,7 +661,7 @@ class qtype_formulas extends question_type {
         }
 
         // Make the defaultmark consistent if not specified.
-        $question->defaultmark = array_sum($question->answermark);
+        $question->defaultmark = array_sum($question->answermark ?? []);
 
         return $question;
     }
@@ -797,14 +804,15 @@ class qtype_formulas extends question_type {
      */
     public function check_and_filter_parts(object $data): object {
         // This function is also called when importing a question.
-        // The answers of imported questions already have their unitpenalty and ruleid set.
-        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+        $isfromimport = property_exists($data, 'import_process');
 
         $partdata = [];
         $errors = [];
         $hasoneanswer = false;
 
-        foreach (array_keys($data->answermark) as $i) {
+        // Note: If we are importing and the data is damaged, there might be no parts at all. Hence,
+        // it is safer to use the ?? operator.
+        foreach (array_keys($data->answermark ?? []) as $i) {
             // The answermark must not be empty or 0.
             $nomark = empty(trim($data->answermark[$i]));
 
@@ -899,7 +907,7 @@ class qtype_formulas extends question_type {
             // the part was otherwise empty, that will not have triggered an error message so far,
             // because it might have been on purpose (to delete the unused part). But now that
             // there seems to be no part left, we should add an error message to the field.
-            if (empty($data->answermark[$i])) {
+            if (empty($data->answermark[0])) {
                 $errors['answermark[0]'] = get_string('error_mark', 'qtype_formulas');
             }
         }
@@ -923,9 +931,7 @@ class qtype_formulas extends question_type {
         // because they are defined at the question level, even though they affect the parts.
         // If we are importing a question, those fields will not be present, because the values
         // are already stored with the parts.
-        // Note: we validate this first, because the fields will be referenced during validation
-        // of the parts.
-        $isfromimport = property_exists($data, 'unitpenalty') && property_exists($data, 'ruleid');
+        $isfromimport = property_exists($data, 'import_process');
         if (!$isfromimport) {
             $errors += $this->validate_global_unit_fields($data);
         }

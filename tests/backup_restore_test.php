@@ -468,6 +468,151 @@ final class backup_restore_test extends \advanced_testcase {
         }
     }
 
+    public function test_restore_of_backup_with_empty_formulas_section(): void {
+        global $DB, $USER, $CFG;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a course and a user with editing teacher capabilities.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $teacher = $USER;
+        $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $coursecontext = \context_course::instance($course->id);
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        // Create a question category.
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+
+        // Create a quiz with a multipart Formulas question.
+        $quiz = $this->create_test_quiz($course);
+        $question = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $cat->id]);
+        quiz_add_quiz_question($question->id, $quiz, 0);
+
+        // Backup quiz.
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Empty the <formulas> section inside the backup file.
+        $xmlfile = $bc->get_plan()->get_basepath() . '/questions.xml';
+        $xml = file_get_contents($xmlfile);
+        $xml = preg_replace('#<formulas id="(\d+)">.*</formulas>#s', '<formulas id="\1"></formulas>', $xml);
+        file_put_contents($xmlfile, $xml);
+
+        // Delete the current course to make sure there is no data.
+        delete_course($course, false);
+
+        // Create a new course and restore the backup.
+        $newcourse = $generator->create_course();
+        $rc = new restore_controller(
+            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+        );
+
+        // We have corrupt input data, so there will be a warning about the missing array key. We don't want
+        // that warning, but rather we want to provoke the real TypeError exception, so we suppress warnings.
+        @$rc->execute_precheck();
+        @$rc->execute_plan();
+        $rc->destroy();
+
+        // Fetch the quiz and question ID.
+        $modules = get_fast_modinfo($newcourse->id)->get_instances_of('quiz');
+        $quiz = reset($modules);
+        $structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($quiz->instance, $quiz->context);
+        $question = reset($structure);
+
+        // Fetch the question and its additional data from the DB. We just check the question has been
+        // restored and the global vars are now empty. That should be enough to know that restoring of the
+        // corrupted data worked.
+        $questionrecord = $DB->get_record('question', ['id' => $question->questionid], '*', MUST_EXIST);
+        $qtype = new qtype_formulas();
+        $qtype->get_question_options($questionrecord);
+        self::assertEquals('test-methodsinparts', $questionrecord->name);
+        self::assertEquals('', $questionrecord->options->varsglobal);
+
+        // With MDL-85721, the error reporting has changed for Moodle 4.5 and later. Instead of a notification,
+        // the "Failed to load question options" error is now output via debugging as well.
+        // is now output via debugging.
+        if ($CFG->branch < 405) {
+            self::assertDebuggingCalled("Formulas question ID {$questionrecord->id} was missing an options record. Using default.");
+
+            // Notification we expect due to missing options.
+            $this->expectOutputString('!! Failed to load question options from the table qtype_formulas_options' .
+                                    ' for questionid ' . $questionrecord->id . ' !!' . "\n");
+        } else {
+            self::assertdebuggingcalledcount(2, [
+                "Formulas question ID {$questionrecord->id} was missing an options record. Using default.",
+                "Failed to load question options from the table qtype_formulas_options for questionid {$questionrecord->id}",
+            ]);
+        }
+    }
+
+    public function test_restore_of_backup_with_no_parts(): void {
+        global $DB, $USER, $CFG;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Create a course and a user with editing teacher capabilities.
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $teacher = $USER;
+        $generator->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $coursecontext = \context_course::instance($course->id);
+        /** @var \core_question_generator $questiongenerator */
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+
+        // Create a question category.
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+
+        // Create a quiz with a multipart Formulas question.
+        $quiz = $this->create_test_quiz($course);
+        $question = $questiongenerator->create_question('formulas', 'testmethodsinparts', ['category' => $cat->id]);
+        quiz_add_quiz_question($question->id, $quiz, 0);
+
+        // Backup quiz.
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $backupid = $bc->get_backupid();
+        $bc->execute_plan();
+        $bc->destroy();
+
+        // Empty the <formulas_answers> section inside the backup file.
+        $xmlfile = $bc->get_plan()->get_basepath() . '/questions.xml';
+        $xml = file_get_contents($xmlfile);
+        $xml = preg_replace('#<formulas_answers>.*</formulas_answers>#s', '<formulas_answers></formulas_answers>', $xml);
+        file_put_contents($xmlfile, $xml);
+
+        // Delete the current course to make sure there is no data.
+        delete_course($course, false);
+
+        // Create a new course and restore the backup.
+        $newcourse = $generator->create_course();
+        $rc = new restore_controller(
+            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+        );
+        $rc->execute_precheck();
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Fetch the quiz and question ID.
+        $modules = get_fast_modinfo($newcourse->id)->get_instances_of('quiz');
+        $quiz = reset($modules);
+        $structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($quiz->instance, $quiz->context);
+        $question = reset($structure);
+
+        // Fetch the question and its additional data from the DB. We just check the question has been
+        // restored and that there are no parts. That should be enough to know that restoring of the
+        // corrupted data was able to be completed.
+        $questionrecord = $DB->get_record('question', ['id' => $question->questionid], '*', MUST_EXIST);
+        $qtype = new qtype_formulas();
+        $qtype->get_question_options($questionrecord);
+        self::assertEquals('test-methodsinparts', $questionrecord->name);
+        self::assertEmpty($questionrecord->options->answers);
+    }
+
     /**
      * Restore a quiz with duplicate questions (same stamp and questions) into the same course.
      * This is a contrived case, but this test serves as a control for the other tests in this class, proving

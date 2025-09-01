@@ -886,7 +886,7 @@ final class questiontype_test extends \advanced_testcase {
         $formdata->varsrandom = 'foo = {1,2,3}';
         $formdata->varsglobal = 'bar = foo * 2';
         $formdata->globalunitpenalty = '0.9';
-        $formdata->globalruleid = 99;
+        $formdata->globalruleid = 1;
         $formdata->subqtext = [['text' => 'testing text for part', 'format' => FORMAT_HTML]];
         $formdata->answertype = [qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA];
         $formdata->vars1 = ['local = 1 + foo + bar'];
@@ -904,7 +904,7 @@ final class questiontype_test extends \advanced_testcase {
         // should now be stored with the part (as unitpenalty and ruleid) and not with the question.
         self::assertEquals('foo = {1,2,3}', $savedquestion->options->varsrandom);
         self::assertEquals('bar = foo * 2', $savedquestion->options->varsglobal);
-        self::assertEquals('99', $savedpart->ruleid);
+        self::assertEquals('1', $savedpart->ruleid);
         self::assertEquals('0.9', $savedpart->unitpenalty);
         self::assertEquals('testing text for part', $savedpart->subqtext);
         self::assertEquals('local = 1 + foo + bar', $savedpart->vars1);
@@ -1022,6 +1022,10 @@ final class questiontype_test extends \advanced_testcase {
                 $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_grading_model_answer.xml',
             ],
             [
+                '?Question "Formulas question with no parts" does not contain any parts.',
+                $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_invalid_no_parts.xml',
+            ],
+            [
                 'For a minimal question, you must define a subquestion with (1) mark, (2) answer, (3) grading criteria',
                 $CFG->dirroot . '/question/type/formulas/tests/fixtures/qtype_sample_formulas_5.2.0.xml',
             ],
@@ -1069,16 +1073,26 @@ final class questiontype_test extends \advanced_testcase {
 
         // Import our XML file.
         self::assertTrue($qformat->importpreprocess());
-        if ($expected[0] !== '!') {
-            self::assertTrue($qformat->importprocess());
-        } else {
+        if ($expected[0] === '!') {
+            $prefix = '\+\+ Importing 1 questions from file \+\+.*';
             $expected = substr($expected, 1);
             self::assertFalse($qformat->importprocess());
+        } else if ($expected[0] === '?') {
+            $prefix = '\+\+ Parsing questions from import file. \+\+.*';
+            $expected = substr($expected, 1);
+            if ($CFG->branch < 404) {
+                self::assertTrue($qformat->importprocess());
+            } else {
+                self::assertFalse($qformat->importprocess());
+            }
+        } else {
+            $prefix = '';
+            self::assertTrue($qformat->importprocess());
         }
         self::assertTrue($qformat->importpostprocess());
 
         // Importing generates output. Make sure the tests expects that.
-        $this->expectOutputRegex('/\+\+ Importing 1 questions from file \+\+.*' . preg_quote($expected, '/') . '/s');
+        $this->expectOutputRegex('/' . $prefix . preg_quote($expected, '/') . '/s');
     }
 
     /**
