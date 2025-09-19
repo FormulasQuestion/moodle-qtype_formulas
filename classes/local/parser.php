@@ -230,6 +230,11 @@ class parser {
                     if ($value === 'r=') {
                         $value = '=';
                     }
+                    // In the answer parser, we allow the % sign to be at the end. In this case, we simply break,
+                    // because the token is not an identifier, so there is nothing left to be done.
+                    if ($this instanceof answer_parser && $type === token::OPERATOR && $value === '%') {
+                        break;
+                    }
                     $this->die(get_string('error_unexpectedend', 'qtype_formulas', $value), $currenttoken);
                 }
                 // The last identifier of a statement cannot be a FUNCTION, because it would have

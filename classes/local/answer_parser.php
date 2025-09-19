@@ -69,13 +69,6 @@ class answer_parser extends parser {
             if ($token->type === token::END_OF_STATEMENT) {
                 $this->die(get_string('error_unexpectedtoken', 'qtype_formulas', ';'), $token);
             }
-
-            // Anwers must not contain the modulo operator %. Student answers in a combined
-            // field could, however, include that symbol as a "unit". In that case, we classify
-            // it as a VARIABLE token.
-            if ($token->type === token::OPERATOR && $token->value === '%') {
-                $token->type = token::VARIABLE;
-            }
         }
 
         // Once this is done, we can parse the expression normally.
@@ -312,7 +305,11 @@ class answer_parser extends parser {
      */
     public function find_start_of_units(): int {
         foreach ($this->tokenlist as $token) {
-            if ($token->type === token::VARIABLE) {
+            $isvariable = $token->type === token::VARIABLE;
+            // If the % sign is used, we consider it as a unit, because students are not allowed to
+            // use the modulo operator.
+            $ispercent = $token->type === token::OPERATOR && $token->value === '%';
+            if ($isvariable || $ispercent) {
                 return $token->column - 1;
             }
         }
