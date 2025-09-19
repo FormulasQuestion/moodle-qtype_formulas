@@ -35,6 +35,7 @@ use qtype_formulas\local\token;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\answer_parser
+ * @covers \qtype_formulas\local\parser
  */
 final class answer_parser_test extends \advanced_testcase {
 
