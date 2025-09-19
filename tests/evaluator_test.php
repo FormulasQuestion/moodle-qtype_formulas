@@ -1808,6 +1808,30 @@ final class evaluator_test extends \advanced_testcase {
                 'List must not contain more than 1000 elements.',
                 'a = fill(2000, 1)',
             ],
+            'invalid variable, µ alone' => [
+                'Invalid variable name: µ.',
+                'µ = 2',
+            ],
+            'invalid variable, µ at start' => [
+                'Invalid variable name: µs.',
+                'µs = 2',
+            ],
+            'invalid variable, µ in name' => [
+                'Invalid variable name: abµc.',
+                'abµc = 2',
+            ],
+            'invalid variable, OHM alone' => [
+                'Invalid variable name: Ω.',
+                'Ω = 2',
+            ],
+            'invalid variable, OHM at start' => [
+                'Invalid variable name: Ωx.',
+                'Ωx = 2',
+            ],
+            'invalid variable, OHM in name' => [
+                'Invalid variable name: kΩ.',
+                'kΩ = 2',
+            ],
         ];
     }
 
