@@ -311,6 +311,8 @@ final class answer_parser_test extends \advanced_testcase {
             'OHM SIGN' => [['1', 'Ω'], '1 Ω'],
             'GREEK SMALL MU' => [['1', 'μs'], '1 μs'],
             'MICRO SIGN' => [['1', 'µs'], '1 µs'],
+            'percent' => [['5', '%'], '5 %'],
+            'percent' => [['5', '%'], '5%'],
 
             [['.3', ''], '.3'],
             [['3.1', ''], '3.1'],

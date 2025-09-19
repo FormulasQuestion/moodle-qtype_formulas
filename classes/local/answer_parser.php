@@ -70,6 +70,12 @@ class answer_parser extends parser {
                 $this->die(get_string('error_unexpectedtoken', 'qtype_formulas', ';'), $token);
             }
 
+            // Anwers must not contain the modulo operator %. Student answers in a combined
+            // field could, however, include that symbol as a "unit". In that case, we classify
+            // it as a VARIABLE token.
+            if ($token->type === token::OPERATOR && $token->value === '%') {
+                $token->type = token::VARIABLE;
+            }
         }
 
         // Once this is done, we can parse the expression normally.
@@ -223,7 +229,6 @@ class answer_parser extends parser {
     /**
      * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
      * - everything allowed for numerical formulas
-     * - modulo operator %
      * - variables (TODO: maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @param bool $fornumericalformula whether we disallow the usage of variables and the PREFIX operator
@@ -251,7 +256,7 @@ class answer_parser extends parser {
             'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
             'sqrt', 'exp', 'log10', 'lb', 'ln', 'lg', 'abs', 'ceil', 'floor', 'fact',
         ];
-        $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
+        $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^'];
         foreach ($answertokens as $token) {
             // Cut short, if it is a NUMBER or CONSTANT token.
             if (in_array($token->type, [token::NUMBER, token::CONSTANT])) {
