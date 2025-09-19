@@ -971,4 +971,92 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_mark(0);
     }
 
+    public function test_combined_field_with_ohm(): void {
+        // Create a question.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->answer = '1000';
+        $q->parts[0]->postunit = 'Ω';
+        $q->parts[0]->otherrule = '1 ohm = 1 Ω ; 1 kohm = 1 kΩ ; 1 Mohm = 1 MΩ';
+
+        // Start an attempt and submit various correct answers.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1000 ohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1000 Ω', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1 kohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1 kΩ', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '.001 Mohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '.001 MΩ', '-submit' => 1]);
+        $this->check_current_mark(1);
+    }
+
+    public function test_separate_unit_field_with_ohm(): void {
+        // Create a question.
+        $q = $this->get_test_formulas_question('testsinglenumunitsep');
+        $q->parts[0]->answer = '1000';
+        $q->parts[0]->postunit = 'Ω';
+        $q->parts[0]->otherrule = '1 ohm = 1 Ω ; 1 kohm = 1 kΩ ; 1 Mohm = 1 MΩ';
+
+        // Start an attempt and submit various correct answers.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1000', '0_1' => 'ohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1000', '0_1' => 'Ω', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1', '0_1' => 'kohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1', '0_1' => 'kΩ', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '.001', '0_1' => 'Mohm', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '.001', '0_1' => 'MΩ', '-submit' => 1]);
+        $this->check_current_mark(1);
+    }
+
+    public function test_combined_field_with_micro(): void {
+        // Create a question.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->answer = '1e-6';
+        $q->parts[0]->postunit = 'A';
+        $q->parts[0]->otherrule = '1 uA = 1 µA';
+
+        // Start an attempt and submit various correct answers.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1 uA', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '1 µA', '-submit' => 1]);
+        $this->check_current_mark(1);
+    }
+
+    public function test_separate_unit_field_with_micro(): void {
+        // Create a question.
+        $q = $this->get_test_formulas_question('testsinglenumunitsep');
+        $q->parts[0]->answer = '1e-6';
+        $q->parts[0]->postunit = 'A';
+        $q->parts[0]->otherrule = '1 uA = 1 µA';
+
+        // Start an attempt and submit various correct answers.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1', '0_1' => 'uA', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '1', '0_1' => 'µA', '-submit' => 1]);
+        $this->check_current_mark(1);
+    }
+
 }
