@@ -40,6 +40,14 @@ if ($ADMIN->fulltree) {
         0
     ));
 
+    // Whether the tooltip for answer type "Number" should be shown.
+    $settings->add(new admin_setting_configcheckbox(
+        'qtype_formulas/shownumbertooltip',
+        new lang_string('settingshownumbertooltip', 'qtype_formulas'),
+        new lang_string('settingshownumbertooltip_desc', 'qtype_formulas'),
+        1
+    ));
+
     // Default delay for the on-the-fly validation's debounce timer.
     $settings->add(new admin_setting_configselect(
         'qtype_formulas/debouncedelay',
