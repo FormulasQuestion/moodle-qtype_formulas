@@ -602,7 +602,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // If the answer type is "Number" and it is not a combined field, we only add the tooltip, if the
         // corresponding option is set.
-        $isnumber = $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
+        $iscombined = $inputattributes['data-withunit'] === '1';
+        $isnumber = !$iscombined && $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
         if (!$isnumber || $shownumbertooltip) {
             $inputattributes += [
