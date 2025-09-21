@@ -595,13 +595,23 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             'data-answertype' => ($answerindex === self::UNIT_FIELD ? 'unit' : $part->answertype),
             'data-withunit' => ($answerindex === self::COMBINED_FIELD ? '1' : '0'),
 
-            'data-toggle' => 'tooltip',
-            'data-title' => $title,
-            'data-custom-class' => 'qtype_formulas-tooltip',
             'title' => $title,
             'class' => "form-control formulas_{$titlestring} {$feedbackclass}",
             'maxlength' => 128,
         ];
+
+        // If the answer type is "Number" and it is not a combined field, we only add the tooltip, if the
+        // corresponding option is set.
+        $iscombined = $inputattributes['data-withunit'] === '1';
+        $isnumber = !$iscombined && $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
+        $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
+        if (!$isnumber || $shownumbertooltip) {
+            $inputattributes += [
+                'data-toggle' => 'tooltip',
+                'data-title' => $title,
+                'data-custom-class' => 'qtype_formulas-tooltip',
+            ];
+        }
 
         if ($displayoptions->readonly) {
             $inputattributes['readonly'] = 'readonly';

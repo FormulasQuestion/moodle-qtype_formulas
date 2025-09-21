@@ -95,3 +95,28 @@ Feature: Display of tooltips
     And I press shift tab
     Then I should not see "Number"
     And "div.tooltip-inner" "css_element" should not exist
+
+  Scenario: Tooltip for Number is not shown if disabled
+    When the following config values are set as admin:
+      | shownumbertooltip | 0 | qtype_formulas |
+    And I follow "Quiz 1"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "1"
+    Then I should not see "Number"
+    And "div.tooltip-inner" "css_element" should not exist
+
+  Scenario: Setting does not affect tooltip for combined field with answer type "Number"
+    When the following config values are set as admin:
+      | shownumbertooltip | 0 | qtype_formulas |
+    And I follow "Quiz 3"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "5 m/s"
+    Then I should see "Number and unit"
+
+  Scenario: Setting does not affect tooltip for other answer types
+    When the following config values are set as admin:
+      | shownumbertooltip | 0 | qtype_formulas |
+    And I follow "Quiz 2"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "x"
+    Then I should see "Algebraic formula"
