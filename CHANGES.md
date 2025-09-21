@@ -1,5 +1,11 @@
 # Changelog
 
+### 6.2.0 (2025-09-21)
+
+- improvement: add option to hide "Number" tooltip
+- improvement: increased robustness when importing/restoring bad data
+- bugfix: allow Ω, µ and % symbols in units
+
 ### 6.1.2 (2025-08-20)
 
 - improvement: allow :MC suffix for radio-box multi-choice
