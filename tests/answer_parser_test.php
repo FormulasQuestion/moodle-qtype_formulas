@@ -35,6 +35,7 @@ use qtype_formulas\local\token;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas\local\answer_parser
+ * @covers \qtype_formulas\local\parser
  */
 final class answer_parser_test extends \advanced_testcase {
 
@@ -307,6 +308,12 @@ final class answer_parser_test extends \advanced_testcase {
             'combination 3' => [['1', 'm kg s^-2'], '1 m kg s^-2'],
             'numerical' => [['12 + 3 * 4/8', 'm^2'], '12 + 3 * 4/8 m^2'],
             'numerical formula' => [['12 * sqrt(3)', 'kg/s'], '12 * sqrt(3) kg/s'],
+            'GREEK CAPITAL OMEGA' => [['1', 'Ω'], '1 Ω'],
+            'OHM SIGN' => [['1', 'Ω'], '1 Ω'],
+            'GREEK SMALL MU' => [['1', 'μs'], '1 μs'],
+            'MICRO SIGN' => [['1', 'µs'], '1 µs'],
+            'percent with space' => [['5', '%'], '5 %'],
+            'percent without space' => [['5', '%'], '5%'],
 
             [['.3', ''], '.3'],
             [['3.1', ''], '3.1'],

@@ -26,6 +26,9 @@ use qtype_formulas;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class answer_parser extends parser {
+    /** @var array list of operators that may exceptionally appear at the end of the input */
+    protected $allowedoperatorsatend = ['%'];
+
     /**
      * Create a parser for student answers. This class does additional filtering (e. g. block
      * forbidden operators) and syntax checking according to the answer type. It also translates
@@ -69,7 +72,6 @@ class answer_parser extends parser {
             if ($token->type === token::END_OF_STATEMENT) {
                 $this->die(get_string('error_unexpectedtoken', 'qtype_formulas', ';'), $token);
             }
-
         }
 
         // Once this is done, we can parse the expression normally.
@@ -223,7 +225,6 @@ class answer_parser extends parser {
     /**
      * Check whether the given answer contains only valid tokens for the answer type ALGEBRAIC, i. e.
      * - everything allowed for numerical formulas
-     * - modulo operator %
      * - variables (TODO: maybe only allow registered variables, would avoid student mistake "ab" instead of "a b" or "a*b")
      *
      * @param bool $fornumericalformula whether we disallow the usage of variables and the PREFIX operator
@@ -251,7 +252,7 @@ class answer_parser extends parser {
             'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
             'sqrt', 'exp', 'log10', 'lb', 'ln', 'lg', 'abs', 'ceil', 'floor', 'fact',
         ];
-        $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^', '%'];
+        $operatorwhitelist = ['+', '_', '-', '/', '*', '**', '^'];
         foreach ($answertokens as $token) {
             // Cut short, if it is a NUMBER or CONSTANT token.
             if (in_array($token->type, [token::NUMBER, token::CONSTANT])) {
@@ -307,7 +308,11 @@ class answer_parser extends parser {
      */
     public function find_start_of_units(): int {
         foreach ($this->tokenlist as $token) {
-            if ($token->type === token::VARIABLE) {
+            $isvariable = $token->type === token::VARIABLE;
+            // If the % sign is used, we consider it as a unit, because students are not allowed to
+            // use the modulo operator.
+            $ispercent = $token->type === token::OPERATOR && $token->value === '%';
+            if ($isvariable || $ispercent) {
                 return $token->column - 1;
             }
         }
