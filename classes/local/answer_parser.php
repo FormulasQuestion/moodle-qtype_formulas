@@ -26,6 +26,9 @@ use qtype_formulas;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class answer_parser extends parser {
+    /** @var array list of operators that may exceptionally appear at the end of the input */
+    protected $allowedoperatorsatend = ['%'];
+
     /**
      * Create a parser for student answers. This class does additional filtering (e. g. block
      * forbidden operators) and syntax checking according to the answer type. It also translates

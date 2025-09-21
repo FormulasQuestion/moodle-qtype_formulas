@@ -44,6 +44,9 @@ class parser {
     /** @var array list of known variables */
     private array $variableslist = [];
 
+    /** @var array list of operators that may exceptionally appear at the end of the input, for overriding in subclasses */
+    protected $allowedoperatorsatend = [];
+
     /**
      * Create a parser class and have it parse a given input. The input can be given as a string, in
      * which case it will first be sent to the lexer. If that step has already been made, the constructor
@@ -223,17 +226,15 @@ class parser {
             $value = $currenttoken->value;
             $nexttoken = $this->peek();
             if ($nexttoken === self::EOF) {
-                // The last token must not be an OPERATOR, a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR.
-                if (in_array($type, [token::OPERATOR, token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR])) {
+                $invalidoperator = $type === token::OPERATOR && !in_array($value, $this->allowedoperatorsatend);
+                $invalidothertoken = in_array($type, [token::PREFIX, token::ARG_SEPARATOR, token::RANGE_SEPARATOR]);
+                // The last token must not be a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR. Also, it must not
+                // be an OPERATOR, unless it is in the whitelist of operators that may appear at the end of the input.
+                if ($invalidoperator || $invalidothertoken) {
                     // When coming from the random parser, the assignment operator is 'r=' instead of '=', but
                     // the user does not know that. We must instead report the value they entered.
                     if ($value === 'r=') {
                         $value = '=';
-                    }
-                    // In the answer parser, we allow the % sign to be at the end. In this case, we simply break,
-                    // because the token is not an identifier, so there is nothing left to be done.
-                    if ($this instanceof answer_parser && $type === token::OPERATOR && $value === '%') {
-                        break;
                     }
                     $this->die(get_string('error_unexpectedend', 'qtype_formulas', $value), $currenttoken);
                 }
