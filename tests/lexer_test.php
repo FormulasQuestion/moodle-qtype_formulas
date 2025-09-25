@@ -338,7 +338,7 @@ EOF;
         $input = <<<EOF
         a = (     b == 1    ?   7 : 3);
         b = c[var > 1];
-        c = thing     *    (x != 4);
+        c = thing     *    (x <> 4);
 EOF;
 
         // We are not testing the positions anymore.
@@ -370,7 +370,7 @@ EOF;
             new token(token::OPERATOR, '*'),
             new token(token::OPENING_PAREN, '('),
             new token(token::IDENTIFIER, 'x'),
-            new token(token::OPERATOR, '!='),
+            new token(token::OPERATOR, '!=', -1, -1, '<>'),
             new token(token::NUMBER, 4),
             new token(token::CLOSING_PAREN, ')'),
             new token(token::END_OF_STATEMENT, ';'),
@@ -380,6 +380,9 @@ EOF;
         foreach ($tokens as $i => $token) {
             self::assertEquals($output[$i]->type, $token->type);
             self::assertEquals($output[$i]->value, $token->value);
+            if (isset($output[$i]->metadata)) {
+                self::assertEquals($output[$i]->metadata, $token->metadata);
+            }
         }
     }
 
