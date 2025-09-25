@@ -44,9 +44,11 @@ class random_parser extends parser {
         // to random variables.
         foreach ($tokenlist as $token) {
             // When parsing random variables, we change the assignment operator from '=' to 'r=' in order
-            // for the evaluator to know it has to store them as random variables.
+            // for the evaluator to know it has to store them as random variables. Store the original value
+            // in the metadata.
             if ($token->type === token::OPERATOR && $token->value === '=') {
                 $token->value = 'r=';
+                $token->metadata = '=';
             }
 
             // In legacy code, arrays in random variables always had to be used together with

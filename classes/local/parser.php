@@ -231,13 +231,8 @@ class parser {
                 // The last token must not be a PREFIX, an ARG_SEPARATOR or a RANGE_SEPARATOR. Also, it must not
                 // be an OPERATOR, unless it is in the whitelist of operators that may appear at the end of the input.
                 if ($invalidoperator || $invalidothertoken) {
-                    // When coming from the random parser, the assignment operator is 'r=' instead of '=', but
-                    // the user does not know that. We must instead report the value they entered.
-                    if ($value === 'r=') {
-                        $value = '=';
-                    }
-                    // In some cases, an operator might have been translated (e. g. <> becomes !=), but the user should
-                    // still be presented what they have entered.
+                    // In some cases, an operator might have been translated (e. g. <> becomes != or = becomes r= in the random
+                    // parser), but the user should still be presented what they have entered.
                     $value = $currenttoken->metadata ?? $value;
                     $this->die(get_string('error_unexpectedend', 'qtype_formulas', $value), $currenttoken);
                 }
