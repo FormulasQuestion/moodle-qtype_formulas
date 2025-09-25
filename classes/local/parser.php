@@ -236,6 +236,9 @@ class parser {
                     if ($value === 'r=') {
                         $value = '=';
                     }
+                    // In some cases, an operator might have been translated (e. g. <> becomes !=), but the user should
+                    // still be presented what they have entered.
+                    $value = $currenttoken->metadata ?? $value;
                     $this->die(get_string('error_unexpectedend', 'qtype_formulas', $value), $currenttoken);
                 }
                 // The last identifier of a statement cannot be a FUNCTION, because it would have
