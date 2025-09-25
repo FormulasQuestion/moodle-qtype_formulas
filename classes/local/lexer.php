@@ -473,12 +473,21 @@ class lexer {
         if (preg_match('/[*=&|<>]/', $followedby)) {
             // In most cases, two-character operators have the same character twice.
             // The only exceptions are !=, <= and >= where the second char is always the equal sign.
-            if (($currentchar === $followedby)
-                || ($followedby === '=' && preg_match('/[!<>]/', $currentchar))) {
+            // Also, we want to allow <> as alternative syntax for inequality.
+            $sametwice = $currentchar === $followedby;
+            $secondequal = ($followedby === '=' && preg_match('/[!<>]/', $currentchar));
+            $alternativeinequality = $currentchar === '<' && $followedby === '>';
+            if ($sametwice || $secondequal || $alternativeinequality) {
                 $result .= $this->inputstream->read();
             }
         }
-        return new token(token::OPERATOR, $result, $startingposition['row'], $startingposition['column']);
+        // Translate <> into !=, but always store the original value in the metadata. There might be
+        // other translations later.
+        $original = $result;
+        if ($result === '<>') {
+            $result = '!=';
+        }
+        return new token(token::OPERATOR, $result, $startingposition['row'], $startingposition['column'], $original);
     }
 
     /**

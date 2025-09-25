@@ -46,51 +46,51 @@ test = (a == b ? c : d);
 EOF;
         $output = [
             new token(token::IDENTIFIER, 'this', 1, 1),
-            new token(token::OPERATOR, '=', 1, 6),
+            new token(token::OPERATOR, '=', 1, 6, '='),
             new token(token::IDENTIFIER, 'that', 1, 8),
-            new token(token::OPERATOR, '*', 1, 13),
+            new token(token::OPERATOR, '*', 1, 13, '*'),
             new token(token::IDENTIFIER, 'other_thing', 1, 15),
             new token(token::END_OF_STATEMENT, ';', 1, 26),
             new token(token::IDENTIFIER, 's1', 2, 1),
-            new token(token::OPERATOR, '=', 2, 4),
+            new token(token::OPERATOR, '=', 2, 4, '='),
             new token(token::STRING, 'single quoted string with a double quote " inside', 2, 6),
             new token(token::END_OF_STATEMENT, ';', 2, 57),
             new token(token::IDENTIFIER, 's2', 4, 1),
-            new token(token::OPERATOR, '=', 4, 4),
+            new token(token::OPERATOR, '=', 4, 4, '='),
             new token(token::STRING, 'double quoted string with a single quote \' inside', 4, 6),
             new token(token::END_OF_STATEMENT, ';', 4, 57),
             new token(token::IDENTIFIER, 's3', 5, 1),
-            new token(token::OPERATOR, '=', 5, 4),
+            new token(token::OPERATOR, '=', 5, 4, '='),
             new token(token::STRING, "string\nwith a newline", 5, 6),
             new token(token::END_OF_STATEMENT, ';', 5, 30),
             new token(token::IDENTIFIER, '_s4', 6, 1),
-            new token(token::OPERATOR, '=', 6, 5),
+            new token(token::OPERATOR, '=', 6, 5, '='),
             new token(token::STRING, "string with a real\nnewline", 6, 7),
             new token(token::END_OF_STATEMENT, ';', 7, 9),
             new token(token::IDENTIFIER, 'x', 8, 1),
-            new token(token::OPERATOR, '=', 8, 3),
+            new token(token::OPERATOR, '=', 8, 3, '='),
             new token(token::NUMBER, 2, 8, 5),
-            new token(token::OPERATOR, '*', 8, 6),
+            new token(token::OPERATOR, '*', 8, 6, '*'),
             new token(token::IDENTIFIER, 'x', 8, 7),
-            new token(token::OPERATOR, '+', 8, 8),
+            new token(token::OPERATOR, '+', 8, 8, '+'),
             new token(token::IDENTIFIER, 'z', 8, 9),
             new token(token::END_OF_STATEMENT, ';', 8, 10),
             new token(token::IDENTIFIER, 'f', 9, 1),
-            new token(token::OPERATOR, '=', 9, 3),
+            new token(token::OPERATOR, '=', 9, 3, '='),
             new token(token::NUMBER, 4, 9, 5),
             new token(token::IDENTIFIER, 'g', 9, 6),
-            new token(token::OPERATOR, '-', 9, 7),
+            new token(token::OPERATOR, '-', 9, 7, '-'),
             new token(token::IDENTIFIER, 'e', 9, 8),
             new token(token::END_OF_STATEMENT, ';', 9, 9),
             new token(token::IDENTIFIER, 'test', 10, 1),
-            new token(token::OPERATOR, '=', 10, 6),
+            new token(token::OPERATOR, '=', 10, 6, '='),
             new token(token::OPENING_PAREN, '(', 10, 8),
             new token(token::IDENTIFIER, 'a', 10, 9),
-            new token(token::OPERATOR, '==', 10, 11),
+            new token(token::OPERATOR, '==', 10, 11, '=='),
             new token(token::IDENTIFIER, 'b', 10, 14),
-            new token(token::OPERATOR, '?', 10, 16),
+            new token(token::OPERATOR, '?', 10, 16, '?'),
             new token(token::IDENTIFIER, 'c', 10, 18),
-            new token(token::OPERATOR, ':', 10, 20),
+            new token(token::OPERATOR, ':', 10, 20, ':'),
             new token(token::IDENTIFIER, 'd', 10, 22),
             new token(token::CLOSING_PAREN, ')', 10, 23),
             new token(token::END_OF_STATEMENT, ';', 10, 24),
@@ -107,11 +107,11 @@ t = join("", 'äöü', 'éçñ…');
 EOF;
         $output = [
             new token(token::IDENTIFIER, 's', 1, 1),
-            new token(token::OPERATOR, '=', 1, 3),
+            new token(token::OPERATOR, '=', 1, 3, '='),
             new token(token::STRING, 'string with äöüéç…', 1, 5),
             new token(token::END_OF_STATEMENT, ';', 1, 25),
             new token(token::IDENTIFIER, 't', 2, 1),
-            new token(token::OPERATOR, '=', 2, 3),
+            new token(token::OPERATOR, '=', 2, 3, '='),
             new token(token::IDENTIFIER, 'join', 2, 5),
             new token(token::OPENING_PAREN, '(', 2, 9),
             new token(token::STRING, '', 2, 10),
@@ -338,7 +338,7 @@ EOF;
         $input = <<<EOF
         a = (     b == 1    ?   7 : 3);
         b = c[var > 1];
-        c = thing     *    (x != 4);
+        c = thing     *    (x <> 4);
 EOF;
 
         // We are not testing the positions anymore.
@@ -370,7 +370,7 @@ EOF;
             new token(token::OPERATOR, '*'),
             new token(token::OPENING_PAREN, '('),
             new token(token::IDENTIFIER, 'x'),
-            new token(token::OPERATOR, '!='),
+            new token(token::OPERATOR, '!=', -1, -1, '<>'),
             new token(token::NUMBER, 4),
             new token(token::CLOSING_PAREN, ')'),
             new token(token::END_OF_STATEMENT, ';'),
@@ -380,6 +380,9 @@ EOF;
         foreach ($tokens as $i => $token) {
             self::assertEquals($output[$i]->type, $token->type);
             self::assertEquals($output[$i]->value, $token->value);
+            if (isset($output[$i]->metadata)) {
+                self::assertEquals($output[$i]->metadata, $token->metadata);
+            }
         }
     }
 

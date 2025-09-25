@@ -363,6 +363,8 @@ final class evaluator_test extends \advanced_testcase {
             'ternary in both parts without parens, 2' => [12, '1>1 ? 1 == 2 ? 3 : 4 : 7 < 8 ? 12 : 15'],
             'ternary with vars' => [1, 'a=1; b=2; a < b ? a : b'],
             'ternary with arrays' => [2, 'a=[1,2,3]; b=2; a[0] > a[b] ? a[1] : a[0] * a[1]'],
+            'alternative inequality with numbers' => [7, '2 <> 3 ? 7 : 5'],
+            'alternative inequality with strings' => ['x', '"a" <> "b" ? "x" : "y"'],
         ];
     }
 
@@ -500,6 +502,14 @@ final class evaluator_test extends \advanced_testcase {
             'boolean true should be 1' => [
                 ['a' => new variable('a', 1, variable::NUMERIC)],
                 'a = (5 == 5);',
+            ],
+            'boolean true should be 1, with inequality' => [
+                ['a' => new variable('a', 1, variable::NUMERIC)],
+                'a = (4 != 5);',
+            ],
+            'boolean true should be 1, with alternative inequality' => [
+                ['a' => new variable('a', 1, variable::NUMERIC)],
+                'a = (4 <> 5);',
             ],
             'boolean false should be 0' => [
                 ['a' => new variable('a', 0, variable::NUMERIC)],
@@ -1835,6 +1845,14 @@ final class evaluator_test extends \advanced_testcase {
             'invalid assignment with % at end' => [
                 "Syntax error: unexpected end of expression after '%'.",
                 'a = 2 %',
+            ],
+            'invalid assignment with <> at end' => [
+                "Syntax error: unexpected end of expression after '<>'.",
+                'a = 2 <>',
+            ],
+            'invalid assignment with != at end' => [
+                "Syntax error: unexpected end of expression after '!='.",
+                'a = 2 !=',
             ],
         ];
     }
