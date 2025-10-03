@@ -833,11 +833,16 @@ class functions {
      * Note: technically, the function accepts a float, because in some
      * PHP versions, if one passes a float to a function that expectes an int,
      * the float will be converted. We'd rather detect that and print an error.
+     * Although the returned value is an integer, we use the float type, because
+     * PHP_FLOAT_MAX is much larger than PHP_INT_MAX.
+     * Beware: Due to the limited precision of floats (~ 16 digits), factorials
+     * larger than 27! are not guaranteed to be accurate, or rather, they are
+     * guaranteed not to be accurate...
      *
      * @param float $n the number
-     * @return int
+     * @return float
      */
-    public static function fact(float $n): int {
+    public static function fact(float $n): float {
         $n = self::assure_numeric(
             $n,
             get_string('error_func_nnegint', 'qtype_formulas', 'fact()'),
@@ -848,7 +853,7 @@ class functions {
         }
         $result = 1;
         for ($i = 1; $i <= $n; $i++) {
-            if ($result > PHP_INT_MAX / $i) {
+            if ($result > PHP_FLOAT_MAX / $i) {
                 self::die('error_fact_toolarge', $n);
             }
             $result *= $i;
