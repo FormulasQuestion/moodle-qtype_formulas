@@ -365,8 +365,8 @@ class evaluator {
             $basename = strstr($basename, '[', true);
         }
 
-        // We do not allow Ω and µ in variable names.
-        $isunit = preg_match('/[\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $basename);
+        // We do not allow °, Ω and µ in variable names.
+        $isunit = preg_match('/[°\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $basename);
         if ($isunit) {
             $this->die(get_string('error_invalidvarname', 'qtype_formulas', $basename), $value);
         }

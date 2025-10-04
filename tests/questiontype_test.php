@@ -312,6 +312,7 @@ final class questiontype_test extends \advanced_testcase {
             [[], ['answer' => [0 => '\sin(20)']]],
             [[], ['answer' => [0 => '[1, 2]']]],
             [[], ['answer' => [0 => '0']]],
+            [[], ['answer' => [0 => '5'], 'postunit' => [0 => '°']]],
             [[], ['answer' => [0 => '5'], 'postunit' => [0 => '%']]],
             [[], ['answer' => [0 => '1'], 'postunit' => [0 => 'Ω']]],
             [[], ['answer' => [0 => '1'], 'postunit' => [0 => 'µs']]],

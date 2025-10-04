@@ -314,6 +314,8 @@ final class answer_parser_test extends \advanced_testcase {
             'MICRO SIGN' => [['1', 'µs'], '1 µs'],
             'percent with space' => [['5', '%'], '5 %'],
             'percent without space' => [['5', '%'], '5%'],
+            'degree with space' => [['5', '°'], '5 °'],
+            'degree without space' => [['5', '°'], '5°'],
 
             [['.3', ''], '.3'],
             [['3.1', ''], '3.1'],
