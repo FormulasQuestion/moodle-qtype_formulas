@@ -89,7 +89,7 @@ class random_variable extends variable {
                 // TODO: non-capturing catch.
                 return PHP_INT_MAX;
             }
-            return $result;
+            return $result >= PHP_INT_MAX ? PHP_INT_MAX : (int) $result;
         }
         return count($this->reservoir);
     }
