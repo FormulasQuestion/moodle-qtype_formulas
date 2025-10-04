@@ -1,5 +1,16 @@
 # Changelog
 
+### 6.2.1 (2025-10-06)
+
+- bugfix: use float datatype to calculate factorials
+- bugfix: allow ° symbol as a unit
+- improvement: allow <> as alternative to !=
+- internal: assure full compatibility with Moodle 5.1
+
+Note: The plugin now allows to calculate factorials larger than 20! in the same way
+as older (5.x) versions. However, due to limited precision, the result for factorials
+larger than 27! will generally not be accurate -- in the same way as in older versions.
+
 ### 6.2.0 (2025-09-21)
 
 - improvement: add option to hide "Number" tooltip
