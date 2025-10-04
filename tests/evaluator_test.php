@@ -1842,6 +1842,18 @@ final class evaluator_test extends \advanced_testcase {
                 'Invalid variable name: kΩ.',
                 'kΩ = 2',
             ],
+            'invalid variable, degree alone' => [
+                'Invalid variable name: °.',
+                '° = 2',
+            ],
+            'invalid variable, degree at start' => [
+                'Invalid variable name: °x.',
+                '°x = 2',
+            ],
+            'invalid variable, degree in name' => [
+                'Invalid variable name: k°.',
+                'k° = 2',
+            ],
             'invalid assignment with % at end' => [
                 "Syntax error: unexpected end of expression after '%'.",
                 'a = 2 %',

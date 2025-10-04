@@ -986,6 +986,21 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->check_current_mark(1);
     }
 
+    public function test_combined_field_with_degree(): void {
+        // Create a question.
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->parts[0]->answer = '5';
+        $q->parts[0]->postunit = '°';
+
+        // Start an attempt and submit various correct answers.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '5 °', '-submit' => 1]);
+        $this->check_current_mark(1);
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_' => '5°', '-submit' => 1]);
+        $this->check_current_mark(1);
+    }
+
     public function test_combined_field_with_ohm(): void {
         // Create a question.
         $q = $this->get_test_formulas_question('testsinglenumunit');

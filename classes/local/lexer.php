@@ -109,8 +109,8 @@ class lexer {
         }
         // A letter indicates the start of an identifier, i. e. a variable or function name.
         // We also accept U+00B5 (MICRO SIGN), U+03BC (GREEK SMALL MU), U+2126 (OHM) and
-        // U+03A9 (GREEK CAPITAL OMEGA) for units.
-        if (preg_match('/[_A-Za-z\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $currentchar)) {
+        // U+03A9 (GREEK CAPITAL OMEGA) for units. And we allow the degree symbol ° as well.
+        if (preg_match('/[_A-Za-z°\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $currentchar)) {
             return $this->read_identifier();
         }
         // Unless we are in the middle of a ternary operator, we treat : as a RANGE_SEPARATOR.
@@ -426,10 +426,11 @@ class lexer {
         while ($currentchar !== input_stream::EOF) {
             $nextchar = $this->inputstream->peek();
             // Identifiers may contain letters, digits or underscores. Also, we will accept the
-            // µ and Ω symbols, because they may appear in units. We don't want to throw lexing
-            // errors while reading them. Note that we explicitly include U+00B5 (MICRO SIGN),
-            // U+03BC (GREEK SMALL MU), U+2126 (OHM) and U+03A9 (GREEK CAPITAL OMEGA).
-            if (!preg_match('/[A-Za-z0-9_\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $nextchar)) {
+            // µ and Ω symbols, because they may appear in units. The same is true for the degree °
+            // symbol. We don't want to throw lexing errors while reading them. Note that we
+            // explicitly include U+00B5 (MICRO SIGN), U+03BC (GREEK SMALL MU), U+2126 (OHM) and
+            // U+03A9 (GREEK CAPITAL OMEGA).
+            if (!preg_match('/[A-Za-z°0-9_\x{00B5}\x{03BC}\x{03A9}\x{2126}]/u', $nextchar)) {
                 break;
             }
             $currentchar = $this->inputstream->read();
