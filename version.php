@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-$plugin->version = 2025092100;
+$plugin->version = 2025100600;
 
 $plugin->cron = 0;
 $plugin->requires = 2022112800;
@@ -35,7 +35,7 @@ $plugin->dependencies = [
     'qtype_multichoice' => 2015111600,
     'filter_mathjaxloader' => 2022112800,
 ];
-$plugin->supported = [401, 500];
-$plugin->release = '6.2.0';
+$plugin->supported = [401, 501];
+$plugin->release = '6.2.1';
 
 $plugin->maturity = MATURITY_STABLE;
