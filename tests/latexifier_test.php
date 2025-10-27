@@ -99,6 +99,8 @@ final class latexifier_test extends \advanced_testcase {
             ['\lg\left(12\right)', 'log10(12)'],
             ['\operatorname{arctan2}\left(1, 3\right)', 'atan2(1, 3)'],
             ['\operatorname{pick}\left(12\right)', 'pick(12)'],
+            ['\frac{}{1}\cdot 2', '1/*2'],
+            ['\cdot 1\cdot 2', '1* *2'],
         ];
     }
 

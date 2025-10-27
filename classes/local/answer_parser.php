@@ -192,8 +192,8 @@ class answer_parser extends parser {
             }
         }
 
-        // Still here? Then it's all good.
-        return true;
+        // Still here? Then let's check the syntax.
+        return $this->is_valid_syntax();
     }
 
     /**
@@ -338,8 +338,8 @@ class answer_parser extends parser {
         // should be only one single element on the stack.
         $stack = [];
         foreach ($tokens as $token) {
-            if (in_array($token->type, [token::STRING, token::NUMBER, token::VARIABLE, token::CONSTANT])) {
-                $stack[] = $token->value;
+            if (self::could_be_argument($token)) {
+                $stack[] = $token;
             }
             if ($token->type === token::OPERATOR) {
                 // Check whether the operator is unary. We also include operators that are not
@@ -353,16 +353,30 @@ class answer_parser extends parser {
                 // operator in their answer. Also, they are not allowed other than round parens,
                 // so there can be no %%rangebuild or similar pseudo-operators in the queue.
                 // A binary operator would pop the two top elements, do its magic and then push
-                // the result on the stack. As we do not evaluate anything, we simply drop the top
-                // element.
-                array_pop($stack);
+                // the result on the stack. So we first check that the two top-most elements are
+                // literals (string, number, constant, variable), before dropping them. Note that
+                // we do not check whether the elements are valid input values for the operator,
+                // e. g. we would accept two strings (or the number zero) for a division operator.
+                $first = array_pop($stack);
+                if (!self::could_be_argument($first)) {
+                    return false;
+                }
+                // We do not pop the second argument, because we will later need to put
+                // the "result" of the operation back onto the stack anyway.
+                $second = end($stack);
+                if (!($second instanceof token) || !self::could_be_argument($second)) {
+                    return false;
+                }
+                // Check has passed. We do not put the operator on the stack, because it has
+                // been "consumed" by operating on the two arguments.
+                continue;
             }
             // For functions, the top element on the stack (always a number literal) will indicate
             // the number of arguments to consume. So we pop that element plus one less than what
             // it indicates, meaning we actually drop exactly the number of elements indicated
             // by that element.
             if ($token->type === token::FUNCTION) {
-                $n = end($stack);
+                $n = end($stack)->value;
                 // If the top element on the stack was not a number, there must have been a syntax
                 // error. This should not happen anymore, but it does no harm to keep the fallback.
                 if (!is_numeric($n)) {
@@ -375,10 +389,26 @@ class answer_parser extends parser {
         // The element must not be the empty string. As empty() returns true for the number 0, we
         // check whether the element is numeric. If it is, that's fine. Also, the stack must have
         // exactly one element.
-        $element = reset($stack);
         $countok = count($stack) === 1;
-        $notemptystring = !empty($element) || is_numeric($element);
+        $element = reset($stack);
+        $value = $element instanceof token ? $element->value : null;
+        $notemptystring = !empty($value) || is_numeric($value);
         return $countok && $notemptystring;
     }
 
+    /**
+     * Check whether a given token can be used as an argument to a function or an operator,
+     * i. e. whether it is a literal (string, number, constant) or a variable that could
+     * contain a literal.
+     *
+     * @param ?token $token the token to be checked, null is allowed
+     * @return bool
+     */
+    private static function could_be_argument(?token $token): bool {
+        // TODO: We can use the null-safe operator once we drop support for PHP 7.4.
+        if ($token === null) {
+            return false;
+        }
+        return in_array($token->type, [token::STRING, token::NUMBER, token::VARIABLE, token::CONSTANT]);
+    }
 }

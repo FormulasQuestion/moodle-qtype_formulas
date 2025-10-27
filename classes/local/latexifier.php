@@ -116,6 +116,14 @@ class latexifier {
                 // everything to a dedicated function to build the next expression.
                 if (in_array($op, ['+', '-', '*', '/', '%', '**', '^', '==', '<=', '>=', '!='])) {
                     $first = array_pop($stack);
+                    // The stack should not be empty, but it might be in case of certain syntax errors.
+                    // In that case, we want to avoid dropping out with an error message, because that
+                    // could block the student from continuing a quiz. Instead, we create an empty token
+                    // and will (probably) finish by returning some bad output following the principle
+                    // "garbe in, garbage out".
+                    if ($first === null) {
+                        $first = ['content' => '', 'precedence' => PHP_INT_MAX];
+                    }
                     $new = self::build_binary_part($op, $first, $second);
                 }
                 $stack[] = ['content' => $new, 'precedence' => shunting_yard::get_precedence($op)];
