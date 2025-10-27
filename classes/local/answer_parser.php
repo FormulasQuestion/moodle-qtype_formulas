@@ -364,7 +364,7 @@ class answer_parser extends parser {
                 // We do not pop the second argument, because we will later need to put
                 // the "result" of the operation back onto the stack anyway.
                 $second = end($stack);
-                if (!($second instanceof token) || !self::could_be_argument($second)) {
+                if ($second === false || !self::could_be_argument($second)) {
                     return false;
                 }
                 // Check has passed. We do not put the operator on the stack, because it has

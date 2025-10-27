@@ -82,6 +82,7 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
             [false, '1/*8'],
             [false, '1* *8'],
+            [false, 'sin(/)'],
             [false, '(1+2)*ln'],
             [false, '\sin(3)'],
             [false, 'sin(3+)'],
