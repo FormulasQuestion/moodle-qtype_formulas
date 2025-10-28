@@ -80,6 +80,9 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e 10'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, 'a*b'],
+            [false, '1/*8'],
+            [false, '1* *8'],
+            [false, 'sin(/)'],
             [false, '(1+2)*ln'],
             [false, '\sin(3)'],
             [false, 'sin(3+)'],
@@ -150,6 +153,8 @@ final class answer_parser_test extends \advanced_testcase {
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8'],
             // Note: the following is syntactically valid and is read as 3e8*e8e8; it can be evaluated if e8e8 is a valid variable.
             [qtype_formulas::ANSWER_TYPE_ALGEBRAIC, '3e8e8e8'],
+            [false, 'a/*b'],
+            [false, 'a* *b'],
             [false, 'a-'],
             [false, '*a'],
             [false, 'a+^c+f'],
