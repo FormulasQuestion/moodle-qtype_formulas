@@ -30,7 +30,6 @@ use qtype_formulas\local\token;
  * @covers \qtype_formulas\local\random_variable
  */
 final class random_variable_test extends \advanced_testcase {
-
     /**
      * Test random_variable::get_instantiated_definition().
      *
@@ -42,7 +41,8 @@ final class random_variable_test extends \advanced_testcase {
     public function test_get_instantiated_definition(string $expected, random_variable $input): void {
         $input->instantiate();
         self::assertMatchesRegularExpression(
-            $expected, $input->get_instantiated_definition()
+            $expected,
+            $input->get_instantiated_definition(),
         );
     }
 
@@ -82,7 +82,8 @@ final class random_variable_test extends \advanced_testcase {
      */
     public function test_how_many(int $expected, random_variable $input): void {
         self::assertEquals(
-            $expected, $input->how_many()
+            $expected,
+            $input->how_many(),
         );
     }
 

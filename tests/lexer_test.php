@@ -30,7 +30,6 @@ use qtype_formulas\local\token;
  * @covers \qtype_formulas\local\lexer
  */
 final class lexer_test extends \advanced_testcase {
-
     public function test_get_token_list_1(): void {
         $input = <<<EOF
 this = that * other_thing;

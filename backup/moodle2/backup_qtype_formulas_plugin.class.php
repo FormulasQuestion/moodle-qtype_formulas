@@ -22,7 +22,6 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_qtype_formulas_plugin extends backup_qtype_plugin {
-
     /**
      * Returns the qtype information to attach to question element
      */
@@ -66,12 +65,14 @@ class backup_qtype_formulas_plugin extends backup_qtype_plugin {
         $pluginwrapper->add_child($formulas);
 
         // Set source to populate the data.
-        $formulasanswer->set_source_sql('
+        $formulasanswer->set_source_sql(
+            '
                 SELECT *
                 FROM {qtype_formulas_answers}
                 WHERE questionid = :questionid
                 ORDER BY partindex',
-                ['questionid' => backup::VAR_PARENTID]);
+            ['questionid' => backup::VAR_PARENTID],
+        );
 
         $formulas->set_source_table('qtype_formulas_options', ['questionid' => backup::VAR_PARENTID]);
 

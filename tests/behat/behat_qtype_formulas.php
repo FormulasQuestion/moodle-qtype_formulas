@@ -25,7 +25,6 @@ require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_qtype_formulas extends behat_base {
-
     /**
      * Return the list of exact named selectors.
      *
@@ -76,7 +75,7 @@ class behat_qtype_formulas extends behat_base {
         $field = behat_context_helper::escape($field);
 
         $xpath = "//div[contains(@class, 'tabulator-row')][not(contains(@class, 'tabulator-calc'))][$rownumber]"
-        ."/div[contains(@class, 'tabulator-cell')][@tabulator-field=$field]";
+            . "/div[contains(@class, 'tabulator-cell')][@tabulator-field=$field]";
 
         $this->execute("behat_general::assert_element_contains_text", [$text, $xpath, "xpath_element"]);
     }

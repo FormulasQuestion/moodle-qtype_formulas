@@ -28,7 +28,6 @@ use qtype_formulas\local\variable;
  * @covers \qtype_formulas\local\variable
  */
 final class variable_test extends \advanced_testcase {
-
     /**
      * Test conversion of variable object into string.
      *

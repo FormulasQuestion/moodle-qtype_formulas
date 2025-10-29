@@ -107,11 +107,13 @@ final class externallib_test extends \externallib_advanced_testcase {
      */
     public function test_check_random_global_vars($expected, $input): void {
         $returnvalue = external\instantiation::check_random_global_vars(
-            $input['randomvars'], $input['globalvars']
+            $input['randomvars'],
+            $input['globalvars'],
         );
 
         $returnvalue = \external_api::clean_returnvalue(
-            external\instantiation::check_random_global_vars_returns(), $returnvalue
+            external\instantiation::check_random_global_vars_returns(),
+            $returnvalue,
         );
 
         self::assertEquals($expected['source'], $returnvalue['source']);
@@ -206,7 +208,9 @@ final class externallib_test extends \externallib_advanced_testcase {
      */
     public function test_check_local_vars($expected, $input): void {
         $returnvalue = external\instantiation::check_local_vars(
-            $input['randomvars'], $input['globalvars'], $input['localvars']
+            $input['randomvars'],
+            $input['globalvars'],
+            $input['localvars'],
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::check_local_vars_returns(), $returnvalue);
 
@@ -295,7 +299,10 @@ final class externallib_test extends \externallib_advanced_testcase {
      */
     public function test_render_question_text($expected, $input): void {
         $returnvalue = external\instantiation::render_question_text(
-            $input['questiontext'], $input['parttexts'], $input['globalvars'], $input['partvars']
+            $input['questiontext'],
+            $input['parttexts'],
+            $input['globalvars'],
+            $input['partvars'],
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::render_question_text_returns(), $returnvalue);
 
@@ -588,7 +595,11 @@ final class externallib_test extends \externallib_advanced_testcase {
      */
     public function test_instantiate($expected, $input): void {
         $returnvalue = external\instantiation::instantiate(
-            $input['n'], $input['randomvars'], $input['globalvars'], $input['localvars'], $input['answers']
+            $input['n'],
+            $input['randomvars'],
+            $input['globalvars'],
+            $input['localvars'],
+            $input['answers'],
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
 
@@ -605,7 +616,11 @@ final class externallib_test extends \externallib_advanced_testcase {
         $randomvars = 'a = {0:1:1e-9}';
         $globalvars = 'b = 2*a';
         $returnvalue = external\instantiation::instantiate(
-            $n, $randomvars, $globalvars, [''], ['1']
+            $n,
+            $randomvars,
+            $globalvars,
+            [''],
+            ['1'],
         );
         $returnvalue = \external_api::clean_returnvalue(external\instantiation::instantiate_returns(), $returnvalue);
 

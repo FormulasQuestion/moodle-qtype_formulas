@@ -115,7 +115,12 @@ final class backup_restore_test extends \advanced_testcase {
 
         // Backup course. By using MODE_IMPORT, we avoid the backup being zipped.
         $bc = new backup_controller(
-            backup::TYPE_1COURSE, $course->id, backup::FORMAT_MOODLE, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id
+            backup::TYPE_1COURSE,
+            $course->id,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id,
         );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
@@ -127,7 +132,12 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a new course and restore the backup.
         $newcourse = $generator->create_course();
         $rc = new restore_controller(
-            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+            $backupid,
+            $newcourse->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id,
+            backup::TARGET_NEW_COURSE,
         );
         $rc->execute_precheck();
         $rc->execute_plan();
@@ -251,15 +261,27 @@ final class backup_restore_test extends \advanced_testcase {
         }
 
         // Backup quiz1.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz1->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -327,8 +349,14 @@ final class backup_restore_test extends \advanced_testcase {
         quiz_add_quiz_question($question->id, $quiz, 0);
 
         // Backup quiz1.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
@@ -340,8 +368,14 @@ final class backup_restore_test extends \advanced_testcase {
         file_put_contents($xmlfile, $xml);
 
         // Restore the (modified) backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -384,8 +418,14 @@ final class backup_restore_test extends \advanced_testcase {
         quiz_add_quiz_question($question->id, $quiz, 0);
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
@@ -421,7 +461,12 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a new course and restore the backup.
         $newcourse = $generator->create_course();
         $rc = new restore_controller(
-            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+            $backupid,
+            $newcourse->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id,
+            backup::TARGET_NEW_COURSE,
         );
         $rc->execute_precheck();
         $rc->execute_plan();
@@ -491,8 +536,14 @@ final class backup_restore_test extends \advanced_testcase {
         quiz_add_quiz_question($question->id, $quiz, 0);
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
@@ -509,7 +560,12 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a new course and restore the backup.
         $newcourse = $generator->create_course();
         $rc = new restore_controller(
-            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+            $backupid,
+            $newcourse->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id,
+            backup::TARGET_NEW_COURSE,
         );
 
         // We have corrupt input data, so there will be a warning about the missing array key. We don't want
@@ -573,8 +629,14 @@ final class backup_restore_test extends \advanced_testcase {
         quiz_add_quiz_question($question->id, $quiz, 0);
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
@@ -591,7 +653,12 @@ final class backup_restore_test extends \advanced_testcase {
         // Create a new course and restore the backup.
         $newcourse = $generator->create_course();
         $rc = new restore_controller(
-            $backupid, $newcourse->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id, backup::TARGET_NEW_COURSE
+            $backupid,
+            $newcourse->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $USER->id,
+            backup::TARGET_NEW_COURSE,
         );
         $rc->execute_precheck();
         $rc->execute_plan();
@@ -664,15 +731,27 @@ final class backup_restore_test extends \advanced_testcase {
         ]);
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz1->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -735,15 +814,27 @@ final class backup_restore_test extends \advanced_testcase {
         quiz_add_quiz_question($question2->id, $quiz1);
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz1->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -821,24 +912,38 @@ final class backup_restore_test extends \advanced_testcase {
         }
 
         $course1q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-            $quiz1->id, \context_module::instance($quiz1->cmid)
+            $quiz1->id,
+            \context_module::instance($quiz1->cmid),
         );
         $this->assertEquals($question1->id, $course1q1structure[1]->questionid);
         $course1q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-            $quiz2->id, \context_module::instance($quiz2->cmid)
+            $quiz2->id,
+            \context_module::instance($quiz2->cmid),
         );
         $this->assertEquals($question2->id, $course1q2structure[1]->questionid);
 
         // Backup course1.
-        $bc = new backup_controller(backup::TYPE_1COURSE, $course1->id, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1COURSE,
+            $course1->id,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup, adding to course2.
-        $rc = new restore_controller($backupid, $course2->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course2->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -846,18 +951,26 @@ final class backup_restore_test extends \advanced_testcase {
         // Verify that the newly-restored course's quizzes use the same questions as their counterparts of course1.
         $modules = get_fast_modinfo($course2->id)->get_instances_of('quiz');
         $course1q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-                $quiz1->id, \context_module::instance($quiz1->cmid));
+            $quiz1->id,
+            \context_module::instance($quiz1->cmid),
+        );
         $course2quiz1 = array_shift($modules);
         $course2q1structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-                $course2quiz1->instance, $course2quiz1->context);
+            $course2quiz1->instance,
+            $course2quiz1->context,
+        );
         $this->assertEquals($question1->id, $course1q1structure[1]->questionid);
         $this->assertEquals($question1->id, $course2q1structure[1]->questionid);
 
         $course1q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-                $quiz2->id, \context_module::instance($quiz2->cmid));
+            $quiz2->id,
+            \context_module::instance($quiz2->cmid),
+        );
         $course2quiz2 = array_shift($modules);
         $course2q2structure = \mod_quiz\question\bank\qbank_helper::get_question_structure(
-                $course2quiz2->instance, $course2quiz2->context);
+            $course2quiz2->instance,
+            $course2quiz2->context,
+        );
         $this->assertEquals($question2->id, $course1q2structure[1]->questionid);
         $this->assertEquals($question2->id, $course2q2structure[1]->questionid);
     }
@@ -918,15 +1031,27 @@ final class backup_restore_test extends \advanced_testcase {
         }
 
         // Backup quiz1.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz1->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();
@@ -1033,15 +1158,27 @@ final class backup_restore_test extends \advanced_testcase {
         }
 
         // Backup quiz.
-        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz1->cmid, backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO, backup::MODE_IMPORT, $teacher->id);
+        $bc = new backup_controller(
+            backup::TYPE_1ACTIVITY,
+            $quiz1->cmid,
+            backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+        );
         $backupid = $bc->get_backupid();
         $bc->execute_plan();
         $bc->destroy();
 
         // Restore the backup into the same course.
-        $rc = new restore_controller($backupid, $course1->id, backup::INTERACTIVE_NO, backup::MODE_IMPORT,
-            $teacher->id, backup::TARGET_CURRENT_ADDING);
+        $rc = new restore_controller(
+            $backupid,
+            $course1->id,
+            backup::INTERACTIVE_NO,
+            backup::MODE_IMPORT,
+            $teacher->id,
+            backup::TARGET_CURRENT_ADDING,
+        );
         $rc->execute_precheck();
         $rc->execute_plan();
         $rc->destroy();

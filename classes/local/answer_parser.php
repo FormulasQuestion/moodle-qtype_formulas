@@ -39,8 +39,12 @@ class answer_parser extends parser {
      * @param bool $caretmeanspower whether ^ should be interpreted as exponentiation operator
      * @param bool $formodelanswer whether we are parsing a teacher's model answer (thus allowing \ prefix)
      */
-    public function __construct($tokenlist, array $knownvariables = [], bool $caretmeanspower = true,
-            bool $formodelanswer = false) {
+    public function __construct(
+        $tokenlist,
+        array $knownvariables = [],
+        bool $caretmeanspower = true,
+        bool $formodelanswer = false,
+    ) {
         // If the input is given as a string, run it through the lexer first. Also, if we aren't parsing
         // a model answer (coming from the teacher), we replace all commas by points, because there is no
         // situation where the comma would be a valid character. Replacement is only done if the admin

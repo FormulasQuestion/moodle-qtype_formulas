@@ -87,7 +87,8 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
      */
     protected function get_contains_div_with_class_expectation($class) {
         return new \question_contains_tag_with_attributes(
-            'div', ['class' => $class]
+            'div',
+            ['class' => $class],
         );
     }
 
@@ -114,7 +115,8 @@ abstract class walkthrough_test_base extends \qbehaviour_walkthrough_test_base {
      */
     protected function get_does_not_contain_div_with_class_expectation($class) {
         return new \question_does_not_contain_tag_with_attributes(
-            'div', ['class' => $class]
+            'div',
+            ['class' => $class],
         );
     }
 

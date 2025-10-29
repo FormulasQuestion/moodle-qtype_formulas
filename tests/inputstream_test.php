@@ -29,7 +29,6 @@ use qtype_formulas\local\input_stream;
  * @covers \qtype_formulas\local\input_stream
  */
 final class inputstream_test extends \advanced_testcase {
-
     /**
      * Test read() and peek() function of the inputstream class.
      */
@@ -62,7 +61,6 @@ final class inputstream_test extends \advanced_testcase {
         $e = null;
         try {
             $reader->die('foo');
-
         } catch (Exception $e) {
             self::assertEquals('1:0:foo', $e->getMessage());
         }

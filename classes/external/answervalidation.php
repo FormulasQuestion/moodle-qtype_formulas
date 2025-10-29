@@ -42,7 +42,6 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
  * Class containing various methods to validate a student's answer to a Formulas question.
  */
 class answervalidation extends \external_api {
-
     /**
      * Description of the parameters for the external function 'validate_student_answer'
      *
@@ -122,7 +121,7 @@ class answervalidation extends \external_api {
         $numberpartlatex = latexifier::latexify($parser->get_statements()[0]->body);
 
         // Finally, check the unit part and, if it is valid, translate to LaTeX.
-        list('status' => $checkresult, 'detail' => $unitpartlatex) = self::validate_unit($unit);
+        ['status' => $checkresult, 'detail' => $unitpartlatex] = self::validate_unit($unit);
         if ($checkresult === 'error') {
             return ['status' => 'error', 'detail' => get_string('error_unit', 'qtype_formulas')];
         }

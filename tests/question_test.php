@@ -49,7 +49,6 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @covers     \qtype_formulas
  */
 final class question_test extends \advanced_testcase {
-
     /**
      * Create a question object of a certain type, as defined in the helper.php file.
      *
@@ -389,21 +388,25 @@ final class question_test extends \advanced_testcase {
 
     public function test_get_expected_data_testthreeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
-        self::assertEquals(['0_0' => PARAM_RAW,
-                                  '1_0' => PARAM_RAW,
-                                  '2_0' => PARAM_RAW],
-                                  $q->get_expected_data());
+        self::assertEquals(
+            ['0_0' => PARAM_RAW, '1_0' => PARAM_RAW, '2_0' => PARAM_RAW],
+            $q->get_expected_data(),
+        );
     }
 
     public function test_get_expected_data_test2(): void {
         $q = $this->get_test_formulas_question('test4');
-        self::assertEquals(['0_' => PARAM_RAW,
-                                  '1_0' => PARAM_RAW,
-                                  // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
-                                  '1_1' => PARAM_RAW,
-                                  '2_0' => PARAM_RAW,
-                                  '3_0' => PARAM_RAW],
-                                  $q->get_expected_data());
+        self::assertEquals(
+            [
+                '0_' => PARAM_RAW,
+                '1_0' => PARAM_RAW,
+                // phpcs:ignore Universal.Arrays.DuplicateArrayKey.Found
+                '1_1' => PARAM_RAW,
+                '2_0' => PARAM_RAW,
+                '3_0' => PARAM_RAW,
+            ],
+            $q->get_expected_data(),
+        );
     }
 
     /**
@@ -466,15 +469,18 @@ final class question_test extends \advanced_testcase {
         $q = $this->get_test_formulas_question('testsinglenum');
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals(
-                "This is a minimal question. The answer is 5.\n",
-                $q->get_question_summary());
+            "This is a minimal question. The answer is 5.\n",
+            $q->get_question_summary()
+        );
     }
 
     public function test_get_question_summary_threeparts(): void {
         $q = $this->get_test_formulas_question('testthreeparts');
         $q->start_attempt(new question_attempt_step(), 1);
-        self::assertEquals("Multiple parts : --This is first part.--This is second part.--This is third part.\n",
-                $q->get_question_summary());
+        self::assertEquals(
+            "Multiple parts : --This is first part.--This is second part.--This is third part.\n",
+            $q->get_question_summary()
+        );
     }
 
     public function test_translate_mc_answers_for_feedback(): void {
@@ -902,7 +908,6 @@ final class question_test extends \advanced_testcase {
                           ];
         $finalgrade = $q->compute_final_grade($responses, 3);
         self::assertEquals((2 + 2 * (1 - 2 * 0.3) + 2 * (1 - 0.3)) / 6, $finalgrade);
-
     }
 
     public function test_compute_final_grade_threeparts_2(): void {

@@ -21,7 +21,6 @@ use qtype_formulas\local\evaluator;
 use qtype_formulas\local\variable;
 use qtype_formulas\local\token;
 use qtype_formulas\local\functions;
-
 use Exception;
 
 defined('MOODLE_INTERNAL') || die();
@@ -43,7 +42,6 @@ require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
  * @covers \qtype_formulas\local\evaluator
  */
 final class functions_test extends \advanced_testcase {
-
     /**
      * Data provider.
      *
@@ -722,7 +720,6 @@ final class functions_test extends \advanced_testcase {
             // phpcs:ignore
             // ['1:1:decoct(): Argument #1 ($num) must be of type int, string given', 'decoct("a")'],
         ];
-
     }
 
     /**

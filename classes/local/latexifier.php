@@ -30,7 +30,6 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class latexifier {
-
     /**
      * Transform a unit expression as returned from answer_unit_conversion::parse_unit() into LaTeX
      * code.
@@ -148,7 +147,6 @@ class latexifier {
                             $arg,
                         );
                     }
-
                 }
                 // The pow() function is just a legacy form for the exponentiation operator.
                 if ($funcname === 'pow') {

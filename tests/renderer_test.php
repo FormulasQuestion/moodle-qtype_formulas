@@ -176,8 +176,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedpartial);
         $this->check_current_mark(0.5);
         $this->check_current_output(
-                $this->get_contains_mark_summary(0.5),
-                $this->get_contains_num_parts_correct(0)
+            $this->get_contains_mark_summary(0.5),
+            $this->get_contains_num_parts_correct(0),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '5', false);
@@ -188,7 +188,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_mark(1);
         $this->check_current_output(
-                $this->get_contains_mark_summary(1),
+            $this->get_contains_mark_summary(1),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '5 m/s', false);
@@ -206,7 +206,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedwrong);
         $this->check_current_mark(0);
         $this->check_current_output(
-                $this->get_contains_mark_summary(0),
+            $this->get_contains_mark_summary(0),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', false);
@@ -219,7 +219,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedwrong);
         $this->check_current_mark(0);
         $this->check_current_output(
-                $this->get_contains_mark_summary(0),
+            $this->get_contains_mark_summary(0),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '"5x^2"', false);
@@ -232,7 +232,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_mark(1);
         $this->check_current_output(
-                $this->get_contains_mark_summary(1),
+            $this->get_contains_mark_summary(1),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5*x^2', false);
@@ -243,7 +243,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_mark(1);
         $this->check_current_output(
-                $this->get_contains_mark_summary(1),
+            $this->get_contains_mark_summary(1),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5*x*x', false);
@@ -257,7 +257,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedwrong);
         $this->check_current_mark(0);
         $this->check_current_output(
-                $this->get_contains_mark_summary(0),
+            $this->get_contains_mark_summary(0),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', 'sol', false);
@@ -302,8 +302,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$invalid);
         $this->check_current_mark(null);
         $this->check_current_output(
-                $this->get_contains_marked_out_of_summary(),
-                $this->get_contains_validation_error_expectation()
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_contains_validation_error_expectation(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', true);
@@ -314,8 +314,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedpartial);
         $this->check_current_mark(0.5);
         $this->check_current_output(
-                $this->get_contains_mark_summary(0.5),
-                $this->get_contains_num_parts_correct(0)
+            $this->get_contains_mark_summary(0.5),
+            $this->get_contains_num_parts_correct(0),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', false);
@@ -327,7 +327,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_mark(1);
         $this->check_current_output(
-                $this->get_contains_mark_summary(1),
+            $this->get_contains_mark_summary(1),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '5', false);
@@ -591,7 +591,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$invalid);
         $this->check_current_mark(null);
         $this->check_current_output(
-                $this->get_contains_marked_out_of_summary(),
+            $this->get_contains_marked_out_of_summary(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '40 m/s', true);
@@ -604,8 +604,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_state(question_state::$gradedpartial);
         $this->check_current_mark(6);
         $this->check_current_output(
-                $this->get_contains_mark_summary(6),
-                $this->get_contains_num_parts_correct(3)
+            $this->get_contains_mark_summary(6),
+            $this->get_contains_num_parts_correct(3),
         );
     }
 
@@ -680,8 +680,8 @@ final class renderer_test extends walkthrough_test_base {
 
         $this->render();
         $this->check_current_output(
-                $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, false),
-                $this->get_does_not_contain_specific_feedback_expectation()
+            $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, false),
+            $this->get_does_not_contain_specific_feedback_expectation(),
         );
 
         // Submit wrong answer.
@@ -689,8 +689,8 @@ final class renderer_test extends walkthrough_test_base {
 
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
-                $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, true),
-                $this->get_contains_num_parts_correct(0)
+            $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, true),
+            $this->get_contains_num_parts_correct(0),
         );
         $this->check_current_mark(0);
 
@@ -698,8 +698,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => '1', '-submit' => 1]);
         $this->check_current_state(question_state::$complete);
         $this->check_current_output(
-                $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, true),
-                $this->get_contains_num_parts_correct(1)
+            $this->get_contains_radio_expectation(['name' => $this->quba->get_field_prefix($this->slot) . '0_0'], true, true),
+            $this->get_contains_num_parts_correct(1),
         );
         $this->check_current_mark(0.7);
 
@@ -933,16 +933,16 @@ final class renderer_test extends walkthrough_test_base {
         $this->render();
         $this->check_output_contains_text_input('0_0', '', true);
         $this->check_current_output(
-                $this->get_no_hint_visible_expectation()
+            $this->get_no_hint_visible_expectation(),
         );
 
         // Submit first wrong answer.
         $this->process_submission(['0_0' => '999', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
-                $this->get_contains_hint_expectation('Hint 1. 555 foo'),
-                $this->get_tries_remaining_expectation(2),
-                $this->get_contains_try_again_button_expectation(),
+            $this->get_contains_hint_expectation('Hint 1. 555 foo'),
+            $this->get_tries_remaining_expectation(2),
+            $this->get_contains_try_again_button_expectation(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_0', '999', false);
@@ -958,10 +958,10 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => '123', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
-                $this->get_contains_hint_expectation('Hint 2.'),
-                $this->get_tries_remaining_expectation(1),
-                $this->get_contains_try_again_button_expectation(),
-                // The second hint is NOT set to "clear wrong answers", so there should be no
+            $this->get_contains_hint_expectation('Hint 2.'),
+            $this->get_tries_remaining_expectation(1),
+            $this->get_contains_try_again_button_expectation(),
+            // The second hint is NOT set to "clear wrong answers", so there should be no
                 // hidden field in this case.
                 $this->get_does_not_contain_hidden_expectation('0_0'),
         );
@@ -987,7 +987,7 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('2_0', '', true);
         $this->check_output_contains_text_input('3_0', '', true);
         $this->check_current_output(
-                $this->get_no_hint_visible_expectation()
+            $this->get_no_hint_visible_expectation(),
         );
 
         // Submit wrong answer in first and third part, right answer for the others.
@@ -997,9 +997,9 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_' => '(', '1_0' => '40', '1_1' => 'm/s', '2_0' => '1', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
-                $this->get_contains_hint_expectation('Hint 1.'),
-                $this->get_tries_remaining_expectation(2),
-                $this->get_contains_try_again_button_expectation(),
+            $this->get_contains_hint_expectation('Hint 1.'),
+            $this->get_tries_remaining_expectation(2),
+            $this->get_contains_try_again_button_expectation(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '(', false);
@@ -1027,9 +1027,9 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_' => '2', '1_0' => '2', '1_1' => 'kg', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$todo);
         $this->check_current_output(
-                $this->get_contains_hint_expectation('Hint 2.'),
-                $this->get_tries_remaining_expectation(1),
-                $this->get_contains_try_again_button_expectation(),
+            $this->get_contains_hint_expectation('Hint 2.'),
+            $this->get_tries_remaining_expectation(1),
+            $this->get_contains_try_again_button_expectation(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '2', false);
@@ -1058,8 +1058,8 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['0_' => '40 m/s', '1_0' => '40', '1_1' => 'm/s', '2_0' => '40', '3_0' => '40', '-submit' => 1]);
         $this->check_current_state(question_state::$gradedright);
         $this->check_current_output(
-                $this->get_no_hint_visible_expectation(),
-                $this->get_does_not_contain_try_again_button_expectation(),
+            $this->get_no_hint_visible_expectation(),
+            $this->get_does_not_contain_try_again_button_expectation(),
         );
         $this->render();
         $this->check_output_contains_text_input('0_', '40 m/s', false);

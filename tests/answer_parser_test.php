@@ -38,7 +38,6 @@ use qtype_formulas\local\token;
  * @covers \qtype_formulas\local\parser
  */
 final class answer_parser_test extends \advanced_testcase {
-
     /**
      * Data provider.
      *

@@ -30,7 +30,6 @@ use qtype_formulas\local\range;
  * @covers \qtype_formulas\local\range
  */
 final class range_test extends \advanced_testcase {
-
     public function test_offset_exists(): void {
         $range = new range(1, 100);
         self::assertTrue(true, isset($range[0]));
@@ -40,7 +39,7 @@ final class range_test extends \advanced_testcase {
     public function test_split(): void {
         $range = new range(1, 10);
         self::assertEquals(4, $range->get_element(3)->value);
-        list($left, $right) = $range->split(3);
+        [$left, $right] = $range->split(3);
 
         self::assertEquals(3, $left->count());
         self::assertEquals(6, $right->count());
@@ -51,7 +50,7 @@ final class range_test extends \advanced_testcase {
 
         $range = new range(20, 10, -1);
         self::assertEquals(16, $range->get_element(4)->value);
-        list($left, $right) = $range->split(4);
+        [$left, $right] = $range->split(4);
 
         self::assertEquals(4, $left->count());
         self::assertEquals(6, $right->count());

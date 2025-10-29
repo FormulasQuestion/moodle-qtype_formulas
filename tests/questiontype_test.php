@@ -54,7 +54,6 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @covers     \qtype_formulas_edit_form
  */
 final class questiontype_test extends \advanced_testcase {
-
     /** @var formulas instance of the question type class to test. */
     protected $qtype;
 
@@ -171,12 +170,12 @@ final class questiontype_test extends \advanced_testcase {
         $answers = [0 => $ans0, 1 => $ans1, 2 => $ans2, 3 => $ans3, 4 => $ans4];
         $expected = [
                 'placeholder[0]' => 'The placeholder\'s length is limited to 40 characters.'
-                        .' This placeholder is missing from the main question text.',
+                        . ' This placeholder is missing from the main question text.',
                 'placeholder[1]' => 'Wrong placeholder\'s format or forbidden characters.'
-                        .' This placeholder is missing from the main question text.',
+                        . ' This placeholder is missing from the main question text.',
                 'placeholder[2]' => 'This placeholder is missing from the main question text.',
                 'placeholder[3]' => 'This placeholder has already been defined in some other part.'
-                        .' This placeholder is missing from the main question text.',
+                        . ' This placeholder is missing from the main question text.',
                 'placeholder[4]' => 'Duplicated placeholder in the main question text.',
                 ];
         self::assertEquals($expected, $this->qtype->check_placeholders($questiontext, $answers));
@@ -818,10 +817,10 @@ final class questiontype_test extends \advanced_testcase {
 
         // Prepare the URL for the newly created draft file.
         $url = \moodle_url::make_draftfile_url(
-                $file->get_itemid(),
-                $file->get_filepath(),
-                $file->get_filename(),
-                false // Do not force download of the file.
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename(),
+            false, // Do not force download of the file.
         );
 
         // Create a basic question in the DB.
@@ -962,10 +961,10 @@ final class questiontype_test extends \advanced_testcase {
 
         // Prepare the URL for the newly created draft file.
         $url = \moodle_url::make_draftfile_url(
-                $file->get_itemid(),
-                $file->get_filepath(),
-                $file->get_filename(),
-                false // Do not force download of the file.
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename(),
+            false, // Do not force download of the file.
         );
 
         // Prepare form data and add image to last part.
@@ -1253,7 +1252,7 @@ final class questiontype_test extends \advanced_testcase {
 
         // Importing will generate output. Make sure the test expects this.
         $message = preg_quote(strip_tags($questiondata->questiontext), '/');
-        $this->expectOutputRegex('/\+\+ Importing 1 questions from file \+\+.*' . $message. '/s');
+        $this->expectOutputRegex('/\+\+ Importing 1 questions from file \+\+.*' . $message . '/s');
 
         // Load the question and its parts from the DB. We are supposed to be operating on a
         // clean DB, so we can filter for the qtype and still get only one match. This avoids

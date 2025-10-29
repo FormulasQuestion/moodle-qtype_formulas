@@ -2148,5 +2148,4 @@ class qtype_formulas_test_helper extends question_test_helper {
         $stringmanager = get_string_manager();
         $stringmanager->reset_caches(true);
     }
-
 }

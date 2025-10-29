@@ -34,7 +34,6 @@ require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
  * coodinate question type editing form definition.
  */
 class qtype_formulas_edit_form extends question_edit_form {
-
     /**
      * Add question-type specific form fields.
      *
@@ -55,30 +54,57 @@ class qtype_formulas_edit_form extends question_edit_form {
         $mform->addHelpButton('questiontext', 'questiontext', 'qtype_formulas');
 
         // Random and global variables and main question.
-        $mform->insertElementBefore($mform->createElement('header', 'globalvarshdr', get_string('globalvarshdr', 'qtype_formulas'),
-            ''), 'questiontext');
-        $mform->insertElementBefore($mform->createElement('textarea', 'varsrandom', get_string('varsrandom', 'qtype_formulas'),
-            ['cols' => 80, 'rows' => 1]) , 'questiontext');
+        $mform->insertElementBefore($mform->createElement(
+            'header',
+            'globalvarshdr',
+            get_string('globalvarshdr', 'qtype_formulas'),
+            '',
+        ), 'questiontext');
+        $mform->insertElementBefore($mform->createElement(
+            'textarea',
+            'varsrandom',
+            get_string('varsrandom', 'qtype_formulas'),
+            ['cols' => 80, 'rows' => 1],
+        ), 'questiontext');
         $mform->addHelpButton('varsrandom', 'varsrandom', 'qtype_formulas');
-        $mform->insertElementBefore($mform->createElement('textarea', 'varsglobal', get_string('varsglobal', 'qtype_formulas'),
-            ['cols' => 80, 'rows'  => 1]) , 'questiontext');
+        $mform->insertElementBefore($mform->createElement(
+            'textarea',
+            'varsglobal',
+            get_string('varsglobal', 'qtype_formulas'),
+            ['cols' => 80, 'rows'  => 1],
+        ), 'questiontext');
         $mform->addHelpButton('varsglobal', 'varsglobal', 'qtype_formulas');
-        $mform->insertElementBefore($mform->createElement('header', 'mainq', get_string('mainq', 'qtype_formulas'),
-            ''), 'questiontext');
+        $mform->insertElementBefore($mform->createElement(
+            'header',
+            'mainq',
+            get_string('mainq', 'qtype_formulas'),
+            '',
+        ), 'questiontext');
         $numberingoptions = qtype_multichoice::get_numbering_styles();
-        $mform->addElement('select', 'answernumbering',
-                get_string('answernumbering', 'qtype_multichoice'), $numberingoptions);
+        $mform->addElement(
+            'select',
+            'answernumbering',
+            get_string('answernumbering', 'qtype_multichoice'),
+            $numberingoptions,
+        );
         $mform->setDefault('answernumbering', get_config('qtype_multichoice', 'answernumbering'));
 
         // Part's answers.
-        $this->add_per_answer_fields($mform, get_string('answerno', 'qtype_formulas', '{no}'),
-            question_bank::fraction_options(), 1, 2);
+        $this->add_per_answer_fields(
+            $mform,
+            get_string('answerno', 'qtype_formulas', '{no}'),
+            question_bank::fraction_options(),
+            1,
+            2,
+        );
 
         // Display options, flow options and global part's options.
         $mform->addElement('header', 'subqoptions', get_string('subqoptions', 'qtype_formulas'));
-        $mform->addElement('text', 'globalunitpenalty',
+        $mform->addElement(
+            'text',
+            'globalunitpenalty',
             get_string('unitpenalty', 'qtype_formulas'),
-            ['size' => 3]
+            ['size' => 3],
         );
         $mform->addHelpButton('globalunitpenalty', 'unitpenalty', 'qtype_formulas');
         $mform->setDefault('globalunitpenalty', $config->defaultunitpenalty);
@@ -96,17 +122,23 @@ class qtype_formulas_edit_form extends question_edit_form {
         // Allow instantiate random variables and display the data for instantiated variables.
         $mform->addElement('header', 'checkvarshdr', get_string('checkvarshdr', 'qtype_formulas'));
         $numdatasetgroup = [];
-        $numdatasetgroup[] = $mform->createElement('select', 'numdataset', '',
+        $numdatasetgroup[] = $mform->createElement(
+            'select',
+            'numdataset',
+            '',
             [
                 '1' => '1', '5' => '5', '10' => '10', '25' => '25', '50' => '50', '100' => '100', '250' => '250',
                 '500' => '500', '1000' => '1000', '-1' => '*',
-            ]
+            ],
         );
         $numdatasetgroup[] = $mform->createElement('button', 'instantiatebtn', get_string('instantiate', 'qtype_formulas'));
         $mform->addElement('group', 'instantiationctrl', get_string('numdataset', 'qtype_formulas'), $numdatasetgroup, null, false);
         $mform->addElement('static', 'varsdata', get_string('varsdata', 'qtype_formulas'), '<div id="varsdata_display"></div>');
         $mform->addElement(
-            'static', 'qtextpreview', '', '<div id="qtextpreview_display" class="filter_mathjaxloader_equation"></div>'
+            'static',
+            'qtextpreview',
+            '',
+            '<div id="qtextpreview_display" class="filter_mathjaxloader_equation"></div>',
         );
 
         $this->add_combined_feedback_fields(true);
@@ -123,14 +155,23 @@ class qtype_formulas_edit_form extends question_edit_form {
      * @param array $answersoption reference to return the name of $question->options field holding an array of answers
      * @return array of form fields.
      */
-    protected function get_per_answer_fields($mform, $label, $gradeoptions,
-            &$repeatedoptions, &$answersoption) {
+    protected function get_per_answer_fields(
+        $mform,
+        $label,
+        $gradeoptions,
+        &$repeatedoptions,
+        &$answersoption,
+    ) {
         $config = get_config('qtype_formulas');
         $repeated = [];
         $repeated[] = $mform->createElement('header', 'answerhdr', $label);
         // Part's mark.
-        $repeated[] = $mform->createElement('text', 'answermark', get_string('answermark', 'qtype_formulas'),
-            ['size' => 3]);
+        $repeated[] = $mform->createElement(
+            'text',
+            'answermark',
+            get_string('answermark', 'qtype_formulas'),
+            ['size' => 3],
+        );
         $repeatedoptions['answermark']['helpbutton'] = ['answermark', 'qtype_formulas'];
         $repeatedoptions['answermark']['default'] = $config->defaultanswermark;
         $repeatedoptions['answermark']['type'] = PARAM_FLOAT;
@@ -138,25 +179,45 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeated[] = $mform->createElement('hidden', 'numbox', '', '');   // Exact value will be computed during validation.
         $repeatedoptions['numbox']['type'] = PARAM_INT;
         // Part's placeholder.
-        $repeated[] = $mform->createElement('text', 'placeholder', get_string('placeholder', 'qtype_formulas'),
-            ['size' => 20]);
+        $repeated[] = $mform->createElement(
+            'text',
+            'placeholder',
+            get_string('placeholder', 'qtype_formulas'),
+            ['size' => 20],
+        );
         $repeatedoptions['placeholder']['helpbutton'] = ['placeholder', 'qtype_formulas'];
         $repeatedoptions['placeholder']['type'] = PARAM_RAW;
         // Part's text.
-        $repeated[] = $mform->createElement('editor', 'subqtext', get_string('subqtext', 'qtype_formulas'),
-            ['rows' => 3], $this->editoroptions);
+        $repeated[] = $mform->createElement(
+            'editor',
+            'subqtext',
+            get_string('subqtext', 'qtype_formulas'),
+            ['rows' => 3],
+            $this->editoroptions,
+        );
         $repeatedoptions['subqtext']['helpbutton'] = ['subqtext', 'qtype_formulas'];
         // Part's answer type (0, 10, 100, 1000).
-        $repeated[] = $mform->createElement('select', 'answertype', get_string('answertype', 'qtype_formulas'),
-                [0 => get_string('number', 'qtype_formulas'), 10 => get_string('numeric', 'qtype_formulas'),
-                        100 => get_string('numerical_formula', 'qtype_formulas'),
-                        1000 => get_string('algebraic_formula', 'qtype_formulas')]);;
+        $repeated[] = $mform->createElement(
+            'select',
+            'answertype',
+            get_string('answertype', 'qtype_formulas'),
+            [
+                0 => get_string('number', 'qtype_formulas'),
+                10 => get_string('numeric', 'qtype_formulas'),
+                100 => get_string('numerical_formula', 'qtype_formulas'),
+                1000 => get_string('algebraic_formula', 'qtype_formulas'),
+            ],
+        );
         $repeatedoptions['answertype']['default'] = $config->defaultanswertype;
         $repeatedoptions['answertype']['type'] = PARAM_INT;
         $repeatedoptions['answertype']['helpbutton'] = ['answertype', 'qtype_formulas'];
         // Part's answer.
-        $repeated[] = $mform->createElement('text', 'answer', get_string('answer', 'qtype_formulas'),
-            ['size' => 80]);
+        $repeated[] = $mform->createElement(
+            'text',
+            'answer',
+            get_string('answer', 'qtype_formulas'),
+            ['size' => 80],
+        );
         $repeatedoptions['answer']['helpbutton'] = ['answer', 'qtype_formulas'];
         $repeatedoptions['answer']['type'] = PARAM_RAW_TRIMMED;
         // Whether the question has multiple answers.
@@ -167,17 +228,25 @@ class qtype_formulas_edit_form extends question_edit_form {
         );
         $repeatedoptions['answernotunique']['helpbutton'] = ['answernotunique', 'qtype_formulas'];
         // Part's unit.
-        $repeated[] = $mform->createElement('text', 'postunit', get_string('postunit', 'qtype_formulas'),
-            ['size' => 60]);
+        $repeated[] = $mform->createElement(
+            'text',
+            'postunit',
+            get_string('postunit', 'qtype_formulas'),
+            ['size' => 60],
+        );
         $repeatedoptions['postunit']['helpbutton'] = ['postunit', 'qtype_formulas'];
         $repeatedoptions['postunit']['type'] = PARAM_RAW;
         // Part's grading criteria.
         $gradinggroup = [];
-        $gradinggroup[] = $mform->createElement('select', 'correctness_simple_type', null,
+        $gradinggroup[] = $mform->createElement(
+            'select',
+            'correctness_simple_type',
+            null,
             [
                 get_string('relerror', 'qtype_formulas'),
                 get_string('abserror', 'qtype_formulas'),
-            ], ['aria-label' => 'type'] // ARIA label needed as workaround for accessibility.
+            ],
+            ['aria-label' => 'type'], // ARIA label needed as workaround for accessibility.
         );
         $gradinggroup[] = $mform->createElement(
             'select',
@@ -196,12 +265,16 @@ class qtype_formulas_edit_form extends question_edit_form {
             null,
             false
         );
-        $repeated[] = $mform->createElement('text', 'correctness', get_string('correctness', 'qtype_formulas'),
-        ['size' => 60]);
+        $repeated[] = $mform->createElement(
+            'text',
+            'correctness',
+            get_string('correctness', 'qtype_formulas'),
+            ['size' => 60],
+        );
         $repeated[] = $mform->createElement(
             'checkbox',
             'correctness_simple_mode',
-            get_string('correctnesssimple', 'qtype_formulas')
+            get_string('correctnesssimple', 'qtype_formulas'),
         );
 
         $repeatedoptions['correctness_simple_mode']['default'] = 0;
@@ -215,44 +288,71 @@ class qtype_formulas_edit_form extends question_edit_form {
         $repeatedoptions['correctness_simple_tol']['default'] = '0.01';
 
         // Part's local variables.
-        $repeated[] = $mform->createElement('textarea', 'vars1', get_string('vars1', 'qtype_formulas'),
-            ['cols' => 80, 'rows' => 1]);
+        $repeated[] = $mform->createElement(
+            'textarea',
+            'vars1',
+            get_string('vars1', 'qtype_formulas'),
+            ['cols' => 80, 'rows' => 1],
+        );
         $repeatedoptions['vars1']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars1']['helpbutton'] = ['vars1', 'qtype_formulas'];
         $repeatedoptions['vars1']['advanced'] = true;
         // Part's grading variables.
-        $repeated[] = $mform->createElement('textarea', 'vars2', get_string('vars2', 'qtype_formulas'),
-            ['cols' => 80, 'rows' => 1]);
+        $repeated[] = $mform->createElement(
+            'textarea',
+            'vars2',
+            get_string('vars2', 'qtype_formulas'),
+            ['cols' => 80, 'rows' => 1],
+        );
         $repeatedoptions['vars2']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['vars2']['helpbutton'] = ['vars2', 'qtype_formulas'];
         $repeatedoptions['vars2']['advanced'] = true;
         // Part's other rules.
-        $repeated[] = $mform->createElement('textarea', 'otherrule', get_string('otherrule', 'qtype_formulas'),
-            ['cols' => 80, 'rows' => 1]);
+        $repeated[] = $mform->createElement(
+            'textarea',
+            'otherrule',
+            get_string('otherrule', 'qtype_formulas'),
+            ['cols' => 80, 'rows' => 1],
+        );
         $repeatedoptions['otherrule']['helpbutton'] = ['otherrule', 'qtype_formulas'];
         $repeatedoptions['otherrule']['type'] = PARAM_RAW_TRIMMED;
         $repeatedoptions['otherrule']['advanced'] = true;
         // Part's feedback.
-        $repeated[] = $mform->createElement('editor', 'feedback', get_string('feedback', 'qtype_formulas'),
-            ['rows' => 3], $this->editoroptions);
+        $repeated[] = $mform->createElement(
+            'editor',
+            'feedback',
+            get_string('feedback', 'qtype_formulas'),
+            ['rows' => 3],
+            $this->editoroptions,
+        );
         $repeatedoptions['feedback']['helpbutton'] = ['feedback', 'qtype_formulas'];
         $repeatedoptions['feedback']['advanced'] = true;
         // Part's combined feedback.
-        $repeated[] = $mform->createElement('editor', 'partcorrectfb', get_string('correctfeedback', 'qtype_formulas'),
-            ['rows' => 3], $this->editoroptions);
+        $repeated[] = $mform->createElement(
+            'editor',
+            'partcorrectfb',
+            get_string('correctfeedback', 'qtype_formulas'),
+            ['rows' => 3],
+            $this->editoroptions,
+        );
         $repeatedoptions['partcorrectfb']['helpbutton'] = ['correctfeedback', 'qtype_formulas'];
         $repeatedoptions['partcorrectfb']['advanced'] = true;
         $repeated[] = $mform->createElement(
-          'editor',
-          'partpartiallycorrectfb',
-          get_string('partiallycorrectfeedback', 'qtype_formulas'),
-          ['rows' => 3],
-          $this->editoroptions
+            'editor',
+            'partpartiallycorrectfb',
+            get_string('partiallycorrectfeedback', 'qtype_formulas'),
+            ['rows' => 3],
+            $this->editoroptions,
         );
         $repeatedoptions['partpartiallycorrectfb']['helpbutton'] = ['partiallycorrectfeedback', 'qtype_formulas'];
         $repeatedoptions['partpartiallycorrectfb']['advanced'] = true;
-        $repeated[] = $mform->createElement('editor', 'partincorrectfb', get_string('incorrectfeedback', 'qtype_formulas'),
-            ['rows' => 3], $this->editoroptions);
+        $repeated[] = $mform->createElement(
+            'editor',
+            'partincorrectfb',
+            get_string('incorrectfeedback', 'qtype_formulas'),
+            ['rows' => 3],
+            $this->editoroptions,
+        );
         $repeatedoptions['partincorrectfb']['helpbutton'] = ['incorrectfeedback', 'qtype_formulas'];
         $repeatedoptions['partincorrectfb']['advanced'] = true;
         $answersoption = 'answers';
@@ -270,12 +370,22 @@ class qtype_formulas_edit_form extends question_edit_form {
      *      Default QUESTION_NUMANS_START.
      * @param int $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
      */
-    protected function add_per_answer_fields(&$mform, $label, $gradeoptions,
-            $minoptions = QUESTION_NUMANS_START, $addoptions = QUESTION_NUMANS_ADD) {
+    protected function add_per_answer_fields(
+        &$mform,
+        $label,
+        $gradeoptions,
+        $minoptions = QUESTION_NUMANS_START,
+        $addoptions = QUESTION_NUMANS_ADD,
+    ) {
         $answersoption = '';
         $repeatedoptions = [];
-        $repeated = $this->get_per_answer_fields($mform, $label, $gradeoptions,
-                $repeatedoptions, $answersoption);
+        $repeated = $this->get_per_answer_fields(
+            $mform,
+            $label,
+            $gradeoptions,
+            $repeatedoptions,
+            $answersoption,
+        );
 
         // If we are editing an existing question and the user inadvertently cleared all parts,
         // we still want to show the fields for one part in the form. If we are creating a new
@@ -286,9 +396,16 @@ class qtype_formulas_edit_form extends question_edit_form {
             $repeatsatstart = $minoptions;
         }
 
-        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions,
-                'noanswers', 'addanswers', $addoptions,
-                $this->get_more_choices_string(), false);
+        $this->repeat_elements(
+            $repeated,
+            $repeatsatstart,
+            $repeatedoptions,
+            'noanswers',
+            'addanswers',
+            $addoptions,
+            $this->get_more_choices_string(),
+            false,
+        );
     }
 
     /**
@@ -317,12 +434,11 @@ class qtype_formulas_edit_form extends question_edit_form {
             if (count($question->options->answers)) {
                 $tags = qtype_formulas::PART_BASIC_FIELDS;
                 foreach ($question->options->answers as $key => $answer) {
-
                     foreach ($tags as $tag) {
                         if ($tag === 'unitpenalty' || $tag === 'ruleid') {
                             $defaultvalues['global' . $tag] = $answer->$tag;
                         } else {
-                            $defaultvalues[$tag.'['.$key.']'] = $answer->$tag;
+                            $defaultvalues[$tag . '[' . $key . ']'] = $answer->$tag;
                         }
                     }
 
@@ -330,9 +446,15 @@ class qtype_formulas_edit_form extends question_edit_form {
                     foreach ($fields as $field) {
                         $fieldformat = $field . 'format';
                         $itemid = file_get_submitted_draft_itemid($field . '[' . $key . ']');
-                        $fieldtxt = file_prepare_draft_area($itemid, $this->context->id, 'qtype_formulas',
-                                'answer' . $field, empty($answer->id) ? null : (int)$answer->id,
-                                $this->fileoptions, $answer->$field);
+                        $fieldtxt = file_prepare_draft_area(
+                            $itemid,
+                            $this->context->id,
+                            'qtype_formulas',
+                            'answer' . $field,
+                            empty($answer->id) ? null : (int)$answer->id,
+                            $this->fileoptions,
+                            $answer->$field,
+                        );
                         $defaultvalues[$field . '[' . $key . ']'] = ['text' => $fieldtxt,
                             'format' => $answer->$fieldformat, 'itemid' => $itemid];
                     }
@@ -340,9 +462,15 @@ class qtype_formulas_edit_form extends question_edit_form {
                     foreach ($fields as $field) {
                         $fieldformat = $field . 'format';
                         $itemid = file_get_submitted_draft_itemid($field . '[' . $key . ']');
-                        $fieldtxt = file_prepare_draft_area($itemid, $this->context->id, 'qtype_formulas',
-                                $field, empty($answer->id) ? null : (int)$answer->id,
-                                $this->fileoptions, $answer->$field);
+                        $fieldtxt = file_prepare_draft_area(
+                            $itemid,
+                            $this->context->id,
+                            'qtype_formulas',
+                            $field,
+                            empty($answer->id) ? null : (int)$answer->id,
+                            $this->fileoptions,
+                            $answer->$field,
+                        );
                         $defaultvalues[$field . '[' . $key . ']'] = ['text' => $fieldtxt,
                             'format' => $answer->$fieldformat, 'itemid' => $itemid];
                     }

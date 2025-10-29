@@ -46,7 +46,6 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  * @covers     \qtype_formulas_edit_form
  */
 final class edit_formulas_form_test extends \advanced_testcase {
-
     /** @var formulas instance of the question type class to test. */
     protected $qtype;
 
@@ -121,7 +120,6 @@ final class edit_formulas_form_test extends \advanced_testcase {
                 self::assertObjectHasAttribute($field, $processedquestion);
             }
             self::assertEquals($formdata->$field, $processedquestion->$field);
-
         }
 
         // Now, check the per-part fields, with exception of the unitpenalty and ruleid mentioned above.
@@ -148,7 +146,4 @@ final class edit_formulas_form_test extends \advanced_testcase {
             }
         }
     }
-
-
-
 }

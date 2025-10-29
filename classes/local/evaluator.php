@@ -971,7 +971,6 @@ class evaluator {
             if ($type === token::FUNCTION) {
                 $this->stack[] = $this->execute_function($token);
             }
-
         }
         // If the stack contains more than one element, there must have been a problem somewhere.
         if (count($this->stack) !== 1) {

@@ -53,9 +53,7 @@ require_once($CFG->dirroot . '/question/behaviour/adaptivemultipart/behaviour.ph
  * @author Philipp Imhof
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_formulas_question extends question_graded_automatically_with_countback
-        implements question_automatically_gradable_with_multiple_parts {
-
+class qtype_formulas_question extends question_graded_automatically_with_countback implements question_automatically_gradable_with_multiple_parts {
     /** @var int seed used to initialize the RNG; needed to restore an attempt state */
     public int $seed;
 
@@ -299,7 +297,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         $numcorrect = 0;
         foreach ($this->parts as $part) {
-            list('answer' => $answercorrect, 'unit' => $unitcorrect) = $part->grade($response);
+            ['answer' => $answercorrect, 'unit' => $unitcorrect] = $part->grade($response);
 
             if ($answercorrect >= 0.999 && $unitcorrect == true) {
                 $numcorrect++;
@@ -422,7 +420,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                     return false;
                 }
                 // Response is gradable, so try to grade and get the corresponding state.
-                list($ignored, $state) = $this->grade_response($response);
+                [$ignored, $state] = $this->grade_response($response);
             }
 
             // Files from the answerfeedback area belong to the part's general feedback. It is showed
@@ -545,31 +543,49 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
 
             // If there is an answer, we check its correctness.
-            list('answer' => $answergrade, 'unit' => $unitcorrect) = $part->grade($response);
+            ['answer' => $answergrade, 'unit' => $unitcorrect] = $part->grade($response);
 
             if ($part->postunit !== '') {
                 // The unit can only be correct (1.0) or wrong (0.0).
                 // The answer can be any float from 0.0 to 1.0 inclusive.
                 if ($answergrade >= 0.999 && $unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'right', $part->summarise_response($response), 1);
+                        'right',
+                        $part->summarise_response($response),
+                        1,
+                    );
                 } else if ($unitcorrect) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrongvalue', $part->summarise_response($response), 0);
+                        'wrongvalue',
+                        $part->summarise_response($response),
+                        0,
+                    );
                 } else if ($answergrade >= 0.999) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrongunit', $part->summarise_response($response), 1 - $part->unitpenalty);
+                        'wrongunit',
+                        $part->summarise_response($response),
+                        1 - $part->unitpenalty,
+                    );
                 } else {
                     $classification[$part->partindex] = new question_classified_response(
-                            'wrong', $part->summarise_response($response), 0);
+                        'wrong',
+                        $part->summarise_response($response),
+                        0,
+                    );
                 }
             } else {
                 if ($answergrade >= .999) {
                     $classification[$part->partindex] = new question_classified_response(
-                            'right', $part->summarise_response($response), $answergrade);
+                        'right',
+                        $part->summarise_response($response),
+                        $answergrade,
+                    );
                 } else {
                      $classification[$part->partindex] = new question_classified_response(
-                            'wrong', $part->summarise_response($response), $answergrade);
+                         'wrong',
+                         $part->summarise_response($response),
+                         $answergrade,
+                     );
                 }
             }
         }
@@ -671,7 +687,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
             }
 
             $partresults[$part->partindex] = new qbehaviour_adaptivemultipart_part_result(
-                $part->partindex, $fraction, $this->penalty
+                $part->partindex,
+                $fraction,
+                $this->penalty,
             );
         }
 
@@ -780,7 +798,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
                     $partfraction = $partfraction * (1 - $part->unitpenalty);
                 }
             }
-            $obtainedgrade += $part->answermark * max(0,  $partfraction - $lastchange * $this->penalty);
+            $obtainedgrade += $part->answermark * max(0, $partfraction - $lastchange * $this->penalty);
         }
 
         return $obtainedgrade / $maxgrade;
@@ -843,7 +861,6 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qtype_formulas_part {
-
     /** @var ?evaluator the part's evaluator class */
     public ?evaluator $evaluator = null;
 
@@ -1404,7 +1421,7 @@ class qtype_formulas_part {
         if ($isalgebraic) {
             $modelanswers = self::wrap_algebraic_formulas_in_quotes($modelanswers);
         }
-        $command = '_a = [' . implode(',', $modelanswers ). '];';
+        $command = '_a = [' . implode(',', $modelanswers) . '];';
 
         // The variable _r will contain the student's answers, scaled according to the unit,
         // but not containing the unit. Also, the variables _0, _1, ... will contain the
@@ -1723,7 +1740,7 @@ class qtype_formulas_part {
      */
     public function clear_from_response_if_wrong(array $response): array {
         // First, we have the response graded.
-        list('answer' => $answercorrect, 'unit' => $unitcorrect) = $this->grade($response);
+        ['answer' => $answercorrect, 'unit' => $unitcorrect] = $this->grade($response);
 
         // If the part's answer is correct (including the unit, if any), we return an empty array.
         // The caller of this function uses our values to overwrite the ones in the response, so
@@ -1738,6 +1755,4 @@ class qtype_formulas_part {
         }
         return $result;
     }
-
-
 }

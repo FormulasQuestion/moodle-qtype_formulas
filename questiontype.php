@@ -47,7 +47,6 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class qtype_formulas extends question_type {
-
     /** @var int */
     const ANSWER_TYPE_NUMBER = 0;
 
@@ -572,7 +571,8 @@ class qtype_formulas extends question_type {
                     'right' => new question_possible_response(get_string('response_right', 'qtype_formulas'), 1),
                     'wrongvalue' => new question_possible_response(get_string('response_wrong_value', 'qtype_formulas'), 0),
                     'wrongunit' => new question_possible_response(
-                        get_string('response_wrong_unit', 'qtype_formulas'), 1 - $part->unitpenalty
+                        get_string('response_wrong_unit', 'qtype_formulas'),
+                        1 - $part->unitpenalty,
                     ),
                     null => question_possible_response::no_response(),
                 ];
@@ -617,7 +617,7 @@ class qtype_formulas extends question_type {
         }
         // Otherwise, loop over each answer block found in the XML.
         foreach ($xml['#']['answers'] as $i => $part) {
-            $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
+            $partindex = $format->getpath($part, ['#', 'partindex', 0, '#', 'text', 0, '#'], false);
             if ($partindex !== false) {
                 $question->partindex[$i] = $partindex;
             }
@@ -634,30 +634,50 @@ class qtype_formulas extends question_type {
                 }
                 $question->{$field}[$i] = $format->getpath(
                     $part,
-                    ['#', $field, 0 , '#' , 'text' , 0 , '#'],
+                    ['#', $field, 0, '#', 'text', 0, '#'],
                     $default,
                     false,
-                    $ifnotexists
+                    $ifnotexists,
                 );
             }
 
             $subqxml = $format->getpath($part, ['#', 'subqtext', 0], []);
-            $question->subqtext[$i] = $format->import_text_with_files($subqxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->subqtext[$i] = $format->import_text_with_files(
+                $subqxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
 
             $feedbackxml = $format->getpath($part, ['#', 'feedback', 0], []);
-            $question->feedback[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->feedback[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
 
             $feedbackxml = $format->getpath($part, ['#', 'correctfeedback', 0], []);
-            $question->partcorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partcorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
             $feedbackxml = $format->getpath($part, ['#', 'partiallycorrectfeedback', 0], []);
-            $question->partpartiallycorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partpartiallycorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
             $feedbackxml = $format->getpath($part, ['#', 'incorrectfeedback', 0], []);
-            $question->partincorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partincorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
         }
 
         // Make the defaultmark consistent if not specified.
@@ -765,7 +785,7 @@ class qtype_formulas extends question_type {
                 $errormsgs[] = get_string('error_placeholder_too_long', 'qtype_formulas');
             }
             // Placeholders must start with # and contain only alphanumeric characters or underscores.
-            if (!preg_match('/^#\w+$/', $part->placeholder) ) {
+            if (!preg_match('/^#\w+$/', $part->placeholder)) {
                 $errormsgs[] = get_string('error_placeholder_format', 'qtype_formulas');
             }
             // Placeholders must be unique.
@@ -990,7 +1010,7 @@ class qtype_formulas extends question_type {
         $errors = [];
 
         if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
-            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');
         }
 
         // If the globalruleid field is missing, that means the request or the form has

@@ -25,7 +25,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
-
     $settings->add(new admin_setting_heading(
         'qtype_formulas/settings',
         new lang_string('settings_heading_general', 'qtype_formulas'),

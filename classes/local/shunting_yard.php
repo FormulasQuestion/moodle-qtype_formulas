@@ -134,8 +134,12 @@ class shunting_yard {
      * @param callable $callback custom comparison function
      * @param bool $poplast whether the last element should be popped or not
      */
-    private static function flush_while(array &$input, array &$out, callable $callback,
-            bool $poplast = false) {
+    private static function flush_while(
+        array &$input,
+        array &$out,
+        callable $callback,
+        bool $poplast = false,
+    ) {
         $head = end($input);
         while ($head !== false) {
             // Entries that do not follow the criteria will not be flushed.
@@ -160,7 +164,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_ternary_part(array &$opstack, array &$output): void {
-        self::flush_while($opstack, $output, function($token) {
+        self::flush_while($opstack, $output, function ($token) {
             return $token->value !== '%%ternary-sentinel';
         }, true);
     }
@@ -174,7 +178,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_higher_precedence(array &$opstack, int $precedence, array &$output): void {
-        self::flush_while($opstack, $output, function($operator) use ($precedence) {
+        self::flush_while($opstack, $output, function ($operator) use ($precedence) {
             return $precedence <= self::get_precedence($operator->value);
         });
     }
@@ -187,7 +191,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_all_operators(array &$opstack, array &$output): void {
-        self::flush_while($opstack, $output, function($operator) {
+        self::flush_while($opstack, $output, function ($operator) {
             return $operator->type === token::OPERATOR;
         });
     }
@@ -202,7 +206,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_until_paren(array &$opstack, int $type, array &$output): void {
-        self::flush_while($opstack, $output, function($operator) use ($type) {
+        self::flush_while($opstack, $output, function ($operator) use ($type) {
             return $operator->type !== $type;
         }, true);
     }
@@ -248,7 +252,7 @@ class shunting_yard {
      * @return void
      */
     private static function flush_all(array &$opstack, array &$output): void {
-        self::flush_while($opstack, $output, function() {
+        self::flush_while($opstack, $output, function () {
             return true;
         });
     }
@@ -539,5 +543,4 @@ class shunting_yard {
     private static function die(string $message, token $offendingtoken): void {
         throw new \Exception($offendingtoken->row . ':' . $offendingtoken->column . ':' . $message);
     }
-
 }
