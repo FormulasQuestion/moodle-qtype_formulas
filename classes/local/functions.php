@@ -423,6 +423,7 @@ class functions {
                 // If the single argument is neither an array, nor a number or numeric string,
                 // we throw an error.
                 self::die('error_poly_one');
+                // No break statement, because the script has already died here.
             case 2:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
@@ -453,6 +454,7 @@ class functions {
                 }
                 // Any other invocations with two arguments is invalid.
                 self::die('error_poly_two');
+                // No break statement, because the script has already died here.
             case 3:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
