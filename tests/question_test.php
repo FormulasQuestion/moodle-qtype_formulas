@@ -470,7 +470,7 @@ final class question_test extends \advanced_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals(
             "This is a minimal question. The answer is 5.\n",
-            $q->get_question_summary()
+            $q->get_question_summary(),
         );
     }
 
@@ -479,7 +479,7 @@ final class question_test extends \advanced_testcase {
         $q->start_attempt(new question_attempt_step(), 1);
         self::assertEquals(
             "Multiple parts : --This is first part.--This is second part.--This is third part.\n",
-            $q->get_question_summary()
+            $q->get_question_summary(),
         );
     }
 

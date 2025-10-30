@@ -43,7 +43,7 @@ class answer_parser extends parser {
         $tokenlist,
         array $knownvariables = [],
         bool $caretmeanspower = true,
-        bool $formodelanswer = false,
+        bool $formodelanswer = false
     ) {
         // If the input is given as a string, run it through the lexer first. Also, if we aren't parsing
         // a model answer (coming from the teacher), we replace all commas by points, because there is no

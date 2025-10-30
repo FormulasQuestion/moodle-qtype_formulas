@@ -131,7 +131,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function part_formulation_and_controls(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part,
+        qtype_formulas_part $part
     ): string {
 
         // The behaviour might change the display options per part, so it is safer to clone them here.
@@ -181,7 +181,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     public function get_part_feedback_class_and_symbol(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part,
+        qtype_formulas_part $part
     ): stdClass {
         // Prepare a new object to hold the different elements.
         $result = new stdClass();
@@ -260,7 +260,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         array $answeroptions,
         bool $shuffle,
         question_display_options $displayoptions,
-        string $feedbackclass = '',
+        string $feedbackclass = ''
     ): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -449,7 +449,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         question_attempt $qa,
         array $answeroptions,
         bool $shuffle,
-        question_display_options $displayoptions,
+        question_display_options $displayoptions
     ): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -525,7 +525,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $answerindex,
         int $totalanswers,
         int $partindex,
-        int $totalparts,
+        int $totalparts
     ): string {
 
         // Some language strings need parameters.
@@ -573,7 +573,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         question_attempt $qa,
         question_display_options $displayoptions,
         array $formatoptions = [],
-        string $feedbackclass = '',
+        string $feedbackclass = ''
     ): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -692,7 +692,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         question_attempt $qa,
         question_display_options $options,
         qtype_formulas_part $part,
-        stdClass $sub,
+        stdClass $sub
     ): string {
         /** @var qype_formulas_question $question */
         $question = $qa->get_question();
@@ -1031,7 +1031,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         question_attempt $qa,
         question_display_options $options,
         qtype_formulas_part $part,
-        float $fraction,
+        float $fraction
     ): string {
         $feedback = '';
         $showfeedback = false;

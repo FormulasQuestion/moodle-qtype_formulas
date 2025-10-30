@@ -160,7 +160,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $label,
         $gradeoptions,
         &$repeatedoptions,
-        &$answersoption,
+        &$answersoption
     ) {
         $config = get_config('qtype_formulas');
         $repeated = [];
@@ -375,7 +375,7 @@ class qtype_formulas_edit_form extends question_edit_form {
         $label,
         $gradeoptions,
         $minoptions = QUESTION_NUMANS_START,
-        $addoptions = QUESTION_NUMANS_ADD,
+        $addoptions = QUESTION_NUMANS_ADD
     ) {
         $answersoption = '';
         $repeatedoptions = [];

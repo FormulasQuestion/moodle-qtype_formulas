@@ -138,7 +138,7 @@ class shunting_yard {
         array &$input,
         array &$out,
         callable $callback,
-        bool $poplast = false,
+        bool $poplast = false
     ) {
         $head = end($input);
         while ($head !== false) {

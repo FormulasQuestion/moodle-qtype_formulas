@@ -1445,7 +1445,6 @@ final class evaluator_test extends \advanced_testcase {
         $globalparser = new parser($globalvars);
         $evaluator->evaluate($globalparser->get_statements());
         $a = $evaluator->export_single_variable('a')->value;
-        ;
         self::assertEquals(111, $a[0]->value);
 
         // Try to change a value in b. This should fail.
