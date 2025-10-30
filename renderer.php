@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+use qtype_formulas\local\formulas_part;
+
 /**
  * Formulas question renderer class.
  *
@@ -47,7 +49,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options): ?string {
         // First, fetch the instantiated question from the attempt.
-        /** @var qtype_formulas_question $question */
+        /** @var formulas_question $question */
         $question = $qa->get_question();
 
         if (count($question->textfragments) !== $question->numparts + 1) {
@@ -125,13 +127,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @return void
      */
     public function part_formulation_and_controls(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part
+        formulas_part $part
     ): string {
 
         // The behaviour might change the display options per part, so it is safer to clone them here.
@@ -175,13 +177,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @return stdClass
      */
     public function get_part_feedback_class_and_symbol(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part
+        formulas_part $part
     ): stdClass {
         // Prepare a new object to hold the different elements.
         $result = new stdClass();
@@ -244,7 +246,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Create a set of radio boxes for a multiple choice answer input.
      *
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
@@ -254,7 +256,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function create_radio_mc_answer(
-        qtype_formulas_part $part,
+        formulas_part $part,
         $answerindex,
         question_attempt $qa,
         array $answeroptions,
@@ -435,7 +437,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Create a <select> field for a multiple choice answer input.
      *
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param array $answeroptions array of strings containing the answer options to choose from
@@ -444,7 +446,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function create_dropdown_mc_answer(
-        qtype_formulas_part $part,
+        formulas_part $part,
         $answerindex,
         question_attempt $qa,
         array $answeroptions,
@@ -559,7 +561,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Create an <input> field.
      *
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @param int|string $answerindex index of the answer (starting at 0) or special value for combined/separate unit field
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $displayoptions controls what should and should not be displayed
@@ -568,7 +570,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function create_input_box(
-        qtype_formulas_part $part,
+        formulas_part $part,
         $answerindex,
         question_attempt $qa,
         question_display_options $displayoptions,
@@ -684,14 +686,14 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @param stdClass $sub class and symbol for the part feedback
      * @return string HTML fragment
      */
     public function get_part_formulation(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part,
+        formulas_part $part,
         stdClass $sub
     ): string {
         /** @var qype_formulas_question $question */
@@ -845,7 +847,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Generate an automatic description of the correct response for a given part.
      *
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @return string HTML fragment
      */
     public function part_correct_response($part) {
@@ -868,7 +870,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function num_parts_correct(question_attempt $qa) {
-        /** @var qtype_formulas_question $question */
+        /** @var formulas_question $question */
         $question = $qa->get_question();
         $response = $qa->get_last_qt_data();
         if (!$question->is_gradable_response($response)) {
@@ -891,7 +893,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function hint(question_attempt $qa, question_hint $hint) {
-        /** @var qtype_formulas_question $question */
+        /** @var formulas_question $question */
         $question = $qa->get_question();
         $hint->hint = $question->evaluator->substitute_variables_in_text($hint->hint);
 
@@ -905,7 +907,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function combined_feedback(question_attempt $qa) {
-        /** @var qtype_formulas_question $question */
+        /** @var formulas_question $question */
         $question = $qa->get_question();
 
         $state = $qa->get_state();
@@ -957,11 +959,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @return string HTML fragment
      */
-    protected function part_general_feedback(question_attempt $qa, question_display_options $options, qtype_formulas_part $part) {
-        /** @var qtype_formulas_question $question */
+    protected function part_general_feedback(question_attempt $qa, question_display_options $options, formulas_part $part) {
+        /** @var formulas_question $question */
         $question = $qa->get_question();
         $state = $qa->get_state();
 
@@ -1023,19 +1025,19 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      *
      * @param question_attempt $qa question attempt that will be displayed on the page
      * @param question_display_options $options controls what should and should not be displayed
-     * @param qtype_formulas_part $part question part
+     * @param formulas_part $part question part
      * @param float $fraction the obtained grade
      * @return string HTML fragment
      */
     protected function part_combined_feedback(
         question_attempt $qa,
         question_display_options $options,
-        qtype_formulas_part $part,
+        formulas_part $part,
         float $fraction
     ): string {
         $feedback = '';
         $showfeedback = false;
-        /** @var qtype_formulas_question $question */
+        /** @var formulas_question $question */
         $question = $qa->get_question();
         $state = $qa->get_state();
         $feedbackclass = $state->get_feedback_class();

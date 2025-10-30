@@ -27,6 +27,7 @@
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\unit_conversion_rules;
 use qtype_formulas\local\evaluator;
+use qtype_formulas\local\formulas_part;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\parser;
@@ -476,7 +477,7 @@ class qtype_formulas extends question_type {
      * no fragment of the question's main text after them.
      *
      * @param string $questiontext main question tex
-     * @param qtype_formulas_part[] $parts
+     * @param formulas_part[] $parts
      * @return string[] fragments (one more than the number of parts
      */
     public function split_questiontext(string $questiontext, array $parts): array {
@@ -508,7 +509,7 @@ class qtype_formulas extends question_type {
 
     /**
      * Initialise instante of the qtype_formulas_question class and its parts which, in turn,
-     * are instances of the qtype_formulas_part class.
+     * are instances of the formulas_part class.
      *
      * @param question_definition $question instance of a Formulas question (qtype_formulas_question)
      * @param object $questiondata question data as stored in the DB
@@ -527,7 +528,7 @@ class qtype_formulas extends question_type {
         // The attribute $questiondata->options->answers stores all information for the parts. Despite
         // its name, it does not only contain the model answers, but also e.g. local or grading vars.
         foreach ($questiondata->options->answers as $partdata) {
-            $questionpart = new qtype_formulas_part();
+            $questionpart = new formulas_part();
 
             // Copy the data fields fetched from the DB to the question part object.
             foreach ($partdata as $key => $value) {
@@ -973,7 +974,7 @@ class qtype_formulas extends question_type {
         // Make sure that answer box placeholders (if used) are unique for each part.
         foreach ($parts as $i => $part) {
             try {
-                qtype_formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
+                formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
             } catch (Exception $e) {
                 $errors["subqtext[$i]"] = $e->getMessage();
             }
@@ -1197,7 +1198,7 @@ class qtype_formulas extends question_type {
             // _a and _r or _0, _1, ... or _err and _relerr. We will create a dummy part and use it
             // as our worker. Note that the result will automatically flow back into $partevaluator,
             // because the assignment is by reference only.
-            $dummypart = new qtype_formulas_part();
+            $dummypart = new formulas_part();
             $dummypart->answertype = $part->answertype;
             $dummypart->answer = $part->answer;
             $dummypart->evaluator = $partevaluator;

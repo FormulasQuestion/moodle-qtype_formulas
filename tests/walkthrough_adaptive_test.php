@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas
- * @covers \qtype_formulas_part
+ * @covers \qtype_formulas\local\formulas_part
  * @covers \qtype_formulas_question
  */
 final class walkthrough_adaptive_test extends walkthrough_test_base {

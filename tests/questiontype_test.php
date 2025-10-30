@@ -50,7 +50,7 @@ require_once($CFG->dirroot . '/question/type/formulas/edit_formulas_form.php');
  *
  * @covers     \qtype_formulas
  * @covers     \qtype_formulas_question
- * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas\local\formulas_part
  * @covers     \qtype_formulas_edit_form
  */
 final class questiontype_test extends \advanced_testcase {

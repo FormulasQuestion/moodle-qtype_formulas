@@ -24,7 +24,7 @@ use question_attempt_step;
 use question_display_options;
 use question_hint_with_parts;
 use question_usage_by_activity;
-use qtype_formulas_part;
+use formulas_part;
 use qtype_formulas_question;
 use qtype_formulas_test_helper;
 
@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
 require_once($CFG->dirroot . '/question/type/formulas/question.php');
 
 /**
- * Unit tests for qtype_formulas_question and qtype_formulas_part classes.
+ * Unit tests for qtype_formulas_question and formulas_part classes.
  *
  * @copyright  2008 The Open University
  * @copyright  2012 Jean-Michel Védrine
@@ -45,7 +45,7 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @package    qtype_formulas
  *
  * @covers     \qtype_formulas_question
- * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas\local\formulas_part
  * @covers     \qtype_formulas
  */
 final class question_test extends \advanced_testcase {
@@ -1166,7 +1166,7 @@ final class question_test extends \advanced_testcase {
     }
 
     /**
-     * Test for qtype_formulas_part::scan_for_answer_boxes().
+     * Test for formulas_part::scan_for_answer_boxes().
      *
      * @param array $expected associative array, key: answer variable (e. g. _0 or _u),
      *      value: 'placeholder' => string (original text), 'options' => string (name of var containing the options),
@@ -1186,7 +1186,7 @@ final class question_test extends \advanced_testcase {
         foreach ($expected as $key => $value) {
             $expected[$key] = $value + $default;
         }
-        $boxes = qtype_formulas_part::scan_for_answer_boxes($input);
+        $boxes = formulas_part::scan_for_answer_boxes($input);
         self::assertEquals($expected, $boxes);
     }
 
@@ -1212,7 +1212,7 @@ final class question_test extends \advanced_testcase {
     }
 
     /**
-     * Test for qtype_formulas_part::scan_for_answer_boxes() with invalid input.
+     * Test for formulas_part::scan_for_answer_boxes() with invalid input.
      *
      * @param string $expected field that should be flagged as invalid
      * @param string $input simulated (invalid) input in text field
@@ -1222,7 +1222,7 @@ final class question_test extends \advanced_testcase {
     public function test_scan_for_answer_boxes_invalid($expected, $input): void {
         $e = null;
         try {
-            qtype_formulas_part::scan_for_answer_boxes($input);
+            formulas_part::scan_for_answer_boxes($input);
         } catch (Exception $e) {
             self::assertStringContainsString(
                 get_string('error_answerbox_duplicate', 'qtype_formulas', $expected),
@@ -1474,7 +1474,7 @@ final class question_test extends \advanced_testcase {
     }
 
     /**
-     * Test for qtype_formulas_part::wrap_algebraic_formulas_in_quotes().
+     * Test for formulas_part::wrap_algebraic_formulas_in_quotes().
      *
      * @param string $expected
      * @param string $input
@@ -1482,7 +1482,7 @@ final class question_test extends \advanced_testcase {
      * @dataProvider provide_formulas_for_wrapping
      */
     public function test_wrap_algebraic_formulas_in_quotes($expected, $input): void {
-        $func = new \ReflectionMethod(qtype_formulas_part::class, 'wrap_algebraic_formulas_in_quotes');
+        $func = new \ReflectionMethod(formulas_part::class, 'wrap_algebraic_formulas_in_quotes');
         $func->setAccessible(true);
 
         $error = false;

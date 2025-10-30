@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+use qtype_formulas\local\formulas_part;
+
 /**
  * Test helper class for the formulas question type.
  *
@@ -94,14 +96,14 @@ class qtype_formulas_test_helper extends question_test_helper {
     }
 
     /**
-     * Create a qtype_formulas_part object for testing.
+     * Create a formulas_part object for testing.
      *
-     * @return qtype_formulas_part
+     * @return formulas_part
      */
-    public static function make_a_formulas_part(): qtype_formulas_part {
+    public static function make_a_formulas_part(): formulas_part {
         question_bank::load_question_definition_classes('formulas');
 
-        $p = new qtype_formulas_part();
+        $p = new formulas_part();
         $p->id = 0;
         $p->placeholder = '';
         $p->answermark = 1;

@@ -41,7 +41,7 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
  *
  * @covers     \qtype_formulas_renderer
  * @covers     \qtype_formulas_question
- * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas\local\formulas_part
  * @covers     \qtype_formulas
  */
 final class renderer_test extends walkthrough_test_base {
