@@ -49,7 +49,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options): ?string {
         // First, fetch the instantiated question from the attempt.
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         if (count($question->textfragments) !== $question->numparts + 1) {
@@ -264,7 +264,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         question_display_options $displayoptions,
         string $feedbackclass = ''
     ): string {
-        /** @var qype_formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         $variablename = "{$part->partindex}_{$answerindex}";
@@ -453,7 +453,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         bool $shuffle,
         question_display_options $displayoptions
     ): string {
-        /** @var qype_formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         $variablename = "{$part->partindex}_{$answerindex}";
@@ -577,7 +577,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         array $formatoptions = [],
         string $feedbackclass = ''
     ): string {
-        /** @var qype_formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         // The variable name will be N_ for the (single) combined unit field of part N,
@@ -696,7 +696,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         formulas_part $part,
         stdClass $sub
     ): string {
-        /** @var qype_formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         // Clone the part's evaluator and remove special variables like _0 etc., because they must
@@ -870,7 +870,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function num_parts_correct(question_attempt $qa) {
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $response = $qa->get_last_qt_data();
         if (!$question->is_gradable_response($response)) {
@@ -893,7 +893,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function hint(question_attempt $qa, question_hint $hint) {
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $hint->hint = $question->evaluator->substitute_variables_in_text($hint->hint);
 
@@ -907,7 +907,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function combined_feedback(question_attempt $qa) {
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
         $state = $qa->get_state();
@@ -963,7 +963,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     protected function part_general_feedback(question_attempt $qa, question_display_options $options, formulas_part $part) {
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $state = $qa->get_state();
 
@@ -1037,7 +1037,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     ): string {
         $feedback = '';
         $showfeedback = false;
-        /** @var formulas_question $question */
+        /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $state = $qa->get_state();
         $feedbackclass = $state->get_feedback_class();

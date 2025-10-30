@@ -61,7 +61,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @covers     \backup_qtype_formulas_plugin
  * @covers     \qtype_formulas
  * @covers     \qtype_formulas_question
- * @covers     \qtype_formulas_part
+ * @covers     \qtype_formulas\local\formulas_part
  */
 final class backup_restore_test extends \advanced_testcase {
     use \quiz_question_helper_test_trait;

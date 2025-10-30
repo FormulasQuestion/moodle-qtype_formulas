@@ -16,6 +16,7 @@
 
 namespace qtype_formulas\local;
 
+use qtype_formulas;
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\evaluator;
@@ -23,9 +24,12 @@ use qtype_formulas\local\lexer;
 use qtype_formulas\local\parser;
 use qtype_formulas\local\token;
 use qtype_formulas\unit_conversion_rules;
+use Exception;
+use Throwable;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/question/type/formulas/question.php');
 require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
 require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
 require_once($CFG->dirroot . '/question/type/formulas/conversion_rules.php');
@@ -190,7 +194,7 @@ class formulas_part {
         // Compare previous response and new response for every expected key.
         // If we have a difference at one point, we can return early.
         foreach (array_keys($this->get_expected_data()) as $key) {
-            if (!question_utils::arrays_same_at_key_missing_is_blank($prevresponse, $newresponse, $key)) {
+            if (!\question_utils::arrays_same_at_key_missing_is_blank($prevresponse, $newresponse, $key)) {
                 return false;
             }
         }
