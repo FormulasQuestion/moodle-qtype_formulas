@@ -24,7 +24,7 @@ use question_attempt_step;
 use question_display_options;
 use question_hint_with_parts;
 use question_usage_by_activity;
-use formulas_part;
+use qtype_formulas\local\formulas_part;
 use qtype_formulas_question;
 use qtype_formulas_test_helper;
 
