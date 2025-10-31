@@ -1053,12 +1053,12 @@ final class question_test extends \advanced_testcase {
             [[], '{_0::}'],
             [[], '{_0::MCE}'],
             [[], '{_0:foo:}'],
-            [[], '{_0:foo }'],
             [[], '{ _0:foo}'],
             [[], '{ _u}'],
             [[], '{_ u}'],
             [[], '{_u }'],
             [[], '{_a}'],
+            [['_0' => ['placeholder' => '{_0:foo }', 'options' => 'foo']], '{_0:foo }'],
             [[
                 '_0' => ['placeholder' => '{_0}'],
             ], '{_0}'],
@@ -1084,6 +1084,9 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo'],
             ], '{_0:foo}'],
             [[
+                '_0' => ['placeholder' => '{_0:  foo   }', 'options' => 'foo'],
+            ], '{_0:  foo   }'],
+            [[
                 '_0' => ['placeholder' => '{_0:foo|align=center|bgcol=red|w=10}', 'options' => 'foo', 'format' => $formatarray],
             ], '{_0:foo|align=center|bgcol=red|w=10}'],
             [[
@@ -1104,6 +1107,9 @@ final class question_test extends \advanced_testcase {
             [[
                 '_0' => ['placeholder' => '{_0:foo:MC}', 'options' => 'foo'],
             ], '{_0:foo:MC}'],
+            [[
+                '_0' => ['placeholder' => '{_0:   foo   :MC}', 'options' => 'foo'],
+            ], '{_0:   foo   :MC}'],
             [[
                 '_0' => [
                     'placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}',
