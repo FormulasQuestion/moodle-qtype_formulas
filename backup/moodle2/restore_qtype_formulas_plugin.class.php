@@ -23,7 +23,6 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_qtype_formulas_plugin extends restore_qtype_plugin {
-
     /**
      * The Formulas question type uses some custom fields that have to be backed up, but are not
      * accounted for in the default routines. This function defines the necessary XML paths.

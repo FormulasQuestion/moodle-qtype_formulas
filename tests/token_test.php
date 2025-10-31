@@ -238,5 +238,4 @@ final class token_test extends \advanced_testcase {
     public function test_recursive_count($expected, $input): void {
         self::assertEquals($expected, token::recursive_count($input));
     }
-
 }

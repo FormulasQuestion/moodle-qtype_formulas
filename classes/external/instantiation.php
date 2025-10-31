@@ -43,7 +43,6 @@ require_once($CFG->libdir . "/externallib.php");
  * instantiation of questions inside the edit form.
  */
 class instantiation extends \external_api {
-
     /**
      * Convert array to string of form '[1, 2, 3, ... ]'.
      * If argument is a string or a number, return it unchanged.
@@ -332,11 +331,11 @@ class instantiation extends \external_api {
                         'list of parts',
                         VALUE_REQUIRED
                     ),
-                ]
+                ]),
+                'data, if successful',
+                VALUE_OPTIONAL,
             ),
-            'data, if successful',
-            VALUE_OPTIONAL
-        )]);
+        ]);
     }
 
     /**

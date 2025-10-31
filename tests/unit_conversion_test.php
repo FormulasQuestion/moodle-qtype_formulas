@@ -35,7 +35,6 @@ require_once($CFG->dirroot . '/question/type/formulas/answer_unit.php');
  * @covers \qtype_formulas\answer_unit_conversion
  */
 final class unit_conversion_test extends \advanced_testcase {
-
     /**
      * Test conversion between "common SI units".
      *
@@ -118,7 +117,4 @@ final class unit_conversion_test extends \advanced_testcase {
             'combination 3' => ['1 m kg s^-2', ['1 m kg / s^2', '1 km g / s^2', '1 km g s^-2']],
         ];
     }
-
-
-
 }

@@ -142,7 +142,8 @@ final class answervalidation_test extends \advanced_testcase {
         foreach ($answertypes as $answertype) {
             $result = answervalidation::validate_student_answer($input, $answertype, false);
             $result = \external_api::clean_returnvalue(
-                answervalidation::validate_student_answer_returns(), $result
+                answervalidation::validate_student_answer_returns(),
+                $result,
             );
             if ($type === false) {
                 self::assertEquals($result['status'], 'error');
@@ -173,7 +174,8 @@ final class answervalidation_test extends \advanced_testcase {
         foreach ($answertypes as $answertype) {
             $result = answervalidation::validate_student_answer($input, $answertype, true);
             $result = \external_api::clean_returnvalue(
-                answervalidation::validate_student_answer_returns(), $result
+                answervalidation::validate_student_answer_returns(),
+                $result,
             );
             if ($type === false) {
                 self::assertEquals($result['status'], 'error');
@@ -197,7 +199,8 @@ final class answervalidation_test extends \advanced_testcase {
     public function test_validate_unit(bool $expected, string $input): void {
         $result = answervalidation::validate_unit($input);
         $result = \external_api::clean_returnvalue(
-            answervalidation::validate_unit_returns(), $result
+            answervalidation::validate_unit_returns(),
+            $result,
         );
         if ($expected) {
             self::assertEquals($result['status'], 'success');

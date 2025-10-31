@@ -99,5 +99,4 @@ class variable {
         // For everything else, we use PHP's string conversion.
         return strval($this->value);
     }
-
 }

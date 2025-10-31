@@ -32,7 +32,6 @@ use qtype_formulas\local\token;
  * @covers \qtype_formulas\local\lazylist
  */
 final class lazylist_test extends \advanced_testcase {
-
     public function test_append_value_and_range(): void {
         $list = new lazylist();
         self::assertEquals(0, $list->count());

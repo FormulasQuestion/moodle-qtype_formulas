@@ -90,8 +90,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         $table = new xmldb_table('qtype_formulas');
 
         // Define field correctfeedback to be added to qtype_formulas.
-        $field = new xmldb_field('correctfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'showperanswermark');
+        $field = new xmldb_field(
+            'correctfeedback',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'showperanswermark',
+        );
 
         // Conditionally launch add field correctfeedback.
         if (!$dbman->field_exists($table, $field)) {
@@ -101,14 +109,30 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas', 'correctfeedback', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('correctfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'showperanswermark');
+            $field = new xmldb_field(
+                'correctfeedback',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'showperanswermark',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field correctfeedbackformat to be added to qtype_formulas.
-        $field = new xmldb_field('correctfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'correctfeedback');
+        $field = new xmldb_field(
+            'correctfeedbackformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'correctfeedback',
+        );
 
         // Conditionally launch add field correctfeedbackformat.
         if (!$dbman->field_exists($table, $field)) {
@@ -116,8 +140,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         }
 
         // Define field partiallycorrectfeedback to be added to qtype_formulas.
-        $field = new xmldb_field('partiallycorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'correctfeedbackformat');
+        $field = new xmldb_field(
+            'partiallycorrectfeedback',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'correctfeedbackformat',
+        );
 
         // Conditionally launch add field partiallycorrectfeedback.
         if (!$dbman->field_exists($table, $field)) {
@@ -127,14 +159,30 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas', 'partiallycorrectfeedback', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('partiallycorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'correctfeedbackformat');
+            $field = new xmldb_field(
+                'partiallycorrectfeedback',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'correctfeedbackformat',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field partiallycorrectfeedbackformat to be added to qtype_formulas.
-        $field = new xmldb_field('partiallycorrectfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'partiallycorrectfeedback');
+        $field = new xmldb_field(
+            'partiallycorrectfeedbackformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'partiallycorrectfeedback',
+        );
 
         // Conditionally launch add field partiallycorrectfeedbackformat.
         if (!$dbman->field_exists($table, $field)) {
@@ -142,8 +190,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         }
 
         // Define field incorrectfeedback to be added to qtype_formulas.
-        $field = new xmldb_field('incorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'partiallycorrectfeedbackformat');
+        $field = new xmldb_field(
+            'incorrectfeedback',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'partiallycorrectfeedbackformat',
+        );
 
         // Conditionally launch add field incorrectfeedback.
         if (!$dbman->field_exists($table, $field)) {
@@ -153,14 +209,30 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas', 'incorrectfeedback', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('incorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'partiallycorrectfeedbackformat');
+            $field = new xmldb_field(
+                'incorrectfeedback',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'partiallycorrectfeedbackformat',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field incorrectfeedbackformat to be added to qtype_formulas.
-        $field = new xmldb_field('incorrectfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'incorrectfeedback');
+        $field = new xmldb_field(
+            'incorrectfeedbackformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'incorrectfeedback',
+        );
 
         // Conditionally launch add field incorrectfeedbackformat.
         if (!$dbman->field_exists($table, $field)) {
@@ -168,8 +240,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         }
 
         // Define field shownumcorrect to be added to qtype_formulas.
-        $field = new xmldb_field('shownumcorrect', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'incorrectfeedbackformat');
+        $field = new xmldb_field(
+            'shownumcorrect',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'incorrectfeedbackformat',
+        );
 
         // Conditionally launch add field shownumcorrect.
         if (!$dbman->field_exists($table, $field)) {
@@ -216,7 +296,6 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
     }
 
     if ($oldversion < 2012071406) {
-
         // Define field partindex to be added to qtype_formulas_answers.
         $table = new xmldb_table('qtype_formulas_answers');
         $field = new xmldb_field('partindex', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'questionid');
@@ -260,8 +339,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         $table = new xmldb_table('qtype_formulas_answers');
 
         // Define field partcorrectfb to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partcorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'feedbackformat');
+        $field = new xmldb_field(
+            'partcorrectfb',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'feedbackformat',
+        );
 
         // Conditionally launch add field partcorrectfb.
         if (!$dbman->field_exists($table, $field)) {
@@ -271,26 +358,49 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas_answers', 'partcorrectfb', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('partcorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'feedbackformat');
+            $field = new xmldb_field(
+                'partcorrectfb',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'feedbackformat',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field partcorrectfbformat to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partcorrectfbformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'partcorrectfb');
+        $field = new xmldb_field(
+            'partcorrectfbformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'partcorrectfb',
+        );
 
         // Conditionally launch add field partcorrectfbformat.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
             // Now fill it with FORMAT_HTML.
             $DB->set_field('qtype_formulas_answers', 'partcorrectfbformat', FORMAT_HTML);
-
         }
 
         // Define field partpartiallycorrectfb to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partpartiallycorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'partcorrectfbformat');
+        $field = new xmldb_field(
+            'partpartiallycorrectfb',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'partcorrectfbformat',
+        );
 
         // Conditionally launch add field partpartiallycorrectfb.
         if (!$dbman->field_exists($table, $field)) {
@@ -300,14 +410,30 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas_answers', 'partpartiallycorrectfb', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('partpartiallycorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'partcorrectfbformat');
+            $field = new xmldb_field(
+                'partpartiallycorrectfb',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'partcorrectfbformat',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field partpartiallycorrectfbformat to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partpartiallycorrectfbformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'partpartiallycorrectfb');
+        $field = new xmldb_field(
+            'partpartiallycorrectfbformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'partpartiallycorrectfb',
+        );
 
         // Conditionally launch add field partpartiallycorrectfbformat.
         if (!$dbman->field_exists($table, $field)) {
@@ -317,8 +443,16 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         }
 
         // Define field partincorrectfb to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partincorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                null, null, null, 'partpartiallycorrectfbformat');
+        $field = new xmldb_field(
+            'partincorrectfb',
+            XMLDB_TYPE_TEXT,
+            'small',
+            null,
+            null,
+            null,
+            null,
+            'partpartiallycorrectfbformat',
+        );
 
         // Conditionally launch add field partincorrectfb.
         if (!$dbman->field_exists($table, $field)) {
@@ -328,14 +462,30 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
             $DB->set_field('qtype_formulas_answers', 'partincorrectfb', '');
 
             // Now add the not null constraint.
-            $field = new xmldb_field('partincorrectfb', XMLDB_TYPE_TEXT, 'small', null,
-                    XMLDB_NOTNULL, null, null, 'partpartiallycorrectfbformat');
+            $field = new xmldb_field(
+                'partincorrectfb',
+                XMLDB_TYPE_TEXT,
+                'small',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                null,
+                'partpartiallycorrectfbformat',
+            );
             $dbman->change_field_notnull($table, $field);
         }
 
         // Define field partincorrectfbformat to be added to qtype_formulas_answers.
-        $field = new xmldb_field('partincorrectfbformat', XMLDB_TYPE_INTEGER, '2', null,
-                XMLDB_NOTNULL, null, '0', 'partincorrectfb');
+        $field = new xmldb_field(
+            'partincorrectfbformat',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '0',
+            'partincorrectfb',
+        );
 
         // Conditionally launch add field partincorrectfbformat.
         if (!$dbman->field_exists($table, $field)) {

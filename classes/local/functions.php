@@ -303,7 +303,7 @@ class functions {
         for ($i = $min->value; $i <= $max->value; $i++) {
             $result[] = new token(token::NUMBER, floatval($i));
         }
-        uksort($result, function($a, $b) use ($list) {
+        uksort($result, function ($a, $b) use ($list) {
             return $list[$a] <=> $list[$b];
         });
 
@@ -376,7 +376,7 @@ class functions {
 
         // Now sort the first array, using the second as the sort order.
         $tmp = $tosort;
-        uksort($tmp, function($a, $b) use ($order) {
+        uksort($tmp, function ($a, $b) use ($order) {
             $first = $order[$a]->value;
             $second = $order[$b]->value;
             // If both elements are numeric, we compare their numerical value.
@@ -423,6 +423,7 @@ class functions {
                 // If the single argument is neither an array, nor a number or numeric string,
                 // we throw an error.
                 self::die('error_poly_one');
+                // No break statement, because the script has already died here.
             case 2:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
@@ -453,6 +454,7 @@ class functions {
                 }
                 // Any other invocations with two arguments is invalid.
                 self::die('error_poly_two');
+                // No break statement, because the script has already died here.
             case 3:
                 $first = token::unpack($args[0]);
                 $second = token::unpack($args[1]);
@@ -751,7 +753,7 @@ class functions {
         $result = [];
         // Using array_walk_recursive() makes it easy to accept a list of strings as the second
         // argument instead of giving all strings individually.
-        array_walk_recursive($values, function($val) use (&$result) {
+        array_walk_recursive($values, function ($val) use (&$result) {
             $result[] = $val;
         });
         return implode($separator, $result);
@@ -1001,12 +1003,12 @@ class functions {
             // Inverse does not exist.
             return 0;
         }
-        list($s, $t, $lasts, $lastt) = [1, 0, 0, 1];
+        [$s, $t, $lasts, $lastt] = [1, 0, 0, 1];
         while ($m != 0) {
             $q = floor($a / $m);
-            list($a, $m) = [$m, $a - $q * $m];
-            list($s, $lasts) = [$lasts, $s - $q * $lasts];
-            list($t, $lastt) = [$lastt, $t - $q * $lastt];
+            [$a, $m] = [$m, $a - $q * $m];
+            [$s, $lasts] = [$lasts, $s - $q * $lasts];
+            [$t, $lastt] = [$lastt, $t - $q * $lastt];
         }
         return $s < 0 ? $s + $origm : $s;
     }
@@ -1543,5 +1545,4 @@ class functions {
     private static function die(string $identifier, $a = null): void {
         throw new Exception(get_string($identifier, 'qtype_formulas', $a));
     }
-
 }

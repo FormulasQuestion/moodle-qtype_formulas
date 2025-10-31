@@ -626,13 +626,13 @@ final class evaluator_test extends \advanced_testcase {
                     'a' => new variable('a', 1, variable::NUMERIC),
                     'b' => new variable('b', 4, variable::NUMERIC),
                     'c' => new variable('c', 4, variable::NUMERIC),
-                    'g' => new variable('g', [1, 47 , 2 , 2.718281828459, 16], variable::LIST),
+                    'g' => new variable('g', [1, 47, 2, 2.718281828459, 16], variable::LIST),
                 ],
                 'a = 1; b = 4; c = a*b; g= [1,2+45, cos(0)+1,exp(a),b*c];',
             ],
             'list with expressions + list element reference' => [
                 [
-                    'h' => new variable('h', [1, 5 , -0.7568024953079282, 5], variable::LIST),
+                    'h' => new variable('h', [1, 5, -0.7568024953079282, 5], variable::LIST),
                     'j' => new variable('j', 5, variable::NUMERIC),
                 ],
                 'h = [1,2+3,sin(4),5]; j=h[1];',
@@ -643,28 +643,28 @@ final class evaluator_test extends \advanced_testcase {
             ],
             'assign to list element' => [
                 [
-                    'e' => new variable('e', [1, 2 , 111 , 4], variable::LIST),
+                    'e' => new variable('e', [1, 2, 111, 4], variable::LIST),
                 ],
                 'e = [1,2,3,4]; e[2]=111;',
             ],
             'assign string to list element with variable index' => [
                 [
                     'a' => new variable('a', 0, variable::NUMERIC),
-                    'e' => new variable('e', ['A', 2 , 3 , 4], variable::LIST),
+                    'e' => new variable('e', ['A', 2, 3, 4], variable::LIST),
                 ],
                 'e = [1,2,3,4]; a=1-1; e[a]="A";',
             ],
             'assign number to list element with variable index' => [
                 [
                     'a' => new variable('a', 1, variable::NUMERIC),
-                    'e' => new variable('e', [1, 111 , 3 , 4], variable::LIST),
+                    'e' => new variable('e', [1, 111, 3, 4], variable::LIST),
                 ],
                 'e = [1,2,3,4]; a=1; e[a]=111;',
             ],
             'assign to list element with calculated variable as index' => [
                 [
                     'a' => new variable('a', 0, variable::NUMERIC),
-                    'e' => new variable('e', [111, 2 , 3 , 4], variable::LIST),
+                    'e' => new variable('e', [111, 2, 3, 4], variable::LIST),
                 ],
                 'e = [1,2,3,4]; a=1-1; e[a]=111;',
             ],
@@ -1048,7 +1048,6 @@ final class evaluator_test extends \advanced_testcase {
                 ';; a=1;;;;;;; b=2 ;;;;;;',
             ],
         ];
-
     }
 
     /**
@@ -1445,7 +1444,7 @@ final class evaluator_test extends \advanced_testcase {
         $globalvars = 'a[0] = 111;';
         $globalparser = new parser($globalvars);
         $evaluator->evaluate($globalparser->get_statements());
-        $a = $evaluator->export_single_variable('a')->value;;
+        $a = $evaluator->export_single_variable('a')->value;
         self::assertEquals(111, $a[0]->value);
 
         // Try to change a value in b. This should fail.

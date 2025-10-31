@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/question/type/formulas/questiontype.php');
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class token {
-
     /** @var int all literals (string or number) will have their 1-bit set */
     const ANY_LITERAL = 1;
 
@@ -343,5 +342,4 @@ class token {
 
         return $count;
     }
-
 }

@@ -34,7 +34,6 @@ use qtype_formulas\local\token;
  * @covers \qtype_formulas\local\shunting_yard
  */
 final class parser_test extends \advanced_testcase {
-
     public function test_has_token_in_tokenlist(): void {
         $input = 'sin = 5';
         $parser = new parser($input);

@@ -39,7 +39,7 @@ require_once($CFG->dirroot . '/question/type/formulas/tests/helper.php');
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \qtype_formulas
- * @covers \qtype_formulas_part
+ * @covers \qtype_formulas\local\formulas_part
  * @covers \qtype_formulas_question
  */
 final class walkthrough_adaptive_test extends walkthrough_test_base {
@@ -612,8 +612,10 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
         $this->check_current_mark(null);
-        self::assertEquals('adaptivemultipart',
-        $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
+        self::assertEquals(
+            'adaptivemultipart',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name(),
+        );
         $this->render();
         $this->check_output_contains_text_input('0_0');
         $this->check_output_does_not_contain_text_input_with_class('0_0', 'correct');
@@ -660,8 +662,10 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        self::assertEquals('adaptivemultipart',
-        $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
+        self::assertEquals(
+            'adaptivemultipart',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name(),
+        );
         $this->render();
         $this->check_output_contains_text_input('0_0');
         $this->check_current_output(
@@ -753,9 +757,10 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-            self::assertEquals('interactivecountback',
-            $this->quba->get_question_attempt($this->slot)->get_behaviour_name()
-        );
+            self::assertEquals(
+                'interactivecountback',
+                $this->quba->get_question_attempt($this->slot)->get_behaviour_name(),
+            );
         $this->render();
         $this->check_output_contains_text_input('0_');
         $this->check_current_output(
@@ -797,8 +802,10 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        self::assertEquals('adaptivemultipart',
-        $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
+        self::assertEquals(
+            'adaptivemultipart',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name(),
+        );
         $this->render();
         $this->check_output_contains_text_input('0_0');
         $this->check_current_output(
@@ -850,8 +857,10 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
 
         // Check the initial state.
         $this->check_current_state(question_state::$todo);
-        self::assertEquals('adaptivemultipart',
-        $this->quba->get_question_attempt($this->slot)->get_behaviour_name());
+        self::assertEquals(
+            'adaptivemultipart',
+            $this->quba->get_question_attempt($this->slot)->get_behaviour_name(),
+        );
         $this->render();
         $this->check_output_contains_text_input('0_0');
         $this->check_current_output(
@@ -1088,5 +1097,4 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => '1', '0_1' => 'µA', '-submit' => 1]);
         $this->check_current_mark(1);
     }
-
 }

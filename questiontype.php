@@ -27,6 +27,7 @@
 use qtype_formulas\answer_unit_conversion;
 use qtype_formulas\unit_conversion_rules;
 use qtype_formulas\local\evaluator;
+use qtype_formulas\local\formulas_part;
 use qtype_formulas\local\random_parser;
 use qtype_formulas\local\answer_parser;
 use qtype_formulas\local\parser;
@@ -47,7 +48,6 @@ require_once($CFG->dirroot . '/question/type/formulas/question.php');
  * @license https://www.gnu.org/copyleft/gpl.html GNU Public License version 3
  */
 class qtype_formulas extends question_type {
-
     /** @var int */
     const ANSWER_TYPE_NUMBER = 0;
 
@@ -477,7 +477,7 @@ class qtype_formulas extends question_type {
      * no fragment of the question's main text after them.
      *
      * @param string $questiontext main question tex
-     * @param qtype_formulas_part[] $parts
+     * @param formulas_part[] $parts
      * @return string[] fragments (one more than the number of parts
      */
     public function split_questiontext(string $questiontext, array $parts): array {
@@ -509,7 +509,7 @@ class qtype_formulas extends question_type {
 
     /**
      * Initialise instante of the qtype_formulas_question class and its parts which, in turn,
-     * are instances of the qtype_formulas_part class.
+     * are instances of the formulas_part class.
      *
      * @param question_definition $question instance of a Formulas question (qtype_formulas_question)
      * @param object $questiondata question data as stored in the DB
@@ -528,7 +528,7 @@ class qtype_formulas extends question_type {
         // The attribute $questiondata->options->answers stores all information for the parts. Despite
         // its name, it does not only contain the model answers, but also e.g. local or grading vars.
         foreach ($questiondata->options->answers as $partdata) {
-            $questionpart = new qtype_formulas_part();
+            $questionpart = new formulas_part();
 
             // Copy the data fields fetched from the DB to the question part object.
             foreach ($partdata as $key => $value) {
@@ -572,7 +572,8 @@ class qtype_formulas extends question_type {
                     'right' => new question_possible_response(get_string('response_right', 'qtype_formulas'), 1),
                     'wrongvalue' => new question_possible_response(get_string('response_wrong_value', 'qtype_formulas'), 0),
                     'wrongunit' => new question_possible_response(
-                        get_string('response_wrong_unit', 'qtype_formulas'), 1 - $part->unitpenalty
+                        get_string('response_wrong_unit', 'qtype_formulas'),
+                        1 - $part->unitpenalty,
                     ),
                     null => question_possible_response::no_response(),
                 ];
@@ -617,7 +618,7 @@ class qtype_formulas extends question_type {
         }
         // Otherwise, loop over each answer block found in the XML.
         foreach ($xml['#']['answers'] as $i => $part) {
-            $partindex = $format->getpath($part, ['#', 'partindex', 0 , '#' , 'text' , 0 , '#'], false);
+            $partindex = $format->getpath($part, ['#', 'partindex', 0, '#', 'text', 0, '#'], false);
             if ($partindex !== false) {
                 $question->partindex[$i] = $partindex;
             }
@@ -634,30 +635,50 @@ class qtype_formulas extends question_type {
                 }
                 $question->{$field}[$i] = $format->getpath(
                     $part,
-                    ['#', $field, 0 , '#' , 'text' , 0 , '#'],
+                    ['#', $field, 0, '#', 'text', 0, '#'],
                     $default,
                     false,
-                    $ifnotexists
+                    $ifnotexists,
                 );
             }
 
             $subqxml = $format->getpath($part, ['#', 'subqtext', 0], []);
-            $question->subqtext[$i] = $format->import_text_with_files($subqxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->subqtext[$i] = $format->import_text_with_files(
+                $subqxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
 
             $feedbackxml = $format->getpath($part, ['#', 'feedback', 0], []);
-            $question->feedback[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->feedback[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
 
             $feedbackxml = $format->getpath($part, ['#', 'correctfeedback', 0], []);
-            $question->partcorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partcorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
             $feedbackxml = $format->getpath($part, ['#', 'partiallycorrectfeedback', 0], []);
-            $question->partpartiallycorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partpartiallycorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
             $feedbackxml = $format->getpath($part, ['#', 'incorrectfeedback', 0], []);
-            $question->partincorrectfb[$i] = $format->import_text_with_files($feedbackxml,
-                        [], '', $format->get_format($question->questiontextformat));
+            $question->partincorrectfb[$i] = $format->import_text_with_files(
+                $feedbackxml,
+                [],
+                '',
+                $format->get_format($question->questiontextformat),
+            );
         }
 
         // Make the defaultmark consistent if not specified.
@@ -765,7 +786,7 @@ class qtype_formulas extends question_type {
                 $errormsgs[] = get_string('error_placeholder_too_long', 'qtype_formulas');
             }
             // Placeholders must start with # and contain only alphanumeric characters or underscores.
-            if (!preg_match('/^#\w+$/', $part->placeholder) ) {
+            if (!preg_match('/^#\w+$/', $part->placeholder)) {
                 $errormsgs[] = get_string('error_placeholder_format', 'qtype_formulas');
             }
             // Placeholders must be unique.
@@ -953,7 +974,7 @@ class qtype_formulas extends question_type {
         // Make sure that answer box placeholders (if used) are unique for each part.
         foreach ($parts as $i => $part) {
             try {
-                qtype_formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
+                formulas_part::scan_for_answer_boxes($part->subqtext['text'], true);
             } catch (Exception $e) {
                 $errors["subqtext[$i]"] = $e->getMessage();
             }
@@ -990,7 +1011,7 @@ class qtype_formulas extends question_type {
         $errors = [];
 
         if ($data->globalunitpenalty < 0 || $data->globalunitpenalty > 1) {
-            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');;
+            $errors['globalunitpenalty'] = get_string('error_unitpenalty', 'qtype_formulas');
         }
 
         // If the globalruleid field is missing, that means the request or the form has
@@ -1177,7 +1198,7 @@ class qtype_formulas extends question_type {
             // _a and _r or _0, _1, ... or _err and _relerr. We will create a dummy part and use it
             // as our worker. Note that the result will automatically flow back into $partevaluator,
             // because the assignment is by reference only.
-            $dummypart = new qtype_formulas_part();
+            $dummypart = new formulas_part();
             $dummypart->answertype = $part->answertype;
             $dummypart->answer = $part->answer;
             $dummypart->evaluator = $partevaluator;
