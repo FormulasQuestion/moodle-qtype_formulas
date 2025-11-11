@@ -231,7 +231,7 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
 
         // For the question summary, it seems useful to simplify the answer box placeholders.
         $summary = preg_replace(
-            '/\{(_u|_\d+)(:\s*(_[A-Za-z]|[A-Za-z]\w*)\s*(:(MC|MCE|MCES|MCS))?)?((\|[\w =#]*)*)\}/u',
+            '/\{(_u|_\d+)(:\s*(_[A-Za-z]|[A-Za-z][A-Za-z_]*)\s*(:(MC|MCE|MCS|MCES))?)?((\|[A-Za-z0-9_ .=#]*)*)\}/u',
             '{\1}',
             $summary,
         );

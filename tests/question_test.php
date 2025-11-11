@@ -1053,6 +1053,8 @@ final class question_test extends \advanced_testcase {
             [[], '{_0::}'],
             [[], '{_0::MCE}'],
             [[], '{_0:foo:}'],
+            // The capital E is not an ASCII character, so it should not match.
+            [[], '{_0:TΕ}'],
             [[], '{ _0:foo}'],
             [[], '{ _u}'],
             [[], '{_ u}'],
