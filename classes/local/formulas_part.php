@@ -252,7 +252,7 @@ class formulas_part {
      */
     public static function scan_for_answer_boxes(string $text): array {
         // Match the text and store the matches.
-        preg_match_all('/\{(_u|_\d+)(:\s*(_[A-Za-z]|[A-Za-z]\w*)\s*(:(MC|MCE|MCS|MCES))?)?((\|[\w .=#]*)*)\}/', $text, $matches);
+        preg_match_all('/\{(_u|_\d+)(:\s*(_[A-Za-z]|[A-Za-z]\w*)\s*(:(MC|MCE|MCS|MCES))?)?((\|[\w .=#]*)*)\}/u', $text, $matches);
 
         $boxes = [];
 
