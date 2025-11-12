@@ -1089,6 +1089,9 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:foo1}', 'options' => 'foo1'],
             ], '{_0:foo1}'],
             [[
+                '_0' => ['placeholder' => '{_0:fO_o1}', 'options' => 'fO_o1'],
+            ], '{_0:fO_o1}'],
+            [[
                 '_0' => ['placeholder' => '{_0:mychoices}', 'options' => 'mychoices'],
             ], '{_0:mychoices}'],
             [[
