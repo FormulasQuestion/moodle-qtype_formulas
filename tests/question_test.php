@@ -1053,12 +1053,14 @@ final class question_test extends \advanced_testcase {
             [[], '{_0::}'],
             [[], '{_0::MCE}'],
             [[], '{_0:foo:}'],
-            [[], '{_0:foo }'],
+            // The capital E is not an ASCII character, so it should not match.
+            [[], '{_0:TΕ}'],
             [[], '{ _0:foo}'],
             [[], '{ _u}'],
             [[], '{_ u}'],
             [[], '{_u }'],
             [[], '{_a}'],
+            [['_0' => ['placeholder' => '{_0:foo }', 'options' => 'foo']], '{_0:foo }'],
             [[
                 '_0' => ['placeholder' => '{_0}'],
             ], '{_0}'],
@@ -1084,6 +1086,21 @@ final class question_test extends \advanced_testcase {
                 '_0' => ['placeholder' => '{_0:foo}', 'options' => 'foo'],
             ], '{_0:foo}'],
             [[
+                '_0' => ['placeholder' => '{_0:foo1}', 'options' => 'foo1'],
+            ], '{_0:foo1}'],
+            [[
+                '_0' => ['placeholder' => '{_0:fO_o1}', 'options' => 'fO_o1'],
+            ], '{_0:fO_o1}'],
+            [[
+                '_0' => ['placeholder' => '{_0:mychoices}', 'options' => 'mychoices'],
+            ], '{_0:mychoices}'],
+            [[
+                '_0' => ['placeholder' => '{_0:  foo   }', 'options' => 'foo'],
+            ], '{_0:  foo   }'],
+            [[
+                '_0' => ['placeholder' => '{_0: foo }', 'options' => 'foo'],
+            ], '{_0: foo }'],
+            [[
                 '_0' => ['placeholder' => '{_0:foo|align=center|bgcol=red|w=10}', 'options' => 'foo', 'format' => $formatarray],
             ], '{_0:foo|align=center|bgcol=red|w=10}'],
             [[
@@ -1104,6 +1121,9 @@ final class question_test extends \advanced_testcase {
             [[
                 '_0' => ['placeholder' => '{_0:foo:MC}', 'options' => 'foo'],
             ], '{_0:foo:MC}'],
+            [[
+                '_0' => ['placeholder' => '{_0:   foo   :MC}', 'options' => 'foo'],
+            ], '{_0:   foo   :MC}'],
             [[
                 '_0' => [
                     'placeholder' => '{_0:foo:MCE|align=center|bgcol=red|w=10}',
