@@ -266,12 +266,12 @@ final class functions_test extends \advanced_testcase {
             [2, 'fact(2)'],
             [6, 'fact(3)'],
             [720, 'fact(6)'],
-            [15511210043330985984000000, 'fact(25)'],
-            [403291461126605635584000000, 'fact(26)'],
-            [10888869450418352160768000000, 'fact(27)'],
+            [8000, 'fact(18) - 6402373705720000'],
+            [32000, 'fact(19) - 121645100408800000'],
+            [640000, 'fact(20) - 2432902008176000000'],
             ['fact() expects its argument to be a non-negative integer.', 'fact(-2)'],
             ['fact() expects its argument to be a non-negative integer.', 'fact(2.5)'],
-            ['Cannot compute 250! on this platform, the result is bigger than PHP_MAX_INT.', 'fact(250)'],
+            ['Cannot compute 250! on this platform, the result is bigger than PHP_MAX_FLOAT.', 'fact(250)'],
         ];
     }
 
