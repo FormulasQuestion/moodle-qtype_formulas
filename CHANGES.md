@@ -1,5 +1,13 @@
 # Changelog
 
+### 6.2.2 (2025-11-15)
+
+- compatibility: correctly render multi-choice answer placeholders that use spaces around variable name; although undocumented, this used to be possible in 5.x versions
+- bugfix: improved validation of answer types "Numeric" and "Numerical formula"
+- bugfix: MathJax renderer should not fail if accidentally called with invalid input
+- internal: improve unit tests for factorials
+- internal: follow updated Moodle coding style rules
+
 ### 6.2.1 (2025-10-06)
 
 - bugfix: use float datatype to calculate factorials
