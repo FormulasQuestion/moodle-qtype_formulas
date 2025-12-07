@@ -1349,6 +1349,9 @@ final class evaluator_test extends \advanced_testcase {
     }
 
     public function test_substitute_variables_in_text_with_sigfig(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
         // Define, parse and evaluate some variables.
         $vars = 'a=0.3; b=sigfig(a, 2); c=0.000005; d=sigfig(c, 8); e=fact(19); f=sigfig(e, 3)';
         $parser = new parser($vars);
@@ -1361,6 +1364,14 @@ final class evaluator_test extends \advanced_testcase {
         $text = '{a} -- {b} -- {c} -- {d} -- {e} -- {f}';
         $output = $evaluator->substitute_variables_in_text($text);
         $expected = '0.3 -- 0.3 -- 5.0E-6 -- 5.0E-6 -- 1.2164510040883E+17 -- 1.22E+17';
+        self::assertEquals($expected, $output);
+
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        self::assertEquals('1', get_config('qtype_formulas', 'allowdecimalcomma'));
+        $output = $evaluator->substitute_variables_in_text($text);
+        $expected = '0,3 -- 0,3 -- 5,0E-6 -- 5,0E-6 -- 1,2164510040883E+17 -- 1,22E+17';
         self::assertEquals($expected, $output);
     }
 

@@ -288,6 +288,33 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_does_not_contain_stray_placeholders();
     }
 
+    public function test_right_answer_feedback_uses_appropriate_decimal_separator(): void {
+        // Setting the localised decimal separator, but disallow the decimal comma in the admin settings.
+        qtype_formulas_test_helper::define_local_decimal_separator();
+        self::assertEquals('0', get_config('qtype_formulas', 'allowdecimalcomma'));
+
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->answer = '3.5';
+
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '42', '-submit' => 1]);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '3.5');
+
+        // Now allowing the decimal comma to be used.
+        set_config('allowdecimalcomma', 1, 'qtype_formulas');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '42', '-submit' => 1]);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '3,5');
+
+        // Make sure the decimal comma is also applied for numbers that are string tokens.
+        // Note that we *should* have 3,50 as the model answer, but as we are converting
+        // the string output from sigfig() back to a number, trailing zeroes will be lost.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $q->parts[0]->answer = 'sigfig(3.5, 3)';
+        $this->process_submission(['0_0' => '42', '-submit' => 1]);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '3,5');
+    }
+
     public function test_render_question_with_separate_unit_field(): void {
         $q = $this->get_test_formulas_question('testsinglenumunitsep');
         $q->parts[0]->unitpenalty = 0.5;
