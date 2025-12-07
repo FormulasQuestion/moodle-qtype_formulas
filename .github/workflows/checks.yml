@@ -52,7 +52,7 @@ jobs:
           moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
         env:
           DB: mariadb
-          MOODLE_BRANCH: ${{ matrix.php == '8.1' && 'MOODLE_405_STABLE' || 'main'}}
+          MOODLE_BRANCH: ${{ matrix.php == '8.1' && 'MOODLE_405_STABLE' || 'MOODLE_501_STABLE'}}
 
       - name: PHP Lint
         if: ${{ always() }}
