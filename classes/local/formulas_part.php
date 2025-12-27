@@ -83,6 +83,9 @@ class formulas_part {
     /** @var int whether there are multiple possible answers */
     public int $answernotunique;
 
+    /** @var int whether students can leave one or more fields empty */
+    public int $emptyallowed;
+
     /** @var string definition of the grading criterion */
     public string $correctness;
 
@@ -418,6 +421,11 @@ class formulas_part {
      * @return bool
      */
     public function is_gradable_response(array $response): bool {
+        // If the part allows empty fields, we do not have to check anything; the response would be
+        // gradable even if all fields were empty.
+        if ($this->emptyallowed) {
+            return true;
+        }
         return !$this->is_unanswered($response);
     }
 
@@ -431,6 +439,11 @@ class formulas_part {
      * @return bool
      */
     public function is_complete_response(array $response): bool {
+        // If the part allows empty fields, we do not have to check anything; the response can be
+        // considered complete even if all fields are empty.
+        if ($this->emptyallowed) {
+            return true;
+        }
         // First, we check if there is a combined unit field. In that case, there will
         // be only one field to verify.
         if ($this->has_combined_unit_field()) {
@@ -463,6 +476,9 @@ class formulas_part {
      * @return bool
      */
     public function is_unanswered(array $response): bool {
+        if (array_key_exists('_seed', $response)) {
+            return true;
+        }
         if (!array_key_exists('normalized', $response)) {
             $response = $this->normalize_response($response);
         }
@@ -528,6 +544,10 @@ class formulas_part {
         // their numerical value.
         if ($isalgebraic) {
             foreach ($this->evaluatedanswers as &$answer) {
+                // If the answer is $EMPTY, there is nothing to do.
+                if ($answer === '$EMPTY') {
+                    continue;
+                }
                 $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
             }
             // In case we later write to $answer, this would alter the last entry of the $modelanswers
@@ -547,6 +567,11 @@ class formulas_part {
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
         foreach ($formulas as &$formula) {
+            // We do not have to wrap the $EMPTY token in quotes.
+            if ($formula === '$EMPTY') {
+                continue;
+            }
+
             // If the formula is aready wrapped in quotes, we throw an Exception, because that
             // should not happen. It will happen, if the student puts quotes around their response, but
             // we want that to be graded wrong. The exception will be caught and dealt with upstream,
@@ -631,7 +656,7 @@ class formulas_part {
         foreach ($studentanswers as $i => &$studentanswer) {
             // We only do the calculation if the answer type is not algebraic. For algebraic
             // answers, we don't do anything, because quotes have already been added.
-            if (!$isalgebraic) {
+            if (!$isalgebraic && $studentanswer !== '$EMPTY') {
                 $studentanswer = $conversionfactor * $studentanswer;
                 $ssqstudentanswer += $studentanswer ** 2;
             }
@@ -643,9 +668,9 @@ class formulas_part {
         // The variable _d will contain the absolute differences between the model answer
         // and the student's response. Using the parser's diff() function will make sure
         // that algebraic answers are correctly evaluated.
+        // Note: We *must* send the model answer first, because the function has a special check for the
+        // EMPTY token.
         $command .= '_d = diff(_a, _r);';
-
-        // Prepare the variable _err which is the root of the sum of squared differences.
         $command .= "_err = sqrt(sum(map('*', _d, _d)));";
 
         // Finally, calculate the relative error, unless the question uses an algebraic answer.
@@ -653,6 +678,9 @@ class formulas_part {
             // We calculate the sum of squares of all model answers.
             $ssqmodelanswer = 0;
             foreach ($this->get_evaluated_answers() as $answer) {
+                if ($answer === '$EMPTY') {
+                    continue;
+                }
                 $ssqmodelanswer += $answer ** 2;
             }
             // If the sum of squares is 0 (i.e. all answers are 0), then either the student
@@ -731,7 +759,7 @@ class formulas_part {
                 // Check whether the answer is valid for the given answer type. If it is not,
                 // we just throw an exception to make use of the catch block. Note that if the
                 // student's answer was empty, it will fail in this check.
-                if (!$parser->is_acceptable_for_answertype($this->answertype)) {
+                if (!$parser->is_acceptable_for_answertype($this->answertype, $this->emptyallowed)) {
                     throw new Exception();
                 }
 
@@ -739,8 +767,12 @@ class formulas_part {
                 // failed evaluation, e.g. caused by an invalid answer.
                 $this->evaluator->clear_stack();
 
-                $evaluated = $this->evaluator->evaluate($parser->get_statements())[0];
-                $evaluatedresponse[] = token::unpack($evaluated);
+                // Evaluate. If the answer was empty (an empty string or the '$EMPTY'), the parser
+                // will create an appropriate evaluable statement or return an empty array. The evaluator,
+                // on the other hand, will know how to deal with the "false" return value from reset()
+                // and return the $EMPTY token.
+                $statements = $parser->get_statements();
+                $evaluatedresponse[] = token::unpack($this->evaluator->evaluate(reset($statements)));
             } catch (Throwable $t) {
                 // TODO: convert to non-capturing catch
                 // If parsing, validity check or evaluation fails, we consider the answer as wrong.
@@ -828,8 +860,12 @@ class formulas_part {
         $answers = $this->get_evaluated_answers();
 
         // Numeric answers should be localized, if that functionality is enabled.
+        // Empty answers should be just the empty string; a more user-friendly
+        // output will be created in the renderer.
         foreach ($answers as &$answer) {
-            if (is_numeric($answer)) {
+            if ($answer === '$EMPTY') {
+                $answer = '';
+            } else if (is_numeric($answer)) {
                 $answer = qtype_formulas::format_float($answer);
             }
         }

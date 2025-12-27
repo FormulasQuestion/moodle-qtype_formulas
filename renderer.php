@@ -852,6 +852,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     public function part_correct_response($part) {
         $answers = $part->get_correct_response(true);
+        foreach ($answers as &$answer) {
+            if ($answer === '') {
+                $answer = get_string('emptyanswer', 'qtype_formulas');
+            }
+        }
         $answertext = implode('; ', $answers);
 
         $string = ($part->answernotunique ? 'correctansweris' : 'uniquecorrectansweris');
@@ -873,7 +878,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
         $response = $qa->get_last_qt_data();
-        if (!$question->is_gradable_response($response)) {
+        if (!$question->is_gradable_response($response) || array_key_exists('_seed', $response)) {
             return '';
         }
 
@@ -913,7 +918,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $state = $qa->get_state();
         if (!$state->is_finished()) {
             $response = $qa->get_last_qt_data();
-            if (!$question->is_gradable_response($response)) {
+            // When starting a question, there will be no response, but the _seed variable will be set.
+            // As we now accept questions with an empty response, the grading mechanism would try to grade
+            // this "startup data" like an entirely empty response and hence give the feedback for a wrong
+            // answer, before the student has even submitted anything.
+            if (!$question->is_gradable_response($response) || array_key_exists('_seed', $response)) {
                 return '';
             }
             $state = $question->grade_response($response)[1];

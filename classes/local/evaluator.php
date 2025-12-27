@@ -277,6 +277,20 @@ class evaluator {
     }
 
     /**
+     * FIXME
+     *
+     * @param string $name name of the variable
+     * @param variable $variable variable instance
+     */
+    public function import_single_variable(string $name, variable $variable, bool $overwrite = false): void {
+        if (array_key_exists($name, $this->variables) && !$overwrite) {
+            return;
+        }
+
+        $this->variables[$name] = $variable;
+    }
+
+    /**
      * Calculate the number of possible variants according to the defined random variables.
      *
      * @return int
@@ -776,17 +790,30 @@ class evaluator {
         // This is needed for the diff() function, because strings are evaluated as algebraic
         // formulas, i. e. in a completely different way. Also, both lists must have the same data
         // type.
-        $type = $first[0]->type;
-        if (!in_array($type, [token::NUMBER, token::STRING])) {
-            throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
-        }
+        $type = token::EMPTY;
         for ($i = 0; $i < $count; $i++) {
-            if ($first[$i]->type !== $type) {
+            // As long as we have not found a "real" (i. e. non-empty) element, we update the type.
+            if ($type === token::EMPTY) {
+                $type = $first[$i]->type;
+            }
+            // If the current element's type does not match, we throw an error, unless it is the
+            // $EMPTY token, because it may appear in a list of numbers or strings.
+            if ($first[$i]->type !== $type && $first[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_firstlist_mismatch', 'qtype_formulas', $i));
             }
-            if ($second[$i]->type !== $type) {
+            if ($second[$i]->type !== $type && $second[$i]->type !== token::EMPTY) {
                 throw new Exception(get_string('error_diff_secondlist_mismatch', 'qtype_formulas', $i));
             }
+        }
+        // If all elements of the first list are $EMPTY, we treat the list as a list of numbers, because
+        // that's the most straightforward way to calculate the difference. There's probably no real use
+        // case to have only empty answers in a question, but there's no reason to forbid it, either.
+        if ($type === token::EMPTY) {
+            $type = token::NUMBER;
+        }
+        // If the type is not valid, we throw an error.
+        if (!in_array($type, [token::NUMBER, token::STRING])) {
+            throw new Exception(get_string('error_diff_firstlist_content', 'qtype_formulas'));
         }
 
         // If we are working with numbers, we can directly calculate the differences and return.
@@ -798,8 +825,17 @@ class evaluator {
 
             $result = [];
             for ($i = 0; $i < $count; $i++) {
-                $diff = abs($first[$i]->value - $second[$i]->value);
-                $result[$i] = token::wrap($diff);
+                // This function is also used to calculate the difference between the model answers
+                // and the student's response. In that case, the difference between an $EMPTY answer
+                // and any other value shall always be PHP_FLOAT_MAX. The difference between an
+                // $EMPTY answer and an empty response shall, of course, be 0. For "real" values,
+                // the difference is calculated normally.
+                if ($first[$i]->type === token::EMPTY || $second[$i]->type === token::EMPTY) {
+                    $diff = ($second[$i]->type === $first[$i]->type ? 0 : PHP_FLOAT_MAX);
+                } else {
+                    $diff = abs($first[$i]->value - $second[$i]->value);
+                }
+                $result[$i] = token::wrap($diff, token::NUMBER);
             }
             return $result;
         }
@@ -812,8 +848,18 @@ class evaluator {
         $result = [];
         // Iterate over all strings and calculate the root mean square difference between the two expressions.
         for ($i = 0; $i < $count; $i++) {
+            // If both list elements are the $EMPTY token, the difference is zero and we do not have to
+            // do any more calculations. Otherwise, we just carry on. The calculation will fail later
+            // and the difference will automatically be PHP_FLOAT_MAX.
+            if ($first[$i]->type === token::EMPTY && $second[$i]->type === token::EMPTY) {
+                $result[$i] = token::wrap(0, token::NUMBER);
+                continue;
+            }
+
             $result[$i] = 0;
             $expression = "({$first[$i]}) - ({$second[$i]})";
+            // FIXME: get rid of this again
+            $expression = str_replace('"', '', $expression);
 
             // Flag that we will set to TRUE if a difference cannot be evaluated. This
             // is to make sure that the difference will be PHP_FLOAT_MAX and not
@@ -867,13 +913,18 @@ class evaluator {
     /**
      * Evaluate a single expression or an array of expressions.
      *
-     * @param expression|for_loop|array $input
+     * @param expression|for_loop|array|false $input
      * @param bool $godmode whether to run the evaluation in god mode
      * @return token|array
      */
     public function evaluate($input, bool $godmode = false) {
         if (($input instanceof expression) || ($input instanceof for_loop)) {
             return $this->evaluate_the_right_thing($input, $godmode);
+        }
+        // For convenience, the evaluator accepts FALSE as an input, This allows
+        // passing reset($array) with a possibly empty array.
+        if ($input === false) {
+            return new token(token::EMPTY, '$EMPTY');
         }
         if (!is_array($input)) {
             throw new Exception(get_string('error_evaluate_invocation', 'qtype_formulas', 'evaluate()'));

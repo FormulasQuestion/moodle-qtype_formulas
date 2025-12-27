@@ -78,6 +78,13 @@ class answer_parser extends parser {
             }
         }
 
+        // If we only have one single token and it is an empty string, we set it to the $EMPTY token.
+        $firsttoken = reset($tokenlist);
+        if (count($tokenlist) === 1 && $firsttoken->value === '') {
+            // FIXME: temporarily disabling this
+            // $tokenlist[0] = new token(token::EMPTY, '$EMPTY', $firsttoken->row, $firsttoken->column);
+        }
+
         // Once this is done, we can parse the expression normally.
         parent::__construct($tokenlist, $knownvariables);
     }
@@ -88,7 +95,18 @@ class answer_parser extends parser {
      * @param int $type the answer type, a constant from the qtype_formulas class
      * @return bool
      */
-    public function is_acceptable_for_answertype(int $type): bool {
+    public function is_acceptable_for_answertype(int $type, bool $acceptempty = false): bool {
+        // An empty answer is never acceptable regardless of the answer type, unless empty fields
+        // are explicitly allowed for a question's part.
+        // FIXME: this can be removed later
+        if (empty($this->tokenlist)) {
+            return $acceptempty;
+        }
+        $firsttoken = reset($this->tokenlist);
+        if (count($this->tokenlist) === 1 && $firsttoken->type === token::EMPTY) {
+            return $acceptempty;
+        }
+
         if ($type === qtype_formulas::ANSWER_TYPE_NUMBER) {
             return $this->is_acceptable_number();
         }
@@ -102,6 +120,9 @@ class answer_parser extends parser {
         }
 
         if ($type === qtype_formulas::ANSWER_TYPE_ALGEBRAIC) {
+            if (count($this->tokenlist) === 1 && $this->tokenlist[0]->value === '') {
+                return $acceptempty;
+            }
             return $this->is_acceptable_algebraic_formula();
         }
 
