@@ -1,3 +1,8 @@
+div.qtype_formulas_input_wrapper {
+    display: inline-block;
+    position: relative;
+}
+
 div#qtype_formulas_mathjax_display {
     background-color: #eef;
     border: 1px solid #88c;
