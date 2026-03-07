@@ -186,7 +186,7 @@ const handleRenderingComplete = (evt) => {
     if (div !== null) {
         let style = window.getComputedStyle(div);
         width += 3 * parseInt(style.padding);
-        width = Math.min(width, div.parentNode.getBoundingClientRect().width);
+        width = Math.min(width, div.closest('.formulaspart').getBoundingClientRect().width);
         div.style.width = width + 'px';
     }
 };
