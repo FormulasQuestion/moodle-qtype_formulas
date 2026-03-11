@@ -111,6 +111,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             'init',
             [get_config('qtype_formulas', 'debouncedelay')]
         );
+        $this->page->requires->js_call_amd(
+            'qtype_formulas/tooltip',
+            'init',
+        );
 
         return '';
     }
@@ -661,9 +665,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
         if (!$isnumber || $shownumbertooltip) {
             $inputattributes += [
-                "{$bootstrapnamespace}-toggle" => 'tooltip',
-                "{$bootstrapnamespace}-title" => $title,
-                "{$bootstrapnamespace}-custom-class" => 'qtype_formulas-tooltip',
             ];
         }
 

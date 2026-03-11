@@ -16,6 +16,45 @@ div[id^='fitem_id_postunit_'] #qtype_formulas_mathjax_display {
     margin-left: 10px;
 }
 
+div.qtype_formulas_tooltip_wrapper {
+  position: absolute;
+  display: inline-block;
+  visibility: hidden;
+  pointer-events: none;
+  font-family: sans-serif;
+  font-size: smaller;
+}
+
+div.qtype_formulas_tooltip_inner {
+  background: black;
+  color: white;
+  border-radius: 10px;
+  text-align: center;
+  text-wrap: nowrap;
+  padding: 5px 10px;
+  bottom: 100%;
+  position: absolute;
+  transform: translateX(-50%);
+
+}
+
+.qtype_formulas_tooltip_inner::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #333;
+}
+
+div.qtype_formulas_tooltip_wrapper.show {
+  visibility: visible;
+}
+
 .que.formulas .formulas_unit {
     display: inline-block;
     margin: 0 0 0 0;
