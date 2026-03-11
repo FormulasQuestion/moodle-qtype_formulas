@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   release-at-moodle-org:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       PLUGIN: qtype_formulas
       CURL: curl -s
