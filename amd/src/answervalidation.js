@@ -76,6 +76,10 @@ export const init = (debounceDelay) => {
     } else {
         addLegacyMathJaxListener();
     }
+
+    // Add event listener for scrolling and resizing, because our preview div might have to be shifted.
+    window.addEventListener('scroll', repositionPreviewDiv);
+    window.addEventListener('resize', repositionPreviewDiv);
 };
 
 /**
@@ -154,7 +158,7 @@ const addLegacyMathJaxListener = () => {
  * @returns Element
  */
 const getMathJaxContainer = (element) => {
-    // If we are using MathJax v3, the rendered output is in a custom <mjx-container> tag.
+    // If we are using MathJax v3 or v4, the rendered output is in a custom <mjx-container> tag.
     // If we are using MathJax v2, the rendered output is in a <span> with a certain id.
     let v3container = element.querySelector('mjx-container');
     let v2container = element.querySelector("span[id^='MathJax-Element-'][id$='Frame']");
@@ -196,13 +200,21 @@ const handleRenderingComplete = (evt) => {
 
     // Now fetch our preview <div> and set its width. We must account for the padding and
     // want to make sure that the preview is not larger than the rectangle around the question
-    // itself.
+    // itself. For MathJax v4, we do not set the width, but rather the max-width. The reason is that
+    // MathJax v4 will auto-wrap mathematical content if it is being typeset in a constrained container,
+    // so once a width has been set, the <div> will never grow beyond that value. (Setting it every time
+    // would not be necessary, but we don't mind.)
     let div = document.getElementById('qtype_formulas_mathjax_display');
     if (div !== null) {
-        let style = window.getComputedStyle(div);
-        width += 3 * parseInt(style.padding);
-        width = Math.min(width, div.closest('.formulaspart').getBoundingClientRect().width);
-        div.style.width = width + 'px';
+        const field = document.getElementById(div.dataset.for);
+        if (field !== null) {
+            div.style.maxWidth = field.closest('.formulaspart').getBoundingClientRect().width + 'px';
+        }
+
+        if (parseInt((window.MathJax.version || '')[0]) < 4) {
+            width += 3 * parseInt(window.getComputedStyle(div).padding);
+            div.style.width = width + 'px';
+        }
     }
 };
 
@@ -301,6 +313,31 @@ const doesNotNeedPreview = (content) => {
 };
 
 /**
+ * Make sure the preview div is correctly positioned below the input field, taking into account the
+ * scroll position.
+ *
+ * @returns void
+ */
+const repositionPreviewDiv = () => {
+    // Fetch our div. If it does not exist, we have nothing to do.
+    const div = document.getElementById('qtype_formulas_mathjax_display');
+    if (div === null) {
+        return;
+    }
+
+    // Fetch the field our div belongs to. If we cannot fetch it (which should not happen),
+    // we simply stop.
+    const field = document.getElementById(div.dataset.for);
+    if (field === null) {
+        return;
+    }
+
+    const rect = field.getBoundingClientRect();
+    div.style.left = (rect.left + window.scrollX) + 'px';
+    div.style.top = (rect.bottom + window.scrollY) + 'px';
+};
+
+/**
  * Render LaTeX code and show the preview <div> at the right place.
  *
  * @param {string} id the input field's id
@@ -333,9 +370,10 @@ const showMathJax = (id, texcode) => {
         div.id = 'qtype_formulas_mathjax_display';
         div.classList.add('filter_mathjaxloader_equation');
         div.dataset.for = id;
-        div.style.left = field.offsetLeft + 'px';
-        // We insert the div right after the relevant input field.
-        field.parentNode.insertBefore(div, field.nextSibling);
+
+        // We have to insert the <div> first. For full flexibility in placement, we append it to the <body>.
+        document.body.appendChild(div);
+        repositionPreviewDiv();
     }
 
     // Copy the LaTeX code into the div, show it and tell the MathJax filter that there is work to be done.

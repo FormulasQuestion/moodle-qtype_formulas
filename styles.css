@@ -12,7 +12,6 @@ div#qtype_formulas_mathjax_display {
     overflow-y: hidden;
     padding: 4px;
     position: absolute;
-    width: 150px;
     z-index: 1;
 }
 

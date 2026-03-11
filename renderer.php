@@ -671,10 +671,8 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // We need to wrap our input field into a wrapper <div>, in order for the LaTeX preview
         // to be correctly positioned even inside a table.
-        $output = html_writer::start_div('qtype_formulas_input_wrapper');
-        $output .= $label['html'];
+        $output = $label['html'];
         $output .= html_writer::empty_tag('input', $inputattributes);
-        $output .= html_writer::end_div();
 
         return $output;
     }
