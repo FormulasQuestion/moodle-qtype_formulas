@@ -66,6 +66,7 @@ export const init = (debounceDelay) => {
         input.addEventListener('input', setDebounceTimer);
         input.addEventListener('focus', focusReceived);
         input.addEventListener('blur', hideMathJax);
+        input.addEventListener('change', markTainted);
     }
 
     // If we have a recent version of Moodle (4.3 and newer), the MathJax filter will notify us when our
@@ -78,6 +79,19 @@ export const init = (debounceDelay) => {
 };
 
 /**
+ * Event handler when input field has been changed. In that case, it should be marked "tainted", in order
+ * to make sure that upon next re-entry, the preview will be updated.
+ *
+ * @param {Event} evt event with details
+ * @returns void
+ */
+const markTainted = (evt) => {
+    const field = evt.target;
+
+    field.dataset.qtypeFormulasTainted = "true";
+};
+
+/**
  * Event handler when input field receives focus.
  *
  * @param {Event} evt event with details
@@ -86,17 +100,18 @@ export const init = (debounceDelay) => {
 const focusReceived = (evt) => {
     const field = evt.target;
 
-    // If the field is empty, there is nothing to do.
-    if (field.value.trim() == '') {
+    // If the field is empty or does not need a preview, there is nothing to do.
+    if (field.value.trim() == '' || doesNotNeedPreview(field.value)) {
         return;
     }
 
     // If the field is not empty, not invalid and we already have a MathJax display for this field,
-    // we can simply reactivate it -- unless the field does not need rendering, because in that case,
-    // the content might not be accurate.
+    // we can simply reactivate it, unless it is marked as "tainted", in which case we should rather
+    // do a complete re-rendering.
     const div = document.getElementById('qtype_formulas_mathjax_display');
     let isOurDiv = div !== null && div.dataset.for == field.id;
-    if (!doesNotNeedRendering(field.value) && !field.classList.contains('is-invalid') && isOurDiv) {
+    let needsReRendering = field.dataset.qtypeFormulasTainted === "true";
+    if (!needsReRendering && !field.classList.contains('is-invalid') && isOurDiv) {
         div.style.visibility = 'visible';
         return;
     }
@@ -249,6 +264,7 @@ const validateStudentAnswer = async(id) => {
         if (validationResult.status === 'success') {
             field.classList.remove('is-invalid');
             showMathJax(id, validationResult.detail);
+            field.dataset.qtypeFormulasTainted = "false";
         } else {
             field.classList.add('is-invalid');
             hideMathJax();
@@ -277,7 +293,7 @@ const hideMathJax = () => {
  * @param {string} content the field's content
  * @returns bool
  */
-const doesNotNeedRendering = (content) => {
+const doesNotNeedPreview = (content) => {
     return content.trim().match(/^([A-Za-z]+|[0-9]*[.,]?[0-9]*)$/);
 };
 
@@ -296,7 +312,7 @@ const showMathJax = (id, texcode) => {
         return;
     }
 
-    if (doesNotNeedRendering(field.value)) {
+    if (doesNotNeedPreview(field.value)) {
         hideMathJax();
         return;
     }
