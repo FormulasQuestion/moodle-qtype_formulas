@@ -814,47 +814,54 @@ final class renderer_test extends walkthrough_test_base {
     }
 
     public function test_textbox_tooltip_title(): void {
+        global $CFG;
+        $attributename = 'data-bs';
+        if ($CFG->branch < 500) {
+            $attributename = 'data';
+        }
+        $attributename .= '-title';
+
         // Create a simple test question.
         $q = $this->get_test_formulas_question('testsinglenum');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Number'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Number'),
         );
 
         // Change answer type to numeric.
         $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_NUMERIC;
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Numeric'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Numeric'),
         );
 
         // Change answer type to numerical formula.
         $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_NUMERICAL_FORMULA;
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Numerical formula'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Numerical formula'),
         );
 
         // Change answer type to algebraic formula.
         $q->parts[0]->answertype = qtype_formulas::ANSWER_TYPE_ALGEBRAIC;
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Algebraic formula'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Algebraic formula'),
         );
 
         // Create a simple test question with a combined field.
         $q = $this->get_test_formulas_question('testsinglenumunit');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Number and unit'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Number and unit'),
         );
 
         // Create a simple test question with a separate unit field.
         $q = $this->get_test_formulas_question('testsinglenumunitsep');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Number'),
-            new \question_contains_tag_with_attribute('input', 'data-title', 'Unit'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Number'),
+            new \question_contains_tag_with_attribute('input', $attributename, 'Unit'),
         );
     }
 

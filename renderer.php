@@ -106,18 +106,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     public function head_code(question_attempt $qa): string {
-        global $CFG;
         $this->page->requires->js_call_amd(
             'qtype_formulas/answervalidation',
             'init',
             [get_config('qtype_formulas', 'debouncedelay')]
         );
-
-        // Include backwards-compatibility layer for Bootstrap 4 data attributes, if available.
-        // We may safely assume that if the uncompiled version is there, the minified one exists as well.
-        if (file_exists($CFG->dirroot . '/theme/boost/amd/src/bs4-compat.js')) {
-            $this->page->requires->js_call_amd('theme_boost/bs4-compat', 'init');
-        }
 
         return '';
     }
@@ -577,6 +570,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         array $formatoptions = [],
         string $feedbackclass = ''
     ): string {
+        // Importing global $CFG object to check for the Moodle version. Can be removed once we drop compatibility
+        // with Moodle 4.5 LTS.
+        global $CFG;
+
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -653,15 +650,20 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         ];
 
         // If the answer type is "Number" and it is not a combined field, we only add the tooltip, if the
-        // corresponding option is set.
+        // corresponding option is set. Note that, starting from Moodle 5.0, we have to use the new namespaced
+        // data attributes for Bootstrap 5, e. g. data-bs-toggle instead of data-toggle.
+        $bootstrapnamespace = 'data-bs';
+        if ($CFG->branch < 500) {
+            $bootstrapnamespace = 'data';
+        }
         $iscombined = $inputattributes['data-withunit'] === '1';
         $isnumber = !$iscombined && $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
         if (!$isnumber || $shownumbertooltip) {
             $inputattributes += [
-                'data-toggle' => 'tooltip',
-                'data-title' => $title,
-                'data-custom-class' => 'qtype_formulas-tooltip',
+                "{$bootstrapnamespace}-toggle" => 'tooltip',
+                "{$bootstrapnamespace}-title" => $title,
+                "{$bootstrapnamespace}-custom-class" => 'qtype_formulas-tooltip',
             ];
         }
 
