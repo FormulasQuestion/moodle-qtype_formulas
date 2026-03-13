@@ -51,7 +51,7 @@ Feature: Display of tooltips
     When I follow "Quiz 1"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
-    Then I should see "Number"
+    Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
     And I press tab
     Then I should not see "Number"
     And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
