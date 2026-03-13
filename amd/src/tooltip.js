@@ -30,6 +30,9 @@ var mouseIsOver = null;
 export const init = () => {
     let inputs = document.querySelectorAll("input[type='text'][class*='formulas_'],input[type='text'][id*='_postunit_']");
     for (let input of inputs) {
+        if (input.dataset.qtypeFormulasEnableTooltip !== 'true') {
+            continue;
+        }
         input.addEventListener('focus', focused);
         input.addEventListener('mouseover', mouseOver);
         input.addEventListener('mouseout', mouseOut);

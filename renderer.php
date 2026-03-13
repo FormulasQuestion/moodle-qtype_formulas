@@ -574,10 +574,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         array $formatoptions = [],
         string $feedbackclass = ''
     ): string {
-        // Importing global $CFG object to check for the Moodle version. Can be removed once we drop compatibility
-        // with Moodle 4.5 LTS.
-        global $CFG;
-
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -654,19 +650,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         ];
 
         // If the answer type is "Number" and it is not a combined field, we only add the tooltip, if the
-        // corresponding option is set. Note that, starting from Moodle 5.0, we have to use the new namespaced
-        // data attributes for Bootstrap 5, e. g. data-bs-toggle instead of data-toggle.
-        $bootstrapnamespace = 'data-bs';
-        if ($CFG->branch < 500) {
-            $bootstrapnamespace = 'data';
-        }
+        // corresponding option is set.
         $iscombined = $inputattributes['data-withunit'] === '1';
         $isnumber = !$iscombined && $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
-        if (!$isnumber || $shownumbertooltip) {
-            $inputattributes += [
-            ];
-        }
+        $inputattributes += [
+            'data-qtype-formulas-enable-tooltip' => (!$isnumber || $shownumbertooltip ? 'true' : 'false'),
+        ];
 
         if ($displayoptions->readonly) {
             $inputattributes['readonly'] = 'readonly';
