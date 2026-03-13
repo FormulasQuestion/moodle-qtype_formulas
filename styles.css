@@ -30,6 +30,7 @@ div.qtype_formulas_tooltip_inner {
     color: white;
     border-radius: 10px;
     text-align: center;
+    white-space: nowrap;
     padding: 5px 10px;
     bottom: 100%;
     position: absolute;

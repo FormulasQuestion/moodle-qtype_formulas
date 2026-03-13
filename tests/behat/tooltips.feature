@@ -54,7 +54,7 @@ Feature: Display of tooltips
     Then I should see "Number"
     And I press tab
     Then I should not see "Number"
-    And "div.tooltip-inner" "css_element" should not be visible
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Try to answer a question with an algebraic formula answer
     When I follow "Quiz 2"
@@ -63,7 +63,7 @@ Feature: Display of tooltips
     Then I should see "Algebraic formula"
     And I press tab
     Then I should not see "Algebraic formula"
-    And "div.tooltip-inner" "css_element" should not be visible
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Try to answer a question with one combined answer+unit field
     When I follow "Quiz 3"
@@ -72,7 +72,7 @@ Feature: Display of tooltips
     Then I should see "Number and unit"
     And I press tab
     Then I should not see "Number and unit"
-    And "div.tooltip-inner" "css_element" should not be visible
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Try to answer a question with one answer + one unit field
     When I follow "Quiz 4"
@@ -94,7 +94,7 @@ Feature: Display of tooltips
     Then I should see "Number"
     And I press shift tab
     Then I should not see "Number"
-    And "div.tooltip-inner" "css_element" should not be visible
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Tooltip for Number is not shown if disabled
     When the following config values are set as admin:
@@ -103,7 +103,7 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "1"
     Then I should not see "Number"
-    And "div.tooltip-inner" "css_element" should not be visible
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Setting does not affect tooltip for combined field with answer type "Number"
     When the following config values are set as admin:
