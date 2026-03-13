@@ -69,7 +69,7 @@ Feature: Display of tooltips
     When I follow "Quiz 3"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5 m/s"
-    Then I should see "Number and unit"
+    Then I should see "Number and unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
     And I press tab
     Then I should not see "Number and unit"
     And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
@@ -79,11 +79,10 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
     Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
-    And I should not see "Unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    And I should not see "Unit"
     And I set the field "Unit" to "m/s"
-    Then I should not see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should not see "Number"
     And I should see "Unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
-    And I should see "Unit"
     And I press tab
     Then "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
@@ -91,7 +90,7 @@ Feature: Display of tooltips
     When I follow "Quiz 5"
     And I press "Attempt quiz"
     And I set the field "Answer field 1 for part 1" to "1"
-    Then I should see "Number"
+    Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
     And I press shift tab
     Then I should not see "Number"
     And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
