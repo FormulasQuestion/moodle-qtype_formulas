@@ -112,7 +112,7 @@ const showTooltip = (tooltip) => {
     const raise = parseInt(window.getComputedStyle(tooltip.firstChild, '::after').borderTopWidth);
     tooltip.style.top = `${rect.top - tooltip.offsetHeight - raise}px`;
     tooltip.style.left = `${rect.left + rect.width / 2}px`;
-    //tooltip.classList.add('show');
+    tooltip.classList.add('show');
 };
 
 /**
@@ -121,7 +121,7 @@ const showTooltip = (tooltip) => {
  * @param {Element} tooltip the tooltip to be hidden
  */
 const hideTooltip = (tooltip) => {
-    tooltip.classList.remove('show');
+    // tooltip.classList.remove('show');
     setPersistence(tooltip, false);
 };
 

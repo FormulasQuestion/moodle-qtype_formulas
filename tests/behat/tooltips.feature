@@ -60,7 +60,7 @@ Feature: Display of tooltips
     When I follow "Quiz 2"
     And I press "Attempt quiz"
     And I set the field "Answer" to "x"
-    Then I should see "Algebraic formula"
+    Then I should see "Algebraic formula" in the "div.qtype_formulas_tooltip_inner" "css_element"
     And I press tab
     Then I should not see "Algebraic formula"
     And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
