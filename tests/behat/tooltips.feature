@@ -79,11 +79,15 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
     Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
-    And I should not see "Unit"
+    And I should not see "Unit" in the "//*[not(self::label)]" "xpath_element"
+    # We must reload the page in order to remove the hidden tooltip from the DOM,
+    # because later search for our div will only return the first match and the
+    # unit's tooltip would be the second.
+    When I reload the page
     And I set the field "Unit" to "m/s"
     Then I should not see "Number"
     And I should see "Unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
-    And I press tab
+    When I press tab
     Then "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Try to answer a question with multiple input fields
@@ -111,6 +115,9 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "5 m/s"
     Then I should see "Number and unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    And I press the escape key
+    Then I should not see "Number and unit"
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
 
   Scenario: Setting does not affect tooltip for other answer types
     When the following config values are set as admin:
@@ -119,3 +126,6 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "x"
     Then I should see "Algebraic formula" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    And I press the escape key
+    Then I should not see "Number and unit"
+    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible

@@ -416,7 +416,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     protected function create_label_for_input(string $text, string $inputid, array $additionalattributes = []): array {
         $labelid = 'lbl_' . str_replace(':', '__', $inputid);
         $attributes = [
-            'class' => 'subq accesshide',
+            'class' => 'subq sr-only',
             'for' => $inputid,
             'id' => $labelid,
         ];

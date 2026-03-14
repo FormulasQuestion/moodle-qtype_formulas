@@ -727,7 +727,7 @@ final class renderer_test extends walkthrough_test_base {
             new \question_contains_tag_with_attribute('select', 'name', $this->quba->get_field_prefix($this->slot) . '0_0'),
             $this->get_does_not_contain_specific_feedback_expectation(),
             new \question_contains_tag_with_contents('label', 'Answer'),
-            new \question_contains_tag_with_attribute('label', 'class', 'subq accesshide'),
+            new \question_contains_tag_with_attribute('label', 'class', 'subq sr-only'),
         );
         $this->check_output_contains_selectoptions(
             $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
