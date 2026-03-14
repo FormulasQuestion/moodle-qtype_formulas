@@ -560,11 +560,11 @@ class qtype_formulas_test_helper extends question_test_helper {
         $q = self::make_a_formulas_question();
 
         $q->name = 'test-singlenumunitsep';
-        $q->questiontext = '<p>One part, one number plus unit, answer is 5 m/s</p>';
+        $q->questiontext = '<p>One part, separate fields, answer is 5 m/s</p>';
 
         $q->penalty = 0.3;
         $q->textfragments = [
-            0 => '<p>One part, one number plus unit, answer is 5 m/s</p>',
+            0 => '<p>One part, separate fields, answer is 5 m/s</p>',
             1 => '',
         ];
         $q->numparts = 1;
@@ -622,7 +622,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => self::DEFAULT_INCORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
         $form->questiontext = [
-            'text' => '<p>One part, one number plus unit, answer is 5 m/s</p>',
+            'text' => '<p>One part, separate fields, answer is 5 m/s</p>',
             'format' => FORMAT_HTML,
         ];
         $form->generalfeedback = ['text' => '', 'format' => FORMAT_HTML];
@@ -654,7 +654,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $qdata->qtype = 'formulas';
         $qdata->name = 'test-singlenumunitsep';
-        $qdata->questiontext = '<p>One part, one number plus unit, answer is 5 m/s</p>';
+        $qdata->questiontext = '<p>One part, separate fields, answer is 5 m/s</p>';
         $qdata->generalfeedback = '';
         $qdata->defaultmark = 2;
         $qdata->penalty = 0.3;

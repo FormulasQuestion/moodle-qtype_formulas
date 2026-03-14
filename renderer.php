@@ -111,6 +111,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             'init',
             [get_config('qtype_formulas', 'debouncedelay')]
         );
+        $this->page->requires->js_call_amd(
+            'qtype_formulas/tooltip',
+            'init',
+        );
 
         return '';
     }
@@ -275,6 +279,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         // Inside the fieldset, we put the accessibility label, following the example of core's multichoice
         // question type, i. e. the label is inside a <span> with class 'sr-only', wrapped in a <legend>.
+        // TODO: we should use visually-hidden after dropping Moodle 4.5.
         $output .= html_writer::start_tag('legend', ['class' => 'sr-only']);
         $output .= html_writer::span(
             $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
@@ -412,7 +417,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     protected function create_label_for_input(string $text, string $inputid, array $additionalattributes = []): array {
         $labelid = 'lbl_' . str_replace(':', '__', $inputid);
         $attributes = [
-            'class' => 'subq accesshide',
+            'class' => 'subq sr-only',
             'for' => $inputid,
             'id' => $labelid,
         ];
@@ -570,10 +575,6 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         array $formatoptions = [],
         string $feedbackclass = ''
     ): string {
-        // Importing global $CFG object to check for the Moodle version. Can be removed once we drop compatibility
-        // with Moodle 4.5 LTS.
-        global $CFG;
-
         /** @var qtype_formulas_question $question */
         $question = $qa->get_question();
 
@@ -650,22 +651,13 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         ];
 
         // If the answer type is "Number" and it is not a combined field, we only add the tooltip, if the
-        // corresponding option is set. Note that, starting from Moodle 5.0, we have to use the new namespaced
-        // data attributes for Bootstrap 5, e. g. data-bs-toggle instead of data-toggle.
-        $bootstrapnamespace = 'data-bs';
-        if ($CFG->branch < 500) {
-            $bootstrapnamespace = 'data';
-        }
+        // corresponding option is set.
         $iscombined = $inputattributes['data-withunit'] === '1';
         $isnumber = !$iscombined && $inputattributes['data-answertype'] === qtype_formulas::ANSWER_TYPE_NUMBER;
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
-        if (!$isnumber || $shownumbertooltip) {
-            $inputattributes += [
-                "{$bootstrapnamespace}-toggle" => 'tooltip',
-                "{$bootstrapnamespace}-title" => $title,
-                "{$bootstrapnamespace}-custom-class" => 'qtype_formulas-tooltip',
-            ];
-        }
+        $inputattributes += [
+            'data-qtype-formulas-enable-tooltip' => (!$isnumber || $shownumbertooltip ? 'true' : 'false'),
+        ];
 
         if ($displayoptions->readonly) {
             $inputattributes['readonly'] = 'readonly';
