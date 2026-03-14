@@ -28,7 +28,7 @@ var mouseIsOver = null;
  * Initialisation, i. e. attaching event handlers to the input fields.
  */
 export const init = () => {
-    let inputs = document.querySelectorAll("input[type='text'][class*='formulas_'],input[type='text'][id*='_postunit_']");
+    let inputs = document.querySelectorAll("div[class*='formulaspart'] input[type='text'][class*='formulas_']");
     for (let input of inputs) {
         if (input.dataset.qtypeFormulasEnableTooltip !== 'true') {
             continue;
@@ -121,12 +121,13 @@ const showTooltip = (tooltip) => {
  * @param {Element} tooltip the tooltip to be hidden
  */
 const hideTooltip = (tooltip) => {
-    // tooltip.classList.remove('show');
+    tooltip.classList.remove('show');
     setPersistence(tooltip, false);
 };
 
 /**
- * FIXME
+ * Handle the blur event for our input fields, i. e. hide the tooltip or mark it as non-persistent, if the
+ * mouse is still over the field.
  *
  * @param {Event} evt
  * @returns void
@@ -150,7 +151,7 @@ const lostFocus = (evt) => {
 };
 
 /**
- * FIXME
+ * Handle the mouseout event.
  *
  * @param {Event} evt
  * @returns void
@@ -203,7 +204,7 @@ const focused = (evt) => {
 };
 
 /**
- * FIXME
+ * Handle the mouseover event.
  *
  * @param {Event} evt
  */
