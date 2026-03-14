@@ -51,34 +51,34 @@ Feature: Display of tooltips
     When I follow "Quiz 1"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
-    Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Number" in the "" "qtype_formulas > tooltip"
     And I press tab
     Then I should not see "Number"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Try to answer a question with an algebraic formula answer
     When I follow "Quiz 2"
     And I press "Attempt quiz"
     And I set the field "Answer" to "x"
-    Then I should see "Algebraic formula" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Algebraic formula" in the "" "qtype_formulas > tooltip"
     And I press tab
     Then I should not see "Algebraic formula"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Try to answer a question with one combined answer+unit field
     When I follow "Quiz 3"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5 m/s"
-    Then I should see "Number and unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Number and unit" in the "" "qtype_formulas > tooltip"
     And I press tab
     Then I should not see "Number and unit"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Try to answer a question with one answer + one unit field
     When I follow "Quiz 4"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
-    Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Number" in the "" "qtype_formulas > tooltip"
     And I should not see "Unit" in the "//*[not(self::label)]" "xpath_element"
     # We must reload the page in order to remove the hidden tooltip from the DOM,
     # because later search for our div will only return the first match and the
@@ -86,18 +86,18 @@ Feature: Display of tooltips
     When I reload the page
     And I set the field "Unit" to "m/s"
     Then I should not see "Number"
-    And I should see "Unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    And I should see "Unit" in the "" "qtype_formulas > tooltip"
     When I press tab
-    Then "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    Then "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Try to answer a question with multiple input fields
     When I follow "Quiz 5"
     And I press "Attempt quiz"
     And I set the field "Answer field 1 for part 1" to "1"
-    Then I should see "Number" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Number" in the "" "qtype_formulas > tooltip"
     And I press shift tab
     Then I should not see "Number"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Tooltip for Number is not shown if disabled
     When the following config values are set as admin:
@@ -106,7 +106,7 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "1"
     Then I should not see "Number"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Setting does not affect tooltip for combined field with answer type "Number"
     When the following config values are set as admin:
@@ -114,10 +114,10 @@ Feature: Display of tooltips
     And I follow "Quiz 3"
     And I press "Attempt quiz"
     And I set the field "Answer" to "5 m/s"
-    Then I should see "Number and unit" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Number and unit" in the "" "qtype_formulas > tooltip"
     And I press the escape key
     Then I should not see "Number and unit"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Setting does not affect tooltip for other answer types
     When the following config values are set as admin:
@@ -125,7 +125,7 @@ Feature: Display of tooltips
     And I follow "Quiz 2"
     And I press "Attempt quiz"
     And I set the field "Answer" to "x"
-    Then I should see "Algebraic formula" in the "div.qtype_formulas_tooltip_inner" "css_element"
+    Then I should see "Algebraic formula" in the "" "qtype_formulas > tooltip"
     And I press the escape key
     Then I should not see "Number and unit"
-    And "div.qtype_formulas_tooltip_inner" "css_element" should not be visible
+    And "" "qtype_formulas > tooltip" should not be visible

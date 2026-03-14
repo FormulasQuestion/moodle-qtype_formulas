@@ -44,6 +44,10 @@ class behat_qtype_formulas extends behat_base {
                 'MathJax display',
                 ["//div[@id='qtype_formulas_mathjax_display']"],
             ),
+            new behat_component_named_selector(
+                'tooltip',
+                ["//div[contains(@class, 'qtype_formulas_tooltip_wrapper')]"],
+            ),
         ];
     }
 
