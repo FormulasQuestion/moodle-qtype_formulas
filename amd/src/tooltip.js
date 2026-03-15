@@ -117,7 +117,7 @@ const repositionTooltips = () => {
         const rect = input.getBoundingClientRect();
         const raise = parseInt(window.getComputedStyle(tooltip.firstChild, '::after').borderTopWidth);
 
-        tooltip.style.top = `${window.scrollY + rect.top - tooltip.offsetHeight  - raise}px`;
+        tooltip.style.top = `${window.scrollY + rect.top - tooltip.offsetHeight - raise}px`;
         tooltip.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
     }
 };
