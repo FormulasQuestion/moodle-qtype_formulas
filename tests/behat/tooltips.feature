@@ -52,7 +52,9 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "5"
     Then I should see "Number" in the "" "qtype_formulas > tooltip"
-    And I press tab
+    # Taking away the focus is not enough, because the simulated mouse cursor might still
+    # be above the input field.
+    And I click on "Quiz navigation" "heading"
     Then I should not see "Number"
     And "" "qtype_formulas > tooltip" should not be visible
 
@@ -61,7 +63,9 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "x"
     Then I should see "Algebraic formula" in the "" "qtype_formulas > tooltip"
-    And I press tab
+    # Taking away the focus is not enough, because the simulated mouse cursor might still
+    # be above the input field.
+    And I click on "Quiz navigation" "heading"
     Then I should not see "Algebraic formula"
     And "" "qtype_formulas > tooltip" should not be visible
 
@@ -70,7 +74,9 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer" to "5 m/s"
     Then I should see "Number and unit" in the "" "qtype_formulas > tooltip"
-    And I press tab
+    # Taking away the focus is not enough, because the simulated mouse cursor might still
+    # be above the input field.
+    And I click on "Quiz navigation" "heading"
     Then I should not see "Number and unit"
     And "" "qtype_formulas > tooltip" should not be visible
 
@@ -87,7 +93,9 @@ Feature: Display of tooltips
     And I set the field "Unit" to "m/s"
     Then I should not see "Number"
     And I should see "Unit" in the "" "qtype_formulas > tooltip"
-    When I press tab
+    # Taking away the focus is not enough, because the simulated mouse cursor might still
+    # be above the input field.
+    And I click on "Quiz navigation" "heading"
     Then "" "qtype_formulas > tooltip" should not be visible
 
   Scenario: Try to answer a question with multiple input fields
@@ -95,7 +103,9 @@ Feature: Display of tooltips
     And I press "Attempt quiz"
     And I set the field "Answer field 1 for part 1" to "1"
     Then I should see "Number" in the "" "qtype_formulas > tooltip"
-    And I press shift tab
+    # Taking away the focus is not enough, because the simulated mouse cursor might still
+    # be above the input field.
+    And I click on "Quiz navigation" "heading"
     Then I should not see "Number"
     And "" "qtype_formulas > tooltip" should not be visible
 
