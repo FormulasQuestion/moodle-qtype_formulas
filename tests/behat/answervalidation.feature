@@ -31,7 +31,7 @@ Feature: Validation of student responses
     When I set the field "Answer for part 2" to "1+"
     Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Answer for part 2" to "1"
-    And I press tab
+    And I take focus off "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
 
@@ -39,7 +39,7 @@ Feature: Validation of student responses
     When I set the field "Answer for part 2" to "1;"
     Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Answer for part 2" to "1"
-    And I press tab
+    And I take focus off "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
 
@@ -47,7 +47,7 @@ Feature: Validation of student responses
     When I set the field "Unit for part 2" to "m + m"
     Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Unit for part 2" to "m/s"
-    And I press tab
+    And I take focus off "Unit for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
 
@@ -55,7 +55,7 @@ Feature: Validation of student responses
     When I set the field "Answer and unit for part 1" to "1 + m"
     Then "" "qtype_formulas > Formulas field with warning" should exist
     When I set the field "Answer and unit for part 1" to "1.5e5 m/s"
-    And I press tab
+    And I take focus off "Answer and unit for part 1" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should not exist
 
@@ -69,9 +69,7 @@ Feature: Validation of student responses
     And I wait "1" seconds
     Then "" "qtype_formulas > Formulas field with warning" should exist
     And "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
-    And I wait "1" seconds
-    And I press shift tab
+    And I click on "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
 
@@ -84,10 +82,8 @@ Feature: Validation of student responses
     When I set the field "Answer for part 2" to "1.5"
     And I wait "1" seconds
     And "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
-    And I wait "1" seconds
     # Returning to the field must not reactivate the outdated preview
-    And I press shift tab
+    And I click on "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
 
@@ -113,12 +109,11 @@ Feature: Validation of student responses
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
     # And see it is removed when focus is lost.
-    When I press tab
+    And I take focus off "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
     # When coming back into the field, the preview must be shown again.
-    When I press shift tab
+    And I click on "Answer for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
 
@@ -144,12 +139,11 @@ Feature: Validation of student responses
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
     # And see it is removed when focus is lost.
-    When I press tab
+    And I take focus off "Unit for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
     # When coming back into the field, the preview must be shown again.
-    When I press shift tab
+    And I click on "Unit for part 2" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
 
@@ -175,11 +169,10 @@ Feature: Validation of student responses
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
     # And see it is removed when focus is lost.
-    When I press tab
+    And I take focus off "Answer and unit for part 1" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
     # When coming back into the field, the preview must be shown again.
-    When I press shift tab
+    And I click on "Answer and unit for part 1" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
