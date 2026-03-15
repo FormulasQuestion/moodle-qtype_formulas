@@ -107,11 +107,10 @@ Feature: Test editing a Formulas question
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
     # Preview should disappear when focus is lost.
-    When I press tab
+    And I take focus off "id_postunit_0" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should not be visible
-    When I press tab
     # When coming back into the field, the preview must be shown again.
-    When I press shift tab
+    And I click on "id_postunit_0" "field"
     And I wait "1" seconds
     Then "" "qtype_formulas > MathJax display" should be visible
