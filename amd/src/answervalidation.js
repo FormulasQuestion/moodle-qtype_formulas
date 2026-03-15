@@ -88,7 +88,7 @@ export const init = (debounceDelay) => {
 const markTainted = (evt) => {
     const field = evt.target;
 
-    field.dataset.qtypeFormulasTainted = "true";
+    field.dataset.qtypeFormulasTainted = 'true';
 };
 
 /**
@@ -110,7 +110,7 @@ const focusReceived = (evt) => {
     // do a complete re-rendering.
     const div = document.getElementById('qtype_formulas_mathjax_display');
     let isOurDiv = div !== null && div.dataset.for == field.id;
-    let needsReRendering = field.dataset.qtypeFormulasTainted === "true";
+    let needsReRendering = field.dataset.qtypeFormulasTainted === 'true';
     if (!needsReRendering && !field.classList.contains('is-invalid') && isOurDiv) {
         div.style.visibility = 'visible';
         return;
@@ -264,7 +264,10 @@ const validateStudentAnswer = async(id) => {
         if (validationResult.status === 'success') {
             field.classList.remove('is-invalid');
             showMathJax(id, validationResult.detail);
-            field.dataset.qtypeFormulasTainted = "false";
+            // Only remove the "tainted" flag, if we still have focus.
+            if (document.activeElement === field) {
+                field.dataset.qtypeFormulasTainted = 'false';
+            }
         } else {
             field.classList.add('is-invalid');
             hideMathJax();
