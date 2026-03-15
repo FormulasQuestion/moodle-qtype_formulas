@@ -42,6 +42,10 @@ export const init = () => {
     // When the user presses the Escape key anywhere, the tooltips should be removed in order to follow
     // accessibility standards.
     document.addEventListener('keydown', dealWithEscape);
+
+    // Add event listener for scrolling and resizing, because our tooltips might have to be shifted.
+    window.addEventListener('scroll', repositionTooltips);
+    window.addEventListener('resize', repositionTooltips);
 };
 
 /**
@@ -101,17 +105,30 @@ const setPersistence = (tooltip, persistent) => {
 };
 
 /**
+ * Make sure the tooltips are correctly positioned above the input field, taking into account the
+ * scroll position.
+ *
+ * @returns void
+ */
+const repositionTooltips = () => {
+    const tooltips = document.querySelectorAll('div.qtype_formulas_tooltip_wrapper');
+    for (let tooltip of tooltips) {
+        const input = document.getElementById(tooltip.dataset.qtypeFormulasTooltipFor);
+        const rect = input.getBoundingClientRect();
+        const raise = parseInt(window.getComputedStyle(tooltip.firstChild, '::after').borderTopWidth);
+
+        tooltip.style.top = `${window.scrollY + rect.top - tooltip.offsetHeight  - raise}px`;
+        tooltip.style.left = `${window.scrollX + rect.left + rect.width / 2}px`;
+    }
+};
+
+/**
  * Show a given tooltip.
  *
  * @param {Element} tooltip the tooltip to be shown
  */
 const showTooltip = (tooltip) => {
-    // Make sure the tooltip is placed right above the input field.
-    const input = document.getElementById(tooltip.dataset.qtypeFormulasTooltipFor);
-    const rect = input.getBoundingClientRect();
-    const raise = parseInt(window.getComputedStyle(tooltip.firstChild, '::after').borderTopWidth);
-    tooltip.style.top = `${rect.top - tooltip.offsetHeight - raise}px`;
-    tooltip.style.left = `${rect.left + rect.width / 2}px`;
+    repositionTooltips();
     tooltip.classList.add('show');
 };
 
