@@ -657,6 +657,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $shownumbertooltip = get_config('qtype_formulas', 'shownumbertooltip');
         $inputattributes += [
             'data-qtype-formulas-enable-tooltip' => (!$isnumber || $shownumbertooltip ? 'true' : 'false'),
+            'data-qtype-formulas-tooltip-trigger' => get_config('qtype_formulas', 'tooltiptrigger'),
         ];
 
         if ($displayoptions->readonly) {
