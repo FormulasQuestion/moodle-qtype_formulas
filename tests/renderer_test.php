@@ -813,7 +813,7 @@ final class renderer_test extends walkthrough_test_base {
         );
     }
 
-    public function test_textbox_tooltip_title(): void {
+    public function test_textbox_tooltip_enable(): void {
         // Create a simple test question. First, 'shownumbertooltip' is enabled. Then we disable the option.
         // This should only have an effect for the number type.
         $q = $this->get_test_formulas_question('testsinglenum');
@@ -861,6 +861,31 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_current_output(
             new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-enable-tooltip', 'true'),
             new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-enable-tooltip', 'true'),
+        );
+    }
+
+    public function test_textbox_tooltip_trigger(): void {
+        // Create a simple test question. Check the data-qtype-formulas-tooltip-trigger attribute is set
+        // correctly. The default value is 'hover'.
+        $q = $this->get_test_formulas_question('testsinglenum');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-tooltip-trigger', 'hover'),
+        );
+        set_config('tooltiptrigger', 'hover,focus', 'qtype_formulas');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-tooltip-trigger', 'hover,focus'),
+        );
+        set_config('tooltiptrigger', '', 'qtype_formulas');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-tooltip-trigger', ''),
+        );
+        set_config('tooltiptrigger', 'hover', 'qtype_formulas');
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->check_current_output(
+            new \question_contains_tag_with_attribute('input', 'data-qtype-formulas-tooltip-trigger', 'hover'),
         );
     }
 

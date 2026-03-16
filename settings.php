@@ -109,7 +109,7 @@ if ($ADMIN->fulltree) {
         'qtype_formulas/tooltiptrigger',
         new lang_string('tooltiptrigger', 'qtype_formulas'),
         new lang_string('tooltiptrigger_desc', 'qtype_formulas'),
-        0,
+        'hover',
         [
             'hover,focus' => new lang_string('triggerboth', 'qtype_formulas'),
             'hover' => new lang_string('triggerhover', 'qtype_formulas'),

@@ -151,3 +151,12 @@ Feature: Display of tooltips
     Then I should not see "Number and unit"
     And "" "qtype_formulas > tooltip" should not be visible
 
+  Scenario: Tooltip is not shown on focus, if disabled
+    When the following config values are set as admin:
+      | tooltiptrigger |  | qtype_formulas |
+    And I follow "Quiz 3"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "5 m/s"
+    Then I should not see "Number and unit"
+    And "" "qtype_formulas > tooltip" should not be visible
+
