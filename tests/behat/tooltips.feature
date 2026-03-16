@@ -159,4 +159,3 @@ Feature: Display of tooltips
     And I set the field "Answer" to "5 m/s"
     Then I should not see "Number and unit"
     And "" "qtype_formulas > tooltip" should not be visible
-
