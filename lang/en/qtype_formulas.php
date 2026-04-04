@@ -358,9 +358,9 @@ All missing fields are automatically appended at the end of the part\'s text. A 
 and there is only one answer field and unit, i. e. <tt>{_0}{_u}</tt>, they will be combined into a single long input answer field for both answer and unit.';
 $string['tooltiptrigger'] = 'Trigger';
 $string['tooltiptrigger_desc'] = 'On what occasions the tooltips should be shown.';
-$string['triggerboth'] = 'Focus or mouse hover';
+$string['triggerboth'] = 'On mouse hover and focus';
 $string['triggerdisabled'] = 'No tooltips';
-$string['triggerhover'] = 'Mouse hover only';
+$string['triggerhover'] = 'On mouse hover only';
 $string['uniquecorrectansweris'] = 'The correct answer is: {$a}';
 $string['unit'] = 'Unit';
 $string['unitpenalty'] = 'Deduction for wrong unit (0-1)*';
