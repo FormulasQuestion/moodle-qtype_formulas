@@ -854,7 +854,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         return html_writer::nonempty_tag(
             'div',
             get_string($string, 'qtype_formulas', $answertext),
-            ['class' => 'formulaspartcorrectanswer'],
+            ['class' => 'formulaspartcorrectanswer filter_mathjaxloader_equation'],
         );
     }
 
