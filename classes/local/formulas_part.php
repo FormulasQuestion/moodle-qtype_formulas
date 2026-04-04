@@ -527,12 +527,9 @@ class formulas_part {
         // If the answer type is algebraic, substitute all non-algebraic variables by
         // their numerical value.
         if ($isalgebraic) {
-            foreach ($this->evaluatedanswers as &$answer) {
-                $answer = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
+            foreach ($this->evaluatedanswers as $index => $answer) {
+                $this->evaluatedanswers[$index] = $this->evaluator->substitute_variables_in_algebraic_formula($answer);
             }
-            // In case we later write to $answer, this would alter the last entry of the $modelanswers
-            // array, so we'd better remove the reference to make sure this won't happend.
-            unset($answer);
         }
 
         return $this->evaluatedanswers;
@@ -546,7 +543,7 @@ class formulas_part {
      * @return array array containing wrapped formulas
      */
     private static function wrap_algebraic_formulas_in_quotes(array $formulas): array {
-        foreach ($formulas as &$formula) {
+        foreach ($formulas as $index => $formula) {
             // If the formula is aready wrapped in quotes, we throw an Exception, because that
             // should not happen. It will happen, if the student puts quotes around their response, but
             // we want that to be graded wrong. The exception will be caught and dealt with upstream,
@@ -555,11 +552,8 @@ class formulas_part {
                 throw new Exception();
             }
 
-            $formula = '"' . $formula . '"';
+            $formulas[$index] = '"' . $formula . '"';
         }
-        // In case we later write to $formula, this would alter the last entry of the $formulas
-        // array, so we'd better remove the reference to make sure this won't happen.
-        unset($formula);
 
         return $formulas;
     }
@@ -828,13 +822,11 @@ class formulas_part {
         $answers = $this->get_evaluated_answers();
 
         // Numeric answers should be localized, if that functionality is enabled.
-        foreach ($answers as &$answer) {
+        foreach ($answers as $index => $answer) {
             if (is_numeric($answer)) {
-                $answer = qtype_formulas::format_float($answer);
+                $answers[$index] = qtype_formulas::format_float($answer);
             }
         }
-        // Make sure we do not accidentally write to $answer later.
-        unset($answer);
 
         // If we have a combined unit field, we return both the model answer plus the unit
         // in "i_". Combined fields are only possible for parts with one signle answer.
