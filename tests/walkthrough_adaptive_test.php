@@ -1097,4 +1097,98 @@ final class walkthrough_adaptive_test extends walkthrough_test_base {
         $this->process_submission(['0_0' => '1', '0_1' => 'µA', '-submit' => 1]);
         $this->check_current_mark(1);
     }
+    public function test_deferred_partially_answered_with_empty_allowed(): void {
+        // Create a question with one empty field.
+        $q = $this->get_test_formulas_question('testnumandempty');
+        $this->start_attempt_at_question($q, 'deferredfeedback', 2);
+
+        // Check the initial state.
+        $this->check_current_state(question_state::$todo);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_output_contains_text_input('0_0');
+        $this->check_output_contains_text_input('0_1');
+        $this->check_current_output(
+            $this->get_contains_marked_out_of_summary(),
+            $this->get_does_not_contain_submit_button_expectation(),
+            $this->get_does_not_contain_feedback_expectation(),
+        );
+
+        // Submit the empty form. The question should be counted as "gave up" with no grade.
+        // The feedback should be "incorrect".
+        $this->finish();
+        $this->check_current_state(question_state::$gaveup);
+        $this->check_current_mark(null);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', false);
+        $this->check_output_contains_text_input('0_1', '', false);
+
+        // Submit a partial answer, filling only the first field, but wrong. The question should be
+        // graded wrong due to the grading criterion. The student's response should be shown in the
+        // text field. All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 2);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '5', '0_1' => '']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '5', false);
+        $this->check_output_contains_text_input('0_1', '', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_incorrect_expectation(),
+        );
+
+        // Submit an answer, filling only the first field, correct. The question should be
+        // graded correct. The student's response should be shown in the text field.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 2);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '1', '0_1' => '']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedright);
+        $this->check_current_mark(2);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '1', false);
+        $this->check_output_contains_text_input('0_1', '', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(2),
+            $this->get_contains_correct_expectation(),
+        );
+
+        // Submit an answer, filling only the second field, obviously wrong. The question should
+        // be graded wrong. The student's response should be shown in the text field.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 2);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '', '0_1' => '1']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '', false);
+        $this->check_output_contains_text_input('0_1', '1', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_incorrect_expectation(),
+        );
+
+        // Submit an answer, filling both fields. The question should be graded wrong.
+        // The student's response should be shown in the text field.
+        // All text fields should be disabled.
+        $this->start_attempt_at_question($q, 'deferredfeedback', 2);
+        $this->check_current_state(question_state::$todo);
+        $this->process_submission(['0_0' => '1', '0_1' => '2']);
+        $this->finish();
+        $this->check_current_state(question_state::$gradedwrong);
+        $this->check_current_mark(0);
+        $this->render();
+        $this->check_output_contains_text_input('0_0', '1', false);
+        $this->check_output_contains_text_input('0_1', '2', false);
+        $this->check_current_output(
+            $this->get_contains_mark_summary(0),
+            $this->get_contains_incorrect_expectation(),
+        );
+    }
 }

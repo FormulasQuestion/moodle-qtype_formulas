@@ -82,7 +82,7 @@ class qtype_formulas extends question_type {
      * - otherrule: additional rules for unit conversion
      */
     const PART_BASIC_FIELDS = ['placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
-        'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
+        'emptyallowed', 'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
 
     /**
      * This function returns the "simple" additional fields defined in the qtype_formulas_options
@@ -285,6 +285,7 @@ class qtype_formulas extends question_type {
                     'numbox' => 1,
                     'answer' => '',
                     'answernotunique' => 1,
+                    'emptyallowed' => 1,
                     'correctness' => '',
                     'ruleid' => 1,
                     'subqtext' => '',
@@ -623,12 +624,16 @@ class qtype_formulas extends question_type {
                 $question->partindex[$i] = $partindex;
             }
             foreach (self::PART_BASIC_FIELDS as $field) {
-                // Older questions do not have this field, so we do not want to issue an error message.
-                // Also, for maximum backwards compatibility, we set the default value to 1. With this,
-                // nothing changes for old questions.
+                // Older questions do not have the 'answernotunique' field, so we do not want to issue an
+                // error message. For maximum backwards compatibility, we set the default value to 1. With
+                // this, nothing changes for old questions. Also, questions exported prior to version 6.2
+                // won't have the 'emptyallowed' field. We will set it to 0 (false) for backwards compatiblity.
                 if ($field === 'answernotunique') {
                     $ifnotexists = '';
                     $default = '1';
+                } else if ($field === 'emptyallowed') {
+                    $ifnotexists = '';
+                    $default = '0';
                 } else {
                     $ifnotexists = get_string('error_import_missing_field', 'qtype_formulas', $field);
                     $default = '0';
@@ -1151,17 +1156,18 @@ class qtype_formulas extends question_type {
             // "algebraic formula", they must all be strings. Otherwise, they must all be numbers or
             // at least numeric strings.
             foreach ($modelanswers as $answer) {
-                if ($isalgebraic && $answer->type !== token::STRING) {
+                if ($isalgebraic && ($answer->type !== token::STRING && $answer->type !== token::EMPTY)) {
                     $errors["answer[$i]"] = get_string('error_string_for_algebraic_formula', 'qtype_formulas');
                     continue;
                 }
-                if (!$isalgebraic && !($answer->type === token::NUMBER || is_numeric($answer->value))) {
+                if (!$isalgebraic && !($answer->type === token::EMPTY || $answer->type === token::NUMBER || is_numeric($answer->value))) {
                     $errors["answer[$i]"] = get_string('error_number_for_numeric_answertypes', 'qtype_formulas');
                     continue;
                 }
             }
             // Finally, we convert the array of tokens into an array of literals.
-            $modelanswers = token::unpack($modelanswers);
+            // FIXME: remove this
+            // $modelanswers = token::unpack($modelanswers);
 
             // Now that we know the model answers, we can set the $numbox property for the part,
             // i. e. the number of answer boxes that are to be shown.
@@ -1170,10 +1176,14 @@ class qtype_formulas extends question_type {
             // If the answer type is algebraic, we must now try to do algebraic evaluation of each answer
             // to check for bad formulas.
             if ($isalgebraic) {
-                foreach ($modelanswers as $k => $answer) {
+                foreach ($modelanswers as $k => $answertoken) {
+                    // If it is the $EMPTY token, we have nothing to do.
+                    if ($answertoken->type === token::EMPTY) {
+                        continue;
+                    }
                     // Evaluating the string should give us a numeric value.
                     try {
-                        $result = $partevaluator->calculate_algebraic_expression($answer);
+                        $result = $partevaluator->calculate_algebraic_expression($answertoken->value);
                     } catch (Exception $e) {
                         $a = (object)[
                             // Answers are zero-indexed, but users normally count from 1.

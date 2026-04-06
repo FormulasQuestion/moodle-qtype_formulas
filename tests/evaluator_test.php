@@ -133,7 +133,8 @@ final class evaluator_test extends \advanced_testcase {
             ['The first argument of diff() must be a list.', 'diff("", "");'],
             ['The second argument of diff() must be a list.', 'diff([1,2,3], 1);'],
             ['diff() expects two lists of the same size.', 'diff([1,2,3], [1,2]);'],
-            ['When using diff(), the first list must contain only numbers or only strings.', 'diff([[1,2]], [1]);'],
+            ['When using diff(), the first list must contain only numbers or only strings.', 'diff([[1,2]], [[1,2]]);'],
+            ['diff(): type mismatch for element #0 (zero-indexed) of the second list.', 'diff([[1,2]], [1]);'],
             ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff([1,"a"], [1,2]);'],
             ['diff(): type mismatch for element #1 (zero-indexed) of the first list.', 'diff(["a",1], ["a","b"]);'],
             ['diff(): type mismatch for element #0 (zero-indexed) of the second list.', 'diff([1,2], ["a",2]);'],
@@ -1937,6 +1938,29 @@ final class evaluator_test extends \advanced_testcase {
         self::assertStringEndsWith($expected, $error);
     }
 
+    public function test_fixme_test(): void {
+        $error = '';
+        $result = [];
+        $statements = [
+            new expression([
+                new token(token::NUMBER, 2),
+                new token(token::NUMBER, NAN),
+                new token(token::OPERATOR, '*'),
+            ])
+        ];
+        $parser = new parser('a = [1, 2]');
+        $statements = $parser->get_statements();
+
+        try {
+            $evaluator = new evaluator();
+            $result = $evaluator->evaluate($statements);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            echo $error . PHP_EOL;
+        }
+        //var_dump($result);
+    }
+
     /**
      * Provide various (valid and invalid) algebraic expressions.
      *
@@ -2056,6 +2080,40 @@ final class evaluator_test extends \advanced_testcase {
         }
         self::assertNotNull($e);
     }
+
+    public function test_import_single_variable(): void {
+        // Prepare an empty evaluator.
+        $evaluator = new evaluator();
+
+        // Add variables.
+        $evaluator->import_single_variable('_foo', new variable('_foo', 'value', token::STRING));
+        $evaluator->import_single_variable('bar', new variable('bar', 1234, token::NUMBER));
+
+        // Verify the evaluator contains the correct variables with the correct values.
+        $variables = $evaluator->export_variable_list();
+        self::assertCount(2, $variables);
+        self::assertContains('_foo', $variables);
+        self::assertContains('bar', $variables);
+
+        $foo = $evaluator->export_single_variable('_foo');
+        self::assertEquals(token::STRING, $foo->type);
+        self::assertEquals('value', $foo->value);
+
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(token::NUMBER, $bar->type);
+        self::assertEquals(1234, $bar->value);
+
+        // Try to set variable again without specifying the overwrite parameter. The value should not change.
+        $evaluator->import_single_variable('bar', new variable('bar', 5678, token::NUMBER));
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(1234, $bar->value);
+
+        // Try again, forcing overwrite this time. The value should thus change.
+        $evaluator->import_single_variable('bar', new variable('bar', 5678, token::NUMBER), true);
+        $bar = $evaluator->export_single_variable('bar');
+        self::assertEquals(5678, $bar->value);
+    }
+
 
     /**
      * Provide answers of answer type number.
