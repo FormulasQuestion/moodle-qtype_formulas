@@ -456,7 +456,7 @@ class qtype_formulas_test_helper extends question_test_helper {
 
         $form->name = 'test-numandempty';
         $form->noanswers = 1;
-        $form->answer = ['1', '$EMPTY'];
+        $form->answer = ['[1, $EMPTY]'];
         $form->answernotunique = ['1'];
         $form->emptyallowed = ['1'];
         $form->answermark = [2];
