@@ -340,6 +340,8 @@ $string['settinglenientimport'] = 'Lenient check on import';
 $string['settinglenientimport_desc'] = 'When importing a question, do not check whether the provided model answers would receive full marks. <br>Note: You should only activate this setting temporarily.';
 $string['settings_heading_general'] = 'General preferences';
 $string['settings_heading_general_desc'] = '';
+$string['settings_heading_tooltip'] = 'Tooltips';
+$string['settings_heading_tooltip_desc'] = '';
 $string['settings_heading_width'] = 'Default widths';
 $string['settings_heading_width_desc'] = 'Default width of input fields for the various answer types. For fields that are left empty, the settings from the plugin\'s style file will be used. Please use this settings carefully. Making the fields too small can make it difficult for your students to type their answer. Note that the exclamation mark icon shown for invalid answers takes up approximately 12 pixels.';
 $string['settingshownumbertooltip'] = 'Show "Number" tooltip';
@@ -354,6 +356,11 @@ The <tt>{_0}, {_1}, {_2}</tt> are the different input fields for values and <tt>
 
 All missing fields are automatically appended at the end of the part\'s text. A special case is that if <tt>{_0}</tt> and <tt>{_u}</tt> are specified consecutively with no space,
 and there is only one answer field and unit, i. e. <tt>{_0}{_u}</tt>, they will be combined into a single long input answer field for both answer and unit.';
+$string['tooltiptrigger'] = 'Trigger';
+$string['tooltiptrigger_desc'] = 'On what occasions the tooltips should be shown.';
+$string['triggerboth'] = 'On mouse hover and focus';
+$string['triggerdisabled'] = 'No tooltips';
+$string['triggerhover'] = 'On mouse hover only';
 $string['uniquecorrectansweris'] = 'The correct answer is: {$a}';
 $string['unit'] = 'Unit';
 $string['unitpenalty'] = 'Deduction for wrong unit (0-1)*';

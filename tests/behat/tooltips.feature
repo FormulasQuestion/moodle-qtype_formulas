@@ -44,6 +44,8 @@ Feature: Display of tooltips
     And quiz "Quiz 5" contains the following questions:
       | question  | page |
       | twoandtwo | 1    |
+    And the following config values are set as admin:
+      | tooltiptrigger | hover,focus | qtype_formulas |
     And I log in as "student"
     And I am on "Course 1" course homepage
 
@@ -137,5 +139,23 @@ Feature: Display of tooltips
     And I set the field "Answer" to "x"
     Then I should see "Algebraic formula" in the "" "qtype_formulas > tooltip"
     And I press the escape key
+    Then I should not see "Number and unit"
+    And "" "qtype_formulas > tooltip" should not be visible
+
+  Scenario: Tooltip is not shown on focus, if set to hover only
+    When the following config values are set as admin:
+      | tooltiptrigger | hover | qtype_formulas |
+    And I follow "Quiz 3"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "5 m/s"
+    Then I should not see "Number and unit"
+    And "" "qtype_formulas > tooltip" should not be visible
+
+  Scenario: Tooltip is not shown on focus, if disabled
+    When the following config values are set as admin:
+      | tooltiptrigger |  | qtype_formulas |
+    And I follow "Quiz 3"
+    And I press "Attempt quiz"
+    And I set the field "Answer" to "5 m/s"
     Then I should not see "Number and unit"
     And "" "qtype_formulas > tooltip" should not be visible

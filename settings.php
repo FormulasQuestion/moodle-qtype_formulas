@@ -39,14 +39,6 @@ if ($ADMIN->fulltree) {
         0
     ));
 
-    // Whether the tooltip for answer type "Number" should be shown.
-    $settings->add(new admin_setting_configcheckbox(
-        'qtype_formulas/shownumbertooltip',
-        new lang_string('settingshownumbertooltip', 'qtype_formulas'),
-        new lang_string('settingshownumbertooltip_desc', 'qtype_formulas'),
-        1
-    ));
-
     // Default delay for the on-the-fly validation's debounce timer.
     $settings->add(new admin_setting_configselect(
         'qtype_formulas/debouncedelay',
@@ -104,6 +96,33 @@ if ($ADMIN->fulltree) {
         1,
         PARAM_FLOAT,
         4
+    ));
+
+    $settings->add(new admin_setting_heading(
+        'qtype_formulas/tooltip',
+        new lang_string('settings_heading_tooltip', 'qtype_formulas'),
+        new lang_string('settings_heading_tooltip_desc', 'qtype_formulas'),
+    ));
+
+    // Tooltip trigger.
+    $settings->add(new admin_setting_configselect(
+        'qtype_formulas/tooltiptrigger',
+        new lang_string('tooltiptrigger', 'qtype_formulas'),
+        new lang_string('tooltiptrigger_desc', 'qtype_formulas'),
+        'hover',
+        [
+            'hover,focus' => new lang_string('triggerboth', 'qtype_formulas'),
+            'hover' => new lang_string('triggerhover', 'qtype_formulas'),
+            '' => new lang_string('triggerdisabled', 'qtype_formulas'),
+        ]
+    ));
+
+    // Whether the tooltip for answer type "Number" should be shown.
+    $settings->add(new admin_setting_configcheckbox(
+        'qtype_formulas/shownumbertooltip',
+        new lang_string('settingshownumbertooltip', 'qtype_formulas'),
+        new lang_string('settingshownumbertooltip_desc', 'qtype_formulas'),
+        1
     ));
 
     $settings->add(new admin_setting_heading(

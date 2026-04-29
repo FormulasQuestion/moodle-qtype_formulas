@@ -33,10 +33,15 @@ export const init = () => {
         if (input.dataset.qtypeFormulasEnableTooltip !== 'true') {
             continue;
         }
-        input.addEventListener('focus', focused);
-        input.addEventListener('mouseover', mouseOver);
-        input.addEventListener('mouseout', mouseOut);
-        input.addEventListener('blur', lostFocus);
+        let trigger = input.dataset.qtypeFormulasTooltipTrigger;
+        if (trigger.includes('hover')) {
+            input.addEventListener('mouseover', mouseOver);
+            input.addEventListener('mouseout', mouseOut);
+        }
+        if (trigger.includes('focus')) {
+            input.addEventListener('focus', focused);
+            input.addEventListener('blur', lostFocus);
+        }
     }
 
     // When the user presses the Escape key anywhere, the tooltips should be removed in order to follow
