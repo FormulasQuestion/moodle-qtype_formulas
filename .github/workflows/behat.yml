@@ -48,12 +48,6 @@ jobs:
           ini-values: max_input_vars=5000
           coverage: none
 
-      - name: Setup Chrome and ChromeDriver
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: 145
-          install-chromedriver: true
-
       - name: Initialise moodle-plugin-ci
         run: |
           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
