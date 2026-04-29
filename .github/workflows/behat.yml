@@ -67,3 +67,5 @@ jobs:
 
       - name: Behat features
         run: moodle-plugin-ci behat --auto-rerun 1 --profile chrome
+        env:
+          MOODLE_BEHAT_SELENIUM_IMAGE: selenium/standalone-chrome:145.0-20260222
