@@ -51,7 +51,7 @@ jobs:
       - name: Setup Chrome and ChromeDriver
         uses: browser-actions/setup-chrome@v2
         with:
-          chrome-version: 146
+          chrome-version: 145
           install-chromedriver: true
 
       - name: Initialise moodle-plugin-ci
