@@ -1853,6 +1853,42 @@ final class evaluator_test extends \advanced_testcase {
                 'Invalid variable name: k°.',
                 'k° = 2',
             ],
+            'invalid variable, dollar alone' => [
+                'Invalid variable name: $.',
+                '$ = 2',
+            ],
+            'invalid variable, dollar at start' => [
+                'Invalid variable name: $x.',
+                '$x = 2',
+            ],
+            'invalid variable, dollar in name' => [
+                'Invalid variable name: k$.',
+                'k$ = 2',
+            ],
+            'invalid variable, euro alone' => [
+                'Invalid variable name: €.',
+                '€ = 2',
+            ],
+            'invalid variable, euro at start' => [
+                'Invalid variable name: €x.',
+                '€x = 2',
+            ],
+            'invalid variable, euro in name' => [
+                'Invalid variable name: k€.',
+                'k€ = 2',
+            ],
+            'invalid variable, pound alone' => [
+                'Invalid variable name: £.',
+                '£ = 2',
+            ],
+            'invalid variable, pound at start' => [
+                'Invalid variable name: £x.',
+                '£x = 2',
+            ],
+            'invalid variable, pound in name' => [
+                'Invalid variable name: k£.',
+                'k£ = 2',
+            ],
             'invalid assignment with % at end' => [
                 "Syntax error: unexpected end of expression after '%'.",
                 'a = 2 %',

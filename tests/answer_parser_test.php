@@ -320,6 +320,12 @@ final class answer_parser_test extends \advanced_testcase {
             'percent without space' => [['5', '%'], '5%'],
             'degree with space' => [['5', '°'], '5 °'],
             'degree without space' => [['5', '°'], '5°'],
+            'dollar with space' => [['5', '$'], '5 $'],
+            'dollar without space' => [['5', '$'], '5$'],
+            'euro with space' => [['5', '€'], '5 €'],
+            'euro without space' => [['5', '€'], '5€'],
+            'pound with space' => [['5', '£'], '5 £'],
+            'pound without space' => [['5', '£'], '5£'],
 
             [['.3', ''], '.3'],
             [['3.1', ''], '3.1'],
