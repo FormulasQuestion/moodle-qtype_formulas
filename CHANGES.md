@@ -1,5 +1,19 @@
 # Changelog
 
+### 6.3.0 (2026-04-30)
+
+- improvement: add setting to control trigger of answer type tooltip
+- improvement: correctly resize preview also for MathJax v4
+- improvement: if correct answer feedback contains MathJax, make sure it is rendered
+- compatibility: allow $, € and £ symbols as units
+- bugfix: fix problems with algebraic formulas
+- bugfix: re-render MathJax if field was changed since last display
+- bugfix: fix bad positioning of MathJax preview in tables
+- internal: write own implementation for tooltips
+- internal: remove Bootstrap 4 compatibility helper
+- internal: update CI
+- internal: assure full compatibility with Moodle 5.2
+
 ### 6.2.2 (2025-11-15)
 
 - compatibility: correctly render multi-choice answer placeholders that use spaces around variable name; although undocumented, this used to be possible in 5.x versions

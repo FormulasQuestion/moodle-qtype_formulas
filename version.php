@@ -25,17 +25,17 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_formulas';
-$plugin->version = 2025111500;
+$plugin->version = 2026043000;
 
 $plugin->cron = 0;
-$plugin->requires = 2022112800;
+$plugin->requires = 2024100700;
 $plugin->dependencies = [
     'qbehaviour_adaptive' => 2015111600,
     'qbehaviour_adaptivemultipart' => 2014092500,
     'qtype_multichoice' => 2015111600,
-    'filter_mathjaxloader' => 2022112800,
+    'filter_mathjaxloader' => 2024100700,
 ];
-$plugin->supported = [401, 501];
-$plugin->release = '6.2.2';
+$plugin->supported = [405, 502];
+$plugin->release = '6.3.0';
 
 $plugin->maturity = MATURITY_STABLE;

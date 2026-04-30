@@ -23,11 +23,13 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'main']
+        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE', 'main']
         database: [mariadb]
         exclude:
           - moodle-branch: 'MOODLE_405_STABLE'
             php: '8.4'
+          - moodle-branch: 'MOODLE_502_STABLE'
+            php: '8.2'
           - moodle-branch: 'main'
             php: '8.2'
         include:
