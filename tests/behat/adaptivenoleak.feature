@@ -18,8 +18,8 @@ Feature: Make sure we do not leak information in adaptive mode
       | questioncategory | qtype    | name       | template       |
       | Test questions   | formulas | threeparts | testthreeparts |
     And the following "activities" exist:
-      | activity | name   | course | idnumber | preferredbehaviour |
-      | quiz     | Quiz 1 | C1     | quiz1    | adaptive           |
+      | activity | name   | course | idnumber | preferredbehaviour | reviewcorrectness | reviewmarks | reviewspecificfeedback | reviewgeneralfeedback |
+      | quiz     | Quiz 1 | C1     | quiz1    | adaptive           | 65536             | 65536       | 65536                  | 65536                 |
     And quiz "Quiz 1" contains the following questions:
       | question   | page |
       | threeparts | 1    |
