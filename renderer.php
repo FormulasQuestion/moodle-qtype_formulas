@@ -875,8 +875,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      */
     protected function response_is_same_as_submitted(question_attempt $qa, formulas_part|null $part = null): bool {
         // If the last step contains the behaviour var 'submit', it was itself a submitted response.
+        // For the deferredfeedback behaviour, the step will contain 'finish' instead of 'submit'.
         $laststep = $qa->get_last_step();
-        if ($laststep->has_behaviour_var('submit')) {
+        if ($laststep->has_behaviour_var('submit') || $laststep->has_behaviour_var('finish')) {
             return true;
         }
 
