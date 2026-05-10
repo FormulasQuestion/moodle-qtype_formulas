@@ -163,8 +163,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $feedback .= $this->part_correct_response($part);
         }
 
-        // Put all feedback into a <div> with the appropriate CSS class and append it to the output.
-        $output .= html_writer::nonempty_tag('div', $feedback, ['class' => 'formulaspartoutcome outcome']);
+        // If the current response is a real submission (or identical to one), we put all feedback into a
+        // <div> with the appropriate CSS class and append it to the output.
+        if ($this->response_is_same_as_submitted($qa, $part)) {
+            $output .= html_writer::nonempty_tag('div', $feedback, ['class' => 'formulaspartoutcome outcome']);
+        }
 
         return html_writer::tag('div', $output, ['class' => 'formulaspart']);
     }

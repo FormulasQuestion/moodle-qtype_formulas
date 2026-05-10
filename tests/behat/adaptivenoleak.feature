@@ -18,8 +18,8 @@ Feature: Make sure we do not leak information in adaptive mode
       | questioncategory | qtype    | name       | template       |
       | Test questions   | formulas | threeparts | testthreeparts |
     And the following "activities" exist:
-      | activity | name   | course | idnumber | preferredbehaviour | reviewcorrectness | reviewmarks | reviewspecificfeedback | reviewgeneralfeedback |
-      | quiz     | Quiz 1 | C1     | quiz1    | adaptive           | 65536             | 65536       | 65536                  | 65536                 |
+      | activity | name   | course | idnumber | preferredbehaviour |
+      | quiz     | Quiz 1 | C1     | quiz1    | adaptive           |
     And quiz "Quiz 1" contains the following questions:
       | question   | page |
       | threeparts | 1    |
@@ -35,20 +35,22 @@ Feature: Make sure we do not leak information in adaptive mode
     And I press "Finish attempt"
     And I press "Return to attempt"
     Then ".formulaspartfeedback-0" "css_element" should not exist
-    Then ".formulaspartfeedback-1" "css_element" should not exist
-    Then ".formulaspartfeedback-2" "css_element" should not exist
+    And ".formulaspartfeedback-1" "css_element" should not exist
+    And ".formulaspartfeedback-2" "css_element" should not exist
     And ".numpartscorrect" "css_element" should not exist
+    And ".fa-circle-check" "css_element" should not exist
 
   Scenario: Try to leak number of correct parts via partial submission and navigation
     When I set the field "Answer for part 1" to "5"
     And I press "Check"
-    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0" "css_element"
+    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
     And I should see "Part 1 correct feedback."
     And I should see "You have correctly answered 1 part of this question."
+    And ".fa-circle-check" "css_element" should exist
     When I set the field "Answer for part 2" to "6"
-    When I press "Finish attempt"
+    And I press "Finish attempt"
     And I press "Return to attempt"
-    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0" "css_element"
+    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
     And I should see "Part 1 correct feedback."
     And ".formulaspartfeedback-1" "css_element" should not exist
     And ".numpartscorrect" "css_element" should not exist
@@ -56,12 +58,36 @@ Feature: Make sure we do not leak information in adaptive mode
   Scenario: Part feedback is not shown if answer has been modified since last check
     When I set the field "Answer for part 1" to "5"
     And I press "Check"
-    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0" "css_element"
+    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
     And I should see "Part 1 correct feedback."
     And I should see "You have correctly answered 1 part of this question."
+    And ".fa-circle-check" "css_element" should exist
     When I set the field "Answer for part 1" to "6"
-    When I press "Finish attempt"
+    And I press "Finish attempt"
     And I press "Return to attempt"
     Then ".formulaspartfeedback-0" "css_element" should not exist
     And ".gradingdetails" "css_element" should not exist
     And ".numpartscorrect" "css_element" should not exist
+    And ".fa-circle-check" "css_element" should not exist
+
+  Scenario: Part feedback is shown when navigating back with an answer identical to the last one that was checked
+    When I set the field "Answer for part 1" to "5"
+    And I press "Check"
+    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
+    And I should see "Part 1 correct feedback."
+    And I should see "You have correctly answered 1 part of this question."
+    And ".fa-circle-check" "css_element" should exist
+    When I set the field "Answer for part 1" to "6"
+    And I press "Finish attempt"
+    And I press "Return to attempt"
+    Then ".formulaspartfeedback-0" "css_element" should not exist
+    And ".gradingdetails" "css_element" should not exist
+    And ".numpartscorrect" "css_element" should not exist
+    And ".fa-circle-check" "css_element" should not exist
+    When I set the field "Answer for part 1" to "5"
+    And I press "Finish attempt"
+    And I press "Return to attempt"
+    Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
+    And I should see "Part 1 correct feedback."
+    And I should see "You have correctly answered 1 part of this question."
+    And ".fa-circle-check" "css_element" should exist
