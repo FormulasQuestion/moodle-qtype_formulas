@@ -200,7 +200,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $result->feedbacksymbol = '';
         $result->feedbackclass = '';
         // ... unless correctness is requested in the display options.
-        if ($options->correctness) {
+        // Note that no feedback should be given, if the response has been modified since the last submission,
+        // i. e. it is just a response that was saved during page navigation.
+        if ($this->response_is_same_as_submitted($qa, $part) && $options->correctness) {
             $result->feedbacksymbol = $this->feedback_image($result->fraction);
             $result->feedbackclass = $this->feedback_class($result->fraction);
         }
@@ -860,6 +862,56 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     /**
+     * Check whether the last response of a question attempt is the same as the last submitted response, i. e. it
+     * was either submitted (e. g. using the "Check" button) or it was saved during page navigation in a quiz but
+     * still contains the same answers as the ones from the last regular submission.
+     *
+     * @param question_attempt $qa
+     * @param formulas_part|null $part
+     * @return bool
+     */
+    protected function response_is_same_as_submitted(question_attempt $qa, formulas_part|null $part = null): bool {
+        // If the last step contains the behaviour var 'submit', it was itself a submitted response.
+        $laststep = $qa->get_last_step();
+        if ($laststep->has_behaviour_var('submit')) {
+            return true;
+        }
+
+        // Otherwise, we try to fetch the step containing the last submitted response.
+        $lastsubmitted = $qa->get_last_step_with_behaviour_var('submit');
+        $lastsubmitteddata = $lastsubmitted->get_qt_data();
+
+        // If there is no data, then no response has ever been submitted.
+        if (empty($lastsubmitteddata)) {
+            return false;
+        }
+
+        // If we have a part, we compare the last step's data to the one from the last submitted response,
+        // but only for the fields of the relevant part.
+        $lastdata = $laststep->get_qt_data();
+        if ($part !== null) {
+            return $part->is_same_response($lastsubmitteddata, $lastdata);
+        }
+
+        // If we do not have a part, we compare the reponse for the entire question.
+        /** @var qtype_formulas_question $question */
+        $question = $qa->get_question();
+
+        return $question->is_same_response($lastsubmitteddata, $lastdata);
+    }
+
+    #[\Override]
+    public function feedback(question_attempt $qa, question_display_options $options) {
+        // We should not give feedback if the response is not properly submitted, but rather just saved
+        // during navigation through the quiz.
+        if (!$this->response_is_same_as_submitted($qa)) {
+            return '';
+        }
+
+        return parent::feedback($qa, $options);
+    }
+
+    /**
      * Generate a brief statement of how many sub-parts of this question the
      * student got right.
      *
@@ -979,9 +1031,9 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
             $state = $details->state;
         }
-        // If the question is in a state that does not yet allow to give a feedback,
-        // we return an empty string.
-        if (empty($state->get_feedback_class())) {
+        // If the question is in a state that does not yet allow to give a feedback
+        // or if the response is not the last one to be checked, we return an empty string.
+        if (!$this->response_is_same_as_submitted($qa, $part) || empty($state->get_feedback_class())) {
             return '';
         }
 
