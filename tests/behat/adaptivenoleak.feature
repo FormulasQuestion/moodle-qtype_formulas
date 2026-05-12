@@ -55,7 +55,7 @@ Feature: Make sure we do not leak information in adaptive mode
     And ".formulaspartfeedback-1" "css_element" should not exist
     And ".numpartscorrect" "css_element" should not exist
 
-  Scenario: Part feedback is not shown if answer has been modified since last check
+  Scenario: Part feedback is not shown if answer has been modified (from correct to wrong) since last check
     When I set the field "Answer for part 1" to "5"
     And I press "Check"
     Then I should see "Marks for this submission" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
@@ -68,7 +68,24 @@ Feature: Make sure we do not leak information in adaptive mode
     Then ".formulaspartfeedback-0" "css_element" should not exist
     And ".gradingdetails" "css_element" should not exist
     And ".numpartscorrect" "css_element" should not exist
+    And ".fa-circle-xmark" "css_element" should not exist
     And ".fa-circle-check" "css_element" should not exist
+
+  Scenario: Part feedback is not shown if answer has been modified (from wrong to correct) since last check
+    When I set the field "Answer for part 1" to "6"
+    And I press "Check"
+    Then I should see "Marks for this submission: 0.00" in the ".formulaspartfeedback-0 .gradingdetails" "css_element"
+    And I should see "Part 1 incorrect feedback."
+    And I should see "You have correctly answered 0 parts of this question."
+    And ".fa-circle-xmark" "css_element" should exist
+    When I set the field "Answer for part 1" to "5"
+    And I press "Finish attempt"
+    And I press "Return to attempt"
+    Then ".formulaspartfeedback-0" "css_element" should not exist
+    And ".gradingdetails" "css_element" should not exist
+    And ".numpartscorrect" "css_element" should not exist
+    And ".fa-circle-check" "css_element" should not exist
+    And ".fa-circle-xmark" "css_element" should not exist
 
   Scenario: Part feedback is shown when navigating back with an answer identical to the last one that was checked
     When I set the field "Answer for part 1" to "5"
