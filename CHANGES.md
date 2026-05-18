@@ -1,5 +1,11 @@
 # Changelog
 
+### 6.3.1 (2026-05-18)
+
+- bugfix: correct visibility of feedback in adaptive mode
+
+Note: Prior to this version, students could use quiz navigation (Next page/Previous page or Finish attempt/Return to attempt) to get feedback on parts of a question without using the adaptive mode's "Check" function and hence whitout getting a penalty for wrong answers, because Moodle automatically saves answers when the user switches between pages of a quiz. Other modes like interactive or immediate feedback are not affected.
+
 ### 6.3.0 (2026-04-30)
 
 - improvement: add setting to control trigger of answer type tooltip
