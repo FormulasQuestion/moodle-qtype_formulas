@@ -426,6 +426,67 @@ EOF;
         }
     }
 
+    /**
+     * Data provider. The test will assume the input starts with 'a =' and will automatically check for
+     * the 'a' (IDENTIFIER) and '=' (OPERATOR) token. For invalid input, we use the string of the expected
+     * error message.
+     *
+     * @return array
+     */
+    public static function provide_inputs_with_empty(): array {
+        $string = new token(token::STRING, '$EMPTY');
+        $empty = new token(token::EMPTY, '$EMPTY');
+        $plus = new token(token::OPERATOR, '+');
+        $errormessage = 'Invalid use of the dollar ($) symbol. It can only be used for the special value $EMPTY.';
+        return [
+            [[$empty], 'a = $EMPTY'],
+            [[$string], 'a = "$EMPTY"'],
+            [[$string], "a = '\$EMPTY'"],
+            [[$empty, $plus], 'a = $EMPTY+'],
+            ["Unexpected input: '.'", 'a = $EMPTY.'],
+            [$errormessage, 'a = $EMPT'],
+            [$errormessage, 'a = $EMPTYness'],
+        ];
+    }
+
+    /**
+     * Test whether lexing of the special $EMPTY token works as expected.
+     *
+     * @param array|string $expected array of tokens after the 'a =' part or expected error message
+     * @param string $input the input to be parsed
+     * @return void
+     *
+     * @dataProvider provide_inputs_with_empty
+     */
+    public function test_get_token_list_with_empty_token($expected, $input): void {
+        $error = '';
+        try {
+            $lexer = new lexer($input);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+
+        // If we expect an error, check the error message.
+        if (is_string($expected)) {
+            self::assertStringEndsWith($expected, $error);
+            return;
+        }
+
+        // We did not expect an error. Check there was none and verify we got the right tokens.
+        self::assertEmpty($error);
+        $expectedlist = [
+            new token(token::IDENTIFIER, 'a'),
+            new token(token::OPERATOR, '='),
+        ];
+        $expectedlist = $expectedlist + $expected;
+
+        $tokens = $lexer->get_tokens();
+        foreach ($expectedlist as $i => $token) {
+            self::assertEquals($token->type, $tokens[$i]->type);
+            self::assertEquals($token->value, $tokens[$i]->value);
+        }
+    }
+
     public function test_get_token_list_with_subsequent_comments(): void {
         $input = <<<EOF
         # First comment

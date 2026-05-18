@@ -546,5 +546,21 @@ function xmldb_qtype_formulas_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2023100800, 'qtype', 'formulas');
     }
 
+    if ($oldversion < 2025080100) {
+        // Define field emptyallowed to be added to qtype_formulas_answers.
+        $table = new xmldb_table('qtype_formulas_answers');
+        $field = new xmldb_field('emptyallowed', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'answernotunique');
+
+        // Conditionally add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            // Now fill it with '0' for compatibility with existing questions.
+            $DB->set_field('qtype_formulas_answers', 'emptyallowed', '0');
+        }
+
+        // Formulas savepoint reached.
+        upgrade_plugin_savepoint(true, 2025080100, 'qtype', 'formulas');
+    }
+
     return true;
 }
