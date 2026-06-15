@@ -727,7 +727,7 @@ final class renderer_test extends walkthrough_test_base {
             new \question_contains_tag_with_attribute('select', 'name', $this->quba->get_field_prefix($this->slot) . '0_0'),
             $this->get_does_not_contain_specific_feedback_expectation(),
             new \question_contains_tag_with_contents('label', 'Answer'),
-            new \question_contains_tag_with_attribute('label', 'class', 'subq sr-only'),
+            new \question_contains_tag_with_attribute('label', 'class', 'subq visually-hidden'),
         );
         $this->check_output_contains_selectoptions(
             $this->get_contains_select_expectation('0_0', ['Dog', 'Cat', 'Bird', 'Fish'], 0)
@@ -894,8 +894,8 @@ final class renderer_test extends walkthrough_test_base {
         $q = $this->get_test_formulas_question('testmc');
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
-            new \question_contains_tag_with_attribute('span', 'class', 'sr-only'),
+            new \question_contains_tag_with_attribute('legend', 'class', 'visually-hidden'),
+            new \question_contains_tag_with_attribute('span', 'class', 'visually-hidden'),
             new \question_contains_tag_with_contents('span', 'Answer'),
         );
 
@@ -905,7 +905,7 @@ final class renderer_test extends walkthrough_test_base {
         $q->parts[0]->answer = '[1, 1]';
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_attribute('legend', 'class', 'visually-hidden'),
             new \question_contains_tag_with_contents('span', 'Answer field 1'),
             new \question_contains_tag_with_contents('label', 'Answer field 2'),
         );
@@ -919,7 +919,7 @@ final class renderer_test extends walkthrough_test_base {
 
         $this->start_attempt_at_question($q, 'immediatefeedback', 1);
         $this->check_current_output(
-            new \question_contains_tag_with_attribute('legend', 'class', 'sr-only'),
+            new \question_contains_tag_with_attribute('legend', 'class', 'visually-hidden'),
             new \question_contains_tag_with_contents('span', 'Answer field 1 for part 1'),
             new \question_contains_tag_with_contents('label', 'Answer field 2 for part 1'),
             new \question_contains_tag_with_contents('span', 'Answer field 1 for part 2'),
