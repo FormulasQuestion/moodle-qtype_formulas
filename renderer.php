@@ -867,13 +867,20 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     /**
      * Check whether the last response of a question attempt is the same as the last submitted response, i. e. it
      * was either submitted (e. g. using the "Check" button) or it was saved during page navigation in a quiz but
-     * still contains the same answers as the ones from the last regular submission.
+     * still contains the same answers as the ones from the last regular submission. This is used to decide whether
+     * the feedback should be shown or not.
      *
      * @param question_attempt $qa
      * @param formulas_part|null $part
      * @return bool
      */
     protected function response_is_same_as_submitted(question_attempt $qa, formulas_part|null $part = null): bool {
+        // If the question is marked as finished, we will return true here to make sure the feedback
+        // will be shown, because students will not be able to interact with the question anymore.
+        if ($qa->get_state()->is_finished()) {
+            return true;
+        }
+
         // If the last step contains the behaviour var 'submit', it was itself a submitted response.
         // For the deferredfeedback behaviour, the step will contain 'finish' instead of 'submit'.
         $laststep = $qa->get_last_step();
