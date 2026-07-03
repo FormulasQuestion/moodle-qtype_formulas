@@ -1,5 +1,9 @@
 # Changelog
 
+### 6.3.2 (2026-07-03)
+
+- bugfix: keep feedback visible after manual regrading / commenting of question
+
 ### 6.3.1 (2026-05-18)
 
 - bugfix: correct visibility of feedback in adaptive mode
