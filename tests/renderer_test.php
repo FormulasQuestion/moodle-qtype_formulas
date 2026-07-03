@@ -121,6 +121,36 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains_text_input('0_0', '\1', false);
     }
 
+    public function test_feedback_remains_visible_after_manual_regrading(): void {
+        $q = $this->get_test_formulas_question('testthreeparts');
+        $this->start_attempt_at_question($q, 'deferredfeedback', 3);
+
+        // Submit wrong answer.
+        $this->process_submission(['0_0' => '1', '1_0' => '6', '2_0' => '7']);
+        $this->finish();
+        $this->render();
+        $this->check_current_state(question_state::$gradedpartial);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5');
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '6');
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '7');
+        $this->check_current_output(
+            $this->get_contains_num_parts_correct(2),
+        );
+
+        // Manually regrade the question and add a comment.
+        $this->quba->manual_grade(1, 'giving some bonus', 2.5, FORMAT_HTML);
+
+        $this->render();
+        $this->check_current_state(question_state::$mangrpartial);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5');
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '6');
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '7');
+        $this->check_output_contains('giving some bonus');
+        $this->check_current_output(
+            $this->get_contains_num_parts_correct(2),
+        );
+    }
+
     public function test_adaptive_grading_details_are_shown(): void {
         // Create a simple test question with no feedback strings at all.
         $q = $this->get_test_formulas_question('testsinglenum');
