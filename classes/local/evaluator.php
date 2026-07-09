@@ -163,6 +163,13 @@ class evaluator {
                 if ($skiplists && in_array($result->type, [token::LIST, token::SET])) {
                     continue;
                 }
+                // If the result is a numeric string, we convert it back to a number, in order for
+                // the standard PHP formatting to apply: numbers with an absolute value ≥ 1e14
+                // or < 0.0001 would normally be printed in scientific notation.
+                if ($result->type === token::STRING && is_numeric($result->value)) {
+                    $result->type = token::NUMBER;
+                    $result->value = floatval($result->value);
+                }
                 // If the result is a number, we try to localize it, unless the admin settings do not
                 // allow the decimal comma.
                 if ($result->type === token::NUMBER) {
