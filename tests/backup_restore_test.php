@@ -74,6 +74,7 @@ final class backup_restore_test extends \advanced_testcase {
     public static function provide_question_names(): array {
         return [
             ['testsinglenum'],
+            ['testnumandempty'],
             ['testalgebraic'],
             ['testtwonums'],
             ['testsinglenumunit'],
@@ -306,6 +307,7 @@ final class backup_restore_test extends \advanced_testcase {
      */
     public static function provide_xml_keys_to_remove(): array {
         return [
+            ['emptyallowed'],
             ['answernotunique'],
             ['partindex'],
         ];
@@ -438,6 +440,7 @@ final class backup_restore_test extends \advanced_testcase {
         // value that will be assigned in restore_qtype_formulas_plugin.class.php.
         $fieldstoremove = [
             'answernotunique' => '1',
+            'emptyallowed' => '0',
             'shownumcorrect' => 0,
             'answernumbering' => 'none',
             'feedbackformat' => FORMAT_HTML,

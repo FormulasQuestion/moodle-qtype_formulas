@@ -960,7 +960,7 @@ final class question_test extends \advanced_testcase {
         $summary2 = $q->parts[2]->summarise_response($response);
         self::assertEquals('7', $summary2);
         $summary = $q->summarise_response($response);
-        self::assertEquals('5, 6, 7', $summary);
+        self::assertEquals('5; 6; 7', $summary);
     }
 
     public function test_summarise_response_test1(): void {
@@ -978,7 +978,7 @@ final class question_test extends \advanced_testcase {
         $summary3 = $q->parts[3]->summarise_response($response);
         self::assertEquals('50', $summary3);
         $summary = $q->summarise_response($response);
-        self::assertEquals('30m/s, 20, m/s, 40, 50', $summary);
+        self::assertEquals('30m/s; 20, m/s; 40; 50', $summary);
     }
 
     public function test_is_complete_response_test3(): void {

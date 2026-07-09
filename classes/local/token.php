@@ -41,6 +41,9 @@ class token {
     /** @var int used to designate a token storing a string literal */
     const STRING = 5;
 
+    /** @var int used to designate the special token used for empty answers */
+    const EMPTY = 7;
+
     /**
      * Parentheses are organised in groups, allowing for bitwise comparison.
      * examples: CLOSING_PAREN & ANY_PAREN = ANY_PAREN
@@ -286,6 +289,10 @@ class token {
         // If the token value is a literal (number or string), return it directly.
         if (in_array($token->type, [self::NUMBER, self::STRING])) {
             return $token->value;
+        }
+        // If the token is the $EMPTY token, return the string '$EMPTY'.
+        if ($token->type === self::EMPTY) {
+            return '$EMPTY';
         }
 
         // If the token is a list or set, we have to unpack all elements separately and recursively.
