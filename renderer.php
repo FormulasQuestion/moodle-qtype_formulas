@@ -1039,6 +1039,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // This is rather a hack, but it will probably work.
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
+            // The general feedback should not be shown if the answer can still be improved.
+            if ($details->improvable) {
+                return '';
+            }
             $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
             $state = $details->state;
         }
