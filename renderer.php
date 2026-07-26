@@ -1114,7 +1114,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
 
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
-            $feedbackclass = $details->state->get_feedback_class();
+            // If the student "gave up", we must not take the feedback from the multipart behaviour.
+            $feedbackclass = $state->get_feedback_class();
+            if (!$state->is_gave_up()) {
+                $feedbackclass = $details->state->get_feedback_class();
+            }
         } else {
             $state = question_state::graded_state_for_fraction($fraction);
             $feedbackclass = $state->get_feedback_class();
