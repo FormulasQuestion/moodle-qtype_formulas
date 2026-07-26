@@ -1041,8 +1041,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
             // The general feedback should not be shown if the answer can still be improved, unless
-            // the part is finished.
-            if ($details->improvable && !$qa->get_last_step()->has_behaviour_var('finish')) {
+            // the part is finished. Note that a question can also be finished, because the student
+            // has attracted too many penalties and cannot get a grade > 0 anymore.
+            $isfinished = $qa->get_last_step()->has_behaviour_var('finish');
+            $canstillscore = (round($details->totalpenalty, $options->markdp) < $details->maxmark);
+            if ($details->improvable && $canstillscore && !$isfinished) {
                 $withholdfeedback = true;
             }
             $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
