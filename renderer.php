@@ -1044,7 +1044,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
             // the part is finished. Note that a question can also be finished, because the student
             // has attracted too many penalties and cannot get a grade > 0 anymore.
             $isfinished = $qa->get_last_step()->has_behaviour_var('finish');
-            $canstillscore = (round($details->totalpenalty, $options->markdp) < $details->maxmark);
+            $canstillscore = !$state->is_gave_up() && (round($details->totalpenalty, $options->markdp) < $details->maxmark);
             if ($details->improvable && $canstillscore && !$isfinished) {
                 $withholdfeedback = true;
             }

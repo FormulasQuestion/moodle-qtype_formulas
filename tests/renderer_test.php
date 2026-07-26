@@ -179,8 +179,26 @@ final class renderer_test extends walkthrough_test_base {
         $this->check_output_contains('Marks for this submission');
         $this->check_output_contains('This submission attracted a penalty of');
 
-        // If there is a general feedback, it should be there now.
+        // If there is a general feedback, it should not be shown anyway, because the student
+        // can still improve their solution. As there is no combined feedback, we can check that
+        // there is no <div> with the class formulaslocalfeedback. (That <div> is only added for the
+        // general feedback and for the combined feedback.)
         $q->parts[0]->feedback = 'foo bar feedback';
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->process_submission(['0_0' => '0', '-submit' => 1]);
+        $this->render();
+        $this->check_current_output(
+            $this->get_does_not_contain_div_with_class_expectation('formulaslocalfeedback'),
+            $this->get_contains_div_with_class_expectation('gradingdetails'),
+        );
+        $this->check_output_contains('Marks for this submission');
+        $this->check_output_contains('This submission attracted a penalty of');
+
+        // If there is a general feedback, it should not be shown anyway, because the student
+        // can still improve their solution. As there is no combined feedback, we can check that
+        // there is no <div> with the class formulaslocalfeedback. (That <div> is only added for the
+        // general feedback and for the combined feedback.)
+        $q->parts[0]->partincorrectfb = 'xxx';
         $this->start_attempt_at_question($q, 'adaptive', 1);
         $this->process_submission(['0_0' => '0', '-submit' => 1]);
         $this->render();
@@ -188,7 +206,7 @@ final class renderer_test extends walkthrough_test_base {
             $this->get_contains_div_with_class_expectation('formulaslocalfeedback'),
             $this->get_contains_div_with_class_expectation('gradingdetails'),
         );
-        $this->check_output_contains('foo bar feedback');
+        $this->check_output_does_not_contain('foo bar feedback');
         $this->check_output_contains('Marks for this submission');
         $this->check_output_contains('This submission attracted a penalty of');
     }
@@ -1208,6 +1226,9 @@ final class renderer_test extends walkthrough_test_base {
         $q = $this->get_test_formulas_question($input['question']);
         $q->parts[0]->unitpenalty = 0.6;
         $q->parts[0]->feedback = $generalfeedback;
+        $q->hints = [
+            new question_hint_with_parts(101, 'Hint 1.', FORMAT_HTML, 1, 0),
+        ];
 
         // Start question, check that there is no feedback yet.
         $this->start_attempt_at_question($q, $input['behaviour'], 1);
@@ -1220,7 +1241,6 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission($input['response'] + ['-submit' => 1]);
 
         // Verify the feedback.
-        $this->check_output_contains('Part general feedback');
         foreach ($feedbacks as $feedback) {
             if ($feedback === $expectedfeedback) {
                 $this->check_output_contains($feedback);
@@ -1228,5 +1248,50 @@ final class renderer_test extends walkthrough_test_base {
                 $this->check_output_does_not_contain($feedback);
             }
         }
+        // In adaptive and interactive mode, the general feedback should not be shown if the student can still improve their grade,
+        // i. e. if their answer is not yet correct and there are tries left. (For adaptive mode, the number of tries is not limited,
+        // but after a certain number of wrong answers, the student will have too many penalties and cannot get a grade > 0 anymore.
+        if ($input['behaviour'] === 'immediatefeedback' || $expectedfeedback === qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK) {
+            $this->check_output_contains($generalfeedback);
+        } else {
+            $this->check_output_does_not_contain($generalfeedback);
+        }
+    }
+
+    public function test_general_feedback_visibility_in_adaptive_mode(): void {
+        // Create the requested question.
+        $generalfeedback = 'Part general feedback';
+        $q = $this->get_test_formulas_question('testsinglenumunit');
+        $q->penalty = 0.3333333;
+        $q->parts[0]->unitpenalty = 0.6;
+        $q->parts[0]->feedback = $generalfeedback;
+
+        // Start question, check that there is no feedback yet.
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->check_output_does_not_contain($generalfeedback);
+
+        // Submit partially correct answer. No general feedback should be shown.
+        $this->process_submission(['0_' => '5', '-submit' => 1]);
+        $this->check_output_does_not_contain($generalfeedback);
+
+        // Submit wrong answer. No general feedback should be shown.
+        $this->process_submission(['0_' => '4', '-submit' => 1]);
+        $this->check_output_does_not_contain($generalfeedback);
+
+        // Submit another wrong answer. Now the general feedback should appear, because the student
+        // cannot improve anymore.
+        $this->process_submission(['0_' => '111', '-submit' => 1]);
+        $this->check_output_contains($generalfeedback);
+
+        // Start question again. Submit the correct answer and check the general feedback is there.
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->process_submission(['0_' => '5 m/s', '-submit' => 1]);
+        $this->check_output_contains($generalfeedback);
+
+        // Start question again. Give up by finishing it in an empty state. The general feedback should
+        // be there.
+        $this->start_attempt_at_question($q, 'adaptive', 1);
+        $this->process_submission(['-finish' => 1]);
+        $this->check_output_contains($generalfeedback);
     }
 }
