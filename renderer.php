@@ -1035,13 +1035,15 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // If we use the adaptive multipart behaviour, there will be some feedback about the grading,
         // e. g. the obtained marks for this submission and the attracted penalty.
         $gradingdetailsdiv = '';
+        $withholdfeedback = false;
         if ($qa->get_behaviour_name() == 'adaptivemultipart') {
             // This is rather a hack, but it will probably work.
             $renderer = $this->page->get_renderer('qbehaviour_adaptivemultipart');
             $details = $qa->get_behaviour()->get_part_mark_details($part->partindex);
-            // The general feedback should not be shown if the answer can still be improved.
-            if ($details->improvable) {
-                return '';
+            // The general feedback should not be shown if the answer can still be improved, unless
+            // the part is finished.
+            if ($details->improvable && !$qa->get_last_step()->has_behaviour_var('finish')) {
+                $withholdfeedback = true;
             }
             $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
             $state = $details->state;
@@ -1055,7 +1057,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         // If we have a general feedback, we substitute local / grading variables and
         // wrap it in a <div>.
         $feedbackdiv = '';
-        if (strlen(trim($part->feedback)) !== 0) {
+        if (strlen(trim($part->feedback)) !== 0 && !$withholdfeedback) {
             $feedbacktext = $part->evaluator->substitute_variables_in_text($part->feedback);
             $feedbacktext = $question->format_text(
                 $feedbacktext,
