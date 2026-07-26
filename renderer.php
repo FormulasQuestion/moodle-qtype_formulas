@@ -1046,7 +1046,11 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
                 $withholdfeedback = true;
             }
             $gradingdetailsdiv = $renderer->render_adaptive_marks($details, $options);
-            $state = $details->state;
+            // We do not overwrite the state if the student "gave up", e. g. by finishing and submitting
+            // an unattempted question.
+            if (!$state->is_gave_up()) {
+                $state = $details->state;
+            }
         }
         // If the question is in a state that does not yet allow to give a feedback
         // or if the response is not the last one to be checked, we return an empty string.
