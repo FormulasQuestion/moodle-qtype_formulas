@@ -306,6 +306,7 @@ final class backup_restore_test extends \advanced_testcase {
      */
     public static function provide_xml_keys_to_remove(): array {
         return [
+            ['hidecorrectanswer'],
             ['answernotunique'],
             ['partindex'],
         ];
@@ -441,6 +442,7 @@ final class backup_restore_test extends \advanced_testcase {
             'shownumcorrect' => 0,
             'answernumbering' => 'none',
             'feedbackformat' => FORMAT_HTML,
+            'hidecorrectanswer' => '0',
             'partindex' => null,
             'correctfeedback' => '',
             'partiallycorrectfeedback' => '',
@@ -1097,6 +1099,7 @@ final class backup_restore_test extends \advanced_testcase {
             ['otherrule', '60 s = 1 min'],
             ['subqtext', 'edited'],
             ['feedback', 'edited'],
+            ['hidecorrectanswer', '1'],
             ['partcorrectfb', 'edited'],
             ['partpartiallycorrectfb', 'edited'],
             ['partincorrectfb', 'edited'],

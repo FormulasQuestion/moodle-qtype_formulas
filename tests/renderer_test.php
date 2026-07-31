@@ -1248,9 +1248,10 @@ final class renderer_test extends walkthrough_test_base {
                 $this->check_output_does_not_contain($feedback);
             }
         }
-        // In adaptive and interactive mode, the general feedback should not be shown if the student can still improve their grade,
-        // i. e. if their answer is not yet correct and there are tries left. (For adaptive mode, the number of tries is not limited,
-        // but after a certain number of wrong answers, the student will have too many penalties and cannot get a grade > 0 anymore.
+        // In adaptive and interactive mode, the general feedback should not be shown if the student can still improve their
+        // grade, i. e. if their answer is not yet correct and there are tries left. (For adaptive mode, the number of tries
+        // is not limited, but after a certain number of wrong answers, the student will have too many penalties and cannot get
+        // a grade > 0 anymore.
         if ($input['behaviour'] === 'immediatefeedback' || $expectedfeedback === qtype_formulas_test_helper::DEFAULT_CORRECT_FEEDBACK) {
             $this->check_output_contains($generalfeedback);
         } else {
