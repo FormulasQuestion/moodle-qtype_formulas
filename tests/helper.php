@@ -122,6 +122,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $p->subqtextformat = FORMAT_HTML;
         $p->feedback = '';
         $p->feedbackformat = FORMAT_HTML;
+        $p->hidecorrectanswer = '0';
         $p->partcorrectfb = self::DEFAULT_CORRECT_FEEDBACK;
         $p->partcorrectfbformat = FORMAT_HTML;
         $p->partpartiallycorrectfb = self::DEFAULT_PARTIALLYCORRECT_FEEDBACK;
@@ -190,6 +191,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->otherrule = [''];
         $form->subqtext = [['text' => '', 'format' => FORMAT_HTML]];
         $form->feedback = [['text' => '', 'format' => FORMAT_HTML]];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [['text' => 'Your answer is correct.', 'format' => FORMAT_HTML]];
         $form->partpartiallycorrectfb = [['text' => 'Your answer is partially correct.', 'format' => FORMAT_HTML]];
         $form->partincorrectfb = [['text' => 'Your answer is incorrect.', 'format' => FORMAT_HTML]];
@@ -276,6 +278,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
@@ -364,6 +367,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -454,6 +458,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => '<p>Correct answer, well done.</p>', 'format' => FORMAT_HTML],
         ];
@@ -536,6 +541,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -612,6 +618,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
@@ -693,6 +700,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -769,6 +777,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML],
         ];
@@ -894,6 +903,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => '', 'format' => FORMAT_HTML],
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0', '0', '0'];
         $form->partcorrectfb = [
             ['text' => 'Part 1 correct feedback.', 'format' => FORMAT_HTML],
             ['text' => 'Part 2 correct feedback.', 'format' => FORMAT_HTML],
@@ -1055,6 +1065,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -1083,6 +1094,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -1111,6 +1123,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -1139,6 +1152,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => self::DEFAULT_CORRECT_FEEDBACK,
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -1282,6 +1296,12 @@ class qtype_formulas_test_helper extends question_test_helper {
             2 => ['text' => '', 'format' => FORMAT_HTML],
             3 => ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = [
+            0 => '0',
+            1 => '0',
+            2 => '0',
+            3 => '0',
+        ];
         $form->partcorrectfb = [
             0 => ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
             1 => ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
@@ -1369,6 +1389,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
@@ -1516,6 +1537,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             ['text' => '', 'format' => FORMAT_HTML],
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0', '0', '0', '0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
@@ -1604,6 +1626,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
@@ -1687,6 +1710,7 @@ class qtype_formulas_test_helper extends question_test_helper {
         $form->feedback = [
             ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0'];
         $form->partcorrectfb = [
             ['text' => self::DEFAULT_CORRECT_FEEDBACK, 'format' => FORMAT_HTML],
         ];
@@ -1785,6 +1809,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             0 => ['text' => '', 'format' => FORMAT_HTML],
             1 => ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0', '0'];
         $form->partcorrectfb = [
             0 => ['text' => 'Your first answer is correct.', 'format' => FORMAT_HTML],
             1 => ['text' => 'Your second answer is correct.', 'format' => FORMAT_HTML],
@@ -1887,6 +1912,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             0 => ['text' => '', 'format' => FORMAT_HTML],
             1 => ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0', '0'];
         $form->partcorrectfb = [
             0 => ['text' => 'Your first answer is correct.', 'format' => FORMAT_HTML],
             1 => ['text' => 'Your second answer is correct.', 'format' => FORMAT_HTML],
@@ -1994,6 +2020,7 @@ class qtype_formulas_test_helper extends question_test_helper {
             0 => ['text' => '', 'format' => FORMAT_HTML],
             1 => ['text' => '', 'format' => FORMAT_HTML],
         ];
+        $form->hidecorrectanswer = ['0', '0'];
         $form->partcorrectfb = [
             0 => ['text' => 'Your answers in part 1 are correct.', 'format' => FORMAT_HTML],
             1 => ['text' => 'Your answers in part 2 are correct.', 'format' => FORMAT_HTML],
@@ -2088,6 +2115,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => 'Your answers in part 1 are correct.',
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,
@@ -2116,6 +2144,7 @@ class qtype_formulas_test_helper extends question_test_helper {
                 'subqtextformat' => FORMAT_HTML,
                 'feedback' => '',
                 'feedbackformat' => FORMAT_HTML,
+                'hidecorrectanswer' => '0',
                 'partcorrectfb' => 'Your answers in part 2 are correct.',
                 'partcorrectfbformat' => FORMAT_HTML,
                 'partpartiallycorrectfb' => self::DEFAULT_PARTIALLYCORRECT_FEEDBACK,

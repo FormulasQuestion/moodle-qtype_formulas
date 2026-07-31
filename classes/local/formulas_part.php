@@ -110,6 +110,9 @@ class formulas_part {
     /** @var int format constant (FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN or FORMAT_MARKDOWN) */
     public int $feedbackformat;
 
+    /** @var int whether the correct answer should be hidden from the feedback */
+    public int $hidecorrectanswer;
+
     /** @var string part's feedback for any correct response */
     public string $partcorrectfb;
 

@@ -327,6 +327,14 @@ class qtype_formulas_edit_form extends question_edit_form {
         );
         $repeatedoptions['feedback']['helpbutton'] = ['feedback', 'qtype_formulas'];
         $repeatedoptions['feedback']['advanced'] = true;
+        // Option to hide the correct answer, e. g. because it is included in the general feedback.
+        $repeated[] = $mform->createElement(
+            'advcheckbox',
+            'hidecorrectanswer',
+            get_string('hidecorrectanswer', 'qtype_formulas'),
+        );
+        $repeatedoptions['hidecorrectanswer']['helpbutton'] = ['hidecorrectanswer', 'qtype_formulas'];
+        $repeatedoptions['hidecorrectanswer']['advanced'] = true;
         // Part's combined feedback.
         $repeated[] = $mform->createElement(
             'editor',

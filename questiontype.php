@@ -74,15 +74,17 @@ class qtype_formulas extends question_type {
      * - numbox: number of answers for this part, not including a possible unit field
      * - vars1: the part's local variables
      * - answer: the model answer(s) for this part
+     * - answernotunique: whether there is more than one correct answer
      * - vars2: the part's grading variables
      * - correctness: the part's grading criterion
      * - unitpenalty: deduction to be made for wrong units
      * - postunit: the unit in which the model answer has been entered
      * - ruleid: ruleset used for unit conversion
      * - otherrule: additional rules for unit conversion
+     * - hidecorrectanswer: whether the correct answer should be shown along with the general feedback
      */
     const PART_BASIC_FIELDS = ['placeholder', 'answermark', 'answertype', 'numbox', 'vars1', 'answer', 'answernotunique', 'vars2',
-        'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule'];
+        'correctness', 'unitpenalty', 'postunit', 'ruleid', 'otherrule', 'hidecorrectanswer'];
 
     /**
      * This function returns the "simple" additional fields defined in the qtype_formulas_options
@@ -287,6 +289,7 @@ class qtype_formulas extends question_type {
                     'answernotunique' => 1,
                     'correctness' => '',
                     'ruleid' => 1,
+                    'hidecorrectanswer' => 0,
                     'subqtext' => '',
                     'subqtextformat' => FORMAT_HTML,
                     'feedback' => '',
@@ -623,16 +626,20 @@ class qtype_formulas extends question_type {
                 $question->partindex[$i] = $partindex;
             }
             foreach (self::PART_BASIC_FIELDS as $field) {
-                // Older questions do not have this field, so we do not want to issue an error message.
-                // Also, for maximum backwards compatibility, we set the default value to 1. With this,
-                // nothing changes for old questions.
+                // Older questions do not have these fields, so we do not want to issue an error message.
+                // Also, for maximum backwards compatibility, we set the default value to 1 for 'anwernotunique'
+                // and to 0 for 'hidecorrectanswer'. With this, nothing changes for old questions.
                 if ($field === 'answernotunique') {
                     $ifnotexists = '';
                     $default = '1';
+                } else if ($field === 'hidecorrectanswer') {
+                    $ifnotexists = '';
+                    $default = '0';
                 } else {
                     $ifnotexists = get_string('error_import_missing_field', 'qtype_formulas', $field);
                     $default = '0';
                 }
+
                 $question->{$field}[$i] = $format->getpath(
                     $part,
                     ['#', $field, 0, '#', 'text', 0, '#'],

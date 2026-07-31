@@ -1294,4 +1294,22 @@ final class renderer_test extends walkthrough_test_base {
         $this->process_submission(['-finish' => 1]);
         $this->check_output_contains($generalfeedback);
     }
+
+    public function test_hiding_correct_answer(): void {
+        // Create the requested question.
+        $q = $this->get_test_formulas_question('testsinglenum');
+
+        // Start question and submit wrong answer. The correct answer should be shown.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '4', '-submit' => 1]);
+        $this->check_output_contains_lang_string('correctansweris', 'qtype_formulas', '5');
+
+        // Change setting.
+        $q->parts[0]->hidecorrectanswer = '1';
+
+        // Submit a wrong answer again. Now the correct answer should not be shown.
+        $this->start_attempt_at_question($q, 'immediatefeedback', 1);
+        $this->process_submission(['0_0' => '4', '-submit' => 1]);
+        $this->check_output_does_not_contain(get_string('correctansweris', 'qtype_formulas', '5'));
+    }
 }

@@ -148,6 +148,10 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
             if (!isset($data->answernotunique)) {
                 $data->answernotunique = '1';
             }
+            // Older backups might not yet have the hidecorrectanswer field.
+            if (!isset($data->hidecorrectanswer)) {
+                $data->hidecorrectanswer = '0';
+            }
             // Insert record.
             $newitemid = $DB->insert_record('qtype_formulas_answers', $data);
             // Create mapping.
@@ -193,6 +197,9 @@ class restore_qtype_formulas_plugin extends restore_qtype_plugin {
         foreach ($backupdata['plugin_qtype_formulas_question']['formulas_answers']['formulas_answer'] ?? [] as $i => $answer) {
             if (!key_exists('answernotunique', $answer)) {
                 $answer['answernotunique'] = '1';
+            }
+            if (!key_exists('hidecorrectanswer', $answer)) {
+                $answer['hidecorrectanswer'] = '0';
             }
             if (!key_exists('partindex', $answer)) {
                 $answer['partindex'] = $i;

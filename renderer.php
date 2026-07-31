@@ -853,6 +853,10 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
      * @return string HTML fragment
      */
     public function part_correct_response($part) {
+        if ($part->hidecorrectanswer) {
+            return '';
+        }
+
         $answers = $part->get_correct_response(true);
         $answertext = implode('; ', $answers);
 
