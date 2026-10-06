@@ -28,7 +28,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading(
         'qtype_formulas/settings',
         new lang_string('settings_heading_general', 'qtype_formulas'),
-        new lang_string('settings_heading_general_desc', 'qtype_formulas'),
+        '',
     ));
 
     // Whether students are allowed to use the comma as decimal separator.
@@ -101,7 +101,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading(
         'qtype_formulas/tooltip',
         new lang_string('settings_heading_tooltip', 'qtype_formulas'),
-        new lang_string('settings_heading_tooltip_desc', 'qtype_formulas'),
+        '',
     ));
 
     // Tooltip trigger.
