@@ -23,12 +23,14 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE', 'main']
+        moodle-branch: ['MOODLE_405_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE', 'MOODLE_503_STABLE', 'main']
         database: [mariadb]
         exclude:
           - moodle-branch: 'MOODLE_405_STABLE'
             php: '8.4'
           - moodle-branch: 'MOODLE_502_STABLE'
+            php: '8.2'
+          - moodle-branch: 'MOODLE_503_STABLE'
             php: '8.2'
           - moodle-branch: 'main'
             php: '8.2'
@@ -68,6 +70,16 @@ jobs:
           MOODLE_APP: true
 
       - name: Behat features
+        id: behat
         run: moodle-plugin-ci behat --auto-rerun 1 --profile chrome
         env:
           MOODLE_BEHAT_SELENIUM_IMAGE: selenium/standalone-chrome:145.0-20260222
+
+      - name: Upload Behat Faildump
+        if: ${{ failure() && steps.behat.outcome == 'failure' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: Behat Faildump (${{ join(matrix.*, ', ') }})
+          path: ${{ github.workspace }}/moodledata/behat_dump
+          retention-days: 7
+          if-no-files-found: ignore
