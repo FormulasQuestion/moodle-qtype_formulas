@@ -636,6 +636,7 @@ class functions {
             get_string('error_func_second_posint', 'qtype_formulas', 'sigfig()'),
             self::POSITIVE | self::INTEGER
         );
+        $originalnumber = $number;
         $number = floatval($number);
         $precision = intval($precision);
 
@@ -657,7 +658,22 @@ class functions {
         // We only request decimals if $digitsafter is greater than zero.
         $digitsafter = max(0, $digitsafter);
 
-        return number_format($number, $digitsafter, '.', '');
+        // If the absolute value of the *original* number is >= 1e-4 and < 1e14, we can format
+        // it and return a string. The same is true if the rounded number is zero.
+        if ($number == 0 || (abs($originalnumber) >= 1e-4 && abs($originalnumber) < 1e14)) {
+            return number_format($number, $digitsafter, '.', '');
+        }
+
+        // If the absolute value of the original number was below 1e-4, but just reached that
+        // limit after rounding, it should be output as 0.0001, plus possibly some trailing zeroes.
+        if (abs($originalnumber) < 1e-4 && abs($number) == 1e-4) {
+            return sprintf("%.{$precision}H", $number);
+        }
+
+        // For all other cases, we force scientific notation. Note that we have to subtract 1
+        // from the requested precision, because with the E format, the parameter indicates
+        // the number of places *after* the decimal comma.
+        return sprintf('%.' . ($precision - 1) . 'E', $number);
     }
 
     /**
