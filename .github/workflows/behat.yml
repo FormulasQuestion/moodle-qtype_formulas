@@ -72,8 +72,6 @@ jobs:
       - name: Behat features
         id: behat
         run: moodle-plugin-ci behat --auto-rerun 1 --profile chrome
-        env:
-          MOODLE_BEHAT_SELENIUM_IMAGE: selenium/standalone-chrome:145.0-20260222
 
       - name: Upload Behat Faildump
         if: ${{ failure() && steps.behat.outcome == 'failure' }}
