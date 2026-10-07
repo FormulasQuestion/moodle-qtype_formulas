@@ -104,9 +104,9 @@ class qtype_formulas_question extends question_graded_automatically_with_countba
      * @return question_behaviour
      */
     public function make_behaviour(question_attempt $qa, $preferredbehaviour) {
-        // If the requested behaviour is 'adaptive' or 'adaptiveopenpenalty', we have to change it
+        // If the requested behaviour is 'adaptive' or 'adaptivenopenalty', we have to change it
         // to 'adaptivemultipart'.
-        if (in_array($preferredbehaviour, ['adaptive', 'adaptiveopenpenalty'])) {
+        if (in_array($preferredbehaviour, ['adaptive', 'adaptivenopenalty'])) {
             return question_engine::make_behaviour('adaptivemultipart', $qa, $preferredbehaviour);
         }
 
