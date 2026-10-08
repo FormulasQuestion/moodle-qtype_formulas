@@ -1,5 +1,15 @@
 # Changelog
 
+### 6.4.0 (2026-10-08)
+
+- new feature: allow hiding correct answer from feedback
+- improvement: for Adaptive Mode, only show part's general feedback when finished
+- improvement: make sure sigfig() follows PHP convention for scientific notation
+- bugfix: remove empty strings from language file
+- bugfix: fix Adaptive Mode not working in "no penalty" variant
+- internal: update CI
+- internal: assure full compatibility with Moodle 5.2
+
 ### 6.3.2 (2026-07-03)
 
 - bugfix: keep feedback visible after manual regrading / commenting of question
