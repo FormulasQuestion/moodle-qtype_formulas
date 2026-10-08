@@ -283,12 +283,12 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
         $output = html_writer::start_tag('fieldset', ['class' => 'multichoice_answer']);
 
         // Inside the fieldset, we put the accessibility label, following the example of core's multichoice
-        // question type, i. e. the label is inside a <span> with class 'sr-only', wrapped in a <legend>.
+        // question type, i. e. the label is inside a <span> with class 'visually-hidden', wrapped in a <legend>.
         // TODO: we should use visually-hidden after dropping Moodle 4.5.
-        $output .= html_writer::start_tag('legend', ['class' => 'sr-only']);
+        $output .= html_writer::start_tag('legend', ['class' => 'visually-hidden']);
         $output .= html_writer::span(
             $this->generate_accessibility_label_text($answerindex, $part->numbox, $part->partindex, $question->numparts),
-            'sr-only'
+            'visually-hidden'
         );
         $output .= html_writer::end_tag('legend');
 
@@ -422,7 +422,7 @@ class qtype_formulas_renderer extends qtype_with_combined_feedback_renderer {
     protected function create_label_for_input(string $text, string $inputid, array $additionalattributes = []): array {
         $labelid = 'lbl_' . str_replace(':', '__', $inputid);
         $attributes = [
-            'class' => 'subq sr-only',
+            'class' => 'subq visually-hidden',
             'for' => $inputid,
             'id' => $labelid,
         ];
